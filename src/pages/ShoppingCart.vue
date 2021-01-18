@@ -1,0 +1,641 @@
+<template>
+  <section class="backgrou">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <section class="tabb">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="270.306" height="73.539" viewBox="0 0 270.306 73.539">
+                            <path id="Path_643" data-name="Path 643" d="M76.724-31.722a13,13,0,0,0-17.367,4.87c-.19.347-.4.686-.609,1.021A25.145,25.145,0,0,0,54.924-12.5h-.04a3.529,3.529,0,0,1-1.059,2.515,3.651,3.651,0,0,1-2.559,1.037,3.651,3.651,0,0,1-2.559-1.041,3.528,3.528,0,0,1-1.06-2.514v0a1.708,1.708,0,0,0-1.687-1.684,1.689,1.689,0,0,0-.711.157,31.434,31.434,0,0,1-3.816,1.48,5.212,5.212,0,0,0-3.71,4.947h-.042a5.916,5.916,0,0,1-5.861,5.811h-.1A5.916,5.916,0,0,1,25.86-7.605a5.252,5.252,0,0,0-3.751-4.985,1.968,1.968,0,0,0-1.73.279,1.893,1.893,0,0,0-.786,1.537v7.332A3.474,3.474,0,0,1,16.151,0a3.474,3.474,0,0,1-3.442-3.442V-15.818a3.145,3.145,0,0,0-1.175-2.434.7.7,0,0,0-.73-.09.677.677,0,0,0-.394.611v2.67a2.737,2.737,0,0,1-2.735,2.682H7.652a2.737,2.737,0,0,1-2.711-2.689v-1.645a38.074,38.074,0,0,0-2.748-14.2A30.546,30.546,0,0,1,0-42.312,31.816,31.816,0,0,1,31.764-73.539,31.737,31.737,0,0,1,57.782-59.984a18.085,18.085,0,0,0,6.229,5.527l2.93,1.576A18.085,18.085,0,0,0,87.22-55.028a23.184,23.184,0,0,1,15.119-5.629,23.31,23.31,0,0,1,17.34,7.713,25.345,25.345,0,0,0,18.81,8.367A25.345,25.345,0,0,0,157.3-52.944a23.31,23.31,0,0,1,17.339-7.713,23.31,23.31,0,0,1,17.34,7.713,25.344,25.344,0,0,0,18.813,8.367h0a25.348,25.348,0,0,0,18.814-8.367,23.311,23.311,0,0,1,17.338-7.714,23.482,23.482,0,0,1,23.36,23.36,23.482,23.482,0,0,1-23.36,23.36A23.267,23.267,0,0,1,231.819-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.427,32.427,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.269,23.269,0,0,1,159.514-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.428,32.428,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.48,23.48,0,0,1,81.6-26.617a11.812,11.812,0,0,0-4.919-5.018A.581.581,0,0,0,76.724-31.722Z" transform="translate(0 73.539)" fill="#f6f6f6" fill-rule="evenodd"/>
+                        </svg>
+                        <div class="link">
+                            <router-link :to="{ name: 'cart' }" tag="div" class="lii" exact>
+                                <img src="~assets/img/cart.png" alt="">`
+                            </router-link>
+
+                            <div ref="arrow" class="arrow">
+                                <img src="~assets/img/nexxx.png" alt="">
+                            </div>
+
+                            <router-link :to="{ name: 'login-cart' }" tag="div" class="lii" exact>
+                                <img src="~assets/img/acc.png" alt="">
+                            </router-link>
+
+                            <div ref="arrow" class="arrow">
+                                <img src="~assets/img/nexxx.png" alt="">
+                            </div>
+
+                            <router-link :to="{ name: 'payment' }" tag="div" class="lii" exact>
+                                <img src="~assets/img/payment.png" alt="">
+                            </router-link>
+
+                            <div ref="arrow" class="arrow">
+                                <img src="~assets/img/nexxx.png" alt="">
+                            </div>
+
+                            <router-link :to="{ name: 'cart-success' }" tag="div" class="lii upp" exact>
+                                <img src="~assets/img/accses.png" alt="">
+                            </router-link>
+
+                        </div>
+                    </section>
+                    <div class="contt">
+                        <div class="titell">
+                            <h3>الســـلة</h3>
+                            <hr>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <router-view></router-view>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+<script>
+
+export default {
+  name: 'ShoppingCardPage',
+  data () {
+    return {
+      courses: true,
+      paymnetData: false,
+      successMessage: false,
+      loginCart: false
+    }
+  },
+  mounted () {
+    this.$el.querySelector('.lii.router-link-active').nextSibling.classList.add('show')
+  },
+  updated () {
+    if (this.$el.querySelector('.arrow.show')) {
+      this.$el.querySelector('.arrow.show').classList.remove('show')
+    }
+
+    if (this.$el.querySelector('.lii.router-link-active').nextSibling) {
+      this.$el.querySelector('.lii.router-link-active').nextSibling.classList.add('show')
+    }
+  }
+
+}
+</script>
+<style lang="scss">
+@import "src/css/helpers/_mixins.scss";
+@import "src/css/helpers/_variabels.scss";
+/*--- start shopping popup ---*/
+.router-link-active {
+    background-color: $yalloColor !important;
+}
+
+.show {
+    opacity:1 ;
+    transition: all ease-in-out .5s;
+}
+
+.backgrou{
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 30;
+    background:rgba( #0C7AD8, .8);
+    padding: 0 20%;
+    overflow-y: scroll;
+    .tabb{
+        position: relative;
+        height: 87px;
+        width: 271px;
+        margin: 0 auto;
+        text-align: center;
+        svg{
+            position: absolute;
+            top: 12px;
+            width: auto;
+            left: 0;
+        }
+        .link{
+            position: absolute;
+            text-align: right;
+            width: 310px;
+            .arrow{
+                position: absolute;
+                display: inline-block;
+                top: 36px;
+                margin: 0 -15px 0 0;
+                opacity: 0;
+                transition: all ease-in-out .5s;
+                img{
+                    width: auto;
+                }
+            }
+            .show{
+                opacity:1 ;
+                transition: all ease-in-out .5s;
+            }
+            .lii{
+                cursor: pointer;
+                position: relative;
+                top: 33px;
+                right: 8px;
+                background: #F2F2F9;
+                width: 33px;
+                height: 33px;
+                text-align: center;
+                border-radius: 100px;
+                line-height: 1.8;
+                margin-left: 34px;
+                display: inline-block;
+            }
+            .active{
+                background-color: $yalloColor;
+                cursor: pointer;
+            }
+            .upp{
+                top: 18px;
+                width: 50px;
+                right: 1px;
+                height: 50px;
+                img{
+                    position: relative;
+                    top: 9px;
+                }
+            }
+        }
+    }
+    .contt{
+        background-color: #fff;
+        margin: 10px auto;
+        max-width: 521px;
+        border-radius: 45px;
+        height: auto;
+        padding: 33px;
+        .titell{
+            h3{
+                font-size: 18px;
+                font-family: 'cairoR';
+                color: $textColor;
+                text-align: right;
+            }
+            hr{
+                margin: 21px auto 29px auto;
+                border: 0;
+                border-top: 2px solid #F2F2F2;
+                max-width: 375px;
+            }
+        }
+        /* courses step */
+        .courses{
+            display: block;
+            .groupp{
+                position: relative;
+                .man{
+                    text-align: initial;
+                    z-index: 1;
+                    position: relative;
+                    background-color: #fff;
+                    padding: 9px 8px 10px 15px;
+                    border-radius: 31px;
+                    margin: 0px 0 27px 51px;
+                    @include prefixer(box-shadow, 2px 7px 9px #9e9e9e36, webkit moz ms);
+                    .compon{
+                        .mag{
+                            margin-left: 5px;
+                            display: inline-block;
+                            img{
+                                width: 88px;
+                                height: 84px;
+                                border-radius: 20px;
+                            }
+                        }
+                        h2{
+                            font-size: 18px;
+                            font-family: 'cairoR';
+                            color: $textColor;
+                            display: inline-block;
+                            position: relative;
+                            top: -18px;
+                            margin: 0 5px 10px 0;
+                        }
+                        h3{
+                            color: $yalloColor;
+                            font-size: 18px;
+                            font-family: 'cairoR';
+                            text-align: left;
+                            margin: -22px 0 0px 11px;
+                            span{
+                                font-size: 9px;
+                                font-family: 'cairoR';
+                                color: $textColor;
+                                margin: 0 0 0 6px;
+                            }
+                        }
+                    }
+                }
+                .delate{
+                    width: 97px;
+                    height: 67px;
+                    background-color: #F8F8F8;
+                    border-radius: 51px;
+                    position: absolute;
+                    top: 20px;
+                    left: 1px;
+                    text-align: center;
+                    cursor: pointer;
+                    img{
+                        width: auto;
+                        position: relative;
+                        top: 18px;
+                        left: -17px;
+                    }
+                }
+            }
+        }
+        /*-- Account --*/
+        .dataUser{
+            display: block;
+            .creatt{
+                .logBy{
+                    margin: 0 auto 26px auto;
+                    text-align: center;
+                    .social{
+                        display: inline-block;
+                        margin: 0 13px 0 0;
+                        background-color: #fff;
+                        padding: 5px;
+                        @include prefixer( box-shadow, 0px 4px 10px #e4e4e45c, webkit moz o);
+                        width: 60px;
+                        height: 42px;
+                        text-align: center;
+                        line-height: 1.7;
+                        border-radius: 36px;
+                        cursor: pointer;
+                        img{
+                            width: auto;
+                        }
+                    }
+                    .login {
+                        height: 41px;
+                        color: #926D05;
+                        background-color: $yalloColor;
+                        border-radius: 50px;
+                        padding: 7px 15px;
+                        text-align: center;
+                        display: inline-block;
+                        a {
+                            text-decoration: none;
+                            font-size: 16px;
+                            color: #926D05;
+                            img {
+                                margin-left: 0;
+                            }
+                            h3 {
+                                display: inline-block;
+                                font-size: 16px;
+                                font-family: 'cairoR';
+                            }
+                        }
+                    }
+                }
+                .creat{
+                    text-align: center;
+                    position: relative;
+                    margin: 28px 0 38px 0;
+                    .orr{
+                        position: relative;
+                        margin: 0 auto;
+                        max-width: 41px;
+                        svg{
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                        }
+                        span{
+                            font-size: 18px;
+                            color: $textColor;
+                            font-family: 'cairoR';
+                            position: relative;
+                            top: 5px;
+                            left: 1px;
+                        }
+                    }
+                    h3{
+                        font-size: 18px;
+                        color: $textColor;
+                        font-family: 'cairoR';
+                        display: block;
+                        text-align: center;
+                        margin: 38px 0 0 0;
+                    }
+                }
+                form{
+                    position: relative;
+                    margin: 0;
+                    overflow: hidden;
+                    padding: 0 0 0 16px;
+                    .inp{
+                        position: relative;
+                        margin-bottom: 15px;
+                        img{
+                            position: absolute;
+                            top: 17px;
+                            right: 12px;
+                        }
+                        input{
+                            padding: 10px;
+                            border: 1px solid #E1E1E1;
+                            color: $textColor;
+                            font-size: 17px;
+                            font-family: 'cairoR';
+                            padding: 0px 37px 0 0;
+                            height: 50px;
+                            ::placeholder{
+                                font-size: 14px;
+                                font-family: 'cairoR';
+                            }
+                        }
+                    }
+                    .terms{
+                        margin: 0;
+                        text-align: right;
+                        .check{
+                            position: relative;
+                            width: 20px;
+                            height: 19px;
+                            overflow: hidden;
+                            display: inline-block;
+                            label{
+                                position: relative;
+                                width: 25px;
+                                height: 25px;
+                                img{
+                                    width: auto;
+                                    position: absolute;
+                                    top: -4px;
+                                    right: 3px;
+                                    opacity: 0;
+                                    transition: all ease-in .4s;
+                                }
+                            }
+                            input[type=checkbox]{
+                                display: none;
+                                position: absolute;
+                                top: 4px;
+                                right: 3px;
+                                :checked + label img {
+                                    opacity: 1;
+                                    display: block;
+                                    transition: all ease-in .3s;
+                                }
+                            }
+                            svg{
+                                position: absolute;
+                                top: 0;
+                                right: 0;
+                                 width: auto;
+                            }
+                        }
+                        h3{
+                            font-size: 11px;
+                            font-family: 'cairoR';
+                            color: $textColor;
+                            margin: 0 5px 0 0;
+                            display: inline-block;
+                            position: relative;
+                            top: -5px;
+                            span{
+                                color: $yalloColor;
+                            }
+                        }
+                    }
+                    .but{
+                        width: 52%;
+                        height: 47px;
+                        background-color: #7B86FA;
+                        margin: 20px auto 0 auto;
+                        text-align: center;
+                        @include prefixer(border-radius, 68px, webkit moz o);
+                        cursor: pointer;
+                        h3{
+                            font-size: 16px;
+                            font-family: 'cairoR';
+                            text-align: center;
+                            color: #fff;
+                            padding: 15px 0 0 0;
+                            img{
+                                width: auto;
+                                margin-left: 6px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /*-- Payment Method --*/
+        .msPayment{
+            display: block;
+            .options{
+                display: none;
+                .sele{
+                    background-color: #fff;
+                    cursor: pointer;
+                    padding: 0 9px 0 0;
+                    width: 100%;
+                    height: 81px;
+                    margin: 0 0 12px 0;
+                    @include prefixer (border-radius, 98px, webkit moz o);
+                    @include prefixer (box-shadow , 8px 7px 10px #b9b9b952, webkit moz o);
+                    img{
+                        width: auto;
+                        margin: 0 12px 0 0;
+                        display: inline-block;
+                    }
+                    h3{
+                        display: inline-block;
+                        font-size: 16px;
+                        font-family: 'cairoR';
+                        margin-right: 10px;
+                    }
+                }
+                .active{
+                    border: 2px solid $yalloColor;
+                }
+                .edit{
+                    line-height: 5;
+                    padding: 0 11px 0 0;
+                }
+            }
+            /*-- details Payment --*/
+            .details{
+                .error{
+                    background-color: #F67A66;
+                    padding: 10px;
+                    width: 100%;
+                    height: 41px;
+                    margin: -17px 0 35px 0;
+                    @include prefixer(border-radius, 7px, webkit moz o);
+                    h3{
+                        color: #fff;
+                        font-size: 14px;
+                        font-family: 'cairoR';
+                        margin: 0;
+                        img{
+                            margin-left: 6px;
+                            width: auto;
+                        }
+                    }
+                }
+                .logoPay{
+                    margin: -13px 0 11px 0;
+                    text-align: center;
+                    img{
+                        width: auto;
+                    }
+                }
+                form{
+                    position: relative;
+                    margin: 0;
+                    overflow: hidden;
+                    padding: 0 0 0 16px;
+                    .inp{
+                        position: relative;
+                        margin-bottom: 15px;
+                        img{
+                            position: absolute;
+                            top: 13px;
+                            left: 15px;
+                            width: auto;
+                        }
+                        input{
+                            padding: 10px;
+                            outline: 0;
+                            color: $textColor;
+                            font-size: 17px;
+                            font-family: 'cairoR';
+                            padding: 0px 15px 0 0;
+                            height: 50px;
+                            ::placeholder{
+                                font-size: 14px;
+                                font-family: 'cairoR';
+                            }
+                        }
+                    }
+                    .but{
+                        width: 84%;
+                        height: 47px;
+                        background-color: #FCC74C;
+                        margin: 20px auto 0 auto;
+                        text-align: center;
+                        @include prefixer(border-radius, 68px, webkit moz o);
+                        cursor: pointer;
+                        h3{
+                            font-size: 16px;
+                            font-family: 'cairoR';
+                            text-align: center;
+                            color: #fff;
+                            padding: 15px 0 0 0;
+                            img{
+                                width: auto;
+                                margin-left: 10px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /*-- Succsess Payment --*/
+        .succses{
+            display: block;
+            text-align: center;
+            h3{
+                font-size: 18px;
+                text-align: center;
+                margin: 0 0 33px 0;
+                color:$textColor;
+                font-family: 'cairoB';
+                span{
+                    font-size: 18px;
+                    margin-right: 10px;
+                    color: #949494;
+                    font-family: 'cairoR';
+                }
+            }
+            .imaagg{
+               img{
+                   width: auto;
+               }
+               h2{
+                   font-family: 'cairoB';
+                   color: #03E88B;
+                   margin: 11px 0 31px 0;
+               }
+               p{
+                   color: #949494;
+                   font-size: 16px;
+                   font-family: 'cairoR';
+                   span{
+                       color: $yalloColor;
+                       margin-right: 4px;
+                       cursor: pointer;
+                   }
+               }
+            }
+        }
+        /* Total Price */
+        .total{
+            margin-top: 90px;
+            .price{
+                background-color: #F8F8F8;
+                padding: 10px;
+                border-radius: 100px;
+                width: 84%;
+                h2{
+                    font-size: 18px;
+                    font-family: 'cairoR';
+                    color: $textColor;
+                    text-align: right;
+                    margin: 0 11px 7px 0;
+                }
+                h3{
+                    color: $yalloColor;
+                    font-size: 18px;
+                    font-family: 'cairoR';
+                    margin: -33px 0 0px -2px;
+                    background-color: #F2F2F2;
+                    width: 90px;
+                    text-align: center;
+                    padding: 9px;
+                    float: left;
+                    border-radius: 55px;
+                    span{
+                        font-size: 9px;
+                        font-family: 'cairoR';
+                        color: $textColor;
+                        margin: 0 0 0 6px;
+                    }
+                }
+            }
+            .next{
+                position: relative;
+                .nexx{
+                    position: absolute;
+                    top: -50px;
+                    left: 0;
+                    width: auto;
+                }
+                img{
+                    position: absolute;
+                    width: auto;
+                    left: 18px;
+                    top: -35px;
+                }
+            }
+        }
+    }
+}
+/*--- End shopping popup ---*/
+</style>

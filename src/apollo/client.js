@@ -1,0 +1,30 @@
+import { ApolloClient } from 'apollo-client'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import { LocalStorage } from 'quasar'
+import { ApolloLink } from 'apollo-link'
+// import { API_URI } from 'src/utils/hostConfig'
+const { buildAxiosFetch } = require('@lifeomic/axios-fetch')
+import { createUploadLink } from 'apollo-upload-client'
+import axios from 'axios'
+
+const customLink = ApolloLink.from([
+  createUploadLink({
+    uri: 'http://localhost:8000/graphql/',
+    // uri: `${API_URI}/graphql/`,
+    fetch: buildAxiosFetch(axios, (config, input, init) => ({
+      ...config,
+      onUploadProgress: init.onUploadProgress
+    })),
+    headers: {
+      authorization: LocalStorage.getItem('token') || null
+    }
+  })
+])
+
+// Create the apollo client
+export const apolloClient = new ApolloClient({
+  link: customLink,
+  // link: httpLink,
+  cache: new InMemoryCache(),
+  connectToDevTools: true
+})

@@ -1,0 +1,74 @@
+<template>
+  <section class="top">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-2">
+                    <!--menu & logo -->
+                    <div class="minlog">
+                        <div class="menu">
+                            <img src="~assets/img/menu.png" alt="">
+                        </div>
+                        <!--logo-->
+                        <div class="logo">
+                            <img src="~assets/img/logo.png" alt="">
+                        </div>
+                    </div>
+                </div>
+                <!-- search box -->
+                <div class="col-lg-6">
+                    <div class="search">
+                        <form>
+                            <input type="text" placeholder="ما الذي تبحث عنة؟">
+                            <button><img src="~assets/img/down.png">حدد القسم</button>
+                        </form>
+                    </div>
+                </div>
+                <!--login $ sign-->
+                <div class="col-lg-3">
+                    <div class="account">
+                        <div class="sign">
+                            <router-link :to="{ name: 'signUp' }" tag="a" exact>
+                                <img src="~assets/img/sign.png" alt="">
+                                <h3> تسجيل حساب</h3>
+                            </router-link>
+                        </div>
+                        <div class="login">
+                            <router-link :to="{ name: 'login' }" tag="a" exact>
+                                <img src="~assets/img/login.png" alt="">
+                                <h3>دخول</h3>
+                            </router-link>
+                        </div>
+                    </div>
+                </div>
+                <!-- Language -->
+                <div class="col-lg-1">
+                    <div class="lang">
+                        <img src="~assets/img/doown.png" alt="">
+                        <h3>Ar</h3>
+                        <div class="contry">
+                            <img src="~assets/img/ar.png" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+export default {
+  name: 'NavBar',
+  props: {
+  },
+  computed: {
+    ...mapGetters('authentication', ['token'])
+  },
+
+  methods: {
+    goToLoginPage () {
+      this.$router.push({ name: 'login' })
+    }
+  }
+}
+</script>
