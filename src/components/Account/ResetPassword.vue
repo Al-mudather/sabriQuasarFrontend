@@ -1,35 +1,42 @@
 <template>
+  <AccountHeader dialogName="إستعادة كلمة المرور" v-on:closeDialog="closePasswordResetDialog">
+    <!--
+      Password Reset section
+    -->
     <div class="resetPass">
-        <form>
-            <div class="row">
-                <div class="col-lg-12 col-xs-12">
-                    <div class="" style="text-align:left" v-if="errorMessages.length > 0">
-                      Please fix these <strong>error first</strong>
-                      <ul>
-                        <li v-for="(message, index) in errorMessages" :key="index">{{message}}<br /></li>
-                      </ul>
-                    </div>
-                    <div class="inp">
-                        <img src="~assets/img/gmail.png" alt="">
-                        <input v-model="email" type="email" placeholder="الإيميل">
-                    </div>
-                    <div class="next">
-                        <a @click="sendEmailConfirmationToTheUser" style="cursor: pointer">
-                            <svg class="nexx" id="Group_391" data-name="Group 391" xmlns="http://www.w3.org/2000/svg" width="37" height="32.4" viewBox="0 0 37 32.4">
-                                <path id="Path_595" data-name="Path 595" d="M38.867-36.467a14.207,14.207,0,0,0-14.2-14.2h-5.8a14.207,14.207,0,0,0-14.2,14.2,14.207,14.207,0,0,0,14.2,14.2h5.8A14.207,14.207,0,0,0,38.867-36.467Z" transform="translate(-1.867 52.667)" fill="#fbc74b" fill-rule="evenodd"/>
-                                <path id="Path_596" data-name="Path 596" d="M17-22.4l-.8.8A16.208,16.208,0,0,1,0-37.8,16.208,16.208,0,0,1,16.2-54l.8.8A15.407,15.407,0,0,0,1.6-37.8,15.407,15.407,0,0,0,17-22.4Z" transform="translate(0 54)" fill="#fbc74b" fill-rule="evenodd"/>
-                            </svg>
-                            <img src="~assets/img/back.png" alt="">
-                        </a>
-                    </div>
-                </div>
+      <form>
+        <div class="row">
+          <div class="col-lg-12 col-xs-12">
+            <div class="" style="text-align:left" v-if="errorMessages.length > 0">
+              Please fix these <strong>error first</strong>
+              <ul>
+                <li v-for="(message, index) in errorMessages" :key="index">{{message}}<br /></li>
+              </ul>
             </div>
-        </form>
+            <div class="inp">
+                <img src="~assets/img/gmail.png" alt="">
+                <input v-model="email" type="email" placeholder="الإيميل">
+            </div>
+            <div class="next">
+                <a @click="sendEmailConfirmationToTheUser" style="cursor: pointer">
+                    <svg class="nexx nexx_1" id="Group_391" data-name="Group 391" xmlns="http://www.w3.org/2000/svg" width="37" height="32.4" viewBox="0 0 37 32.4">
+                        <path id="Path_595" data-name="Path 595" d="M38.867-36.467a14.207,14.207,0,0,0-14.2-14.2h-5.8a14.207,14.207,0,0,0-14.2,14.2,14.207,14.207,0,0,0,14.2,14.2h5.8A14.207,14.207,0,0,0,38.867-36.467Z" transform="translate(-1.867 52.667)" fill="#fbc74b" fill-rule="evenodd"/>
+                        <path id="Path_596" data-name="Path 596" d="M17-22.4l-.8.8A16.208,16.208,0,0,1,0-37.8,16.208,16.208,0,0,1,16.2-54l.8.8A15.407,15.407,0,0,0,1.6-37.8,15.407,15.407,0,0,0,17-22.4Z" transform="translate(0 54)" fill="#fbc74b" fill-rule="evenodd"/>
+                    </svg>
+                    <img src="~assets/img/back.png" alt="">
+                </a>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
+  </AccountHeader>
 </template>
 
 <script>
 import { UserPasswordResetEmail } from 'src/queries/account_management/mutation/UserPasswordResetEmail'
+import { mapActions } from 'vuex'
+import AccountHeader from 'src/components/utils/accountHeader'
 export default {
   data () {
     return {
@@ -37,7 +44,16 @@ export default {
       errorMessages: []
     }
   },
+  components: {
+    AccountHeader
+  },
   methods: {
+    ...mapActions('authentication', ['setPasswordResetDialogAction', 'setRegisterationDialogAction']),
+
+    closePasswordResetDialog () {
+      this.setPasswordResetDialogAction(false)
+      this.setRegisterationDialogAction(false)
+    },
     errorHandler (errorsObj) {
       console.log(errorsObj)
       for (const key in errorsObj) {
@@ -66,6 +82,5 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss">
 </style>

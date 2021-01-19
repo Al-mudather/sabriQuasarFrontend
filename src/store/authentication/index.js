@@ -1,6 +1,10 @@
 import { LocalStorage } from 'quasar'
 
 const state = {
+  loginDialog: false,
+  signUpDialog: false,
+  registerationDialog: false,
+  passwordResetDialog: false,
   user: LocalStorage.getItem('user') || null,
   token: LocalStorage.getItem('token') || null,
   refreshToken: LocalStorage.getItem('refreshToken') || null
@@ -19,10 +23,39 @@ const mutations = {
   deleteData (state) {
     state.token = null
     state.refreshToken = null
+  },
+  updateLoginDialog (state, value) {
+    state.loginDialog = value
+  },
+  updatePasswordResetDialog (state, value) {
+    state.passwordResetDialog = value
+  },
+  updateSignUpDialog (state, value) {
+    state.signUpDialog = value
+  },
+  updateregisterationDialog (state, value) {
+    state.registerationDialog = value
   }
 }
 
 const actions = {
+
+  setLoginDialogAction ({ commit }, value) {
+    commit('updateLoginDialog', value)
+  },
+
+  setPasswordResetDialogAction ({ commit }, value) {
+    commit('updatePasswordResetDialog', value)
+  },
+
+  setSignUpDialogAction ({ commit }, value) {
+    commit('updateSignUpDialog', value)
+  },
+
+  setRegisterationDialogAction ({ commit }, value) {
+    commit('updateregisterationDialog', value)
+  },
+
   loginAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
       const user = payload.user

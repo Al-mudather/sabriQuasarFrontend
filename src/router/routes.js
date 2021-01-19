@@ -17,16 +17,17 @@ const routes = [
     name: 'reset-password-form',
     component: () => import('pages/PasswordResetForm.vue')
   },
-  {
-    path: '/account/',
-    component: () => import('pages/Account.vue'),
-    children: [
-      { path: 'login', name: 'login', component: () => import('components/Account/Login') },
-      { path: 'signUp', name: 'signUp', component: () => import('components/Account/SignUp') },
-      { path: 'passwordReset', name: 'password-reset', component: () => import('components/Account/ResetPassword') },
-      { path: 'confirm', name: 'password-confirm', component: () => import('components/Account/Confirm') }
-    ]
-  },
+  { path: '/account/confirm', name: 'password-confirm', component: () => import('components/Account/Confirm') },
+  // {
+  //   path: '/account/',
+  //   component: () => import('pages/Account.vue'),
+  //   children: [
+  //     { path: 'login', name: 'login', component: () => import('components/Account/Login') },
+  //     // { path: 'signUp', name: 'signUp', component: () => import('components/Account/SignUp') },
+  //     { path: 'passwordReset', name: 'password-reset', component: () => import('components/Account/ResetPassword') },
+  //     { path: 'confirm', name: 'password-confirm', component: () => import('components/Account/Confirm') }
+  //   ]
+  // },
   {
     path: '/cart/',
     component: () => import('pages/ShoppingCart.vue'),

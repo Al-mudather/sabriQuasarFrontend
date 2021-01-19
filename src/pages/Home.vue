@@ -8,6 +8,7 @@
     <Training />
     <SwiperData />
     <Footer />
+    <Account />
   </section>
 </template>
 
@@ -23,9 +24,17 @@ import Evaluation from 'components/Home/Evaluation'
 import Training from 'components/Home/Training'
 import SwiperData from 'components/Home/SwiperData'
 
+import Account from 'pages/Account'
+import { mapState } from 'vuex'
+
 export default {
   name: 'Home',
+  data () {
+    return {
+    }
+  },
   components: {
+    Account,
     ShoppingCart,
     Header,
     Footer,
@@ -34,6 +43,9 @@ export default {
     Evaluation,
     Training,
     SwiperData
+  },
+  computed: {
+    ...mapState('authentication', ['loginDialog'])
   }
 }
 </script>

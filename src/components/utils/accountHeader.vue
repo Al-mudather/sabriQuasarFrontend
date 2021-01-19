@@ -1,5 +1,5 @@
 <template>
-<div class="backAccount">
+    <div class="backAccount">
     <div class="container">
       <div class="row">
           <div class="col-lg-12">
@@ -30,18 +30,13 @@
                           </g>
                         </g>
                     </svg>
-                    <h3>تأكيد</h3>
-                    <img @click="GoToHomePage" class="backButton" src="~assets/img/bacck.png" alt="">
+                    <h3>{{dialogName}}</h3>
+                    <img @click="closeDialog" class="backButton" src="~assets/img/bacck.png" alt="">
                 </div>
                 <!--
-                  Confirm Section
+                  Login Section
                 -->
-                <div class="confirm">
-                    <div class="imaagg">
-                        <img src="~assets/img/success.png" alt="">
-                        <p>تم إرسال رابط تعيين كلمة المرور علي بريدك الالكتروني</p>
-                    </div>
-                </div>
+                <slot/>
           </div>
         </div>
       </div>
@@ -51,17 +46,15 @@
 
 <script>
 export default {
+  props: ['dialogName', 'reviewDetail'],
   methods: {
-    GoToHomePage () {
-      this.$router.push({ name: 'Home' })
+    closeDialog () {
+      this.$emit('closeDialog')
     }
   }
 }
 </script>
 
-<style lang="scss">
-@import 'src/assets/css/sass/helpers/_variabels.scss';
-@import 'src/assets/css/sass/helpers/_mixins.scss';
-@import 'src/assets/css/account.scss';
+<style>
 
 </style>

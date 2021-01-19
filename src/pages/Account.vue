@@ -1,390 +1,46 @@
 <template>
-  <div class="backAccount">
-      <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="content">
-                  <div class="hedTop">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="340" height="136.806" viewBox="0 0 340 136.806">
-                          <g id="Group_390" data-name="Group 390" transform="translate(-516 -162)">
-                            <path id="Path_713" data-name="Path 713" d="M0-68.44V-89.306a47.522,47.522,0,0,1,47.5-47.5h245a47.522,47.522,0,0,1,47.5,47.5V0a26.077,26.077,0,0,1-16.378-9.646,26.324,26.324,0,0,1-4.808-22.838c1.077-4.131,2.142-7.956,3.054-11.225,6.2-22.236-32.868-31.1-19.305,6.892S267,2.527,261.667-30.14s-52-56.667-140-27.333C66.649-39.134,24.139-54.41,0-68.44Z" transform="translate(516 298.806)" fill="#fbc74b" fill-rule="evenodd"/>
-                            <path id="Path_557" data-name="Path 557" d="M384.342-356.325h-4.653a13.588,13.588,0,0,1-4,9.653,13.6,13.6,0,0,1-9.656,4,13.606,13.606,0,0,1-9.656-4,13.6,13.6,0,0,1-4-9.653,13.606,13.606,0,0,1,4-9.658,13.6,13.6,0,0,1,9.656-4,13.609,13.609,0,0,1,9.656,4,13.6,13.6,0,0,1,4,9.658h4.653a18.308,18.308,0,0,0-18.307-18.31,18.312,18.312,0,0,0-18.31,18.31,18.313,18.313,0,0,0,18.31,18.307A18.309,18.309,0,0,0,384.342-356.325Z" transform="translate(452.806 550.029)" fill="#fdffff" opacity="0.11"/>
-                            <g id="Group_376" data-name="Group 376" transform="translate(1091.803 383.003) rotate(-177)" opacity="0.49">
-                              <path id="Path_552" data-name="Path 552" d="M362.9-367.048H360.97a5.63,5.63,0,0,1-1.657,4,5.636,5.636,0,0,1-4,1.658,5.638,5.638,0,0,1-4-1.658,5.635,5.635,0,0,1-1.658-4,5.638,5.638,0,0,1,1.658-4,5.637,5.637,0,0,1,4-1.657,5.639,5.639,0,0,1,4,1.657,5.633,5.633,0,0,1,1.657,4H362.9a7.586,7.586,0,0,0-7.586-7.587,7.588,7.588,0,0,0-7.587,7.587,7.588,7.588,0,0,0,7.587,7.586A7.587,7.587,0,0,0,362.9-367.048Z" transform="translate(207.159 512.27)" fill="#fdffff"/>
-                              <path id="Path_556" data-name="Path 556" d="M85.292-346.731a5.619,5.619,0,0,1-5.619,5.618,5.618,5.618,0,0,1-5.618-5.618,5.618,5.618,0,0,1,5.618-5.618A5.619,5.619,0,0,1,85.292-346.731Z" transform="translate(460.801 479.575)" fill="#fdffff"/>
-                            </g>
-                            <g id="Group_375" data-name="Group 375" transform="translate(19 74.194)" opacity="0.37">
-                              <path id="Path_554" data-name="Path 554" d="M5.633-8.42A2.816,2.816,0,0,1,2.817-5.6,2.816,2.816,0,0,1,0-8.42a2.817,2.817,0,0,1,2.817-2.816A2.816,2.816,0,0,1,5.633-8.42Z" transform="translate(769.763 141)" fill="#fdffff"/>
-                              <path id="Path_712" data-name="Path 712" d="M11.251-5.611A5.624,5.624,0,0,1,5.626.014,5.625,5.625,0,0,1,0-5.611a5.626,5.626,0,0,1,5.626-5.625A5.626,5.626,0,0,1,11.251-5.611Z" transform="translate(775.763 150)" fill="#fdffff"/>
-                            </g>
-                            <g id="Group_377" data-name="Group 377" transform="translate(752.866 -256.506) rotate(99)" opacity="0.28">
-                              <path id="Path_552-2" data-name="Path 552" d="M355.693-370.651H354.68a2.957,2.957,0,0,1-.87,2.1,2.959,2.959,0,0,1-2.1.871,2.96,2.96,0,0,1-2.1-.871,2.959,2.959,0,0,1-.871-2.1,2.961,2.961,0,0,1,.871-2.1,2.96,2.96,0,0,1,2.1-.87,2.961,2.961,0,0,1,2.1.87,2.958,2.958,0,0,1,.87,2.1h1.012a3.984,3.984,0,0,0-3.984-3.984,3.985,3.985,0,0,0-3.984,3.984,3.985,3.985,0,0,0,3.984,3.984A3.984,3.984,0,0,0,355.693-370.651Z" transform="translate(194.807 510.621)" fill="#fbc74b"/>
-                              <path id="Path_556-2" data-name="Path 556" d="M79.956-349.4a2.951,2.951,0,0,1-2.951,2.95,2.95,2.95,0,0,1-2.95-2.95,2.95,2.95,0,0,1,2.95-2.95A2.95,2.95,0,0,1,79.956-349.4Z" transform="translate(458.751 478.681)" fill="#fbc74b"/>
-                            </g>
-                            <g id="Group_380" data-name="Group 380" transform="translate(22.705 337.468) rotate(-30)" opacity="0.28">
-                              <path id="Path_552-3" data-name="Path 552" d="M355.693-370.651H354.68a2.957,2.957,0,0,1-.87,2.1,2.959,2.959,0,0,1-2.1.871,2.96,2.96,0,0,1-2.1-.871,2.959,2.959,0,0,1-.871-2.1,2.961,2.961,0,0,1,.871-2.1,2.96,2.96,0,0,1,2.1-.87,2.961,2.961,0,0,1,2.1.87,2.958,2.958,0,0,1,.87,2.1h1.012a3.984,3.984,0,0,0-3.984-3.984,3.985,3.985,0,0,0-3.984,3.984,3.985,3.985,0,0,0,3.984,3.984A3.984,3.984,0,0,0,355.693-370.651Z" transform="translate(194.79 512.84)" fill="#fff"/>
-                              <path id="Path_556-3" data-name="Path 556" d="M79.956-349.4a2.951,2.951,0,0,1-2.951,2.95,2.95,2.95,0,0,1-2.95-2.95,2.95,2.95,0,0,1,2.95-2.95A2.95,2.95,0,0,1,79.956-349.4Z" transform="translate(458.751 478.681)" fill="#fff"/>
-                            </g>
-                            <g id="Group_381" data-name="Group 381" transform="translate(616 241.956)">
-                              <path id="Path_714" data-name="Path 714" d="M.023,0,0-.867c0-38.955,32.058-71.01,71.014-71.014,36.476,0,66.9,28.113,70.616,63.676a71.475,71.475,0,0,0-19.917-7.918,52.369,52.369,0,0,0-13.255-22.2,52.8,52.8,0,0,0-37.449-15.51A52.78,52.78,0,0,0,33.56-38.325,52.448,52.448,0,0,0,18.212-4.385,162.409,162.409,0,0,1,.023,0Z" fill="rgba(253,255,255,0.1)" fill-rule="evenodd"/>
-                            </g>
-                          </g>
-                      </svg>
-                      <h3>تسجيـل دخول</h3>
-                      <img src="~assets/img/bacck.png" alt="">
-                  </div>
-                  <router-view></router-view>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div>
+    <q-dialog full-width full-height v-model="loginDialog">
+      <Login v-if="!passwordResetDialog"/>
+      <ResetPassword v-if="passwordResetDialog"/>
+    </q-dialog>
+
+    <q-dialog full-width full-height v-model="signUpDialog">
+      <SignUp />
+    </q-dialog>
+
+  </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+import Login from 'components/Account/Login'
+import ResetPassword from 'components/Account/ResetPassword'
+import SignUp from 'components/Account/SignUp'
 export default {
   name: 'Home',
   data () {
     return {
-      login: true,
-      passwordReset: false,
-      confirm: false
     }
   },
   components: {
+    Login,
+    ResetPassword,
+    SignUp
+  },
+
+  computed: {
+    ...mapState('authentication', [
+      'loginDialog',
+      'signUpDialog',
+      'registerationDialog',
+      'passwordResetDialog'
+    ])
   }
 }
 </script>
 <style lang="scss">
-@import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variabels.scss";
-/*--- START Account popup ---*/
-.backAccount{
-    display: block;
-    text-align: right; // Addedd by almudather
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    z-index: 30;
-    background:rgba( #0C7AD8, .8);
-    .content{
-        background-color: #fff;
-        margin: 42px auto;
-        max-width: 400px;
-        border-radius: 63px;
-        height: auto;
-        padding: 20px;
-        position: relative;
-        .hedTop{
-            position: relative;
-            svg{
-                position: absolute;
-                top: -20px;
-                right: -20px;
-                width: auto;
-                height: 161.1px;
-            }
-            h3{
-                color: $textColor;
-                font-size: 19px;
-                font-family: 'cairoR';
-                position: relative;
-                text-align: center;
-                top: 16px;
-            }
-            img{
-                position: absolute;
-                top: 16px;
-            }
-        }
-        /*-- login form --*/
-        .login{
-            display: block;
-            margin: 86px 0 25px 0;
-            .logBy{
-                margin: 0 auto 26px auto;
-                text-align: center;
-                .social{
-                    display: inline-block;
-                    cursor: pointer;
-                    margin: 0 13px 0 0;
-                    background-color: #fff;
-                    padding: 5px;
-                    @include prefixer( box-shadow, 0px 4px 10px #e4e4e45c, webkit moz o);
-                    width: 74px;
-                    height: 47px;
-                    text-align: center;
-                    line-height:2;
-                    border-radius: 36px;
-                    cursor: pointer;
-                    img{
-                        width: auto;
-                    }
-                }
-            }
-            form{
-                position: relative;
-                margin: 0;
-                overflow: hidden;
-                padding: 0 0 0 16px;
-                .inp{
-                    position: relative;
-                    margin-bottom: 15px;
-                    img{
-                        position: absolute;
-                        top: 22px;
-                        right: 12px;
-                    }
-                    input{
-                        padding: 10px;
-                        border: 1px solid #E1E1E1;
-                        color: $textColor;
-                        font-size: 17px;
-                        font-family: 'cairoR';
-                        padding: 0px 37px 0 0;
-                        height: 54px;
-                        ::placeholder{
-                            font-size: 14px;
-                            font-family: 'cairoR';
-                        }
-                    }
-                }
-                .forget{
-                    h3{
-                        font-size: 11px;
-                        font-family: 'cairoR';
-                        color: $textColor;
-                        margin: 0 5px 0 0;
-                        display: inline-block;
-                        position: relative;
-                        top: -5px;
-                        a{
-                            text-decoration: none;
-                            span{
-                                color: $yalloColor;
-                            }
-                        }
-                    }
-                }
-                .next{
-                    position: relative;
-                    height: 66px;
-                    margin: 0 0 -3px 0;
-                    .nexx{
-                        position: absolute;
-                        top: 6px;
-                        left: 0;
-                        width: auto;
-                    }
-                    img{
-                        position: absolute;
-                        width: auto;
-                        left: 18px;
-                        top: 20px;
-                    }
-                }
-            }
-            .creat{
-                text-align: center;
-                position: relative;
-                margin: -12px 0 12px 0;
-                .orr{
-                    position: relative;
-                    margin: 0 auto;
-                    max-width: 41px;
-                    svg{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                    }
-                    span{
-                        font-size: 18px;
-                        color: $textColor;
-                        font-family: 'cairoR';
-                        position: relative;
-                        top: 5px;
-                        left: 1px;
-                    }
-                }
-                a{
-                    text-decoration: none;
-                    h3{
-                        font-size: 18px;
-                        color: $textColor;
-                        font-family: 'cairoR';
-                        display: block;
-                        text-align: center;
-                        margin: 38px 0 0 0;
-                    }
-                }
-            }
-        }
-        /*-- Signin form --*/
-        .signup{
-            display: block;
-            margin: 86px 0 25px 0;
-            .logBy{
-                margin: 0 auto 26px auto;
-                text-align: center;
-                .social{
-                    display: inline-block;
-                    cursor: pointer;
-                    margin: 0 13px 0 0;
-                    background-color: #fff;
-                    padding: 5px;
-                    @include prefixer( box-shadow, 0px 4px 10px #e4e4e45c, webkit moz o);
-                    width: 74px;
-                    height: 47px;
-                    text-align: center;
-                    line-height:2;
-                    border-radius: 36px;
-                    cursor: pointer;
-                    img{
-                        width: auto;
-                    }
-                }
-            }
-            form{
-                position: relative;
-                margin: 0;
-                overflow: hidden;
-                padding: 0 0 0 16px;
-                .inp{
-                    position: relative;
-                    margin-bottom: 15px;
-                    .closee{
-                        position: absolute;
-                        top: 22px;
-                        left: 12px !important;
-                    }
-                    img{
-                        position: absolute;
-                        top: 22px;
-                        right: 12px;
-                    }
-                    input{
-                        padding: 10px;
-                        border: 1px solid #E1E1E1;
-                        color: $textColor;
-                        font-size: 17px;
-                        font-family: 'cairoR';
-                        padding: 0px 37px 0 0;
-                        height: 54px;
-                        ::placeholder{
-                            font-size: 14px;
-                            font-family: 'cairoR';
-                        }
-                    }
-                }
-                .forget{
-                    h3{
-                        font-size: 11px;
-                        font-family: 'cairoR';
-                        color: $textColor;
-                        margin: 0 5px 0 0;
-                        display: inline-block;
-                        position: relative;
-                        top: -5px;
-                        a{
-                            text-decoration: none;
-                            span{
-                                color: $yalloColor;
-                            }
-                        }
-                    }
-                }
-                .next{
-                    position: relative;
-                    height: 66px;
-                    margin: 0 0 -3px 0;
-                    .nexx{
-                        position: absolute;
-                        top: 6px;
-                        left: 0;
-                        width: auto;
-                    }
-                    img{
-                        position: absolute;
-                        width: auto;
-                        left: 18px;
-                        top: 20px;
-                    }
-                }
-            }
-        }
-        /*-- Reset Password --*/
-        .resetPass{
-            display: block;
-            margin: 121px 0 0 0;
-            form{
-                position: relative;
-                margin: 0 0 7px 0;
-                overflow: hidden;
-                padding: 0 0 0 16px;
-                .inp{
-                    position: relative;
-                    margin-bottom: 15px;
-                    img{
-                        position: absolute;
-                        top: 22px;
-                        right: 12px;
-                    }
-                    input{
-                        padding: 10px;
-                        border: 1px solid #E1E1E1;
-                        color: $textColor;
-                        font-size: 17px;
-                        font-family: 'cairoR';
-                        padding: 0px 37px 0 0;
-                        height: 54px;
-                        ::placeholder{
-                            font-size: 14px;
-                            font-family: 'cairoR';
-                        }
-                    }
-                }
-                .next{
-                    position: relative;
-                    opacity: 1;
-                    transition: all ease-in-out .4s;
-                    .nexx{
-                        position: absolute;
-                        top: -58px;
-                        left: 8px;
-                        width: auto;
-                    }
-                    img{
-                        position: absolute;
-                        width: 16px;
-                        left: 19px;
-                        top: -50px;
-                        height: 16px
-                    }
-                }
-            }
-        }
-        /*-- Confirm Password --*/
-        .confirm{
-            display: block;
-            margin: 121px 0 0 0;
-            .imaagg{
-                text-align: center;
-                margin: -27px 0 22px 0;
-                img{
-                    width: 102px;
-                    height: 85px;
-                    margin: 0 0 26px 0;
-                }
-                p{
-                    color: #949494;
-                    font-size: 17px;
-                    font-family: 'cairoR';
-                }
-             }
-        }
-    }
-}
-/*--- End Account popup ---*/
-
+@import 'src/assets/css/sass/helpers/_variabels.scss';
+@import 'src/assets/css/sass/helpers/_mixins.scss';
+@import 'src/assets/css/account.scss';
 </style>

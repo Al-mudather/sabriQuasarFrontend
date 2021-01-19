@@ -27,16 +27,16 @@
                 <div class="col-lg-3">
                     <div class="account">
                         <div class="sign">
-                            <router-link :to="{ name: 'signUp' }" tag="a" exact>
+                            <a @click="openSignUpDailog" style="cursor: pointer">
                                 <img src="~assets/img/sign.png" alt="">
                                 <h3> تسجيل حساب</h3>
-                            </router-link>
+                            </a>
                         </div>
                         <div class="login">
-                            <router-link :to="{ name: 'login' }" tag="a" exact>
+                            <a @click="openLoginDailog" style="cursor: pointer">
                                 <img src="~assets/img/login.png" alt="">
                                 <h3>دخول</h3>
-                            </router-link>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'NavBar',
   props: {
@@ -66,8 +66,16 @@ export default {
   },
 
   methods: {
-    goToLoginPage () {
-      this.$router.push({ name: 'login' })
+    ...mapActions('authentication', ['setLoginDialogAction', 'setSignUpDialogAction', 'setRegisterationDialogAction']),
+
+    openLoginDailog () {
+      // TODO: Close the registeration Dialog
+      this.setRegisterationDialogAction(false)
+      this.setLoginDialogAction(true)
+    },
+
+    openSignUpDailog () {
+      this.setSignUpDialogAction(true)
     }
   }
 }
