@@ -1,7 +1,7 @@
 <template>
   <section class="web">
-    <ShoppingCart />
     <Header />
+    <ShoppingCartPopUp v-if="shoppinCartDialog"/>
     <Statiscs />
     <ViewData />
     <Evaluation />
@@ -15,7 +15,6 @@
 <script>
 // @ is an alias to /src
 
-import ShoppingCart from 'components/Home/Shopping_cart'
 import Header from 'components/Home/Header'
 import Footer from 'components/Home/Footer'
 import Statiscs from 'components/Home/Statiscs'
@@ -23,6 +22,8 @@ import ViewData from 'components/Home/ViewData'
 import Evaluation from 'components/Home/Evaluation'
 import Training from 'components/Home/Training'
 import SwiperData from 'components/Home/SwiperData'
+
+import ShoppingCartPopUp from 'src/pages/ShoppingCart'
 
 import Account from 'pages/Account'
 import { mapState } from 'vuex'
@@ -34,8 +35,8 @@ export default {
     }
   },
   components: {
+    ShoppingCartPopUp,
     Account,
-    ShoppingCart,
     Header,
     Footer,
     Statiscs,
@@ -45,7 +46,8 @@ export default {
     SwiperData
   },
   computed: {
-    ...mapState('authentication', ['loginDialog'])
+    ...mapState('authentication', ['loginDialog']),
+    ...mapState('shoppingCart', ['shoppinCartDialog'])
   }
 }
 </script>
