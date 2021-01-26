@@ -13,6 +13,7 @@
                 <h3><span>{{unit}}</span>{{price}}</h3>
             </div>
             <button>أحصل علية</button>
+            <button @click=" $router.push( { name: 'course-details', params: { pk: course.id } } ) ">Details</button>
             <div class="cart">
                 <svg class="sala" xmlns="http://www.w3.org/2000/svg" width="36.023" height="33.215" viewBox="0 0 36.023 33.215">
                     <g id="Group_282" data-name="Group 282" transform="translate(-24.557 -104.864)">
@@ -39,7 +40,7 @@
 <script>
 export default {
   name: 'courseCard',
-  props: ['name', 'instructor', 'unit', 'price']
+  props: ['name', 'instructor', 'unit', 'price', 'course']
 }
 </script>
 

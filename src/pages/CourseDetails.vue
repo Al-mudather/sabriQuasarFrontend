@@ -7,13 +7,13 @@
                 </div>
                 <div class="col-lg-8">
                     <div class="detailes">
-                        <aboutTheCourse />
+                        <aboutTheCourse :course_id="courseID"/>
 
-                        <whatIwillLearn />
+                        <whatIwillLearn :course_id="courseID"/>
 
-                        <courseContents />
+                        <courseUnits :course_id="courseID"/>
 
-                        <courseInstructors />
+                        <courseInstructors :course_id="courseID"/>
                     </div>
                 </div>
             </div>
@@ -25,22 +25,33 @@
 import courseMainCard from 'components/course/courseMainCard'
 import aboutTheCourse from 'components/course/aboutTheCourse'
 import whatIwillLearn from 'components/course/whatIwillLearn'
-import courseContents from 'components/course/courseContents'
+import courseUnits from 'components/course/courseUnits'
 import courseInstructors from 'components/course/courseInstructors'
 
 export default {
   name: 'Home',
   data () {
-    return {}
+    return {
+      courseID: ''
+    }
   },
   components: {
     courseMainCard,
     aboutTheCourse,
     whatIwillLearn,
-    courseContents,
+    courseUnits,
     courseInstructors
   },
-  computed: {}
+  computed: {},
+  watch: {
+    '$route.params': {
+      handler: function (params) {
+        this.courseID = params.pk
+      },
+      deep: true,
+      immediate: true
+    }
+  }
 }
 </script>
 <style lang="scss">

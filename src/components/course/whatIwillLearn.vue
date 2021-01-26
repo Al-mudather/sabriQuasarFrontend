@@ -36,29 +36,39 @@
             </div>
             <h3>ما الذي سأتعلمه ؟</h3>
         </div>
-        <div class="pluse">
+        <div class="pluse" v-for="point in allWhatYouWillLearn.edges" :key="point.node.id">
             <img src="~assets/img/adedd.png" alt="" />
-            <h3>الأغذية الوظيفية و طرق تحضيرها</h3>
-        </div>
-        <div class="pluse">
-            <img src="~assets/img/adedd.png" alt="" />
-            <h3>
-                أهم المكونات الوظيفية (الحموض الدسمة أوميغا، البروبيوتيك و
-                البريبيوتيك، الأغذية)
-            </h3>
-        </div>
-        <div class="pluse">
-            <img src="~assets/img/adedd.png" alt="" />
-            <h3>
-                الفلورا المعوية كخط دفاعي أول في الجسم يؤثر في صحة الفرد
-            </h3>
+            <h3>{{point.node.points}}</h3>
         </div>
     </div>
 </template>
 
 <script>
+import { GetAllWhatYouWillLearnByCourseID } from 'src/queries/course_management/query/GetAllWhatYouWillLearnByCourseID'
+
 export default {
-  name: 'WhatIwillLearn'
+  name: 'WhatIwillLearn',
+  data () {
+    return {
+      allWhatYouWillLearn: ''
+    }
+  },
+
+  props: ['course_id'],
+
+  apollo: {
+    allWhatYouWillLearn: {
+      query () {
+        return GetAllWhatYouWillLearnByCourseID
+      },
+
+      variables () {
+        return {
+          courseID: this.course_id
+        }
+      }
+    }
+  }
 }
 </script>
 

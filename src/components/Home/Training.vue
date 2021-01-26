@@ -39,6 +39,7 @@
                                                 unit="SDG"
                                             /> -->
                                             <course-card
+                                                :course="course.node"
                                                 :name="course.node.title"
                                                 instructor="د.صبري أبوقرون"
                                                 :price="course.node.courseFee"

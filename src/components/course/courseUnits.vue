@@ -36,185 +36,43 @@
             </div>
             <h3>المحتويـات</h3>
         </div>
+
         <div id="accordion">
-            <div class="card">
-                <div class="card-header" id="headingOne">
-                    <h5 class="mb-0">
-                        <a
-                            data-toggle="collapse"
-                            data-target="#collapseOne"
-                            aria-expanded="true"
-                            aria-controls="collapseOne"
-                        >
-                            <div class="linke">
-                                <img src="~assets/img/mins.png" alt="" />
-                            </div>
-                            الوحدة الاولي : الأغذية الوظيفية
-                        </a>
-                    </h5>
-                </div>
-                <div
-                    id="collapseOne"
-                    class="collapse show"
-                    aria-labelledby="headingOne"
-                    data-parent="#accordion"
+
+            <q-list ref="contentList" class="rounded-borders">
+                <transition-group
+                    appear
+                    enter-active-class="animated fadeIn"
+                    leave-active-class="animated fadeOut"
                 >
-                    <div class="card-body">
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header" id="headingTwo">
-                    <h5 class="mb-0">
-                        <a
-                            data-toggle="collapse"
-                            data-target="#collapseTwo"
-                            aria-expanded="true"
-                            aria-controls="collapseOne"
+                    <q-expansion-item
+                        header-class="text-white"
+                        class="card"
+                        v-for="unit in allCourseUnits.edges"
+                        :key="unit.node.id"
+                    >
+                        <template slot="header">
+                            <contentHeader :headerText="unit.node.title" :open="open" />
+                        </template>
+
+                        <div
+                            id="collapseOne"
+                            class="collapse show"
+                            aria-labelledby="headingOne"
+                            data-parent="#accordion"
                         >
-                            <div class="linke">
-                                <img src="~assets/img/pluus.png" alt="" />
+                            <div class="card-body">
+                                <contentItem
+                                    v-for="content in unit.node.courseunitcontentSet.edges"
+                                    :key="content.node.id"
+                                    :content="content.node"
+                                />
                             </div>
-                            الوحدة الثانية : الأغذية الوظيفية
-                        </a>
-                    </h5>
-                </div>
-                <div
-                    id="collapseTwo"
-                    class="collapse"
-                    aria-labelledby="headingTwo"
-                    data-parent="#accordion"
-                >
-                    <div class="card-body">
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
                         </div>
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header" id="headingThree">
-                    <h5 class="mb-0">
-                        <a
-                            class="collapsed"
-                            data-toggle="collapse"
-                            data-target="#collapseThree"
-                            aria-expanded="false"
-                            aria-controls="collapseThree"
-                        >
-                            <div class="linke">
-                                <img src="~assets/img/pluus.png" alt="" />
-                            </div>
-                            الوحدة الثالثة : الأغذية الوظيفية
-                        </a>
-                    </h5>
-                </div>
-                <div
-                    id="collapseThree"
-                    class="collapse"
-                    aria-labelledby="headingThree"
-                    data-parent="#accordion"
-                >
-                    <div class="card-body">
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header" id="headingFour">
-                    <h5 class="mb-0">
-                        <a
-                            class="collapsed"
-                            data-toggle="collapse"
-                            data-target="#collapseFour"
-                            aria-expanded="false"
-                            aria-controls="collapseThree"
-                        >
-                            <div class="linke">
-                                <img src="~assets/img/pluus.png" alt="" />
-                            </div>
-                            الوحدة الرابعة : الأغذية الوظيفية
-                        </a>
-                    </h5>
-                </div>
-                <div
-                    id="collapseFour"
-                    class="collapse"
-                    aria-labelledby="headingFour"
-                    data-parent="#accordion"
-                >
-                    <div class="card-body">
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                        <div class="info">
-                            <div class="mage">
-                                <img src="~assets/img/padlock.png" alt="" />
-                            </div>
-                            <h3>تحضير الأغذية الوظيفية</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    </q-expansion-item>
+                </transition-group>
+            </q-list>
+
         </div>
         <div class="butDown">
             <svg
@@ -368,15 +226,81 @@
                     </g>
                 </g>
             </svg>
-            <button>عرض المزيد</button>
+            <button @click="loadMoreData">عرض المزيد</button>
         </div>
     </div>
 </template>
 
 <script>
+import contentHeader from 'components/course/contentHeader'
+import contentItem from 'components/course/contentItem'
+import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
 export default {
-  name: 'CourseContents'
+  name: 'courseUnits',
+  data () {
+    return {
+      allCourseUnits: '',
+      open: true,
+      contentOptions: ['الوحدة الاولي : الأغذية الوظيفية', 'الوحدة الثانية : الأغذية الوظيفية', 'الوحدة الثالثة : الأغذية الوظيفية', 'الوحدة الرابعة : الأغذية الوظيفية']
+    }
+  },
+
+  apollo: {
+    allCourseUnits: {
+      query () {
+        return GetAllCourseUnitsByCourseID
+      },
+
+      variables () {
+        return {
+          courseID: this.course_id,
+          first: 2
+        }
+      }
+    }
+  },
+
+  props: ['course_id'],
+
+  components: {
+    contentHeader,
+    contentItem
+  },
+  methods: {
+    async loadMoreData () {
+      await this.$apollo.queries.allCourseUnits.fetchMore({
+        variables: {
+          cursor: this.allCourseUnits.pageInfo.endCursor
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          const newEdges = fetchMoreResult.allCourseUnits.edges
+          const pageInfo = fetchMoreResult.allCourseUnits.pageInfo
+          if (newEdges.length) {
+            this.allCourseUnits = {
+              __typename: previousResult.allCourseUnits.__typename,
+              edges: [...previousResult.allCourseUnits.edges, ...newEdges],
+              pageInfo
+            }
+            return this.allCourseUnits
+          }
+          return previousResult
+        }
+      })
+    },
+
+    openItemData (e) {
+    }
+  }
 }
 </script>
 
-<style></style>
+<style lang="scss">
+.q-card__section--vert {
+    padding: 0 !important;
+}
+.q-item__section--side {
+    display: none;
+    visibility: hidden;
+    width: 0;
+}
+</style>
