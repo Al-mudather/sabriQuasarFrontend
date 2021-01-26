@@ -3,22 +3,53 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
+                    <ul v-if="allCourseSpecialities" class="nav nav-tabs" @click="changeTab" id="myTab" role="tablist">
+                        <li class="nav-item" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
+                           <a  @click="changeCourseData(spec.node.courseSet)" class="nav-link" id="home-tab" data-toggle="tab" href="" role="tab" aria-controls="home" aria-selected="true">
+                            <img src="~assets/img/brain.png" alt="">{{spec.node.speciality}}
+                           </a>
+                        </li>
+                        <!-- <li class="nav-item">
+                          <a class="nav-link" id="profile-tab" data-toggle="tab" href="" role="tab" aria-controls="profile" aria-selected="false"><img src="~assets/img/shield.png" alt=""> مخ وأعصاب</a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link" id="contact-tab" data-toggle="tab" href="" role="tab" aria-controls="contact" aria-selected="false"><img src="~assets/img/brain.png" alt=""> طب أسنان</a>
+                        </li> -->
+                    </ul>
                     <div class="txt">
                         <h3>الــــدورات</h3>
+                        <h4>عرض <span>{{courses.edgeCount || 0}}</span> من اصل {{courses.totalCount || 0}}</h4>
                     </div>
                     <!-- start rate -->
                     <div class="rate">
                         <div class="container-fluid">
-                            <div class="cn">
-                                <div class="row">
-                                    <div v-for="i in 5" :key="i" class="col-lg-2 col-md-3 col-sm-6 col-xs-12">
-                                        <course-card
-                                            name="تغذية امراض الجهاز الهضمي السفلي (القولون)"
-                                            instructor="د.صبري أبوقرون"
-                                            price="1588"
-                                            unit="SDG"
-                                        />
+                            <div class="cn fadeIn">
+                                <div class="row" v-if="courses.edgeCount > 0">
+                                    <div  v-for="course in courses.edges" :key="course.node.id" class="col-lg-2 col-md-3 col-sm-6 col-xs-12">
+                                        <transition
+                                        appear
+                                        enter-active-class="animated fadeIn"
+                                        leave-active-class="animated fadeOut"
+                                        >
+                                            <!-- Wrapping only one DOM element, defined by QBtn -->
+                                            <!-- <course-card
+                                                name="Good"
+                                                instructor="د.صبري أبوقرون"
+                                                price="500"
+                                                unit="SDG"
+                                            /> -->
+                                            <course-card
+                                                :name="course.node.title"
+                                                instructor="د.صبري أبوقرون"
+                                                :price="course.node.courseFee"
+                                                unit="SDG"
+                                            />
+                                        </transition>
+
                                     </div>
+                                </div>
+                                <div class="txt" v-else>
+                                    لا توجد دورات في هذا القسم حاليا
                                 </div>
                             </div>
                             <div class="butDown">
@@ -64,12 +95,59 @@
 
 <script>
 import courseCard from 'components/utils/courseCard'
+// import catItem from 'components/utils/category_item'
+// import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
+import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
+
 export default {
   name: 'Training',
+  data () {
+    return {
+      totalNumberOfCourses: 150,
+      numOfSelectedCourses: 5,
+      courses: [],
+      allCourses: null
+    }
+  },
   props: {
   },
   components: {
     courseCard
+    // catItem
+  },
+  apollo: {
+    allCourseSpecialities: {
+      query () {
+        return GetSpecialities
+      },
+      variables () {
+        return {
+        }
+      }
+    }
+  },
+  methods: {
+    changeCourseData (courses) {
+      console.log('GGGGGGGGGGGGGGGGGGGGG')
+      console.log(courses.edges)
+      console.log('GGGGGGGGGGGGGGGGGGGGG')
+      this.courses = courses
+    },
+    changeTab (e) {
+      e.preventDefault()
+      // TODO: Get the cliked li parent for the a child
+      const clickedLiParent = e.target.parentElement
+      // TODO: Get the parent ul element
+      const ulParent = clickedLiParent.parentElement
+      if (clickedLiParent.classList.contains('nav-item')) {
+        // TODO: Remove the class active from all the li elements
+        for (const liParent of ulParent.childNodes) {
+          liParent.firstChild.classList.remove('active')
+        }
+        // TODO: Add the class active to only the cliked item
+        clickedLiParent.firstChild.classList.add('active')
+      }
+    }
   }
 }
 </script>
@@ -77,27 +155,53 @@ export default {
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
 /*--- Start Training ---*/
-
 .training {
     padding: 20px 0;
     margin-top: 0;
-
+    .nav-tabs{
+        margin: 0 0 20px 0;
+        padding: 15px;
+        border: 1px dashed #F1F0F0;
+        border-radius: 52px;
+        .nav-link{
+            img{
+                margin-left: 4px;
+            }
+            font-size: 18px;
+            font-family: 'cairoR';
+            width: 155px;
+            height: 44px;
+            margin-left: 10px;
+            border-radius: 50px;
+            color:$textColor;
+            border: 1px solid #F6F6F6;
+            background-color: #fff;
+            @include prefixer(box-shadow, 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14), webkit moz o ms);
+            &.active{
+                background-color: #2D77D8;
+                color: #fff;
+            }
+        }
+    }
     .txt {
         position: relative;
         margin-bottom: 40px;
-        text-align: right; // Addedd by almudather
-
-        img {
-            width: auto;
-            display: inline-block;
-        }
-
         h3 {
             font-size: 25px;
             font-family: 'cairoR';
             display: inline-block;
             color: $textColor;
             margin-right: 7px;
+        }
+        h4{
+            font-family: 'cairoR';
+            font-size: 14px;
+            color: #BBBABA;
+            margin-right: 8px;
+            span{
+                color: $yalloColor;
+                font-family: 'cairoR';
+            }
         }
     }
 
@@ -108,11 +212,14 @@ export default {
             padding: 0 0 0 0;
             position: relative;
             right: 8%;
-
+            @media (min-width: 320px) and (max-width: 700px){
+                right: 0;
+            }
             .parent {
                 margin-bottom: 20px;
-                text-align: right; // Addedd by almudather
-
+                @media (min-width: 320px) and (max-width: 700px){
+                    margin-bottom: 0;
+                }
                 .imag {
                     position: relative;
                     border-radius: 50px;
@@ -160,7 +267,6 @@ export default {
                     margin: -59px auto;
                     position: relative;
                     z-index: 2;
-                    text-align: right; // Addedd by almudather
 
                     .detai {
                         text-align: center;

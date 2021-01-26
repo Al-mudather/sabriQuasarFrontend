@@ -1,31 +1,48 @@
-<template>
-  <div>
-    <MainNavBar />
-    <ShoppingCart />
-    <router-view></router-view>
-  </div>
-</template>
-
-<script>
-
-import MainNavBar from 'components/utils/MainNavBar'
-import ShoppingCart from 'components/Home/Shopping_cart'
-
-export default {
-  name: 'MainLayout',
-  components: {
-    MainNavBar,
-    ShoppingCart
-  },
-  data () {
-    return {
-    }
-  }
+/*-- font style --*/
+@font-face {
+    font-family: "cairoB";
+    src: url('../font/Cairo-Bold.ttf')
 }
-</script>
-<style lang="scss">
-@import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variabels.scss";
+
+@font-face {
+    font-family: "cairoR";
+    src: url('../font/Cairo-Regular.ttf')
+}
+
+@font-face {
+    font-family: "airR";
+    src: url('../font/AirStripR.ttf')
+}
+
+/*-- import --*/
+@import 'sass/helpers/variabels';
+@import 'sass/helpers/mixins';
+
+@import 'sass/layout/navbar';
+@import 'sass/layout/header';
+@import 'sass/pages/homepage';
+@import 'sass/pages/resetPassword';
+@import 'sass/components/buttons';
+@import 'sass/layout/footer';
+
+/*-- body style --*/
+body {
+    box-sizing: content-box;
+    height: auto;
+    background-color: #fcfcfc;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+.web {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/*--- start navbar ---*/
 .top{
     background-color: #fff;
     .search{
@@ -34,6 +51,7 @@ export default {
                 background-color:#FAFAFA;
             }
             button{
+                
             }
         }
     }
@@ -239,8 +257,8 @@ export default {
             p{
                color: #9C9C9C;
                font-size: 16px;
-               font-family: 'cairoR';
-               line-height: 1.7;
+               font-family: 'cairoR';  
+               line-height: 1.7;   
                width: 90%;
                margin-right: 39px;
             }
@@ -254,7 +272,7 @@ export default {
                     display: inline-block;
                     color: #9C9C9C;
                     font-size: 16px;
-                    font-family: 'cairoR';
+                    font-family: 'cairoR';  
                 }
             }
             /*colaps*/
@@ -353,4 +371,3 @@ export default {
     }
 }
 /*---   End cources ---*/
-</style>

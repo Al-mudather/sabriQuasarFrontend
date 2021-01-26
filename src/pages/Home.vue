@@ -13,7 +13,6 @@
 </template>
 
 <script>
-// @ is an alias to /src
 
 import Header from 'components/Home/Header'
 import Footer from 'components/Home/Footer'
