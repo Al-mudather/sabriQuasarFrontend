@@ -2,19 +2,13 @@
   <section class="training">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-lg-12">
-                    <ul v-if="allCourseSpecialities" class="nav nav-tabs" @click="changeTab" id="myTab" role="tablist">
+                <div ref="col" class="col-lg-12">
+                    <ul ref="cat" class="nav nav-tabs" @click="changeTab" id="myTab" role="tablist">
                         <li class="nav-item" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
-                           <a  @click="changeCourseData(spec.node.courseSet)" class="nav-link" id="home-tab" data-toggle="tab" href="" role="tab" aria-controls="home" aria-selected="true">
+                           <a style="outline: 0" :data-course="JSON.stringify(spec.node.courseSet)"  @click="changeCourseData(spec.node.courseSet)" class="nav-link" id="home-tab" data-toggle="tab" href="" role="tab" aria-controls="home" aria-selected="true">
                             <img src="~assets/img/brain.png" alt="">{{spec.node.speciality}}
                            </a>
                         </li>
-                        <!-- <li class="nav-item">
-                          <a class="nav-link" id="profile-tab" data-toggle="tab" href="" role="tab" aria-controls="profile" aria-selected="false"><img src="~assets/img/shield.png" alt=""> مخ وأعصاب</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="contact-tab" data-toggle="tab" href="" role="tab" aria-controls="contact" aria-selected="false"><img src="~assets/img/brain.png" alt=""> طب أسنان</a>
-                        </li> -->
                     </ul>
                     <div class="txt">
                         <h3>الــــدورات</h3>
@@ -31,13 +25,6 @@
                                         enter-active-class="animated fadeIn"
                                         leave-active-class="animated fadeOut"
                                         >
-                                            <!-- Wrapping only one DOM element, defined by QBtn -->
-                                            <!-- <course-card
-                                                name="Good"
-                                                instructor="د.صبري أبوقرون"
-                                                price="500"
-                                                unit="SDG"
-                                            /> -->
                                             <course-card
                                                 :course="course.node"
                                                 :name="course.node.title"
@@ -104,8 +91,10 @@ export default {
   name: 'Training',
   data () {
     return {
+      counter: 0,
       totalNumberOfCourses: 150,
       numOfSelectedCourses: 5,
+      allCourseSpecialities: '',
       courses: [],
       allCourses: null
     }
@@ -116,6 +105,7 @@ export default {
     courseCard
     // catItem
   },
+
   apollo: {
     allCourseSpecialities: {
       query () {
@@ -127,11 +117,21 @@ export default {
       }
     }
   },
+
+  updated () {
+    console.log('updated')
+    if (this.counter === 0) {
+      // TODO: When the page is loadded, select the first category with it's
+      // data courses to be viewd
+      this.$refs.cat.firstChild.firstChild.classList.add('active')
+      const data = JSON.parse(this.$refs.cat.firstChild.firstChild.dataset.course)
+      this.courses = data
+      this.counter += 10
+    }
+  },
+
   methods: {
     changeCourseData (courses) {
-      console.log('GGGGGGGGGGGGGGGGGGGGG')
-      console.log(courses.edges)
-      console.log('GGGGGGGGGGGGGGGGGGGGG')
       this.courses = courses
     },
     changeTab (e) {

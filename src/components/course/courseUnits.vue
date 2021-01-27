@@ -74,7 +74,7 @@
             </q-list>
 
         </div>
-        <div class="butDown">
+        <div class="butDown" v-if="allCourseUnits.pageInfo.hasNextPage">
             <svg
                 class="right"
                 xmlns="http://www.w3.org/2000/svg"
@@ -235,6 +235,7 @@
 import contentHeader from 'components/course/contentHeader'
 import contentItem from 'components/course/contentItem'
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
+
 export default {
   name: 'courseUnits',
   data () {
@@ -254,7 +255,7 @@ export default {
       variables () {
         return {
           courseID: this.course_id,
-          first: 2
+          limit: 2
         }
       }
     }
@@ -270,12 +271,18 @@ export default {
     async loadMoreData () {
       await this.$apollo.queries.allCourseUnits.fetchMore({
         variables: {
+          courseID: this.course_id,
           cursor: this.allCourseUnits.pageInfo.endCursor
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           const newEdges = fetchMoreResult.allCourseUnits.edges
           const pageInfo = fetchMoreResult.allCourseUnits.pageInfo
           if (newEdges.length) {
+            console.log('lllllllllllllllll')
+            console.log(newEdges)
+            console.log('lllllllllllllllll')
+            console.log(pageInfo)
+            console.log('lllllllllllllllll')
             this.allCourseUnits = {
               __typename: previousResult.allCourseUnits.__typename,
               edges: [...previousResult.allCourseUnits.edges, ...newEdges],

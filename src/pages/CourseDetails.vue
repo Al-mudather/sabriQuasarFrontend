@@ -27,9 +27,10 @@ import aboutTheCourse from 'components/course/aboutTheCourse'
 import whatIwillLearn from 'components/course/whatIwillLearn'
 import courseUnits from 'components/course/courseUnits'
 import courseInstructors from 'components/course/courseInstructors'
+import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
 
 export default {
-  name: 'Home',
+  name: 'CourseDetails',
   data () {
     return {
       courseID: ''
@@ -45,8 +46,17 @@ export default {
   computed: {},
   watch: {
     '$route.params': {
-      handler: function (params) {
+      handler: async function (params) {
         this.courseID = params.pk
+        const res = await this.$apollo.query({
+          query: GetCourseByID,
+          variables: {
+            courseID: params.pk
+          }
+        })
+        console.log('DDDDDDDDDDDDD')
+        console.log(res.data)
+        console.log('DDDDDDDDDDDDD')
       },
       deep: true,
       immediate: true

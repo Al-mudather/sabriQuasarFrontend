@@ -9,7 +9,9 @@ query GetAllCourseInstructors($courseID: ID) {
         instructor{
           id,
           username,
-          fullName
+          fullName,
+          firstName,
+          lastName
         }
       }
     }

@@ -1,8 +1,8 @@
 import gql from 'graphql-tag'
 
 export const GetAllCourseUnitsByCourseID = gql`
-query GetAllCourseUnitsByCourseID($first: Int, $courseID: ID) {
-  allCourseUnits(course: $courseID, first: $first) {
+query GetAllCourseUnitsByCourseID($cursor: String, $limit: Int, $courseID: ID) {
+  allCourseUnits(course: $courseID, after: $cursor, first: $limit) {
     pageInfo {
       startCursor,
       endCursor,

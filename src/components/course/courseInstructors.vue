@@ -38,22 +38,11 @@
         </div>
         <div class="tetch">
             <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 col-xs-12">
+                <div class="row justify-center">
+                    <div class="col-lg-6 col-xs-12" v-for="instructor in allCourseInstructors.edges" :key="instructor.node.id">
                         <div class="tech">
                             <img src="~assets/img/user-13.jpg" alt="" />
-                            <h3>د. صبري أبوقرون</h3>
-                            <p>
-                                الأستاذة الدكتورة غادة بشور صيدلانية من سوريا
-                                حاصلة على درجة الدكتوراه في علوم الأغذية من
-                                جامعة غيسن -
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-xs-12">
-                        <div class="tech">
-                            <img src="~assets/img/user-13.jpg" alt="" />
-                            <h3>د. صبري أبوقرون</h3>
+                            <h3>{{instructor.node.instructor.firstName}} {{instructor.node.instructor.lastName}}</h3>
                             <p>
                                 الأستاذة الدكتورة غادة بشور صيدلانية من سوريا
                                 حاصلة على درجة الدكتوراه في علوم الأغذية من
@@ -68,8 +57,24 @@
 </template>
 
 <script>
+import { GetAllCourseInstructors } from 'src/queries/course_management/query/GetAllCourseInstructors'
+
 export default {
-  name: 'CourseInstructors'
+  name: 'CourseInstructors',
+  props: ['course_id'],
+  apollo: {
+    allCourseInstructors: {
+      query () {
+        return GetAllCourseInstructors
+      },
+
+      variables () {
+        return {
+          courseID: this.course_id
+        }
+      }
+    }
+  }
 }
 </script>
 
