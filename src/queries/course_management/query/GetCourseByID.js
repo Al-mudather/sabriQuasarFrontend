@@ -1,22 +1,22 @@
 import gql from 'graphql-tag'
 
 export const GetCourseByID = gql`
-query GetCourseByID($courseID:ID!) {
-  course(id:$courseID) {
+query GetCourseByID($coursePk:Int) {
+  course(id:$coursePk) {
     id,
+    pk,
     title,
     courseFee,
-    courseinstructorSet {
-      edges{
-        node{
-          id,
-          isMainInstructor,
-          instructor{
-            id,
-            firstName
-          }
-        }
-      }
+    brief,
+    enrollmentSet{
+      edgeCount,
+      totalCount
+    },
+    courseLanguage{
+      id,
+      pk,
+      languageName,
+      languageCode
     }
   }
 }

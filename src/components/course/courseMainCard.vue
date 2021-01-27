@@ -1,6 +1,6 @@
 <template>
-    <div class="asid">
-        <h3>تغذية أمراض الجهاز الهضمي السفلي (القولون)</h3>
+    <div class="asid" v-if="courseData">
+        <h3>{{courseData.title}}</h3>
         <div class="rate">
             <img src="~assets/img/rate.png" alt="" />
             <h3>أعلي تقييم</h3>
@@ -13,7 +13,7 @@
         </div>
         <div class="content">
             <div class="tow">
-                <h3>58<span>K</span></h3>
+                <h3>{{courseData.enrollmentSet.totalCount}}<span v-if="courseData.enrollmentSet.totalCount >= 1000">K</span></h3>
                 <P>الطلاب الملتحقين</P>
                 <hr />
             </div>
@@ -24,7 +24,7 @@
             </div>
             <div class="tow">
                 <img src="~assets/img/languages.png" alt="" />
-                <P>العربيــة</P>
+                <P>{{courseData.courseLanguage.languageName}}</P>
             </div>
             <div class="more">
                 <svg
@@ -68,7 +68,7 @@
                     </g>
                 </svg>
                 <div class="pric">
-                    <h3>1588<span>SDG</span></h3>
+                    <h3>{{formatCoureFee}}<span>SDG</span></h3>
                     <button>أمتلك الأن</button>
                 </div>
                 <img class="share" src="~assets/img/share.png" alt="" />
@@ -80,7 +80,13 @@
 
 <script>
 export default {
-  name: 'CourseMainCard'
+  name: 'CourseMainCard',
+  props: ['courseData'],
+  computed: {
+    formatCoureFee () {
+      return this.courseData.courseFee.split('.')[0]
+    }
+  }
 }
 </script>
 

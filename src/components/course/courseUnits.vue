@@ -36,6 +36,7 @@
             </div>
             <h3>المحتويـات</h3>
         </div>
+        <skeletonList v-if="!allCourseUnits.pageInfo.hasNextPage" />
 
         <div id="accordion">
 
@@ -235,15 +236,22 @@
 import contentHeader from 'components/course/contentHeader'
 import contentItem from 'components/course/contentItem'
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
+import skeletonList from 'src/components/skeleton/skeletonList'
 
 export default {
   name: 'courseUnits',
   data () {
     return {
-      allCourseUnits: '',
+      allCourseUnits: { pageInfo: { hasNextPage: '' } },
       open: true,
       contentOptions: ['الوحدة الاولي : الأغذية الوظيفية', 'الوحدة الثانية : الأغذية الوظيفية', 'الوحدة الثالثة : الأغذية الوظيفية', 'الوحدة الرابعة : الأغذية الوظيفية']
     }
+  },
+
+  components: {
+    contentHeader,
+    contentItem,
+    skeletonList
   },
 
   apollo: {
@@ -263,10 +271,6 @@ export default {
 
   props: ['course_id'],
 
-  components: {
-    contentHeader,
-    contentItem
-  },
   methods: {
     async loadMoreData () {
       await this.$apollo.queries.allCourseUnits.fetchMore({
@@ -278,11 +282,6 @@ export default {
           const newEdges = fetchMoreResult.allCourseUnits.edges
           const pageInfo = fetchMoreResult.allCourseUnits.pageInfo
           if (newEdges.length) {
-            console.log('lllllllllllllllll')
-            console.log(newEdges)
-            console.log('lllllllllllllllll')
-            console.log(pageInfo)
-            console.log('lllllllllllllllll')
             this.allCourseUnits = {
               __typename: previousResult.allCourseUnits.__typename,
               edges: [...previousResult.allCourseUnits.edges, ...newEdges],

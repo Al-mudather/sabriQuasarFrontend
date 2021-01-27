@@ -8,6 +8,7 @@ query GetAllSpecialities {
     edges{
       node{
         id,
+        pk,
         speciality,
         courseSet(first:5){
           totalCount,
@@ -15,6 +16,7 @@ query GetAllSpecialities {
           edges {
             node{
               id,
+              pk,
               title
             }
           }

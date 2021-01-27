@@ -40,11 +40,14 @@
             <img src="~assets/img/adedd.png" alt="" />
             <h3>{{point.node.points}}</h3>
         </div>
+
+        <skeletonList v-if="!allWhatYouWillLearn" />
     </div>
 </template>
 
 <script>
 import { GetAllWhatYouWillLearnByCourseID } from 'src/queries/course_management/query/GetAllWhatYouWillLearnByCourseID'
+import skeletonList from 'src/components/skeleton/skeletonList'
 
 export default {
   name: 'WhatIwillLearn',
@@ -52,6 +55,10 @@ export default {
     return {
       allWhatYouWillLearn: ''
     }
+  },
+
+  components: {
+    skeletonList
   },
 
   props: ['course_id'],

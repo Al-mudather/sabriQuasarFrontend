@@ -3,11 +3,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4">
-                    <courseMainCard />
+                    <courseMainCard :courseData="courseData" />
                 </div>
                 <div class="col-lg-8">
                     <div class="detailes">
-                        <aboutTheCourse :course_id="courseID"/>
+                        <aboutTheCourse :courseData="courseData" />
 
                         <whatIwillLearn :course_id="courseID"/>
 
@@ -33,7 +33,8 @@ export default {
   name: 'CourseDetails',
   data () {
     return {
-      courseID: ''
+      courseID: '',
+      courseData: ''
     }
   },
   components: {
@@ -47,16 +48,17 @@ export default {
   watch: {
     '$route.params': {
       handler: async function (params) {
-        this.courseID = params.pk
+        this.courseID = params.id
         const res = await this.$apollo.query({
           query: GetCourseByID,
           variables: {
-            courseID: params.pk
+            coursePk: params.pk
           }
         })
-        console.log('DDDDDDDDDDDDD')
-        console.log(res.data)
-        console.log('DDDDDDDDDDDDD')
+        console.log('GGGGGGGGGGGGG')
+        console.log(res.data.course)
+        console.log('GGGGGGGGGGGGG')
+        this.courseData = res.data.course
       },
       deep: true,
       immediate: true

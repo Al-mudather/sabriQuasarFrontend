@@ -39,6 +39,12 @@
         <div class="tetch">
             <div class="container">
                 <div class="row justify-center">
+                    <div v-if="!allCourseInstructors" class="col-lg-6 col-xs-12">
+                      <skeletonUserInfo />
+                    </div>
+                    <div v-if="!allCourseInstructors" class="col-lg-6 col-xs-12">
+                      <skeletonUserInfo />
+                    </div>
                     <div class="col-lg-6 col-xs-12" v-for="instructor in allCourseInstructors.edges" :key="instructor.node.id">
                         <div class="tech">
                             <img src="~assets/img/user-13.jpg" alt="" />
@@ -58,10 +64,19 @@
 
 <script>
 import { GetAllCourseInstructors } from 'src/queries/course_management/query/GetAllCourseInstructors'
+import skeletonUserInfo from 'src/components/skeleton/skeletonUserInfo'
 
 export default {
   name: 'CourseInstructors',
+  data () {
+    return {
+      allCourseInstructors: ''
+    }
+  },
   props: ['course_id'],
+  components: {
+    skeletonUserInfo
+  },
   apollo: {
     allCourseInstructors: {
       query () {

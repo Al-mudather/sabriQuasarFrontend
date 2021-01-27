@@ -11,7 +11,7 @@ const routes = [
     path: '/course/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: ':pk', name: 'course-details', component: () => import('pages/CourseDetails.vue') }
+      { path: ':pk&:id', name: 'course-details', component: () => import('pages/CourseDetails.vue') }
     ]
   },
   {
