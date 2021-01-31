@@ -1,9 +1,7 @@
 <template>
-    <div class="asid" v-if="courseData">
-        <h3>{{courseData.title}}</h3>
+    <div class="asid">
         <div class="rate">
-            <img src="~assets/img/rate.png" alt="" />
-            <h3>أعلي تقييم</h3>
+            <img src="~assets/img/raha.png" alt="" />
         </div>
         <div class="vidd">
             <div class="mag">
@@ -12,55 +10,64 @@
             <img class="playy" src="~assets/img/playy.png" alt="" />
         </div>
         <div class="content">
-            <div class="tow">
-                <h3>{{courseData.enrollmentSet.totalCount}}<span v-if="courseData.enrollmentSet.totalCount >= 1000">K</span></h3>
-                <P>الطلاب الملتحقين</P>
-                <hr />
-            </div>
-            <div class="tow">
-                <h3>42</h3>
-                <P>عدد الساعات</P>
-                <hr class="hr-2" />
-            </div>
-            <div class="tow">
-                <img src="~assets/img/languages.png" alt="" />
-                <P>{{courseData.courseLanguage.languageName}}</P>
+            <div class="uper">
+                <div v-if="courseData.enrollmentSet" class="tow ordO">
+                    <h3>{{courseData.enrollmentSet.totalCount}}<span v-if="courseData.enrollmentSet.totalCount >= 1000">K</span></h3>
+                    <P>الطلاب الملتحقين</P>
+                </div>
+
+                <div v-else class="tow ordO">
+                    <q-skeleton type="text" width="50px"/>
+                    <P>الطلاب الملتحقين</P>
+                    <hr />
+                </div>
+
+                <div class="tow">
+                    <h3>42<span>H</span></h3>
+                    <P>عدد الساعات</P>
+                </div>
+                <div v-if="courseData.courseLanguage" class="tow ordT">
+                    <img src="~assets/img/languages.png" alt="" />
+                    <P>{{courseData.courseLanguage.languageName}}</P>
+                </div>
+
+                <div v-else class="tow ordT">
+                    <img src="~assets/img/languages.png" alt="" />
+                    <q-skeleton type="text" width="50px"/>
+                </div>
+
             </div>
             <div class="more">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="325"
-                    height="200.333"
-                    viewBox="0 0 325 200.333"
+                    width="241.182"
+                    height="148.667"
+                    viewBox="0 0 241.182 148.667"
                 >
                     <g
-                        id="Group_633"
-                        data-name="Group 633"
-                        transform="translate(-972 -677.333)"
+                        id="Group_671"
+                        data-name="Group 671"
+                        transform="translate(-987 -499.333)"
                     >
-                        <g
-                            id="Group_584"
-                            data-name="Group 584"
-                            transform="translate(972 877.666)"
-                        >
-                            <path
-                                id="Path_943"
-                                data-name="Path 943"
-                                d="M138.718-18.326A51.5,51.5,0,0,1,99.356-.034C73.683,0,42,0,42,0A42.02,42.02,0,0,1,0-42,42.02,42.02,0,0,1,42-84h6.167a23,23,0,0,0,23-23h0A93.377,93.377,0,0,1,164.5-200.333,93.377,93.377,0,0,1,257.833-107h0a23,23,0,0,0,23,23H283a42.02,42.02,0,0,1,42,42A42.02,42.02,0,0,1,283,0H225.644a51.531,51.531,0,0,1-39.388-18.3A30.793,30.793,0,0,0,162.5-29.45,30.939,30.939,0,0,0,138.718-18.326Z"
-                                fill="#5666b9"
-                                fill-rule="evenodd"
-                            />
-                        </g>
+                        <path
+                            id="Path_943"
+                            data-name="Path 943"
+                            d="M102.943-65.266A38.216,38.216,0,0,1,73.732-51.691c-19.052.025-42.564.025-42.564.025A31.183,31.183,0,0,1,0-82.834,31.183,31.183,0,0,1,31.168-114h4.576a17.068,17.068,0,0,0,17.068-17.068h0a69.3,69.3,0,0,1,69.263-69.262,69.3,69.3,0,0,1,69.262,69.262h0A17.069,17.069,0,0,0,208.406-114h1.608a31.183,31.183,0,0,1,31.168,31.168,31.183,31.183,0,0,1-31.168,31.168H167.45a38.241,38.241,0,0,1-29.23-13.584,22.852,22.852,0,0,0-17.629-8.271A22.96,22.96,0,0,0,102.943-65.266Z"
+                            transform="translate(987 699.666)"
+                            fill="#5666b9"
+                            fill-rule="evenodd"
+                        />
                         <g
                             id="Group_582"
                             data-name="Group 582"
-                            transform="translate(1107.681 735.678) rotate(3)"
+                            transform="translate(1089.758 503.14) rotate(3)"
                             opacity="0.49"
                         >
                             <path
                                 id="Path_942"
                                 data-name="Path 942"
-                                d="M2.026-43.322A78.761,78.761,0,0,1,17.46-47.891a79.34,79.34,0,0,1,15.984-1.364,79.628,79.628,0,0,1,27.123,5.074,82.02,82.02,0,0,1,16.46,8.3A79.622,79.622,0,0,1,106.544-.9a1.449,1.449,0,0,0,1.892.786A1.449,1.449,0,0,0,109.222-2,82.108,82.108,0,0,0,79.414-39.44a78.7,78.7,0,0,0-17.283-8.967,80.836,80.836,0,0,0-28.687-4.878,82.1,82.1,0,0,0-16.693,1.96A80.952,80.952,0,0,0,.872-45.98,1.449,1.449,0,0,0,.12-44.074,1.449,1.449,0,0,0,2.026-43.322Z"
+                                d="M1.5,7.4a58.942,58.942,0,0,1,23.316-4.4A59.092,59.092,0,0,1,44.947,6.758a60.867,60.867,0,0,1,12.215,6.158,59.088,59.088,0,0,1,21.9,25.965,1.075,1.075,0,0,0,1.987-.821A60.932,60.932,0,0,0,58.933,10.277,58.4,58.4,0,0,0,46.107,3.622,59.988,59.988,0,0,0,24.819,0,60.927,60.927,0,0,0,12.431,1.457,60.074,60.074,0,0,0,.647,5.423,1.075,1.075,0,1,0,1.5,7.4Z"
+                                transform="translate(0)"
                                 fill="#fbc74b"
                                 fill-rule="evenodd"
                             />
@@ -84,7 +91,8 @@ export default {
   props: ['courseData'],
   computed: {
     formatCoureFee () {
-      return this.courseData.courseFee.split('.')[0]
+      if (this.courseData.courseFee) { return this.courseData.courseFee.split('.')[0] }
+      return ''
     }
   }
 }

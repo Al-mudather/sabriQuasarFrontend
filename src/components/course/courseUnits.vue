@@ -32,7 +32,7 @@
                         />
                     </g>
                 </svg>
-                <img src="~assets/img/exclamation.png" alt="" />
+                <img src="~assets/img/questio.png" alt="">
             </div>
             <h3>المحتويـات</h3>
         </div>

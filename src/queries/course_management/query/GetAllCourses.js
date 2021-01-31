@@ -1,8 +1,8 @@
 import gql from 'graphql-tag'
 
 export const GetAllCourses = gql`
-query GetAllCourses($first:Int) {
-  allCourses(first:$first) {
+query GetAllCourses($first:Int, $courseSpeciality: ID) {
+  allCourses(first:$first, courseSpeciality: $courseSpeciality) {
     totalCount,
     edgeCount
     edges{
@@ -10,6 +10,10 @@ query GetAllCourses($first:Int) {
         id,
         title,
         courseFee,
+        courseSpeciality {
+          id,
+          pk
+        },
         courseinstructorSet {
           edges{
             node{

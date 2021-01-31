@@ -8,6 +8,10 @@ query GetCourseByID($coursePk:Int) {
     title,
     courseFee,
     brief,
+    courseSpeciality {
+      id,
+      pk
+    },
     enrollmentSet{
       edgeCount,
       totalCount

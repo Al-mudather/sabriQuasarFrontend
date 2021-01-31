@@ -41,7 +41,7 @@
             <h3>{{point.node.points}}</h3>
         </div>
 
-        <skeletonList v-if="!allWhatYouWillLearn" />
+        <skeletonList v-if="allWhatYouWillLearn.edges.length === 0" />
     </div>
 </template>
 
@@ -53,7 +53,7 @@ export default {
   name: 'WhatIwillLearn',
   data () {
     return {
-      allWhatYouWillLearn: ''
+      allWhatYouWillLearn: { edges: [] }
     }
   },
 
