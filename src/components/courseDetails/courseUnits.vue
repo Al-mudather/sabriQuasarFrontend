@@ -233,8 +233,8 @@
 </template>
 
 <script>
-import contentHeader from 'components/course/contentHeader'
-import contentItem from 'components/course/contentItem'
+import contentHeader from 'components/courseDetails/contentHeader'
+import contentItem from 'components/courseDetails/contentItem'
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
 import skeletonList from 'src/components/skeleton/skeletonList'
 

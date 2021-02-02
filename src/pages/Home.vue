@@ -7,7 +7,6 @@
     <Evaluation />
     <Training />
     <SwiperData />
-    <Footer />
     <Account />
   </section>
 </template>
@@ -15,7 +14,6 @@
 <script>
 
 import Header from 'components/Home/Header'
-import Footer from 'components/Home/Footer'
 import Statiscs from 'components/Home/Statiscs'
 import ViewData from 'components/Home/ViewData'
 import Evaluation from 'components/Home/Evaluation'
@@ -37,7 +35,6 @@ export default {
     ShoppingCartPopUp,
     Account,
     Header,
-    Footer,
     Statiscs,
     ViewData,
     Evaluation,

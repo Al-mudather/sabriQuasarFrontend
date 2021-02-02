@@ -14,23 +14,5 @@ export default {
 }
 </script>
 <style lang="scss">
-footer{
-    padding: 20px 0;
-    margin: 70px 0 0 0;
-    background-color: #5666B9;
-    .copright{
-        text-align: center;
-        h3{
-            font-size: 17px;
-            color: #fff;
-            font-family: 'cairoR';
-            margin: 0;
-            img{
-                width: 30px;
-                height: 25px;
-                margin: 0 5px 0 5px;
-            }
-        }
-    }
-}
+
 </style>

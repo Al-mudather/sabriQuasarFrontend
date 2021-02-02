@@ -3,18 +3,21 @@
     <MainNavBar />
     <ShoppingCart />
     <router-view></router-view>
+    <Footer />
   </div>
 </template>
 
 <script>
 
 import MainNavBar from 'components/utils/MainNavBar'
+import Footer from 'src/components/utils/Footer'
 import ShoppingCart from 'components/Home/Shopping_cart'
 
 export default {
   name: 'MainLayout',
   components: {
     MainNavBar,
+    Footer,
     ShoppingCart
   },
   data () {
@@ -26,26 +29,26 @@ export default {
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
-.top{
-    background-color: #fff;
-    .search{
-        form{
-            input{
-                background-color:#FAFAFA;
-            }
-            button{
-            }
-        }
-    }
-    .lang{
-        background-color: #fff;
-        border: 2px solid #ECEAEA;
-        padding: 3px 1px 0 0;
-        h3{
-            color: #474747;
-        }
-    }
-}
+// .top{
+//     background-color: #fff;
+//     .search{
+//         form{
+//             input{
+//                 background-color:#FAFAFA;
+//             }
+//             button{
+//             }
+//         }
+//     }
+//     .lang{
+//         background-color: #fff;
+//         border: 2px solid #ECEAEA;
+//         padding: 3px 1px 0 0;
+//         h3{
+//             color: #474747;
+//         }
+//     }
+// }
 /*--- End navbar ---*/
 
 /*--- START cources ---*/

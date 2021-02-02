@@ -38,12 +38,12 @@
 </template>
 
 <script>
-import relatedCoureses from 'src/components/course/relatedCoureses'
-import courseMainCard from 'components/course/courseMainCard'
-import aboutTheCourse from 'components/course/aboutTheCourse'
-import whatIwillLearn from 'components/course/whatIwillLearn'
-import courseUnits from 'components/course/courseUnits'
-import courseInstructors from 'components/course/courseInstructors'
+import relatedCoureses from 'src/components/courseDetails/relatedCoureses'
+import courseMainCard from 'components/courseDetails/courseMainCard'
+import aboutTheCourse from 'components/courseDetails/aboutTheCourse'
+import whatIwillLearn from 'components/courseDetails/whatIwillLearn'
+import courseUnits from 'components/courseDetails/courseUnits'
+import courseInstructors from 'components/courseDetails/courseInstructors'
 import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
 
 export default {
@@ -88,26 +88,26 @@ export default {
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
 /*--- start navbar ---*/
-.top {
-    background-color: #fff;
-    .search {
-        form {
-            input {
-                background-color: #fafafa;
-            }
-            button {
-            }
-        }
-    }
-    .lang {
-        background-color: #fff;
-        border: 2px solid #eceaea;
-        padding: 3px 1px 0 0;
-        h3 {
-            color: #474747;
-        }
-    }
-}
+// .top {
+//     background-color: #fff;
+//     .search {
+//         form {
+//             input {
+//                 background-color: #fafafa;
+//             }
+//             button {
+//             }
+//         }
+//     }
+//     .lang {
+//         background-color: #fff;
+//         border: 2px solid #eceaea;
+//         padding: 3px 1px 0 0;
+//         h3 {
+//             color: #474747;
+//         }
+//     }
+// }
 /*--- End navbar ---*/
 
 /*--- START cources ---*/

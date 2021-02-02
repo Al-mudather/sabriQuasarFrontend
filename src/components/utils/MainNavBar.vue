@@ -80,3 +80,26 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+@import "src/css/helpers/_mixins.scss";
+@import "src/css/helpers/_variabels.scss";
+.top{
+    background-color: #fcfcfc;
+    .search{
+        display: block;
+        form{
+            input{
+                background-color:#FAFAFA;
+            }
+        }
+    }
+    .lang{
+        background-color: #fff;
+        border: 2px solid #ECEAEA;
+        padding: 3px 1px 0 0;
+        h3{
+            color: #474747;
+        }
+    }
+}
+</style>
