@@ -8,10 +8,11 @@ const routes = [
     ]
   },
   {
-    path: '/course/',
+    path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: ':pk&:id', name: 'course-details', component: () => import('pages/CourseDetails.vue') }
+      { path: 'course/:pk&:id', name: 'course-details', component: () => import('pages/CourseDetails.vue') },
+      { path: 'courses', name: 'courses', component: () => import('pages/Courses.vue') }
     ]
   },
   {

@@ -113,6 +113,7 @@ export default {
       },
       variables () {
         return {
+          courseNumber: 5
         }
       }
     }

@@ -36,7 +36,7 @@
             </div>
             <h3>المحتويـات</h3>
         </div>
-        <skeletonList v-if="!allCourseUnits.pageInfo.hasNextPage" />
+        <skeletonList v-if="allCourseUnits.edges.length === 0" />
 
         <div id="accordion">
 

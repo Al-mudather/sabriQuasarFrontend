@@ -1,7 +1,7 @@
 import gql from 'graphql-tag'
 
 export const GetSpecialities = gql`
-query GetAllSpecialities {
+query GetAllSpecialities($courseNumber:Int) {
   allCourseSpecialities {
     totalCount,
     edgeCount,
@@ -10,7 +10,7 @@ query GetAllSpecialities {
         id,
         pk,
         speciality,
-        courseSet(first:5){
+        courseSet(first:$courseNumber){
           totalCount,
           edgeCount,
           edges {

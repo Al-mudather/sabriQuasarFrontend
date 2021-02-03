@@ -23,7 +23,8 @@ module.exports = function (/* ctx */) {
       'i18n',
       'axios',
       'apollo',
-      'customFiles'
+      'customFiles',
+      'main'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -104,6 +105,7 @@ module.exports = function (/* ctx */) {
       // Quasar plugins
       plugins: [
         'Notify',
+        'Loading',
         'LocalStorage'
       ]
     },
