@@ -46,9 +46,9 @@
                                     الدورات
                                 </h3>
                                 <ul @click="ChangeFilter">
-                                    <li class="active">الكل</li>
-                                    <li>مجاني</li>
-                                    <li>مدفوع</li>
+                                    <li @click="GetAllCoursesWithoutFilter" class="active">الكل</li>
+                                    <li @click="GetAllFreeCourses">مجاني</li>
+                                    <li @click="GetAllPayeedCourses">مدفوع</li>
                                 </ul>
                             </div>
                         </div>
@@ -65,7 +65,7 @@
 
                     <ul ref="cat" class="nav nav-tabs" @click="changeTab" id="myTab" role="tablist">
                         <li class="nav-item carousel-cell" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
-                        <a style="outline: 0" :data-course="JSON.stringify(spec.node.courseSet)"  @click="changeCourseData(spec.node.id)" class="nav-link" id="home-tab" data-toggle="tab" href="" role="tab" aria-controls="home" aria-selected="true">
+                        <a style="outline: 0" :data-id="spec.node.id" :data-course="JSON.stringify(spec.node.courseSet)"  @click="changeCourseData(spec.node.id)" class="nav-link" id="home-tab" data-toggle="tab" href="" role="tab" aria-controls="home" aria-selected="true">
                             <img src="~assets/img/brain.png" alt="">{{spec.node.speciality}}
                         </a>
                     </li>
@@ -79,6 +79,7 @@
                     <!-- {{courses}} -->
                                 <div class="row justify-center" v-if="courses.edgeCount > 0">
                                     <div  v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                        isPaid: {{course.node.isPaid}}
                                         <transition
                                         appear
                                         enter-active-class="animated fadeIn"
@@ -125,9 +126,11 @@ export default {
       counter: 0,
       tab: 'main',
       openFilter: true,
+      activeSpecialityID: '',
       allCourseSpecialities: '',
       courses: [],
       allCourses: null,
+      filter: {},
       flickityOptions: {
         initialIndex: 3,
         prevNextButtons: false,
@@ -205,12 +208,29 @@ export default {
       // data courses to be viewd
       this.$refs.cat.firstChild.firstChild.classList.add('active')
       const data = JSON.parse(this.$refs.cat.firstChild.firstChild.dataset.course)
+      this.activeSpecialityID = this.$refs.cat.firstChild.firstChild.dataset.id
       this.courses = data
       this.counter += 10
     }
   },
 
   methods: {
+    // TODO: Get Only the free courses
+    GetAllFreeCourses () {
+      this.filter = { isPaid: false }
+      this.changeCourseData(this.activeSpecialityID)
+    },
+    // TODO: Get only the payeed courses
+    GetAllPayeedCourses () {
+      this.filter = { isPaid: true }
+      this.changeCourseData(this.activeSpecialityID)
+    },
+    // TODO: Get all courses without filter
+    GetAllCoursesWithoutFilter () {
+      this.filter = { }
+      this.changeCourseData(this.activeSpecialityID)
+    },
+    // TODO: Change the filter activation class
     ChangeFilter (e) {
       const ulParent = e.target.parentElement
       for (const child of ulParent.childNodes) {
@@ -225,24 +245,27 @@ export default {
     previous () {
       this.$refs.flickity.previous()
     },
-
+    // TODO: Get the related courses data when the selected speciality become active
     changeCourseData (specialityID) {
+      this.activeSpecialityID = specialityID
       this.$q.loading.show({
         spinner: QSpinnerHourglass,
         spinnerColor: 'primary',
         delay: 400 // ms
       })
+      // TODO: fill the varaibles
       this.$apollo.mutate({
         mutation: GetAllCourses,
         variables: {
           courseSpeciality: specialityID,
-          first: 20
+          ...this.filter
         }
       }).then((res) => {
         this.courses = res.data.allCourses
         this.$q.loading.hide()
       })
     },
+    // TODO: Change the speciality when it been clicked
     changeTab (e) {
       e.preventDefault()
       // TODO: Get the cliked li parent for the a child

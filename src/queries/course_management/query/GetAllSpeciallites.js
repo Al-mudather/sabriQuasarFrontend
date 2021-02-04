@@ -17,7 +17,8 @@ query GetAllSpecialities($courseNumber:Int) {
             node{
               id,
               pk,
-              title
+              title,
+              isPaid
             }
           }
         }

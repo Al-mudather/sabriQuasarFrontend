@@ -8,6 +8,7 @@ query GetCourseByID($coursePk:Int) {
     title,
     courseFee,
     brief,
+    isPaied,
     courseSpeciality {
       id,
       pk
