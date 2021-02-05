@@ -16,6 +16,11 @@ const routes = [
     ]
   },
   {
+    path: '/class',
+    name: 'course-class',
+    component: () => import('pages/CourseClass.vue')
+  },
+  {
     path: '/verify/email/:token',
     name: 'verify-email',
     component: () => import('pages/VerifyEmail.vue')

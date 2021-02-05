@@ -1,7 +1,7 @@
 <template>
-    <div class="info">
+    <div class="info" style="width: 100%">
         <div class="mage">
-            <img src="~assets/img/padlock.png" alt="" />
+            <img src="~assets/img/Rectangle 1.png" alt="" />
         </div>
         <h3>{{content.modelName}} || welcome</h3>
     </div>
