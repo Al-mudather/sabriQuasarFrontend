@@ -11,7 +11,7 @@
                     <img src="~assets/img/mins.png" v-if="!open" alt="" />
                     <img src="~assets/img/pluus.png" v-if="open" alt="" />
                 </div>
-                {{ headerText }} || title
+                {{ headerText }}
             </a>
         </h5>
     </div>

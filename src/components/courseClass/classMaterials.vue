@@ -1,6 +1,6 @@
 <template>
     <div class="download">
-        <div class="row">
+        <div class="row justify-center">
             <div class="col-lg-3 col-xs-12">
                 <div class="down">
                     <h3>ملخص علم الاعصاب الوحدة الاولي</h3>

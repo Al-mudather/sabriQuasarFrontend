@@ -16,7 +16,7 @@ const routes = [
     ]
   },
   {
-    path: '/class',
+    path: '/class/:pk&:id',
     name: 'course-class',
     component: () => import('pages/CourseClass.vue')
   },

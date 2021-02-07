@@ -72,7 +72,7 @@
                                 id="myTab"
                                 role="tablist"
                                 active-color="warning"
-                                align="left"
+                                align="center"
                                 class="nav nav-tabs"
                             >
                                 <!-- <q-tab :ripple="false" name="mails" icon="mail" label="Mails" /> -->
@@ -223,6 +223,7 @@ export default {
     var cardHeader = document.querySelectorAll(
       '.Lecture .card .card-header .dowUp a'
     )
+
     var num = cardHeader.length
     console.log(cardHeader[0])
     for (var i = 0; i < num; i++) {
@@ -235,11 +236,11 @@ export default {
           console.log('GGGGGGGGGGGGG')
           console.log(imgEl)
           console.log('GGGGGGGGGGGGG')
-          imgEl.src = '../../assets/img/pluus.png'
+          imgEl.src = '~assets/img/pluus.png'
         }
         if (typeimg === 'plus') {
           imgEl.alt = 'mins'
-          imgEl.src = '../../assets/img/mins.png'
+          imgEl.src = '~/assets/img/mins.png'
         }
       })
     }
@@ -247,16 +248,12 @@ export default {
   watch: {
     '$route.params': {
       handler: async function (params) {
-        this.courseID = params.id
         const res = await this.$apollo.query({
           query: GetCourseByID,
           variables: {
             coursePk: params.pk
           }
         })
-        // console.log('GGGGGGGGGGGGG')
-        // console.log(res.data.course.courseSpeciality.id)
-        // console.log('GGGGGGGGGGGGG')
         this.courseData = res.data.course
       },
       deep: true,

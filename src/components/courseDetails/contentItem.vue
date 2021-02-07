@@ -3,7 +3,7 @@
         <div class="mage">
             <img src="~assets/img/padlock.png" alt="" />
         </div>
-        <h3>{{content.modelName}} || welcome</h3>
+        <h3>{{content.modelName}}</h3>
     </div>
 </template>
 
