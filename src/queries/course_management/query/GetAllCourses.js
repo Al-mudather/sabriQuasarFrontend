@@ -22,7 +22,13 @@ query GetAllCourses($first:Int, $courseSpeciality: ID, $isPaid: Boolean) {
               isMainInstructor,
               instructor{
                 id,
-                firstName
+                user {
+                  id,
+                  username,
+                  fullName,
+                  firstName,
+                  lastName
+                }
               }
             }
           }

@@ -54,7 +54,7 @@
                                 </g>
                             </svg>
                             <img src="~assets/img/user-13.jpg" alt="" />
-                            <h3>{{instructor.node.instructor.firstName}} {{instructor.node.instructor.lastName}}</h3>
+                            <h3>{{instructor.node.instructor.user.firstName}} {{instructor.node.instructor.user.lastName}}</h3>
                             <p>
                                 الأستاذة الدكتورة غادة بشور صيدلانية من سوريا
                                 حاصلة على درجة الدكتوراه في علوم الأغذية من
