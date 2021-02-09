@@ -19,7 +19,7 @@
                     <div class="search">
                         <form>
                             <input type="text" placeholder="ما الذي تبحث عنة؟">
-                            <button><img src="~assets/img/down.png">حدد القسم</button>
+                            <button><img src="~assets/img/search.png"></button>
                         </form>
                     </div>
                 </div>

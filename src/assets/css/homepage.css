@@ -23,6 +23,187 @@
 **Auto add prefixes To Propret
 */
 /*--- Start Header ---*/
+.top {
+  background-color: #104982;
+  width: 100%;
+  height: auto;
+  padding: 0 3% 0 3%;
+}
+
+.top .minlog {
+  width: 100%;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  margin-top: 14px;
+}
+
+.top .minlog .menu img {
+  width: auto;
+  margin-top: 15px;
+}
+
+.top .minlog .logo {
+  margin: 0 46px 0px 0;
+}
+
+.top .minlog .logo img {
+  width: auto;
+}
+
+.top .search {
+  margin-top: 14px;
+  padding: 0 13% 0 9%;
+}
+
+.top .search form {
+  position: relative;
+}
+
+.top .search form input {
+  width: 100%;
+  height: 48px;
+  padding: 15px;
+  font-size: 17px;
+  font-family: 'cairoR';
+  border-radius: 50px;
+  border: 0;
+  background-color: #4e78a2;
+  color: #fff;
+  outline: 0;
+}
+
+.top .search form input::-webkit-input-placeholder {
+  color: #CECECE !important;
+  font-size: 14px;
+  font-family: 'cairoR';
+}
+
+.top .search form input:-ms-input-placeholder {
+  color: #CECECE !important;
+  font-size: 14px;
+  font-family: 'cairoR';
+}
+
+.top .search form input::-ms-input-placeholder {
+  color: #CECECE !important;
+  font-size: 14px;
+  font-family: 'cairoR';
+}
+
+.top .search form input::placeholder {
+  color: #CECECE !important;
+  font-size: 14px;
+  font-family: 'cairoR';
+}
+
+.top .search form button {
+  width: 47px;
+  height: 40px;
+  color: #7B7B7B;
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  font-size: 16px;
+  outline: 0;
+}
+
+.top .search form button img {
+  margin-left: 0px;
+}
+
+.top .account {
+  margin-top: 17px;
+  text-align: center;
+  padding: 0 0% 0 14%;
+}
+
+.top .account .sign {
+  height: 41px;
+  color: #fff;
+  background-color: #1C508D;
+  border-radius: 50px;
+  padding: 8px 16px;
+  text-align: center;
+  display: inline-block;
+  margin-left: 10px;
+  overflow: hidden;
+}
+
+.top .account .sign a {
+  text-decoration: none;
+  font-size: 16px;
+  color: #fff;
+}
+
+.top .account .sign a img {
+  margin-left: 0;
+}
+
+.top .account .sign a h3 {
+  display: inline-block;
+  font-size: 16px;
+  font-family: 'cairoR';
+}
+
+.top .account .login {
+  height: 41px;
+  color: #926D05;
+  background-color: #FCC74C;
+  border-radius: 50px;
+  padding: 7px 15px;
+  text-align: center;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.top .account .login a {
+  text-decoration: none;
+  font-size: 16px;
+  color: #926D05;
+}
+
+.top .account .login a img {
+  margin-left: 0;
+}
+
+.top .account .login a h3 {
+  display: inline-block;
+  font-size: 16px;
+  font-family: 'cairoR';
+}
+
+.top .lang {
+  margin-top: 17px;
+  background-color: #215296;
+  cursor: pointer;
+  width: 90px;
+  height: 39px;
+  border-radius: 50px;
+  padding: 5px;
+  overflow: hidden;
+  text-align: center;
+  float: left;
+}
+
+.top .lang img {
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.top .lang h3 {
+  color: #fff;
+  font-size: 16px;
+  font-family: 'cairoR';
+  display: inline-block;
+}
+
+.top .lang .contry {
+  display: inline-block;
+}
+
+/*--- End navbar ---*/
+/*--- Start Header ---*/
 .header {
   position: relative;
 }
@@ -42,6 +223,20 @@
   overflow: hidden;
   background-color: #104982;
   padding: 0px 11% 0 0;
+}
+
+@media (min-width: 320px) and (max-width: 991px) {
+  .header .cn {
+    color: green;
+    height: 921px;
+  }
+}
+
+@media (min-width: 320px) and (max-width: 700px) {
+  .header .cn {
+    color: red;
+    height: 921px;
+  }
 }
 
 .header .cn .swiper-container {
@@ -92,6 +287,22 @@
   margin: 0 -11px 0 0;
 }
 
+@media (min-width: 320px) and (max-width: 700px) {
+  .header .cn .showImage .box {
+    height: 477px;
+    width: 537px;
+    margin: 0 -59px 0 0;
+  }
+}
+
+@media (min-width: 320px) and (max-width: 991px) {
+  .header .cn .showImage .box {
+    height: 477px;
+    width: 537px;
+    margin: 0 -59px 0 0;
+  }
+}
+
 .header .cn .showImage .box img {
   width: 100%;
 }
@@ -101,11 +312,38 @@
   position: relative;
 }
 
+@media (min-width: 320px) and (max-width: 700px) {
+  .header .cn .content {
+    color: red;
+    margin: 98px 0 0 0;
+  }
+}
+
+@media (min-width: 320px) and (max-width: 991px) {
+  .header .cn .content {
+    margin: 98px 0 0 0;
+  }
+}
+
 .header .cn .content .point-1 {
   position: absolute;
   top: -111px;
   left: 7px;
   width: auto;
+}
+
+@media (min-width: 320px) and (max-width: 700px) {
+  .header .cn .content .point-1 {
+    top: 80px;
+    left: 0;
+  }
+}
+
+@media (min-width: 320px) and (max-width: 991px) {
+  .header .cn .content .point-1 {
+    top: 80px;
+    left: 0;
+  }
 }
 
 .header .cn .content .point-2 {
@@ -123,12 +361,30 @@
   line-height: 40px;
 }
 
+@media (min-width: 320px) and (max-width: 991px) {
+  .header .cn .content h2 {
+    color: green;
+  }
+}
+
+@media (min-width: 320px) and (max-width: 700px) {
+  .header .cn .content h2 {
+    color: red;
+  }
+}
+
 .header .cn .content p {
   color: #fff;
   font-size: 18px;
   font-family: 'cairoR';
   line-height: 1.8;
   padding: 0 0 0 14%;
+}
+
+@media (min-width: 768px) {
+  .header .cn .content p {
+    font-size: 16px;
+  }
 }
 
 /*--- End Header ---*/
@@ -154,25 +410,114 @@ input {
   outline: 0;
   border: 1px solid #E1E1E1;
   width: 100%;
+  height: 52px;
   outline: 0;
+  padding: 0px 37px 0 0;
   overflow: hidden;
   border-radius: 100px;
+  font-family: 'cairoR';
 }
 
 a {
   text-decoration: none;
 }
 
+/*--- Start Footer ---*/
+footer {
+  padding: 10px 0;
+  margin: 150PX  0 0 0;
+}
+
+footer .support {
+  cursor: pointer;
+  text-align: center;
+  position: fixed;
+  bottom: 64px;
+  right: 17px;
+  z-index: 5;
+}
+
+footer .support img {
+  width: auto;
+}
+
+footer .foo {
+  background-color: #f9f9f9;
+}
+
+footer .foo .copright {
+  text-align: center;
+  background-color: #f9f9f9;
+  width: 173px;
+  margin: 0 auto;
+  padding: 10px;
+  border-radius: 55px;
+  position: relative;
+  top: -41px;
+}
+
+footer .foo .copright h3 {
+  font-size: 16px;
+  color: #5666B9;
+  font-family: 'cairoB';
+  margin: 0 auto;
+  line-height: 1.5;
+  position: relative;
+  width: 161px;
+  top: -35px;
+  text-align: center;
+}
+
+footer .foo .copright h3 span {
+  color: #5666B9;
+  font-family: 'cairoB';
+}
+
+footer .foo .copright .logos {
+  position: relative;
+  margin: -42px 0 0 0;
+  text-align: center;
+}
+
+footer .foo .copright .logos img {
+  width: auto;
+}
+
+footer .foo .method {
+  text-align: center;
+  margin: -54px 0 0 0;
+}
+
+footer .foo .method ul {
+  list-style: none;
+  margin: 0;
+}
+
+footer .foo .method ul h3 {
+  color: #7B7B7B;
+  font-size: 18px;
+  font-family: 'cairoR';
+  display: inline-block;
+  margin-left: 10px;
+}
+
+footer .foo .method ul li {
+  margin-left: 20px;
+  display: inline-block;
+}
+
+/*--- End Footer ---*/
 /*-- body style --*/
 body {
   -webkit-box-sizing: content-box;
           box-sizing: content-box;
-  /* height: 4000px; */
+  height: auto;
 }
 
 * {
   margin: 0;
   padding: 0;
+  outline: 0;
 }
 
 .noPadding {
@@ -186,13 +531,35 @@ body {
 
 /*--- START Account popup ---*/
 .backAccount {
-  display: block;
+  display: none;
   width: 100%;
   height: 100%;
   position: fixed;
   top: 0;
   z-index: 30;
   background: rgba(12, 122, 216, 0.8);
+}
+
+.backAccount .clos {
+  position: relative;
+  margin: 0 auto;
+  height: 52px;
+  width: 38px;
+  cursor: pointer;
+}
+
+.backAccount .clos svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.backAccount .clos img {
+  position: absolute;
+  width: auto;
+  top: 24px;
+  right: 11px;
 }
 
 .backAccount .content {
@@ -204,6 +571,7 @@ body {
   padding: 20px;
   position: relative;
   /*-- login form --*/
+  /*-- Signin form --*/
   /*-- Reset Password --*/
   /*-- Confirm Password --*/
 }
@@ -391,8 +759,131 @@ body {
   margin: 38px 0 0 0;
 }
 
-.backAccount .content .resetPass {
+.backAccount .content .signup {
   display: none;
+  margin: 86px 0 25px 0;
+}
+
+.backAccount .content .signup .logBy {
+  margin: 0 auto 26px auto;
+  text-align: center;
+}
+
+.backAccount .content .signup .logBy .social {
+  display: inline-block;
+  cursor: pointer;
+  margin: 0 13px 0 0;
+  background-color: #fff;
+  padding: 5px;
+  -webkit-box-shadow: 0px 4px 10px #e4e4e45c;
+  -o-box-shadow: 0px 4px 10px #e4e4e45c;
+  box-shadow: 0px 4px 10px #e4e4e45c;
+  width: 74px;
+  height: 47px;
+  text-align: center;
+  line-height: 2;
+  border-radius: 36px;
+  cursor: pointer;
+}
+
+.backAccount .content .signup .logBy .social img {
+  width: auto;
+}
+
+.backAccount .content .signup form {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  padding: 0 0 0 16px;
+}
+
+.backAccount .content .signup form .inp {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.backAccount .content .signup form .inp .closee {
+  position: absolute;
+  top: 22px;
+  left: 12px !important;
+}
+
+.backAccount .content .signup form .inp img {
+  position: absolute;
+  top: 22px;
+  right: 12px;
+}
+
+.backAccount .content .signup form .inp input {
+  padding: 10px;
+  border: 1px solid #E1E1E1;
+  color: #7B7B7B;
+  font-size: 17px;
+  font-family: 'cairoR';
+  padding: 0px 37px 0 0;
+  height: 54px;
+}
+
+.backAccount .content .signup form .inp input ::-webkit-input-placeholder {
+  font-size: 14px;
+  font-family: 'cairoR';
+}
+
+.backAccount .content .signup form .inp input :-ms-input-placeholder {
+  font-size: 14px;
+  font-family: 'cairoR';
+}
+
+.backAccount .content .signup form .inp input ::-ms-input-placeholder {
+  font-size: 14px;
+  font-family: 'cairoR';
+}
+
+.backAccount .content .signup form .inp input ::placeholder {
+  font-size: 14px;
+  font-family: 'cairoR';
+}
+
+.backAccount .content .signup form .forget h3 {
+  font-size: 11px;
+  font-family: 'cairoR';
+  color: #7B7B7B;
+  margin: 0 5px 0 0;
+  display: inline-block;
+  position: relative;
+  top: -5px;
+}
+
+.backAccount .content .signup form .forget h3 a {
+  text-decoration: none;
+}
+
+.backAccount .content .signup form .forget h3 a span {
+  color: #FCC74C;
+}
+
+.backAccount .content .signup form .next {
+  position: relative;
+  height: 66px;
+  margin: 0 0 -3px 0;
+}
+
+.backAccount .content .signup form .next .nexx {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: auto;
+}
+
+.backAccount .content .signup form .next img {
+  position: absolute;
+  width: auto;
+  left: 18px;
+  top: 20px;
+}
+
+.backAccount .content .resetPass {
+  display: block;
   margin: 121px 0 0 0;
 }
 
@@ -467,7 +958,7 @@ body {
 }
 
 .backAccount .content .confirm {
-  display: block;
+  display: none;
   margin: 121px 0 0 0;
 }
 
@@ -488,6 +979,27 @@ body {
   font-family: 'cairoR';
 }
 
+.backAccount .content .activateAcco {
+  display: none;
+  margin: 121px 0 0 0;
+}
+
+.backAccount .content .activateAcco .imaagg {
+  text-align: center;
+  margin: -27px 0 22px 0;
+}
+
+.backAccount .content .activateAcco .imaagg img {
+  width: auto;
+  margin: 0 0 26px 0;
+}
+
+.backAccount .content .activateAcco .imaagg p {
+  color: #949494;
+  font-size: 17px;
+  font-family: 'cairoR';
+}
+
 /*--- End Account popup ---*/
 /*--- start shopping popup ---*/
 .backgrou {
@@ -500,6 +1012,28 @@ body {
   background: rgba(12, 122, 216, 0.8);
   padding: 0 20%;
   overflow-y: scroll;
+}
+
+.backgrou .clos {
+  position: relative;
+  margin: 0 auto;
+  height: 52px;
+  width: 38px;
+  cursor: pointer;
+}
+
+.backgrou .clos svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.backgrou .clos img {
+  position: absolute;
+  width: auto;
+  top: 24px;
+  right: 11px;
 }
 
 .backgrou .tabb {
@@ -832,16 +1366,18 @@ body {
   position: relative;
   width: 25px;
   height: 25px;
+  z-index: 99;
+  cursor: pointer;
 }
 
 .backgrou .contt .dataUser .creatt form .terms .check label img {
   width: auto;
   position: absolute;
-  top: -4px;
+  top: 6px;
   right: 3px;
   opacity: 0;
-  -webkit-transition: all ease-in .4s;
-  transition: all ease-in .4s;
+  -webkit-transition: all ease-in .3s;
+  transition: all ease-in .3s;
 }
 
 .backgrou .contt .dataUser .creatt form .terms .check input[type=checkbox] {
@@ -851,9 +1387,8 @@ body {
   right: 3px;
 }
 
-.backgrou .contt .dataUser .creatt form .terms .check input[type=checkbox] :checked + label img {
+.backgrou .contt .dataUser .creatt form .terms .check input:checked ~ label img {
   opacity: 1;
-  display: block;
   -webkit-transition: all ease-in .3s;
   transition: all ease-in .3s;
 }
@@ -997,10 +1532,8 @@ body {
 
 .backgrou .contt .msPayment .details form .inp input {
   padding: 10px;
-  outline: 0;
   color: #7B7B7B;
   font-size: 17px;
-  font-family: 'cairoR';
   padding: 0px 15px 0 0;
   height: 50px;
 }
@@ -1148,186 +1681,6 @@ body {
 }
 
 /*--- End shopping popup ---*/
-/*--- start navbar ---*/
-.top {
-  background-color: #104982;
-  width: 100%;
-  height: auto;
-  padding: 0 3% 0 3%;
-}
-
-.top .minlog {
-  width: 100%;
-  display: -webkit-inline-box;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  margin-top: 14px;
-}
-
-.top .minlog .menu img {
-  width: auto;
-  margin-top: 15px;
-}
-
-.top .minlog .logo {
-  margin: 0 46px 0px 0;
-}
-
-.top .minlog .logo img {
-  width: auto;
-}
-
-.top .search {
-  margin-top: 14px;
-  padding: 0 13% 0 9%;
-}
-
-.top .search form {
-  position: relative;
-}
-
-.top .search form input {
-  width: 100%;
-  height: 48px;
-  padding: 15px;
-  font-size: 17px;
-  font-family: 'cairoR';
-  border-radius: 50px;
-  border: 0;
-  background-color: #4e78a2;
-  color: #fff;
-  outline: 0;
-}
-
-.top .search form input::-webkit-input-placeholder {
-  color: #CECECE !important;
-  font-size: 14px;
-  font-family: 'cairoR';
-}
-
-.top .search form input:-ms-input-placeholder {
-  color: #CECECE !important;
-  font-size: 14px;
-  font-family: 'cairoR';
-}
-
-.top .search form input::-ms-input-placeholder {
-  color: #CECECE !important;
-  font-size: 14px;
-  font-family: 'cairoR';
-}
-
-.top .search form input::placeholder {
-  color: #CECECE !important;
-  font-size: 14px;
-  font-family: 'cairoR';
-}
-
-.top .search form button {
-  width: 128px;
-  height: 40px;
-  color: #7B7B7B;
-  position: absolute;
-  left: 6px;
-  top: 4px;
-  font-size: 16px;
-}
-
-.top .search form button img {
-  margin-left: 7px;
-}
-
-.top .account {
-  margin-top: 17px;
-  text-align: center;
-  padding: 0 0% 0 14%;
-}
-
-.top .account .sign {
-  height: 41px;
-  color: #fff;
-  background-color: #1C508D;
-  border-radius: 50px;
-  padding: 8px 16px;
-  text-align: center;
-  display: inline-block;
-  margin-left: 10px;
-  overflow: hidden;
-}
-
-.top .account .sign a {
-  text-decoration: none;
-  font-size: 16px;
-  color: #fff;
-}
-
-.top .account .sign a img {
-  margin-left: 0;
-}
-
-.top .account .sign a h3 {
-  display: inline-block;
-  font-size: 16px;
-  font-family: 'cairoR';
-}
-
-.top .account .login {
-  height: 41px;
-  color: #926D05;
-  background-color: #FCC74C;
-  border-radius: 50px;
-  padding: 7px 15px;
-  text-align: center;
-  display: inline-block;
-  overflow: hidden;
-}
-
-.top .account .login a {
-  text-decoration: none;
-  font-size: 16px;
-  color: #926D05;
-}
-
-.top .account .login a img {
-  margin-left: 0;
-}
-
-.top .account .login a h3 {
-  display: inline-block;
-  font-size: 16px;
-  font-family: 'cairoR';
-}
-
-.top .lang {
-  margin-top: 17px;
-  background-color: #215296;
-  cursor: pointer;
-  width: 90px;
-  height: 39px;
-  border-radius: 50px;
-  padding: 5px;
-  overflow: hidden;
-  text-align: center;
-  float: left;
-}
-
-.top .lang img {
-  display: inline-block;
-  margin-right: 4px;
-}
-
-.top .lang h3 {
-  color: #fff;
-  font-size: 16px;
-  font-family: 'cairoR';
-  display: inline-block;
-}
-
-.top .lang .contry {
-  display: inline-block;
-}
-
-/*--- End navbar ---*/
 /*--- start shopping cart ---*/
 .shoppgCart {
   position: fixed;
@@ -1385,6 +1738,97 @@ body {
 .statiscs {
   padding: 30px 0;
   margin-top: 100px;
+}
+
+@media (min-width: 320px) and (max-width: 700px) {
+  .statiscs .chart {
+    text-align: center;
+  }
+}
+
+.statiscs .chart .dector {
+  width: 100%;
+  position: relative;
+  margin-bottom: 80px;
+}
+
+@media (min-width: 320px) and (max-width: 700px) {
+  .statiscs .chart .dector {
+    margin: 0 0 80px 0;
+  }
+}
+
+.statiscs .chart .dector .dec-2 {
+  background-color: #6284BF !important;
+}
+
+.statiscs .chart .dector .dec-3 {
+  background-color: #10BBD5 !important;
+}
+
+.statiscs .chart .dector .svdec {
+  position: absolute;
+  width: auto;
+  top: 81px;
+  left: 0;
+  right: 15px;
+}
+
+@media (min-width: 320px) and (max-width: 700px) {
+  .statiscs .chart .dector .svdec {
+    right: 82px;
+  }
+}
+
+.statiscs .chart .dector .dec {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background-color: #AEC2FF;
+  position: relative;
+  display: inline-block;
+}
+
+.statiscs .chart .dector .dec img {
+  width: auto;
+  position: absolute;
+  left: 0;
+  right: -13px;
+  top: -37px;
+}
+
+.statiscs .chart .dector .details {
+  display: inline-block;
+}
+
+.statiscs .chart .dector .details .tow {
+  margin-right: 15px;
+}
+
+@media (min-width: 320px) and (max-width: 700px) {
+  .statiscs .chart .dector .details .tow {
+    margin: 22px 59px 0 0;
+  }
+}
+
+.statiscs .chart .dector .details .tow h3 {
+  font-size: 32px;
+  color: #FCC74C;
+  font-family: 'cairoB';
+  display: inline-block;
+}
+
+.statiscs .chart .dector .details .tow span {
+  font-size: 32px;
+  color: #0c7ad8;
+  font-family: 'cairoB';
+  display: inline-block;
+}
+
+.statiscs .chart .dector .details .tow p {
+  font-size: 15px;
+  font-family: 'cairoR';
+  color: #7B7B7B;
 }
 
 .statiscs .dector {
@@ -1553,6 +1997,12 @@ body {
   height: 327px;
 }
 
+@media (min-width: 320px) and (max-width: 700px) {
+  .evaluation .rate .parent .imag {
+    left: 0;
+  }
+}
+
 .evaluation .rate .parent .imag .overlay {
   position: absolute;
   top: 0;
@@ -1660,6 +2110,12 @@ body {
   box-shadow: 8px 12px 8px #eceaea;
 }
 
+@media (min-width: 320px) and (max-width: 700px) {
+  .evaluation .rate .parent .name {
+    width: 255px;
+  }
+}
+
 .evaluation .rate .parent .name .user {
   margin-right: 23px;
 }
@@ -1682,14 +2138,41 @@ body {
   margin-top: 0;
 }
 
+.training .nav-tabs {
+  margin: 0 0 20px 0;
+  padding: 15px;
+  border: 1px dashed #F1F0F0;
+  border-radius: 52px;
+}
+
+.training .nav-tabs .nav-link {
+  font-size: 18px;
+  font-family: 'cairoR';
+  width: 155px;
+  height: 44px;
+  margin-left: 10px;
+  border-radius: 50px;
+  color: #7B7B7B;
+  border: 1px solid #F6F6F6;
+  background-color: #fff;
+  -webkit-box-shadow: 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14);
+  -o-box-shadow: 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14);
+  -ms-box-shadow: 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14);
+  box-shadow: 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14);
+}
+
+.training .nav-tabs .nav-link img {
+  margin-left: 4px;
+}
+
+.training .nav-tabs .nav-link.active {
+  background-color: #2D77D8;
+  color: #fff;
+}
+
 .training .txt {
   position: relative;
   margin-bottom: 40px;
-}
-
-.training .txt img {
-  width: auto;
-  display: inline-block;
 }
 
 .training .txt h3 {
@@ -1700,6 +2183,18 @@ body {
   margin-right: 7px;
 }
 
+.training .txt h4 {
+  font-family: 'cairoR';
+  font-size: 14px;
+  color: #BBBABA;
+  margin-right: 8px;
+}
+
+.training .txt h4 span {
+  color: #FCC74C;
+  font-family: 'cairoR';
+}
+
 .training .rate {
   margin-top: 30px;
   /*parent2*/
@@ -1708,23 +2203,51 @@ body {
 .training .rate .cn {
   padding: 0 0 0 0;
   position: relative;
-  right: 8%;
 }
 
-.training .rate .cn .parent {
+@media (min-width: 320px) and (max-width: 700px) {
+  .training .rate .cn {
+    right: 0;
+  }
+}
+
+.training .rate .cn .swiper-container {
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+.training .rate .cn .swiper-container .swiper-wrapper {
+  width: 100% !important;
+  -webkit-transform: none !important;
+          transform: none !important;
+  height: 500px !important;
+}
+
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide {
+  width: 260px !important;
+  height: 461px !important;
+}
+
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent {
   margin-bottom: 20px;
 }
 
-.training .rate .cn .parent .imag {
+@media (min-width: 320px) and (max-width: 700px) {
+  .training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent {
+    margin-bottom: 0;
+  }
+}
+
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .imag {
   position: relative;
   border-radius: 50px;
   overflow: hidden;
   margin: 0 auto 0 auto;
-  height: 238px;
-  width: 82%;
+  height: 327px;
+  width: 233px;
 }
 
-.training .rate .cn .parent .imag .overlay {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .imag .overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -1733,11 +2256,11 @@ body {
   background-color: rgba(251, 251, 255, 0.6);
 }
 
-.training .rate .cn .parent .imag img {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .imag img {
   width: 100%;
 }
 
-.training .rate .cn .parent .imag .magtxt h4 {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .imag .magtxt h4 {
   position: absolute;
   top: 25px;
   left: 0;
@@ -1748,29 +2271,29 @@ body {
   padding: 0 8% 0 13%;
 }
 
-.training .rate .cn .parent .imag .magtxt img {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .imag .magtxt img {
   position: absolute;
   width: 26px;
   top: 45%;
   left: 44%;
 }
 
-.training .rate .cn .parent .pric {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .pric {
   background-color: #7B86FA;
   padding: 20px;
-  border-radius: 107px 107px 27px 27px;
-  height: 117px;
-  width: 158px;
+  border-radius: 105px 100px 27px 27px;
+  height: 137px;
+  width: 210px;
   margin: -59px auto;
   position: relative;
   z-index: 2;
 }
 
-.training .rate .cn .parent .pric .detai {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .pric .detai {
   text-align: center;
 }
 
-.training .rate .cn .parent .pric .detai span {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .pric .detai span {
   display: inline-block;
   font-size: 13px;
   font-family: 'cairoR';
@@ -1778,51 +2301,51 @@ body {
   margin: 0 0 0 6px;
 }
 
-.training .rate .cn .parent .pric .detai h3 {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .pric .detai h3 {
   display: inline-block;
   color: #FFF067;
   font-size: 31px;
   font-family: 'cairoR';
 }
 
-.training .rate .cn .parent .pric button {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .pric button {
   width: 85px;
   height: 33px;
   background-color: #FFF067;
   color: #7B7B7B;
   font-size: 14px;
   outline: 0;
-  margin: 13px 0 0 0;
+  margin: 27px 0 0 0;
   -webkit-box-shadow: 8px 3px 7px #9e9e9e36;
   -ms-box-shadow: 8px 3px 7px #9e9e9e36;
   box-shadow: 8px 3px 7px #9e9e9e36;
 }
 
-.training .rate .cn .parent .pric .cart {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .pric .cart {
   position: relative;
   cursor: pointer;
   right: 12px;
   margin: 0 0 0 0;
 }
 
-.training .rate .cn .parent .pric .cart .sala {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .pric .cart .sala {
   position: absolute;
   left: 4px;
   top: -31px;
   width: auto;
 }
 
-.training .rate .cn .parent .pric .cart img {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .pric .cart img {
   width: auto;
   position: absolute;
   left: 19px;
   top: -21px;
 }
 
-.training .rate .cn .parent .name {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .name {
   border-radius: 50px;
   background-color: #5666B9;
-  width: 100%;
+  width: 274px;
   padding-top: 178px;
   height: 222px;
   position: relative;
@@ -1833,19 +2356,23 @@ body {
   box-shadow: 8px 12px 8px #eceaea;
 }
 
-.training .rate .cn .parent .name .user {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .name .user {
   margin-right: 23px;
 }
 
-.training .rate .cn .parent .name .user img {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .name .user img {
   display: inline-block;
   width: 25px;
 }
 
-.training .rate .cn .parent .name .user h3 {
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .name .user h3 {
   display: inline-block;
   font-size: 12px;
   color: #fff;
+}
+
+.training .rate .cn .swiper-container .swiper-wrapper .swiper-slide .parent .color {
+  background-color: #0C79D6;
 }
 
 .training .rate .butDown {

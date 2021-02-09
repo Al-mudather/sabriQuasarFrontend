@@ -12,20 +12,21 @@
                 <!-- strat Fltter-->
                 <div class="col-lg-12">
                     <div class="search">
-                        <form>
+                        <form @submit="GetAllCoursesByTitle">
                             <input
+                                v-model="search"
                                 type="text"
-                                placeholder="ما الذي تبحث عنة؟"
+                                placeholder="ما الذي تبحث عنة في التخصص المختار ادناه؟"
                             />
-                            <button><img src="~assets/img/search.png" /></button>
+                            <button type="submit"><img src="~assets/img/search.png" /></button>
                         </form>
                     </div>
                 </div>
                 <div class="col-lg-12">
                     <div class="flbut">
                         <div class="but">
-                            <img src="~assets/img/sortD.png" alt="" />
-                            <img src="~assets/img/sortU.png" alt="" />
+                            <img @click="GetAllCoursesByOrderingDecendinOrAcending('DEC')" class="but-filter" src="~assets/img/sortD.png" alt="" />
+                            <img @click="GetAllCoursesByOrderingDecendinOrAcending('ACE')" class="but-filter" src="~assets/img/sortU.png" alt="" />
                         </div>
                         <!--dropdown-->
                         <div class="dropdow">
@@ -79,7 +80,6 @@
                     <!-- {{courses}} -->
                                 <div class="row justify-center" v-if="courses.edgeCount > 0">
                                     <div  v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                                        isPaid: {{course.node.isPaid}}
                                         <transition
                                         appear
                                         enter-active-class="animated fadeIn"
@@ -117,6 +117,7 @@ import courseCard from 'components/utils/courseCard'
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
 import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
 import { QSpinnerHourglass } from 'quasar'
+import { mapActions } from 'vuex'
 // import Flickity from 'vue-flickity'
 
 export default {
@@ -124,6 +125,7 @@ export default {
   data () {
     return {
       counter: 0,
+      search: '',
       tab: 'main',
       openFilter: true,
       activeSpecialityID: '',
@@ -131,6 +133,8 @@ export default {
       courses: [],
       allCourses: null,
       filter: {},
+      searchFilter: {},
+      orderingFilter: {},
       flickityOptions: {
         initialIndex: 3,
         prevNextButtons: false,
@@ -161,6 +165,8 @@ export default {
   },
 
   mounted () {
+    // TODO: Disable the navebar
+    this.setNavbarSearchAction(false)
     // Drowp Down js
     var
       butFilter = document.querySelector('.dropdow .open'),
@@ -201,8 +207,12 @@ export default {
     })
   },
 
+  destroyed () {
+    // TODO: Enable the navebar
+    this.setNavbarSearchAction(true)
+  },
+
   updated () {
-    console.log('updated')
     if (this.counter === 0) {
       // TODO: When the page is loadded, select the first category with it's
       // data courses to be viewd
@@ -215,6 +225,27 @@ export default {
   },
 
   methods: {
+    ...mapActions('authentication', [
+      'setNavbarSearchAction'
+    ]),
+    // TODO: Get All courses by Title from search
+    GetAllCoursesByOrderingDecendinOrAcending (type) {
+      if (type === 'DEC') {
+        this.orderingFilter = { orderBy: ['-title'] }
+        this.changeCourseData(this.activeSpecialityID)
+      } else {
+        this.orderingFilter = { orderBy: ['title'] }
+        this.changeCourseData(this.activeSpecialityID)
+      }
+    },
+    // TODO: Get All courses by Title from search
+    GetAllCoursesByTitle (event) {
+      event.preventDefault()
+      this.searchFilter = { title_Icontains: this.search }
+      this.changeCourseData(this.activeSpecialityID)
+      // TODO: Remove the search filter
+      this.searchFilter = {}
+    },
     // TODO: Get Only the free courses
     GetAllFreeCourses () {
       this.filter = { isPaid: false }
@@ -258,7 +289,9 @@ export default {
         mutation: GetAllCourses,
         variables: {
           courseSpeciality: specialityID,
-          ...this.filter
+          ...this.filter,
+          ...this.searchFilter,
+          ...this.orderingFilter
         }
       }).then((res) => {
         this.courses = res.data.allCourses
@@ -316,6 +349,15 @@ export default {
             overflow: hidden;
             position: relative;
             top: 9px;
+
+            &-filter {
+                cursor: pointer;
+                transition: all 0.2s ease-in-out;
+                &:hover {
+                    transform: scale(1.1);
+                }
+            }
+
             img{
                 display: inline-block;
                 margin: 0 0 0 22px;

@@ -17,7 +17,8 @@
                     <!-- search box -->
                     <div class="col-lg-6">
                         <div class="search">
-                            <form>
+                            {{navbarSearch}}
+                            <form v-if="navbarSearch">
                                 <input type="text" placeholder="ما الذي تبحث عنة؟">
                                 <button><img src="~assets/img/search.png"></button>
                             </form>
@@ -62,7 +63,7 @@ export default {
   props: {
   },
   computed: {
-    ...mapGetters('authentication', ['token'])
+    ...mapGetters('authentication', ['token', 'navbarSearch'])
   },
 
   methods: {

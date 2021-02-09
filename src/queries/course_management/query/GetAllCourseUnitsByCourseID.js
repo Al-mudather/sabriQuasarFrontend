@@ -21,7 +21,8 @@ query GetAllCourseUnitsByCourseID($cursor: String, $limit: Int, $courseID: ID) {
               id,
               isFree,
               isMandatory,
-              modelName
+              modelName,
+              modelValue
             }
           }
         }

@@ -3,6 +3,7 @@ import { LocalStorage } from 'quasar'
 const state = {
   loginDialog: false,
   signUpDialog: false,
+  navbarSearch: true,
   registerationDialog: false,
   passwordResetDialog: false,
   user: LocalStorage.getItem('user') || null,
@@ -35,10 +36,17 @@ const mutations = {
   },
   updateregisterationDialog (state, value) {
     state.registerationDialog = value
+  },
+  updateNavebarSearcgDialog (state, value) {
+    state.navbarSearch = value
   }
 }
 
 const actions = {
+
+  setNavbarSearchAction ({ commit }, value) {
+    commit('updateNavebarSearcgDialog', value)
+  },
 
   setLoginDialogAction ({ commit }, value) {
     commit('updateLoginDialog', value)
