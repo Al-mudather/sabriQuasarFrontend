@@ -1,12 +1,11 @@
 <template>
     <div class="rate">
         <div class="row justify-center">
-            <!-- <div
+            <div
                 v-if="!allCourses.edges"
             >
                 <skeletonCard class="col-lg-3 col-md-6 col-sm-6 col-xs-12" v-for="sk in 4" :key="sk"/>
-            </div> -->
-
+            </div>
             <div
                 v-for="course in allCourses.edges"
                 :key="course.node.id"
@@ -48,6 +47,7 @@ export default {
           query: GetAllCourses,
           variables: {
             courseSpeciality: data.courseSpeciality.id,
+            execludeIds: [this.courseData.pk], // TODO: Give me all courses except this one
             first: 4
           }
 

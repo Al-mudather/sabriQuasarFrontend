@@ -1,5 +1,6 @@
 <template>
     <div class="parent">
+        {{shopingCartDataList.length}}
         <div class="imag">
             <div class="overlay"></div>
             <img src="~assets/img/person.png" alt="">
@@ -12,7 +13,7 @@
             <div class="detai">
                 <h3><span>{{unit}}</span>{{price}}</h3>
             </div>
-            <button>أحصل علية</button>
+            <button @click="AddTheCourseToTheBasket">أحصل علية</button>
             <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">Details</button>
             <div class="cart">
                 <svg class="sala" xmlns="http://www.w3.org/2000/svg" width="36.023" height="33.215" viewBox="0 0 36.023 33.215">
@@ -38,9 +39,29 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
+
 export default {
   name: 'courseCard',
-  props: ['name', 'instructor', 'unit', 'price', 'course']
+  props: ['name', 'instructor', 'unit', 'price', 'course'],
+
+  computed: {
+    ...mapState('authentication', ['user']),
+    ...mapState('shoppingCart', ['shopingCartDataList'])
+  },
+
+  methods: {
+    ...mapActions('shoppingCart', ['setShopingCartDataListAction']),
+
+    AddTheCourseToTheBasket (course) {
+      const data = {
+        user: this.user,
+        course: this.course
+      }
+
+      this.setShopingCartDataListAction(data)
+    }
+  }
 }
 </script>
 

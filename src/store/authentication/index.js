@@ -99,6 +99,7 @@ const actions = {
 const getters = {
   user: state => state.user,
   token: state => state.token,
+  navbarSearch: state => state.navbarSearch,
   errorMessages: state => state.errorMessages
 }
 
