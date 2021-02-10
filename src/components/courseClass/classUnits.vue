@@ -21,11 +21,11 @@
                             <q-expansion-item
                                 header-class="text-white"
                                 class="card"
-                                v-for="unit in 3"
-                                :key="unit"
+                                v-for="unit in allCourseUnits.edges"
+                                :key="unit.node.id"
                             >
                                 <template slot="header">
-                                    <contentHeader headerText="header 1" :open="open" />
+                                    <contentHeader :headerText="unit.node.title" :open="open" />
                                 </template>
 
                                 <div
@@ -37,12 +37,12 @@
                                     <div class="card-body">
                                         <q-item
                                             style="width: 95%"
-                                            v-for="content in 3"
-                                            :key="content"
+                                            v-for="content in unit.node.courseunitcontentSet.edges"
+                                            :key="content.node.id"
                                             clickable v-ripple
                                         >
                                             <classContentItem
-                                                :content="content"
+                                                :content="content.node"
                                             />
                                         </q-item>
                                     </div>
@@ -55,16 +55,26 @@
         </div>
         <div class="col-lg-8 col-xs-12">
             <div class="vedio">
-                <div class="megx">
+                <div v-if="!lodash.isEmpty(currentContent)">
+                        <q-video
+                            :ratio="16/9"
+                            :src="prepareVideoUrl(JSON.parse(currentContent.modelValue).video)"
+                        />
+                    <!-- <vimeo-player
+                        ref="player"
+                        :video-id="507727334"
+                    ></vimeo-player> -->
+                </div>
+                <div v-else class="megx">
                     <img src="~assets/img/pexels.png" alt="" />
                     <img class="play" src="~assets/img/player.png" alt="" />
                 </div>
                 <div class="arrow">
-                    <div class="next">
+                    <div @click="GoToThePrevListon" :disabled="!hasPrevContent" class="next">
                         <img src="~assets/img/previous.png" alt="" />
                         <h3>الدرس السابق</h3>
                     </div>
-                    <div class="next">
+                    <div @click="GoToTheNexListon" :disabled="!hasNextContent" class="next">
                         <h3>الدرس التالي</h3>
                         <img src="~assets/img/next.png" alt="" />
                     </div>
@@ -77,15 +87,118 @@
 <script>
 import contentHeader from 'components/utils/contentHeader'
 import classContentItem from 'components/courseClass/classContentItem'
+import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
+import { mapState, mapActions } from 'vuex'
+import _ from 'lodash'
+
 export default {
   data () {
     return {
-      open: true
+      open: true,
+      hasNextContent: true,
+      hasPrevContent: false,
+      lodash: _,
+      allCourseUnits: {
+        type: Object
+      }
     }
   },
+
   components: {
     classContentItem,
     contentHeader
+  },
+
+  computed: {
+    ...mapState('courseManagement', ['selectedClassUnitContent', 'contentLists', 'currentContent'])
+  },
+
+  watch: {
+    currentContent (value) {
+      const currentContentIndex = _.indexOf(this.contentLists, this.currentContent)
+      // TODO: Is this content has NEXT content
+      if (this.contentLists[currentContentIndex + 1] === undefined) {
+        this.hasNextContent = false
+      } else {
+        this.hasNextContent = true
+      }
+
+      // TODO: Is this content has PREV content
+      if (this.contentLists[currentContentIndex - 1] === undefined) {
+        this.hasPrevContent = false
+      } else {
+        this.hasPrevContent = true
+      }
+    }
+  },
+
+  props: ['course_id'],
+
+  apollo: {
+    allCourseUnits: {
+      query () {
+        return GetAllCourseUnitsByCourseID
+      },
+
+      variables () {
+        return {
+          courseID: this.course_id
+        }
+      }
+    }
+  },
+
+  mounted () {
+    // TODO: initialize the class with the first video
+    this.setCurrentContentAction(this.contentLists[0])
+  },
+
+  methods: {
+    ...mapActions('courseManagement', ['setCurrentContentAction']),
+
+    GoToTheNexListon () {
+      const currentContentIndex = _.indexOf(this.contentLists, this.currentContent)
+      const nextContent = this.contentLists[currentContentIndex + 1]
+      // TODO: Is this content has NEXT content
+      if (nextContent === undefined) {
+        this.hasNextContent = false
+      } else {
+        this.hasNextContent = true
+        this.setCurrentContentAction(nextContent)
+      }
+
+      // TODO: Is this content has PREV content
+      if (this.contentLists[currentContentIndex - 1] === undefined) {
+        this.hasPrevContent = false
+      } else {
+        this.hasPrevContent = true
+      }
+    },
+
+    GoToThePrevListon () {
+      const currentContentIndex = _.indexOf(this.contentLists, this.currentContent)
+      const prevContent = this.contentLists[currentContentIndex - 1]
+      // TODO: Is this content has NEXT content
+      if (this.contentLists[currentContentIndex + 1] === undefined) {
+        this.hasNextContent = false
+      } else {
+        this.hasNextContent = true
+      }
+
+      // TODO: Is this content has PREV content
+      if (prevContent === undefined) {
+        this.hasPrevContent = false
+      } else {
+        this.hasPrevContent = true
+        this.setCurrentContentAction(prevContent)
+      }
+    },
+
+    prepareVideoUrl (videoUrl) {
+      const i = videoUrl.indexOf('v')
+      const videoKey = videoUrl.slice(i + 2)
+      return 'https://www.youtube.com/embed?=' + videoKey
+    }
   }
 }
 </script>

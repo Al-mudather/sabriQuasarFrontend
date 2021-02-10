@@ -244,13 +244,7 @@ export default {
   data () {
     return {
       allCourseUnits: { pageInfo: { hasNextPage: '' } },
-      open: true,
-      contentOptions: [
-        'الوحدة الاولي : الأغذية الوظيفية',
-        'الوحدة الثانية : الأغذية الوظيفية',
-        'الوحدة الثالثة : الأغذية الوظيفية',
-        'الوحدة الرابعة : الأغذية الوظيفية'
-      ]
+      open: true
     }
   },
 
