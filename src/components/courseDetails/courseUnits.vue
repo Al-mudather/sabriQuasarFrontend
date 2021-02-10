@@ -32,14 +32,12 @@
                         />
                     </g>
                 </svg>
-                <img src="~assets/img/questio.png" alt="">
+                <img src="~assets/img/questio.png" alt="" />
             </div>
             <h3>المحتويـات</h3>
         </div>
         <skeletonList v-if="allCourseUnits.edges.length === 0" />
-
         <div id="accordion">
-
             <q-list ref="contentList" class="rounded-borders">
                 <transition-group
                     appear
@@ -53,7 +51,10 @@
                         :key="unit.node.id"
                     >
                         <template slot="header">
-                            <contentHeader :headerText="unit.node.title" :open="open" />
+                            <contentHeader
+                                :headerText="unit.node.title"
+                                :open="open"
+                            />
                         </template>
 
                         <div
@@ -64,7 +65,8 @@
                         >
                             <div class="card-body">
                                 <contentItem
-                                    v-for="content in unit.node.courseunitcontentSet.edges"
+                                    v-for="content in unit.node
+                                        .courseunitcontentSet.edges"
                                     :key="content.node.id"
                                     :content="content.node"
                                 />
@@ -73,7 +75,6 @@
                     </q-expansion-item>
                 </transition-group>
             </q-list>
-
         </div>
         <div class="butDown" v-if="allCourseUnits.pageInfo.hasNextPage">
             <svg
@@ -244,7 +245,12 @@ export default {
     return {
       allCourseUnits: { pageInfo: { hasNextPage: '' } },
       open: true,
-      contentOptions: ['الوحدة الاولي : الأغذية الوظيفية', 'الوحدة الثانية : الأغذية الوظيفية', 'الوحدة الثالثة : الأغذية الوظيفية', 'الوحدة الرابعة : الأغذية الوظيفية']
+      contentOptions: [
+        'الوحدة الاولي : الأغذية الوظيفية',
+        'الوحدة الثانية : الأغذية الوظيفية',
+        'الوحدة الثالثة : الأغذية الوظيفية',
+        'الوحدة الرابعة : الأغذية الوظيفية'
+      ]
     }
   },
 
@@ -281,21 +287,26 @@ export default {
         updateQuery: (previousResult, { fetchMoreResult }) => {
           const newEdges = fetchMoreResult.allCourseUnits.edges
           const pageInfo = fetchMoreResult.allCourseUnits.pageInfo
+
           if (newEdges.length) {
             this.allCourseUnits = {
-              __typename: previousResult.allCourseUnits.__typename,
-              edges: [...previousResult.allCourseUnits.edges, ...newEdges],
+              __typename:
+                                previousResult.allCourseUnits.__typename,
+              edges: [
+                ...previousResult.allCourseUnits.edges,
+                ...newEdges
+              ],
               pageInfo
             }
-            return this.allCourseUnits
+
+            return { allCourseUnits: this.allCourseUnits }
           }
           return previousResult
         }
       })
     },
 
-    openItemData (e) {
-    }
+    openItemData (e) {}
   }
 }
 </script>
