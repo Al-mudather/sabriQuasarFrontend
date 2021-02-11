@@ -1,6 +1,6 @@
 <template>
     <div class="card-header" style="width: 100% !important" id="headingOne">
-        <h5 class="mb-0">
+        <h5 @click="ChangeTheSign" class="dowUp mb-0">
             <a
                 data-toggle="collapse"
                 data-target="#collapseOne"
@@ -8,8 +8,15 @@
                 aria-controls="collapseOne"
             >
                 <div class="linke">
-                    <img src="~assets/img/mins.png" v-if="!open" alt="" />
-                    <img src="~assets/img/pluus.png" v-if="open" alt="" />
+                    <img
+                        v-if="plussImage"
+                        src="~assets/img/pluus.png"
+                        alt="mins"
+                    />
+                    <img v-if="!plussImage"
+                        src="~assets/img/mins.png"
+                        alt="pluss"
+                    />
                 </div>
                 {{ headerText }}
             </a>
@@ -19,7 +26,18 @@
 
 <script>
 export default {
-  props: ['headerText', 'open']
+  data () {
+    return {
+      plussImage: true
+    }
+  },
+  props: ['headerText', 'open'],
+
+  methods: {
+    ChangeTheSign (e) {
+      this.plussImage = !this.plussImage
+    }
+  }
 }
 </script>
 

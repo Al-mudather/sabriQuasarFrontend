@@ -120,7 +120,6 @@ export default {
   },
 
   updated () {
-    console.log('updated')
     if (this.counter === 0) {
       // TODO: When the page is loadded, select the first category with it's
       // data courses to be viewd

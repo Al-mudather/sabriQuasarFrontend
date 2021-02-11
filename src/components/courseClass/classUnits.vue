@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-lg-4 col-xs-12">
+        <div class="col-lg-5 col-xs-12">
             <div class="asid">
                 <div class="titel">
                     <img src="~assets/img/tit2.png" alt="" />
@@ -11,6 +11,7 @@
                     </div>
                 </div>
                 <!--colapss-->
+                <skeletonList v-if="lodash.isEmpty(allCourseUnits.edges)" />
                 <div class="accord" id="accordion">
                     <q-list ref="contentList" class="rounded-borders">
                         <transition-group
@@ -21,11 +22,16 @@
                             <q-expansion-item
                                 header-class="text-white"
                                 class="card"
+                                ref="card"
                                 v-for="unit in allCourseUnits.edges"
                                 :key="unit.node.id"
+                                @show="openTheExpansionItem"
                             >
                                 <template slot="header">
-                                    <contentHeader :headerText="unit.node.title" :open="open" />
+                                    <contentHeader
+                                        :headerText="unit.node.title"
+                                        :open="open"
+                                    />
                                 </template>
 
                                 <div
@@ -34,12 +40,14 @@
                                     aria-labelledby="headingOne"
                                     data-parent="#accordion"
                                 >
-                                    <div class="card-body">
+                                    <div @click="clickedItem" class="card-body">
                                         <q-item
                                             style="width: 95%"
-                                            v-for="content in unit.node.courseunitcontentSet.edges"
+                                            v-for="content in unit.node
+                                                .courseunitcontentSet.edges"
                                             :key="content.node.id"
-                                            clickable v-ripple
+                                            clickable
+                                            v-ripple
                                         >
                                             <classContentItem
                                                 :content="content.node"
@@ -53,13 +61,22 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-8 col-xs-12">
-            <div class="vedio">
+        <div class="col-lg-7 col-xs-12">
+            <q-skeleton
+                v-if="lodash.isEmpty(currentContent)"
+                height="500px"
+                square
+            />
+            <div v-else class="vedio">
                 <div v-if="!lodash.isEmpty(currentContent)">
-                        <q-video
-                            :ratio="16/9"
-                            :src="prepareVideoUrl(JSON.parse(currentContent.modelValue).video)"
-                        />
+                    <q-video
+                        :ratio="16 / 9"
+                        :src="
+                            prepareVideoUrl(
+                                JSON.parse(currentContent.modelValue).video
+                            )
+                        "
+                    />
                     <!-- <vimeo-player
                         ref="player"
                         :video-id="507727334"
@@ -70,11 +87,19 @@
                     <img class="play" src="~assets/img/player.png" alt="" />
                 </div>
                 <div class="arrow">
-                    <div @click="GoToThePrevListon" :disabled="!hasPrevContent" class="next">
+                    <div
+                        @click="GoToThePrevListon"
+                        :disabled="!hasPrevContent"
+                        class="next"
+                    >
                         <img src="~assets/img/previous.png" alt="" />
                         <h3>الدرس السابق</h3>
                     </div>
-                    <div @click="GoToTheNexListon" :disabled="!hasNextContent" class="next">
+                    <div
+                        @click="GoToTheNexListon"
+                        :disabled="!hasNextContent"
+                        class="next"
+                    >
                         <h3>الدرس التالي</h3>
                         <img src="~assets/img/next.png" alt="" />
                     </div>
@@ -85,6 +110,7 @@
 </template>
 
 <script>
+import skeletonList from 'src/components/skeleton/skeletonList'
 import contentHeader from 'components/utils/contentHeader'
 import classContentItem from 'components/courseClass/classContentItem'
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
@@ -95,6 +121,7 @@ export default {
   data () {
     return {
       open: true,
+      counter: 0,
       hasNextContent: true,
       hasPrevContent: false,
       lodash: _,
@@ -106,16 +133,24 @@ export default {
 
   components: {
     classContentItem,
+    skeletonList,
     contentHeader
   },
 
   computed: {
-    ...mapState('courseManagement', ['selectedClassUnitContent', 'contentLists', 'currentContent'])
+    ...mapState('courseManagement', [
+      'selectedClassUnitContent',
+      'contentLists',
+      'currentContent'
+    ])
   },
 
   watch: {
     currentContent (value) {
-      const currentContentIndex = _.indexOf(this.contentLists, this.currentContent)
+      const currentContentIndex = _.indexOf(
+        this.contentLists,
+        this.currentContent
+      )
       // TODO: Is this content has NEXT content
       if (this.contentLists[currentContentIndex + 1] === undefined) {
         this.hasNextContent = false
@@ -129,6 +164,11 @@ export default {
       } else {
         this.hasPrevContent = true
       }
+    },
+
+    contentLists (val) {
+      // TODO: initialize the class with the first video
+      this.setCurrentContentAction(val[0])
     }
   },
 
@@ -148,16 +188,50 @@ export default {
     }
   },
 
-  mounted () {
-    // TODO: initialize the class with the first video
-    this.setCurrentContentAction(this.contentLists[0])
+  updated () {
+    if (this.counter === 0) {
+      // TODO: When the page is updated, select the first content and activate it
+      const infoes = document.querySelectorAll('.info')
+      infoes[0].classList.add('active')
+      this.counter += 10
+    }
   },
 
   methods: {
     ...mapActions('courseManagement', ['setCurrentContentAction']),
 
+    openTheExpansionItem (evt) {
+      console.log('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+      console.log(evt.target)
+      console.log('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+    },
+    clickedItem (e) {
+      // TODO: remove the active class from all the contents
+      const infoes = document.querySelectorAll('.info')
+      for (const info of infoes) {
+        info.classList.remove('active')
+      }
+
+      // TODO: if the clicked item is the class info make it active
+      if (_.indexOf(e.target.classList, 'info') === 0) {
+        e.target.classList.add('active')
+      }
+
+      // TODO: if the clicked item is not class info, search about it and make it active
+      if (_.indexOf(e.target.classList, 'q-item') === -1) {
+        e.target.parentNode.classList.add('active')
+      } else {
+        for (const item of e.target.childNodes) {
+          item.classList.add('active')
+        }
+      }
+    },
+
     GoToTheNexListon () {
-      const currentContentIndex = _.indexOf(this.contentLists, this.currentContent)
+      const currentContentIndex = _.indexOf(
+        this.contentLists,
+        this.currentContent
+      )
       const nextContent = this.contentLists[currentContentIndex + 1]
       // TODO: Is this content has NEXT content
       if (nextContent === undefined) {
@@ -176,7 +250,10 @@ export default {
     },
 
     GoToThePrevListon () {
-      const currentContentIndex = _.indexOf(this.contentLists, this.currentContent)
+      const currentContentIndex = _.indexOf(
+        this.contentLists,
+        this.currentContent
+      )
       const prevContent = this.contentLists[currentContentIndex - 1]
       // TODO: Is this content has NEXT content
       if (this.contentLists[currentContentIndex + 1] === undefined) {
@@ -215,5 +292,9 @@ export default {
     display: none;
     visibility: hidden;
     width: 0;
+}
+.item-active {
+    background-color: #fcd462 !important;
+    color: #fff;
 }
 </style>
