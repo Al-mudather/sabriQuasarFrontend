@@ -26,10 +26,19 @@ export default {
     this.parsedContent = JSON.parse(this.content.modelValue)
     // TODO: Fill the content list
     this.setContentListsAction(this.content)
+    // TODO: Save all course content file
+    if (this.content.modelName === 'ContentFile') {
+      this.setCourseFilesAction(this.content)
+    }
   },
 
   methods: {
-    ...mapActions('courseManagement', ['setSelectedClassUnitContentAction', 'setCurrentContentAction', 'setContentListsAction']),
+    ...mapActions('courseManagement', [
+      'setSelectedClassUnitContentAction',
+      'setCurrentContentAction',
+      'setContentListsAction',
+      'setCourseFilesAction'
+    ]),
 
     changeThecourseContent () {
       // TODO: Get the current selected content

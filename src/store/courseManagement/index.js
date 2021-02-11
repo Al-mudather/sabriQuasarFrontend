@@ -1,10 +1,15 @@
 const state = {
   selectedClassUnitContent: {},
   currentContent: {},
-  contentLists: []
+  contentLists: [],
+  courseFiles: []
 }
 
 const mutations = {
+  updateCourseFiles (state, value) {
+    state.courseFiles.push(value)
+  },
+
   updateSelectedClassUnitContent (state, value) {
     state.selectedClassUnitContent = value
   },
@@ -22,6 +27,10 @@ const actions = {
 
   setSelectedClassUnitContentAction ({ commit }, value) {
     commit('updateSelectedClassUnitContent', value)
+  },
+
+  setCourseFilesAction ({ commit }, value) {
+    commit('updateCourseFiles', value)
   },
 
   setCurrentContentAction ({ commit }, value) {
