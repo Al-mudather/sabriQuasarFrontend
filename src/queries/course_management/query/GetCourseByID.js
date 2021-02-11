@@ -9,10 +9,44 @@ query GetCourseByID($coursePk:Int) {
     courseFee,
     brief,
     isPaid,
+    courseinstructorSet {
+      edges {
+        node {
+          id,
+          instructor {
+            id,
+            qualification,
+            image,
+            user {
+              id,
+              username,
+              firstName,
+              lastName
+            }
+          }
+        }
+      }
+    },
+    courseunitSet {
+      edges {
+        node{
+          id,
+          courseunitcontentSet {
+            edges {
+              node {
+                id,
+                modelName,
+                modelValue
+              }
+            }
+          }
+        }
+      }
+    },
     courseSpeciality {
       id,
       pk
-    },
+    }, 
     enrollmentSet{
       edgeCount,
       totalCount

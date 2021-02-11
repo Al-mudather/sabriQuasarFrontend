@@ -161,7 +161,7 @@
                                         role="tabpanel"
                                         aria-labelledby="download-tab"
                                     >
-                                        <classMaterials />
+                                        <classMaterials :course="courseData" />
                                     </q-tab-panel>
 
                                     <!-- start Tetch -->
@@ -172,19 +172,9 @@
                                         role="tabpanel"
                                         aria-labelledby="tech-tab"
                                     >
-                                        <classinstructors />
+                                        <classinstructors :instructors="courseData.courseinstructorSet" />
                                     </q-tab-panel>
                                 </q-tab-panels>
-
-                                <!-- <div class="cn tab-pane fade" id="tutorial" role="tabpanel" aria-labelledby="tutorial-tab">
-                                    <classUnits />
-                                </div>
-                                <div class="cn tab-pane fade" id="download" role="tabpanel" aria-labelledby="download-tab">
-                                    <classMaterials />
-                                </div>
-                                <div class="cn tab-pane fade" id="tech" role="tabpanel" aria-labelledby="tech-tab">
-                                    <classinstructors />
-                                </div> -->
                             </div>
                         </div>
                     </div>

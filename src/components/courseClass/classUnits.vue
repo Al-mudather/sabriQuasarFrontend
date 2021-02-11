@@ -201,9 +201,9 @@ export default {
     ...mapActions('courseManagement', ['setCurrentContentAction']),
 
     openTheExpansionItem (evt) {
-      console.log('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
-      console.log(evt.target)
-      console.log('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+      // console.log('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+      // console.log(evt.target)
+      // console.log('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
     },
     clickedItem (e) {
       // TODO: remove the active class from all the contents
