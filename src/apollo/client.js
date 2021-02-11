@@ -7,9 +7,17 @@ const { buildAxiosFetch } = require('@lifeomic/axios-fetch')
 import { createUploadLink } from 'apollo-upload-client'
 import axios from 'axios'
 
+let uri
+
+if (process.env.NODE_ENV === 'development') {
+  uri = 'http://localhost:8000/graphql/'
+} else {
+  uri = 'http://134.209.69.30/api/graphql/'
+}
+
 const customLink = ApolloLink.from([
   createUploadLink({
-    uri: 'http://localhost:8000/graphql/',
+    uri: uri,
     // uri: `${API_URI}/graphql/`,
     fetch: buildAxiosFetch(axios, (config, input, init) => ({
       ...config,
