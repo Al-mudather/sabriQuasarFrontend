@@ -1,6 +1,6 @@
 <template>
     <div class="parent">
-        {{shopingCartDataList.length}}
+        {{shoppingCartDataList.length}}
         <div class="imag">
             <div class="overlay"></div>
             <img src="~assets/img/person.png" alt="">
@@ -11,7 +11,7 @@
         </div>
         <div class="pric">
             <div class="detai">
-                <h3><span>{{unit}}</span>{{price}}</h3>
+                <h3><span>{{unit}}</span>{{parseInt(price)}}</h3>
             </div>
             <button @click="AddTheCourseToTheBasket">أحصل علية</button>
             <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">Details</button>
@@ -47,11 +47,11 @@ export default {
 
   computed: {
     ...mapState('authentication', ['user']),
-    ...mapState('shoppingCart', ['shopingCartDataList'])
+    ...mapState('shoppingCart', ['shoppingCartDataList'])
   },
 
   methods: {
-    ...mapActions('shoppingCart', ['setShopingCartDataListAction']),
+    ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
 
     AddTheCourseToTheBasket (course) {
       const data = {
@@ -59,7 +59,7 @@ export default {
         course: this.course
       }
 
-      this.setShopingCartDataListAction(data)
+      this.setShoppingCartDataListAction(data)
     }
   }
 }

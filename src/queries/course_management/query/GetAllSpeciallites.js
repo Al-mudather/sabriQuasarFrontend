@@ -18,7 +18,8 @@ query GetAllSpecialities($courseNumber:Int) {
               id,
               pk,
               title,
-              isPaid
+              isPaid,
+              courseFee
             }
           }
         }

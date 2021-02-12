@@ -10,7 +10,7 @@ import axios from 'axios'
 let uri
 
 if (process.env.NODE_ENV === 'development') {
-  uri = 'http://localhost:8000/graphql/'
+  uri = 'http://localhost:8000/api/graphql/'
 } else {
   uri = 'http://134.209.69.30/api/graphql/'
 }

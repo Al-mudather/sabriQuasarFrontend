@@ -27,6 +27,7 @@
 <script>
 import _ from 'lodash'
 import { mapState, mapActions } from 'vuex'
+import { openURL } from 'quasar'
 
 export default {
   data () {
@@ -55,7 +56,7 @@ export default {
     ]),
 
     downloadFile (fileURL) {
-      window.open('http://localhost:8000' + fileURL)
+      openURL('http://localhost:8000' + fileURL)
     },
 
     formatTitle (file) {

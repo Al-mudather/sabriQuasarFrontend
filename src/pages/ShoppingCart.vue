@@ -509,7 +509,7 @@ export default {
         .msPayment{
             display: block;
             .options{
-                display: none;
+                display: block;
                 .sele{
                     background-color: #fff;
                     cursor: pointer;
@@ -541,6 +541,7 @@ export default {
             }
             /*-- details Payment --*/
             .details{
+                display: none;
                 .error{
                     background-color: #F67A66;
                     padding: 10px;

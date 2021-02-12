@@ -114,7 +114,7 @@ export default {
       }
     },
     LoginUser () {
-      const redirectUrl = this.$route.query.redirect
+      // const redirectUrl = this.$route.query.redirect
       this.$apollo.mutate({
         mutation: LoginUserWithEmail,
         variables: {
@@ -124,7 +124,8 @@ export default {
       }).then((result) => {
         if (result.data.tokenAuth.success) {
           this.loginAction(result.data.tokenAuth).then(() => {
-            this.$router.push(redirectUrl || { name: 'Home' })
+            this.setLoginDialogAction(false)
+            // this.$router.push(redirectUrl || { name: 'Home' })
           })
         } else if (result.data.tokenAuth.errors) {
           this.errorHandler(result.data.tokenAuth.errors)

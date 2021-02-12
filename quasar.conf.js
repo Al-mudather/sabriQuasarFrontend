@@ -6,15 +6,15 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
+// const envparser = require('src/boot/envparser.js')
 
 module.exports = function (/* ctx */) {
   return {
     // https://quasar.dev/quasar-cli/supporting-ts
     supportTS: false,
-
     // https://quasar.dev/quasar-cli/prefetch-feature
     // preFetch: true,
-
+    // env: envparser(),
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
