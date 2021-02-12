@@ -53,7 +53,6 @@
                         <template slot="header">
                             <contentHeader
                                 :headerText="unit.node.title"
-                                :open="open"
                             />
                         </template>
 
@@ -243,8 +242,7 @@ export default {
   name: 'courseUnits',
   data () {
     return {
-      allCourseUnits: { pageInfo: { hasNextPage: '' } },
-      open: true
+      allCourseUnits: { pageInfo: { hasNextPage: '' } }
     }
   },
 

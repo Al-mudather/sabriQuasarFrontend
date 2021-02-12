@@ -30,7 +30,6 @@
                                 <template slot="header">
                                     <contentHeader
                                         :headerText="unit.node.title"
-                                        :open="open"
                                     />
                                 </template>
 
@@ -120,7 +119,6 @@ import _ from 'lodash'
 export default {
   data () {
     return {
-      open: true,
       counter: 0,
       hasNextContent: true,
       hasPrevContent: false,

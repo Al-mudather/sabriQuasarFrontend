@@ -3,27 +3,34 @@
         <div class="mage">
             <img src="~assets/img/Rectangle 1.png" alt="" />
         </div>
-        <!-- {{ parsedContent }} -->
-        <h3>{{ parsedContent.title }}</h3>
+        <h3>{{ formatTitle }}</h3>
     </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 export default {
   data () {
     return {
-      parsedContent: {
-        type: Object
-      }
+      parsedContentTitle: ''
     }
   },
 
   props: ['content'],
 
-  created () {
-    this.parsedContent = JSON.parse(this.content.modelValue)
+  computed: {
+    ...mapState('courseManagement', ['courseFiles']),
+    formatTitle () {
+      const title = JSON.parse(this.content.modelValue)
+      if (this.content.modelName === 'ContentFile') {
+        return title.attachment.split('/attachment/')[1]
+      }
+      return title.title
+    }
+  },
+
+  mounted () {
     // TODO: Fill the content list
     this.setContentListsAction(this.content)
     // TODO: Save all course content file

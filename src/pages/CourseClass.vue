@@ -164,6 +164,17 @@
                                         <classMaterials :course="courseData" />
                                     </q-tab-panel>
 
+                                    <!-- start question -->
+                                    <q-tab-panel
+                                        name="question"
+                                        class="cn"
+                                        id="question"
+                                        role="tabpanel"
+                                        aria-labelledby="question-tab"
+                                    >
+                                        <classQuestionAndAnswer :course="courseData" />
+                                    </q-tab-panel>
+
                                     <!-- start Tetch -->
                                     <q-tab-panel
                                         name="tech"
@@ -190,6 +201,7 @@ import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID
 import classUnits from 'src/components/courseClass/classUnits'
 import classMaterials from 'src/components/courseClass/classMaterials'
 import classinstructors from 'src/components/courseClass/classinstructors'
+import classQuestionAndAnswer from 'src/components/courseClass/classQuestionAndAnswer'
 
 export default {
   name: 'CourseClass',
@@ -203,6 +215,7 @@ export default {
   components: {
     classUnits,
     classMaterials,
+    classQuestionAndAnswer,
     classinstructors
   },
 
@@ -538,6 +551,143 @@ export default {
                         height: 30px;
                         border-radius: 17px;
                         margin: 0 -16px 0 4px;
+                    }
+                }
+            }
+            /* start Question */
+            .question{
+                width: 100%;
+                height: auto;
+                .pernt{
+                    background-color: #fff;
+                    border-radius: 15px;
+                    padding: 50px 20px 20px 20px;
+                    .ask{
+                        background-color: #fff;
+                        padding: 10px;
+                        position: relative;
+                        border-radius: 15px;
+                        margin: 0 0 35px 0;
+                        @include prefixer(box-shadow,2px 9px 18.79px 2.21px rgba(185, 183, 183, 0.14), webkit moz o);
+                        .point{
+                            position: absolute;
+                            top: 11px;
+                            left: 16px;
+                        }
+                        .users{
+                            text-align: center;
+                            position: relative;
+                            top: -18px;
+                            img{
+                                margin: 0 0 6px 0
+                            }
+                            h3{
+                                font-size: 10px;
+                                font-family: 'cairoR';
+                                color: $textColor;
+                                @media(max-width:767px){
+                                    font-size: 14px;
+                                }
+                            }
+                        }
+                        .pragh{
+                            h3{
+                                font-size: 15px;
+                                width: 80%;
+                                font-family: 'cairoR';
+                                color: #7B7B7B;
+                                line-height: 1.8;
+                                margin: 0 0 33px 0;
+                                //maxMobile
+                                @media(max-width:767px){
+                                   width: 100%;
+                                }
+                            }
+                        }
+                        .bottom{
+                            //maxMobile
+                            @media(max-width:767px){
+                                padding: 0 10px 0 10px;
+                            }
+                            .like{
+                                display: inline-block;
+                                margin: 0 0 0 30px;
+                                h4{
+                                    font-size: 14px;
+                                    font-family: 'cairoR';
+                                    color: $textColor;
+                                    display: inline-block;
+                                    svg{
+                                        display: inline-block;
+                                        position:unset;
+                                        margin: 0 3px 0 0;
+                                        cursor: pointer;
+                                    }
+                                }
+                            }
+                            .reply{
+                                display: inline-block;
+                                h4{
+                                    font-size: 14px;
+                                    font-family: 'cairoR';
+                                    color: $textColor;
+                                    display: inline-block;
+                                    margin: 0 0 0 10px;
+                                }
+                                .person{
+                                    width: 25px;
+                                    height: 25px;
+                                    display: inline-block;
+                                    border-radius: 50px;
+                                    margin: 0 0 0 10px;
+                                }
+                                img{
+                                    width: auto;
+                                    display: inline-block;
+                                    cursor: pointer;
+                                }
+                            }
+                            .more{
+                                display: inline-block;
+                                float: left;
+                                cursor: pointer;
+                                h4{
+                                    font-size: 14px;
+                                    font-family: 'cairoR';
+                                    color: $textColor;
+                                    img{
+                                        margin: 0 4px 0 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .send{
+                        margin: 84px 0 12px 0;
+                        form{
+                            position: relative;
+                            input{
+                                width: 100%;
+                                height: 49px;
+                                padding: 15px 15px 15px 47px;
+                                font-size: 16px;
+                                font-family: 'cairoR';
+                                border-radius: 50px;
+                                color: $textColor;
+                                ::placeholder{
+                                    font-size: 14px;
+                                    font-family: 'cairoR';
+                                    color: $textColor;
+                                }
+                            }
+                            button{
+                                position: absolute;
+                                left: 7px;
+                                top: 9px;
+                                width: unset;
+                                height: 0;
+                            }
+                        }
                     }
                 }
             }

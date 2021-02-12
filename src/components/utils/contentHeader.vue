@@ -1,6 +1,6 @@
 <template>
-    <div class="card-header" style="width: 100% !important" id="headingOne">
-        <h5 @click="ChangeTheSign" class="dowUp mb-0">
+    <div @click="ChangeTheSign" class="card-header" style="width: 100% !important" id="headingOne">
+        <h5 class="dowUp mb-0">
             <a
                 data-toggle="collapse"
                 data-target="#collapseOne"
@@ -31,7 +31,7 @@ export default {
       plussImage: true
     }
   },
-  props: ['headerText', 'open'],
+  props: ['headerText'],
 
   methods: {
     ChangeTheSign (e) {

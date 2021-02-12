@@ -1,4 +1,5 @@
 const state = {
+  dataCreated: true,
   selectedClassUnitContent: {},
   currentContent: {},
   contentLists: [],
@@ -6,6 +7,14 @@ const state = {
 }
 
 const mutations = {
+  updateDataCreated (state, value) {
+    state.dataCreated = value
+  },
+
+  deleteCourseFilesArray (state, value) {
+    state.courseFiles = []
+  },
+
   updateCourseFiles (state, value) {
     state.courseFiles.push(value)
   },
@@ -24,6 +33,14 @@ const mutations = {
 }
 
 const actions = {
+
+  setDeleteCourseFilesArrayAction ({ commit }, value) {
+    commit('deleteCourseFilesArray', value)
+  },
+
+  setDataCreatedAction ({ commit }, value) {
+    commit('updateDataCreated', value)
+  },
 
   setSelectedClassUnitContentAction ({ commit }, value) {
     commit('updateSelectedClassUnitContent', value)

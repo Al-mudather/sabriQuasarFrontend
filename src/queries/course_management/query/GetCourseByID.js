@@ -32,6 +32,7 @@ query GetCourseByID($coursePk:Int) {
         node{
           id,
           courseunitcontentSet {
+            totalCount,
             edges {
               node {
                 id,

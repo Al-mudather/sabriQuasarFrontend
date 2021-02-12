@@ -2,9 +2,9 @@
     <div class="tetch">
         <div class="row justify-center">
             <div
-              class="col-lg-4 col-xs-12"
-              v-for="inst in instructors.edges"
-              :key="inst.node.id"
+                class="col-lg-4 col-xs-12"
+                v-for="inst in instructors.edges"
+                :key="inst.node.id"
             >
                 <div class="tech">
                     <svg
@@ -35,10 +35,16 @@
                         </g>
                     </svg>
                     <!-- <img src="~assets/img/user-13.jpg" alt="" /> -->
-                    <img :src=" 'http://localhost:8000/media/' + inst.node.instructor.image" alt="" />
-                    <h3>{{inst.node.instructor.user.firstName}} {{inst.node.instructor.user.lastName}}</h3>
+                    <img
+                        :src="'http://localhost:8000' + '/media/' +inst.node.instructor.image"
+                        alt=""
+                    />
+                    <h3>
+                        {{ inst.node.instructor.user.firstName }}
+                        {{ inst.node.instructor.user.lastName }}
+                    </h3>
                     <p>
-                        {{inst.node.instructor.qualification}}
+                        {{ inst.node.instructor.qualification }}
                     </p>
                     <a href="#">
                         <h3>
@@ -53,12 +59,11 @@
 
 <script>
 export default {
-  props: ['instructors'],
-  mounted () {
-    console.log('gggggggggggggggg')
-    console.log(this.instructors)
-    console.log('gggggggggggggggg')
-  }
+  data () {
+    return {
+    }
+  },
+  props: ['instructors']
 }
 </script>
 
