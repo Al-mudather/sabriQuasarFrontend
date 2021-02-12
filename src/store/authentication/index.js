@@ -66,9 +66,9 @@ const actions = {
 
   loginAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      const user = payload.user
-      const token = 'JWT ' + payload.token
-      const refreshToken = 'JWT ' + payload.refreshToken
+      const user = payload.user || payload.social.user
+      const token = 'Bearer ' + payload.token
+      const refreshToken = 'Bearer ' + payload.refreshToken || null
       // Set the user
       LocalStorage.set('user', user)
       // Set the token authentication

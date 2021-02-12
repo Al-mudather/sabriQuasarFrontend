@@ -23,6 +23,8 @@ module.exports = function (/* ctx */) {
       'i18n',
       'axios',
       'apollo',
+      'hello',
+      'socail_auth',
       'customFiles',
       'main'
     ],
