@@ -221,33 +221,6 @@ export default {
 
   computed: {},
 
-  mounted () {
-    // colaps
-    var cardHeader = document.querySelectorAll(
-      '.Lecture .card .card-header .dowUp a'
-    )
-
-    var num = cardHeader.length
-    console.log(cardHeader[0])
-    for (var i = 0; i < num; i++) {
-      cardHeader[i].addEventListener('click', function () {
-        var typeimg = this.parentNode.children[0].children[0]
-            .children[0].alt,
-          imgEl = this.parentNode.children[0].children[0].children[0]
-        if (typeimg === 'mins') {
-          imgEl.alt = 'plus'
-          console.log('GGGGGGGGGGGGG')
-          console.log(imgEl)
-          console.log('GGGGGGGGGGGGG')
-          imgEl.src = '~assets/img/pluus.png'
-        }
-        if (typeimg === 'plus') {
-          imgEl.alt = 'mins'
-          imgEl.src = '~/assets/img/mins.png'
-        }
-      })
-    }
-  },
   watch: {
     '$route.params': {
       handler: async function (params) {
@@ -398,7 +371,7 @@ export default {
             .asid {
                 width: 100%;
                 background: #fff;
-                height: 409px;
+                // height: 409px;
                 border-bottom-left-radius: 42px;
                 border-bottom-right-radius: 42px;
                 margin: 0 0 30px 0;
