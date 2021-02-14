@@ -25,7 +25,6 @@
                                 ref="card"
                                 v-for="unit in allCourseUnits.edges"
                                 :key="unit.node.id"
-                                @show="openTheExpansionItem"
                             >
                                 <template slot="header">
                                     <contentHeader
@@ -197,12 +196,6 @@ export default {
 
   methods: {
     ...mapActions('courseManagement', ['setCurrentContentAction']),
-
-    openTheExpansionItem (evt) {
-      // console.log('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
-      // console.log(evt.target)
-      // console.log('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
-    },
     clickedItem (e) {
       // TODO: remove the active class from all the contents
       const infoes = document.querySelectorAll('.info')

@@ -41,16 +41,16 @@ const routes = [
   //     { path: 'confirm', name: 'password-confirm', component: () => import('components/Account/Confirm') }
   //   ]
   // },
-  // {
-  //   path: '/cart/',
-  //   component: () => import('pages/ShoppingCart.vue'),
-  //   children: [
-  //     { path: '', name: 'cart', component: () => import('components/ShoppingCard/cartCourses') },
-  //     { path: 'loginCart', name: 'login-cart', component: () => import('components/ShoppingCard/loginCart') },
-  //     { path: 'payment', name: 'payment', component: () => import('components/ShoppingCard/payment') },
-  //     { path: 'success', name: 'cart-success', component: () => import('components/ShoppingCard/successMessage') }
-  //   ]
-  // },
+  {
+    path: '/cart/',
+    component: () => import('pages/ShoppingCart.vue'),
+    children: [
+      { path: '', name: 'cart', component: () => import('components/ShoppingCard/cartCourses') },
+      { path: 'loginCart', name: 'login-cart', component: () => import('components/ShoppingCard/loginCart') },
+      { path: 'payment', name: 'payment', component: () => import('components/ShoppingCard/payment') },
+      { path: 'success', name: 'cart-success', component: () => import('components/ShoppingCard/successMessage') }
+    ]
+  },
 
   // Always leave this as last one,
   // but you can also remove it

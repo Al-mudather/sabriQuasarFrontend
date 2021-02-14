@@ -3,6 +3,43 @@
         <div class="container-fluid">
             <div class="row">
                 <div ref="col" class="col-lg-12">
+                    <!-- <q-tabs
+                        v-model="navTab"
+                        narrow-indicator
+                        dense
+                        id="myTab"
+                        role="tablist"
+                        active-color="warning"
+                        align="center"
+                        class="nav nav-tabs"
+                    >
+                        <q-tab
+                            ref="cat"
+                            v-for="spec in allCourseSpecialities.edges" :key="spec.node.id"
+                            :ripple="false"
+                            :name="spec.node.speciality">
+                            <template v-slot:default>
+                                <li class="nav-item">
+                                    <a
+                                        class="nav-link"
+                                        style="outline: 0"
+                                        :data-course="JSON.stringify(spec.node.courseSet)"
+                                        @click="changeCourseData(spec.node.courseSet)"
+                                        id="home-tab"
+                                        data-toggle="tab"
+                                        role="tab"
+                                        aria-controls="home"
+                                        aria-selected="true"
+                                    >
+                                        <img src="~assets/img/brain.png" alt="">
+                                        {{spec.node.speciality}}
+                                    </a
+                                    >
+                                </li>
+                            </template>
+                        </q-tab>
+
+                    </q-tabs> -->
                     <ul ref="cat" class="nav nav-tabs" @click="changeTab" id="myTab" role="tablist">
                         <li class="nav-item" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
                            <a style="outline: 0" :data-course="JSON.stringify(spec.node.courseSet)"  @click="changeCourseData(spec.node.courseSet)" class="nav-link" id="home-tab" data-toggle="tab" href="" role="tab" aria-controls="home" aria-selected="true">
@@ -92,6 +129,7 @@ export default {
   data () {
     return {
       counter: 0,
+      navTab: '',
       totalNumberOfCourses: 150,
       numOfSelectedCourses: 5,
       allCourseSpecialities: '',
@@ -116,6 +154,12 @@ export default {
           courseNumber: 5
         }
       }
+    }
+  },
+
+  watch: {
+    allCourseSpecialities (val) {
+      this.navTab = val.edges[0].node.speciality
     }
   },
 
@@ -170,7 +214,7 @@ export default {
             }
             font-size: 18px;
             font-family: 'cairoR';
-            width: 155px;
+            // width: 155px;
             height: 44px;
             margin-left: 10px;
             border-radius: 50px;
