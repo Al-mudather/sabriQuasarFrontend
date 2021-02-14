@@ -12,11 +12,11 @@ export default {
   props: ['content'],
   computed: {
     formatTitle () {
-      const title = JSON.parse(this.content.modelValue)
+      const result = JSON.parse(this.content.modelValue)
       if (this.content.modelName === 'ContentFile') {
-        return title.attachment.split('/attachment/')[1]
+        return result.attachment.split('/attachment/')[1]
       }
-      return title.title
+      return result.title
     }
   }
 }

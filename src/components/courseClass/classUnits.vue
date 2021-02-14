@@ -11,7 +11,7 @@
                     </div>
                 </div>
                 <!--colapss-->
-                <skeletonList v-if="lodash.isEmpty(allCourseUnits.edges)" />
+                <skeletonList v-if="lodash.isEmpty(allCourseUnits)" />
                 <div class="accord" id="accordion">
                     <q-list ref="contentList" class="rounded-borders">
                         <transition-group
@@ -101,6 +101,13 @@
                         <h3>الدرس التالي</h3>
                         <img src="~assets/img/next.png" alt="" />
                     </div>
+                    <div
+                        @click="startlearningUnitTraking"
+                        class="next"
+                    >
+                        <h3>Start Learning</h3>
+                        <img src="~assets/img/next.png" alt="" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,6 +115,10 @@
 </template>
 
 <script>
+import { StartLearningUnit } from 'src/queries/learning_management/mutation/StartLearningUnit'
+import { EndLearningUnit } from 'src/queries/learning_management/mutation/EndLearningUnit'
+import { GetEnrollmentByCourseForCurrentUser } from 'src/queries/enrollment_management/query/GetEnrollmentByCourseForCurrentUser'
+
 import skeletonList from 'src/components/skeleton/skeletonList'
 import contentHeader from 'components/utils/contentHeader'
 import classContentItem from 'components/courseClass/classContentItem'
@@ -119,6 +130,7 @@ export default {
   data () {
     return {
       counter: 0,
+      startLearningTrackingID: '',
       hasNextContent: true,
       hasPrevContent: false,
       lodash: _,
@@ -146,7 +158,7 @@ export default {
     currentContent (value) {
       const currentContentIndex = _.indexOf(
         this.contentLists,
-        this.currentContent
+        value
       )
       // TODO: Is this content has NEXT content
       if (this.contentLists[currentContentIndex + 1] === undefined) {
@@ -169,7 +181,7 @@ export default {
     }
   },
 
-  props: ['course_id'],
+  props: ['course'],
 
   apollo: {
     allCourseUnits: {
@@ -179,7 +191,7 @@ export default {
 
       variables () {
         return {
-          courseID: this.course_id
+          courseID: this.course.id
         }
       }
     }
@@ -196,6 +208,40 @@ export default {
 
   methods: {
     ...mapActions('courseManagement', ['setCurrentContentAction']),
+
+    /////////////////////////////////////////////////////////////
+    // Start Learning Tracking
+    /////////////////////////////////////////////////////////////
+    async startlearningUnitTraking () {
+      // TODO: 1) Get the enrollment id for the current user at this course
+      const enrollmentResult = await this.$apollo.query({
+        query: GetEnrollmentByCourseForCurrentUser,
+        variables: {
+          courseId: this.course.pk
+        }
+      })
+      const enrollment = enrollmentResult.data.enrollmentByCourseForCurrentUser
+      // TODO: 2) Fill the progress data
+      const progressData = {
+        courseId: this.course.pk,
+        enrollmentId: enrollment.pk,
+        courseUnitId: this.currentContent.courseUnit.pk,
+        courseUnitContentId: this.currentContent.pk
+      }
+      // TODO: 3) Start lesson tracking
+      const startTrackingResult = await this.$apollo.mutate({
+        mutation: StartLearningUnit,
+        variables: {
+          progressData: progressData
+        }
+      })
+
+      if (startTrackingResult.data.startLearningUnit.success) {
+        this.startLearningTrackingID = startTrackingResult.data.startLearningUnit.learning.pk
+      }
+    },
+
+    endlearningUnitTraking () {},
     clickedItem (e) {
       // TODO: remove the active class from all the contents
       const infoes = document.querySelectorAll('.info')

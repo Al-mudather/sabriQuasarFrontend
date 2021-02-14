@@ -2,6 +2,9 @@
     <div class="sele edit active" @click="buyTheCoursesUsingStripe">
         <img src="~assets/img/discover.png" alt="" />
         <img src="~assets/img/visa.png" alt="" />
+        <q-inner-loading :showing="visible">
+            <q-spinner-hourglass size="70px" />
+        </q-inner-loading>
     </div>
 </template>
 
@@ -12,11 +15,17 @@ import { StripePublishableKey } from "src/queries/checkout_management/query/Stri
 import { mapState } from "vuex";
 
 export default {
+    data () {
+        return {
+            visible: false
+        }
+    },
     computed: {
         ...mapState("shoppingCart", ["shoppingCartDataList"])
     },
     methods: {
         async buyTheCoursesUsingStripe () {
+            this.visible = true
             // TODO: Extract all courses ids
             const courseIds = this.getOrdersIds();
             // TODO: Make the order
@@ -33,6 +42,7 @@ export default {
             stripe.redirectToCheckout({
                 sessionId: stripPaymentUrl
             });
+            this.visible = false
         },
 
         getOrdersIds () {
@@ -50,6 +60,7 @@ export default {
             const dataObj = result.data.createNewOrderWithBulkOrderDetails;
 
             if (this.$_.get(dataObj,'[errors]')) {
+                this.visible = false
                 alert(dataObj.errors.nonFieldErrors);
             }
 
@@ -79,6 +90,7 @@ export default {
             });
             const stripDetails = stripPaymentresult.data.createStripeCheckout;
             if (this.$_.get(stripDetails,'[errors]')) {
+                this.visible = false
                 alert(details.errors.nonFieldErrors);
             }
 

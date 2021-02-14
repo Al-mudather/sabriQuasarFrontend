@@ -150,7 +150,7 @@
                                         role="tabpanel"
                                         aria-labelledby="tutorial-tab"
                                     >
-                                        <classUnits :course_id="courseData.id" />
+                                        <classUnits :course="courseData" />
                                     </q-tab-panel>
 
                                     <!-- start download -->

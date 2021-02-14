@@ -1,14 +1,9 @@
 <template>
     <div class="msPayment">
         <div class="options">
-            <div class="sele">
-                <img src="~assets/img/paypal.png" alt="" />
-            </div>
+            <paypal-payment />
             <strip-payment />
-            <div class="sele edit">
-                <img src="~assets/img/credit-cards.png" alt="" />
-                <h3>بطاقة بنكيــة</h3>
-            </div>
+            <syber-pay-payment />
             <div class="sele edit">
                 <img src="~assets/img/STCPAY.png" alt="" />
             </div>
@@ -58,11 +53,15 @@ import { CreateNewOrderWithBulkOrderDetails } from 'src/queries/order_management
 import { CreateStripeCheckout } from 'src/queries/checkout_management/mutation/CreateStripeCheckout'
 import { StripePublishableKey } from 'src/queries/checkout_management/query/StripePublishableKey'
 import stripPayment from 'src/components/ShoppingCard/stripPayment'
+import syberPay from 'src/components/ShoppingCard/syberPay'
+import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
 // import { openURL } from 'quasar'
 
 export default {
   components: {
-    'strip-payment': stripPayment
+    'strip-payment': stripPayment,
+    'syber-pay-payment': syberPay,
+    'paypal-payment': paypalPayment
   },
 
   methods: {
@@ -103,59 +102,7 @@ export default {
     //       openURL(siberDetails.paymentUrl)
     //     }
     //   }
-    // },
-
-    // async buyTheCoursesUsingStripe () {
-    //   // TODO: Extract all courses ids
-    //   const courseIds = this.shoppingCartDataList.map((item) => {
-    //     return item.course.pk
-    //   })
-    //   // TODO: Make the order
-    //   const orderResult = await this.$apollo.mutate({
-    //     mutation: CreateNewOrderWithBulkOrderDetails,
-    //     variables: {
-    //       courseIds: courseIds
-    //     }
-    //   })
-    //   const details = orderResult.data.createNewOrderWithBulkOrderDetails
-
-    //   // TODO: IF there is an errors show them
-    //   if (details.errors) {
-    //     alert(details.errors.nonFieldErrors)
-    //   }
-
-    //   // IF every thing is ok, procced to the payment
-    //   if (details.success) {
-    //     // TODO: Get the strip id first from the backend
-    //     const stripKeyResult = await this.$apollo.query({
-    //       query: StripePublishableKey
-    //     })
-
-    //     const stripKey = JSON.parse(this.$_.get(stripKeyResult, '[data][stripePublishableKey]')).publisableKey
-
-    //     const stripe = this.$Stripe(stripKey)
-    //     const stripPaymentresult = await this.$apollo.mutate({
-    //       mutation: CreateStripeCheckout,
-    //       variables: {
-    //         orderId: details.order.pk,
-    //         successUrl: location.origin + '/cart/success',
-    //         cancelUrl: location.origin + '/cart/cancel'
-    //       }
-    //     })
-
-    //     const stripDetails = stripPaymentresult.data.createStripeCheckout
-
-    //     if (stripDetails.errors) {
-    //       alert(details.errors.nonFieldErrors)
-    //     }
-
-    //     if (stripDetails.success) {
-    //       // openURL(stripDetails.paymentUrl)
-    //       stripe.redirectToCheckout({ sessionId: stripDetails.paymentUrl })
-    //     }
-    //   }
     // }
-
   },
 
   computed: {

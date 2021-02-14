@@ -14,15 +14,22 @@ query GetAllCourseUnitsByCourseID($cursor: String, $limit: Int, $courseID: ID) {
     edges {
       node {
         id,
+        pk,
         title,
         courseunitcontentSet {
           edges {
             node {
               id,
+              pk,
               isFree,
               isMandatory,
               modelName,
-              modelValue
+              modelValue,
+              courseUnit {
+                id,
+                pk,
+                title
+              }
             }
           }
         }
