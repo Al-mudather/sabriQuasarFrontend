@@ -35,14 +35,16 @@
     "vue-hellojs": "0.0.4",
     "vue-i18n": "^8.0.0",
     "vue-plyr": "^7.0.0",
+    "vue-video-player": "^5.0.2",
     "vue-vimeo-player": "^0.1.1"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",
+    "@quasar/quasar-app-extension-qmediaplayer": "^1.2.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
     "eslint-config-prettier": "^6.9.0",
+    "eslint-config-standard": "^14.1.0",
     "eslint-loader": "^3.0.3",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^11.0.0",

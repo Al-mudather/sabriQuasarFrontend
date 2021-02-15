@@ -36,7 +36,7 @@
             </div>
             <h3>المحتويـات</h3>
         </div>
-        <skeletonList v-if="allCourseUnits.edges.length === 0" />
+        <skeletonList v-if="lodash.get(allCourseUnits,'[edges]').length === 0" />
         <div id="accordion">
             <q-list ref="contentList" class="rounded-borders">
                 <transition-group
@@ -242,7 +242,8 @@ export default {
   name: 'courseUnits',
   data () {
     return {
-      allCourseUnits: { pageInfo: { hasNextPage: '' } }
+        lodash: this.$_ ,
+        allCourseUnits: { pageInfo: { hasNextPage: '' } }
     }
   },
 

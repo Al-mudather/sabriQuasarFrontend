@@ -2,12 +2,12 @@
     <div class="rate">
         <div class="row justify-center">
             <div
-                v-if="!allCourses.edges"
+                v-if="!lodash.isEmpty(lodash.get(allCourses,'[edges]'))"
             >
                 <skeletonCard class="col-lg-3 col-md-6 col-sm-6 col-xs-12" v-for="sk in 4" :key="sk"/>
             </div>
             <div
-                v-for="course in allCourses.edges"
+                v-for="course in lodash.get(allCourses,'[edges]')"
                 :key="course.node.id"
                 class="col-lg-3 col-md-6 col-sm-6 col-xs-12"
             >
@@ -26,19 +26,20 @@
 
 <script>
 import relatedCourseCard from 'src/components/utils/relatedCourseCard'
-// import skeletonCard from 'src/components/skeleton/skeletonCard'
+import skeletonCard from 'src/components/skeleton/skeletonCard'
 import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
 
 export default {
   data () {
     return {
-      allCourses: []
+      allCourses: [],
+      lodash: this.$_
     }
   },
   props: ['courseData'],
   components: {
-    relatedCourseCard
-    // skeletonCard
+    relatedCourseCard,
+    skeletonCard
   },
   watch: {
     courseData (data) {
