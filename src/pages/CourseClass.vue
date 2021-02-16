@@ -534,7 +534,7 @@ export default {
                 .pernt{
                     background-color: #fff;
                     border-radius: 15px;
-                    padding: 50px 20px 20px 20px;
+                    // padding: 50px 20px 20px 20px;
                     .ask{
                         background-color: #fff;
                         padding: 10px;
@@ -636,7 +636,8 @@ export default {
                         }
                     }
                     .send{
-                        margin: 84px 0 12px 0;
+                        // margin: 84px 0 12px 0;
+                        margin-bottom: 5rem;
                         form{
                             position: relative;
                             input{

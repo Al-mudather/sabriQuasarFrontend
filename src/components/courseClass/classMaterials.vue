@@ -1,22 +1,22 @@
 <template>
     <div class="download">
-        <div v-if="!lodash.isEmpty(courseFiles)" class="row justify-center">
+        <div v-if="!lodash.isEmpty(allCourseUnitContentsByCourseContentFile)" class="row justify-center">
             <div
                 class="col-lg-3 col-xs-12"
-                v-for="file in courseFiles"
-                :key="file.id"
+                v-for="file in lodash.get(allCourseUnitContentsByCourseContentFile,'[edges]')"
+                :key="file.node.id"
             >
                 <div class="down">
-                    <h3>{{ formatTitle(file.modelValue) }}</h3>
+                    <h3>{{ formatTitle(file.node.modelValue) }}</h3>
                     <button
                         @click="
-                            downloadFile(JSON.parse(file.modelValue).attachment)
+                            downloadFile(JSON.parse(lodash(file.node,'[modelValue]')).attachment)
                         "
                     >
                         <div class="immag">
                             <img src="~assets/img/download.png" alt="" />
                         </div>
-                        <!-- 3.1MB -->
+                        {{  formatFileSize(file.node.modelValue).toFixed(2) }} MB
                     </button>
                 </div>
             </div>
@@ -26,19 +26,31 @@
 
 <script>
 import _ from 'lodash'
+import { AllCourseUnitContentsByCourseContentFile } from 'src/queries/course_management/query/GetAllCourseUnitContentsByCourseContentFile'
 import { mapState, mapActions } from 'vuex'
 import { openURL } from 'quasar'
 
 export default {
   data () {
     return {
-      lodash: _
+      lodash: _,
+      courseFiles: []
     }
   },
   props: ['course'],
 
-  computed: {
-    ...mapState('courseManagement', ['courseFiles'])
+  apollo: {
+      allCourseUnitContentsByCourseContentFile: {
+          query() {
+              return AllCourseUnitContentsByCourseContentFile;
+          },
+
+          variables() {
+              return {
+                  courseId: this.course.pk
+              };
+          }
+      }
   },
 
   beforeDestroy () {
@@ -49,10 +61,6 @@ export default {
   methods: {
     ...mapActions('courseManagement', [
       'setDeleteCourseFilesArrayAction',
-      'setSelectedClassUnitContentAction',
-      'setCurrentContentAction',
-      'setContentListsAction',
-      'setCourseFilesAction'
     ]),
 
     downloadFile (fileURL) {
@@ -62,6 +70,10 @@ export default {
     formatTitle (file) {
       const title = JSON.parse(file).attachment
       return title.split('/attachment/')[1]
+    },
+
+    formatFileSize (file) {
+      return parseFloat(JSON.parse(file).fileSize)
     }
   }
 }

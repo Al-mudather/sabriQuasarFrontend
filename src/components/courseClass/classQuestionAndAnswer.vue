@@ -3,14 +3,7 @@
         <div class="row justify-center">
             <div class="col-lg-5 col-xs-12">
                 <div class="pernt">
-                    <div
-                        class="ask"
-                        v-for="question in allQuestionsByCourse.edges"
-                        :key="question.node.id"
-                    >
-                        <class-question :question="question.node"/>
-                    </div>
-                    <div class="send">
+                  <div class="send">
                         <form @submit="createNewQuestion">
                             <input
                                 type="text"
@@ -23,6 +16,13 @@
                             </button>
                         </form>
                     </div>
+                    <div
+                        class="ask"
+                        v-for="question in allQuestionsByCourse.edges"
+                        :key="question.node.id"
+                    >
+                        <class-question :question="question.node"/>
+                    </div>
                 </div>
             </div>
         </div>
@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import question from 'src/components/courseClass/question'
+import classQuestion from 'src/components/courseClass/classQuestion'
 import { CreateCourseQuestion } from 'src/queries/question_management/mutation/CreateCourseQuestion'
 import { AllQuestionsByCourse } from 'src/queries/question_management/query/AllQuestionsByCourse'
 
@@ -43,7 +43,7 @@ export default {
   },
 
   components: {
-    'class-question': question
+    classQuestion
   },
 
   props: ['course'],

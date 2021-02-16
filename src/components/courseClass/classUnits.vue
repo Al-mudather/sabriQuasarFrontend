@@ -212,11 +212,7 @@ export default {
                 .then(res => {
                     this.courseEnrollment =
                         res.data.enrollmentByCourseForCurrentUser;
-                }).catch(e => {
-                    console.log('lllllllllllllllllll')
-                    console.log(e)
-                    console.log('lllllllllllllllllll')
-                });
+                })
         }
     },
 
