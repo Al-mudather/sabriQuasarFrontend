@@ -11,7 +11,7 @@
                     </div>
                 </div>
                 <!--colapss-->
-                <skeletonList v-if="lodash.isEmpty(allCourseUnits)" />
+                <skeletonList v-if="lodash.isEmpty(allCourseUnits.edges)" />
                 <div class="accord" id="accordion">
                     <q-list ref="contentList" class="rounded-borders">
                         <transition-group
@@ -66,18 +66,27 @@
                 square
             />
             <div v-else class="vedio">
-                <div class="megx" v-if="!lodash.isEmpty(currentContent) && isOpen">
-                    <q-video
+                <div class="megx" v-if="!lodash.isEmpty(currentContent)" disable="1">
+                    <!-- <q-video
                         :ratio="13 / 11"
                         controls = "false"
-                        display='none'
                         @play="StartPlayingTheLesson"
                         :src="
                             prepareVideoUrl(
                                 JSON.parse(currentContent.modelValue).video
                             )
                         "
-                    />
+                    /> -->
+                    <vimeo-player
+                        ref="player"
+                        class="megx"
+                        @play="startlearningUnitTraking"
+                        @ended="endlearningUnitTraking"
+                        :video-id="507727334"
+                    ></vimeo-player>
+                    <!-- <q-inner-loading :showing="visible">
+                        <q-spinner-hourglass size="70px" />
+                    </q-inner-loading> -->
                     <!-- <vimeo-player
                         ref="player"
                         class="megx"
@@ -87,7 +96,6 @@
                         @pause="StartPlayingTheLesson"
                         @progress="StartPlayingTheLesson"
                         @ended="StartPlayingTheLesson"
-                        @loaded="StartPlayingTheLesson"
                         :video-id="507727334"
                     ></vimeo-player> -->
                 </div>
@@ -112,15 +120,6 @@
                         <h3>الدرس التالي</h3>
                         <img src="~assets/img/next.png" alt="" />
                     </div>
-
-                    <div @click="startlearningUnitTraking" class="next">
-                        <h3>Start Learning</h3>
-                        <img src="~assets/img/next.png" alt="" />
-                    </div>
-                    <div @click="endlearningUnitTraking" class="next">
-                        <h3>End Learning</h3>
-                        <img src="~assets/img/previous.png" alt="" />
-                    </div>
                 </div>
             </div>
         </div>
@@ -144,6 +143,7 @@ export default {
         return {
             counter: 0,
             isOpen: false,
+            visible: true,
             startLearningTrackingID: "",
             courseEnrollment: "",
             hasNextContent: true,
@@ -169,6 +169,11 @@ export default {
         ])
     },
 
+    beforeDestroy () {
+        // TODO: If the learning tracker is started, end it
+        this.endlearningUnitTraking()
+    },
+
     watch: {
         currentContent(value) {
             const currentContentIndex = _.indexOf(this.contentLists, value);
@@ -185,6 +190,9 @@ export default {
             } else {
                 this.hasPrevContent = true;
             }
+
+            // TODO: If the learning tracker is started, end it
+            this.endlearningUnitTraking() 
         },
 
         contentLists(val) {
@@ -204,6 +212,10 @@ export default {
                 .then(res => {
                     this.courseEnrollment =
                         res.data.enrollmentByCourseForCurrentUser;
+                }).catch(e => {
+                    console.log('lllllllllllllllllll')
+                    console.log(e)
+                    console.log('lllllllllllllllllll')
                 });
         }
     },
@@ -235,11 +247,6 @@ export default {
 
     methods: {
         ...mapActions("courseManagement", ["setCurrentContentAction"]),
-        StartPlayingTheLesson (e) {
-          console.log('GGGGGGGGGGGG')
-          console.log(e)
-          console.log('GGGGGGGGGGGG')
-        },
         /////////////////////////////////////////////////////////////
         // Start Learning Tracking
         /////////////////////////////////////////////////////////////
@@ -296,16 +303,6 @@ export default {
                         ).nonFieldErrors
                     });
                 }
-            } else {
-                this.$q.notify({
-                    color: "negative",
-                    textColor: "white",
-                    position: "top",
-                    icon: "cloud_done",
-                    message:
-                        " عيك ان تنتهي من تعلم هذا الدرس اولا" +
-                        JSON.parse(this.currentContent.modelValue).title
-                });
             }
         },
 
@@ -338,14 +335,6 @@ export default {
                     // TODO: empty the start tracking progress id
                     this.startLearningTrackingID = "";
                 }
-            } else {
-                this.$q.notify({
-                    color: "negative",
-                    textColor: "white",
-                    position: "top",
-                    icon: "cloud_done",
-                    message: 'من فضلك ابدا التعلم بالضغط على "ابدا الدرس"اولا'
-                });
             }
         },
 
@@ -372,71 +361,51 @@ export default {
         },
 
         GoToTheNexListon() {
-          if (!this.startLearningTrackingID) {
-              const currentContentIndex = _.indexOf(
-                  this.contentLists,
-                  this.currentContent
-              );
-              const nextContent = this.contentLists[currentContentIndex + 1];
-              // TODO: Is this content has NEXT content
-              if (nextContent === undefined) {
-                  this.hasNextContent = false;
-              } else {
-                  this.hasNextContent = true;
-                  this.setCurrentContentAction(nextContent);
-              }
-
-              // TODO: Is this content has PREV content
-              if (this.contentLists[currentContentIndex - 1] === undefined) {
-                  this.hasPrevContent = false;
-              } else {
-                  this.hasPrevContent = true;
-              }
-              // TODO: Close the learning video
-              this.open = false
+            const currentContentIndex = _.indexOf(
+                this.contentLists,
+                this.currentContent
+            );
+            const nextContent = this.contentLists[currentContentIndex + 1];
+            // TODO: Is this content has NEXT content
+            if (nextContent === undefined) {
+                this.hasNextContent = false;
             } else {
-              this.$q.notify({
-                  color: "negative",
-                  textColor: "white",
-                  position: "top",
-                  icon: "cloud_done",
-                  message: 'يجب الضغط على زر انتهى الدرس قبل المغادره'
-              });
+                this.hasNextContent = true;
+                this.setCurrentContentAction(nextContent);
             }
+
+            // TODO: Is this content has PREV content
+            if (this.contentLists[currentContentIndex - 1] === undefined) {
+                this.hasPrevContent = false;
+            } else {
+                this.hasPrevContent = true;
+            }
+            // TODO: End the learning tracker vido
+            this.endlearningUnitTraking()
         },
 
         GoToThePrevListon() {
-          if (!this.startLearningTrackingID) {
-              const currentContentIndex = _.indexOf(
-                  this.contentLists,
-                  this.currentContent
-              );
-              const prevContent = this.contentLists[currentContentIndex - 1];
-              // TODO: Is this content has NEXT content
-              if (this.contentLists[currentContentIndex + 1] === undefined) {
-                  this.hasNextContent = false;
-              } else {
-                  this.hasNextContent = true;
-              }
-
-              // TODO: Is this content has PREV content
-              if (prevContent === undefined) {
-                  this.hasPrevContent = false;
-              } else {
-                  this.hasPrevContent = true;
-                  this.setCurrentContentAction(prevContent);
-              }
-              // TODO: Close the learning video
-              this.open = false
+            const currentContentIndex = _.indexOf(
+                this.contentLists,
+                this.currentContent
+            );
+            const prevContent = this.contentLists[currentContentIndex - 1];
+            // TODO: Is this content has NEXT content
+            if (this.contentLists[currentContentIndex + 1] === undefined) {
+                this.hasNextContent = false;
             } else {
-              this.$q.notify({
-                  color: "negative",
-                  textColor: "white",
-                  position: "top",
-                  icon: "cloud_done",
-                  message: 'يجب الضغط على زر انتهى الدرس قبل المغادره'
-              });
+                this.hasNextContent = true;
             }
+
+            // TODO: Is this content has PREV content
+            if (prevContent === undefined) {
+                this.hasPrevContent = false;
+            } else {
+                this.hasPrevContent = true;
+                this.setCurrentContentAction(prevContent);
+            }
+            // TODO: End the learning tracker vido
+            this.endlearningUnitTraking()
         },
 
         prepareVideoUrl(videoUrl) {

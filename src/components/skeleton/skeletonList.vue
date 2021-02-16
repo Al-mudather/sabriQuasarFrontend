@@ -1,6 +1,6 @@
 <template>
     <div class="q-pa-md">
-        <q-item>
+        <q-item v-for="i in 5" :key="i">
             <q-item-section avatar>
                 <q-skeleton type="QAvatar" />
             </q-item-section>
