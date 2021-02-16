@@ -105,7 +105,7 @@
                 </div>
                 <div class="arrow">
                     <div
-                        @click="GoToThePrevListon"
+                        @click="GoToThePrevLesson"
                         :disabled="!hasPrevContent"
                         class="next"
                     >
@@ -113,7 +113,7 @@
                         <h3>الدرس السابق</h3>
                     </div>
                     <div
-                        @click="GoToTheNexListon"
+                        @click="GoToTheNexLesson"
                         :disabled="!hasNextContent"
                         class="next"
                     >
@@ -360,7 +360,11 @@ export default {
             }
         },
 
-        GoToTheNexListon() {
+        // TODO: Go to the next lesson
+        GoToTheNexLesson() {
+            // TODO: End the learning tracker vido
+            this.endlearningUnitTraking()
+            // TODO: Go to next lesson
             const currentContentIndex = _.indexOf(
                 this.contentLists,
                 this.currentContent
@@ -380,11 +384,13 @@ export default {
             } else {
                 this.hasPrevContent = true;
             }
-            // TODO: End the learning tracker vido
-            this.endlearningUnitTraking()
         },
 
-        GoToThePrevListon() {
+        // TODO: Go to the previouse lesson
+        GoToThePrevLesson() {
+            // TODO: End the learning tracker vido
+            this.endlearningUnitTraking()
+            // TODO: Got to previouse lesson
             const currentContentIndex = _.indexOf(
                 this.contentLists,
                 this.currentContent
@@ -404,8 +410,6 @@ export default {
                 this.hasPrevContent = true;
                 this.setCurrentContentAction(prevContent);
             }
-            // TODO: End the learning tracker vido
-            this.endlearningUnitTraking()
         },
 
         prepareVideoUrl(videoUrl) {
