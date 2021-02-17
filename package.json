@@ -12,6 +12,7 @@
   "dependencies": {
     "@lifeomic/axios-fetch": "^1.5.1",
     "@quasar/extras": "^1.9.14",
+    "animate.css": "^4.1.1",
     "apollo-cache-inmemory": "^1.6.6",
     "apollo-client": "^2.6.10",
     "apollo-link": "^1.2.14",

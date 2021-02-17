@@ -28,61 +28,64 @@
             </g>
         </svg>
         <!-- <img src="~assets/img/user-13.jpg" alt="" /> -->
-        <img
-            :src="
-                'http://localhost:8000' + '/media/' + image
-            "
-            alt=""
-        />
+        <img :src="'http://localhost:8000' + '/media/' + image" alt="" />
         <h3>
             {{ firstName }}
             {{ lastName }}
         </h3>
-        <p id="data">
+        <p id="data" class="">
             {{ qualification }}
         </p>
-        <a ref="togleBtn" id="togleBtn" data-type="more" @click="togelMoreOrLessData">
+        <a
+            ref="togleBtn"
+            id="togleBtn"
+            data-type="more"
+            @click="togelMoreOrLessData"
+        >
             <h3>المزيــد <img src="~assets/img/moree.png" alt="" /></h3>
         </a>
     </div>
 </template>
 
 <script>
+// import 'animate.css'
 export default {
     data() {
         return {};
     },
     props: ["firstName", "lastName", "qualification", "image"],
     methods: {
-    togelMoreOrLessData () {
-      const btn = this.$refs.togleBtn
-      const btnType = btn.attributes['data-type'].nodeValue
-      if (btnType === 'more') {
-        btn.previousSibling.classList.add('show_more_data')
-        btn.attributes['data-type'].nodeValue = 'less'
-        btn.firstChild.firstChild.textContent = 'اخفاء'
-      } else if (btnType === 'less') {
-        btn.previousSibling.classList.remove('show_more_data')
-        btn.attributes['data-type'].nodeValue = 'more'
-        btn.firstChild.firstChild.textContent = 'المزيد'
-      }
+        togelMoreOrLessData() {
+            const btn = this.$refs.togleBtn;
+            const btnType = btn.attributes["data-type"].nodeValue;
+            if (btnType === "more") {
+                btn.previousSibling.classList.add("show_more_data");
+                btn.attributes["data-type"].nodeValue = "less";
+                btn.firstChild.firstChild.textContent = "اخفاء";
+            } else if (btnType === "less") {
+                btn.previousSibling.classList.remove("show_more_data");
+                btn.attributes["data-type"].nodeValue = "more";
+                btn.firstChild.firstChild.textContent = "المزيد";
+            }
+        }
     }
-  } 
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 #togleBtn {
-  cursor: pointer;
+    cursor: pointer;
 }
 p {
-  line-height: 18px;
-  height: 54px;
-	overflow: hidden;
-  transition: all ease-in-out
+    line-height: 18px;
+    display: block;
+    height: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
 }
 .show_more_data {
-  height: 100% !important;
+    height: 100% !important;
 }
 
 </style>
