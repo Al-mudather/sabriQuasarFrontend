@@ -5,6 +5,7 @@ import Vuex from 'vuex'
 import authentication from './authentication'
 import shoppingCart from './shoppingCart'
 import courseManagement from './courseManagement'
+import learningProgress from './learningProgress'
 
 Vue.use(Vuex)
 
@@ -22,7 +23,8 @@ export default function (/* { ssrContext } */) {
     modules: {
       authentication,
       shoppingCart,
-      courseManagement
+      courseManagement,
+      learningProgress
     },
 
     // enable strict mode (adds overhead!)

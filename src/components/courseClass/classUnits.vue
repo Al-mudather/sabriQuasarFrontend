@@ -49,6 +49,7 @@
                                         >
                                             <classContentItem
                                                 :content="content.node"
+                                                :courseId="course.pk"
                                             />
                                         </q-item>
                                     </div>
@@ -66,7 +67,14 @@
                 square
             />
             <div v-else class="vedio">
-                <div class="megx" v-if="!lodash.isEmpty(currentContent)" disable="1">
+                <q-inner-loading :showing="visible">
+                    <q-spinner-gears size="50px" color="primary" />
+                </q-inner-loading>
+                <div
+                    class="megx"
+                    v-if="!lodash.isEmpty(currentContent)"
+                    disable="1"
+                >
                     <!-- <q-video
                         :ratio="13 / 11"
                         controls = "false"
@@ -80,13 +88,12 @@
                     <vimeo-player
                         ref="player"
                         class="megx"
+                        @loaded="visible = false"
                         @play="startlearningUnitTraking"
                         @ended="endlearningUnitTraking"
-                        :video-id="507727334"
+                        :video-id="vimoID"
                     ></vimeo-player>
-                    <!-- <q-inner-loading :showing="visible">
-                        <q-spinner-hourglass size="70px" />
-                    </q-inner-loading> -->
+
                     <!-- <vimeo-player
                         ref="player"
                         class="megx"
@@ -101,7 +108,12 @@
                 </div>
                 <div v-else class="megx">
                     <img src="~assets/img/pexels.png" alt="" />
-                    <img class="play" @click="startlearningUnitTraking" src="~assets/img/player.png" alt="" />
+                    <img
+                        class="play"
+                        @click="startlearningUnitTraking"
+                        src="~assets/img/player.png"
+                        alt=""
+                    />
                 </div>
                 <div class="arrow">
                     <div
@@ -129,7 +141,8 @@
 <script>
 import { StartLearningUnit } from "src/queries/learning_management/mutation/StartLearningUnit";
 import { EndLearningUnit } from "src/queries/learning_management/mutation/EndLearningUnit";
-import { GetEnrollmentByCourseForCurrentUser } from "src/queries/enrollment_management/query/GetEnrollmentByCourseForCurrentUser";
+import { GetAllLearningProgressByCourse } from "src/queries/learning_management/query/GetAllLearningProgressByCourse";
+import { QSpinnerGears } from "quasar";
 
 import skeletonList from "src/components/skeleton/skeletonList";
 import contentHeader from "components/utils/contentHeader";
@@ -144,6 +157,7 @@ export default {
             counter: 0,
             isOpen: false,
             visible: true,
+            vimoID: 507727334,
             startLearningTrackingID: "",
             courseEnrollment: "",
             hasNextContent: true,
@@ -166,16 +180,20 @@ export default {
             "selectedClassUnitContent",
             "contentLists",
             "currentContent"
-        ])
+        ]),
+        ...mapState("learningProgress", ["enrollmentId"])
     },
 
-    beforeDestroy () {
+    beforeDestroy() {
         // TODO: If the learning tracker is started, end it
-        this.endlearningUnitTraking()
+        this.endlearningUnitTraking();
     },
 
     watch: {
         currentContent(value) {
+            this.vimoID = 76979871;
+            this.visible = true;
+
             const currentContentIndex = _.indexOf(this.contentLists, value);
             // TODO: Is this content has NEXT content
             if (this.contentLists[currentContentIndex + 1] === undefined) {
@@ -192,27 +210,12 @@ export default {
             }
 
             // TODO: If the learning tracker is started, end it
-            this.endlearningUnitTraking() 
+            this.endlearningUnitTraking();
         },
 
         contentLists(val) {
             // TODO: initialize the class with the first video
             this.setCurrentContentAction(val[0]);
-        },
-
-        course(val) {
-            // GEt the course enrollment data
-            this.$apollo
-                .query({
-                    query: GetEnrollmentByCourseForCurrentUser,
-                    variables: {
-                        courseId: val.pk
-                    }
-                })
-                .then(res => {
-                    this.courseEnrollment =
-                        res.data.enrollmentByCourseForCurrentUser;
-                })
         }
     },
 
@@ -251,7 +254,7 @@ export default {
                 // TODO: 1) Fill the progress data
                 const progressData = {
                     courseId: this.course.pk,
-                    enrollmentId: this.courseEnrollment.pk,
+                    enrollmentId: this.enrollmentId,
                     courseUnitId: this.currentContent.courseUnit.pk,
                     courseUnitContentId: this.currentContent.pk
                 };
@@ -280,7 +283,7 @@ export default {
                         startTrackingResult,
                         "[data][startLearningUnit][learning][pk]"
                     );
-                    this.isOpen = true
+                    this.isOpen = true;
                 }
                 if (
                     this.$_.get(
@@ -310,7 +313,7 @@ export default {
                 // TODO: 1) Fill the end learning tracker data
                 const progressData = {
                     courseId: this.course.pk,
-                    enrollmentId: this.courseEnrollment.pk,
+                    enrollmentId: this.enrollmentId,
                     courseUnitId: this.currentContent.courseUnit.pk,
                     courseUnitContentId: this.currentContent.pk
                 };
@@ -320,7 +323,16 @@ export default {
                     variables: {
                         progressData: progressData,
                         progressId: this.startLearningTrackingID
-                    }
+                    },
+                    refetchQueries: [
+                        {
+                            query: GetAllLearningProgressByCourse,
+                            variables: {
+                                enrollmentId: this.enrollmentId,
+                                courseId: this.course.pk
+                            }
+                        }
+                    ]
                 });
                 if (
                     this.$_.get(
@@ -359,7 +371,7 @@ export default {
         // TODO: Go to the next lesson
         GoToTheNexLesson() {
             // TODO: End the learning tracker vido
-            this.endlearningUnitTraking()
+            this.endlearningUnitTraking();
             // TODO: Go to next lesson
             const currentContentIndex = _.indexOf(
                 this.contentLists,
@@ -385,7 +397,7 @@ export default {
         // TODO: Go to the previouse lesson
         GoToThePrevLesson() {
             // TODO: End the learning tracker vido
-            this.endlearningUnitTraking()
+            this.endlearningUnitTraking();
             // TODO: Got to previouse lesson
             const currentContentIndex = _.indexOf(
                 this.contentLists,
@@ -418,9 +430,13 @@ export default {
 </script>
 
 <style lang="scss">
+.q-inner-loading {
+    top: 10% !important;
+    right: 50% !important;
+}
 #vimeo-player-1 > iframe {
-  height: 100%;
-  width: 100%;
+    height: 100%;
+    width: 100%;
 }
 .card-body {
     padding: 0 !important;

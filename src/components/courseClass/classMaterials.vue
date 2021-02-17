@@ -10,7 +10,7 @@
                     <h3>{{ formatTitle(file.node.modelValue) }}</h3>
                     <button
                         @click="
-                            downloadFile(JSON.parse(lodash(file.node,'[modelValue]')).attachment)
+                            downloadFile(JSON.parse(lodash.get(file.node,'[modelValue]')).attachment)
                         "
                     >
                         <div class="immag">

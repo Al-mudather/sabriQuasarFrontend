@@ -1,26 +1,60 @@
 <template>
-    <div @click="changeThecourseContent" class="info" style="width: 100%">
-        <div class="mage">
-            <img src="~assets/img/Rectangle 1.png" alt="" />
-        </div>
-        <h3>{{ formatTitle }}</h3>
+    <div @click="changeThecourseContent" class="info row items-center" style="width: 100%">
+      <div class="mage col-1">
+          <img src="~assets/img/Rectangle 1.png" alt="" />
+      </div>
+      <h3 class="col-9">{{ formatTitle }}</h3>
+      <div class="q-gutter-sm self-end col-1">
+        <q-checkbox disable v-model="lessonFinished" />
+      </div>
     </div>
 </template>
 
 <script>
 import { mapActions, mapState } from 'vuex'
+import { GetAllLearningProgressByCourse } from 'src/queries/learning_management/query/GetAllLearningProgressByCourse'
 
 export default {
   data () {
     return {
+      lessonFinished: false,
       parsedContentTitle: ''
     }
   },
 
-  props: ['content'],
+  props: ['content', 'courseId'],
+
+  apollo: {
+    learningProgressByCourse: {
+      query () {
+        return GetAllLearningProgressByCourse
+      },
+      variables () {
+        return {
+          enrollmentId: this.enrollmentId,
+          courseId: this.courseId
+        }
+      }
+    }
+  },
+
+  watch: {
+    learningProgressByCourse (value) {
+      for (const progess of value.edges) {
+        if (this.content.pk === progess.node.courseUnitContent.pk) {
+          console.log(progess.node.begin)
+          if (progess.node.begin &&  progess.node.complete) {
+            // TODO: marke the lesson as completed
+            this.lessonFinished = true
+          }
+        }
+      }
+    }
+  },
 
   computed: {
     ...mapState('courseManagement', ['courseFiles']),
+    ...mapState('learningProgress',['enrollmentId']),
     formatTitle () {
       const title = JSON.parse(this.content.modelValue)
       if (this.content.modelName === 'ContentFile') {

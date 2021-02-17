@@ -197,7 +197,9 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
+import { GetEnrollmentByCourseForCurrentUser } from "src/queries/enrollment_management/query/GetEnrollmentByCourseForCurrentUser";
 import classUnits from 'src/components/courseClass/classUnits'
 import classMaterials from 'src/components/courseClass/classMaterials'
 import classinstructors from 'src/components/courseClass/classinstructors'
@@ -219,18 +221,38 @@ export default {
     classinstructors
   },
 
-  computed: {},
+  methods: {
+    ...mapActions("learningProgress", ["setUpdateEnrollmentIdAction"]),
+  },
 
   watch: {
     '$route.params': {
-      handler: async function (params) {
-        const res = await this.$apollo.query({
+      handler: function (params) {
+          // TODO: Get the course by ID
+        this.$apollo.query({
           query: GetCourseByID,
           variables: {
             coursePk: params.pk
           }
+        }).then((res) => {
+            this.courseData = res.data.course
+            if (res.data.course.pk) {
+                // TODO: Get the enrollment of the course
+                this.$apollo.query({
+                query: GetEnrollmentByCourseForCurrentUser,
+                variables: {
+                    courseId: res.data.course.pk
+                }
+                })
+                .then(res => {
+                    const enrollmentID = res.data.enrollmentByCourseForCurrentUser.pk
+                    // TODO: Save the enrollmentId to the store
+                    if (enrollmentID) {
+                        this.setUpdateEnrollmentIdAction(enrollmentID);
+                    }
+                })
+            }
         })
-        this.courseData = res.data.course
       },
       deep: true,
       immediate: true
