@@ -13,7 +13,7 @@ if (process.env.NODE_ENV === 'development') {
   uri = 'http://localhost:8000/api/graphql/'
   // uri = 'http://192.168.43.86:8000/api/graphql/'
 } else {
-  uri = location.origin+'/api/graphql/'
+  uri = location.origin + '/api/graphql/'
 }
 
 const customLink = ApolloLink.from([

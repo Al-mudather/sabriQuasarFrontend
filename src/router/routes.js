@@ -16,9 +16,14 @@ const routes = [
     ]
   },
   {
-    path: '/class/:pk&:id',
+    path: '/class/:pk/:id',
     name: 'course-class',
     component: () => import('pages/CourseClass.vue')
+  },
+  {
+    path: '/myCourses/',
+    name: 'my-courses',
+    component: () => import('pages/course_management/MyCourses.vue')
   },
   {
     path: '/verify/email/:token',

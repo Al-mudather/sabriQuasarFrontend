@@ -1,9 +1,8 @@
 <template>
   <div>
     <div lass="row justify-center">
-      <q-btn @click="logout" class="col-3">
-      Log out
-    </q-btn>
+      <q-btn @click="goToMycourses" class="col-3" color="primary" label="My courses" />
+      <q-btn @click="logout" class="col-3" label="Log out" />
     </div>
     <NavBar />
     <ShoppingCart />
@@ -36,6 +35,10 @@ export default {
     ...mapActions('authentication', ['logOutAction']),
     logout () {
       this.logOutAction()
+    },
+
+    goToMycourses () {
+      this.$router.push({ name: 'my-courses' })
     }
   }
 }

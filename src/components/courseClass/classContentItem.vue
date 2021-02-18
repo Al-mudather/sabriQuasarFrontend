@@ -42,7 +42,6 @@ export default {
     learningProgressByCourse (value) {
       for (const progess of value.edges) {
         if (this.content.pk === progess.node.courseUnitContent.pk) {
-          console.log(progess.node.begin)
           if (progess.node.begin &&  progess.node.complete) {
             // TODO: marke the lesson as completed
             this.lessonFinished = true

@@ -239,10 +239,10 @@ export default {
             if (res.data.course.pk) {
                 // TODO: Get the enrollment of the course
                 this.$apollo.query({
-                query: GetEnrollmentByCourseForCurrentUser,
-                variables: {
-                    courseId: res.data.course.pk
-                }
+                    query: GetEnrollmentByCourseForCurrentUser,
+                    variables: {
+                        courseId: res.data.course.pk
+                    }
                 })
                 .then(res => {
                     const enrollmentID = res.data.enrollmentByCourseForCurrentUser.pk

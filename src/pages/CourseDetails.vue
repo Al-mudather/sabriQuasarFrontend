@@ -3,7 +3,6 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <q-btn @click="$router.push({ name: 'course-class', params: { pk: coursePK, id: courseID } })" color="primary" label="Go to class" />
                     <div  class="titel">
                         <img src="~assets/img/tit.png" alt="">
                         <h3 v-if="courseData.title">{{courseData.title}}</h3>
