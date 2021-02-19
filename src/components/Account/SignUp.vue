@@ -36,7 +36,7 @@
                         <div class="inp">
                             <img src="~assets/img/gmail.png" alt="" />
                             <input
-                                v-model="username"
+                                v-model="fullName"
                                 type="text"
                                 placeholder="الاسم الحقيقي"
                             />
@@ -118,7 +118,7 @@ import AccountHeader from "src/components/utils/accountHeader";
 export default {
     data() {
         return {
-            username: "",
+            fullName: "",
             email: "",
             password1: "",
             password2: "",
@@ -156,7 +156,7 @@ export default {
                         mutation: RegisterNewUser,
                         variables: {
                             email: this.email,
-                            username: this.username,
+                            fullName: this.fullName,
                             password1: this.password1,
                             password2: this.password2
                         }
