@@ -111,138 +111,161 @@
 </template>
 
 <script>
-import { SocialAuth } from 'src/queries/account_management/mutation/CreateSocailAuth'
-import { RegisterNewUser } from 'src/queries/account_management/mutation/RegisterNewUser'
-import { mapActions } from 'vuex'
-import AccountHeader from 'src/components/utils/accountHeader'
+import { SocialAuth } from "src/queries/account_management/mutation/CreateSocailAuth";
+import { RegisterNewUser } from "src/queries/account_management/mutation/RegisterNewUser";
+import { mapActions } from "vuex";
+import AccountHeader from "src/components/utils/accountHeader";
 export default {
-  data () {
-    return {
-      username: '',
-      email: '',
-      password1: '',
-      password2: '',
-      errorMessages: []
-    }
-  },
-  components: {
-    AccountHeader
-  },
-  methods: {
-    ...mapActions('authentication', [
-      'loginAction',
-      'setSignUpDialogAction',
-      'setRegisterationDialogAction'
-    ]),
-
-    closeSiginUpDialog () {
-      this.setSignUpDialogAction(false)
-      this.setRegisterationDialogAction(false)
+    data() {
+        return {
+            username: "",
+            email: "",
+            password1: "",
+            password2: "",
+            errorMessages: []
+        };
     },
+    components: {
+        AccountHeader
+    },
+    methods: {
+        ...mapActions("authentication", [
+            "loginAction",
+            "setSignUpDialogAction",
+            "setRegisterationDialogAction"
+        ]),
 
-    errorHandler (errorsObj) {
-      console.log(errorsObj)
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          this.errorMessages.push(val.message)
+        closeSiginUpDialog() {
+            this.setSignUpDialogAction(false);
+            this.setRegisterationDialogAction(false);
+        },
+
+        errorHandler(errorsObj) {
+            console.log(errorsObj);
+            for (const key in errorsObj) {
+                for (const val of errorsObj[key]) {
+                    this.errorMessages.push(val.message);
+                }
+            }
+        },
+        RegisterNewUser() {
+            if (this.password1 === this.password2) {
+                this.errorMessages = [];
+                this.$apollo
+                    .mutate({
+                        mutation: RegisterNewUser,
+                        variables: {
+                            email: this.email,
+                            username: this.username,
+                            password1: this.password1,
+                            password2: this.password2
+                        }
+                    })
+                    .then(result => {
+                        if (result.data.register.success) {
+                            this.GotToConfirmationPage();
+                        } else if (result.data.register.errors) {
+                            console.log("gggggggggggggggg");
+                            console.log(result.data.register);
+                            console.log("gggggggggggggggg");
+                            this.errorHandler(result.data.register.errors);
+                        }
+                    });
+            } else {
+                this.errorMessages.push("passwords are not the same");
+            }
+        },
+
+        GotToConfirmationPage() {
+            this.closeSiginUpDialog();
+            this.$router.push({ name: "password-confirm" });
+        },
+
+        // TODO: Google and Facebook Register
+        loginAuthMutation(accessToken, provider, email = "") {
+            console.log(" Triggering Apollo ");
+
+            this.$apollo
+                .mutate({
+                    mutation: SocialAuth,
+                    variables: {
+                        provider: provider,
+                        accessToken: accessToken,
+                        email: email
+                    }
+                })
+                .then(result => {
+                    //TODO: There is a network error go and solve it
+                    //TODO: There is a network error go and solve it
+                    //TODO: There is a network error go and solve it
+                    if (result.data.socialAuth) {
+                        this.loginAction(result.data.socialAuth).then(() => {
+                            this.closeSiginUpDialog();
+                        })
+                    }
+                });
+        },
+
+        helloGoogleAuth(network = "google") {
+            const hello = this.hello;
+
+            hello("google")
+                .login({
+                    scope: "email",
+                    force: true
+                })
+                .then(r => {
+                    console.log(r);
+
+                    var google = hello("google").getAuthResponse();
+
+                    // console.log(google)
+                    // console.log(google.access_token)
+
+                    this.loginAuthMutation(
+                        google.access_token,
+                        "google-oauth2"
+                    );
+                });
+        },
+
+        helloFacebookAuth(network = "google") {
+            const hello = this.hello;
+
+            hello("facebook")
+                .login({
+                    scope: "public_profile,email",
+                    force: true
+                })
+                .then(r => {
+                    console.log('Facebook')
+                    console.log(r);
+                    console.log('Facebook')
+
+                    // Call user information, for the given network
+                    hello("facebook")
+                        .api("/me")
+                        .then(r => {
+                            console.log("r = ", r);
+                            // console.log("r.email = " + r.email);
+                            // console.log("r.name== = " + r.name);
+
+                            var facebook = hello("facebook").getAuthResponse();
+
+                            // console.log('')
+                            // console.log(facebook)
+                            // console.log(facebook.access_token)
+
+                            this.loginAuthMutation(
+                                facebook.access_token,
+                                "facebook",
+                                r.email
+                            );
+                        });
+                });
         }
-      }
-    },
-    RegisterNewUser () {
-      if (this.password1 === this.password2) {
-        this.errorMessages = []
-        this.$apollo
-          .mutate({
-            mutation: RegisterNewUser,
-            variables: {
-              email: this.email,
-              username: this.username,
-              password1: this.password1,
-              password2: this.password2
-            }
-          })
-          .then(result => {
-            if (result.data.register.success) {
-              this.GotToConfirmationPage()
-            } else if (result.data.register.errors) {
-              this.errorHandler(result.data.register.errors)
-            }
-          })
-      } else {
-        this.errorMessages.push('passwords are not the same')
-      }
-    },
-
-    GotToConfirmationPage () {
-      this.closeSiginUpDialog()
-      this.$router.push({ name: 'password-confirm' })
-    },
-
-    // TODO: Google Register
-    loginAuthMutation (accessToken, provider) {
-      console.log(' Triggering Apollo ')
-
-      this.$apollo
-        .mutate({
-          mutation: SocialAuth,
-          variables: {
-            provider: provider,
-            accessToken: accessToken
-          }
-        })
-        .then(result => {
-          if (result.data.socialAuth) {
-            this.loginAction(result.data.socialAuth).then(() => {
-              this.closeSiginUpDialog()
-            })
-          }
-        })
-    },
-
-    helloGoogleAuth (network = 'google') {
-      const hello = this.hello
-
-      hello('google')
-        .login({
-          scope: 'email',
-          force: true
-        })
-        .then(r => {
-          console.log(r)
-
-          var google = hello('google').getAuthResponse()
-
-          // console.log(google)
-          // console.log(google.access_token)
-
-          this.loginAuthMutation(
-            google.access_token,
-            'google-oauth2'
-          )
-        })
-    },
-
-    helloFacebookAuth (network = 'google') {
-      const hello = this.hello
-
-      hello('facebook')
-        .login({
-          scope: 'email',
-          force: true
-        })
-        .then(r => {
-          console.log(r)
-
-          var google = hello('facebook').getAuthResponse()
-
-          // console.log(google)
-          // console.log(google.access_token)
-
-          this.loginAuthMutation(google.access_token, 'facebook')
-        })
     }
-  }
-}
+};
 </script>
 
 <style lang="scss">

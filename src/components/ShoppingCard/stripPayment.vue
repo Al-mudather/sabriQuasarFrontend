@@ -61,7 +61,10 @@ export default {
 
             if (this.$_.get(dataObj,'[errors]')) {
                 this.visible = false
-                alert(dataObj.errors.nonFieldErrors);
+                console.log('kkkkkkkkkkkkkkk')
+                console.log(dataObj.errors)
+                console.log('kkkkkkkkkkkkkkk')
+                // alert(dataObj.errors.nonFieldErrors);
             }
 
             if (this.$_.get(dataObj,'[success]')) {
