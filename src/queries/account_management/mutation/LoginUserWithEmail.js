@@ -13,6 +13,8 @@ mutation LoginUser($email:String!, $password: String!){
     user {
       id,
       username,
+      firstName,
+      lastName,
       verified
     },
     refreshToken

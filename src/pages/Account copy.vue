@@ -1,15 +1,22 @@
 <template>
-  <section class="web">
-    <router-view></router-view>
-  </section>
+  <div>
+    <q-dialog full-width full-height v-model="loginDialog">
+      <Login v-if="!passwordResetDialog"/>
+      <ResetPassword v-if="passwordResetDialog"/>
+    </q-dialog>
+
+    <q-dialog full-width full-height v-model="signUpDialog">
+      <SignUp />
+    </q-dialog>
+
+  </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
-// import Login from 'components/Account/Login'
-// import ResetPassword from 'components/Account/ResetPassword'
-// import SignUp from 'components/Account/SignUp'
-// import accountHeader from 'src/components/utils/accountHeader'
+import Login from 'components/Account/Login'
+import ResetPassword from 'components/Account/ResetPassword'
+import SignUp from 'components/Account/SignUp'
 export default {
   name: 'Home',
   data () {
@@ -17,6 +24,9 @@ export default {
     }
   },
   components: {
+    Login,
+    ResetPassword,
+    SignUp
   },
 
   computed: {

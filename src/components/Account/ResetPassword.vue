@@ -1,5 +1,5 @@
 <template>
-  <AccountHeader dialogName="إستعادة كلمة المرور" v-on:closeDialog="closePasswordResetDialog">
+  <AccountHeader dialogName="إستعادة كلمة المرور">
     <!--
       Password Reset section
     -->
@@ -35,7 +35,6 @@
 
 <script>
 import { UserPasswordResetEmail } from 'src/queries/account_management/mutation/UserPasswordResetEmail'
-import { mapActions } from 'vuex'
 import AccountHeader from 'src/components/utils/accountHeader'
 export default {
   data () {
@@ -48,12 +47,7 @@ export default {
     AccountHeader
   },
   methods: {
-    ...mapActions('authentication', ['setPasswordResetDialogAction', 'setRegisterationDialogAction']),
 
-    closePasswordResetDialog () {
-      this.setPasswordResetDialogAction(false)
-      this.setRegisterationDialogAction(false)
-    },
     errorHandler (errorsObj) {
       console.log(errorsObj)
       for (const key in errorsObj) {

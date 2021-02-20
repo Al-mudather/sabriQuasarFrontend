@@ -27,13 +27,13 @@
                 <div class="col-lg-3">
                     <div class="account">
                         <div class="sign">
-                            <a @click="openSignUpDailog" style="cursor: pointer">
+                            <a @click="goToSignUpPage" style="cursor: pointer">
                                 <img src="~assets/img/sign.png" alt="">
                                 <h3> تسجيل حساب</h3>
                             </a>
                         </div>
                         <div class="login">
-                            <a @click="openLoginDailog" style="cursor: pointer">
+                            <a @click="goToLoginPage" style="cursor: pointer">
                                 <img src="~assets/img/login.png" alt="">
                                 <h3>دخول</h3>
                             </a>
@@ -67,6 +67,14 @@ export default {
 
   methods: {
     ...mapActions('authentication', ['setLoginDialogAction', 'setSignUpDialogAction', 'setRegisterationDialogAction']),
+
+    goToSignUpPage () {
+        this.$router.push({ name: 'signUp' })
+    },
+
+    goToLoginPage () {
+        this.$router.push({ name: 'login' })
+    },
 
     openLoginDailog () {
       // TODO: Close the registeration Dialog

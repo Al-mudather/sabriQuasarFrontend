@@ -1,11 +1,10 @@
 <template>
     <AccountHeader
         dialogName="إنشاء حساب جديد"
-        v-on:closeDialog="closeSiginUpDialog"
     >
         <!--
-      Signup Section
-    -->
+        Signup Section
+        -->
         <div class="signup">
             <div class="logBy">
                 <div class="social" @click="helloFacebookAuth">
@@ -135,11 +134,6 @@ export default {
             "setRegisterationDialogAction"
         ]),
 
-        closeSiginUpDialog() {
-            this.setSignUpDialogAction(false);
-            this.setRegisterationDialogAction(false);
-        },
-
         errorHandler(errorsObj) {
             console.log(errorsObj);
             for (const key in errorsObj) {
@@ -177,7 +171,6 @@ export default {
         },
 
         GotToConfirmationPage() {
-            this.closeSiginUpDialog();
             this.$router.push({ name: "password-confirm" });
         },
 
@@ -200,7 +193,8 @@ export default {
                     //TODO: There is a network error go and solve it
                     if (result.data.socialAuth) {
                         this.loginAction(result.data.socialAuth).then(() => {
-                            this.closeSiginUpDialog();
+                            // TODO: Go To the home page
+                            this.$router.push({ name: 'Home' })
                         })
                     }
                 });

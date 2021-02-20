@@ -1,14 +1,13 @@
-import { LocalStorage } from 'quasar'
+import { LocalStorage, Notify } from 'quasar'
+import {apolloClient} from 'src/apollo/client'
+import {tokenStorage, userProfileStorage} from "src/localStorageService";
+import {RefreshLoginUserWithEmail} from 'src/queries/account_management/mutation/RefreshUserToken'
 
 const state = {
-  loginDialog: false,
-  signUpDialog: false,
   navbarSearch: true,
-  registerationDialog: false,
-  passwordResetDialog: false,
-  user: LocalStorage.getItem('user') || null,
-  token: LocalStorage.getItem('token') || null,
-  refreshToken: LocalStorage.getItem('refreshToken') || null
+  user: userProfileStorage.getUser() || {},
+  token: tokenStorage.getAccessToken() || null,
+  refreshToken: tokenStorage.getRefreshToken() || null
 }
 
 const mutations = {
@@ -22,20 +21,9 @@ const mutations = {
     state.refreshToken = refreshToken
   },
   deleteData (state) {
+    state.user = null
     state.token = null
     state.refreshToken = null
-  },
-  updateLoginDialog (state, value) {
-    state.loginDialog = value
-  },
-  updatePasswordResetDialog (state, value) {
-    state.passwordResetDialog = value
-  },
-  updateSignUpDialog (state, value) {
-    state.signUpDialog = value
-  },
-  updateregisterationDialog (state, value) {
-    state.registerationDialog = value
   },
   updateNavebarSearcgDialog (state, value) {
     state.navbarSearch = value
@@ -48,48 +36,75 @@ const actions = {
     commit('updateNavebarSearcgDialog', value)
   },
 
-  setLoginDialogAction ({ commit }, value) {
-    commit('updateLoginDialog', value)
-  },
-
   setPasswordResetDialogAction ({ commit }, value) {
     commit('updatePasswordResetDialog', value)
-  },
-
-  setSignUpDialogAction ({ commit }, value) {
-    commit('updateSignUpDialog', value)
-  },
-
-  setRegisterationDialogAction ({ commit }, value) {
-    commit('updateregisterationDialog', value)
   },
 
   loginAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
       const user = payload.user || payload.social.user
       const token = 'JWT ' + payload.token
-      const refreshToken = 'JWT ' + payload.refreshToken || null
+      const refresh =  payload.refreshToken || null
+      const tokenObj = {
+        token,
+        refresh
+      }
       // Set the user
-      LocalStorage.set('user', user)
-      // Set the token authentication
-      LocalStorage.set('token', token)
-      // Set the refreshToken authentication
-      LocalStorage.set('refreshToken', token)
+      userProfileStorage.setUser(user)
+      // Set the token and the refreshToken authentication
+      tokenStorage.setToken(tokenObj)
       // commit the change to the store
       commit('updateUser', user)
       // update the token
       commit('updateToken', token)
       // update the token
-      commit('updateRefreshToken', refreshToken)
+      commit('updateRefreshToken', refresh)
 
       resolve()
     })
   },
 
+  RE_LOGIN_USER({context}, payload) {
+
+    console.log("Refresh Apollo Client")
+    console.log('hhhhhhhhhhhhhhhhhhhhh')
+    console.log(tokenStorage.getRefreshToken())
+    console.log('hhhhhhhhhhhhhhhhhhhhh')
+
+    return apolloClient.mutate({
+      mutation: RefreshLoginUserWithEmail,
+      variables: {
+        refreshToken: tokenStorage.getRefreshToken(),
+      },
+    }).then((data) => {
+
+      console.log('DDDDDDDDDDDDDDDDDDDDDDDDDDD')
+      console.log(data)
+      console.log('DDDDDDDDDDDDDDDDDDDDDDDDDDD')
+      // Result
+      tokenStorage.setToken({
+        token: data.data.refreshToken.token,
+        refresh: data.data.refreshToken.refreshToken
+      })
+
+      // Notify.create({
+      //   type: 'positive',
+      //   message: `logged in successfully`
+      // })
+
+    }).catch(e => {
+      console.log('ggggggggggggggggg')
+      console.log(e)
+      console.log('ggggggggggggggggg')
+    })
+
+  },
+
   logOutAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
       // Todo clear everything from window.LocalStorage
-      LocalStorage.clear()
+      tokenStorage.clearToken()
+      // LocalStorage.clear()
       commit('deleteData')
       resolve()
     })
@@ -99,8 +114,7 @@ const actions = {
 const getters = {
   user: state => state.user,
   token: state => state.token,
-  navbarSearch: state => state.navbarSearch,
-  errorMessages: state => state.errorMessages
+  navbarSearch: state => state.navbarSearch
 }
 
 export default {

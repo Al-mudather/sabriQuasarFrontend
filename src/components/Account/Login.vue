@@ -1,5 +1,5 @@
 <template>
-  <AccountHeader dialogName="تسجيل الدخول" v-on:closeDialog="closeLoginDialog">
+  <AccountHeader dialogName="تسجيل الدخول">
     <!--
       Login Section
     -->
@@ -30,7 +30,7 @@
                       <input v-model="password" type="password" placeholder="كلمة المرور">
                   </div>
                   <div class="forget" style="cursor: pointer">
-                      <h3>هل نسيت كلمة <a @click="openPasswordResetDialog"><span>المــرور ؟</span></a> </h3>
+                      <h3>هل نسيت كلمة <a @click="goToPasswordResetPage"><span>المــرور ؟</span></a> </h3>
                   </div>
               </div>
           </div>
@@ -55,7 +55,7 @@
               </svg>
               <span>أو</span>
           </div>
-          <a @click="openSiginUpDialog" style="cursor: pointer">
+          <a @click="goToSignUpPage" style="cursor: pointer">
               <h3>إنشـاء حســاب</h3>
           </a>
       </div>
@@ -67,6 +67,7 @@
 import { LoginUserWithEmail } from 'src/queries/account_management/mutation/LoginUserWithEmail'
 import { mapActions } from 'vuex'
 import AccountHeader from 'src/components/utils/accountHeader'
+
 export default {
   data () {
     return {
@@ -78,31 +79,18 @@ export default {
   components: {
     AccountHeader
   },
+
   methods: {
     ...mapActions('authentication', [
-      'loginAction',
-      'setLoginDialogAction',
-      'setPasswordResetDialogAction',
-      'setSignUpDialogAction'
+      'loginAction'
     ]),
 
-    closeLoginDialog () {
-      this.setLoginDialogAction(false)
-    },
-
-    openSiginUpDialog () {
-      // TODO: Close the login page
-      this.closeLoginDialog()
-      this.setSignUpDialogAction(true)
-    },
-
-    openPasswordResetDialog () {
-      // TODO: Close the registeration dialog
-      this.setPasswordResetDialogAction(true)
-    },
-
-    GoToPasswordReset () {
+    goToPasswordResetPage () {
       this.$router.push({ name: 'password-reset' })
+    },
+
+    goToSignUpPage () {
+      this.$router.push({ name: 'signUp' })
     },
 
     errorHandler (errorsObj) {
@@ -114,7 +102,7 @@ export default {
       }
     },
     LoginUser () {
-      // const redirectUrl = this.$route.query.redirect
+
       this.$apollo.mutate({
         mutation: LoginUserWithEmail,
         variables: {
@@ -124,7 +112,9 @@ export default {
       }).then((result) => {
         if (result.data.tokenAuth.success) {
           this.loginAction(result.data.tokenAuth).then(() => {
-            this.setLoginDialogAction(false)
+            
+            // TODO: Go to the page that you came from
+            this.$router.go(-1)
             // this.$router.push(redirectUrl || { name: 'Home' })
           })
         } else if (result.data.tokenAuth.errors) {

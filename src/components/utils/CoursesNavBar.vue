@@ -6,9 +6,13 @@
                     <div class="menu">
                         <img src="~assets/img/menu.png" alt="" />
                     </div>
-                    <div class="user">
+                    <div class="user" v-if="user.firstName">
                         <img src="~assets/img/hassbo.png" alt="" />
-                        <h3>محمد حسب الرسول</h3>
+                        <h3>{{user.firstName}} {{user.lastName}}</h3>
+                    </div>
+                    <div class="user" v-else>
+                        <img src="~assets/img/hassbo.png" alt="" />
+                        <h3>{{user.username}}</h3>
                     </div>
                     <div class="notification">
                         <span>+8</span>
@@ -21,8 +25,13 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
-    name: "CoursesNavBar"
+    name: "CoursesNavBar",
+    computed: {
+        ...mapState('authentication', ['user'])
+    }
 };
 </script>
 <style lang="scss">

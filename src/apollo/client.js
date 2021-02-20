@@ -2,6 +2,7 @@ import { ApolloClient } from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { LocalStorage } from 'quasar'
 import { ApolloLink } from 'apollo-link'
+import {tokenStorage} from 'src/localStorageService'
 // import { API_URI } from 'src/utils/hostConfig'
 const { buildAxiosFetch } = require('@lifeomic/axios-fetch')
 import { createUploadLink } from 'apollo-upload-client'
@@ -25,7 +26,7 @@ const customLink = ApolloLink.from([
       onUploadProgress: init.onUploadProgress
     })),
     headers: {
-      authorization: LocalStorage.getItem('token') || null
+      authorization: tokenStorage.getAccessToken() || null
     }
   })
 ])
