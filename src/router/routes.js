@@ -12,7 +12,7 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: 'course/:pk&:id', name: 'course-details', component: () => import('pages/CourseDetails.vue') },
-      { path: 'courses', name: 'courses', component: () => import('pages/Courses.vue') }
+      { path: 'courses/:search', name: 'courses', component: () => import('pages/Courses.vue') }
     ]
   },
   {

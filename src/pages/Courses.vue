@@ -164,6 +164,25 @@ export default {
     }
   },
 
+  watch: {
+    '$route.params': {
+      handler: function (params) {
+        // TODO: save the searching data 
+        this.search = params.search
+        // TODO: Make the searching
+        this.GetAllCoursesByTitle()
+      },
+      deep: true,
+      immediate: true
+    },
+
+    search (val) {
+      if (this.$_.isEmpty(val)) {
+        this.GetAllCoursesByTitle()
+      }
+    }
+  },
+
   mounted () {
     // TODO: Disable the navebar
     this.setNavbarSearchAction(false)
@@ -239,8 +258,7 @@ export default {
       }
     },
     // TODO: Get All courses by Title from search
-    GetAllCoursesByTitle (event) {
-      event.preventDefault()
+    GetAllCoursesByTitle () {
       this.searchFilter = { title_Icontains: this.search }
       this.changeCourseData(this.activeSpecialityID)
       // TODO: Remove the search filter

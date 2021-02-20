@@ -1,40 +1,46 @@
 <template>
-  <section class="top">
+    <section class="top">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-2">
                     <!--menu & logo -->
                     <div class="minlog">
                         <div class="menu">
-                            <img src="~assets/img/menu.png" alt="">
+                            <img src="~assets/img/menu.png" alt="" />
                         </div>
                         <!--logo-->
                         <div class="logo">
-                            <img src="~assets/img/logo.png" alt="">
+                            <img src="~assets/img/logo.png" alt="" />
                         </div>
                     </div>
                 </div>
                 <!-- search box -->
                 <div class="col-lg-6">
                     <div class="search">
-                        <form>
-                            <input type="text" placeholder="ما الذي تبحث عنة؟">
-                            <button><img src="~assets/img/search.png"></button>
+                        <form  @submit="gotToCourses">
+                            <input
+                                v-model="search"
+                                type="text"
+                                placeholder="ما الذي تبحث عنة؟"
+                            />
+                            <button>
+                                <img src="~assets/img/search.png" />
+                            </button>
                         </form>
                     </div>
                 </div>
                 <!--login $ sign-->
                 <div class="col-lg-3">
                     <div class="account">
-                        <div class="sign">
+                        <div class="sign"> 
                             <a @click="goToSignUpPage" style="cursor: pointer">
-                                <img src="~assets/img/sign.png" alt="">
-                                <h3> تسجيل حساب</h3>
+                                <img src="~assets/img/sign.png" alt="" />
+                                <h3>تسجيل حساب</h3>
                             </a>
                         </div>
                         <div class="login">
                             <a @click="goToLoginPage" style="cursor: pointer">
-                                <img src="~assets/img/login.png" alt="">
+                                <img src="~assets/img/login.png" alt="" />
                                 <h3>دخول</h3>
                             </a>
                         </div>
@@ -43,10 +49,10 @@
                 <!-- Language -->
                 <div class="col-lg-1">
                     <div class="lang">
-                        <img src="~assets/img/doown.png" alt="">
+                        <img src="~assets/img/doown.png" alt="" />
                         <h3>Ar</h3>
                         <div class="contry">
-                            <img src="~assets/img/ar.png" alt="">
+                            <img src="~assets/img/ar.png" alt="" />
                         </div>
                     </div>
                 </div>
@@ -56,35 +62,47 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions } from "vuex";
 export default {
-  name: 'NavBar',
-  props: {
-  },
-  computed: {
-    ...mapGetters('authentication', ['token'])
-  },
-
-  methods: {
-    ...mapActions('authentication', ['setLoginDialogAction', 'setSignUpDialogAction', 'setRegisterationDialogAction']),
-
-    goToSignUpPage () {
-        this.$router.push({ name: 'signUp' })
+    name: "NavBar",
+    data() {
+        return {
+            search: ""
+        };
+    },
+    props: {},
+    computed: {
+        ...mapGetters("authentication", ["token"])
     },
 
-    goToLoginPage () {
-        this.$router.push({ name: 'login' })
-    },
+    methods: {
 
-    openLoginDailog () {
-      // TODO: Close the registeration Dialog
-      this.setRegisterationDialogAction(false)
-      this.setLoginDialogAction(true)
-    },
+        gotToCourses(e) {
+            e.preventDefault();
+            if (this.search) {
+                this.$router.push({
+                    name: "courses",
+                    params: { search: this.search }
+                });
 
-    openSignUpDailog () {
-      this.setSignUpDialogAction(true)
+            } else {
+                this.$q.notify({
+                    color: 'success',
+                    textColor: 'white',
+                    position: 'top',
+                    icon: 'cloud_done',
+                    message: 'ما الذي تبحث عنه'
+                })
+            }
+        },
+
+        goToSignUpPage() {
+            this.$router.push({ name: "signUp" });
+        },
+
+        goToLoginPage() {
+            this.$router.push({ name: "login" });
+        }
     }
-  }
-}
+};
 </script>
