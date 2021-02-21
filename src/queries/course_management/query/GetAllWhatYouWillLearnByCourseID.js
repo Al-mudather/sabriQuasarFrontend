@@ -6,6 +6,7 @@ query GetAllWhatYouWillLearnByCourseID($courseID: ID) {
     edges {
       node {
         id,
+        pk,
         points
       }
     }

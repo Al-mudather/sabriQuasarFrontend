@@ -303,8 +303,8 @@ export default {
         delay: 400 // ms
       })
       // TODO: fill the varaibles
-      this.$apollo.mutate({
-        mutation: GetAllCourses,
+      this.$apollo.query({
+        query: GetAllCourses,
         variables: {
           courseSpeciality: specialityID,
           ...this.filter,

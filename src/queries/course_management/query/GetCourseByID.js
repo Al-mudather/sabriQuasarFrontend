@@ -13,6 +13,7 @@ query GetCourseByID($coursePk:Int) {
       edges {
         node {
           id,
+          pk,
           instructor {
             id,
             qualification,

@@ -43,7 +43,7 @@ const actions = {
   loginAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
       const user = payload.user || payload.social.user
-      const token = 'JWT ' + payload.token
+      const token = payload.token
       const refresh =  payload.refreshToken || null
       const tokenObj = {
         token,

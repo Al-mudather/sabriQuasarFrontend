@@ -26,6 +26,7 @@ query GetAllCourses(
     edges{
       node{
         id,
+        pk,
         title,
         isPaid,
         courseFee,

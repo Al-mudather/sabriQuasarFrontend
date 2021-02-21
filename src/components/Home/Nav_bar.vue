@@ -17,7 +17,7 @@
                 <!-- search box -->
                 <div class="col-lg-6">
                     <div class="search">
-                        <form  @submit="gotToCourses">
+                        <form @submit="showTheSearchingResult">
                             <input
                                 v-model="search"
                                 type="text"
@@ -32,7 +32,7 @@
                 <!--login $ sign-->
                 <div class="col-lg-3">
                     <div class="account">
-                        <div class="sign"> 
+                        <div class="sign">
                             <a @click="goToSignUpPage" style="cursor: pointer">
                                 <img src="~assets/img/sign.png" alt="" />
                                 <h3>تسجيل حساب</h3>
@@ -63,11 +63,15 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
+
 export default {
     name: "NavBar",
     data() {
         return {
-            search: ""
+            search: "",
+            visible: false,
+            courses: []
         };
     },
     props: {},
@@ -77,23 +81,52 @@ export default {
 
     methods: {
 
-        gotToCourses(e) {
-            e.preventDefault();
-            if (this.search) {
-                this.$router.push({
-                    name: "courses",
-                    params: { search: this.search }
-                });
+        showTheSearchingResult (event) {
+            event.preventDefault();
 
-            } else {
-                this.$q.notify({
-                    color: 'success',
-                    textColor: 'white',
-                    position: 'top',
-                    icon: 'cloud_done',
-                    message: 'ما الذي تبحث عنه'
+            if (!this.$_.isEmpty(this.search)) {
+                this.$apollo.query({
+                    query: GetAllCourses,
+                    variables: {
+                        title_Icontains: this.search
+                    }
+                }).then(res => {
+                    const searchResult = res.data.allCourses.edges.map(course => {
+                        return {
+                            label: course.node.title,
+                            id: course.node.id,
+                            pk: course.node.pk
+                        }
+                    })
+                    if (!this.$_.isEmpty(searchResult)) {
+                        this.$q.bottomSheet({
+                            style: {
+                                textAlign: 'center',
+                                padding: '20px',
+                                'border-bottom': '1px solid #000 !important'
+                            },
+                            actions: searchResult
+                        }).onOk(action => {
+                            // TODO: Go to the course details
+                            this.$router.push({ name: 'course-details', params: { pk: action.pk, id: action.id} })
+                        }).onDismiss(() => {
+                            // TODO: Clear the search
+                            this.search = ''
+                        })
+                    } else {
+                        this.$q.notify({
+                            color: 'negative',
+                            position: 'top',
+                            progress: true,
+                            multiLine: true,
+                            message: 'No result'
+                        })
+                    }
                 })
+
             }
+
+            
         },
 
         goToSignUpPage() {
