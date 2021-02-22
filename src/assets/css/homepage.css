@@ -1002,6 +1002,7 @@ body {
 
 /*--- End Account popup ---*/
 /*--- start shopping popup ---*/
+/** 
 .backgrou {
   display: none;
   width: 100%;
@@ -1114,11 +1115,7 @@ body {
   border-radius: 45px;
   height: auto;
   padding: 33px;
-  /* courses step */
-  /*-- Account --*/
-  /*-- Payment Method --*/
-  /*-- Succsess Payment --*/
-  /* Total Price */
+
 }
 
 .backgrou .contt .titell h3 {
@@ -1439,7 +1436,6 @@ body {
 
 .backgrou .contt .msPayment {
   display: none;
-  /*-- details Payment --*/
 }
 
 .backgrou .contt .msPayment .options {
@@ -1679,7 +1675,7 @@ body {
   left: 18px;
   top: -35px;
 }
-
+*/
 /*--- End shopping popup ---*/
 /*--- start shopping cart ---*/
 .shoppgCart {

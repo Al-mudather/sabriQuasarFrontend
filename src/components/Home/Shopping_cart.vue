@@ -1,8 +1,8 @@
 <template>
   <section class="shoppgCart">
         <svg class="backgroun" xmlns="http://www.w3.org/2000/svg" width="89.315" height="87.309" viewBox="0 0 89.315 87.309">
-            <path id="Path_460" data-name="Path 460" d="M80.426-72.274V0c-5.385-4.158-13.32-7.672-24.842-7.924a45.312,45.312,0,0,0-12.7,1.45,31.586,31.586,0,0,1-7.9,1.005h-4.1A30.884,30.884,0,0,1,0-36.353v0A30.884,30.884,0,0,1,30.884-67.239h4.1a30.923,30.923,0,0,1,8,1.047,46.05,46.05,0,0,0,13.588,1.524C64.273-64.975,73.583-66.693,80.426-72.274Zm8.889-11.259h-1.1a30.409,30.409,0,0,0,1.034-3.776Z" transform="translate(0 87.309)" fill="#fcc74c" fill-rule="evenodd"/>
-          </svg>
+          <path id="Path_460" data-name="Path 460" d="M80.426-72.274V0c-5.385-4.158-13.32-7.672-24.842-7.924a45.312,45.312,0,0,0-12.7,1.45,31.586,31.586,0,0,1-7.9,1.005h-4.1A30.884,30.884,0,0,1,0-36.353v0A30.884,30.884,0,0,1,30.884-67.239h4.1a30.923,30.923,0,0,1,8,1.047,46.05,46.05,0,0,0,13.588,1.524C64.273-64.975,73.583-66.693,80.426-72.274Zm8.889-11.259h-1.1a30.409,30.409,0,0,0,1.034-3.776Z" transform="translate(0 87.309)" fill="#fcc74c" fill-rule="evenodd"/>
+        </svg>
         <div class="cart" @click="OpenShoppingCartSection">
             <!--notifation-->
             <div class="notifc">
@@ -34,7 +34,7 @@ export default {
     ...mapActions('shoppingCart', ['setShoppinCartDialogAction']),
 
     OpenShoppingCartSection () {
-      this.setShoppinCartDialogAction(true)
+      this.$router.push({ name: 'cart' })
     }
   }
 }
