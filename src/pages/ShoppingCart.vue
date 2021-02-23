@@ -14,7 +14,7 @@
                             <path id="Path_643" data-name="Path 643" d="M76.724-31.722a13,13,0,0,0-17.367,4.87c-.19.347-.4.686-.609,1.021A25.145,25.145,0,0,0,54.924-12.5h-.04a3.529,3.529,0,0,1-1.059,2.515,3.651,3.651,0,0,1-2.559,1.037,3.651,3.651,0,0,1-2.559-1.041,3.528,3.528,0,0,1-1.06-2.514v0a1.708,1.708,0,0,0-1.687-1.684,1.689,1.689,0,0,0-.711.157,31.434,31.434,0,0,1-3.816,1.48,5.212,5.212,0,0,0-3.71,4.947h-.042a5.916,5.916,0,0,1-5.861,5.811h-.1A5.916,5.916,0,0,1,25.86-7.605a5.252,5.252,0,0,0-3.751-4.985,1.968,1.968,0,0,0-1.73.279,1.893,1.893,0,0,0-.786,1.537v7.332A3.474,3.474,0,0,1,16.151,0a3.474,3.474,0,0,1-3.442-3.442V-15.818a3.145,3.145,0,0,0-1.175-2.434.7.7,0,0,0-.73-.09.677.677,0,0,0-.394.611v2.67a2.737,2.737,0,0,1-2.735,2.682H7.652a2.737,2.737,0,0,1-2.711-2.689v-1.645a38.074,38.074,0,0,0-2.748-14.2A30.546,30.546,0,0,1,0-42.312,31.816,31.816,0,0,1,31.764-73.539,31.737,31.737,0,0,1,57.782-59.984a18.085,18.085,0,0,0,6.229,5.527l2.93,1.576A18.085,18.085,0,0,0,87.22-55.028a23.184,23.184,0,0,1,15.119-5.629,23.31,23.31,0,0,1,17.34,7.713,25.345,25.345,0,0,0,18.81,8.367A25.345,25.345,0,0,0,157.3-52.944a23.31,23.31,0,0,1,17.339-7.713,23.31,23.31,0,0,1,17.34,7.713,25.344,25.344,0,0,0,18.813,8.367h0a25.348,25.348,0,0,0,18.814-8.367,23.311,23.311,0,0,1,17.338-7.714,23.482,23.482,0,0,1,23.36,23.36,23.482,23.482,0,0,1-23.36,23.36A23.267,23.267,0,0,1,231.819-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.427,32.427,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.269,23.269,0,0,1,159.514-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.428,32.428,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.48,23.48,0,0,1,81.6-26.617a11.812,11.812,0,0,0-4.919-5.018A.581.581,0,0,0,76.724-31.722Z" transform="translate(0 73.539)" fill="#f6f6f6" fill-rule="evenodd"/>
                         </svg>
                         <div class="link" @click="changeNav">
-                            <router-link class="lii active" :to="{ name: 'cart'}" exact><img src="~assets/img/cart.png" alt=""></router-link>
+                            <router-link tag="div" class="lii active" :to="{ name: 'cart'}" exact><img src="~assets/img/cart.png" alt=""></router-link>
                             <!-- <div class="lii active" data-cart="cartCourses">
                                 <img src="~assets/img/cart.png" alt="">
                             </div> -->
@@ -22,15 +22,15 @@
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
-                            <router-link class="lii" :to="{ name: 'login-cart'}"><img src="~assets/img/acc.png" alt=""></router-link>
                             <!-- <div class="lii" data-cart="loginCart">
                                 <img src="~assets/img/acc.png" alt="">
                             </div> -->
+                            <router-link tag="div" class="lii" :to="{ name: 'login-cart'}"><img src="~assets/img/acc.png" alt=""></router-link>
                             <div class="arrow">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
-                            <router-link class="lii" :to="{ name: 'payment'}"><img src="~assets/img/payment.png" alt=""></router-link>
+                            <router-link tag="div" class="lii" :to="{ name: 'payment'}"><img src="~assets/img/payment.png" alt=""></router-link>
                             <!-- <div class="lii" data-cart="paymentData">
                                 <img src="~assets/img/payment.png" alt="">
                             </div> -->
@@ -38,7 +38,7 @@
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
-                            <router-link class="lii upp" :to="{ name: 'cart-success'}"><img src="~assets/img/accses.png" alt=""></router-link>
+                            <router-link tag="div" class="lii upp" :to="{ name: 'cart-success'}"><img src="~assets/img/accses.png" alt=""></router-link>
                             <!-- <div class="lii" data-cart="successMessage">
                                 <img src="~assets/img/accses.png" alt="">
                             </div> -->

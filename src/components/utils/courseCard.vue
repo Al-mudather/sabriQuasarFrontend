@@ -1,6 +1,5 @@
 <template>
     <div class="parent">
-        {{shoppingCartDataList.length}}
         <div class="imag">
             <div class="overlay"></div>
             <img src="~assets/img/person.png" alt="">

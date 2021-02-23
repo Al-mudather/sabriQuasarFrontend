@@ -47,7 +47,7 @@ const routes = [
     ]
   },
   {
-    path: '/cart/',
+    path: '/cart',
     component: () => import('pages/ShoppingCart.vue'),
     children: [
       { path: '', name: 'cart', component: () => import('components/ShoppingCard/cartCourses') },

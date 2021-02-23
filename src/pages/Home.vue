@@ -3,10 +3,10 @@
     <Header />
     <ShoppingCartPopUp v-if="shoppinCartDialog"/>
     <Statiscs />
-    <ViewData />
-    <Evaluation />
+    <!-- <ViewData /> -->
+    <!-- <Evaluation /> -->
     <Training />
-    <SwiperData />
+    <!-- <SwiperData /> -->
     <Account />
   </section>
 </template>
@@ -15,10 +15,10 @@
 
 import Header from 'components/Home/Header'
 import Statiscs from 'components/Home/Statiscs'
-import ViewData from 'components/Home/ViewData'
-import Evaluation from 'components/Home/Evaluation'
+// import ViewData from 'components/Home/ViewData'
+// import Evaluation from 'components/Home/Evaluation'
 import Training from 'components/Home/Training'
-import SwiperData from 'components/Home/SwiperData'
+// import SwiperData from 'components/Home/SwiperData'
 
 import ShoppingCartPopUp from 'src/pages/ShoppingCart'
 
@@ -36,10 +36,10 @@ export default {
     Account,
     Header,
     Statiscs,
-    ViewData,
-    Evaluation,
-    Training,
-    SwiperData
+    // ViewData,
+    // Evaluation,
+    Training
+    // SwiperData
   },
   computed: {
     ...mapState('authentication', ['loginDialog']),

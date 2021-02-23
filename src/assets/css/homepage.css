@@ -1705,7 +1705,7 @@ body {
   background: #f76153;
   overflow: hidden;
   z-index: 1;
-  display: none;
+  display: block;
 }
 
 .shoppgCart .cart .notifc span {

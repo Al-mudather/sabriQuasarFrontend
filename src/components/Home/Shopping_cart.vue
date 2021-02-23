@@ -5,8 +5,8 @@
         </svg>
         <div class="cart" @click="OpenShoppingCartSection">
             <!--notifation-->
-            <div class="notifc">
-                <span>9+</span>
+            <div v-if="!lodash.isEmpty(shoppingCartDataList)" class="notifc"> 
+                <span>{{shoppingCartDataList.length}}</span>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" width="45.206" height="40.979" viewBox="0 0 45.206 40.979">
               <g id="Group_280" data-name="Group 280" transform="translate(-1295.238 -118.414)">
@@ -24,10 +24,19 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 export default {
   name: 'ShoppingCart',
+  data () {
+    return {
+      lodash: this.$_
+    }
+  },
   props: {
+  },
+
+  computed: {
+    ...mapState('shoppingCart', ['shoppingCartDataList'])
   },
 
   methods: {
