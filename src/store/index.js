@@ -6,6 +6,7 @@ import authentication from './authentication'
 import shoppingCart from './shoppingCart'
 import courseManagement from './courseManagement'
 import learningProgress from './learningProgress'
+import websocket from './websocket'
 
 Vue.use(Vuex)
 
@@ -24,6 +25,7 @@ export default function (/* { ssrContext } */) {
       authentication,
       shoppingCart,
       courseManagement,
+      websocket,
       learningProgress
     },
 

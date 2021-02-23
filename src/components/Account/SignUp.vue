@@ -9,10 +9,10 @@
         <div class="signup">
             <div class="logBy">
                 <div class="social" @click="helloFacebookAuth">
-                    <img src="~assets/img/facebook.png" alt="" />
+                    <img src="~assets/img/facebook.png" alt=""/>
                 </div>
                 <div class="social" @click="helloGoogleAuth">
-                    <img src="~assets/img/googel.png" alt="" />
+                    <img src="~assets/img/googel.png" alt=""/>
                 </div>
             </div>
             <form>
@@ -29,12 +29,12 @@
                                     v-for="(message, index) in errorMessages"
                                     :key="index"
                                 >
-                                    {{ message }}<br />
+                                    {{ message }}<br/>
                                 </li>
                             </ul>
                         </div>
                         <div class="inp">
-                            <img src="~assets/img/gmail.png" alt="" />
+                            <img src="~assets/img/gmail.png" alt=""/>
                             <input
                                 v-model="username"
                                 type="text"
@@ -42,7 +42,7 @@
                             />
                         </div>
                         <div class="inp">
-                            <img src="~assets/img/gmail.png" alt="" />
+                            <img src="~assets/img/gmail.png" alt=""/>
                             <input
                                 v-model="email"
                                 type="email"
@@ -50,7 +50,7 @@
                             />
                         </div>
                         <div class="inp">
-                            <img src="~assets/img/password.png" alt="" />
+                            <img src="~assets/img/password.png" alt=""/>
                             <input
                                 v-model="password1"
                                 type="password"
@@ -63,7 +63,7 @@
                             />
                         </div>
                         <div class="inp">
-                            <img src="~assets/img/password.png" alt="" />
+                            <img src="~assets/img/password.png" alt=""/>
                             <input
                                 v-model="password2"
                                 type="password"
@@ -102,7 +102,7 @@
                                 />
                             </g>
                         </svg>
-                        <img src="~assets/img/back.png" alt="" />
+                        <img src="~assets/img/back.png" alt=""/>
                     </a>
                 </div>
             </form>
@@ -111,142 +111,145 @@
 </template>
 
 <script>
-import { SocialAuth } from 'src/queries/account_management/mutation/CreateSocailAuth'
-import { RegisterNewUser } from 'src/queries/account_management/mutation/RegisterNewUser'
-import { mapActions } from 'vuex'
-import AccountHeader from 'src/components/utils/accountHeader'
-export default {
-  data () {
-    return {
-      username: '',
-      email: '',
-      password1: '',
-      password2: '',
-      errorMessages: []
-    }
-  },
-  components: {
-    AccountHeader
-  },
-  methods: {
-    ...mapActions('authentication', [
-      'loginAction',
-      'setSignUpDialogAction',
-      'setRegisterationDialogAction'
-    ]),
+    import {SocialAuth} from 'src/queries/account_management/mutation/CreateSocailAuth'
+    import {RegisterNewUser} from 'src/queries/account_management/mutation/RegisterNewUser'
+    import {mapActions} from 'vuex'
+    import AccountHeader from 'src/components/utils/accountHeader'
 
-    closeSiginUpDialog () {
-      this.setSignUpDialogAction(false)
-      this.setRegisterationDialogAction(false)
-    },
+    export default {
+        data() {
+            return {
+                username: '',
+                email: '',
+                password1: '',
+                password2: '',
+                errorMessages: []
+            }
+        },
+        components: {
+            AccountHeader
+        },
+        methods: {
+            ...mapActions('webscoket', ['createWebSocket']),
+            ...mapActions('authentication', [
+                'loginAction',
+                'setSignUpDialogAction',
+                'setRegisterationDialogAction'
+            ]),
 
-    errorHandler (errorsObj) {
-      console.log(errorsObj)
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          this.errorMessages.push(val.message)
+            closeSiginUpDialog() {
+                this.setSignUpDialogAction(false)
+                this.setRegisterationDialogAction(false)
+            },
+
+            errorHandler(errorsObj) {
+                console.log(errorsObj)
+                for (const key in errorsObj) {
+                    for (const val of errorsObj[key]) {
+                        this.errorMessages.push(val.message)
+                    }
+                }
+            },
+            RegisterNewUser() {
+                if (this.password1 === this.password2) {
+                    this.errorMessages = []
+                    this.$apollo
+                        .mutate({
+                            mutation: RegisterNewUser,
+                            variables: {
+                                email: this.email,
+                                username: this.username,
+                                password1: this.password1,
+                                password2: this.password2
+                            }
+                        })
+                        .then(result => {
+                            if (result.data.register.success) {
+                                this.GotToConfirmationPage()
+                            } else if (result.data.register.errors) {
+                                this.errorHandler(result.data.register.errors)
+                            }
+                        })
+                } else {
+                    this.errorMessages.push('passwords are not the same')
+                }
+            },
+
+            GotToConfirmationPage() {
+                this.closeSiginUpDialog()
+                this.$router.push({name: 'password-confirm'})
+            },
+
+            // TODO: Google Register
+            loginAuthMutation(accessToken, provider) {
+                console.log(' Triggering Apollo ')
+
+                this.$apollo
+                    .mutate({
+                        mutation: SocialAuth,
+                        variables: {
+                            provider: provider,
+                            accessToken: accessToken
+                        }
+                    })
+                    .then(result => {
+                        if (result.data.socialAuth) {
+                            this.loginAction(result.data.socialAuth).then(() => {
+                                this.closeSiginUpDialog()
+                                this.createWebSocket()
+                            })
+                        }
+                    })
+            },
+
+            helloGoogleAuth(network = 'google') {
+                const hello = this.hello
+
+                hello('google')
+                    .login({
+                        scope: 'email',
+                        force: true
+                    })
+                    .then(r => {
+                        console.log(r)
+
+                        var google = hello('google').getAuthResponse()
+
+                        // console.log(google)
+                        // console.log(google.access_token)
+
+                        this.loginAuthMutation(
+                            google.access_token,
+                            'google-oauth2'
+                        )
+                    })
+            },
+
+            helloFacebookAuth(network = 'google') {
+                const hello = this.hello
+
+                hello('facebook')
+                    .login({
+                        scope: 'email',
+                        force: true
+                    })
+                    .then(r => {
+                        console.log(r)
+
+                        var google = hello('facebook').getAuthResponse()
+
+                        // console.log(google)
+                        // console.log(google.access_token)
+
+                        this.loginAuthMutation(google.access_token, 'facebook')
+                    })
+            }
         }
-      }
-    },
-    RegisterNewUser () {
-      if (this.password1 === this.password2) {
-        this.errorMessages = []
-        this.$apollo
-          .mutate({
-            mutation: RegisterNewUser,
-            variables: {
-              email: this.email,
-              username: this.username,
-              password1: this.password1,
-              password2: this.password2
-            }
-          })
-          .then(result => {
-            if (result.data.register.success) {
-              this.GotToConfirmationPage()
-            } else if (result.data.register.errors) {
-              this.errorHandler(result.data.register.errors)
-            }
-          })
-      } else {
-        this.errorMessages.push('passwords are not the same')
-      }
-    },
-
-    GotToConfirmationPage () {
-      this.closeSiginUpDialog()
-      this.$router.push({ name: 'password-confirm' })
-    },
-
-    // TODO: Google Register
-    loginAuthMutation (accessToken, provider) {
-      console.log(' Triggering Apollo ')
-
-      this.$apollo
-        .mutate({
-          mutation: SocialAuth,
-          variables: {
-            provider: provider,
-            accessToken: accessToken
-          }
-        })
-        .then(result => {
-          if (result.data.socialAuth) {
-            this.loginAction(result.data.socialAuth).then(() => {
-              this.closeSiginUpDialog()
-            })
-          }
-        })
-    },
-
-    helloGoogleAuth (network = 'google') {
-      const hello = this.hello
-
-      hello('google')
-        .login({
-          scope: 'email',
-          force: true
-        })
-        .then(r => {
-          console.log(r)
-
-          var google = hello('google').getAuthResponse()
-
-          // console.log(google)
-          // console.log(google.access_token)
-
-          this.loginAuthMutation(
-            google.access_token,
-            'google-oauth2'
-          )
-        })
-    },
-
-    helloFacebookAuth (network = 'google') {
-      const hello = this.hello
-
-      hello('facebook')
-        .login({
-          scope: 'email',
-          force: true
-        })
-        .then(r => {
-          console.log(r)
-
-          var google = hello('facebook').getAuthResponse()
-
-          // console.log(google)
-          // console.log(google.access_token)
-
-          this.loginAuthMutation(google.access_token, 'facebook')
-        })
     }
-  }
-}
 </script>
 
 <style lang="scss">
-@import "src/assets/css/sass/helpers/_variabels.scss";
-@import "src/assets/css/sass/helpers/_mixins.scss";
-@import "src/assets/css/account.scss";
+    @import "src/assets/css/sass/helpers/_variabels.scss";
+    @import "src/assets/css/sass/helpers/_mixins.scss";
+    @import "src/assets/css/account.scss";
 </style>
