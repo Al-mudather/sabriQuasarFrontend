@@ -3,15 +3,11 @@
         <div v-if="!token" class="creatt">
             <div class="linkss">
                 <div class="logBy">
-                    <div class="social">
-                        <img src="~assets/img/facebook.png" alt="" />
-                    </div>
-                    <div class="social">
-                        <img src="~assets/img/googel.png" alt="" />
-                    </div>
-                    <div class="login">
-                        <a href="#">
-                            <img src="~assets/img/login.png" alt="" />
+                    <FacebookAuthentication />
+                    <GoogleAuthentication />
+                    <div class="login" style="cursor: pointer">
+                        <a @click="GoToLoginPage">
+                            <img src="~assets/img/login.png" alt="" />&nbsp;
                             <h3>دخول</h3>
                         </a>
                     </div>
@@ -44,8 +40,8 @@
                 </div>
             </div>
             <form>
-                <div class="row">
-                    <div class="col-lg-7 col-xs-12">
+                <!-- <div class="row">
+                    <div class="col-lg-12 col-xs-12">
                         <div class="inp">
                             <img src="~assets/img/usser.png" alt="" />
                             <input type="text" placeholder="الاسم الحقيقي" />
@@ -55,20 +51,20 @@
                             <input type="email" placeholder="الإيميل" />
                         </div>
                     </div>
-                    <div class="col-lg-5 col-xs-12 noPadding">
+                    <div class="col-lg-12 col-xs-12">
                         <div class="inp">
                             <img src="~assets/img/phone-call.png" alt="" />
-                            <input type="number" placeholder="رقم الهاتف" />
+                            <input type="text" placeholder="رقم الهاتف" />
                         </div>
                         <div class="inp">
                             <img src="~assets/img/password.png" alt="" />
-                            <input type="number" placeholder="كلمة المرور" />
+                            <input type="text" placeholder="كلمة المرور" />
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <div class="terms">
                     <div class="check">
-                        <input type="checkbox" name="hana" id="ck" />
+                        <input type="checkbox" v-mode="checked" name="hana" id="ck" />
                         <label for="ck">
                             <img src="~assets/img/sah.png" alt="" />
                         </label>
@@ -105,13 +101,36 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState } from "vuex";
+import GoogleAuthentication from "src/components/Account/GoogleAuthentication";
+import FacebookAuthentication from "src/components/Account/FacebookAuthentication";
 
 export default {
-  computed: {
-    ...mapState('authentication', ['user', 'token'])
-  }
-}
+    data () {
+        return {
+            checked: false
+        }
+    },
+    computed: {
+        ...mapState("authentication", ["user", "token"])
+    },
+
+    created () {
+        if (this.token) {
+            this.$router.push({ name: 'payment' })
+        }
+    },
+
+    components: {
+        GoogleAuthentication,
+        FacebookAuthentication
+    },
+    methods: {
+        GoToLoginPage () {
+            this.$router.push({ name: 'login' })
+        }
+    }
+};
 </script>
 
 <style></style>

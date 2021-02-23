@@ -7,12 +7,8 @@
         -->
         <div class="signup">
             <div class="logBy">
-                <div class="social" @click="helloFacebookAuth">
-                    <img src="~assets/img/facebook.png" alt="" />
-                </div>
-                <div class="social" @click="helloGoogleAuth">
-                    <img src="~assets/img/googel.png" alt="" />
-                </div>
+                <FacebookAuthentication />
+                <GoogleAuthentication />
             </div>
             <form>
                 <div class="row">
@@ -110,10 +106,12 @@
 </template>
 
 <script>
-import { SocialAuth } from "src/queries/account_management/mutation/CreateSocailAuth";
 import { RegisterNewUser } from "src/queries/account_management/mutation/RegisterNewUser";
 import { mapActions } from "vuex";
 import AccountHeader from "src/components/utils/accountHeader";
+import GoogleAuthentication from 'src/components/Account/GoogleAuthentication';
+import FacebookAuthentication from 'src/components/Account/FacebookAuthentication';
+
 export default {
     data() {
         return {
@@ -125,7 +123,9 @@ export default {
         };
     },
     components: {
-        AccountHeader
+        AccountHeader,
+        GoogleAuthentication,
+        FacebookAuthentication
     },
     methods: {
         ...mapActions("authentication", [
@@ -159,9 +159,7 @@ export default {
                         if (result.data.register.success) {
                             this.GotToConfirmationPage();
                         } else if (result.data.register.errors) {
-                            console.log("gggggggggggggggg");
-                            console.log(result.data.register);
-                            console.log("gggggggggggggggg");
+
                             this.errorHandler(result.data.register.errors);
                         }
                     });
@@ -172,91 +170,6 @@ export default {
 
         GotToConfirmationPage() {
             this.$router.push({ name: "password-confirm" });
-        },
-
-        // TODO: Google and Facebook Register
-        loginAuthMutation(accessToken, provider, email = "") {
-            console.log(" Triggering Apollo ");
-
-            this.$apollo
-                .mutate({
-                    mutation: SocialAuth,
-                    variables: {
-                        provider: provider,
-                        accessToken: accessToken,
-                        email: email
-                    }
-                })
-                .then(result => {
-                    //TODO: There is a network error go and solve it
-                    //TODO: There is a network error go and solve it
-                    //TODO: There is a network error go and solve it
-                    if (result.data.socialAuth) {
-                        this.loginAction(result.data.socialAuth).then(() => {
-                            // TODO: Go To the home page
-                            this.$router.push({ name: 'Home' })
-                        })
-                    }
-                });
-        },
-
-        helloGoogleAuth(network = "google") {
-            const hello = this.hello;
-
-            hello("google")
-                .login({
-                    scope: "email",
-                    force: true
-                })
-                .then(r => {
-                    console.log(r);
-
-                    var google = hello("google").getAuthResponse();
-
-                    // console.log(google)
-                    // console.log(google.access_token)
-
-                    this.loginAuthMutation(
-                        google.access_token,
-                        "google-oauth2"
-                    );
-                });
-        },
-
-        helloFacebookAuth(network = "google") {
-            const hello = this.hello;
-
-            hello("facebook")
-                .login({
-                    scope: "public_profile,email",
-                    force: true
-                })
-                .then(r => {
-                    console.log('Facebook')
-                    console.log(r);
-                    console.log('Facebook')
-
-                    // Call user information, for the given network
-                    hello("facebook")
-                        .api("/me")
-                        .then(r => {
-                            console.log("r = ", r);
-                            // console.log("r.email = " + r.email);
-                            // console.log("r.name== = " + r.name);
-
-                            var facebook = hello("facebook").getAuthResponse();
-
-                            // console.log('')
-                            // console.log(facebook)
-                            // console.log(facebook.access_token)
-
-                            this.loginAuthMutation(
-                                facebook.access_token,
-                                "facebook",
-                                r.email
-                            );
-                        });
-                });
         }
     }
 };

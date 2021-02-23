@@ -6,7 +6,7 @@
         transform: scale(1.2);
     }
 }
-.backAccount{
+.backAccount {
     display: block;
     text-align: right; // Addedd by almudather
     width: 100%;
@@ -14,8 +14,8 @@
     position: fixed;
     top: 0;
     z-index: 30;
-    background:rgba( #0C7AD8, .8);
-    .content{
+    background: rgba(#0c7ad8, 0.8);
+    .content {
         background-color: #fff;
         margin: 42px auto;
         max-width: 400px;
@@ -23,108 +23,114 @@
         height: auto;
         padding: 20px;
         position: relative;
-        .hedTop{
+        .hedTop {
             position: relative;
-            svg{
+            svg {
                 position: absolute;
                 top: -20px;
                 right: -20px;
                 width: auto;
                 height: 161.1px;
             }
-            h3{
+            h3 {
                 color: $textColor;
                 font-size: 19px;
-                font-family: 'cairoR';
+                font-family: "cairoR";
                 position: relative;
                 text-align: center;
                 top: 16px;
             }
-            img{
+            img {
                 position: absolute;
                 top: 16px;
             }
         }
         /*-- login form --*/
-        .login{
+        .login {
             display: block;
+            z-index: 1000;
+            position: relative;
             margin: 86px 0 25px 0;
-            .logBy{
+            .logBy {
                 margin: 0 auto 26px auto;
                 text-align: center;
-                .social{
+                .social {
                     display: inline-block;
                     cursor: pointer;
                     margin: 0 13px 0 0;
                     background-color: #fff;
                     padding: 5px;
-                    @include prefixer( box-shadow, 0px 4px 10px #e4e4e45c, webkit moz o);
+                    @include prefixer(
+                        box-shadow,
+                        0px 4px 10px #e4e4e45c,
+                        webkit moz o
+                    );
                     width: 74px;
                     height: 47px;
                     text-align: center;
-                    line-height:2;
+                    line-height: 2;
                     border-radius: 36px;
                     cursor: pointer;
-                    img{
+                    img {
                         width: auto;
                     }
                 }
             }
-            form{
+            form {
                 position: relative;
                 margin: 0;
                 overflow: hidden;
                 padding: 0 0 0 16px;
-                .inp{
+                .inp {
                     position: relative;
                     margin-bottom: 15px;
-                    img{
+                    img {
                         position: absolute;
                         top: 22px;
                         right: 12px;
                     }
-                    input{
+                    input {
                         padding: 10px;
-                        border: 1px solid #E1E1E1;
+                        border: 1px solid #e1e1e1;
                         color: $textColor;
                         font-size: 17px;
-                        font-family: 'cairoR';
+                        font-family: "cairoR";
                         padding: 0px 37px 0 0;
                         height: 54px;
-                        ::placeholder{
+                        ::placeholder {
                             font-size: 14px;
-                            font-family: 'cairoR';
+                            font-family: "cairoR";
                         }
                     }
                 }
-                .forget{
-                    h3{
+                .forget {
+                    h3 {
                         font-size: 11px;
-                        font-family: 'cairoR';
+                        font-family: "cairoR";
                         color: $textColor;
                         margin: 0 5px 0 0;
                         display: inline-block;
                         position: relative;
                         top: -5px;
-                        a{
+                        a {
                             text-decoration: none;
-                            span{
+                            span {
                                 color: $yalloColor;
                             }
                         }
                     }
                 }
-                .next{
+                .next {
                     position: relative;
                     height: 66px;
                     margin: 0 0 -3px 0;
-                    .nexx{
+                    .nexx {
                         position: absolute;
                         top: 6px;
                         left: 0;
                         width: auto;
                     }
-                    img{
+                    img {
                         position: absolute;
                         width: auto;
                         left: 18px;
@@ -132,34 +138,34 @@
                     }
                 }
             }
-            .creat{
+            .creat {
                 text-align: center;
                 position: relative;
                 margin: -12px 0 12px 0;
-                .orr{
+                .orr {
                     position: relative;
                     margin: 0 auto;
                     max-width: 41px;
-                    svg{
+                    svg {
                         position: absolute;
                         top: 0;
                         left: 0;
                     }
-                    span{
+                    span {
                         font-size: 18px;
                         color: $textColor;
-                        font-family: 'cairoR';
+                        font-family: "cairoR";
                         position: relative;
                         top: 5px;
                         left: 1px;
                     }
                 }
-                a{
+                a {
                     text-decoration: none;
-                    h3{
+                    h3 {
                         font-size: 18px;
                         color: $textColor;
-                        font-family: 'cairoR';
+                        font-family: "cairoR";
                         display: block;
                         text-align: center;
                         margin: 38px 0 0 0;
@@ -168,91 +174,95 @@
             }
         }
         /*-- Signin form --*/
-        .signup{
+        .signup {
             display: block;
             margin: 86px 0 25px 0;
-            .logBy{
+            .logBy {
                 margin: 0 auto 26px auto;
                 text-align: center;
-                .social{
+                .social {
                     display: inline-block;
                     cursor: pointer;
                     margin: 0 13px 0 0;
                     background-color: #fff;
                     padding: 5px;
-                    @include prefixer( box-shadow, 0px 4px 10px #e4e4e45c, webkit moz o);
+                    @include prefixer(
+                        box-shadow,
+                        0px 4px 10px #e4e4e45c,
+                        webkit moz o
+                    );
                     width: 74px;
                     height: 47px;
                     text-align: center;
-                    line-height:2;
+                    line-height: 2;
                     border-radius: 36px;
                     cursor: pointer;
                     position: relative;
-                    img{
+                    img {
                         width: auto;
                     }
                 }
             }
-            form{
+            form {
                 position: relative;
                 margin: 0;
                 overflow: hidden;
                 padding: 0 0 0 16px;
-                .inp{
+                .inp {
                     position: relative;
                     margin-bottom: 15px;
-                    .closee{
+                    .closee {
                         position: absolute;
                         top: 22px;
                         left: 12px !important;
                     }
-                    img{
+                    img {
                         position: absolute;
                         top: 22px;
                         right: 12px;
                     }
-                    input{
+                    input {
                         padding: 10px;
-                        border: 1px solid #E1E1E1;
+                        border: 1px solid #e1e1e1;
                         color: $textColor;
                         font-size: 17px;
-                        font-family: 'cairoR';
+                        font-family: "cairoR";
                         padding: 0px 37px 0 0;
                         height: 54px;
-                        ::placeholder{
+                        ::placeholder {
                             font-size: 14px;
-                            font-family: 'cairoR';
+                            font-family: "cairoR";
                         }
                     }
                 }
-                .forget{
-                    h3{
+                .forget {
+                    h3 {
                         font-size: 11px;
-                        font-family: 'cairoR';
+                        font-family: "cairoR";
                         color: $textColor;
                         margin: 0 5px 0 0;
                         display: inline-block;
                         position: relative;
                         top: -5px;
-                        a{
+                        a {
                             text-decoration: none;
-                            span{
+                            span {
                                 color: $yalloColor;
                             }
                         }
                     }
                 }
-                .next{
+                .next {
                     position: relative;
                     height: 66px;
                     margin: 0 0 -3px 0;
-                    .nexx{
+                    .nexx {
                         position: absolute;
                         top: 6px;
                         left: 0;
                         width: auto;
                     }
-                    img{
+                    img {
                         position: absolute;
                         width: auto;
                         left: 18px;
@@ -262,74 +272,74 @@
             }
         }
         /*-- Reset Password --*/
-        .resetPass{
+        .resetPass {
             display: block;
             margin: 121px 0 0 0;
-            form{
+            form {
                 position: relative;
                 margin: 0 0 7px 0;
                 overflow: hidden;
                 padding: 0 0 0 16px;
-                .inp{
+                .inp {
                     position: relative;
                     margin-bottom: 15px;
-                    img{
+                    img {
                         position: absolute;
                         top: 22px;
                         right: 12px;
                     }
-                    input{
+                    input {
                         padding: 10px;
-                        border: 1px solid #E1E1E1;
+                        border: 1px solid #e1e1e1;
                         color: $textColor;
                         font-size: 17px;
-                        font-family: 'cairoR';
+                        font-family: "cairoR";
                         padding: 0px 37px 0 0;
                         height: 54px;
-                        ::placeholder{
+                        ::placeholder {
                             font-size: 14px;
-                            font-family: 'cairoR';
+                            font-family: "cairoR";
                         }
                     }
                 }
-                .next{
+                .next {
                     position: relative;
                     opacity: 1;
-                    transition: all ease-in-out .4s;
-                    .nexx{
+                    transition: all ease-in-out 0.4s;
+                    .nexx {
                         position: absolute;
                         top: -58px;
                         left: 8px;
                         width: auto;
                     }
-                    img{
+                    img {
                         position: absolute;
                         width: 16px;
                         left: 19px;
                         top: -50px;
-                        height: 16px
+                        height: 16px;
                     }
                 }
             }
         }
         /*-- Confirm Password --*/
-        .confirm{
+        .confirm {
             display: block;
             margin: 121px 0 0 0;
-            .imaagg{
+            .imaagg {
                 text-align: center;
                 margin: -27px 0 22px 0;
-                img{
+                img {
                     width: 102px;
                     height: 85px;
                     margin: 0 0 26px 0;
                 }
-                p{
+                p {
                     color: #949494;
                     font-size: 17px;
-                    font-family: 'cairoR';
+                    font-family: "cairoR";
                 }
-             }
+            }
         }
     }
 }

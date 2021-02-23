@@ -11,7 +11,6 @@
 <script>
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateSyberpayCheckout } from 'src/queries/checkout_management/mutation/CreateSyberpayCheckout';
-import { StripePublishableKey } from "src/queries/checkout_management/query/StripePublishableKey";
 import { mapState } from "vuex";
 
 export default {
@@ -76,6 +75,9 @@ export default {
                 }
             });
             const syberPayDetails = syberpayPaymentresult.data.createSyberpayCheckout;
+            console.log('sssssssssssssssssssss')
+            console.log(syberPayDetails)
+            console.log('sssssssssssssssssssss')
             if (this.$_.get(syberPayDetails, "[errors]")) {
                 this.visible = false;
                 alert(details.errors.nonFieldErrors);

@@ -11,7 +11,7 @@
                 <div class="col-lg-12">
                     <section class="tabb">
                         <svg xmlns="http://www.w3.org/2000/svg" width="270.306" height="73.539" viewBox="0 0 270.306 73.539">
-                            <path id="Path_643" data-name="Path 643" d="M76.724-31.722a13,13,0,0,0-17.367,4.87c-.19.347-.4.686-.609,1.021A25.145,25.145,0,0,0,54.924-12.5h-.04a3.529,3.529,0,0,1-1.059,2.515,3.651,3.651,0,0,1-2.559,1.037,3.651,3.651,0,0,1-2.559-1.041,3.528,3.528,0,0,1-1.06-2.514v0a1.708,1.708,0,0,0-1.687-1.684,1.689,1.689,0,0,0-.711.157,31.434,31.434,0,0,1-3.816,1.48,5.212,5.212,0,0,0-3.71,4.947h-.042a5.916,5.916,0,0,1-5.861,5.811h-.1A5.916,5.916,0,0,1,25.86-7.605a5.252,5.252,0,0,0-3.751-4.985,1.968,1.968,0,0,0-1.73.279,1.893,1.893,0,0,0-.786,1.537v7.332A3.474,3.474,0,0,1,16.151,0a3.474,3.474,0,0,1-3.442-3.442V-15.818a3.145,3.145,0,0,0-1.175-2.434.7.7,0,0,0-.73-.09.677.677,0,0,0-.394.611v2.67a2.737,2.737,0,0,1-2.735,2.682H7.652a2.737,2.737,0,0,1-2.711-2.689v-1.645a38.074,38.074,0,0,0-2.748-14.2A30.546,30.546,0,0,1,0-42.312,31.816,31.816,0,0,1,31.764-73.539,31.737,31.737,0,0,1,57.782-59.984a18.085,18.085,0,0,0,6.229,5.527l2.93,1.576A18.085,18.085,0,0,0,87.22-55.028a23.184,23.184,0,0,1,15.119-5.629,23.31,23.31,0,0,1,17.34,7.713,25.345,25.345,0,0,0,18.81,8.367A25.345,25.345,0,0,0,157.3-52.944a23.31,23.31,0,0,1,17.339-7.713,23.31,23.31,0,0,1,17.34,7.713,25.344,25.344,0,0,0,18.813,8.367h0a25.348,25.348,0,0,0,18.814-8.367,23.311,23.311,0,0,1,17.338-7.714,23.482,23.482,0,0,1,23.36,23.36,23.482,23.482,0,0,1-23.36,23.36A23.267,23.267,0,0,1,231.819-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.427,32.427,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.269,23.269,0,0,1,159.514-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.428,32.428,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.48,23.48,0,0,1,81.6-26.617a11.812,11.812,0,0,0-4.919-5.018A.581.581,0,0,0,76.724-31.722Z" transform="translate(0 73.539)" fill="#f6f6f6" fill-rule="evenodd"/>
+                            <path id="Path_643" data-name="Path 643" d="M76.724-31.722a13,13,0,0,0-17.367,4.87c-.19.347-.4.686-.609,1.021A25.145,25.145,0,0,0,54.924-12.5h-.04a3.529,3.529,0,0,1-1.059,2.515,3.651,3.651,0,0,1-2.559,1.037,3.651,3.651,0,0,1-2.559-1.041,3.528,3.528,0,0,1-1.06-2.514v0a1.708,1.708,0,0,0-1.687-1.684,1.689,1.689,0,0,0-.711.157,31.434,31.434,0,0,1-3.816,1.48,5.212,5.212,0,0,0-3.71,4.947h-.042a5.916,5.916,0,0,1-5.861,5.811h-.1A5.916,5.916,0,0,1,25.86-7.605a5.252,5.252,0,0,0-3.751-4.985,1.968,1.968,0,0,0-1.73.279,1.893,1.893,0,0,0-.786,1.537v7.332A3.474,3.474,0,0,1,16.151,0a3.474,3.474,0,0,1-3.442-3.442V-15.818a3.145,3.145,0,0,0-1.175-2.434.7.7,0,0,0-.73-.09.677.677,0,0,0-.394.611v2.67a2.737,2.737,0,0,1-2.735,2.682H7.652a2.737,2.737,0,0,1-2.711-2.689v-1.645a38.074,38.074,0,0,0-2.748-14.2A30.546,30.546,0,0,1,0-42.312,31.816,31.816,0,0,1,31.764-73.539,31.737,31.737,0,0,1,57.782-59.984a18.085,18.085,0,0,0,6.229,5.527l2.93,1.576A18.085,18.085,0,0,0,87.22-55.028a23.184,23.184,0,0,1,15.119-5.629,23.31,23.31,0,0,1,17.34,7.713,25.345,25.345,0,0,0,18.81,8.367A25.345,25.345,0,0,0,157.3-52.944a23.31,23.31,0,0,1,17.339-7.713,23.31,23.31,0,0,1,17.34,7.713,25.344,25.344,0,0,0,18.813,8.367h0a25.348,25.348,0,0,0,18.814-8.367,23.311,23.311,0,0,1,17.338-7.714,23.482,23.482,0,0,1,23.36,23.36,23.482,23.482,0,0,1-23.36,23.36A23.267,23.267,0,0,1,231.819-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.427,32.427,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.269,23.269,0,0,1,159.514-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.428,32.428,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.48,23.48,0,0,1,81.6-26.617a11.812,11.812,0,0,0-4.919-5.018A.581.581,0,0,0,76.724-31.722Z" transform="translate(0 73.539)" fill="#2d77d8" fill-rule="evenodd"/>
                         </svg>
                         <div class="link" @click="changeNav">
                             <router-link tag="div" class="lii active" :to="{ name: 'cart'}" exact><img src="~assets/img/cart.png" alt=""></router-link>
@@ -53,12 +53,6 @@
                             <div class="col-lg-12">
                                 <router-view></router-view>
                             </div>
-                            <!-- <div class="col-lg-12">
-                                <cartCoursesSection v-if="cartCourses" />
-                                <loginCartSection v-if="loginCart" />
-                                <paymentSection v-if="paymentData" />
-                                <successMessageSection v-if="successMessage" />
-                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -69,10 +63,6 @@
 
 <script>
 
-// import cartCoursesSection from 'src/components/ShoppingCard/cartCourses'
-// import loginCartSection from 'src/components/ShoppingCard/loginCart'
-// import paymentSection from 'src/components/ShoppingCard/payment'
-// import successMessageSection from 'src/components/ShoppingCard/successMessage'
 import { mapActions } from 'vuex'
 
 export default {
@@ -87,12 +77,6 @@ export default {
     }
   },
 
-//   components: {
-//     cartCoursesSection,
-//     loginCartSection,
-//     paymentSection,
-//     successMessageSection
-//   },
 
   mounted () {
     this.$el.querySelector('.lii.active').nextSibling.classList.add('show')
@@ -187,16 +171,13 @@ export default {
     transition: all ease-in-out .5s;
 }
 
+/*--- start shopping popup ---*/
 .backgrou{
     display: block;
+    min-height: 100vh;
     width: 100%;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    z-index: 30;
-    background:rgba( #0C7AD8, .8);
-    padding: 0 20%;
-    overflow-y: scroll;
+    padding: 0 5%;
+    background-color: #f5f6ff;
     .clos{
         position: relative;
         margin: 0 auto;
@@ -219,9 +200,8 @@ export default {
     .tabb{
         position: relative;
         height: 87px;
-        width: 267px;
-        margin: 0 auto;
-        text-align: center;
+        width: 271px;
+        margin: 0 auto; 
         svg{
             position: absolute;
             top: 12px;
@@ -230,8 +210,7 @@ export default {
         }
         .link{
             position: absolute;
-            text-align: right;
-            width: 400px;
+            width: 310px;
             .arrow{
                 position: absolute;
                 display: inline-block;
@@ -250,7 +229,7 @@ export default {
             .lii{
                 cursor: pointer;
                 position: relative;
-                top: 30px;
+                top: 33px;
                 right: 8px;
                 background: #F2F2F9;
                 width: 33px;
@@ -268,7 +247,7 @@ export default {
             .upp{
                 top: 18px;
                 width: 50px;
-                // right: 5px;
+                right: 1px;
                 height: 50px;
                 img{
                     position: relative;
@@ -276,11 +255,12 @@ export default {
                 }
             }
         }
+        
     }
     .contt{
         background-color: #fff;
-        margin: 10px auto;
-        max-width: 521px;
+        margin: 34px auto;
+        max-width: 666px;
         border-radius: 45px;
         height: auto;
         padding: 33px;
@@ -295,7 +275,7 @@ export default {
                 margin: 21px auto 29px auto;
                 border: 0;
                 border-top: 2px solid #F2F2F2;
-                max-width: 375px;
+                max-width: 666px;
             }
         }
         /* courses step */
@@ -463,6 +443,9 @@ export default {
                             font-family: 'cairoR';
                             padding: 0px 37px 0 0;
                             height: 50px;
+                            width: 100%;
+                            border-radius: 50px;
+                            outline: none;
                             ::placeholder{
                                 font-size: 14px;
                                 font-family: 'cairoR';
@@ -471,7 +454,6 @@ export default {
                     }
                     .terms{
                         margin: 0;
-                        text-align: right;
                         .check{
                             position: relative;
                             width: 20px;
@@ -482,13 +464,15 @@ export default {
                                 position: relative;
                                 width: 25px;
                                 height: 25px;
+                                z-index: 99;
+                                cursor: pointer; 
                                 img{
                                     width: auto;
                                     position: absolute;
-                                    top: -4px;
+                                    top: 6px;
                                     right: 3px;
                                     opacity: 0;
-                                    transition: all ease-in .4s;
+                                    transition: all ease-in .3s;
                                 }
                             }
                             input[type=checkbox]{
@@ -496,17 +480,16 @@ export default {
                                 position: absolute;
                                 top: 4px;
                                 right: 3px;
-                                :checked + label img {
-                                    opacity: 1;
-                                    display: block;
-                                    transition: all ease-in .3s;
-                                }
+                            }
+                            input:checked ~ label img {
+                                opacity: 1;
+                                transition: all ease-in .3s;
                             }
                             svg{
                                 position: absolute;
                                 top: 0;
                                 right: 0;
-                                 width: auto;
+                                width: auto;
                             }
                         }
                         h3{
@@ -623,12 +606,14 @@ export default {
                         }
                         input{
                             padding: 10px;
-                            outline: 0;
                             color: $textColor;
                             font-size: 17px;
-                            font-family: 'cairoR';
                             padding: 0px 15px 0 0;
                             height: 50px;
+                            width: 100%;
+                            border-radius: 50px;
+                            outline: none;
+                            border: 1px solid #E1E1E1;
                             ::placeholder{
                                 font-size: 14px;
                                 font-family: 'cairoR';
@@ -637,9 +622,9 @@ export default {
                     }
                     .but{
                         width: 84%;
-                        height: 47px;
+                        height: 50px;
                         background-color: #FCC74C;
-                        margin: 20px auto 0 auto;
+                        margin: 46px auto 0 auto;
                         text-align: center;
                         @include prefixer(border-radius, 68px, webkit moz o);
                         cursor: pointer;
@@ -679,7 +664,7 @@ export default {
             .imaagg{
                img{
                    width: auto;
-               }
+               } 
                h2{
                    font-family: 'cairoB';
                    color: #03E88B;
@@ -746,6 +731,7 @@ export default {
                     top: -35px;
                 }
             }
+            
         }
     }
 }

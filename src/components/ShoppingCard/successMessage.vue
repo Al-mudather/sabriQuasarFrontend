@@ -10,8 +10,17 @@
 </template>
 
 <script>
-export default {
+import { mapActions } from 'vuex'
 
+export default {
+    methods: {
+        ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction'])
+    },
+
+    mounted () {
+        // TODO: If the user pay for the courses , delete the shooping cart data
+        this.deleteShoppinCartDataListAction()
+    }
 }
 </script>
 
