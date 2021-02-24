@@ -36,6 +36,7 @@
     "vue-hellojs": "0.0.4",
     "vue-i18n": "^8.0.0",
     "vue-plyr": "^7.0.0",
+    "vue-social-sharing": "^3.0.5",
     "vue-video-player": "^5.0.2",
     "vue-vimeo-player": "^0.1.1"
   },

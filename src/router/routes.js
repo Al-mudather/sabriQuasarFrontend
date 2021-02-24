@@ -11,14 +11,15 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: 'course/:pk/:id', name: 'course-details', component: () => import('pages/CourseDetails.vue') },
-      { path: 'courses', name: 'courses', component: () => import('pages/Courses.vue') }
+      { path: 'course/:pk/:id', name: 'course-details', component: () => import('pages/course_management/CourseDetails.vue') },
+      { path: 'course/:link/:pk/:id', name: 'course-affilliate-details', component: () => import('pages/course_management/CourseDetails.vue') },
+      { path: 'courses', name: 'courses', component: () => import('pages/course_management/Courses.vue') }
     ]
   },
   {
     path: '/class/:pk/:id',
     name: 'course-class',
-    component: () => import('pages/CourseClass.vue')
+    component: () => import('pages/course_management/CourseClass.vue')
   },
   {
     path: '/myCourses/',
@@ -28,17 +29,18 @@ const routes = [
   {
     path: '/verify/email/:token',
     name: 'verify-email',
-    component: () => import('pages/VerifyEmail.vue')
+    component: () => import('pages/account_management/VerifyEmail.vue')
   },
   {
     path: '/reset/password/:token',
     name: 'reset-password-form',
-    component: () => import('pages/PasswordResetForm.vue')
+    component: () => import('pages/account_management/PasswordResetForm.vue')
   },
-  // { path: '/account/confirm', name: 'password-confirm', component: () => import('components/Account/Confirm') },
+  { path: '/account/confirm', name: 'account-confirm', component: () => import('components/Account/Confirm') },
+  { path: '/user/profile', name: 'account-confirm', component: () => import('pages/account_management/Profile') },
   {
     path: '/account/',
-    component: () => import('pages/Account.vue'),
+    component: () => import('pages/account_management/Account'),
     children: [
       { path: 'login', name: 'login', component: () => import('components/Account/Login') },
       { path: 'signUp', name: 'signUp', component: () => import('components/Account/SignUp') },

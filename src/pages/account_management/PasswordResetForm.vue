@@ -91,9 +91,7 @@ export default {
             newPassword2: this.newPassword2
           }
         }).then((res) => {
-          console.log('DDDDDDDDDDDDDDDDDDDDDDDD')
-          console.log(res)
-          console.log('DDDDDDDDDDDDDDDDDDDDDDDD')
+
           if (res.data.passwordReset.success) {
             this.$router.push({ name: 'login' })
             console.log(res.data.passwordReset.success)
@@ -109,9 +107,7 @@ export default {
   watch: {
     '$route.params': {
       handler: function (params) {
-        console.log('FFFFFFFFFFFFFFF')
-        console.log(params.token)
-        console.log('FFFFFFFFFFFFFFF')
+
         this.token = params.token
       },
       deep: true,

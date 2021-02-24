@@ -8,7 +8,16 @@ mutation SocialAuth($provider: String!, $accessToken: String!, $email: String!) 
     
       user{
         email
-        fullName
+        fullName,
+        affiliateSet {
+          edges {
+            node {
+              id,
+              pk,
+              affiliateLink
+            }
+          }
+        }
       }
       
       provider

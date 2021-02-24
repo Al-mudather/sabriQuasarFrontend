@@ -1,7 +1,7 @@
 <template>
 	<section class="web">
         <!--=============== START navbar ===============-->
-        <courses-nav-bar />
+        <user-nav-bar /> 
         <!--=============== End navbar ===============-->
 
         <!--=============== START My Courses ===============-->
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import CoursesNavBar from 'src/components/utils/CoursesNavBar'
+import UserNavBar from 'src/components/utils/UserNavBar'
 import courseCard from 'src/components/MyCourses/courseCard'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 
@@ -56,7 +56,7 @@ export default {
     },
 
 	components: {
-		CoursesNavBar,
+		UserNavBar,
 		courseCard
 	},
 

@@ -3,14 +3,15 @@ import '../assets/css/_bootstrap.min.css'
 import '../assets/css/_bootstrap-rtl.css'
 import '../assets/css/homepage.css'
 import vueVimeoPlayer from 'vue-vimeo-player'
+import VueSocialSharing from 'vue-social-sharing'
+import jQuery from 'jquery'
 import _ from 'lodash'
 
+// TODO: Adding vue share
+Vue.use(VueSocialSharing);
+// TODO: Adding vimeo player
 Vue.use(vueVimeoPlayer)
-
-import jQuery from 'jquery'
-
-// import bootStrapjs from 'src/assets/js/bootstrap'
-
+// TODO: Adding jquery
 Vue.prototype.$jquery = jQuery
-
+// TODO: Adding lodash
 Vue.prototype.$_ = _

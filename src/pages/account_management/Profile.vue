@@ -1,0 +1,427 @@
+<template>
+  <section class="web">
+    <!--=============== START navbar ===============-->
+    <user-nav-bar />
+    <!--=============== End navbar ===============-->
+    <div lass="row justify-center">
+      <q-btn @click="AddMeToTheAffiliateProgram" class="col-3" color="primary" label="Join affillite programe" />
+    </div>
+    {{myAffiliateLink}}
+    <!--=============== START profile ===============-->
+    <section class="profile">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="titel">
+              <img src="~assets/img/tit.png" alt="" />
+              <h3>الملف الشخصي</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="details">
+          <div class="row">
+            <div class="col-lg-3">
+              <div class="user">
+                <img src="~assets/img/hassbo.png" alt="" />
+              </div>
+            </div>
+            <div class="col-lg-7">
+              <div class="all">
+                <div class="titel">
+                  <img src="~assets/img/tit.png" alt="" />
+                  <h3>بياناتــي</h3>
+                </div>
+                <form>
+                  <div class="row">
+                    <div class="col-lg-6 col-xs-12">
+                      <div
+                        class=""
+                        style="text-align:left"
+                        v-if="errorMessages.length > 0"
+                      >
+                        Please fix these <strong>error first</strong>
+                        <ul>
+                          <li
+                            v-for="(message, index) in errorMessages"
+                            :key="index"
+                          >
+                            {{ message }}<br />
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="inp">
+                        <img src="~assets/img/usser.png" alt="" />
+                        <input
+                          v-model="fullName"
+                          type="text"
+                          placeholder="الاسم الحقيقي"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-lg-6 col-xs-12">
+                      <div class="inp">
+                        <img src="~assets/img/gmail.png" alt="" />
+                        <input
+                          v-model="email"
+                          type="email"
+                          placeholder="البريد الالكتروني"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-lg-12 col-xs-12">
+                      <div class="inp">
+                        <img src="~assets/img/phone-call.png" alt="" />
+                        <input type="email" placeholder="رقم الهاتف" />
+                      </div>
+                    </div>
+                    <div class="type">
+                      <div class="male">
+                        <img src="~assets/img/male.png" alt="" />
+                        <h3>ذكــر</h3>
+                      </div>
+                      <div class="male">
+                        <img src="~assets/img/female.png" alt="" />
+                        <h3>أنثـــي</h3>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                <div class="password">
+                  <div class="titel">
+                    <img src="~assets/img/tit.png" alt="" />
+                    <h3>تعيين كلمة مرور جديدة</h3>
+                  </div>
+                  <form>
+                    <div class="row">
+                      <div class="col-lg-6 col-sm-6 col-xs-12">
+                        <div class="inp">
+                          <img src="~assets/img/password.png" alt="" />
+                          <input
+                            v-model="oldPassword"
+                            type="password"
+                            placeholder="كلمة المرور القديمة"
+                          />
+                        </div>
+                      </div>
+                      <div class="col-lg-6 col-sm-6 col-xs-12">
+                        <div class="inp">
+                          <img src="~assets/img/password.png" alt="" />
+                          <input
+                            v-model="newPassword1"
+                            type="password"
+                            placeholder="كلمة المرور الجديدة"
+                          />
+                        </div>
+                      </div>
+                      <div class="col-lg-12 col-xs-12">
+                        <div class="inp">
+                          <img src="~assets/img/password.png" alt="" />
+                          <input
+                            v-model="newPassword2"
+                            type="password"
+                            placeholder="تأكيد كلمة المرور الجديدة"
+                          />
+                        </div>
+                      </div>
+                      <div
+                        disable="1"
+                        class="but"
+                        @click="UpdateUserProfileData"
+                      >
+                        <h3>تحديث</h3>
+                        <img src="~assets/img/Group 734.png" alt="" />
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!--=============== End profile ===============-->
+  </section>
+</template>
+
+<script>
+import { mapState } from "vuex";
+import UserNavBar from "src/components/utils/UserNavBar";
+import { ChangeUserPassword } from "src/queries/account_management/mutation/ChangeUserPassword";
+import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
+import { UpdateUserProfile } from "src/queries/account_management/mutation/UpdateUserProfile";
+import { JoinAffiliateProgram } from "src/queries/afilliate_management/mutation/JoinAffiliateProgram";
+
+export default {
+  name: "Home",
+  data() {
+    return {
+      fullName: "",
+      email: "",
+      oldPassword: "",
+      myAffiliateLink: "",
+      newPassword1: "",
+      newPassword2: "",
+      errorMessages: []
+    };
+  },
+  components: {
+    UserNavBar
+  },
+
+  apollo: {
+    me: {
+      query() {
+        return GetMyProfileData;
+      }
+    }
+  },
+
+  watch: {
+    me(value) {
+      this.fullName = value.fullName;
+      this.email = value.email;
+    }
+  },
+
+  methods: {
+    errorHandler(errorsObj) {
+      console.log(errorsObj);
+      for (const key in errorsObj) {
+        for (const val of errorsObj[key]) {
+          this.errorMessages.push(val.message);
+        }
+      }
+    },
+
+    ///////////////////////////////////
+    // JOIN to the affilliate programme
+    ///////////////////////////////////
+    AddMeToTheAffiliateProgram() {
+      this.errorMessages = [];
+      this.$apollo
+        .mutate({
+          mutation: JoinAffiliateProgram
+        })
+        .then(result => {
+          if ( this.$_.get(result,'[data][joinAffiliateProgram][success]') ) {
+            this.myAffiliateLink = location.origin + '/course/' + this.$_.get(result,'[data][joinAffiliateProgram][affiliate][affiliateLink]')
+          } else if ( this.$_.get(result,'[data][joinAffiliateProgram][errors]') ) {
+            this.errorHandler(this.$_.get(result,'[data][joinAffiliateProgram][errors]'));
+          }
+        });
+    },
+
+    UpdateUserProfileData(e) {
+      e.preventDefault();
+      ///////////////////////////////////////////
+      // TODO: IF the password need to be changed
+      ///////////////////////////////////////////
+      if (this.oldPassword) {
+        if (this.newPassword1 === this.newPassword2) {
+          this.errorMessages = [];
+          this.$apollo
+            .mutate({
+              mutation: ChangeUserPassword,
+              variables: {
+                oldPassword: this.oldPassword,
+                newPassword1: this.newPassword1,
+                newPassword2: this.newPassword2
+              }
+            })
+            .then(result => {
+              if (result.data.passwordChange.success) {
+              } else if (result.data.passwordChange.errors) {
+                this.errorHandler(result.data.passwordChange.errors);
+              }
+            });
+        } else {
+          this.errorMessages.push("passwords are not the same");
+        }
+      }
+      //////////////////////////////
+      // TODO: Update the user data
+      //////////////////////////////
+      this.$apollo
+        .mutate({
+          mutation: UpdateUserProfile,
+          variables: {
+            firstName: this.firstName,
+            lastName: this.lastName,
+            fullName: this.fullName
+          }
+        })
+        .then(result => {
+          if (result.data.updateAccount.success) {
+          } else if (result.data.updateAccount.errors) {
+            this.errorHandler(result.data.updateAccount.errors);
+          }
+          console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+          console.log(result);
+          console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+        })
+        .catch(e => {});
+    }
+  },
+
+  mounted() {
+    const userTypes = this.$el.querySelectorAll(".type .male");
+
+    let getSiblings = function(e) {
+      // for collecting siblings
+      let siblings = [];
+      // if no parent, return no sibling
+      if (!e.parentNode) {
+        return siblings;
+      }
+      // first child of the parent node
+      let sibling = e.parentNode.firstChild;
+      // collecting siblings
+      while (sibling) {
+        if (sibling.nodeType === 1 && sibling !== e) {
+          siblings.push(sibling);
+        }
+        sibling = sibling.nextSibling;
+      }
+      return siblings;
+    };
+
+    userTypes.forEach(type => {
+      type.addEventListener("click", function() {
+        let siblings = getSiblings(this);
+
+        siblings.map(e => {
+          e.classList.remove("active");
+        });
+
+        this.classList.add("active");
+      });
+    });
+  }
+};
+</script>
+<style lang="scss">
+@import "src/assets/css/sass/helpers/_variabels.scss";
+@import "src/assets/css/sass/helpers/_mixins.scss";
+
+/*--============= Start profile style =============--*/
+.profile {
+  padding: 10px;
+  margin: 20px 0 45px 0;
+  position: relative;
+  .titel {
+    display: inline-block;
+    width: 100%;
+    padding: 12px;
+    background: #fff;
+    margin: 18px 0 16px 0;
+    img {
+      display: inline-block;
+      margin: -9px 0 0 0;
+    }
+    h3 {
+      color: $textColor;
+      font-size: 22px;
+      font-family: "cairoB";
+      line-height: 1.7;
+      margin: 0 11px 0 0;
+      display: inline-block;
+    }
+  }
+  .details {
+    margin: 30px 0 30px 0;
+    .user {
+      //maxMobile
+      @media (max-width: 767px) {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      //minSmall
+      @media (min-width: 768px) {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      img {
+        width: 129px;
+        height: 129px;
+        border-radius: 50%;
+      }
+    }
+    .all {
+      background: #fff;
+      padding: 14px;
+      border-radius: 28px;
+      .password {
+        margin: 30px 0 0 0;
+      }
+      .titel {
+        background-color: unset;
+        h3 {
+          font-size: 18px;
+        }
+      }
+      form {
+        .inp {
+          position: relative;
+          margin-bottom: 15px;
+          img {
+            position: absolute;
+            top: 22px;
+            right: 12px;
+          }
+        }
+        .type {
+          margin: 15px auto 15px auto;
+          .active {
+            border: 1px solid #fcc74c;
+          }
+          .male {
+            cursor: pointer;
+            background-color: #fff;
+            padding: 12px;
+            display: inline-block;
+            width: 91px;
+            height: 94px;
+            text-align: center;
+            border-radius: 10px;
+            margin: 0 0 0 20px;
+            box-shadow: 0px 3px 20px #eae8e878;
+            h3 {
+              font-size: 13px;
+              color: $textColor;
+              font-family: "cairoR";
+              text-align: center;
+              margin: 8px 0 5px 0;
+            }
+          }
+        }
+        .but {
+          margin: 30px auto 24px auto;
+          background: #fcd462;
+          padding: 5px;
+          width: 130px;
+          border-radius: 50px;
+          text-align: center;
+          cursor: pointer;
+          h3 {
+            display: inline-block;
+            color: $textColor;
+            font-size: 16px;
+            font-family: "cairoR";
+            margin: 0;
+          }
+          img {
+            display: inline-block;
+            position: relative;
+            left: 0;
+            right: 21px;
+          }
+        }
+      }
+    }
+  }
+}
+/*--============= End profile style =============--*/
+</style>

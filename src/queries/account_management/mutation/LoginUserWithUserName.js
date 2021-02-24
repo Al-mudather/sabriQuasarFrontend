@@ -13,7 +13,16 @@ mutation LoginUser($username: String!, $password: String!){
     user {
       id,
       username,
-      verified
+      verified,
+      affiliateSet {
+        edges {
+          node {
+            id,
+            pk,
+            affiliateLink
+          }
+        }
+      }
     },
     refreshToken
   }

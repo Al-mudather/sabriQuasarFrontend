@@ -22,7 +22,7 @@ import Training from 'components/Home/Training'
 
 import ShoppingCartPopUp from 'src/pages/ShoppingCart'
 
-import Account from 'pages/Account'
+import Account from 'pages/account_management/Account'
 import { mapState } from 'vuex'
 
 export default {
