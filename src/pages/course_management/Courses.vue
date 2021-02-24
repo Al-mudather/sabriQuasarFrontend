@@ -64,13 +64,35 @@
             <div class="row">
                 <div ref="col" class="col-lg-12">
 
-                    <ul ref="cat" class="nav nav-tabs" @click="changeTab" id="myTab" role="tablist">
-                        <li class="nav-item carousel-cell" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
-                        <a style="outline: 0" :data-id="spec.node.id" :data-course="JSON.stringify(spec.node.courseSet)"  @click="changeCourseData(spec.node.id)" class="nav-link" id="home-tab" data-toggle="tab" href="" role="tab" aria-controls="home" aria-selected="true">
-                            <img src="~assets/img/brain.png" alt="">{{spec.node.speciality}}
-                        </a>
-                    </li>
-                    </ul>
+                    <div ref="cat" @click="changeTab" class="swiper-container q-mt-xl">
+                        <swiper
+                            ref="mySwiper"
+                            class="nav nav-tabs"
+                            :space-between="1"
+                            :options="swiperOptions"
+                            
+                        >
+                            <swiper-slide class="nav-item" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
+                                <a
+                                  style="outline: 0"
+                                  :data-course="
+                                      JSON.stringify(spec.node.courseSet)
+                                  "
+                                  @click="changeCourseData(spec.node.id)"
+                                  class="nav-link"
+                                  id="home-tab"
+                                  data-toggle="tab"
+                                  role="tab"
+                                  aria-controls="home"
+                                  aria-selected="true"
+                                >
+                                  <img src="~assets/img/brain.png" alt="" />{{
+                                      spec.node.speciality
+                                  }}
+                                </a>
+                            </swiper-slide>
+                        </swiper>
+                    </div>
 
                     <!-- start rate -->
                     <div class="rate">
@@ -118,7 +140,9 @@ import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeci
 import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
 import { QSpinnerHourglass } from 'quasar'
 import { mapActions } from 'vuex'
-// import Flickity from 'vue-flickity'
+import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
+import 'swiper/swiper-bundle.css'
+import 'swiper/swiper.min.css'
 
 export default {
   name: 'Courses',
@@ -135,18 +159,25 @@ export default {
       filter: {},
       searchFilter: {},
       orderingFilter: {},
-      flickityOptions: {
-        initialIndex: 3,
-        prevNextButtons: false,
-        pageDots: false,
-        wrapAround: true
-        // any options from Flickity can be used
+      swiperOptions: {
+        effect: 'coverflow',
+        grabCursor: true,
+        centeredSlides: true,
+        slidesPerView: 'auto',
+        coverflowEffect: {
+          rotate: 500,
+          stretch: 0,
+          depth: 100,
+          modifier: 1,
+          slideShadows: false
+        }
       }
     }
   },
   components: {
-    courseCard
-    // Flickity
+    courseCard,
+    Swiper,
+    SwiperSlide
   },
 
   computed: {},
@@ -183,7 +214,15 @@ export default {
     }
   },
 
+  computed: {
+    swiper() {
+      return this.$refs.mySwiper.$swiper
+    }
+  },
+
   mounted () {
+    // TODO: Adjest the swiper
+    this.swiper.slideTo(2, 1000, false)
     // TODO: Disable the navebar
     this.setNavbarSearchAction(false)
     // Drowp Down js
@@ -235,9 +274,13 @@ export default {
     if (this.counter === 0) {
       // TODO: When the page is loadded, select the first category with it's
       // data courses to be viewd
-      this.$refs.cat.firstChild.firstChild.classList.add('active')
-      const data = JSON.parse(this.$refs.cat.firstChild.firstChild.dataset.course)
-      this.activeSpecialityID = this.$refs.cat.firstChild.firstChild.dataset.id
+      const targetAncer = this.$refs.cat.firstChild.firstChild.firstChild.firstChild 
+      // TODO: make the first category active
+      targetAncer.classList.add("active");
+      const data = JSON.parse(
+          targetAncer.dataset.course
+      );
+      this.activeSpecialityID = targetAncer.dataset.id
       this.courses = data
       this.counter += 10
     }
@@ -296,6 +339,7 @@ export default {
     },
     // TODO: Get the related courses data when the selected speciality become active
     changeCourseData (specialityID) {
+
       this.activeSpecialityID = specialityID
       this.$q.loading.show({
         spinner: QSpinnerHourglass,
@@ -340,6 +384,9 @@ export default {
 @import "src/assets/css/sass/helpers/_mixins.scss";
 @import "src/assets/css/account.scss";
 
+.swiper-slide {
+    width: max-content !important;
+}
 /*--- START cources ---*/
 .cources{
     padding: 50px 0;

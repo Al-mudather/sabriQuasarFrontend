@@ -262,7 +262,7 @@ export default {
       variables () {
         return {
           courseID: this.course_id,
-          limit: 2
+          limit: 5
         }
       }
     }

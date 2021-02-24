@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div ref="col" class="col-lg-12">
-                    <div ref="cat" class="swiper-container">
+                    <div ref="cat" @click="changeTab" class="swiper-container">
                         <swiper
                             ref="mySwiper"
                             class="nav nav-tabs"
