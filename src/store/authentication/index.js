@@ -67,9 +67,6 @@ const actions = {
   RE_LOGIN_USER({context}, payload) {
 
     console.log("Refresh Apollo Client")
-    console.log('hhhhhhhhhhhhhhhhhhhhh')
-    console.log(tokenStorage.getRefreshToken())
-    console.log('hhhhhhhhhhhhhhhhhhhhh')
 
     return apolloClient.mutate({
       mutation: RefreshLoginUserWithEmail,
@@ -78,9 +75,6 @@ const actions = {
       },
     }).then((data) => {
 
-      console.log('DDDDDDDDDDDDDDDDDDDDDDDDDDD')
-      console.log(data)
-      console.log('DDDDDDDDDDDDDDDDDDDDDDDDDDD')
       // Result
       tokenStorage.setToken({
         token: data.data.refreshToken.token,
