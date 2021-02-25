@@ -18,6 +18,8 @@
 
                         <whatIwillLearn :course_id="courseID"/>
 
+                        <coursePreRequisites :course_id="coursePK"/>
+
                         <courseUnits :course_id="courseID"/>
 
                         <courseInstructors :course_id="courseID"/>
@@ -42,6 +44,7 @@ import relatedCoureses from 'src/components/courseDetails/relatedCoureses'
 import courseMainCard from 'components/courseDetails/courseMainCard'
 import aboutTheCourse from 'components/courseDetails/aboutTheCourse'
 import whatIwillLearn from 'components/courseDetails/whatIwillLearn'
+import coursePreRequisites from 'components/courseDetails/coursePreRequisites'
 import courseUnits from 'components/courseDetails/courseUnits'
 import courseInstructors from 'components/courseDetails/courseInstructors'
 import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
@@ -60,6 +63,7 @@ export default {
     courseMainCard,
     aboutTheCourse,
     whatIwillLearn,
+    coursePreRequisites,
     courseUnits,
     courseInstructors
   },

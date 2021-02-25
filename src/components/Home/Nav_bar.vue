@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters } from "vuex";
 import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
 
 export default {
@@ -80,12 +80,6 @@ export default {
     props: {},
     computed: {
         ...mapGetters("authentication", ["token"])
-    },
-
-    mounted () {
-        console.log('ppppppppppppppppppppppppppppp')
-        console.log(process.env)
-        console.log('ppppppppppppppppppppppppppppp')
     },
 
     methods: {
@@ -134,8 +128,6 @@ export default {
                 })
 
             }
-
-            
         },
 
         goToSignUpPage() {

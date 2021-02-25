@@ -54,8 +54,20 @@ export default {
             font-weight: bold;
         }
         img{
-            width: 100%;
-            margin-top: 20px;   
+            width: auto;
+            margin-top: 20px;  
+            //maxMobile
+            @media(max-width:767px){
+                width:100%;
+            }
+            //minSmall
+            @media(min-width:768px){
+                width: 100%;
+            }
+            //minLarg
+            @media(min-width:1200px){
+                width: auto;
+            }
         }
         .butt{
             text-align: center;

@@ -34,11 +34,11 @@
                 </svg>
                 <img src="~assets/img/exclamation.png" alt="" />
             </div>
-            <h3>ما الذي سأتعلمه ؟</h3>
+            <h3>ماهي متطلبات الدوره ؟</h3>
         </div>
-        <div class="pluse" v-for="point in allWhatYouWillLearn.edges" :key="point.node.id">
+        <div class="pluse" v-for="preReq in lodash.get(allPreRequisitesByCourse, '[edges]')" :key="preReq.node.id">
             <img src="~assets/img/adedd.png" alt="" />
-            <h3 class="q-pr-sm">{{point.node.points}}</h3>
+            <h3 class="q-pr-sm">{{preReq.node.prerequisite}}</h3>
         </div>
 
         <skeletonList v-if="loading" />
@@ -46,15 +46,15 @@
 </template>
 
 <script>
-import { GetAllWhatYouWillLearnByCourseID } from 'src/queries/course_management/query/GetAllWhatYouWillLearnByCourseID'
+import { GetAllPreRequisitesByCourse } from 'src/queries/course_management/query/GetAllPreRequisitesByCourse'
 import skeletonList from 'src/components/skeleton/skeletonList'
 
 export default {
   name: 'WhatIwillLearn',
   data () {
     return {
-      loading: true,
-      allWhatYouWillLearn: { edges: [] }
+      lodash: this.$_,
+      loading: true
     }
   },
 
@@ -65,9 +65,9 @@ export default {
   props: ['course_id'],
 
   apollo: {
-    allWhatYouWillLearn: {
+    allPreRequisitesByCourse: {
       query () {
-        return GetAllWhatYouWillLearnByCourseID
+        return GetAllPreRequisitesByCourse
       },
 
       variables () {

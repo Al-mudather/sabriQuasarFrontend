@@ -17,10 +17,12 @@
                 <!-- search box -->
                 <div class="col-lg-6">
                     <div class="search">
-                        <form v-if="navbarSearch"  @submit="goToCourses">
+                        <form v-if="navbarSearch"  @submit="showTheSearchingResult">
                             <input
                                 type="text"
+                                v-model="search"
                                 placeholder="ما الذي تبحث عنة؟"
+                                style="color: #000"
                             />
                             <button>
                                 <img src="~assets/img/search.png" />
@@ -34,13 +36,13 @@
                         <div class="sign">
                             <a @click="goToSignUpPage" style="cursor: pointer">
                                 <img src="~assets/img/sign.png" alt="" />
-                                <h3>تسجيل حساب</h3>
+                                <h3 class="q-pr-sm">تسجيل حساب</h3>
                             </a>
                         </div>
                         <div class="login">
                             <a @click="goToLoginPage" style="cursor: pointer">
                                 <img src="~assets/img/login.png" alt="" />
-                                <h3>دخول</h3>
+                                <h3 class="q-pr-sm">دخول</h3>
                             </a>
                         </div>
                     </div>
@@ -48,11 +50,12 @@
                 <!-- Language -->
                 <div class="col-lg-1">
                     <div class="lang">
-                        <img src="~assets/img/doown.png" alt="" />
+                        <q-toggle v-model="englishLang" icon="language" unchecked-icon="clear" label="English"/>
+                        <!-- <img src="~assets/img/doown.png" alt="" />
                         <h3>Ar</h3>
                         <div class="contry">
                             <img src="~assets/img/ar.png" alt="" />
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -62,11 +65,14 @@
 
 <script>
 import { mapGetters } from "vuex";
+import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
+
 export default {
     name: "NavBar",
     data() {
         return {
-            search: ""
+            search: "",
+            englishLang: false
         };
     },
     props: {},
@@ -75,6 +81,58 @@ export default {
     },
 
     methods: {
+        showTheSearchingResult (event) {
+            event.preventDefault();
+
+            if (!this.$_.isEmpty(this.search)) {
+                this.$apollo.query({
+                    query: GetAllCourses,
+                    variables: {
+                        title_Icontains: this.search
+                    }
+                }).then(res => {
+                    const searchResult = res.data.allCourses.edges.map(course => {
+                        return {
+                            label: course.node.title,
+                            id: course.node.id,
+                            pk: course.node.pk
+                        }
+                    })
+                    if (!this.$_.isEmpty(searchResult)) {
+                        this.$q.bottomSheet({
+                            style: {
+                                textAlign: 'center',
+                                padding: '20px',
+                                'border-bottom': '1px solid #000 !important'
+                            },
+                            actions: searchResult
+                        }).onOk(action => {
+                            // TODO: Go to the course details
+                            this.$router.push({ name: 'course-details', params: { pk: action.pk, id: action.id} })
+                        }).onDismiss(() => {
+                            // TODO: Clear the search
+                            this.search = ''
+                        })
+                    } else {
+                        this.$q.notify({
+                            color: 'negative',
+                            position: 'top',
+                            progress: true,
+                            multiLine: true,
+                            message: 'No result'
+                        })
+                    }
+                })
+            } else {
+                this.$q.notify({
+                    type: 'warning',
+                    position: 'top',
+                    progress: true,
+                    multiLine: true,
+                    message: 'ما الذي تبحث عنه'
+                })
+            }
+        },
 
         goToCourses(e) {
             e.preventDefault();
@@ -119,8 +177,8 @@ export default {
         }
     }
     .lang {
-        background-color: #fff;
-        border: 2px solid #eceaea;
+        // background-color: #fff;
+        // border: 2px solid #eceaea;
         padding: 3px 1px 0 0;
         h3 {
             color: #474747;
