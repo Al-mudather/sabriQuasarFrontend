@@ -175,15 +175,15 @@
 
 .top .lang {
   margin-top: 17px;
-  background-color: #215296;
+  /* background-color: #215296; */
   cursor: pointer;
-  width: 90px;
-  height: 39px;
-  border-radius: 50px;
+  /* width: 90px; */
+  /* height: 39px; */
+  /* border-radius: 50px; */
   padding: 5px;
-  overflow: hidden;
+  /* overflow: hidden; */
   text-align: center;
-  float: left;
+  /* float: left; */
 }
 
 .top .lang img {

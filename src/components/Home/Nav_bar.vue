@@ -35,13 +35,13 @@
                         <div class="sign">
                             <a @click="goToSignUpPage" style="cursor: pointer">
                                 <img src="~assets/img/sign.png" alt="" />
-                                <h3>تسجيل حساب</h3>
+                                <h3 class="q-pr-sm">تسجيل حساب</h3>
                             </a>
                         </div>
                         <div class="login">
                             <a @click="goToLoginPage" style="cursor: pointer">
                                 <img src="~assets/img/login.png" alt="" />
-                                <h3>دخول</h3>
+                                <h3 class="q-pr-sm">دخول</h3>
                             </a>
                         </div>
                     </div>
@@ -49,11 +49,13 @@
                 <!-- Language -->
                 <div class="col-lg-1">
                     <div class="lang">
-                        <img src="~assets/img/doown.png" alt="" />
-                        <h3>Ar</h3>
+                        <q-toggle v-model="englishLang" icon="language" unchecked-icon="clear" class="text-white" label="English"/>
+                        <!-- <img src="~assets/img/doown.png" alt="" />
+                        <q-toggle v-model="englishLang"/>
+                        <h3 class="q-pq-sm">Ar</h3>
                         <div class="contry">
                             <img src="~assets/img/ar.png" alt="" />
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -71,6 +73,7 @@ export default {
         return {
             search: "",
             visible: false,
+            englishLang: false,
             courses: []
         };
     },

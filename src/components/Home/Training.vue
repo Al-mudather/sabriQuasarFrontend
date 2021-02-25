@@ -30,6 +30,7 @@
                                 }}
                             </a>
                             </swiper-slide>
+                            <div class="swiper-pagination" slot="pagination"></div>
                         </swiper>
                     </div>
                     
@@ -256,12 +257,15 @@ export default {
                 centeredSlides: true,
                 slidesPerView: 'auto',
                 coverflowEffect: {
-                rotate: 500,
-                stretch: 0,
-                depth: 100,
-                modifier: 1,
-                slideShadows: false
-                }
+                    rotate: 500,
+                    stretch: 0,
+                    depth: 100,
+                    modifier: 1,
+                    slideShadows: false
+                },
+                pagination: {
+                    el: '.swiper-pagination'
+                },
             }
         };
     },

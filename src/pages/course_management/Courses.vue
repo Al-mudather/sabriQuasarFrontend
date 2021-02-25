@@ -222,7 +222,7 @@ export default {
 
   mounted () {
     // TODO: Adjest the swiper
-    this.swiper.slideTo(2, 1000, false)
+    this.swiper.slideTo(3, 1000, false)
     // TODO: Disable the navebar
     this.setNavbarSearchAction(false)
     // Drowp Down js
@@ -274,13 +274,13 @@ export default {
     if (this.counter === 0) {
       // TODO: When the page is loadded, select the first category with it's
       // data courses to be viewd
-      const targetAncer = this.$refs.cat.firstChild.firstChild.firstChild.firstChild 
+      const targetedAncer = this.$refs.cat.firstChild.firstChild.firstChild.firstChild 
       // TODO: make the first category active
-      targetAncer.classList.add("active");
+      targetedAncer.classList.add("active");
       const data = JSON.parse(
-          targetAncer.dataset.course
+          targetedAncer.dataset.course
       );
-      this.activeSpecialityID = targetAncer.dataset.id
+      this.activeSpecialityID = targetedAncer.dataset.id
       this.courses = data
       this.counter += 10
     }
