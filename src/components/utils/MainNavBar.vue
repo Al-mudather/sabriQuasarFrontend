@@ -22,7 +22,7 @@
                                 type="text"
                                 v-model="search"
                                 placeholder="ما الذي تبحث عنة؟"
-                                style="color: #000"
+                                style="color: #7B7B7B"
                             />
                             <button>
                                 <img src="~assets/img/search.png" />

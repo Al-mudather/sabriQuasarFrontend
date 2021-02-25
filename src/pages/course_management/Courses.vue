@@ -63,7 +63,6 @@
       <div class="container">
             <div class="row">
                 <div ref="col" class="col-lg-12">
-
                     <div ref="cat" @click="changeTab" class="swiper-container q-mt-xl">
                         <swiper
                             ref="mySwiper"
@@ -72,7 +71,10 @@
                             :options="swiperOptions"
                             
                         >
-                            <swiper-slide class="nav-item" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
+                            <div class="row" v-if="lodash.isEmpty(allCourseSpecialities.edges)">
+                              <skeletonChip v-for="(chip, index) in 11" :key="index" class="col" />
+                            </div>
+                            <swiper-slide v-else class="nav-item q-pr-sm" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
                                 <a
                                   style="outline: 0"
                                   :data-course="
@@ -99,8 +101,15 @@
                         <div class="container-fluid">
                           <div class="tab-content" id="myTabContent">
                             <div class="cn fadeIn" id="home" role="tabpanel" aria-labelledby="home-tab">
-                    <!-- {{courses}} -->
-                                <div class="row justify-center" v-if="courses.edgeCount > 0">
+                                <div class="row justify-center" v-if="lodash.isEmpty(courses.edges)">
+                                    <skeletonCard
+                                      class="col-lg-3 col-md-6 col-sm-6 col-xs-12"
+                                      v-for="sk in 8"
+                                      :key="sk"
+                                    />
+                                </div>
+                                <div class="row justify-center" v-else>
+                                <!-- <div class="row justify-center" v-if="courses.edgeCount > 0"> -->
                                     <div  v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
                                         <transition
                                         appear
@@ -118,11 +127,6 @@
 
                                     </div>
                                 </div>
-                                <div class="row justify-center" v-else>
-                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                                        No data is here
-                                    </div>
-                                </div>
                             </div>
                           </div>
                         </div>
@@ -136,6 +140,8 @@
 
 <script>
 import courseCard from 'components/utils/courseCard'
+import skeletonCard from "src/components/skeleton/skeletonCard";
+import skeletonChip from 'components/skeleton/skeletonChip'
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
 import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
 import { QSpinnerHourglass } from 'quasar'
@@ -149,6 +155,7 @@ export default {
   data () {
     return {
       counter: 0,
+      lodash: this.$_,
       search: '',
       tab: 'main',
       openFilter: true,
@@ -176,6 +183,8 @@ export default {
   },
   components: {
     courseCard,
+    skeletonCard,
+    skeletonChip,
     Swiper,
     SwiperSlide
   },
@@ -385,7 +394,7 @@ export default {
 @import "src/assets/css/account.scss";
 
 .swiper-slide {
-    width: max-content !important;
+  width: max-content !important;
 }
 /*--- START cources ---*/
 .cources{
@@ -556,7 +565,7 @@ export default {
             }
             font-size: 18px;
             font-family: 'cairoR';
-            width: 155px;
+            width: 100%;
             height: 44px;
             margin-left: 10px;
             border-radius: 50px;
