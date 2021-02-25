@@ -1,8 +1,8 @@
 {
   "name": "sabri_quasar_frontend",
   "version": "0.0.1",
-  "description": "A Quasar Framework app",
-  "productName": "Quasar App",
+  "description": "Medical Training Center",
+  "productName": "Medical Training Center",
   "author": "Al-mudather <wollof8@gmail.com>",
   "private": true,
   "scripts": {

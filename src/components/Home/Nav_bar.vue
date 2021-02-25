@@ -82,6 +82,12 @@ export default {
         ...mapGetters("authentication", ["token"])
     },
 
+    mounted () {
+        console.log('ppppppppppppppppppppppppppppp')
+        console.log(process.env)
+        console.log('ppppppppppppppppppppppppppppp')
+    },
+
     methods: {
 
         showTheSearchingResult (event) {

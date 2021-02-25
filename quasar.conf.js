@@ -6,7 +6,9 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
-// const envparser = require('src/boot/envparser.js')
+const DotEnv = require('dotenv')
+const webpack = require('webpack')
+const envparser = require('./src/boot/envparser.js')
 
 module.exports = function (/* ctx */) {
   return {
@@ -14,7 +16,6 @@ module.exports = function (/* ctx */) {
     supportTS: false,
     // https://quasar.dev/quasar-cli/prefetch-feature
     // preFetch: true,
-    // env: envparser(),
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
@@ -51,7 +52,7 @@ module.exports = function (/* ctx */) {
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: 'hash', // available values: 'hash', 'history'
-
+      env: envparser(),
       // transpile: false,
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
@@ -127,36 +128,36 @@ module.exports = function (/* ctx */) {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: 'Quasar App',
-        short_name: 'Quasar App',
-        description: 'A Quasar Framework app',
+        name: 'Medical trainng center',
+        short_name: 'Medical Training Center',
+        description: 'Medical Training Center',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
         theme_color: '#027be3',
         icons: [
           {
-            src: 'icons/icon-128x128.png',
+            src: 'assets/img/logo.png',
             sizes: '128x128',
             type: 'image/png'
           },
           {
-            src: 'icons/icon-192x192.png',
+            src: 'assets/img/logo.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'icons/icon-256x256.png',
+            src: 'assets/img/logo.png',
             sizes: '256x256',
             type: 'image/png'
           },
           {
-            src: 'icons/icon-384x384.png',
+            src: 'assets/img/logo.png',
             sizes: '384x384',
             type: 'image/png'
           },
           {
-            src: 'icons/icon-512x512.png',
+            src: 'assets/img/logo.png',
             sizes: '512x512',
             type: 'image/png'
           }
