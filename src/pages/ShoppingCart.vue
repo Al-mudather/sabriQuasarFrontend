@@ -18,27 +18,27 @@
                             <!-- <div class="lii active" data-cart="cartCourses">
                                 <img src="~assets/img/cart.png" alt="">
                             </div> -->
-                            <div class="arrow show" data-cart="loginCart">
+                            <div class="arrow show" style="transform: translate(-3px, -2px)" data-cart="loginCart">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
                             <!-- <div class="lii" data-cart="loginCart">
                                 <img src="~assets/img/acc.png" alt="">
                             </div> -->
-                            <router-link tag="div" class="lii" :to="{ name: 'login-cart'}"><img src="~assets/img/acc.png" alt=""></router-link>
-                            <div class="arrow">
+                            <router-link tag="div" class="lii" style="transform: translateX(-4px)" :to="{ name: 'login-cart'}"><img src="~assets/img/acc.png" alt=""></router-link>
+                            <div class="arrow" style="transform: translate(-9px, -1px)">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
-                            <router-link tag="div" class="lii" :to="{ name: 'payment'}"><img src="~assets/img/payment.png" alt=""></router-link>
+                            <router-link tag="div" class="lii" style="transform: translateX(-9px)" :to="{ name: 'payment'}"><img src="~assets/img/payment.png" alt=""></router-link>
                             <!-- <div class="lii" data-cart="paymentData">
                                 <img src="~assets/img/payment.png" alt="">
                             </div> -->
-                            <div class="arrow">
+                            <div class="arrow" style="transform: translate(-7px, -7px)">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
-                            <router-link tag="div" class="lii upp" :to="{ name: 'cart-success'}"><img src="~assets/img/accses.png" alt=""></router-link>
+                            <router-link tag="div" class="lii upp" style="transform: translateX(-11px)" :to="{ name: 'cart-success'}"><img src="~assets/img/accses.png" alt=""></router-link>
                             <!-- <div class="lii" data-cart="successMessage">
                                 <img src="~assets/img/accses.png" alt="">
                             </div> -->
@@ -105,9 +105,9 @@ export default {
         const AllDivsWithLiiiClass = linkParent.querySelectorAll('.lii')
         // 2. Remove from them the active class
         for (const lii of AllDivsWithLiiiClass) {
-            console.log('gggggggggggggggggg')
-            console.log(lii.classList)
-            console.log('gggggggggggggggggg')
+            // console.log('gggggggggggggggggg')
+            // console.log(lii.classList)
+            // console.log('gggggggggggggggggg')
             // lii.classList.remove('active')
         }
         //////////////////////////////////////
@@ -211,6 +211,7 @@ export default {
         .link{
             position: absolute;
             width: 310px;
+            backface-visibility: hidden;
             .arrow{
                 position: absolute;
                 display: inline-block;

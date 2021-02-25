@@ -688,49 +688,56 @@ export default {
                 }
             }
             /* start Tetch */
-            .tetch {
-                .tech {
+            .tetch{
+                .tech{
                     text-align: center;
                     margin: 0 0 25px 0;
                     position: relative;
                     background: #fff;
                     padding: 25px 0 25px 0;
                     border-radius: 30px;
-                    svg {
-                        position: absolute;
-                        top: 25px;
-                        right: 109px;
-                    }
-                    img {
-                        border-radius: 50%;
-                        width: 69px;
+                    .img-user{
                         position: relative;
-                        height: 69px;
-                        margin: 5px 0 14px 0;
+                        width: 97px;
+                        text-align: center;
+                        margin: 0 auto;
+                        svg{
+                            position: absolute;
+                            top: 0;
+                            right: 9px;
+                            left: 0;
+                        }
+                        img{
+                            border-radius: 50%;
+                            width: 69px;
+                            position: relative;
+                            height: 69px;
+                            margin: 5px 0 14px 0;
+                        }
                     }
-                    h3 {
+                    h3{
                         font-size: 18px;
-                        font-family: "cairoR";
-                        color: #7b7b7b;
+                        font-family: 'cairoR';
+                        color: #7B7B7B;
                         margin: 8px 0 14px 0;
                     }
-                    p {
+                    p{
                         margin: 0 auto 34px auto;
                         width: 82%;
-                        color: #9c9c9c;
+                        color: #9C9C9C;
                         font-size: 16px;
-                        font-family: "cairoR";
+                        font-family: 'cairoR';
                         line-height: 1.7;
                     }
-                    a {
+                    a{
                         text-decoration: none;
-                        h3 {
-                            font-size: 11px;
+                        h3{
+                            font-size:11px;
                             color: $textColor;
-                            font-family: "cairoB";
+                            font-family: 'cairoB';
                             margin: 0;
-                            img {
-                                width: auto;
+                            img{
+                                width: auto;                        
                                 height: auto;
                                 margin: 0 5px 0 0;
                             }

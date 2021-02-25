@@ -2,7 +2,7 @@
     <div class="tetch">
         <div class="row justify-center">
             <div
-                class="col-lg-4 col-xs-12"
+                class="col-lg-3 col-xs-12"
                 v-for="inst in instructors.edges"
                 :key="inst.node.id"
             >
