@@ -1,21 +1,7 @@
 <template>
     <section class="web">
         <!--=============== START navbar ===============-->
-        <section class="navv">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="menu">
-                            <img src="~assets/img/menu.png" alt="" />
-                        </div>
-                        <div class="user">
-                            <img src="~assets/img/hassbo.png" alt="" />
-                            <h3>محمد حسب الرسول</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <user-nav-bar />
         <!--=============== End navbar ===============-->
 
         <!--=============== START Lecture ===============-->
@@ -204,6 +190,7 @@ import classUnits from 'src/components/courseClass/classUnits'
 import classMaterials from 'src/components/courseClass/classMaterials'
 import classinstructors from 'src/components/courseClass/classinstructors'
 import classQuestionAndAnswer from 'src/components/courseClass/classQuestionAndAnswer'
+import UserNavBar from "src/components/utils/UserNavBar"
 
 export default {
   name: 'CourseClass',
@@ -218,7 +205,8 @@ export default {
     classUnits,
     classMaterials,
     classQuestionAndAnswer,
-    classinstructors
+    classinstructors,
+    UserNavBar
   },
 
   methods: {

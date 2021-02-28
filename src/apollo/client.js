@@ -1,7 +1,7 @@
 import { ApolloClient } from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { ApolloLink, split } from 'apollo-link'
-import { WebSocketLink } from 'apollo-link-ws'
+// import { WebSocketLink } from 'apollo-link-ws'
 import {tokenStorage} from 'src/localStorageService'
 // import { API_URI } from 'src/utils/hostConfig'
 const { buildAxiosFetch } = require('@lifeomic/axios-fetch')

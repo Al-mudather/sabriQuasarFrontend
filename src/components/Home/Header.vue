@@ -2,9 +2,15 @@
   <section class="header">
         <!--cn-->
         <div class="cn">
-            <div class="swiper-container">
-                <div class="swiper-wrapper">
-                  <div class="swiper-slide">
+          <!-- <div class="swiper-container">
+              <swiper
+                  ref="mySwiper"
+                  class="nav nav-tabs"
+                  :space-between="1"
+                  :options="swiperOptions"
+                  
+              >
+                  <swiper-slide class="nav-item full_width">
                     <div class="container">
                         <div class="row">
                             <div class="col-lg-12">
@@ -57,8 +63,8 @@
                             </div>
                         </div>
                     </div>
-                  </div>
-                  <div class="swiper-slide">
+                  </swiper-slide>
+                  <swiper-slide class="nav-item full_width">
                     <div class="container">
                         <div class="row">
                             <div class="col-lg-12">
@@ -82,7 +88,7 @@
                                                 </g>
                                             </svg>
                                             <div class="box">
-                                                <img src="~assets/img/person.png" alt="">
+                                                <img src="~assets/img/image1.png" alt="">
                                             </div>
                                         </div>
                                     </div>
@@ -103,7 +109,7 @@
                                             <svg class="point-2" xmlns="http://www.w3.org/2000/svg" width="73.234" height="73.235" viewBox="0 0 73.234 73.235">
                                                 <path id="Path_557" data-name="Path 557" d="M420.959-338.015h-9.306a27.176,27.176,0,0,1-8,19.307,27.2,27.2,0,0,1-19.311,8,27.211,27.211,0,0,1-19.311-8,27.2,27.2,0,0,1-8-19.307,27.213,27.213,0,0,1,8-19.316,27.207,27.207,0,0,1,19.311-8,27.218,27.218,0,0,1,19.311,8,27.19,27.19,0,0,1,8,19.316h9.306a36.617,36.617,0,0,0-36.615-36.62,36.624,36.624,0,0,0-36.62,36.62,36.626,36.626,0,0,0,36.62,36.615A36.619,36.619,0,0,0,420.959-338.015Z" transform="translate(-347.725 374.635)" fill="#fdffff" opacity="0.11"/>
                                             </svg>
-                                            <h2>المنصة الأولى على مستوى الوطن العربي في التدريب الطبي</h2>
+                                            <h2>المنصة الأولى على مستوى الوطن العربي في هنااااء الطبي</h2>
                                             <p>النصة الأولى على مستوى الوطن العربي في التدريب الطبيالنصة الأولى على مستوى الوطن العربي في التدريب الطبيالنصة الأولى على مستوى الوطن العربي في التدريب الطبي</p>
                                         </div>
                                     </div>
@@ -111,6 +117,16 @@
                             </div>
                         </div>
                     </div>
+                  </swiper-slide>
+                  <div class="swiper-pagination" slot="pagination"></div>
+              </swiper>
+          </div> -->
+
+
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                  <div class="swiper-slide full_width" v-for="i in 2" :key="i">
+                    <Swiper-Header />
                   </div>
                 </div>
             <div class="container">
@@ -182,13 +198,28 @@
 </template>
 
 <script>
+import SwiperHeader from 'src/components/Home/SwiperHeader'
+
 export default {
   name: 'Header',
+  data() {
+    return {
+    };
+    },
   props: {
-  }
+  },
+  components: {
+      SwiperHeader
+    },
 }
 </script>
 <style lang="scss">
+.swiper-slide {
+  width: max-content !important;
+}
 
+.full_width {
+  width: 100% !important
+}
 
 </style>

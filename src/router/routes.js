@@ -36,6 +36,7 @@ const routes = [
     name: 'reset-password-form',
     component: () => import('pages/account_management/PasswordResetForm.vue')
   },
+  { path: '/notification', name: 'notification', component: () => import('pages/notifivation_management/Notification.vue') },
   { path: '/account/confirm', name: 'account-confirm', component: () => import('components/Account/Confirm') },
   { path: '/user/profile', name: 'account-confirm', component: () => import('pages/account_management/Profile') },
   {
