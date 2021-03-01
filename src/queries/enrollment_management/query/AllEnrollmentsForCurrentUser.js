@@ -1,8 +1,14 @@
 import gql from 'graphql-tag'
 
 export const AllEnrollmentsForCurrentUser = gql`
-query AllEnrollmentsForCurrentUser{
-  allEnrollmentsForCurrentUser{
+query AllEnrollmentsForCurrentUser($cursor: String, $limit: Int){
+  allEnrollmentsForCurrentUser(after: $cursor, first: $limit){
+    pageInfo {
+      startCursor,
+      endCursor,
+      hasNextPage,
+      hasPreviousPage
+    },
     edges{
       node{
         id,

@@ -1,6 +1,5 @@
 <template>
     <div class="card">
-        
         <div class="card-img-top">
             <div class="overlay"></div>
             <img src="~assets/img/imagback.png" alt="Card image cap" />
@@ -20,7 +19,10 @@
         </div>
         <div class="card-body" style="cursor: pointer" @click="$router.push({ name: 'course-class', params: { pk: course.pk, id: course.id } })">
             <h5 class="card-title">{{course.title}}</h5>
-            <a class="btn">اذهب الى الدرس</a>
+            <a class="btn">
+                <h3>اذهب الى الدرس</h3>
+                <img src="~assets/img/send.png" alt="">
+            </a>
         </div>
     </div>
 </template>

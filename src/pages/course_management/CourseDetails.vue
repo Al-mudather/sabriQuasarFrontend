@@ -120,8 +120,12 @@ export default {
     margin: 25px 0 50px 0;
     .titel{
         margin: 0 0 39px 0;
+        @media(max-width:767px){
+            margin: 0 0 -16px 0;
+        }
         img{
-            display: inline-block;
+            // display: inline-block;
+            display: block;
             margin: -9px 0 0 0;
         }
         h3{
@@ -129,8 +133,15 @@ export default {
             font-size: 22px;
             font-family: 'cairoB';
             line-height: 1.7;
-            margin: 0 11px 0 0;
+            margin: 0 -10px 0 0;
             display: inline-block;
+            width: 94%;
+            padding: 10px 20px 8px 0;
+            background: #fefefe;
+            //maxMobile
+            @media(max-width:767px){
+                font-size: 18px;
+            }
         }
     }
     .mix{
@@ -138,6 +149,9 @@ export default {
     }
     .asid{
         margin: -31px 0 50px 0 n;
+        @media(max-width:767px){
+            margin: -31px 0 0 0;
+        }
         .rate{
             position: relative;
             z-index: 2;
@@ -164,12 +178,39 @@ export default {
             position: relative;
             right: 11px;
             z-index: 1;
+            //maxMobile
+            @media(max-width:767px){
+                right: 0;
+            }
+            //maxSmall
+            @media(max-width:991px){
+                right: 0;
+            }
             .mag{
                 width: 330px;
                 height: 243px;
                 border-radius: 47px;
+                //maxMobile
+                @media(max-width:767px){
+                    width: 100%;
+                    overflow: hidden;
+                }
+                //maxSmall
+                @media(max-width:991px){
+                    width: 100%;
+                    height: auto;
+                    overflow: hidden;
+                }
                 img{
                     width: 330px;
+                    //maxMobile
+                    @media(max-width:767px){
+                        width: 100%;
+                    }
+                    //maxSmall
+                    @media(max-width:991px){
+                        width: 100%;
+                    }
                 }
             }
             .playy{
@@ -194,6 +235,14 @@ export default {
                 position: relative;
                 margin: -106px 0 18px 0;
                 z-index: 1;
+                //maxMobile
+                @media(max-width:767px){
+                    margin: -120px 0 12px 0;
+                }
+                //maxSmall
+                @media(max-width:991px){
+                    margin: -120px 0 12px 0;
+                }
                 .ordO{
                     border-top-right-radius: 34px;
                     border-bottom-right-radius: 34px;
@@ -295,6 +344,10 @@ export default {
     .detailes{
         padding: 10px;
         border-right: 7px solid #F6F6F6;
+        //maxMobile
+        @media(max-width:767px){
+            border: none;
+        }
         .all{
             margin: 0;
             .hedd{
@@ -331,6 +384,10 @@ export default {
             }
             .pluse{
                 margin: 0 50px 17px 0;
+                //maxMobile
+                @media(max-width:767px){
+                    margin: 0 0px 17px 0;
+                }
                 img{
                     width: auto;
                     display: inline-block;
@@ -402,17 +459,24 @@ export default {
                     background: #fff;
                     padding: 25px 0 25px 0;
                     border-radius: 30px;
-                    svg{
-                        position: absolute;
-                        top: 25px;
-                        left: 98px;
-                    }
-                    img{
-                        border-radius: 50%;
-                        width: 69px;
+                    .img-user{
                         position: relative;
-                        height: 69px;
-                        margin: 5px 0 14px 0;
+                        width: 97px;
+                        text-align: center;
+                        margin: 0 auto;
+                        svg{
+                            position: absolute;
+                            top: 0;
+                            right: 9px;
+                            left: 0;
+                        }
+                        img{
+                            border-radius: 50%;
+                            width: 69px;
+                            position: relative;
+                            height: 69px;
+                            margin: 5px 0 14px 0;
+                        }
                     }
                     h3{
                         font-size: 18px;
@@ -423,6 +487,20 @@ export default {
                     p{
                         margin:0 auto 34px auto;
                         width: 82%;
+                    }
+                    a{
+                        text-decoration: none;
+                        h3{
+                            font-size:11px;
+                            color: $textColor;
+                            font-family: 'cairoB';
+                            margin: 0;
+                            img{
+                                width: auto;                        
+                                height: auto;
+                                margin: 0 5px 0 0;
+                            }
+                        }
                     }
                 }
             }

@@ -297,9 +297,7 @@ export default {
           return previousResult
         }
       })
-    },
-
-    openItemData (e) {}
+    }
   }
 }
 </script>

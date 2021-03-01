@@ -4,9 +4,6 @@ const state = {
 
 const mutations = {
   updateEnrollmentId (state, value) {
-    console.log('llllllllllllllllllllll')
-    console.log(value)
-    console.log('llllllllllllllllllllll')
     state.enrollmentId = value
   },
 }
