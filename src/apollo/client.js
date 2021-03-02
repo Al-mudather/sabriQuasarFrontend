@@ -31,7 +31,7 @@ const authMiddleware = new ApolloLink((operation, forward) => {
 
 // Create the subscription websocket link
 const wsLink = new WebSocketLink({
-  uri: `ws://${WS_HOST}/api/graphql/`,
+  uri: `ws://${WS_HOST}/ws/graphql/`,
   options: {
     reconnect: true,
     connectionParams: {
@@ -63,10 +63,11 @@ const link = split(
 
 // Create the apollo client
 export const apolloClient = new ApolloClient({
+  link: httpLink,
   link: concat(
     authMiddleware,
-    link
-    // httpLink
+    link,
+    httpLink
   ),
   cache: new InMemoryCache(),
   connectToDevTools: true

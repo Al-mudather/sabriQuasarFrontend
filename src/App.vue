@@ -5,6 +5,8 @@
 </template>
 <script>
 import { mapActions, mapState } from "vuex";
+import {WOW} from 'wowjs'
+import 'animate.css'
 
 export default {
     name: "App",
@@ -23,6 +25,13 @@ export default {
               this.$router.push({ name: "login" });
            });
         }
+    },
+    mounted () {
+        let options={
+            //Default is true
+            live:false
+        }
+        let wow=new WOW(options)
     }
 };
 </script>

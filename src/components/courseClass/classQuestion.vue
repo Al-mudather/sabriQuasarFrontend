@@ -16,7 +16,7 @@
                 </h3>
             </div>
             <div class="bottom">
-                <div class="like">
+                <div class="like" style="display: none">
                     <h4>
                         85
                         <svg
@@ -50,7 +50,7 @@
                         </svg>
                     </h4>
                 </div>
-                <div class="reply">
+                <div class="reply" style="cursor: pointer" @click="$router.push({ name: 'class-answers' })">
                     <h4>4 رد</h4>
                     <img class="person" src="~assets/img/hassbo.png" alt="" />
                     <img src="~assets/img/reply.png" alt="" />

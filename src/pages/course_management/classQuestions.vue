@@ -39,6 +39,7 @@ export default {
   data () {
     return {
       question: '',
+      courseId: null,
       allQuestionsByCourse: []
     }
   },
@@ -47,7 +48,18 @@ export default {
     classQuestion
   },
 
-  props: ['course'],
+  props: [''],
+
+  watch: {
+    '$route': {
+      handler: function(to, from) {
+
+        this.courseId = to.params.pk
+      },
+      deep: true,
+      immediate: true
+    }
+  },
 
   apollo: {
     allQuestionsByCourse: {
@@ -56,7 +68,7 @@ export default {
       },
       variables () {
         return {
-          courseId: this.course.pk,
+          courseId: this.courseId,
           orderBy: '-id'
         }
       }
@@ -94,7 +106,7 @@ subscription QuestionAndAnswer($courseId: Int) {
 
           variables () {
             return {
-              courseId: this.course.pk
+              courseId: this.courseId
             }
           },
 
@@ -133,10 +145,10 @@ subscription QuestionAndAnswer($courseId: Int) {
       const qResult = await this.$apollo.mutate({
         mutation: CreateCourseQuestion,
         variables: {
-          courseId: this.course.pk,
+          courseId: this.courseId,
           question: this.question
         },
-        refetchQueries: [{ query: AllQuestionsByCourse, variables: { courseId: this.course.pk, orderBy: '-id' } }]
+        refetchQueries: [{ query: AllQuestionsByCourse, variables: { courseId: this.courseId, orderBy: '-id' } }]
       })
       const qData = qResult.data.createCourseQuestion
       if (qData.success) {

@@ -1,327 +1,178 @@
 <template>
-  <section class="web">
-    <!--=============== START navbar ===============-->
-    <user-nav-bar />
-    <!--=============== End navbar ===============-->
-
-    <!--=============== START Lecture ===============-->
-    <section class="Lecture">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="hedeer">
-              <div class="percent">
-                <h3>{{ calculateTheTotalProgress }}%</h3>
-                <span>التقدم</span>
-              </div>
-              <div class="titel">
-                <img src="~assets/img/tit.png" alt="" />
-                <h3>{{ lodash.get(courseData, "[title]") }}</h3>
-              </div>
+    <div class="question">
+        <div class="row justify-center">
+            <div class="col-lg-5 col-xs-12">
+                <div class="pernt">
+                  <div class="send">
+                        <!-- <form @submit="createNewQuestion"> -->
+                        <form>
+                            <input
+                                type="text"
+                                v-model="question"
+                                style="outline: none"
+                                placeholder="ما هي إجابتكٍ"
+                            />
+                            <button type="submit">
+                                <img src="~assets/img/send.png" />
+                            </button>
+                        </form>
+                    </div>
+                    <!-- <div
+                        class="ask"
+                        v-for="question in allQuestionsByCourse.edges"
+                        :key="question.node.id"
+                    >
+                        <class-question :question="question.node"/>
+                    </div> -->
+                </div>
             </div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="15.103"
-              height="9.192"
-              viewBox="0 0 15.103 9.192"
-            >
-              <path
-                id="Path_998"
-                data-name="Path 998"
-                d="M8447.5,1553.75s.75,7.625,5.25,5.875,7.125-2.75,8.875,3.125"
-                transform="translate(-8447.002 -1553.701)"
-                fill="none"
-                stroke="#fcd462"
-                stroke-width="1"
-              />
-            </svg>
-            <div class="progress">
-              <div
-                class="progress-bar"
-                role="progressbar"
-                :style="{ width: calculateTheTotalProgress + '%' }"
-                aria-valuenow="75"
-                aria-valuemin="0"
-                aria-valuemax="100"
-              ></div>
-            </div>
-          </div>
         </div>
-        <!-- start tab lec -->
-        <div class="tabLect">
-          <div class="row">
-            <div class="col-lg-12">
-              <q-tabs
-                v-model="tab"
-                narrow-indicator
-                dense
-                id="myTab"
-                role="tablist"
-                active-color="warning"
-                align="center"
-                class="nav nav-tabs"
-              >
-                <!-- <q-tab :ripple="false" name="mails" icon="mail" label="Mails" /> -->
-                <q-tab :ripple="false" name="tutorial">
-                  <template v-slot:default>
-                    <li class="nav-item">
-                      <a
-                        class="nav-link"
-                        id="tutorial-tab"
-                        data-toggle="tab"
-                        role="tab"
-                        aria-controls="tutorial"
-                        aria-selected="true"
-                        >الـدروس</a
-                      >
-                    </li>
-                  </template>
-                </q-tab>
-                <q-tab :ripple="false" name="download">
-                  <template v-slot:default>
-                    <li class="nav-item">
-                      <a
-                        class="nav-link"
-                        id="download-tab"
-                        data-toggle="tab"
-                        role="tab"
-                        aria-controls="download"
-                        aria-selected="false"
-                        >المادة التعليمية</a
-                      >
-                    </li>
-                  </template>
-                </q-tab>
-                <q-route-tab :ripple="false" name="question" :to="{ name: 'class-questions' }">
-                  <template v-slot:default>
-                    <li class="nav-item">
-                      <a
-                        class="nav-link"
-                        id="question-tab"
-                        data-toggle="tab"
-                        role="tab"
-                        aria-controls="question"
-                        aria-selected="false"
-                        >بوابة الاسئلة</a
-                      >
-                    </li>
-                  </template>
-                </q-route-tab>
-                <q-tab :ripple="false" name="tech">
-                  <template v-slot:default>
-                    <li class="nav-item">
-                      <a
-                        class="nav-link"
-                        id="tech-tab"
-                        data-toggle="tab"
-                        role="tab"
-                        aria-controls="tech"
-                        aria-selected="false"
-                        >مقدمين الدورة</a
-                      >
-                    </li>
-                  </template>
-                </q-tab>
-              </q-tabs>
-            </div>
-            <!-- Tab Content -->
-            <div class="col-lg-12 col-xs-12">
-              <div class="tab-content" id="myTabContent">
-                <q-tab-panels v-model="tab" animated>
-                  <!-- start tutorial -->
-                  <q-tab-panel
-                    name="tutorial"
-                    class="cn"
-                    id="tutorial"
-                    role="tabpanel"
-                    aria-labelledby="tutorial-tab"
-                  >
-                    <classUnits :course="courseData" />
-                  </q-tab-panel>
-
-                  <!-- start download -->
-                  <q-tab-panel
-                    name="download"
-                    class="cn"
-                    id="download"
-                    role="tabpanel"
-                    aria-labelledby="download-tab"
-                  >
-                    <classMaterials :course="courseData" />
-                  </q-tab-panel>
-
-                  <!-- start question -->
-                  <q-tab-panel
-                    name="question"
-                    class="cn"
-                    id="question"
-                    role="tabpanel"
-                    aria-labelledby="question-tab"
-                  >
-                    <!-- <classQuestionAndAnswer :course="courseData" /> -->
-                    <router-view></router-view>
-                  </q-tab-panel>
-
-                  <!-- start Tetch -->
-                  <q-tab-panel
-                    name="tech"
-                    class="cn"
-                    id="tech"
-                    role="tabpanel"
-                    aria-labelledby="tech-tab"
-                  >
-                    <classinstructors
-                      :instructors="
-                        lodash.get(courseData, '[courseinstructorSet]')
-                      "
-                    />
-                  </q-tab-panel>
-                </q-tab-panels>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!--=============== End Lecture ===============-->
-  </section>
+    </div>
 </template>
 
 <script>
-import { mapActions } from "vuex";
-import { GetCourseByID } from "src/queries/course_management/query/GetCourseByID";
-import { GetEnrollmentByCourseForCurrentUser } from "src/queries/enrollment_management/query/GetEnrollmentByCourseForCurrentUser";
-import classUnits from "src/components/courseClass/classUnits";
-import classMaterials from "src/components/courseClass/classMaterials";
-import classinstructors from "src/components/courseClass/classinstructors";
-// import classQuestionAndAnswer from "src/components/courseClass/classQuestionAndAnswer";
-import UserNavBar from "src/components/utils/UserNavBar";
+// import classQuestion from 'src/components/courseClass/classQuestion'
+// import { CreateCourseQuestion } from 'src/queries/question_management/mutation/CreateCourseQuestion'
+// import { AllQuestionsByCourse } from 'src/queries/question_management/query/AllQuestionsByCourse'
+// import gql from 'graphql-tag';
 
 export default {
-  name: "CourseClass",
-  data() {
+  data () {
     return {
-      tab: "tutorial",
-      courseID: "",
-      courseData: "",
-      totalFinishedCourseContents: 0,
-      lodash: this.$_
-    };
-  },
-  components: {
-    classUnits,
-    classMaterials,
-    // classQuestionAndAnswer,
-    classinstructors,
-    UserNavBar
-  },
-
-  methods: {
-    ...mapActions("learningProgress", ["setUpdateEnrollmentIdAction"])
-  },
-
-  computed: {
-    calculateTheTotalProgress() {
-      let totalCourseContents = 0;
-      try {
-        this.courseData.courseunitSet.edges.map(unit => {
-          totalCourseContents += unit.node.courseunitcontentSet.totalCount;
-        });
-        if (totalCourseContents > 0) {
-          return parseInt(
-            (this.totalFinishedCourseContents / totalCourseContents) * 100
-          );
-        }
-        return 0;
-      } catch {
-        return 0;
-      }
+      question: '',
+      courseId: null,
+      allQuestionsByCourse: []
     }
   },
 
-  watch: {
-    "$route.params": {
-      handler: function(params) {
-        // TODO: Get the course by ID
-        this.$apollo
-          .query({
-            query: GetCourseByID,
-            variables: {
-              coursePk: params.pk
-            }
-          })
-          .then(res => {
-            this.courseData = res.data.course;
+  components: {
+    // classQuestion
+  },
 
-            if (res.data.course.pk) {
-              // TODO: Get the enrollment of the course
-              this.$apollo
-                .query({
-                  query: GetEnrollmentByCourseForCurrentUser,
-                  variables: {
-                    courseId: res.data.course.pk
-                  }
-                })
-                .then(res => {
-                  const enrollmentID =
-                    res.data.enrollmentByCourseForCurrentUser.pk;
-                  // TODO: Save the enrollmentId to the store
-                  if (enrollmentID) {
-                    this.setUpdateEnrollmentIdAction(enrollmentID);
-                  }
-                  // TODO: Get the total of finished content to calculate the progress
-                  this.totalFinishedCourseContents =
-                    res.data.enrollmentByCourseForCurrentUser.learningprogressSet.totalCount;
-                });
-            }
-          });
+  props: [''],
+
+  watch: {
+    '$route': {
+      handler: function(to, from) {
+        console.log('fffffffffffffffff')
+        console.log(to.params.pk)
+        console.log('fffffffffffffffff')
+        this.courseId = to.params.pk
       },
       deep: true,
       immediate: true
     }
-  }
-};
+  },
+
+//   apollo: {
+//     allQuestionsByCourse: {
+//       query () {
+//         return AllQuestionsByCourse
+//       },
+//       variables () {
+//         return {
+//           courseId: this.courseId,
+//           orderBy: '-id'
+//         }
+//       }
+//     },
+//     $subscribe: {
+
+//         notificationCreated: {
+
+//           query: gql`
+
+// subscription QuestionAndAnswer($courseId: Int) {
+//   questionAnswerSubscription(courseId: $courseId) {
+//     notification{
+//       id,
+//       pk,
+//       title
+//       description
+//       extraData
+//       type
+//       created
+//       updated
+//     },
+//     question{
+//       pk,
+//       question
+//     },
+//     answer {
+//       pk,
+//       answer
+//     }
+//   }
+// }
+
+//           `,
+
+//           variables () {
+//             return {
+//               courseId: this.courseId
+//             }
+//           },
+
+//           result({data}) {
+//             // console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+//             // this.myNotifications = data.notificationCreated.notifications;
+//             // console.log(data.questionAnswerSubscription)
+//             // this.$root.$emit('updateGlobalNotification',data.questionAnswerSubscription.notification)
+//             // console.log()
+//             // if (this.$_.get(this.myNotifications, '[edges]')) {
+//             //   this.myNotifications.edges.push({
+//             //     node: data.notificationCreated.notification
+//             //   })
+//             //   this.myNotifications.totalCount++
+//             // } else {
+//             //   this.myNotifications = {
+//             //     totalCount: 1,
+//             //     edges: {
+//             //       node: data.notificationCreated.notification
+//             //     }
+//             //   }
+//             // }
+
+//             // console.log(this.notificationCreated)
+//             // console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+//           },
+
+//         },
+
+//       },
+//   },
+
+  // methods: {
+  //   async createNewQuestion (e) {
+  //     e.preventDefault()
+  //     const qResult = await this.$apollo.mutate({
+  //       mutation: CreateCourseQuestion,
+  //       variables: {
+  //         courseId: this.courseId,
+  //         question: this.question
+  //       },
+  //       refetchQueries: [{ query: AllQuestionsByCourse, variables: { courseId: this.courseId, orderBy: '-id' } }]
+  //     })
+  //     const qData = qResult.data.createCourseQuestion
+  //     if (qData.success) {
+  //       // this.$q.notify({
+  //       //   color: 'success',
+  //       //   textColor: 'white',
+  //       //   position: 'top',
+  //       //   icon: 'cloud_done',
+  //       //   message: 'تم السؤال بنجاح'
+  //       // })
+  //       // TODO: Empty the question input for more questions
+  //       this.question = ''
+  //     }
+  //   }
+  // }
+}
 </script>
+
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
-/*--- start navbar ---*/
-// .q-tab__indicator {
-//     opacity: 0 !important;
-// }
-// .q-tab--active {
-//     background-color: 2px solid #FCD462;
-// }
-.navv {
-  background-color: #fcfcfc;
-  padding: 10px;
-  margin: 20px 0 20px 0;
-  .menu {
-    display: inline-block;
-    margin-left: 20px;
-    img {
-      width: auto;
-    }
-  }
-  .user {
-    display: inline-block;
-    img {
-      display: inline-block;
-      width: 45px;
-      height: 45px;
-      border-radius: 50px;
-      margin: 0 0 0 5px;
-    }
-    h3 {
-      display: inline-block;
-      font-size: 18px;
-      font-family: "cairoR";
-      color: $textColor;
-    }
-  }
-}
-/*--- End navbar ---*/
-
 /*--- START lecture ---*/
 .Lecture {
   padding: 10px;

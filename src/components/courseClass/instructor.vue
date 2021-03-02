@@ -87,11 +87,11 @@ export default {
     height: 54px;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: all 0.2s;
+    transition: all 8s ;
 
 }
 .show_more_data {
-    height: 100% !important;
+    height: 40vh !important;
 }
 
 </style>

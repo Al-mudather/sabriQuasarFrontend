@@ -17,10 +17,11 @@
                     <div class="user heading" v-else>
                         غير معروف
                     </div>
-                    <!-- <div class="notification">
-                        <span>+8</span>
+                    <div class="notification">
+                        <!-- {{lodash.get(myNotifications,'[totalCount]')}} -->
+                        <span>+{{lodash.get(myNotifications,'[totalCount]')}}</span>
                         <img src="~assets/img/notif.png" alt="" />
-                    </div> -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -28,14 +29,107 @@
 </template>
 
 <script>
+import gql from 'graphql-tag';
 import { mapState } from 'vuex'
 
 export default {
     name: "CoursesNavBar",
     data () {
         return {
-            lodash: this.$_
+            lodash: this.$_,
+            globalenotification: []
         }
+    },
+    created () {
+        this.$root.$on('updateGlobalNotification', this.updateNotificationCallback)
+    },
+    beforeDestroy () {
+        // Don't forget to turn the listener off before your component is destroyed
+        this.$root.$off('updateGlobalNotification')
+    },
+    methods: {
+        updateNotificationCallback (notification) {
+            console.log('llllllllllllllllllllllllllllllll')
+            console.log(notification)
+            console.log('llllllllllllllllllllllllllllllll')
+            this.globalenotification.push({
+                node: notification
+            })
+        }
+    },
+    apollo: {
+
+        myNotifications: {
+        query: gql`query
+GetMyNotification{
+	myNotifications{
+    totalCount,
+    edges{
+      node{
+        pk
+        title
+        description
+        extraData
+        type
+        created
+        updated
+      }
+    }
+  }
+}
+
+      `
+      },
+
+      $subscribe: {
+
+        notificationCreated: {
+
+          query: gql`
+
+subscription S{
+  notificationCreated{
+    notification{
+      pk
+      title
+      description
+      extraData
+      type
+      created
+      updated
+    }
+  }
+}
+
+          `,
+
+          result({data}) {
+            console.log("ssssssssssssssssssssssssssss")
+            // this.myNotifications = data.notificationCreated.notifications;
+            console.log(data.notificationCreated)
+            // console.log()
+            if (this.$_.get(this.myNotifications, '[edges]')) {
+              this.myNotifications.edges.push({
+                node: data.notificationCreated.notification
+              })
+              this.myNotifications.totalCount++
+            } else {
+              this.myNotifications = {
+                totalCount: 1,
+                edges: {
+                  node: data.notificationCreated.notification
+                }
+              }
+            }
+
+            // console.log(this.notificationCreated)
+            console.log("ssssssssssssssssssssssssssss")
+          },
+
+        },
+
+      },
+
     },
     computed: {
         ...mapState('authentication', ['user'])

@@ -120,12 +120,12 @@ export default {
     margin: 25px 0 50px 0;
     .titel{
         margin: 0 0 39px 0;
+        //maxMobile
         @media(max-width:767px){
             margin: 0 0 -16px 0;
         }
         img{
-            // display: inline-block;
-            display: block;
+            display: inline-block;
             margin: -9px 0 0 0;
         }
         h3{
@@ -133,11 +133,10 @@ export default {
             font-size: 22px;
             font-family: 'cairoB';
             line-height: 1.7;
-            // margin: 0 -10px 0 0;
-            margin: 0 7px 0 0;
+            margin: 0 -10px 0 0;
             display: inline-block;
             width: 94%;
-            // padding: 10px 20px 8px 0;
+            padding: 10px 20px 8px 0;
             background: #fefefe;
             //maxMobile
             @media(max-width:767px){
@@ -149,7 +148,8 @@ export default {
         margin: 57px 0 39px 0;
     }
     .asid{
-        margin: -31px 0 50px 0 n;
+        margin: -31px 0 50px 0;
+        //maxMobile
         @media(max-width:767px){
             margin: -31px 0 0 0;
         }
@@ -234,7 +234,7 @@ export default {
             @include prefixer(box-shadow, 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14), webkit moz o ms);
             .uper{
                 position: relative;
-                margin: -106px 0 18px 0;
+                margin: -106px 0 6px 0;
                 z-index: 1;
                 //maxMobile
                 @media(max-width:767px){
@@ -265,7 +265,7 @@ export default {
                     display: inline-block;
                     margin: 0 0 20px 0;
                     position: relative;
-                    background: #fff;
+                    background: #ffffffde;
                     line-height: 1.9;
                     padding: 6px 10px 6px 10px;
                     h3{
@@ -291,8 +291,9 @@ export default {
             }
             .more{
                 position: relative;
-                width: 100%;
-                height: 179px;
+                width: 250px;
+                height: 167px;
+                margin: 0 auto;
                 svg{
                     position: absolute;
                     top: 0;
@@ -320,20 +321,20 @@ export default {
                         color: $textColor;
                         outline: 0;
                         height: 40px;
-                        width: 113px;
+                        width: 105px;
                     }
                 }
                 .share{
                     position: absolute;
                     top: 102px;
-                    right: 59px;
+                    right: 16px;
                     width: auto;
                     cursor: pointer;
                 }
                 .addCou{
                     position: absolute;
                     top: 100px;
-                    left: 61px;
+                    left: 16px;
                     width: auto;
                     cursor: pointer;
                 }
@@ -378,8 +379,8 @@ export default {
             p{
                color: #9C9C9C;
                font-size: 16px;
-               font-family: 'cairoR';
-               line-height: 1.7;
+               font-family: 'cairoR';  
+               line-height: 1.7;   
                width: 90%;
                margin-right: 39px;
             }
@@ -397,7 +398,7 @@ export default {
                     display: inline-block;
                     color: #9C9C9C;
                     font-size: 16px;
-                    font-family: 'cairoR';
+                    font-family: 'cairoR';  
                 }
             }
             /*colaps*/
@@ -514,30 +515,34 @@ export default {
             button{
                 outline: 0;
                 position: relative;
+                width: 143px;
+                height: 53px;
+                border: 2px solid #ECECEC;
             }
             .right{
                 position: absolute;
                 top: -19px;
-                right: -19px;
+                right: -11px;
                 width: auto;
             }
             .left{
                 position: absolute;
                 top: 11px;
-                left: -19px;
+                left: -11px;
                 width: auto;
             }
         }
     }
     .rate {
         margin-top: 30px;
-
         .parent {
             .imag {
                 position: relative;
                 border-radius: 50px;
                 overflow: hidden;
-                height: 327px;
+                margin: 0 auto 0 auto;
+                height: 294px;
+                width: 82%;
                 @media (min-width: 320px) and (max-width: 700px){
                     left: 0;
                 }
@@ -574,12 +579,11 @@ export default {
                 background-color: #7B86FA;
                 padding: 20px;
                 border-radius: 107px 107px 27px 27px;
-                height: 138px;
-                width: 210px;
+                height: 117px;
+                width: 176px;
                 margin: -59px auto;
                 position: relative;
                 z-index: 2;
-
                 .detai {
                     text-align: center;
 
@@ -600,19 +604,21 @@ export default {
                 }
 
                 button {
-                    width: 106px;
+                    width: 85px;
                     height: 33px;
                     background-color: #FFF067;
                     color: $textColor;
                     font-size: 14px;
                     outline: 0;
-                    margin-top: 26px;
+                    margin: 8px 0 0 0;
                     @include prefixer(box-shadow, 8px 3px 7px #9e9e9e36, webkit moz ms);
                 }
 
                 .cart {
                     position: relative;
                     cursor: pointer;
+                    right: 12px;
+                    margin: 0 0 0 0;
 
                     .sala {
                         position: absolute;
@@ -630,18 +636,17 @@ export default {
                 }
             }
             .name {
-                border-radius: 57px;
-                background-color: #0C79D6;
-                width: 272px;
-                left: 7px;
-                padding-top: 195px;
-                height: 242px;
+                border-radius: 50px;
+                background-color: #5666B9;
+                width: 100%;
+                padding-top: 178px;
+                height: 222px;
                 position: relative;
-                top: -116px;
+                top: -108px;
                 z-index: -1;
                 @include prefixer(box-shadow, 8px 12px 8px #eceaea, webkit moz ms);
                 @media (min-width: 320px) and (max-width: 700px){
-                    width: 255px;
+                    width: 100%;
                 }
                 .user {
                     margin-right: 23px;
