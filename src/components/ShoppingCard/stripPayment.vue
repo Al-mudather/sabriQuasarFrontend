@@ -12,7 +12,7 @@
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateStripeCheckout } from "src/queries/checkout_management/mutation/CreateStripeCheckout";
 import { StripePublishableKey } from "src/queries/checkout_management/query/StripePublishableKey";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 
 export default {
     data () {
@@ -24,12 +24,15 @@ export default {
         ...mapState("shoppingCart", ["shoppingCartDataList"])
     },
     methods: {
+        ...mapActions('shoppingCart', ['setSaveCheckoutOrderIDAction']),
         async buyTheCoursesUsingStripe () {
             this.visible = true
             // TODO: Extract all courses ids
             const courseIds = this.getOrdersIds();
             // TODO: Make the order
             const orderResult = await this.getOrderResult(courseIds);
+            // TODO: Save the order result to the store for the success checkout
+            this.setSaveCheckoutOrderIDAction(orderResult.order.pk)
             // TODO: Get the stripe key from the backend
             const stripKey = await this.getStripeKeyFromTheBackend();
             // TODO: Intialize the stripe objct with strip key to make the payment
@@ -41,7 +44,7 @@ export default {
             // TODO: Make the payment
             stripe.redirectToCheckout({
                 sessionId: stripPaymentUrl
-            });
+            })
             this.visible = false
         },
 
@@ -87,14 +90,14 @@ export default {
                 mutation: CreateStripeCheckout,
                 variables: {
                     orderId: orderResult.order.pk,
-                    successUrl: location.origin + "/cart/success",
-                    cancelUrl: location.origin + "/cart/cancel"
+                    successUrl: location.origin + "/#/cart/success",
+                    cancelUrl: location.origin + "/#/cart/cancel"
                 }
             });
             const stripDetails = stripPaymentresult.data.createStripeCheckout;
             if (this.$_.get(stripDetails,'[errors]')) {
                 this.visible = false
-                alert(details.errors.nonFieldErrors);
+                alert(stripDetails.errors.nonFieldErrors);
             }
 
             if (this.$_.get(stripDetails,'[success]')) {

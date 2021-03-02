@@ -133,10 +133,11 @@ export default {
             font-size: 22px;
             font-family: 'cairoB';
             line-height: 1.7;
-            margin: 0 -10px 0 0;
+            // margin: 0 -10px 0 0;
+            margin: 0 7px 0 0;
             display: inline-block;
             width: 94%;
-            padding: 10px 20px 8px 0;
+            // padding: 10px 20px 8px 0;
             background: #fefefe;
             //maxMobile
             @media(max-width:767px){

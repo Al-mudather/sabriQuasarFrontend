@@ -62,6 +62,7 @@
 </template>
 
 <script>
+import gql from 'graphql-tag';
 
 import { mapActions } from 'vuex'
 
@@ -76,6 +77,68 @@ export default {
       loginCart: false
     }
   },
+
+  apollo: {
+
+      $subscribe: {
+
+        checkoutSubscription: {
+
+          query: gql`
+
+subscription Checkout{
+  checkoutSubscription{
+    notification{
+      pk,
+      title,
+      description,
+      extraData,
+      type,
+      source {
+        id,
+        pk,
+        email,
+        firstName,
+        lastName
+      },
+      created
+      updated
+    }
+  }
+}
+
+          `,
+
+          result({data}) {
+            console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+            // this.myNotifications = data.notificationCreated.notifications;
+            console.log('lllllllllll')
+            console.log(data.checkoutSubscription)
+            console.log('lllllllllll')
+            // console.log()
+            // if (this.$_.get(this.myNotifications, '[edges]')) {
+            //   this.myNotifications.edges.push({
+            //     node: data.notificationCreated.notification
+            //   })
+            //   this.myNotifications.totalCount++
+            // } else {
+            //   this.myNotifications = {
+            //     totalCount: 1,
+            //     edges: {
+            //       node: data.notificationCreated.notification
+            //     }
+            //   }
+            // }
+
+            // console.log(this.notificationCreated)
+            console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+          },
+
+        },
+
+      },
+
+    },
 
 
   mounted () {

@@ -2,14 +2,26 @@ import { Notify, LocalStorage } from 'quasar'
 
 const state = {
   shoppinCartDialog: false,
+  checkoutOrderID: LocalStorage.getItem('orderID') || null,
   shoppingCartDataList: LocalStorage.getItem('shoppingCartList') || []
 }
 
 const mutations = {
 
+  saveCheckoutOrderID (state, value) {
+    LocalStorage.set('orderID', value) || []
+    state.checkoutOrderID = value
+    
+  },
+
   deleteShoppinCartDataList (state) {
+    // TODO: Delete the shopping cart
     state.shoppingCartDataList = []
     LocalStorage.set('shoppingCartList', state.shoppingCartDataList)
+    // TODO: Delete the order
+    state.checkoutOrderID = null
+    // TODO: Delete the order from the localstorage
+    LocalStorage.set('orderID', null)
   },
 
   updateShoppinCartDataList (state, value) {
@@ -52,6 +64,10 @@ const mutations = {
 }
 
 const actions = {
+
+  setSaveCheckoutOrderIDAction ({ commit }, value) {
+    commit('saveCheckoutOrderID', value)
+  },
 
   setShoppinCartDataListAction ({ commit }, value) {
     commit('updateShoppinCartDataList', value)

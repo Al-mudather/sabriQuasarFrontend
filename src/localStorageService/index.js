@@ -1,6 +1,6 @@
 const tokenStorage = {
   setToken(tokenObj) {
-    localStorage.setItem("userAccessToken", 'JWT ' + tokenObj.token);
+    localStorage.setItem("userAccessToken", tokenObj.token);
     localStorage.setItem("userRefreshToken", tokenObj.refresh);
   },
   setAccessToken(accessToken) {
