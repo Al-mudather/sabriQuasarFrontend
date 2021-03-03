@@ -146,7 +146,7 @@
                     id="download"
                     role="tabpanel"
                     aria-labelledby="download-tab"
-                  >
+                  > 
                     <classMaterials :course="courseData" />
                   </q-tab-panel>
 

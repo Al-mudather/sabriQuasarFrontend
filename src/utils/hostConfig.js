@@ -11,6 +11,7 @@ if (process.env.NODE_ENV === 'development') {
   // baseURL = `https://${host}:${port}`
   // baseURL = "http://192.168.43.86:8000"
   baseURL = "localhost:8000"
+  // baseURL = "127.0.0.1:8000"
 
   // ws_host = "192.168.43.86:8000"
   ws_host = "localhost:8000"

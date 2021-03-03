@@ -6,7 +6,7 @@
                 <h3 v-if="!lodash.isEmpty(replay.user.firstName)">
                     {{replay.user.firstName}} {{replay.user.lastName}}
                 </h3>
-                <h3>
+                <h3 v-else>
                     غير معروف
                 </h3>
             </div>

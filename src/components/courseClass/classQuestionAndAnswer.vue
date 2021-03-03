@@ -20,19 +20,30 @@
                         class="ask"
                         v-for="question in allQuestionsByCourse.edges"
                         :key="question.node.id"
-                    >
+                    > 
+                      <transition
+                        appear
+                        enter-active-class="animated fadeIn"
+                        leave-active-class="animated fadeOut"
+                      >
                         <class-question v-on:questionData="showQuestionAnswers" :question="question.node"/>
+                      </transition>
                     </div>
                 </div>
             </div>
             <!-- Answers -->
-            <div class="col-lg-5 col-xs-12" v-if="!showQuestions">
-                <div class="pernt">
+            <div class="row col-lg-5 col-xs-12" v-if="!showQuestions">
+                <div class="col-12 text-right">
+                  <span class="text-overline">
+                    {{selectedQuestionData.question}}
+                  </span>
+                  <button class="text-center q-ma-sm" style="width: 20%; height: 20%" @click="closeTheAnswers">
+                    Back
+                    <img src="~assets/img/send.png" />
+                  </button>
+                </div>
+                <div class="col-12 pernt">
                   <div class="send">
-                      <button class="text-center q-ma-sm" style="width: 20%; height: 20%" @click="closeTheAnswers">
-                        Back
-                        <img src="~assets/img/send.png" />
-                      </button>
                       <form @submit="createNewReplay">
                           <input
                               type="text"
@@ -51,7 +62,13 @@
                       v-for="replay in selectedQuestionData.questionreplySet.edges"
                       :key="replay.node.id"
                   >
+                    <transition
+                      appear
+                      enter-active-class="animated fadeIn"
+                      leave-active-class="animated fadeOut"
+                    >
                       <classAnswer :replay="replay.node"/>
+                    </transition>
                   </div>
                 </div>
             </div>
@@ -64,6 +81,7 @@ import classQuestion from 'src/components/courseClass/classQuestion'
 import classAnswer from 'src/components/courseClass/classAnswer'
 import { CreateCourseQuestion } from 'src/queries/question_management/mutation/CreateCourseQuestion'
 import { AllQuestionsByCourse } from 'src/queries/question_management/query/AllQuestionsByCourse'
+import { QuestionAndAnswerSubscription } from 'src/queries/question_management/subscription/QuestionAndAnswerSubscription'
 
 import { CreateQuestionReply } from 'src/queries/question_management/mutation/CreateQuestionReply'
 import gql from 'graphql-tag';
@@ -100,49 +118,9 @@ export default {
     },
     $subscribe: {
 
-        notificationCreated: {
+        questionAnswerSubscription: {
 
-          query: gql`
-
-subscription QuestionAndAnswer($courseId: Int) {
-  questionAnswerSubscription(courseId: $courseId) {
-    notification{
-      id,
-      pk,
-      title
-      description
-      extraData
-      type
-      created
-      updated
-    },
-    question{
-      pk,
-      question,
-      user {
-        id,
-        pk,
-        firstName,
-        lastName,
-        email
-      }
-    },
-    answer {
-      pk,
-      answer,
-      user {
-        id,
-        pk,
-        firstName,
-        lastName,
-        email
-      }
-    }
-  }
-}
-
-          `,
-
+          query: QuestionAndAnswerSubscription,
 
           variables () {
             return {
@@ -151,61 +129,43 @@ subscription QuestionAndAnswer($courseId: Int) {
           },
 
           result({data}) {
-            console.log("fffffffffffffffffffffffffffffff")
-            console.log(data)
+
             const { notification, answer, question } = data.questionAnswerSubscription;
 
             console.log(notification, answer, question)
             if (notification.type === "QUESTION_ASK") {
               // console.log(question)
-              this.allQuestionsByCourse.edges.push({
+              this.allQuestionsByCourse.edges.unshift({
                 node: question
               })
             }
-            // console.log()
-            // if (this.$_.get(this.selectedQuestionData, '[questionreplySet][edges]')) {
-            //   this.selectedQuestionData.questionreplySet.edges.push({
-            //     node: data.questionAnswerSubscription.notification
-            //   })
-            //   this.selectedQuestionData.questionreplySet.totalCount++
-            // } else {
-            //   this.selectedQuestionData.questionreplySet = {
-            //     totalCount: 1,
-            //     edges: {
-            //       node: data.questionAnswerSubscription.notification
-            //     }
-            //   }
-            // }
-            // if (this.$_.get(this.selectedQuestionData, '[questionreplySet][edges]')) {
-            //   this.selectedQuestionData.questionreplySet.edges.push({
-            //     node: data.questionAnswerSubscription.notification
-            //   })
-            //   this.selectedQuestionData.questionreplySet.totalCount++
-            // } else {
-            //   this.selectedQuestionData.questionreplySet = {
-            //     totalCount: 1,
-            //     edges: {
-            //       node: data.questionAnswerSubscription.notification
-            //     }
-            //   }
-            // }
+            if (notification.type === "QUESTION_ANS") {
+              // console.log(question)
 
-            // console.log(this.notificationCreated)
-            console.log("fffffffffffffffffffffffffffffff")
+              if (this.$_.get(this.selectedQuestionData, '[questionreplySet][edges]')) {
+                this.selectedQuestionData.questionreplySet.edges.unshift({
+                  node: answer
+                })
+                this.selectedQuestionData.questionreplySet.totalCount++
+              } else {
+                this.selectedQuestionData.questionreplySet.edges = {
+                  totalCount: 1,
+                  edges: {
+                    node: answer
+                  }
+                }
+              }
+            }
           },
 
         },
-
-        
 
       },
   },
 
   methods: {
     showQuestionAnswers (question) {
-      // console.log('llllllllllllllllllllllllll')
-      // console.log(question.pk)
-      // console.log('llllllllllllllllllllllllll')
+      // TODO: Save the related question
       this.selectedQuestionData = question
       this.showQuestions = false
     },
@@ -223,7 +183,6 @@ subscription QuestionAndAnswer($courseId: Int) {
           courseId: this.course.pk,
           question: this.question
         }
-        // refetchQueries: [{ query: AllQuestionsByCourse, variables: { courseId: this.course.pk, orderBy: '-id' } }]
       })
       const qData = qResult.data.createCourseQuestion
       if (qData.success) {
@@ -245,12 +204,8 @@ subscription QuestionAndAnswer($courseId: Int) {
       const qData = qResult.data.createQuestionReply
       if (qData.success) {
         const replay = qData.questionReply
-        console.log('kkkkkkkkkkkkkkk')
-        console.log(replay)
-        console.log('kkkkkkkkkkkkkkk')
-        this.selectedQuestionData
         // TODO: Empty the question input for more questions
-        this.question = ''
+        this.answer = ''
       }
     }
   }
