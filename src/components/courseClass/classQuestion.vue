@@ -6,7 +6,8 @@
         <div class="col-lg-2">
             <div class="users">
                 <img src="~assets/img/man.png" alt="" />
-                <h3>{{question.user.firstName}} {{question.user.lastName}}</h3>
+                <!-- <h3>{{question.user.firstName}} {{question.user.lastName}}</h3> -->
+                <h3>{{question.user.email}}</h3>
             </div>
         </div>
         <div class="col-lg-10">
@@ -50,7 +51,7 @@
                         </svg>
                     </h4>
                 </div>
-                <div class="reply" style="cursor: pointer" @click="$router.push({ name: 'class-answers' })">
+                <div class="reply" style="cursor: pointer" @click="sendQuestionData">
                     <h4>4 رد</h4>
                     <img class="person" src="~assets/img/hassbo.png" alt="" />
                     <img src="~assets/img/reply.png" alt="" />
@@ -72,7 +73,12 @@ export default {
   data () {
     return {}
   },
-  props: ['question']
+  props: ['question'],
+  methods: {
+    sendQuestionData () {
+        this.$emit('questionData', this.question)
+    }
+  }
 }
 </script>
 

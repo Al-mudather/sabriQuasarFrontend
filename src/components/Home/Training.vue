@@ -42,10 +42,10 @@
                         </h4>
                     </div>
                     <!-- start rate -->
-                    <div class="rate">
+                    <div class="rate" v-if="courses.edgeCount > 0">
                         <div class="container-fluid">
                             <div class="cn fadeIn">
-                                <div class="row" v-if="courses.edgeCount > 0">
+                                <div class="row">
                                     <div
                                         v-for="course in courses.edges"
                                         :key="course.node.id"
@@ -65,9 +65,6 @@
                                             />
                                         </transition>
                                     </div>
-                                </div>
-                                <div class="txt" v-else>
-                                    لا توجد دورات في هذا القسم حاليا
                                 </div>
                             </div>
                             <div class="butDown">
@@ -226,6 +223,10 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+                    <div class="notCources" v-else>
+                        <img src="~assets/img/Blue.png" alt="">
+                        <p>لا توجد دورات في هذا القسم في الوقت الحالي</p>
                     </div>
                 </div>
             </div>

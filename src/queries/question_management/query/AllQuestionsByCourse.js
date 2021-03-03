@@ -13,13 +13,22 @@ query AllQuestionsByCourse($courseId: Int!, $orderBy:[String]){
             id,
             pk,
             firstName,
-            lastName
+            lastName,
+            email
           },
           questionreplySet {
             edges {
               node {
                 id,
-                pk
+                pk,
+                answer,
+                user {
+                  id,
+                  pk,
+                  firstName,
+                  lastName,
+                  email
+                }
               }
             }
           }

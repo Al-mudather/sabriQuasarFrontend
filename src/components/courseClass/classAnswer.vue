@@ -3,13 +3,18 @@
         <div class="col-lg-2">
             <div class="users">
                 <img src="~assets/img/man.png" alt="" />
-                <h3>Almudather yahya</h3>
+                <h3 v-if="!lodash.isEmpty(replay.user.firstName)">
+                    {{replay.user.firstName}} {{replay.user.lastName}}
+                </h3>
+                <h3>
+                    غير معروف
+                </h3>
             </div>
         </div>
         <div class="col-lg-10">
             <div class="pragh">
                 <h3>
-                    got to hell
+                    {{replay.answer}}
                 </h3>
             </div>
         </div>
@@ -19,9 +24,11 @@
 <script>
 export default {
   data () {
-    return {}
+    return {
+        lodash: this.$_
+    }
   },
-  props: ['question']
+  props: ['replay']
 }
 </script>
 

@@ -92,7 +92,7 @@
                     </li>
                   </template>
                 </q-tab>
-                <q-route-tab :ripple="false" name="question" :to="{ name: 'class-questions' }">
+                <q-tab :ripple="false" name="question">
                   <template v-slot:default>
                     <li class="nav-item">
                       <a
@@ -106,7 +106,7 @@
                       >
                     </li>
                   </template>
-                </q-route-tab>
+                </q-tab>
                 <q-tab :ripple="false" name="tech">
                   <template v-slot:default>
                     <li class="nav-item">
@@ -158,8 +158,8 @@
                     role="tabpanel"
                     aria-labelledby="question-tab"
                   >
-                    <!-- <classQuestionAndAnswer :course="courseData" /> -->
-                    <router-view></router-view>
+                    <classQuestionAndAnswer :course="courseData" />
+                    <!-- <router-view></router-view> -->
                   </q-tab-panel>
 
                   <!-- start Tetch -->
@@ -194,7 +194,7 @@ import { GetEnrollmentByCourseForCurrentUser } from "src/queries/enrollment_mana
 import classUnits from "src/components/courseClass/classUnits";
 import classMaterials from "src/components/courseClass/classMaterials";
 import classinstructors from "src/components/courseClass/classinstructors";
-// import classQuestionAndAnswer from "src/components/courseClass/classQuestionAndAnswer";
+import classQuestionAndAnswer from "src/components/courseClass/classQuestionAndAnswer";
 import UserNavBar from "src/components/utils/UserNavBar";
 
 export default {
@@ -211,7 +211,7 @@ export default {
   components: {
     classUnits,
     classMaterials,
-    // classQuestionAndAnswer,
+    classQuestionAndAnswer,
     classinstructors,
     UserNavBar
   },

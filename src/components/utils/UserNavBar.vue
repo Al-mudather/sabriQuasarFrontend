@@ -104,9 +104,9 @@ subscription S{
           `,
 
           result({data}) {
-            console.log("ssssssssssssssssssssssssssss")
+            // console.log("ssssssssssssssssssssssssssss")
             // this.myNotifications = data.notificationCreated.notifications;
-            console.log(data.notificationCreated)
+            // console.log(data.notificationCreated)
             // console.log()
             if (this.$_.get(this.myNotifications, '[edges]')) {
               this.myNotifications.edges.push({
@@ -123,7 +123,7 @@ subscription S{
             }
 
             // console.log(this.notificationCreated)
-            console.log("ssssssssssssssssssssssssssss")
+            // console.log("ssssssssssssssssssssssssssss")
           },
 
         },

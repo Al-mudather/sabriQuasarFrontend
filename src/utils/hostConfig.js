@@ -9,11 +9,11 @@ if (process.env.NODE_ENV === 'development') {
   port = '8000'
 
   // baseURL = `https://${host}:${port}`
-  baseURL = "http://192.168.43.86:8000"
-  // baseURL = "localhost:8000"
+  // baseURL = "http://192.168.43.86:8000"
+  baseURL = "localhost:8000"
 
-  ws_host = "192.168.43.86:8000"
-  // ws_host = "localhost:8000"
+  // ws_host = "192.168.43.86:8000"
+  ws_host = "localhost:8000"
 
 }
 
