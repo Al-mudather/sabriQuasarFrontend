@@ -1,13 +1,15 @@
 <template>
     <div class="row">
-        <div class="point">
+        <div class="point" style="display: none">
             <img src="~assets/img/point.png" alt="" />
         </div>
         <div class="col-lg-2">
             <div class="users">
                 <img src="~assets/img/man.png" alt="" />
-                <!-- <h3>{{question.user.firstName}} {{question.user.lastName}}</h3> -->
-                <h3>{{question.user.email}}</h3>
+                <h3 v-if="!lodash.isEmpty(question.user.firstName)">
+                    {{question.user.firstName}} {{question.user.lastName}}
+                </h3>
+                <h3 v-else>{{question.user.email.split('@')[0]}}</h3>
             </div>
         </div>
         <div class="col-lg-10">
@@ -52,11 +54,11 @@
                     </h4>
                 </div>
                 <div class="reply" style="cursor: pointer" @click="sendQuestionData">
-                    <h4>4 رد</h4>
-                    <img class="person" src="~assets/img/hassbo.png" alt="" />
+                    <h4>{{question.questionreplySet.totalCount}} رد</h4>
+                    <img class="person" src="~assets/img/hassbo.png" alt="" style="display: none" />
                     <img src="~assets/img/reply.png" alt="" />
                 </div>
-                <div class="more">
+                <div class="more" style="display: none">
                     <h4>
                         عرض المزيد
                         <img src="~assets/img/moree.png" alt="" />
@@ -71,7 +73,9 @@
 
 export default {
   data () {
-    return {}
+    return {
+        lodash: this.$_
+    }
   },
   props: ['question'],
   methods: {

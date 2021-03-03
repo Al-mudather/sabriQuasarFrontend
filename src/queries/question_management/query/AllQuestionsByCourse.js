@@ -3,8 +3,8 @@ import gql from 'graphql-tag'
 export const AllQuestionsByCourse = gql`
 query AllQuestionsByCourse($courseId: Int!, $orderBy:[String]){
   allQuestionsByCourse(courseId: $courseId, orderBy: $orderBy) {
+    totalCount,
     edges {
-    
         node {
           id,
           pk,
@@ -17,6 +17,7 @@ query AllQuestionsByCourse($courseId: Int!, $orderBy:[String]){
             email
           },
           questionreplySet {
+            totalCount,
             edges {
               node {
                 id,

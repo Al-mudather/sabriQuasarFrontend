@@ -15,9 +15,9 @@
                         <h3>{{lodash.get(user,'[username]')}}</h3>
                     </div>
                     <div class="user heading" v-else>
-                        غير معروف
+                        {{lodash.get(user,'[email]')}}
                     </div>
-                    <div class="notification">
+                    <div class="notification" @click="$router.push({ name: 'notification' })">
                         <!-- {{lodash.get(myNotifications,'[totalCount]')}} -->
                         <span>+{{lodash.get(myNotifications,'[totalCount]')}}</span>
                         <img src="~assets/img/notif.png" alt="" />
@@ -29,85 +29,32 @@
 </template>
 
 <script>
-import gql from 'graphql-tag';
 import { mapState } from 'vuex'
+import { NotificationCreatedSubscription } from 'src/queries/notification_management/subscription/NotificationCreatedSubscription'
+import { GetAllMyNotifications } from 'src/queries/notification_management/query/GetAllMyNotifications'
 
 export default {
     name: "CoursesNavBar",
     data () {
         return {
             lodash: this.$_,
-            globalenotification: []
+            myNotifications: []
         }
     },
-    created () {
-        this.$root.$on('updateGlobalNotification', this.updateNotificationCallback)
-    },
-    beforeDestroy () {
-        // Don't forget to turn the listener off before your component is destroyed
-        this.$root.$off('updateGlobalNotification')
-    },
-    methods: {
-        updateNotificationCallback (notification) {
-            console.log('llllllllllllllllllllllllllllllll')
-            console.log(notification)
-            console.log('llllllllllllllllllllllllllllllll')
-            this.globalenotification.push({
-                node: notification
-            })
-        }
-    },
+
     apollo: {
 
         myNotifications: {
-        query: gql`query
-GetMyNotification{
-	myNotifications{
-    totalCount,
-    edges{
-      node{
-        pk
-        title
-        description
-        extraData
-        type
-        created
-        updated
-      }
-    }
-  }
-}
-
-      `
+        query: GetAllMyNotifications
       },
 
       $subscribe: {
 
         notificationCreated: {
 
-          query: gql`
-
-subscription S{
-  notificationCreated{
-    notification{
-      pk
-      title
-      description
-      extraData
-      type
-      created
-      updated
-    }
-  }
-}
-
-          `,
+          query: NotificationCreatedSubscription,
 
           result({data}) {
-            // console.log("ssssssssssssssssssssssssssss")
-            // this.myNotifications = data.notificationCreated.notifications;
-            // console.log(data.notificationCreated)
-            // console.log()
             if (this.$_.get(this.myNotifications, '[edges]')) {
               this.myNotifications.edges.push({
                 node: data.notificationCreated.notification
@@ -121,15 +68,18 @@ subscription S{
                 }
               }
             }
-
-            // console.log(this.notificationCreated)
-            // console.log("ssssssssssssssssssssssssssss")
           },
 
         },
 
       },
 
+    },
+
+    watch: {
+      myNotifications (value) {
+        this.$root.$emit('NotificationData', value)
+      }
     },
     computed: {
         ...mapState('authentication', ['user'])

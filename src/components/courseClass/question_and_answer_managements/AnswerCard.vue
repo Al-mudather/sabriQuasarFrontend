@@ -7,7 +7,7 @@
                     {{replay.user.firstName}} {{replay.user.lastName}}
                 </h3>
                 <h3 v-else>
-                    غير معروف
+                    {{replay.user.email.split('@')[0]}}
                 </h3>
             </div>
         </div>

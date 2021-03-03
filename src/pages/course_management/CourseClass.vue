@@ -194,7 +194,7 @@ import { GetEnrollmentByCourseForCurrentUser } from "src/queries/enrollment_mana
 import classUnits from "src/components/courseClass/classUnits";
 import classMaterials from "src/components/courseClass/classMaterials";
 import classinstructors from "src/components/courseClass/classinstructors";
-import classQuestionAndAnswer from "src/components/courseClass/classQuestionAndAnswer";
+import classQuestionAndAnswer from "src/components/courseClass/question_and_answer_managements/classQuestionAndAnswer";
 import UserNavBar from "src/components/utils/UserNavBar";
 
 export default {
@@ -240,14 +240,17 @@ export default {
   },
 
   watch: {
-    "$route.params": {
-      handler: function(params) {
+    "$route": {
+      handler: function(route) {
         // TODO: Get the course by ID
+        if (route.query) {
+          this.tab = route.query.tab 
+        }
         this.$apollo
           .query({
             query: GetCourseByID,
             variables: {
-              coursePk: params.pk
+              coursePk: route.params.pk
             }
           })
           .then(res => {

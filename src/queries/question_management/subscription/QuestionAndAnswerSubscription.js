@@ -24,6 +24,7 @@ subscription QuestionAndAnswer($courseId: Int) {
         email
       },
       questionreplySet {
+        totalCount,
         edges {
           node {
             id,

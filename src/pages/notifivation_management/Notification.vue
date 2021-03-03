@@ -14,71 +14,13 @@
             </div>
           </div>
           <div class="notifi">
-            <div class="notf">
-              <div class="row">
-                <div class="col-lg-2">
-                  <div class="user">
-                    <img src="~assets/img/hassbo.png" alt="" />
-                  </div>
-                </div>
-                <div class="col-lg-10 noPadding">
-                  <div class="content">
-                    <h3>
-                      مبروك تم إشتراكك في كورس
-                      <span>تغذية أمراض الجهاز الهضمي السفلي (القولون)</span>
-                    </h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="notf">
-              <div class="row">
-                <div class="col-lg-2">
-                  <div class="user">
-                    <img src="~assets/img/hassbo.png" alt="" />
-                  </div>
-                </div>
-                <div class="col-lg-10 noPadding">
-                  <div class="content">
-                    <h3>
-                      رد أستاذ صبري على سؤال لك في
-                      <span>مقدمه في تغذية أمراض الجهاز الهضمي</span>
-                    </h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="notf">
-              <div class="row">
-                <div class="col-lg-2">
-                  <div class="user">
-                    <img src="~assets/img/Brand.png" alt="" />
-                  </div>
-                </div>
-                <div class="col-lg-10 noPadding">
-                  <div class="content">
-                    <h3>الإدارة - تحديث جديد قادم في هذا الشهر</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="notf">
-              <div class="row">
-                <div class="col-lg-2">
-                  <div class="user">
-                    <img src="~assets/img/hassbo.png" alt="" />
-                  </div>
-                </div>
-                <div class="col-lg-10 noPadding">
-                  <div class="content">
-                    <h3>
-                      مبروك تم إشتراكك في كورس
-                      <span>تغذية أمراض الجهاز الهضمي السفلي (القولون)</span>
-                    </h3>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!-- {{notificationData.edges}} -->
+            <Notification-Card 
+              v-for="notification in notificationData.edges"
+              :key="notification.node.pk"
+              :notification="notification.node"
+            />
+
           </div>
         </div>
       </div>
@@ -88,13 +30,28 @@
 
 <script>
 import UserNavBar from "src/components/utils/UserNavBar"
+import NotificationCard from 'src/components/notifivation_management/NotificationCard'
 
 export default {
   name: "Notification",
-  components: {
-    UserNavBar
+  data () {
+    return {
+      notificationData: []
+    }
   },
-  methods: {}
+  components: {
+    UserNavBar,
+    NotificationCard
+  },
+
+  mounted () {
+    this.$root.$on('NotificationData', this.getNotificationDataHnadler)
+  },
+  methods: {
+    getNotificationDataHnadler (Data) {
+      this.notificationData = Data
+    }
+  }
 };
 </script>
 <style lang="scss">
