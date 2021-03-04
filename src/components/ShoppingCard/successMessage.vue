@@ -44,7 +44,7 @@ export default {
         }
     },
 
-    created () {
+    mounted () {
         const shoopingProccess = ['cartCourses', 'loginCart', 'paymentData', 'successMessage']
         shoopingProccess.map(process => {
             const name = `[data-cart="${process}"]`

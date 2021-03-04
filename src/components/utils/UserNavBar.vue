@@ -45,7 +45,11 @@ export default {
     apollo: {
 
         myNotifications: {
-        query: GetAllMyNotifications
+        query: GetAllMyNotifications,
+        variables: {
+          orderBy: ['-id']
+        }
+        
       },
 
       $subscribe: {
@@ -56,7 +60,7 @@ export default {
 
           result({data}) {
             if (this.$_.get(this.myNotifications, '[edges]')) {
-              this.myNotifications.edges.push({
+              this.myNotifications.edges.unshift({
                 node: data.notificationCreated.notification
               })
               this.myNotifications.totalCount++
@@ -73,7 +77,7 @@ export default {
         },
 
       },
-
+ 
     },
 
     watch: {

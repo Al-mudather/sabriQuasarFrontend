@@ -6,11 +6,18 @@ subscription QuestionAndAnswer($courseId: Int) {
     notification{
       id,
       pk,
-      title
-      description
-      extraData
-      type
-      created
+      title,
+      description,
+      extraData,
+      type,
+      source {
+        id,
+        pk,
+        email,
+        firstName,
+        lastName
+      },
+      created,
       updated
     },
     question{

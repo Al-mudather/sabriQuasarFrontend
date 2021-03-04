@@ -56,6 +56,10 @@ export default {
                 params: { pk:  this.courseID, id: this.lodash.get(this.notification, '[type]')},
                 query:{ tab: 'question' }
             })
+        } else if ( (this.lodash.get(this.notification, '[type]') === 'CHECKOUT_DONE') ) {
+            this.$router.push({ 
+                name: 'my-courses'
+            })
         }
     }
     

@@ -106,8 +106,22 @@ export default {
     // }
   },
 
-  created () {
+  mounted () {
     this.$root.$emit('activateShoppingProgress', 'paymentData')
+    
+    const shoopingProccess = ['cartCourses', 'loginCart', 'paymentData']
+    shoopingProccess.map(process => {
+        const name = `[data-cart="${process}"]`
+
+        try {
+            document.querySelector(name).classList.add('active')
+            document.querySelector(name).nextSibling.classList.add('show')
+        } catch (error) {
+            document.querySelector(name).classList.add('active')
+            document.querySelector(name).nextSibling.classList.add('show')
+            
+        }
+    })
   },
 
   computed: {

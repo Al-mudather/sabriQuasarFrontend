@@ -10,7 +10,7 @@
                     </div>
                 </div>
                 <!-- strat Fltter-->
-                <div class="col-lg-12">
+                <div class="col-lg-12 col-md-6 col-xs-12">
                     <div class="search">
                         <form @submit="GetAllCoursesByTitle">
                             <input
@@ -22,7 +22,7 @@
                         </form>
                     </div>
                 </div>
-                <div class="col-lg-12">
+                <div class="col-lg-12 col-md-6 col-xs-12">
                     <div class="flbut">
                         <div class="but">
                             <img @click="GetAllCoursesByOrderingDecendinOrAcending('DEC')" class="but-filter" src="~assets/img/sortD.png" alt="" />
@@ -403,6 +403,7 @@ export default {
 .swiper-slide {
   width: max-content !important;
 }
+
 /*--- START cources ---*/
 .cources{
     padding: 50px 0;
@@ -425,6 +426,17 @@ export default {
     .flbut{
         width: 30%;
         margin: -42px 0 0 0;
+        //maxMobile
+        @media(max-width:767px){
+            width: 100%;
+            text-align: center;
+        }
+        //maxSmall
+        @media(max-width:991px){
+            width: 100%;
+            text-align: center;
+            margin: -2px 0 0 0;
+        }
         .but{
             display: inline-block;
             overflow: hidden;
@@ -517,6 +529,17 @@ export default {
         padding: 0 18% 0 0;
         width: 74%;
         margin: -9px auto;
+        //maxMobile
+        @media(max-width:767px){
+            width: 100%;
+            margin-bottom: 50px;
+            padding: 0;
+        }
+        //maxSmall
+        @media(max-width:991px){
+            width: 100%;
+            padding: 0;
+        }
         form {
             position: relative;
             text-align: center;
@@ -566,27 +589,68 @@ export default {
         border: 0;
         background-color: #FAFAFA;
         border-radius: 50px;
-        .nav-link{
-            img{
-               margin: -3px -3px 0 2px;
+        .nav-item{
+            //maxMobile
+            @media(max-width:767px){
+                margin: 0 9px 10px 0;
             }
-            font-size: 18px;
-            font-family: 'cairoR';
-            width: 100%;
-            height: 44px;
-            margin-left: 10px;
-            border-radius: 50px;
-            color:$textColor;
-            border: 1px solid #F6F6F6;
-            padding: 7px 10px 0 0;
-            background-color: #fff;
-            @include prefixer(box-shadow, 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14), webkit moz o ms);
-            &.active{
-                background-color: #2D77D8;
-                color: #fff;
+            .nav-link{
+                //maxMobile
+                @media(max-width:767px){
+                    width: 100%;
+                }
+                img{
+                   margin: -3px -3px 0 2px;
+                }
+                font-size: 18px;
+                font-family: 'cairoR';
+                width: 100%;
+                height: 44px;
+                margin-left: 10px;
+                border-radius: 50px;
+                color:$textColor;
+                border: 1px solid #F6F6F6;
+                padding: 7px 10px 0 0;
+                background-color: #fff;
+                @include prefixer(box-shadow, 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14), webkit moz o ms);
+                &.active{
+                    background-color: #2D77D8;
+                    color: #fff;
+                }
             }
         }
     }
+    // .nav-tabs{
+    //     margin: 0 0 59px 0;
+    //     padding: 15px;
+    //     border: 0;
+    //     background-color: #FAFAFA;
+    //     border-radius: 50px;
+    //     .nav-link{
+    //         //maxMobile
+    //         @media(max-width:767px){
+    //             margin: 0 9px 10px 0;
+    //         }
+    //         img{
+    //            margin: -3px -3px 0 2px;
+    //         }
+    //         font-size: 18px;
+    //         font-family: 'cairoR';
+    //         width: 100%;
+    //         height: 44px;
+    //         margin-left: 10px;
+    //         border-radius: 50px;
+    //         color:$textColor;
+    //         border: 1px solid #F6F6F6;
+    //         padding: 7px 10px 0 0;
+    //         background-color: #fff;
+    //         @include prefixer(box-shadow, 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14), webkit moz o ms);
+    //         &.active{
+    //             background-color: #2D77D8;
+    //             color: #fff;
+    //         }
+    //     }
+    // }
     .rate {
         margin-top: 30px;
 
@@ -600,6 +664,10 @@ export default {
                 @media (min-width: 320px) and (max-width: 700px){
                     margin-bottom: 0;
                 }
+                //maxMobile
+                @media(max-width:767px){
+                    margin-bottom: -53px;
+                }
                 .imag {
                     position: relative;
                     border-radius: 50px;
@@ -607,7 +675,14 @@ export default {
                     margin: 0 auto 0 auto;
                     height: 294px;
                     width: 82%;
-
+                    //maxMobile
+                    @media(max-width:767px){
+                        height: 274px;
+                    }
+                    //minMedium
+                    @media(min-width:922px){
+                        height: auto;
+                    }
                     .overlay {
                         @include overlay;
                         background-color: rgba(#fbfbff, .6);
@@ -731,6 +806,21 @@ export default {
             }
         }
 
+    }
+    .notResult{
+        padding:10px;
+        margin: 0 auto 40px auto;
+        text-align: center;
+        img{
+            width: auto;
+        }
+        p{
+            font-size: 18px;
+            color: $textColor;
+            font-family: 'cairoR';
+            margin: 30px 0 20px 0;
+            line-height: 1.8;
+        }
     }
 }
 

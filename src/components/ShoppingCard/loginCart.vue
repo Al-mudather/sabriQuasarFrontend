@@ -149,13 +149,18 @@ export default {
         ...mapState("authentication", ["user", "token"])
     },
 
-    created () {
+    mounted () {
         this.$root.$emit('activateShoppingProgress', 'loginCart')
+        const shoopingProccess = ['cartCourses', 'loginCart']
+        shoopingProccess.map(process => {
+            const name = `[data-cart="${process}"]`
+            document.querySelector(name).classList.add('active')
+            document.querySelector(name).nextSibling.classList.add('show')
+        })
         if (this.token) {
             this.$router.push({ name: 'payment' })
         }
     },
-
     components: {
         GoogleAuthentication,
         FacebookAuthentication

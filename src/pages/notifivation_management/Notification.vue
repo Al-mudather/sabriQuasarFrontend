@@ -45,6 +45,7 @@ export default {
   },
 
   mounted () {
+    // TODO: Get the notification from the [ UserNavBar ] component
     this.$root.$on('NotificationData', this.getNotificationDataHnadler)
   },
   methods: {

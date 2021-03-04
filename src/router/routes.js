@@ -20,26 +20,6 @@ const routes = [
     path: '/class/:pk/:id',
     name: 'course-class',
     component: () => import('pages/course_management/CourseClass.vue')
-    // children: [
-    //   {
-    //     path: 'questions',
-    //     name: 'class-questions',
-    //     props: {
-    //       header: true,
-    //       content: true
-    //    },
-    //     component: () => import('pages/course_management/classQuestions.vue')
-    //   },
-    //   {
-    //     path: 'answers',
-    //     name: 'class-answers',
-    //     props: {
-    //       header: true,
-    //       content: true
-    //    },
-    //     component: () => import('pages/course_management/classAnswers.vue')
-    //   }
-    // ]
   },
   {
     path: '/myCourses',
