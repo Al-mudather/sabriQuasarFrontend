@@ -356,18 +356,25 @@ export default {
         delay: 400 // ms
       })
       // TODO: fill the varaibles
-      this.$apollo.query({
-        query: GetAllCourses,
-        variables: {
-          courseSpeciality: specialityID,
-          ...this.filter,
-          ...this.searchFilter,
-          ...this.orderingFilter
-        }
-      }).then((res) => {
-        this.courses = res.data.allCourses
+      try {
+        this.$apollo.query({
+          query: GetAllCourses,
+          variables: {
+            courseSpeciality: specialityID,
+            ...this.filter,
+            ...this.searchFilter,
+            ...this.orderingFilter
+          }
+        }).then((res) => {
+          this.courses = res.data.allCourses
+          this.$q.loading.hide()
+        }).catsh((e) => {
+          this.$q.loading.hide()
+        })
+
+      } catch {
         this.$q.loading.hide()
-      })
+      }
     },
     // TODO: Change the speciality when it been clicked
     changeTab (e) {

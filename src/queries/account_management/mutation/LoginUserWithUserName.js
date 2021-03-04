@@ -13,6 +13,9 @@ mutation LoginUser($username: String!, $password: String!){
     user {
       id,
       username,
+      fullName,
+      firstName,
+      lastName,
       verified,
       affiliateSet {
         edges {

@@ -360,7 +360,7 @@ export default {
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
 /*--- Start Training ---*/
-.swiper-slide {
+.nav-item {
     width: max-content !important;
 }
 .training {

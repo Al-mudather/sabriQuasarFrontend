@@ -52,6 +52,8 @@ const mutations = {
       } else {
         Notify.create({
           type: 'warning',
+          progress: true,
+          multiLine: true,
           position: 'top',
           message: 'هذا الكورس موجود مسبقا في السله'
         })

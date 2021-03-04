@@ -8,7 +8,19 @@ query GetMyProfileData {
     firstName,
     lastName,
     fullName,
-    email
+    email,
+    gender,
+    phoneNumber,
+    affiliateSet {
+      edges {
+        node {
+          id,
+          pk,
+          affiliateLink
+        }
+      }
+    }
   }
 }
 `
+ 

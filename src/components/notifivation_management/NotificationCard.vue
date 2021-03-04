@@ -3,7 +3,7 @@
         <div class="row">            
             <div class="col-lg-2">
                 <div class="user">
-                <img src="~assets/img/hassbo.png" alt="" />
+                    <img src="~assets/img/man.png" alt="" />
                 </div>
             </div>
             <div class="col-lg-10 noPadding">
@@ -13,12 +13,14 @@
                     <span>{{notification.title}}</span>
                 </h3>
                 <h3 v-else-if="notification.type === 'QUESTION_ANS' ">
-                    <!-- الجواب : 
-                    <span>{{notification.description}}</span> -->
                     جواب سؤال : 
                     <span>{{notification.title}}</span>
                     هو : 
                     <span>{{notification.description}}</span>
+                </h3>
+                <h3 v-else-if="notification.type === 'CHECKOUT_DONE' ">
+                    {{notification.description}} 
+                    <span>تمت عملية الدفع بنجاح يمكنك الان التعلم من خلال لوحتك التعليميه</span>
                 </h3>
                 </div>
             </div>
@@ -29,6 +31,7 @@
 <script>
 
 export default {
+  name: "notificationCard",
   data () {
     return {
         lodash: this.$_,

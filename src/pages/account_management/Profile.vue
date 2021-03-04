@@ -3,10 +3,9 @@
     <!--=============== START navbar ===============-->
     <user-nav-bar />
     <!--=============== End navbar ===============-->
-    <div lass="row justify-center">
+    <div lass="row justify-center" v-if="lodash.isEmpty(myAffiliateLink)">
       <q-btn @click="AddMeToTheAffiliateProgram" class="col-3" color="primary" label="Join affillite programe" />
     </div>
-    {{myAffiliateLink}}
     <!--=============== START profile ===============-->
     <section class="profile">
       <div class="container-fluid">
@@ -24,7 +23,7 @@
           <div class="row">
             <div class="col-lg-3">
               <div class="user">
-                <img src="~assets/img/hassbo.png" alt="" />
+                <img src="~assets/img/man.png" alt="" />
               </div>
             </div>
             <div class="col-lg-7">
@@ -67,75 +66,46 @@
                           v-model="email"
                           type="email"
                           placeholder="البريد الالكتروني"
+                          disabled
                         />
                       </div>
                     </div>
                     <div class="col-lg-12 col-xs-12">
                       <div class="inp">
                         <img src="~assets/img/phone-call.png" alt="" />
-                        <input type="email" placeholder="رقم الهاتف" />
+                        <input type="text" v-model="phoneNumber" placeholder="رقم الهاتف" />
                       </div>
                     </div>
                     <div class="type">
-                      <div class="male">
+                      <div class="male" data-gender="male" @click="setTheGenderToMale">
                         <img src="~assets/img/male.png" alt="" />
                         <h3>ذكــر</h3>
                       </div>
-                      <div class="male">
+                      <div class="male" data-gender="female" @click="setTheGenderToFemale">
                         <img src="~assets/img/female.png" alt="" />
                         <h3>أنثـــي</h3>
                       </div>
                     </div>
                   </div>
-                </form>
-                <div class="password">
-                  <div class="titel">
-                    <img src="~assets/img/tit.png" alt="" />
-                    <h3>تعيين كلمة مرور جديدة</h3>
+                  <div
+                    disable="1"
+                    class="but"
+                    @click="UpdateUserProfileData"
+                  >
+                    <h3>تحديث</h3>
+                    <img src="~assets/img/Group 734.png" alt="" />
                   </div>
-                  <form>
-                    <div class="row">
-                      <div class="col-lg-6 col-sm-6 col-xs-12">
-                        <div class="inp">
-                          <img src="~assets/img/password.png" alt="" />
-                          <input
-                            v-model="oldPassword"
-                            type="password"
-                            placeholder="كلمة المرور القديمة"
-                          />
-                        </div>
-                      </div>
-                      <div class="col-lg-6 col-sm-6 col-xs-12">
-                        <div class="inp">
-                          <img src="~assets/img/password.png" alt="" />
-                          <input
-                            v-model="newPassword1"
-                            type="password"
-                            placeholder="كلمة المرور الجديدة"
-                          />
-                        </div>
-                      </div>
-                      <div class="col-lg-12 col-xs-12">
-                        <div class="inp">
-                          <img src="~assets/img/password.png" alt="" />
-                          <input
-                            v-model="newPassword2"
-                            type="password"
-                            placeholder="تأكيد كلمة المرور الجديدة"
-                          />
-                        </div>
-                      </div>
-                      <div
-                        disable="1"
-                        class="but"
-                        @click="UpdateUserProfileData"
-                      >
-                        <h3>تحديث</h3>
-                        <img src="~assets/img/Group 734.png" alt="" />
-                      </div>
-                    </div>
-                  </form>
-                </div>
+                  <q-inner-loading :showing="visible">
+                      <q-spinner-hourglass color="primary" size="70px" />
+                  </q-inner-loading>
+                </form>
+                <!-- 
+                  Start of Passowrd Rest
+                -->
+                <Password-Reset-Profile />
+                <!-- 
+                  End of Passowrd Rest
+                -->
               </div>
             </div>
           </div>
@@ -147,9 +117,10 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import PasswordResetProfile from 'src/components/Profile_managements/PasswordResetProfile'
 import UserNavBar from "src/components/utils/UserNavBar";
-import { ChangeUserPassword } from "src/queries/account_management/mutation/ChangeUserPassword";
+
+
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { UpdateUserProfile } from "src/queries/account_management/mutation/UpdateUserProfile";
 import { JoinAffiliateProgram } from "src/queries/afilliate_management/mutation/JoinAffiliateProgram";
@@ -158,17 +129,19 @@ export default {
   name: "Home",
   data() {
     return {
+      lodash: this.$_,
+      visible: false,
       fullName: "",
+      phoneNumber: "",
       email: "",
-      oldPassword: "",
       myAffiliateLink: "",
-      newPassword1: "",
-      newPassword2: "",
-      errorMessages: []
-    };
+      errorMessages: [],
+      genderOptions: ['male', 'female', 'not_set']
+    }
   },
   components: {
-    UserNavBar
+    UserNavBar,
+    'Password-Reset-Profile': PasswordResetProfile
   },
 
   apollo: {
@@ -181,8 +154,22 @@ export default {
 
   watch: {
     me(value) {
-      this.fullName = value.fullName;
       this.email = value.email;
+      this.fullName = value.fullName;
+      this.phoneNumber = value.phoneNumber;
+      this.myAffiliateLink = value.affiliateSet.edges[0].node.affiliateLink;
+      
+      if (value.gender === "MALE") {
+        document.querySelector('[data-gender="female"]').classList.remove("active");
+        document.querySelector('[data-gender="male"]').classList.add("active");
+        this.gender = 'male'
+      } else if (value.gender === "FEMALE") {
+        document.querySelector('[data-gender="male"]').classList.remove("active");
+        document.querySelector('[data-gender="female"]').classList.add("active");
+        this.gender = 'female'
+      } else {
+
+      }
     }
   },
 
@@ -194,6 +181,14 @@ export default {
           this.errorMessages.push(val.message);
         }
       }
+    },
+
+    setTheGenderToMale () {
+      this.gender = 'male'
+    },
+
+    setTheGenderToFemale () {
+      this.gender = 'female'
     },
 
     ///////////////////////////////////
@@ -216,53 +211,40 @@ export default {
 
     UpdateUserProfileData(e) {
       e.preventDefault();
-      ///////////////////////////////////////////
-      // TODO: IF the password need to be changed
-      ///////////////////////////////////////////
-      if (this.oldPassword) {
-        if (this.newPassword1 === this.newPassword2) {
-          this.errorMessages = [];
-          this.$apollo
-            .mutate({
-              mutation: ChangeUserPassword,
-              variables: {
-                oldPassword: this.oldPassword,
-                newPassword1: this.newPassword1,
-                newPassword2: this.newPassword2
-              }
-            })
-            .then(result => {
-              if (result.data.passwordChange.success) {
-              } else if (result.data.passwordChange.errors) {
-                this.errorHandler(result.data.passwordChange.errors);
-              }
-            });
-        } else {
-          this.errorMessages.push("passwords are not the same");
-        }
-      }
       //////////////////////////////
       // TODO: Update the user data
       //////////////////////////////
-      this.$apollo
-        .mutate({
-          mutation: UpdateUserProfile,
-          variables: {
-            firstName: this.firstName,
-            lastName: this.lastName,
-            fullName: this.fullName
-          }
-        })
-        .then(result => {
-          if (result.data.updateAccount.success) {
-          } else if (result.data.updateAccount.errors) {
-            this.errorHandler(result.data.updateAccount.errors);
-          }
-          console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-          console.log(result);
-          console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-        })
-        .catch(e => {});
+      this.visible = true
+      try {
+        this.$apollo
+          .mutate({
+            mutation: UpdateUserProfile,
+            variables: {
+              fullName: this.fullName,
+              phoneNumber: this.phoneNumber,
+              gender: this.gender
+            }
+          })
+          .then(result => {
+            if (result.data.updateAccount.success) {
+              this.$q.notify({
+                type: "positive",
+                multiLine: true,
+                progress: true,
+                message: "Profile wase updated"
+              })
+            } else if (result.data.updateAccount.errors) {
+              this.errorHandler(result.data.updateAccount.errors);
+            }
+            this.visible = false
+          })
+          .catch(e => {
+            this.visible = false
+          });
+
+      } catch {
+        this.visible = false
+      }
     }
   },
 

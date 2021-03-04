@@ -7,11 +7,11 @@
                         <img src="~assets/img/menu.png" alt="" />
                     </div>
                     <div class="user" v-if="lodash.get(user,'[firstName]')">
-                        <img src="~assets/img/hassbo.png" alt="" />
+                        <img src="~assets/img/man.png" alt="" />
                         <h3>{{lodash.get(user,'[firstName]')}} {{lodash.get(user,'[lastName]')}}</h3>
                     </div>
                     <div class="user" v-else-if="lodash.get(user,'[username]')">
-                        <img src="~assets/img/hassbo.png" alt="" />
+                        <img src="~assets/img/man.png" alt="" />
                         <h3>{{lodash.get(user,'[username]')}}</h3>
                     </div>
                     <div class="user heading" v-else>

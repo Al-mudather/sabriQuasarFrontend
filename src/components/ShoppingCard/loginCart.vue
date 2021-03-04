@@ -84,9 +84,9 @@
                             />
                         </svg>
                     </div>
-                    <h3>أنا أوافق علي <span>شروط الخدمة</span></h3>
+                    <h3 style="display: none">أنا أوافق علي <span>شروط الخدمة</span></h3>
                 </div>
-                <div class="but">
+                <div class="but" @click="GoToSignUpPage">
                     <h3>
                         <img src="~assets/img/Path 478.png" alt="" />إنشاء حساب
                     </h3>
@@ -94,8 +94,40 @@
             </form>
         </div>
 
-        <div v-else class="text-center">
-            You already logged in move one
+        <div class="total">
+            <div class="next" @click="GoToPaymentCartPage">
+                <a href="#">
+                    <svg
+                        class="nexx"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="61.667"
+                        height="54"
+                        viewBox="0 0 61.667 54"
+                    >
+                        <g
+                            id="Group_363"
+                            data-name="Group 363"
+                            transform="translate(0 54)"
+                        >
+                            <path
+                                id="Path_55"
+                                data-name="Path 595"
+                                d="M61.667-27A23.678,23.678,0,0,0,38-50.667H28.333A23.678,23.678,0,0,0,4.667-27,23.678,23.678,0,0,0,28.333-3.333H38A23.678,23.678,0,0,0,61.667-27Z"
+                                fill="#fbc74b"
+                                fill-rule="evenodd"
+                            />
+                            <path
+                                id="Path_56"
+                                data-name="Path 596"
+                                d="M28.333-1.333,27,0A27.013,27.013,0,0,1,0-27,27.013,27.013,0,0,1,27-54l1.333,1.333A25.679,25.679,0,0,0,2.667-27,25.679,25.679,0,0,0,28.333-1.333Z"
+                                fill="#fbc74b"
+                                fill-rule="evenodd"
+                            />
+                        </g>
+                    </svg>
+                    <img src="~assets/img/back.png" alt="" />
+                </a>
+            </div>
         </div>
     </div>
 </template>
@@ -106,9 +138,11 @@ import GoogleAuthentication from "src/components/Account/GoogleAuthentication";
 import FacebookAuthentication from "src/components/Account/FacebookAuthentication";
 
 export default {
+    name:  "loginCartpage",
     data () {
         return {
-            checked: false
+            checked: false,
+            lodash: this.$_
         }
     },
     computed: {
@@ -116,6 +150,7 @@ export default {
     },
 
     created () {
+        this.$root.$emit('activateShoppingProgress', 'loginCart')
         if (this.token) {
             this.$router.push({ name: 'payment' })
         }
@@ -128,6 +163,27 @@ export default {
     methods: {
         GoToLoginPage () {
             this.$router.push({ name: 'login' })
+        },
+
+        GoToSignUpPage () {
+            this.$router.push({ name: 'signUp' })
+        },
+
+        GoToPaymentCartPage () {
+
+            if (!this.$_.isEmpty(this.user)) {
+                this.$router.push({ name: 'payment' })
+
+            } else {
+                
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: 'يجب تسجيل الدخول اولا'
+                })
+            }
         }
     }
 };

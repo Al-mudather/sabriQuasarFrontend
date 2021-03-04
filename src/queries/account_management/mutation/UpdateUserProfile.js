@@ -1,11 +1,11 @@
 import gql from 'graphql-tag'
 
 export const UpdateUserProfile = gql`
-mutation UpdateUserProfile($firstName: String!, $lastName: String, $firstName: String){
+mutation UpdateUserProfile($fullName: String!, $phoneNumber: String, $gender: String){
   updateAccount(
-    firstName: $firstName,
-    lastName: $lastName,
-    fullName: $fullName
+    fullName: $fullName,
+    phoneNumber: $phoneNumber,
+    gender: $gender
   ) {
     success,
     errors

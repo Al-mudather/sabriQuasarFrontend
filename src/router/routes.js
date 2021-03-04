@@ -12,8 +12,8 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: 'course/:pk/:id', name: 'course-details', component: () => import('pages/course_management/CourseDetails.vue') },
-      { path: 'course/:link/:pk/:id', name: 'course-affilliate-details', component: () => import('pages/course_management/CourseDetails.vue') },
-      { path: 'courses', name: 'courses', component: () => import('pages/course_management/Courses.vue') }
+      { path: '/course/:link/:pk/:id', name: 'course-affilliate-details', component: () => import('pages/course_management/CourseDetails.vue') },
+      { path: '/courses', name: 'courses', component: () => import('pages/course_management/Courses.vue') }
     ]
   },
   {
@@ -42,7 +42,7 @@ const routes = [
     // ]
   },
   {
-    path: '/myCourses/',
+    path: '/myCourses',
     name: 'my-courses',
     component: () => import('pages/course_management/MyCourses.vue')
   },
@@ -60,13 +60,13 @@ const routes = [
   { path: '/account/confirm', name: 'account-confirm', component: () => import('components/Account/Confirm') },
   { path: '/user/profile', name: 'user-profile', component: () => import('pages/account_management/Profile') },
   {
-    path: '/account/',
+    path: '/account',
     component: () => import('pages/account_management/Account'),
     children: [
-      { path: 'login', name: 'login', component: () => import('components/Account/Login') },
-      { path: 'signUp', name: 'signUp', component: () => import('components/Account/SignUp') },
-      { path: 'passwordReset', name: 'password-reset', component: () => import('components/Account/ResetPassword') },
-      { path: 'confirm', name: 'password-confirm', component: () => import('components/Account/Confirm') }
+      { path: '/login', name: 'login', component: () => import('components/Account/Login') },
+      { path: '/signUp', name: 'signUp', component: () => import('components/Account/SignUp') },
+      { path: '/passwordReset', name: 'password-reset', component: () => import('components/Account/ResetPassword') },
+      { path: '/confirm', name: 'password-confirm', component: () => import('components/Account/Confirm') }
     ]
   },
   {

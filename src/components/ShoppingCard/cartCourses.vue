@@ -26,7 +26,7 @@
                 <h2>المجمــوع</h2>
                 <h3>{{ calculateTheTotalFees }}<span>SDG</span></h3>
             </div>
-            <div class="next">
+            <div class="next" @click="goToAuthenticationCartPage">
                 <a href="#">
                     <svg
                         class="nexx"
@@ -91,6 +91,10 @@ export default {
       'deleteShoppinCartDataListAction',
       'setShoppinCartDataListAction'
     ]),
+
+    goToAuthenticationCartPage () {
+      this.$router.push({ name: 'login-cart' })
+    },
 
     removeCourseFromCart (item) {
       // You don't allowed to change the data from the store directlly

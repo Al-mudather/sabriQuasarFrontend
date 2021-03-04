@@ -4,12 +4,12 @@
             <paypal-payment />
             <strip-payment />
             <syber-pay-payment />
-            <div class="sele edit">
+            <div class="sele edit" style="display: none">
                 <img src="~assets/img/STCPAY.png" alt="" />
             </div>
         </div>
         <!--details Payment-->
-        <div class="details">
+        <div class="details" style="display: none">
             <div class="error">
                 <h3>
                     <img src="~assets/img/error.png" alt="" />رقم البطاقة غير
@@ -58,6 +58,7 @@ import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
 // import { openURL } from 'quasar'
 
 export default {
+    name:  "paymentCartpage",
   components: {
     'strip-payment': stripPayment,
     'syber-pay-payment': syberPay,
@@ -103,6 +104,10 @@ export default {
     //     }
     //   }
     // }
+  },
+
+  created () {
+    this.$root.$emit('activateShoppingProgress', 'paymentData')
   },
 
   computed: {

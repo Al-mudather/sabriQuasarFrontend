@@ -1,5 +1,5 @@
 <template>
-    <div class="sele edit active" @click="buyTheCoursesUsingStripe">
+    <div class="sele edit" @click="buyTheCoursesUsingStripe">
         <img src="~assets/img/discover.png" alt="" />
         <img src="~assets/img/visa.png" alt="" />
         <q-inner-loading :showing="visible">

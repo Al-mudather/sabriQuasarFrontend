@@ -9,9 +9,12 @@ query GetMyNotifications($orderBy: [String], $type: String, $extraData: String) 
         pk,
         type,
         title,
-        source{
+        source {
           id,
-          pk
+          pk,
+          email,
+          firstName,
+          lastName
         }
       }
     }

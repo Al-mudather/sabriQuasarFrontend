@@ -1,6 +1,8 @@
 <template>
     <div class="succses">
-        <h3>شكرا لك !<span>هنـاء عثمان</span></h3>
+        <h3 v-if="!$_.isEmpty(user.fullName)">شكرا لك !<span>{{user.fullName}}</span></h3>
+        <h3 v-else-if="!$_.isEmpty(user.firstName) && !$_.isEmpty(user.lastName)">شكرا لك !<span>{{user.firstName}} {{user.lastName}}</span></h3>
+        <h3 v-else>شكرا لك !<span>{{user.username.split('@')[0]}}</span></h3>
         <div class="imaagg">
             <img src="~assets/img/success.png" alt="">
             <h2>تهانينا لك</h2>
@@ -14,7 +16,7 @@ import { GetMyNotifications } from 'src/queries/notification_management/query/My
 import { mapState, mapActions } from 'vuex'
 
 export default {
-
+    name:  "successCartpage",
     apollo: {
         myNotifications: {
             query () {
@@ -42,8 +44,18 @@ export default {
         }
     },
 
+    created () {
+        const shoopingProccess = ['cartCourses', 'loginCart', 'paymentData', 'successMessage']
+        shoopingProccess.map(process => {
+            const name = `[data-cart="${process}"]`
+            document.querySelector(name).classList.add('active')
+            document.querySelector(name).nextSibling.classList.add('show')
+        })
+    },
+
     computed: {
-        ...mapState("shoppingCart", ["checkoutOrderID"])
+        ...mapState("shoppingCart", ["checkoutOrderID"]),
+        ...mapState("authentication", ["user"])
     },
 
 

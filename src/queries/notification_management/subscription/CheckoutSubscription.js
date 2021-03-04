@@ -1,13 +1,14 @@
 import gql from 'graphql-tag'
 
-export const NotificationCreatedSubscription = gql`
-subscription NotificationCreatedSubscription{
-  notificationCreated{
+export const CheckoutSubscription = gql`
+subscription CheckoutSubscription{
+  checkoutSubscription{
     notification{
-      pk
-      title
-      description
+      pk,
+      title,
+      description,
       extraData,
+      type,
       source {
         id,
         pk,
@@ -15,7 +16,6 @@ subscription NotificationCreatedSubscription{
         firstName,
         lastName
       },
-      type
       created
       updated
     }

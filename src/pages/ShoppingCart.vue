@@ -13,35 +13,31 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="270.306" height="73.539" viewBox="0 0 270.306 73.539">
                             <path id="Path_643" data-name="Path 643" d="M76.724-31.722a13,13,0,0,0-17.367,4.87c-.19.347-.4.686-.609,1.021A25.145,25.145,0,0,0,54.924-12.5h-.04a3.529,3.529,0,0,1-1.059,2.515,3.651,3.651,0,0,1-2.559,1.037,3.651,3.651,0,0,1-2.559-1.041,3.528,3.528,0,0,1-1.06-2.514v0a1.708,1.708,0,0,0-1.687-1.684,1.689,1.689,0,0,0-.711.157,31.434,31.434,0,0,1-3.816,1.48,5.212,5.212,0,0,0-3.71,4.947h-.042a5.916,5.916,0,0,1-5.861,5.811h-.1A5.916,5.916,0,0,1,25.86-7.605a5.252,5.252,0,0,0-3.751-4.985,1.968,1.968,0,0,0-1.73.279,1.893,1.893,0,0,0-.786,1.537v7.332A3.474,3.474,0,0,1,16.151,0a3.474,3.474,0,0,1-3.442-3.442V-15.818a3.145,3.145,0,0,0-1.175-2.434.7.7,0,0,0-.73-.09.677.677,0,0,0-.394.611v2.67a2.737,2.737,0,0,1-2.735,2.682H7.652a2.737,2.737,0,0,1-2.711-2.689v-1.645a38.074,38.074,0,0,0-2.748-14.2A30.546,30.546,0,0,1,0-42.312,31.816,31.816,0,0,1,31.764-73.539,31.737,31.737,0,0,1,57.782-59.984a18.085,18.085,0,0,0,6.229,5.527l2.93,1.576A18.085,18.085,0,0,0,87.22-55.028a23.184,23.184,0,0,1,15.119-5.629,23.31,23.31,0,0,1,17.34,7.713,25.345,25.345,0,0,0,18.81,8.367A25.345,25.345,0,0,0,157.3-52.944a23.31,23.31,0,0,1,17.339-7.713,23.31,23.31,0,0,1,17.34,7.713,25.344,25.344,0,0,0,18.813,8.367h0a25.348,25.348,0,0,0,18.814-8.367,23.311,23.311,0,0,1,17.338-7.714,23.482,23.482,0,0,1,23.36,23.36,23.482,23.482,0,0,1-23.36,23.36A23.267,23.267,0,0,1,231.819-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.427,32.427,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.269,23.269,0,0,1,159.514-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.428,32.428,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.48,23.48,0,0,1,81.6-26.617a11.812,11.812,0,0,0-4.919-5.018A.581.581,0,0,0,76.724-31.722Z" transform="translate(0 73.539)" fill="#2d77d8" fill-rule="evenodd"/>
                         </svg>
-                        <div class="link" @click="changeNav">
-                            <router-link tag="div" class="lii active" :to="{ name: 'cart'}" exact><img src="~assets/img/cart.png" alt=""></router-link>
-                            <!-- <div class="lii active" data-cart="cartCourses">
+                        <div class="link" >
+                            <div class="lii active" data-cart="cartCourses">
                                 <img src="~assets/img/cart.png" alt="">
-                            </div> -->
-                            <div class="arrow show" style="transform: translate(-3px, -2px)" data-cart="loginCart">
+                            </div>
+                            <div class="arrow show" style="transform: translate(-3px, -2px)">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
-                            <!-- <div class="lii" data-cart="loginCart">
+                            <div class="lii" style="transform: translateX(-4px)" data-cart="loginCart">
                                 <img src="~assets/img/acc.png" alt="">
-                            </div> -->
-                            <router-link tag="div" class="lii" style="transform: translateX(-4px)" :to="{ name: 'login-cart'}"><img src="~assets/img/acc.png" alt=""></router-link>
+                            </div>
                             <div class="arrow" style="transform: translate(-9px, -1px)">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
-                            <router-link tag="div" class="lii" style="transform: translateX(-9px)" :to="{ name: 'payment'}"><img src="~assets/img/payment.png" alt=""></router-link>
-                            <!-- <div class="lii" data-cart="paymentData">
+                            <div class="lii" style="transform: translateX(-9px)" data-cart="paymentData">
                                 <img src="~assets/img/payment.png" alt="">
-                            </div> -->
+                            </div>
                             <div class="arrow" style="transform: translate(-7px, -7px)">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
-                            <router-link tag="div" class="lii upp" style="transform: translateX(-11px)" :to="{ name: 'cart-success'}"><img src="~assets/img/accses.png" alt=""></router-link>
-                            <!-- <div class="lii" data-cart="successMessage">
+                            <div class="lii upp" style="transform: translateX(-11px)" data-cart="successMessage">
                                 <img src="~assets/img/accses.png" alt="">
-                            </div> -->
+                            </div>
                         </div>
                     </section>
                     <div class="contt">
@@ -62,19 +58,14 @@
 </template>
 
 <script>
-import gql from 'graphql-tag';
+import { CheckoutSubscription } from 'src/queries/notification_management/subscription/CheckoutSubscription'
 
 import { mapActions } from 'vuex'
 
 export default {
-  name: 'ShoppingCardPage',
+  name: 'ShoppingCartPage',
   data () {
     return {
-      tab: 'cart',
-      cartCourses: true,
-      paymentData: false,
-      successMessage: false,
-      loginCart: false
     }
   },
 
@@ -84,30 +75,7 @@ export default {
 
         checkoutSubscription: {
 
-          query: gql`
-
-subscription Checkout{
-  checkoutSubscription{
-    notification{
-      pk,
-      title,
-      description,
-      extraData,
-      type,
-      source {
-        id,
-        pk,
-        email,
-        firstName,
-        lastName
-      },
-      created
-      updated
-    }
-  }
-}
-
-          `,
+          query: CheckoutSubscription,
 
           result({data}) {
             console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
@@ -143,80 +111,26 @@ subscription Checkout{
 
   mounted () {
     this.$el.querySelector('.lii.active').nextSibling.classList.add('show')
+    this.$root.$on('activateShoppingProgress', (cart_name) => {
+        if (cart_name) {
+            const name = `[data-cart="${cart_name}"]`
+            this.$el.querySelector(name).classList.add('active')
+            this.$el.querySelector(name).nextSibling.classList.add('show')
+        }
+    })
+   
+  },
+
+  beforeDestroy () {
+    this.$root.$off('activateShoppingProgress')
   },
 
   methods: {
     ...mapActions('shoppingCart', ['setShoppinCartDialogAction']),
 
     closeShoppingCart () {
+    //   this.$router.go(-1)
       this.$router.push({ name: 'Home' })
-    },
-
-    changeNav (e) {
-      // The cliked dev
-      const clickedDiv = e.target.parentElement
-      if (clickedDiv.classList.contains('lii')) {
-        this.openReleventPage(clickedDiv.dataset.cart)
-        // The rext arrow
-        const arrowDiv = clickedDiv.nextSibling
-        // The parent of all div with lii and arrow classes
-        const linkParent = clickedDiv.offsetParent
-        ///////////////////////////////////////
-        // 1. Get all divs with lii class
-        ///////////////////////////////////////
-
-        const AllDivsWithLiiiClass = linkParent.querySelectorAll('.lii')
-        // 2. Remove from them the active class
-        for (const lii of AllDivsWithLiiiClass) {
-            // console.log('gggggggggggggggggg')
-            // console.log(lii.classList)
-            // console.log('gggggggggggggggggg')
-            // lii.classList.remove('active')
-        }
-        //////////////////////////////////////
-        // 3. Get all divs with arrow class //
-        //////////////////////////////////////
-        
-        const AllDivsWithArrorClass = linkParent.querySelectorAll('.arrow')
-        // 4. remove from them the show class
-        for (const arrorw of AllDivsWithArrorClass) {
-        // arrorw.classList.remove('active')
-          arrorw.classList.remove('show')
-        }
-        // 5. Give the clicked div the active class
-        clickedDiv.classList.add('active')
-        // 6. Give the next div of the clicked div the show class
-        if (arrowDiv) {
-          arrowDiv.classList.add('show')
-        }
-      }
-    },
-
-    openReleventPage (data) {
-      // Close all pages
-      this.closeAllPages()
-      // Open The relevent page
-      switch (data) {
-        case 'cartCourses':
-          this.cartCourses = true
-          break
-        case 'paymentData':
-          this.paymentData = true
-          break
-        case 'successMessage':
-          this.successMessage = true
-          break
-        case 'loginCart':
-          this.loginCart = true
-          break
-      }
-    },
-
-    closeAllPages () {
-      this.cartCourses = false
-      this.paymentData = false
-      this.successMessage = false
-      this.loginCart = false
     }
   }
 }
@@ -291,7 +205,7 @@ subscription Checkout{
                 transition: all ease-in-out .5s;
             }
             .lii{
-                cursor: pointer;
+                // cursor: pointer;
                 position: relative;
                 top: 33px;
                 right: 8px;
@@ -306,7 +220,7 @@ subscription Checkout{
             }
             .active{
                 background-color: $yalloColor;
-                cursor: pointer;
+                // cursor: pointer;
             }
             .upp{
                 top: 18px;

@@ -1,7 +1,6 @@
 <template>
   <section class="web">
     <Header />
-    <ShoppingCartPopUp v-if="shoppinCartDialog"/>
     <Statiscs />
     <!-- <ViewData /> -->
     <!-- <Evaluation /> -->
@@ -20,7 +19,6 @@ import Statiscs from 'components/Home/Statiscs'
 import Training from 'components/Home/Training'
 // import SwiperData from 'components/Home/SwiperData'
 
-import ShoppingCartPopUp from 'src/pages/ShoppingCart'
 
 import Account from 'pages/account_management/Account'
 import { mapState } from 'vuex'
@@ -32,7 +30,6 @@ export default {
     }
   },
   components: {
-    ShoppingCartPopUp,
     Account,
     Header,
     Statiscs,
@@ -42,8 +39,7 @@ export default {
     // SwiperData
   },
   computed: {
-    ...mapState('authentication', ['loginDialog']),
-    ...mapState('shoppingCart', ['shoppinCartDialog'])
+    ...mapState('authentication', ['loginDialog'])
   }
 }
 </script>
