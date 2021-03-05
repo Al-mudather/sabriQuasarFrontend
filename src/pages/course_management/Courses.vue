@@ -6,7 +6,7 @@
                 <div class="col-lg-12">
                     <div class="titel">
                         <img src="~assets/img/tit.png" alt="" />
-                        <h3>الـــدورات</h3>
+                        <h3>{{$t('الـــدورات')}}</h3>
                     </div>
                 </div>
                 <!-- strat Fltter-->
@@ -16,7 +16,7 @@
                             <input
                                 v-model="search"
                                 type="text"
-                                placeholder="ما الذي تبحث عنة في التخصص المختار ادناه؟"
+                                :placeholder="$t('ما الذي تبحث عنة في التخصص المختار ادناه؟')"
                             />
                             <button type="submit"><img src="~assets/img/search.png" /></button>
                         </form>
@@ -31,10 +31,10 @@
                         <!--dropdown-->
                         <div class="dropdow">
                             <button class="open active">
-                                <img src="~assets/img/fltter.png" alt="" />فلتر
+                                <img src="~assets/img/fltter.png" alt="" />{{$t('فلتر')}}
                             </button>
                             <button class="end">
-                                <img src="~assets/img/end.png" alt="" />إخفـاء
+                                <img src="~assets/img/end.png" alt="" />{{$t('إخفـاء')}}
                             </button>
                             <div class="listt">
                                 <img class="arrow" src="~assets/img/arrow.png" alt="" />
@@ -47,9 +47,9 @@
                                     الدورات
                                 </h3>
                                 <ul @click="ChangeFilter">
-                                    <li @click="GetAllCoursesWithoutFilter" class="active">الكل</li>
-                                    <li @click="GetAllFreeCourses">مجاني</li>
-                                    <li @click="GetAllPayeedCourses">مدفوع</li>
+                                    <li @click="GetAllCoursesWithoutFilter" class="active">{{$t('الكل')}}</li>
+                                    <li @click="GetAllFreeCourses">{{$t('مجاني')}}</li>
+                                    <li @click="GetAllPayeedCourses">{{$t('مدفوع')}}</li>
                                 </ul>
                             </div>
                         </div>

@@ -2,7 +2,7 @@
   <div class="password">
     <div class="titel">
       <img src="~assets/img/tit.png" alt="" />
-      <h3>تعيين كلمة مرور جديدة</h3>
+      <h3>{{$t('تعيين كلمة مرور جديدة')}}</h3>
     </div>
     <form>
       <div
@@ -27,7 +27,7 @@
             <input
               v-model="oldPassword"
               type="password"
-              placeholder="كلمة المرور القديمة"
+              :placeholder="$t('كلمة المرور القديمة')"
             />
           </div>
         </div>
@@ -37,7 +37,7 @@
             <input
               v-model="newPassword1"
               type="password"
-              placeholder="كلمة المرور الجديدة"
+              :placeholder="$t('كلمة المرور الجديدة')"
             />
           </div>
         </div>
@@ -47,7 +47,7 @@
             <input
               v-model="newPassword2"
               type="password"
-              placeholder="تأكيد كلمة المرور الجديدة"
+              :placeholder="$t('تأكيد كلمة المرور الجديدة')"
             />
           </div>
         </div>
@@ -65,7 +65,7 @@
 
 <script>
 import { ChangeUserPassword } from "src/queries/account_management/mutation/ChangeUserPassword";
-import {tokenStorage, userProfileStorage} from "src/localStorageService";
+import { tokenStorage } from "src/localStorageService";
 
 export default {
   name: "PasswordResetProfile",

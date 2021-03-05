@@ -6,16 +6,16 @@
                     <div class="chart">
                         <div class="row">
                             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                                <dectors name="طالب وطالبة" number="500"><span>K</span></dectors>
+                                <dectors :name="$t('طالب و طالبه')" number="500"><span>K</span></dectors>
                             </div>
                             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                                <dectors name="دكتور متخصص" :query="GetAllInstructorsStatiscs"></dectors>
+                                <dectors :name="$t('دكتور متخصص')" :query="GetAllInstructorsStatiscs"></dectors>
                             </div>
                             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                                <dectors name="دوره تدريبي" :query="GetAllCoursesStatiscs"></dectors>
+                                <dectors :name="$t('دوره تدريبيه')" :query="GetAllCoursesStatiscs"></dectors>
                             </div>
                             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                                <dectors name="عدد الساعات التدربية" number="10"><span>K</span></dectors>
+                                <dectors :name="$t('عدد الساعات التدريبيه')" number="10"><span>K</span></dectors>
                             </div>
                         </div>
                     </div>

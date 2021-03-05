@@ -9,18 +9,18 @@
             <div class="col-lg-10 noPadding">
                 <div class="content">
                 <h3 v-if="notification.type === 'QUESTION_ASK' ">
-                    السؤال : 
+                    {{$t('السؤال :')}} 
                     <span>{{notification.title}}</span>
                 </h3>
                 <h3 v-else-if="notification.type === 'QUESTION_ANS' ">
-                    جواب سؤال : 
+                    {{$t('جواب سؤال :')}} 
                     <span>{{notification.title}}</span>
-                    هو : 
+                    {{$t('هو :')}} 
                     <span>{{notification.description}}</span>
                 </h3>
                 <h3 v-else-if="notification.type === 'CHECKOUT_DONE' ">
                     {{notification.description}} 
-                    <span>تمت عملية الدفع بنجاح يمكنك الان التعلم من خلال لوحتك التعليميه</span>
+                    <span>{{$t('تمت عملية الدفع بنجاح يمكنك الان التعلم من خلال لوحتك التعليميه')}}</span>
                 </h3>
                 </div>
             </div>

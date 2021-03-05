@@ -1,5 +1,5 @@
 <template>
-    <AccountHeader dialogName="تسجيل الدخول">
+    <AccountHeader :dialogName="$t('تسجيل الدخول')">
         <!--
       Login Section
     -->
@@ -31,7 +31,7 @@
                             <input
                                 v-model="email"
                                 type="email"
-                                placeholder="الإيميل"
+                                :placeholder="$t('الإيميل')"
                             />
                         </div>
                         <div class="inp">
@@ -39,14 +39,14 @@
                             <input
                                 v-model="password"
                                 type="password"
-                                placeholder="كلمة المرور"
+                                :placeholder="$t('كلمة المرور')"
                             />
                         </div>
                         <div class="forget" style="cursor: pointer">
                             <h3>
-                                هل نسيت كلمة
+                                {{$t('هل نسيت كلمة')}}
                                 <a @click="goToPasswordResetPage"
-                                    ><span>المــرور ؟</span></a
+                                    ><span>{{$t('المــرور ؟')}}</span></a
                                 >
                             </h3>
                         </div>
@@ -108,12 +108,15 @@
                             />
                         </g>
                     </svg>
-                    <span>أو</span>
+                    <span>{{$t('أو')}}</span>
                 </div>
                 <a @click="goToSignUpPage" style="cursor: pointer">
-                    <h3>إنشـاء حســاب</h3>
+                    <h3>{{$t('إنشـاء حســاب')}}</h3>
                 </a>
             </div>
+            <q-inner-loading :showing="visible">
+                <q-spinner-hourglass color="primary" size="70px" />
+            </q-inner-loading>
         </div>
     </AccountHeader>
 </template>
@@ -130,6 +133,7 @@ export default {
         return {
             email: "",
             password: "",
+            visible: false,
             errorMessages: []
         };
     },
@@ -150,6 +154,11 @@ export default {
             this.$router.push({ name: "signUp" });
         },
 
+        reset () {
+            this.email = ""
+            this.password = ""
+        },
+
         errorHandler(errorsObj) {
             console.log(errorsObj);
             for (const key in errorsObj) {
@@ -159,25 +168,38 @@ export default {
             }
         },
         LoginUser() {
-            this.$apollo
-                .mutate({
-                    mutation: LoginUserWithEmail,
-                    variables: {
-                        email: this.email,
-                        password: this.password
-                    }
-                })
-                .then(result => {
-                    if (result.data.tokenAuth.success) {
-                        this.loginAction(result.data.tokenAuth).then(() => {
-                            // TODO: Go to the page that you came from
-                            this.$router.go(-1);
-                            // this.$router.push(redirectUrl || { name: 'Home' })
-                        });
-                    } else if (result.data.tokenAuth.errors) {
-                        this.errorHandler(result.data.tokenAuth.errors);
-                    }
-                });
+            try {
+                this.visible = true
+                this.errorMessages = []
+                this.$apollo
+                    .mutate({
+                        mutation: LoginUserWithEmail,
+                        variables: {
+                            email: this.email,
+                            password: this.password
+                        }
+                    })
+                    .then(result => {
+                        this.visible = false
+                        if (result.data.tokenAuth.success) {
+                            // TODO: reset the data
+                            this.reset()
+
+                            this.loginAction(result.data.tokenAuth).then(() => {
+                                // TODO: Go to the page that you came from
+                                this.$router.go(-1);
+                                // this.$router.push(redirectUrl || { name: 'Home' })
+                            });
+                        } else if (result.data.tokenAuth.errors) {
+                            this.errorHandler(result.data.tokenAuth.errors);
+                        }
+                    }).catch((error) => {
+                        this.visible = false
+                    });
+                
+            } catch (error) {
+                this.visible = false
+            }
         }
     }
 };

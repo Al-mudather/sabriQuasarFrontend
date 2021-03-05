@@ -17,18 +17,18 @@
             {{ courseData.enrollmentSet.totalCount
             }}<span v-if="courseData.enrollmentSet.totalCount >= 1000">K</span>
           </h3>
-          <P>الطلاب الملتحقين</P>
+          <P>{{$t('الطلاب الملتحقين')}}</P>
         </div>
 
         <div v-else class="tow ordO">
           <q-skeleton type="text" width="50px" />
-          <P>الطلاب الملتحقين</P>
+          <P>{{$t('الطلاب الملتحقين')}}</P>
           <hr />
         </div>
 
         <div class="tow">
           <h3>42<span>H</span></h3>
-          <P>عدد الساعات</P>
+          <P>{{$t('عدد الساعات')}}</P>
         </div>
         <div v-if="courseData.courseLanguage" class="tow ordT">
           <img src="~assets/img/languages.png" alt="" />
@@ -79,7 +79,7 @@
         </svg>
         <div class="pric">
           <h3>{{ formatCoureFee }}<span>SDG</span></h3>
-          <button @click="AddTheCourseToTheBasket">أمتلك الأن</button>
+          <button @click="AddTheCourseToTheBasket">{{$t('أمتلك الأن')}}</button>
         </div>
         <img
           @click="ShareTheCourseLandingPage"

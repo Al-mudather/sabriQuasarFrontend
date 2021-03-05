@@ -1,5 +1,20 @@
 <template>
     <div>
+        <div
+            class=""
+            style="text-align:left"
+            v-if="errorMessages.length > 0"
+        >
+            Please fix these <strong>error first</strong>
+            <ul>
+                <li
+                    v-for="(message, index) in errorMessages"
+                    :key="index"
+                >
+                    {{ message }}<br />
+                </li>
+            </ul>
+        </div>
         <div id="paypal-button-container"></div>
         <div class="sele" v-show="btnVisible" @click="buyTheCoursesUsingPaypal">
             <img src="~assets/img/paypal.png"  alt="" />
@@ -24,6 +39,7 @@ export default {
     data () {
         return {
             visible: false,
+            errorMessages: [],
             btnVisible: true
         };
     },
@@ -33,9 +49,19 @@ export default {
     },
 
     methods: {
+        errorHandler(errorsObj) {
+            console.log(errorsObj);
+            for (const key in errorsObj) {
+                for (const val of errorsObj[key]) {
+                    this.errorMessages.push(val.message);
+                }
+            }
+        },
+
         async buyTheCoursesUsingPaypal () {
             this.visible = true
             this.btnVisible = false
+            this.errorMessages = []
             // console.log('lllllllllllllllllllllll')          
             // console.log('chart')          
             // console.log('lllllllllllllllllllllll')
@@ -160,8 +186,9 @@ export default {
             if (this.$_.get(dataObj, "[errors]")) {
                 this.visible = false;
                 console.log('gggggggggggggggggggg')
-                console.log(dataObj)
+                console.log(dataObj.errors)
                 console.log('gggggggggggggggggggg')
+                this.errorHandler(dataObj.errors)
                 // alert(dataObj.errors.nonFieldErrors);
             }
 

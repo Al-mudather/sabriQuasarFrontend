@@ -21,7 +21,7 @@
                             <input
                                 v-model="search"
                                 type="text"
-                                placeholder="ما الذي تبحث عنة؟"
+                                v-bind:placeholder="$t('ما الذي تبحث عنه؟')"
                             />
                             <button>
                                 <img src="~assets/img/search.png" />
@@ -35,13 +35,13 @@
                         <div class="sign">
                             <a @click="goToSignUpPage" style="cursor: pointer">
                                 <img src="~assets/img/sign.png" alt="" />
-                                <h3 class="q-pr-sm">تسجيل حساب</h3>
+                                <h3 class="q-pr-sm">{{ $t('تسجيل حساب') }}</h3>
                             </a>
                         </div>
                         <div class="login">
                             <a @click="goToLoginPage" style="cursor: pointer">
                                 <img src="~assets/img/login.png" alt="" />
-                                <h3 class="q-pr-sm">دخول</h3>
+                                <h3 class="q-pr-sm">{{ $t('دخول') }}</h3>
                             </a>
                         </div>
                     </div>
@@ -66,6 +66,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
+import { Quasar } from 'quasar'
 
 export default {
     name: "NavBar",
@@ -80,6 +81,30 @@ export default {
     props: {},
     computed: {
         ...mapGetters("authentication", ["token"])
+    },
+
+    watch: {
+        englishLang (value) {
+            
+            console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
+            console.log(value)
+            console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
+            if (value) {
+                
+            }
+            console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
+            console.log(this.$q.lang.getLocale())
+            console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
+            // import(
+            //     'src/assets/css/homepage-rtl.css'
+            // )
+            // if (!value) {
+            //     import(
+            //         'src/assets/css/homepage.css'
+            //     )
+            // }
+            
+        }
     },
 
     methods: {

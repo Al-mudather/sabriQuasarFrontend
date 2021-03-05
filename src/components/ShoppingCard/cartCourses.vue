@@ -23,7 +23,7 @@
         <!--Total Price-->
         <div class="total">
             <div class="price">
-                <h2>المجمــوع</h2>
+                <h2>{{$t('المجمــوع')}}</h2>
                 <h3>{{ calculateTheTotalFees }}<span>SDG</span></h3>
             </div>
             <div class="next" @click="goToAuthenticationCartPage">

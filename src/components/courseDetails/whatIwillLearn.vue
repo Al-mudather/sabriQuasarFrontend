@@ -34,7 +34,7 @@
                 </svg>
                 <img src="~assets/img/exclamation.png" alt="" />
             </div>
-            <h3>ما الذي سأتعلمه ؟</h3>
+            <h3>{{$t('ما الذي سأتعلمه ؟')}}</h3>
         </div>
         <div class="pluse" v-for="point in allWhatYouWillLearn.edges" :key="point.node.id">
             <img src="~assets/img/adedd.png" alt="" />

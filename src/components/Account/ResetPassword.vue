@@ -1,5 +1,5 @@
 <template>
-  <AccountHeader dialogName="إستعادة كلمة المرور">
+  <AccountHeader :dialogName="$t('إستعادة كلمة المرور')">
     <!--
       Password Reset section
     -->
@@ -15,7 +15,7 @@
             </div>
             <div class="inp">
                 <img src="~assets/img/gmail.png" alt="">
-                <input v-model="email" type="email" placeholder="الإيميل">
+                <input v-model="email" type="email" :placeholder="$t('الإيميل')">
             </div>
             <div class="next">
                 <a @click="sendEmailConfirmationToTheUser" style="cursor: pointer">
@@ -29,6 +29,9 @@
           </div>
         </div>
       </form>
+      <q-inner-loading :showing="visible">
+          <q-spinner-hourglass color="primary" size="70px" />
+      </q-inner-loading>
     </div>
   </AccountHeader>
 </template>
@@ -40,6 +43,7 @@ export default {
   data () {
     return {
       email: '',
+      visible: false,
       errorMessages: []
     }
   },
@@ -57,18 +61,28 @@ export default {
       }
     },
     sendEmailConfirmationToTheUser () {
+      // start the loder
+      this.visible = true
       this.$apollo.mutate({
         mutation: UserPasswordResetEmail,
         variables: {
           email: this.email
         }
       }).then((res) => {
+        // Close the loder
+        this.visible = false
         if (res.data.sendPasswordResetEmail.success) {
           this.$router.push({ name: 'password-confirm' })
-        } else if (res.data.sendPasswordResetEmail.success) {
+        } 
+        if (res.data.sendPasswordResetEmail.errors) {
           this.errorHandler(res.data.sendPasswordResetEmail.errors)
+        } 
+        if (res.errors) {
+          this.errorHandler(res.errors)
         }
       }).catch((error) => {
+        // Close the loder
+        this.visible = false
         if (error.message === 'GraphQL error: [Errno 11001] getaddrinfo failed') this.errorMessages.push('I can\'t send to your email, please try again')
       })
     }

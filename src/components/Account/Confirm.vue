@@ -30,7 +30,7 @@
                           </g>
                         </g>
                     </svg>
-                    <h3>تأكيد</h3>
+                    <h3>{{ $t('تأكيد') }}</h3>
                     <img @click="GoToHomePage" class="backButton" src="~assets/img/bacck.png" alt="">
                 </div>
                 <!--
@@ -39,7 +39,7 @@
                 <div class="confirm">
                     <div class="imaagg">
                         <img src="~assets/img/success.png" alt="">
-                        <p>تم إرسال رابط تعيين كلمة المرور علي بريدك الالكتروني</p>
+                        <p>{{ $t('تم إرسال رابط تعيين كلمة المرور علي بريدك الالكتروني') }}</p>
                     </div>
                 </div>
           </div>

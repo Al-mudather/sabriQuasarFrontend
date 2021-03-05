@@ -9,11 +9,11 @@
               <div class="col-lg-7">
                 <div class="price">
                   <img class="hrcooo" src="~assets/img/titleft.png" alt="" />
-                  <h2>الأرباح المستحقة</h2>
+                  <h2>{{$t('الأرباح المستحقة')}}</h2>
                   <h3><span>SDG</span>1588</h3>
                   <div class="linke">
                     <h3>
-                      طلب سحب
+                      {{$t('طلب سحب')}}
                       <img
                         class="mage"
                         src="~assets/img/Group 734.png"
@@ -26,10 +26,10 @@
               </div>
               <div class="col-lg-5">
                 <div class="price right">
-                  <h2>منضم من خلالي</h2>
+                  <h2>{{$t('منضم من خلالي')}}</h2>
                   <div class="box">
                     <h3>480</h3>
-                    <span>شخص</span>
+                    <span>{{$t('شخص')}}</span>
                   </div>
                 </div>
               </div>

@@ -17,10 +17,10 @@
                 ></div>
             </div>
         </div>
-        <div class="card-body" style="cursor: pointer" @click="$router.push({ name: 'course-class', params: { pk: course.pk, id: course.id } })">
+        <div class="card-body" style="cursor: pointer" @click="goToCourseLecture">
             <h5 class="card-title">{{course.title}}</h5>
             <a class="btn">
-                <h3>اذهب الى الدرس</h3>
+                <h3>{{$t('اذهب الى الدرس')}}</h3>
                 <img src="~assets/img/send.png" alt="">
             </a>
         </div>
@@ -49,6 +49,12 @@ export default {
                 return parseInt( (this.totalFinishedCourseContents / totalCourseContents ) * 100 )
             }
             return 0
+        }
+    },
+
+    methods: {
+        goToCourseLecture () {
+            this.$router.push({ name: 'course-class', params: { pk: this.course.pk, id: this.course.id }, query:{ tab: 'tutorial' } })
         }
     }
 };

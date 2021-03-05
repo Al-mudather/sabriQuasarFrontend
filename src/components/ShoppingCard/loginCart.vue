@@ -8,7 +8,7 @@
                     <div class="login" style="cursor: pointer">
                         <a @click="GoToLoginPage">
                             <img src="~assets/img/login.png" alt="" />&nbsp;
-                            <h3>دخول</h3>
+                            <h3>{{$t('دخول')}}</h3>
                         </a>
                     </div>
                 </div>
@@ -34,9 +34,9 @@
                                 />
                             </g>
                         </svg>
-                        <span>أو</span>
+                        <span>{{$t('أو')}}</span>
                     </div>
-                    <h3>إنشـاء حســاب</h3>
+                    <h3>{{$t('إنشـاء حســاب')}}</h3>
                 </div>
             </div>
             <form>
@@ -84,11 +84,11 @@
                             />
                         </svg>
                     </div>
-                    <h3 style="display: none">أنا أوافق علي <span>شروط الخدمة</span></h3>
+                    <h3 style="display: none">{{$t('أنا أوافق علي')}} <span>{{$t('شروط الخدمة')}}</span></h3>
                 </div>
                 <div class="but" @click="GoToSignUpPage">
                     <h3>
-                        <img src="~assets/img/Path 478.png" alt="" />إنشاء حساب
+                        <img src="~assets/img/Path 478.png" alt="" />{{$t('إنشـاء حســاب')}}
                     </h3>
                 </div>
             </form>

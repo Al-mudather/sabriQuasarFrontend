@@ -34,7 +34,7 @@
                 </svg>
                 <img src="~assets/img/exclamation.png" alt="" />
             </div>
-            <h3>ماهي متطلبات الدوره ؟</h3>
+            <h3>{{$t('ماهي متطلبات الدوره ؟')}}</h3>
         </div>
         <div class="pluse" v-for="preReq in lodash.get(allPreRequisitesByCourse, '[edges]')" :key="preReq.node.id">
             <img src="~assets/img/adedd.png" alt="" />

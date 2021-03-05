@@ -10,7 +10,7 @@
           <div class="col-lg-12">
             <div class="titel">
               <img src="~assets/img/tit.png" alt="" />
-              <h3>الإشعارات</h3>
+              <h3>{{$t('الإشعارات')}}</h3>
             </div>
           </div>
           <div class="notifi">

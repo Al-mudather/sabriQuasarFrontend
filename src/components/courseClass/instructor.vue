@@ -44,7 +44,7 @@
             data-type="more"
             @click="togelMoreOrLessData"
         >
-            <h3>المزيــد <img src="~assets/img/moree.png" alt="" /></h3>
+            <h3> {{$t('المزيــد')}}<img src="~assets/img/moree.png" alt="" /></h3>
         </a>
     </div>
 </template>
@@ -63,11 +63,11 @@ export default {
             if (btnType === "more") {
                 btn.previousSibling.classList.add("show_more_data");
                 btn.attributes["data-type"].nodeValue = "less";
-                btn.firstChild.firstChild.textContent = "اخفاء";
+                btn.firstChild.firstChild.textContent = $t('إخفاء');
             } else if (btnType === "less") {
                 btn.previousSibling.classList.remove("show_more_data");
                 btn.attributes["data-type"].nodeValue = "more";
-                btn.firstChild.firstChild.textContent = "المزيد";
+                btn.firstChild.firstChild.textContent = $t('المزيــد');
             }
         }
     }

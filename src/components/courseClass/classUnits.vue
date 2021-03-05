@@ -1,10 +1,10 @@
 <template>
-    <div class="row">
-        <div class="col-lg-5 col-xs-12">
+    <div class="row unint">
+        <div class="col-lg-5 ">
             <div class="asid">
                 <div class="titel">
                     <img src="~assets/img/tit2.png" alt="" />
-                    <h3>المحتــوى</h3>
+                    <h3>{{$t('المحتــوى')}}</h3>
                     <div class="butt">
                         <img src="~assets/img/visibility.png" alt="" />
                         <img src="~assets/img/full screen.png" alt="" />
@@ -60,7 +60,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-7 col-xs-12">
+        <div class="col-lg-7 ">
             <q-skeleton
                 v-if="lodash.isEmpty(currentContent)"
                 height="500px"
@@ -122,14 +122,14 @@
                         class="next"
                     >
                         <img src="~assets/img/previous.png" alt="" />
-                        <h3>الدرس السابق</h3>
+                        <h3>{{$t('الدرس السابق')}}</h3>
                     </div>
                     <div
                         @click="GoToTheNexLesson"
                         :disabled="!hasNextContent"
                         class="next"
                     >
-                        <h3>الدرس التالي</h3>
+                        <h3>{{$t('الدرس التالي')}}</h3>
                         <img src="~assets/img/next.png" alt="" />
                     </div>
                 </div>
@@ -142,7 +142,7 @@
 import { StartLearningUnit } from "src/queries/learning_management/mutation/StartLearningUnit";
 import { EndLearningUnit } from "src/queries/learning_management/mutation/EndLearningUnit";
 import { GetAllLearningProgressByCourse } from "src/queries/learning_management/query/GetAllLearningProgressByCourse";
-import { QSpinnerGears } from "quasar";
+// import { GetCourseByID } from "src/queries/course_management/query/GetCourseByID";
 
 import skeletonList from "src/components/skeleton/skeletonList";
 import contentHeader from "components/utils/contentHeader";
@@ -272,13 +272,13 @@ export default {
                         "[data][startLearningUnit][success]"
                     )
                 ) {
-                    this.$q.notify({
-                        color: "success",
-                        textColor: "white",
-                        position: "top",
-                        icon: "cloud_done",
-                        message: "بدا الدرس"
-                    });
+                    // this.$q.notify({
+                    //     color: "success",
+                    //     textColor: "white",
+                    //     position: "top",
+                    //     icon: "cloud_done",
+                    //     message: "بدا الدرس"
+                    // });
                     this.startLearningTrackingID = this.$_.get(
                         startTrackingResult,
                         "[data][startLearningUnit][learning][pk]"
@@ -332,6 +332,12 @@ export default {
                                 courseId: this.course.pk
                             }
                         }
+                        // {
+                        //     query: GetCourseByID,
+                        //     variables: {
+                        //         courseId: this.course.pk
+                        //     }
+                        // }
                     ]
                 });
                 if (
@@ -454,4 +460,9 @@ export default {
     background-color: #fcd462 !important;
     color: #fff;
 }
+// .unint {
+//     @media(max-width:767px){
+//         flex-direction: column-reverse !important;  
+//     }
+// }
 </style>

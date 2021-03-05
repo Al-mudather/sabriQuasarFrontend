@@ -60,7 +60,7 @@
                 </div>
                 <div class="more" style="display: none">
                     <h4>
-                        عرض المزيد
+                        {{$t('عرض المزيد')}}
                         <img src="~assets/img/moree.png" alt="" />
                     </h4>
                 </div>

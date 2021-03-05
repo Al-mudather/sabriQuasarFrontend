@@ -41,7 +41,7 @@
                             </g>
                         </svg>
                         <img src="~assets/img/rate.png" alt="">
-                        <h3>الأعلي تقيما</h3>
+                        <h3>{{$t('الأعلي تقيما')}}</h3>
                     </div>
                     <!-- start rate -->
                     <div class="rate">

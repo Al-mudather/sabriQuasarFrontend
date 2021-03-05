@@ -34,7 +34,7 @@
                 </svg>
                 <img src="~assets/img/questio.png" alt="" />
             </div>
-            <h3>المحتويـات</h3>
+            <h3>{{$t('المحتويـات')}}</h3>
         </div>
         <skeletonList v-if="lodash.get(allCourseUnits,'[edges]').length === 0" />
         <div id="accordion">

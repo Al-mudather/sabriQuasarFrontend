@@ -12,7 +12,7 @@
             <div class="hedeer">
               <div class="percent">
                 <h3>{{ calculateTheTotalProgress }}%</h3>
-                <span>التقدم</span>
+                <span>{{$t('التقدم')}}</span>
               </div>
               <div class="titel">
                 <img src="~assets/img/tit.png" alt="" />
@@ -72,7 +72,7 @@
                         role="tab"
                         aria-controls="tutorial"
                         aria-selected="true"
-                        >الـدروس</a
+                        >{{$t('الـدروس')}}</a
                       >
                     </li>
                   </template>
@@ -87,7 +87,7 @@
                         role="tab"
                         aria-controls="download"
                         aria-selected="false"
-                        >المادة التعليمية</a
+                        >{{$t('المادة التعليمية')}}</a
                       >
                     </li>
                   </template>
@@ -102,7 +102,7 @@
                         role="tab"
                         aria-controls="question"
                         aria-selected="false"
-                        >بوابة الاسئلة</a
+                        >{{$t('بوابة الاسئلة')}}</a
                       >
                     </li>
                   </template>
@@ -117,7 +117,7 @@
                         role="tab"
                         aria-controls="tech"
                         aria-selected="false"
-                        >مقدمين الدورة</a
+                        >{{$t('مقدمين الدورة')}}</a
                       >
                     </li>
                   </template>
@@ -238,7 +238,7 @@ export default {
       }
     }
   },
-
+ 
   watch: {
     "$route": {
       handler: function(route) {
@@ -288,13 +288,14 @@ export default {
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
+// @import "src/assets/css/Lecture.scss";
 /*--- start navbar ---*/
-// .q-tab__indicator {
-//     opacity: 0 !important;
-// }
-// .q-tab--active {
-//     background-color: 2px solid #FCD462;
-// }
+.q-tab__indicator {
+    opacity: 0 !important;
+}
+.q-tab--active {
+    background-color: 2px solid #FCD462;
+}
 .navv {
   background-color: #fcfcfc;
   padding: 10px;

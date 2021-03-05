@@ -7,7 +7,7 @@
             type="text"
             v-model="question"
             style="outline: none"
-            placeholder="أسئل لتجد الاجابة"
+            :placeholder="$t('أسئل لتجد الاجابة')"
           />
           <button type="submit">
             <img src="~assets/img/send.png" />

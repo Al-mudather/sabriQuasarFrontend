@@ -2,10 +2,10 @@
     <div class="confirm">
         <div class="imaagg">
             <img src="~assets/img/success.png" alt="">
-            <p>تم تفعيل حسابك يرجى تسجيل الدخول للموقع</p>
+            <p>{{$t('تم تفعيل حسابك يرجى تسجيل الدخول للموقع')}}</p>
             <div class="login">
                 <a @click="GotToLoginPage" style="cursor:pointer">
-                    <h3>دخول</h3>
+                    <h3>{{$t('دخول')}}</h3>
                 </a>
             </div>
         </div>

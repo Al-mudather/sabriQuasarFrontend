@@ -13,7 +13,7 @@
           <div class="col-lg-12">
             <div class="titel">
               <img src="~assets/img/tit.png" alt="" />
-              <h3>الملف الشخصي</h3>
+              <h3>{{$t('الملف الشخصي')}}</h3>
             </div>
           </div>
         </div>
@@ -30,7 +30,7 @@
               <div class="all">
                 <div class="titel">
                   <img src="~assets/img/tit.png" alt="" />
-                  <h3>بياناتــي</h3>
+                  <h3>{{$t('بياناتــي')}}</h3>
                 </div>
                 <form>
                   <div class="row">
@@ -55,7 +55,7 @@
                         <input
                           v-model="fullName"
                           type="text"
-                          placeholder="الاسم الحقيقي"
+                          :placeholder="$t('الاسم الحقيقي')"
                         />
                       </div>
                     </div>
@@ -65,7 +65,7 @@
                         <input
                           v-model="email"
                           type="email"
-                          placeholder="البريد الالكتروني"
+                          :placeholder="$t('البريد الالكتروني')"
                           disabled
                         />
                       </div>
@@ -73,17 +73,17 @@
                     <div class="col-lg-12 col-xs-12">
                       <div class="inp">
                         <img src="~assets/img/phone-call.png" alt="" />
-                        <input type="text" v-model="phoneNumber" placeholder="رقم الهاتف" />
+                        <input type="text" v-model="phoneNumber" :placeholder="$t('رقم الهاتف')" />
                       </div>
                     </div>
                     <div class="type">
                       <div class="male" data-gender="male" @click="setTheGenderToMale">
                         <img src="~assets/img/male.png" alt="" />
-                        <h3>ذكــر</h3>
+                        <h3>{{$t('ذكــر')}}</h3>
                       </div>
                       <div class="male" data-gender="female" @click="setTheGenderToFemale">
                         <img src="~assets/img/female.png" alt="" />
-                        <h3>أنثـــي</h3>
+                        <h3>{{$t('أنثـــي')}}</h3>
                       </div>
                     </div>
                   </div>
@@ -92,7 +92,7 @@
                     class="but"
                     @click="UpdateUserProfileData"
                   >
-                    <h3>تحديث</h3>
+                    <h3>{{$t('تحديث')}}</h3>
                     <img src="~assets/img/Group 734.png" alt="" />
                   </div>
                   <q-inner-loading :showing="visible">

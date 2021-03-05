@@ -12,7 +12,7 @@
                         <img src="~assets/img/404.png" alt="">
                         <div class="butt">
                            <a @click="goToHomePage" style="cursor: pointer">
-                            <h3>إنتقال الي الواجهة الرئيسية</h3>
+                            <h3>{{$t('إنتقال الي الواجهة الرئيسية')}}</h3>
                             <img src="~assets/img/send.png" alt="">
                            </a>
                         </div>

@@ -1,6 +1,6 @@
 <template>
     <AccountHeader
-        dialogName="إنشاء حساب جديد"
+        :dialogName="$t('إنشاء حساب جديد')"
     >
         <!--
         Signup Section
@@ -33,7 +33,7 @@
                             <input
                                 v-model="fullName"
                                 type="text"
-                                placeholder="الاسم الحقيقي"
+                                :placeholder="$t('الاسم الحقيقي')"
                             />
                         </div>
                         <div class="inp">
@@ -41,7 +41,7 @@
                             <input
                                 v-model="email"
                                 type="email"
-                                placeholder="الإيميل"
+                                :placeholder="$t('الإيميل')"
                             />
                         </div>
                         <div class="inp">
@@ -49,7 +49,7 @@
                             <input
                                 v-model="password1"
                                 type="password"
-                                placeholder="كلمة المرور"
+                                :placeholder="$t('كلمة المرور')"
                             />
                             <img
                                 class="closee"
@@ -62,7 +62,7 @@
                             <input
                                 v-model="password2"
                                 type="password"
-                                placeholder="إعادة كلمة المرور"
+                                :placeholder="$t('إعادة كلمة المرور')"
                             />
                         </div>
                     </div>
@@ -101,6 +101,9 @@
                     </a>
                 </div>
             </form>
+            <q-inner-loading :showing="visible">
+                <q-spinner-hourglass color="primary" size="70px" />
+            </q-inner-loading>
         </div>
     </AccountHeader>
 </template>
@@ -115,6 +118,7 @@ import FacebookAuthentication from 'src/components/Account/FacebookAuthenticatio
 export default {
     data() {
         return {
+            visible: false,
             fullName: "",
             email: "",
             password1: "",
@@ -143,28 +147,41 @@ export default {
             }
         },
         RegisterNewUser() {
-            if (this.password1 === this.password2) {
-                this.errorMessages = [];
-                this.$apollo
-                    .mutate({
-                        mutation: RegisterNewUser,
-                        variables: {
-                            email: this.email,
-                            fullName: this.fullName,
-                            password1: this.password1,
-                            password2: this.password2
-                        }
-                    })
-                    .then(result => {
-                        if (result.data.register.success) {
-                            this.GotToConfirmationPage();
-                        } else if (result.data.register.errors) {
-
-                            this.errorHandler(result.data.register.errors);
-                        }
-                    });
-            } else {
-                this.errorMessages.push("passwords are not the same");
+            try {
+                if (this.password1 === this.password2) {
+                    // Start the loder
+                    this.visible = true
+                    this.errorMessages = [];
+                    this.$apollo
+                        .mutate({
+                            mutation: RegisterNewUser,
+                            variables: {
+                                email: this.email,
+                                fullName: this.fullName,
+                                password1: this.password1,
+                                password2: this.password2
+                            }
+                        })
+                        .then(result => {
+                            // Close the loder
+                            this.visible = false
+                            if (result.data.register.success) {
+                                this.GotToConfirmationPage();
+                            } else if (result.data.register.errors) {
+                                this.errorHandler(result.data.register.errors);
+                            }
+                        }).catch((error) => {
+                            // Close the loder
+                            this.visible = false
+                            this.errorHandler(error.errors);
+                        });
+                } else {
+                    this.errorMessages.push("passwords are not the same");
+                }
+                
+            } catch (error) {
+                // Close the loder
+                this.visible = false
             }
         },
 

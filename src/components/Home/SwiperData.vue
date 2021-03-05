@@ -4,8 +4,8 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="titel">
-                        <span>بعضا من</span>
-                        <h2>آراء الطــلاب</h2>
+                        <span>{{$t('بعضا من')}}</span>
+                        <h2>{{$t('آراء الطــلاب')}}</h2>
                     </div>
                 </div>
             </div>

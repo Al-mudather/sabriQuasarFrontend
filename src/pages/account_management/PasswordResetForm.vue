@@ -14,7 +14,7 @@
                             </g>
                           </g>
                       </svg>
-                      <h3>تعيين كلمــة مـرور</h3>
+                      <h3>{{$t('تعيين كلمــة مـرور')}}</h3>
                       <form>
                           <div class="row">
                               <div class="col-lg-12 col-xs-12">
@@ -26,12 +26,12 @@
                                   </div>
                                   <div class="inp">
                                       <img src="~assets/img/password.png" alt="">
-                                    <input v-model="newPassword1" type="password" placeholder="كلمة المرور">
+                                    <input v-model="newPassword1" type="password" :placeholder="$t('كلمة المرور')">
                                       <img class="closee" src="~assets/img/eye.png" alt="">
                                   </div>
                                   <div class="inp">
                                       <img src="~assets/img/password.png" alt="">
-                                      <input v-model="newPassword2" type="password" placeholder="إعادة كلمة المرور">
+                                      <input v-model="newPassword2" type="password" :placeholder="$t('إعادة كلمة المرور')">
                                   </div>
                               </div>
                           </div>

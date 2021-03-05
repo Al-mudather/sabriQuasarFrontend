@@ -28,7 +28,7 @@
                 <div class="col-lg-12">
                     <div class="titel mix">
                         <img src="~assets/img/tit.png" alt="">
-                        <h3>دورات ذات صلة</h3>
+                        <h3>{{$t('دورات ذات صلة')}}</h3>
                     </div>
                 </div>
                 <div class="col-lg-12">

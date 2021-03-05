@@ -1,160 +1,51 @@
-<template>
-  <section class="backgrou">
-        <div class="container">
-            <div class="row">
-                <div class="clos" @click="closeShoppingCart">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="37.333" height="51.431" viewBox="0 0 37.333 51.431">
-                        <path id="Path_733" data-name="Path 733" d="M2.042-41.265a13.881,13.881,0,0,0-.686-8.254A18.792,18.792,0,0,1,0-56.529v-9.138H7.851c-.129,5.6,2.188,8.745,5.436,10.486a11.388,11.388,0,0,0,10.758,0c3.248-1.741,5.566-4.884,5.436-10.487h7.851v9.138a18.792,18.792,0,0,1-1.356,7.01,13.881,13.881,0,0,0-.686,8.254c.38.83.681,1.5.842,1.925a18.474,18.474,0,0,1,1.2,6.569A18.545,18.545,0,0,1,18.8-14.236h-.261A18.545,18.545,0,0,1,0-32.772a18.474,18.474,0,0,1,1.2-6.569C1.361-39.762,1.662-40.435,2.042-41.265Z" transform="translate(0 65.667)" fill="#fc9685" fill-rule="evenodd"/>
-                    </svg>
-                    <img src="~assets/img/close.png" alt="">
-                </div>
-                <div class="col-lg-12">
-                    <section class="tabb">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="270.306" height="73.539" viewBox="0 0 270.306 73.539">
-                            <path id="Path_643" data-name="Path 643" d="M76.724-31.722a13,13,0,0,0-17.367,4.87c-.19.347-.4.686-.609,1.021A25.145,25.145,0,0,0,54.924-12.5h-.04a3.529,3.529,0,0,1-1.059,2.515,3.651,3.651,0,0,1-2.559,1.037,3.651,3.651,0,0,1-2.559-1.041,3.528,3.528,0,0,1-1.06-2.514v0a1.708,1.708,0,0,0-1.687-1.684,1.689,1.689,0,0,0-.711.157,31.434,31.434,0,0,1-3.816,1.48,5.212,5.212,0,0,0-3.71,4.947h-.042a5.916,5.916,0,0,1-5.861,5.811h-.1A5.916,5.916,0,0,1,25.86-7.605a5.252,5.252,0,0,0-3.751-4.985,1.968,1.968,0,0,0-1.73.279,1.893,1.893,0,0,0-.786,1.537v7.332A3.474,3.474,0,0,1,16.151,0a3.474,3.474,0,0,1-3.442-3.442V-15.818a3.145,3.145,0,0,0-1.175-2.434.7.7,0,0,0-.73-.09.677.677,0,0,0-.394.611v2.67a2.737,2.737,0,0,1-2.735,2.682H7.652a2.737,2.737,0,0,1-2.711-2.689v-1.645a38.074,38.074,0,0,0-2.748-14.2A30.546,30.546,0,0,1,0-42.312,31.816,31.816,0,0,1,31.764-73.539,31.737,31.737,0,0,1,57.782-59.984a18.085,18.085,0,0,0,6.229,5.527l2.93,1.576A18.085,18.085,0,0,0,87.22-55.028a23.184,23.184,0,0,1,15.119-5.629,23.31,23.31,0,0,1,17.34,7.713,25.345,25.345,0,0,0,18.81,8.367A25.345,25.345,0,0,0,157.3-52.944a23.31,23.31,0,0,1,17.339-7.713,23.31,23.31,0,0,1,17.34,7.713,25.344,25.344,0,0,0,18.813,8.367h0a25.348,25.348,0,0,0,18.814-8.367,23.311,23.311,0,0,1,17.338-7.714,23.482,23.482,0,0,1,23.36,23.36,23.482,23.482,0,0,1-23.36,23.36A23.267,23.267,0,0,1,231.819-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.427,32.427,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.269,23.269,0,0,1,159.514-19.5a32.4,32.4,0,0,0-21.025-7.75v-.026a32.428,32.428,0,0,0-21.041,7.756,23.107,23.107,0,0,1-15.111,5.584A23.48,23.48,0,0,1,81.6-26.617a11.812,11.812,0,0,0-4.919-5.018A.581.581,0,0,0,76.724-31.722Z" transform="translate(0 73.539)" fill="#2d77d8" fill-rule="evenodd"/>
-                        </svg>
-                        <div class="link" >
-                            <div class="lii active" data-cart="cartCourses">
-                                <img src="~assets/img/cart.png" alt="">
-                            </div>
-                            <div class="arrow show" style="transform: translate(-3px, -2px)">
-                                <img src="~assets/img/nexxx.png" alt="">
-                            </div>
-
-                            <div class="lii" style="transform: translateX(-4px)" data-cart="loginCart">
-                                <img src="~assets/img/acc.png" alt="">
-                            </div>
-                            <div class="arrow" style="transform: translate(-9px, -1px)">
-                                <img src="~assets/img/nexxx.png" alt="">
-                            </div>
-
-                            <div class="lii" style="transform: translateX(-9px)" data-cart="paymentData">
-                                <img src="~assets/img/payment.png" alt="">
-                            </div>
-                            <div class="arrow" style="transform: translate(-7px, -7px)">
-                                <img src="~assets/img/nexxx.png" alt="">
-                            </div>
-
-                            <div class="lii upp" style="transform: translateX(-11px)" data-cart="successMessage">
-                                <img src="~assets/img/accses.png" alt="">
-                            </div>
-                        </div>
-                    </section>
-                    <div class="contt">
-                        <div class="titell">
-                            <h3>{{$t('الســـلة')}}</h3>
-                            <hr>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <router-view></router-view>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</template>
-
-<script>
-import { CheckoutSubscription } from 'src/queries/notification_management/subscription/CheckoutSubscription'
-
-import { mapActions } from 'vuex'
-
-export default {
-  name: 'ShoppingCartPage',
-  data () {
-    return {
-    }
-  },
-
-  apollo: {
-
-      $subscribe: {
-
-        checkoutSubscription: {
-
-          query: CheckoutSubscription,
-
-          result({data}) {
-            console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
-            // this.myNotifications = data.notificationCreated.notifications;
-            console.log('lllllllllll')
-            console.log(data.checkoutSubscription)
-            console.log('lllllllllll')
-            // console.log()
-            // if (this.$_.get(this.myNotifications, '[edges]')) {
-            //   this.myNotifications.edges.push({
-            //     node: data.notificationCreated.notification
-            //   })
-            //   this.myNotifications.totalCount++
-            // } else {
-            //   this.myNotifications = {
-            //     totalCount: 1,
-            //     edges: {
-            //       node: data.notificationCreated.notification
-            //     }
-            //   }
-            // }
-
-            // console.log(this.notificationCreated)
-            console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
-          },
-
-        },
-
-      },
-
-    },
-
-
-  mounted () {
-    this.$el.querySelector('.lii.active').nextSibling.classList.add('show')
-    this.$root.$on('activateShoppingProgress', (cart_name) => {
-        if (cart_name) {
-            const name = `[data-cart="${cart_name}"]`
-            this.$el.querySelector(name).classList.add('active')
-            this.$el.querySelector(name).nextSibling.classList.add('show')
-        }
-    })
-   
-  },
-
-  beforeDestroy () {
-    this.$root.$off('activateShoppingProgress')
-  },
-
-  methods: {
-    ...mapActions('shoppingCart', ['setShoppinCartDialogAction']),
-
-    closeShoppingCart () {
-    //   this.$router.go(-1)
-      this.$router.push({ name: 'Home' })
-    }
-  }
-}
-</script>
-<style lang="scss">
-@import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variabels.scss";
-/*--- start shopping popup ---*/
-.router-link-active {
-    background-color: $yalloColor !important;
+/*-- font style --*/
+@font-face {
+    font-family: "cairoB";
+    src: url('../font/Cairo-Bold.ttf')
 }
 
-.show {
-    opacity:1 ;
-    transition: all ease-in-out .5s;
+@font-face {
+    font-family: "cairoR";
+    src: url('../font/Cairo-Regular.ttf')
+}
+
+@font-face {
+    font-family: "airR";
+    src: url('../font/AirStripR.ttf')
+}
+
+/*-- import --*/
+@import 'sass/helpers/variabels';
+@import 'sass/helpers/mixins';
+
+@import 'sass/layout/navbar';
+@import 'sass/layout/header';
+@import 'sass/pages/homepage';
+@import 'sass/pages/resetPassword';
+@import 'sass/layout/footer';
+
+/*-- body style --*/
+body {
+    box-sizing: content-box;
+    height: auto;
+    background-color: #fcfcfc;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+.web {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
 }
 
 /*--- start shopping popup ---*/
 .backgrou{
     display: block;
-    min-height: 100vh;
-    width: 100%;
     padding: 0 5%;
-    background-color: #f5f6ff;
+    background-color: #f5f5f5;
     .clos{
         position: relative;
         margin: 0 auto;
@@ -188,7 +79,6 @@ export default {
         .link{
             position: absolute;
             width: 310px;
-            backface-visibility: hidden;
             .arrow{
                 position: absolute;
                 display: inline-block;
@@ -205,7 +95,7 @@ export default {
                 transition: all ease-in-out .5s;
             }
             .lii{
-                // cursor: pointer;
+                cursor: pointer;
                 position: relative;
                 top: 33px;
                 right: 8px;
@@ -220,7 +110,7 @@ export default {
             }
             .active{
                 background-color: $yalloColor;
-                // cursor: pointer;
+                cursor: pointer;
             }
             .upp{
                 top: 18px;
@@ -242,6 +132,7 @@ export default {
         border-radius: 45px;
         height: auto;
         padding: 33px;
+        box-shadow: 7px 7px 10px #b7b7b747;
         .titell{
             h3{
                 font-size: 18px;
@@ -261,7 +152,12 @@ export default {
             display: block;
             .groupp{
                 position: relative;
+                display: none;
                 .man{
+                    //maxMobile
+                    @media(max-width:767px){
+                        padding: 31px 8px 10px 15px;
+                    }
                     text-align: initial;
                     z-index: 1;
                     position: relative;
@@ -274,6 +170,13 @@ export default {
                         .mag{
                             margin-left: 5px;
                             display: inline-block;
+                            //maxMobile
+                            @media(max-width:767px){
+                                display: none;
+                                text-align: center;
+                                margin: 0 0 26px 0;
+                            }
+
                             img{
                                 width: 88px;
                                 height: 84px;
@@ -288,6 +191,11 @@ export default {
                             position: relative;
                             top: -18px;
                             margin: 0 5px 10px 0;
+                            @media(max-width:767px){
+                                text-align: center;
+                                display: block;
+                                margin: 10px 0 10px 0;
+                            }
                         }
                         h3{
                             color: $yalloColor;
@@ -314,6 +222,10 @@ export default {
                     left: 1px;
                     text-align: center;
                     cursor: pointer;
+                    //maxMobile
+                    @media(max-width:767px){
+                        top: 11px;
+                    }
                     img{
                         width: auto;
                         position: relative;
@@ -322,10 +234,24 @@ export default {
                     }
                 }
             }
+            .notCources{
+                padding:10px;
+                margin: 30px auto 30px auto;
+                text-align: center;
+                img{
+                    width: auto;
+                }
+                p{
+                    font-size: 18px;
+                    color: $textColor;
+                    font-family: 'cairoR';
+                    margin: 30px 0 20px 0;
+                }
+            }
         }
         /*-- Account --*/
         .dataUser{
-            display: block;
+            display: none;
             .creatt{
                 .logBy{
                     margin: 0 auto 26px auto;
@@ -508,9 +434,9 @@ export default {
         }
         /*-- Payment Method --*/
         .msPayment{
-            display: block;
+            display: none;
             .options{
-                display: block;
+                display: none;
                 .sele{
                     background-color: #fff;
                     cursor: pointer;
@@ -542,7 +468,6 @@ export default {
             }
             /*-- details Payment --*/
             .details{
-                display: none;
                 .error{
                     background-color: #F67A66;
                     padding: 10px;
@@ -624,7 +549,7 @@ export default {
 
         /*-- Succsess Payment --*/
         .succses{
-            display: block;
+            display: none;
             text-align: center;
             h3{
                 font-size: 18px;
@@ -714,4 +639,133 @@ export default {
     }
 }
 /*--- End shopping popup ---*/
-</style>
+
+/*--============= start 404 page =============--*/
+.error{
+    .cont{
+        text-align: center;
+        margin: 30px 0 30px 0;
+        span{
+            font-size: 34px;
+            color: #A8CBCF;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+        h2{
+            color: #3271AA;
+            font-size: 46px;
+            font-family:'cairoB';
+            font-weight: bold;
+        }
+        img{
+            width: auto;
+            margin-top: 20px;  
+            //maxMobile
+            @media(max-width:767px){
+                width:100%;
+            }
+            //minSmall
+            @media(min-width:768px){
+                width: 100%;
+            }
+            //minLarg
+            @media(min-width:1200px){
+                width: auto;
+            }
+        }
+        .butt{
+            text-align: center;
+            margin: 46px 0 0 0;
+            h3{
+                font-size: 16px;
+                display: inline-block;
+                color: $textColor;
+                font-family: 'cairoR';
+                margin-left: 10px;
+            }
+            img{
+                width: auto;
+                display: inline-block;
+                margin: 0;
+            }
+        }
+    }
+}
+/*--============= End 404 page =============--*/
+
+/*--============= Start Notification page =============--*/
+.Notific{
+    padding: 10px;
+    margin: 20px 0 45px 0;
+    position: relative;
+    .titel{
+        display: inline-block;
+        width: 100%;
+        padding: 12px;
+        background: #fff;
+        margin: 18px 0 16px 0;
+        img{
+            display: inline-block;
+            margin: -9px 0 0 0;
+        }
+        h3{
+            color: $textColor;
+            font-size: 22px;
+            font-family: 'cairoB';
+            line-height: 1.7;
+            margin: 0 11px 0 0;
+            display: inline-block;
+        }
+    }
+    .notifi{
+        margin: 10px auto;
+        max-width: 600px;
+        .notf{
+            background-color: #fff;
+            padding: 18px;
+            border-radius: 15px;
+            margin: 20px 0 20px 0;
+            box-shadow: 0px 3px 20px #eae8e878;
+            .user{
+            //maxMobile
+            @media(max-width:767px){
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            //minSmall
+            @media(min-width:768px){
+                text-align: center;
+                margin-bottom: 20px;
+            }
+                img{
+                    border-radius: 50px;
+                    width: 50px;
+                    height: 50px;
+                    display: inline-block;
+                }
+            }
+            .content{
+                h3{
+                    font-size: 18px;
+                    display: inline-block;
+                    font-family: 'cairoR';
+                    color: $textColor;
+                    width: 398px;
+                    margin: 0;
+                    line-height: 1.8;
+                    //maxMobile
+                    @media(max-width:767px){
+                        text-align: center;
+                        width: 100%;
+                        font-size: 17px;
+                        padding: 5px;
+                    }
+                    span{
+                        color: #C9C9C9;
+                    }
+                }
+            }
+        }
+    }
+}
+/*--============= End Notification page =============--*/
+

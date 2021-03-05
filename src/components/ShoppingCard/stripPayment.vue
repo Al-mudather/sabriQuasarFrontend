@@ -1,5 +1,20 @@
 <template>
     <div class="sele edit" @click="buyTheCoursesUsingStripe">
+        <div
+            class=""
+            style="text-align:left"
+            v-if="errorMessages.length > 0"
+        >
+            Please fix these <strong>error first</strong>
+            <ul>
+                <li
+                    v-for="(message, index) in errorMessages"
+                    :key="index"
+                >
+                    {{ message }}<br />
+                </li>
+            </ul>
+        </div>
         <img src="~assets/img/discover.png" alt="" />
         <img src="~assets/img/visa.png" alt="" />
         <q-inner-loading :showing="visible">
@@ -17,6 +32,7 @@ import { mapState, mapActions } from "vuex";
 export default {
     data () {
         return {
+            errorMessages: [],
             visible: false
         }
     },
@@ -25,6 +41,14 @@ export default {
     },
     methods: {
         ...mapActions('shoppingCart', ['setSaveCheckoutOrderIDAction']),
+        errorHandler(errorsObj) {
+            console.log(errorsObj);
+            for (const key in errorsObj) {
+                for (const val of errorsObj[key]) {
+                    this.errorMessages.push(val.message);
+                }
+            }
+        },
         async buyTheCoursesUsingStripe () {
             this.visible = true
             // TODO: Extract all courses ids
@@ -67,6 +91,7 @@ export default {
                 console.log('kkkkkkkkkkkkkkk')
                 console.log(dataObj.errors)
                 console.log('kkkkkkkkkkkkkkk')
+                this.errorHandler(dataObj.errors)
                 // alert(dataObj.errors.nonFieldErrors);
             }
 
@@ -97,7 +122,7 @@ export default {
             const stripDetails = stripPaymentresult.data.createStripeCheckout;
             if (this.$_.get(stripDetails,'[errors]')) {
                 this.visible = false
-                alert(stripDetails.errors.nonFieldErrors);
+                this.errorHandler(dataObj.errors)
             }
 
             if (this.$_.get(stripDetails,'[success]')) {

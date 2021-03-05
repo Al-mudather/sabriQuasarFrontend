@@ -34,7 +34,7 @@
                 </svg>
                 <img src="~assets/img/exclamation.png" alt="" />
             </div>
-            <h3>عن الكورس</h3>
+            <h3>{{$t('عن الكورس')}}</h3>
         </div>
         <p>
             {{courseData.brief}}

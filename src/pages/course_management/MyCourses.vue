@@ -11,14 +11,14 @@
                     <div class="col-lg-12">
                         <div class="titel titel2">
                             <img src="~assets/img/tit.png" alt="">
-                            <h3>لوحتي التعليمية</h3>
+                            <h3>{{$t('لوحتي التعليمية')}}</h3>
                         </div>
                         <!-- start afilliate bord -->
                         <afilliateBord />
                         <!-- end afilliate bord -->
                         <div class="titel">
                             <img src="~assets/img/tit.png" alt="">
-                            <h3>كورساتـي</h3>
+                            <h3>{{$t('كورساتـي')}}</h3>
                         </div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                                                 </g>
                                                 </g>
                                             </svg> 
-                                            <button>عرض المزيد <img src="~assets/img/moree.png" alt=""></button>
+                                            <button>{{$t('عرض المزيد')}} <img src="~assets/img/moree.png" alt=""></button>
                                         </div>
                                     </div>
                                 </div>

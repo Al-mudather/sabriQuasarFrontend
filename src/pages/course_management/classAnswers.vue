@@ -10,7 +10,7 @@
                                 type="text"
                                 v-model="question"
                                 style="outline: none"
-                                placeholder="ما هي إجابتكٍ"
+                                :placeholder="$t('ما هي إجابتك')"
                             />
                             <button type="submit">
                                 <img src="~assets/img/send.png" />

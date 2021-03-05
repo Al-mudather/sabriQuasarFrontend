@@ -34,7 +34,7 @@
                 </svg>
                 <img src="~assets/img/tech.png" alt="">
             </div>
-            <h3>المحاضرون</h3>
+            <h3>{{$t('المحاضرون')}}</h3>
         </div>
         <div class="tetch">
             <div class="container">

@@ -35,9 +35,9 @@
                     </div>
                     
                     <div class="txt">
-                        <h3>الــــدورات</h3>
+                        <h3>{{$t('الــــدورات')}}</h3>
                         <h4>
-                            عرض <span>{{ courses.edgeCount || 0 }}</span> من اصل
+                            {{$t('عرض')}} <span>{{ courses.edgeCount || 0 }}</span> {{$t('من اصل')}}
                             {{ courses.totalCount || 0 }}
                         </h4>
                     </div>
@@ -219,14 +219,14 @@
                                     </g>
                                 </svg>
                                 <button @click="gotTocoursesPage">
-                                    جمــــيع الدورات
+                                    {{$t('جمــــيع الدورات')}}
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="notCources" v-else>
                         <img src="~assets/img/Blue.png" alt="">
-                        <p>لا توجد دورات في هذا القسم في الوقت الحالي</p>
+                        <p>{{$t('لا توجد دورات في هذا القسم في الوقت الحالي')}}</p>
                     </div>
                 </div>
             </div>

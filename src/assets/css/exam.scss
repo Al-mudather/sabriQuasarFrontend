@@ -1,0 +1,336 @@
+/*-- font style --*/
+@font-face {
+    font-family: "cairoB";
+    src: url('../font/Cairo-Bold.ttf')
+}
+
+@font-face {
+    font-family: "cairoR";
+    src: url('../font/Cairo-Regular.ttf')
+}
+
+@font-face {
+    font-family: "airR";
+    src: url('../font/AirStripR.ttf')
+}
+
+/*-- import --*/
+@import 'sass/helpers/variabels';
+@import 'sass/helpers/mixins';
+
+@import 'sass/layout/navbar';
+@import 'sass/layout/header';
+@import 'sass/pages/homepage';
+@import 'sass/pages/resetPassword';
+@import 'sass/layout/footer';
+
+/*-- body style --*/
+body {
+    box-sizing: content-box;
+    height: auto;
+    background-color: #fcfcfc;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+.web {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/*--- START exaam ---*/
+.exaam{
+    padding: 10px;
+    margin: 20px 0 45px 0;
+    position: relative;
+    svg{
+        position: absolute;
+        top: 57px;
+        right: 27px;
+        width: auto;
+    }
+    .hedeer{
+        height: 56px;
+        margin: 0 0 12px 0;
+        .percent{
+            display: inline-block;
+            width: 54px;
+            height: 54px;
+            border: 2px solid #FCD462;
+            border-radius: 4px;
+            text-align: center;
+            margin-left: 14px;
+            h3{
+                font-size: 18px;
+                font-family: 'cairoR';
+                margin: 2px 0 4px 0;
+                color: $textColor;
+            }
+            span{
+                font-size: 13px;
+                font-family: 'cairoR';
+                display:block;
+                color: #A1A1A1;
+            }
+        }
+        .titel{
+            display: inline-block;
+            position: relative;
+            top: -6px;
+            img{
+                display: inline-block;
+                margin: -9px 0 0 0;
+            }
+            h3{
+                color: $textColor;
+                font-size: 22px;
+                font-family: 'cairoB';
+                line-height: 1.7;
+                margin: 0 11px 0 0;
+                display: inline-block;
+            }
+        }
+    }
+    /*progress*/
+    .progress{
+        margin: 17px 0 0 0;
+        height: 7px;
+        .progress-bar{
+            background: linear-gradient(90deg, rgba(123,134,250,1) 17%, rgba(252,212,98,1) 66%);
+        }
+    }
+    /*tab Lect*/
+    .test{
+        padding: 10px;
+        .question{
+            margin: 30px 0 0 0;
+            .top-strat{
+                .back{
+                    margin: 0 0 20px 0;
+                    //maxMobile
+                    @media(max-width:767px){
+                        text-align: center;
+                    }
+                    h3{
+                        font-family: 'cairoR';
+                        font-size: 16px;
+                        color: #7B7B7B;
+                        margin: 0;
+                        img{
+                            margin-left: 10px;
+                            cursor: pointer;
+                        }
+                    }
+                }
+                .start{
+                    //maxMobile
+                    @media(max-width:767px){
+                        margin: 0 0 50px 0;
+                    }
+                    display: block;
+                    background-color: #fff;
+                    border-radius: 30px;
+                    border: 4px solid #fff;
+                    width: 345px;
+                    height: auto;
+                    margin: 0 0 34px 0;
+                    @include prefixer(box-shadow,2px 9px 18.79px 2.21px rgba(185, 183, 183, 0.14), webkit moz o);
+                    .other{
+                        display: inline-block;
+                        width: 184px;
+                        h3{
+                            display: inline-block;
+                            font-size: 18px;
+                            font-family: 'cairoB';
+                            display: inline-block;
+                            color: #fff;
+                            background: #2D77D8;
+                            border-radius: 50px;
+                            padding: 18px 29px 12px 59px;
+                            margin: 0;
+                            position: relative;
+                            span{
+                                font-size: 18px;
+                                font-family: 'cairoR';
+                                display: inline-block;
+                                color: $textColor;
+                                margin-right: 14px;
+                                background:$yalloColor;
+                                position: absolute;
+                                padding: 18px 13px 11px 35px;
+                                top: 0;
+                                height: 51px;
+                                border-radius: 50px;
+                            }
+                        }
+                    }
+                    h3{
+                        font-family: 'cairoR';
+                        font-size: 18px;
+                        color: $textColor;
+                        display: inline-block;
+                        margin: 0;
+                        img{
+                            margin-right: 7px;
+                            cursor: pointer;
+                        }
+                    }
+                }
+            }
+            .time{
+                display: none;
+                background-color: #b1b8ff;
+                border: 4px solid #fff;
+                border-radius: 30px;
+                width: 250px;
+                height: auto;
+                margin: 26px auto;
+                @include prefixer(box-shadow,2px 9px 18.79px 2.21px rgba(185, 183, 183, 0.14), webkit moz o);
+                .other{
+                    display: inline-block;
+                    h2{
+                        display: inline-block;
+                        font-size: 18px;
+                        font-family: 'cairoB';
+                        color: #fff;
+                        margin:0 10px 0 0;
+                    }
+                    h3{
+                        display: inline-block;
+                        font-size: 18px;
+                        font-family: 'cairoB';
+                        display: inline-block;
+                        color: #fff;
+                        background: #2D77D8;
+                        border-radius: 50px;
+                        padding: 18px 29px 12px 59px;
+                        margin: 0;
+                        position: relative;
+                        span{
+                            font-size: 18px;
+                            font-family: 'cairoR';
+                            display: inline-block;
+                            color: $textColor;
+                            margin-right: 14px;
+                            background:$yalloColor;
+                            position: absolute;
+                            padding: 18px 13px 11px 35px;
+                            top: 0;
+                            height: 51px;
+                            border-radius: 50px;
+                        }
+                    }
+                }
+            }
+            /*start question*/
+            .ques{
+                margin: 0 0 28px 0;
+                h3{
+                    font-size: 18px;
+                    font-family: 'cairoB';
+                    color: $textColor;
+                    margin: 0 0 35px 0;
+                }
+                ul{
+                    margin-right: 20px;
+                    list-style: none;
+                    li{
+                        margin: 0 0 15px 0;
+                        width: 247px;
+                        cursor: pointer;
+                        span{
+                            font-size: 16px;
+                            font-family: 'cairoR';
+                            color: $textColor;
+                        }
+                        &.true{
+                            background-color: #02ee8a;
+                            padding: 10px 18px 10px 9px;
+                            border-radius: 50px;
+                            cursor: pointer;
+                            span{
+                                color: #fff;
+                            }
+                        }
+                        &.wrong{
+                            background-color: #ff6f69;
+                            padding: 10px 18px 10px 9px;
+                            border-radius: 50px;
+                            cursor: pointer;
+                            span{
+                                color: #fff;
+                            }
+                        }
+                    }
+                    hr{
+                        width: 300px;
+                        height: 3px;
+                        margin: 38px 0 0 33px;
+                        border-top: 3px solid #EBEDFF;
+                    }
+                }
+                .attemp{
+                    padding: 12px;
+                    background-color: #fff;
+                    h3{
+                        font-size: 16px;
+                        color: $textColor;
+                        font-family: 'cairoR';
+                        margin: 0;
+                        border-radius: 50px;
+                        padding: 10px;
+                        background: #ebedff;
+                        width: 190px;
+                    }
+                }
+            }
+        }
+    }
+}
+/*--- End exaam ---*/
+
+/*--- start footer ---*/
+footer{
+    padding: 50px 0;
+    text-align: center;
+    margin: 0;
+    .butons{
+        .exit{
+            display: inline-block;
+            margin:0 0 19px 95px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 50px;
+            width: 167px;
+            @include prefixer(box-shadow,2px 9px 18.79px 2.21px rgba(185, 183, 183, 0.14), webkit moz o);
+            h3{
+                cursor: pointer;
+                font-family: 'cairoR';
+                font-size: 16px;
+                color: $textColor;
+                margin: 0;
+                img{
+                    margin-left: 10px;
+                }
+            }
+        }
+        .next{
+            display: inline-block;
+            h3{
+                font-family: 'cairoR';
+                font-size: 16px;
+                color: $textColor;
+                margin-left: 10px;
+                img{
+                    margin-right: 7px;
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+}
+/*--- End footer ---*/
+
