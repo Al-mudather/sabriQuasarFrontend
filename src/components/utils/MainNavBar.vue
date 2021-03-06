@@ -48,9 +48,9 @@
                     </div>
                 </div>
                 <!-- Language -->
-                <div class="col-lg-1">
+                <div class="col-lg-1" style="display: none">
                     <div class="lang">
-                        <q-toggle v-model="englishLang" icon="language" unchecked-icon="clear" label="English"/>
+                        <q-toggle v-model="isEnglish" icon="language" unchecked-icon="clear" label="English"/>
                         <!-- <img src="~assets/img/doown.png" alt="" />
                         <h3>Ar</h3>
                         <div class="contry">
@@ -65,6 +65,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import { LocalStorage } from 'quasar'
 import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
 
 export default {
@@ -72,15 +73,54 @@ export default {
     data() {
         return {
             search: "",
-            englishLang: false
+            isEnglish: false
         };
     },
+
     props: {},
+
     computed: {
         ...mapGetters("authentication", ["token", "navbarSearch"])
     },
 
+    created () {
+        const _isEnglish = LocalStorage.getItem('isEnglish') || false
+        this.isEnglish = _isEnglish
+
+        // TODO: Listen to the language change
+        // this.$root.$on('SetEnglishLanguage', (value) => {
+        //     if (value) {
+        //         this.$i18n.locale = 'en'
+        //         // TODO: emit The data to the main nav bar
+        //         LocalStorage.set('isEnglish', true)
+        //         this.$root.$emit('SetEnglishLanguage', true)
+        //     } else {
+        //         this.$i18n.locale = 'ar'
+        //         // TODO: emit The data to the main nav bar
+        //         this.$root.$emit('SetEnglishLanguage', false)
+        //         LocalStorage.set('isEnglish', false)
+        //     }
+        // })
+    },
+
+    watch: {
+        isEnglish (value) {
+            if (value) {
+                this.$i18n.locale = 'en'
+                // TODO: emit The data to the main nav bar
+                LocalStorage.set('isEnglish', true)
+                // this.$root.$emit('SetEnglishLanguage', true)
+            } else {
+                this.$i18n.locale = 'ar'
+                // TODO: emit The data to the main nav bar
+                // this.$root.$emit('SetEnglishLanguage', false)
+                LocalStorage.set('isEnglish', false)
+            }
+        }
+    },
+
     methods: {
+
         showTheSearchingResult (event) {
             event.preventDefault();
 

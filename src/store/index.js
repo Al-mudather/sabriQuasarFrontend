@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 // import example from './module-example'
+import settings from './settings'
 import authentication from './authentication'
 import shoppingCart from './shoppingCart'
 import courseManagement from './courseManagement'
@@ -21,6 +22,7 @@ Vue.use(Vuex)
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
+      settings,
       authentication,
       shoppingCart,
       courseManagement,

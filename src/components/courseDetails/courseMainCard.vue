@@ -1,6 +1,7 @@
 <template>
   <div class="asid">
-    User: {{ user.affiliateSet.edges[0].node.affiliateLink }}
+    <!-- User: {{ user.affiliateSet.edges[0].node.affiliateLink }} -->
+    {{!lodash.isEmpty( lodash.get(user,'[affiliateSet][edges]'))}}
     <div class="rate">
       <img src="~assets/img/raha.png" alt="" />
     </div>
@@ -111,7 +112,7 @@ export default {
     onClick () {},
     ShareTheCourseLandingPage() {
       //   user.affiliateSet.edges[0].node.affiliateLink
-      if (this.lodash.get(this.user, "[affiliateSet]")) {
+      if ( !this.lodash.isEmpty( this.lodash.get(this.user, "[affiliateSet][edges]") ) ) {
         const aff =
           location.origin +
           "/#/course/" +
@@ -155,3 +156,4 @@ export default {
 </script>
 
 <style></style>
+ 

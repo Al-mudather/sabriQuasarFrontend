@@ -46,7 +46,7 @@
                             <h3>
                                 {{$t('هل نسيت كلمة')}}
                                 <a @click="goToPasswordResetPage"
-                                    ><span>{{$t('المــرور ؟')}}</span></a
+                                    ><span>{{$t('السر ؟')}}</span></a
                                 >
                             </h3>
                         </div>

@@ -49,7 +49,7 @@
                 <!-- Language -->
                 <div class="col-lg-1">
                     <div class="lang">
-                        <q-toggle v-model="englishLang" icon="language" unchecked-icon="clear" class="text-white" label="English"/>
+                        <q-toggle v-model="isEnglish" icon="language" unchecked-icon="clear" class="text-white" label="English"/>
                         <!-- <img src="~assets/img/doown.png" alt="" />
                         <q-toggle v-model="englishLang"/>
                         <h3 class="q-pq-sm">Ar</h3>
@@ -66,7 +66,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
-import { Quasar } from 'quasar'
+import { LocalStorage, Quasar } from 'quasar'
 
 export default {
     name: "NavBar",
@@ -74,7 +74,7 @@ export default {
         return {
             search: "",
             visible: false,
-            englishLang: false,
+            isEnglish: true,
             courses: []
         };
     },
@@ -83,27 +83,65 @@ export default {
         ...mapGetters("authentication", ["token"])
     },
 
+    created () {
+        const _isEnglish = LocalStorage.getItem('isEnglish') || false
+        this.isEnglish = _isEnglish
+    },
+
     watch: {
-        englishLang (value) {
-            
-            console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
-            console.log(value)
-            console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
+        async isEnglish (value) {
             if (value) {
+                this.$i18n.locale = 'en'
+                LocalStorage.set('isEnglish', true)
+                const langIso = 'en-us'
+
+                try {
+                    await import(
+                    /* webpackInclude: /(de|en-us)\.js$/ */
+                    'quasar/lang/' + langIso
+                    )
+                    .then(lang => {
+                        Quasar.lang.set({
+                            ...lang.default,
+                            rtl: true,
+                        })
+                    })
+
+                    this.$jquery('.backgroun').css({
+                        'transform': 'rotate(180deg)'
+                    })
+
+                    
+
+                    // document.querySelector('.backgroun').style({
+                    //     'transform': 'rotate(180deg);'
+                    // })
+                }
+                catch (err) {
+                    // Requested Quasar Language Pack does not exist,
+                    // let's not break the app, so catching 
+                }
                 
+            } else {
+                const langIso = 'ar'
+                this.$i18n.locale = 'ar'
+                // TODO: Save the language
+                LocalStorage.set('isEnglish', false)
+
+                try {
+                    Quasar.lang.set({
+                        isoName: 'ar',
+                        nativeName: 'العربية',
+                        // rtl: true,
+                    })
+
+                    this.$jquery('.backgroun').css({
+                        'transform': 'rotate(360deg)'
+                    })
+                }
+                catch (err) {
+                }
             }
-            console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
-            console.log(this.$q.lang.getLocale())
-            console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
-            // import(
-            //     'src/assets/css/homepage-rtl.css'
-            // )
-            // if (!value) {
-            //     import(
-            //         'src/assets/css/homepage.css'
-            //     )
-            // }
-            
         }
     },
 
