@@ -59,6 +59,7 @@
 
 <script>
 import { CheckoutSubscription } from 'src/queries/notification_management/subscription/CheckoutSubscription'
+import { LocalStorage, Quasar } from 'quasar'
 
 import { mapActions } from 'vuex'
 
@@ -118,7 +119,34 @@ export default {
             this.$el.querySelector(name).nextSibling.classList.add('show')
         }
     })
-   
+
+    const _isEnglish = LocalStorage.getItem('isEnglish') || false
+    
+    if (_isEnglish) {
+        // TODO: Change the shopping cart elements style when english
+        this.$jquery('.tabb svg').css({
+            'transform': 'rotateY(180deg)'
+        })
+        
+        this.$jquery('[data-cart=loginCart]').css({
+            'transform': 'translateX(15%)'
+        })
+    
+        this.$jquery('[data-cart=paymentData]').css({
+            'transform': 'translateX(30%)'
+        })
+    
+        this.$jquery('[data-cart=paymentData]').css({
+            'transform': 'translateX(30%)'
+        })
+    
+        this.$jquery('[data-cart=successMessage]').css({
+            'transform': 'translate(25%, -1%)'
+        })
+        // this.$jquery('.link > .arrow').css({
+        //     'transform': 'rotateY(180deg) translate(-3px, -2px)'
+        // })
+    }
   },
 
   beforeDestroy () {

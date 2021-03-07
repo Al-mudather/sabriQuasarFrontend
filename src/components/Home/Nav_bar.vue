@@ -107,15 +107,20 @@ export default {
                         })
                     })
 
+                    // TODO: Change the style of the backet when English
                     this.$jquery('.backgroun').css({
                         'transform': 'rotate(180deg)'
                     })
-
+                    // TODO: Change the style of the backet when English
+                    this.$jquery('.shoppgCart > .cart svg').css({
+                        'transform': 'translate(-20%, -30%)'
+                    })
                     
+                    this.$jquery('.shoppgCart > .cart h3').css({
+                        'transform': 'translate(35%, -100%)'
+                    })
 
-                    // document.querySelector('.backgroun').style({
-                    //     'transform': 'rotate(180deg);'
-                    // })
+
                 }
                 catch (err) {
                     // Requested Quasar Language Pack does not exist,
@@ -137,6 +142,15 @@ export default {
 
                     this.$jquery('.backgroun').css({
                         'transform': 'rotate(360deg)'
+                    })
+
+                    // TODO: Change the style of the backet when English
+                    this.$jquery('.shoppgCart > .cart svg').css({
+                        'transform': 'translate(0%, 0%)'
+                    })
+                    
+                    this.$jquery('.shoppgCart > .cart h3').css({
+                        'transform': 'translate(0%, 0%)'
                     })
                 }
                 catch (err) {

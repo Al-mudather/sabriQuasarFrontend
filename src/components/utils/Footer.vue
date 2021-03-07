@@ -2,7 +2,7 @@
     <footer>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-lg-1">
+                <div class="col-lg-1" style="display: none">
                     <div class="support">
                         <img src="~assets/img/support.png" alt="" />
                     </div>
