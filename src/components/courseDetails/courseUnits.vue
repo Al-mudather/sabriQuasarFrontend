@@ -227,7 +227,7 @@
                     </g>
                 </g>
             </svg>
-            <button @click="loadMoreData">عرض المزيد</button>
+            <button @click="loadMoreData">{{$t('عرض المزيد')}}<img class="q-mr-sm" src="~assets/img/moree.png" alt=""></button>
         </div>
     </div>
 </template>

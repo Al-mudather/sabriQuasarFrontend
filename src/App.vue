@@ -4,6 +4,7 @@
     </div>
 </template>
 <script>
+
 import { mapActions, mapState } from "vuex";
 import {WOW} from 'wowjs'
 import 'animate.css'
@@ -31,8 +32,8 @@ export default {
             //Default is true
             live:false
         }
-        let wow=new WOW(options)
-    }
+        new WOW(options)
+    },
 };
 </script>
 <style>

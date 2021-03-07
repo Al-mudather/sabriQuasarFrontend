@@ -56,11 +56,11 @@
                               </svg>
                               <img src="~assets/img/user-13.jpg" alt="" />
                             </div>
-                            <h3>{{instructor.node.instructor.user.firstName}} {{instructor.node.instructor.user.lastName}}</h3>
+                            <!-- {{instructor.node.instructor.user.fullName }}  -->
+                            {{ lodash.get(instructor,'[node][instructor][user][fullName]') || lodash.get(instructor,'[node][instructor][user][username]').split('@')[0] }} 
+                            <!-- <h3>{{instructor.node.instructor.user.firstName}} {{instructor.node.instructor.user.lastName}}</h3> -->
                             <p>
-                                الأستاذة الدكتورة غادة بشور صيدلانية من سوريا
-                                حاصلة على درجة الدكتوراه في علوم الأغذية من
-                                جامعة غيسن -
+                                {{ lodash.get(instructor,'[node][instructor][qualification]') }}
                             </p>
                         </div>
                     </div>
@@ -78,6 +78,7 @@ export default {
   name: 'CourseInstructors',
   data () {
     return {
+      lodash: this.$_,
       allCourseInstructors: { edges: [] }
     }
   },

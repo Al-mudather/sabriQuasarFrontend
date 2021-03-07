@@ -7,10 +7,10 @@
                 :key="inst.node.id"
             >
                 <instructor 
-                :firstName="inst.node.instructor.user.firstName"
-                :lastName="inst.node.instructor.user.lastName"
-                :qualification="inst.node.instructor.qualification"
-                :image="inst.node.instructor.image"
+                  :firstName="inst.node.instructor.user.firstName"
+                  :lastName="inst.node.instructor.user.lastName"
+                  :qualification="inst.node.instructor.qualification"
+                  :image="inst.node.instructor.image"
                 />
 
             </div>

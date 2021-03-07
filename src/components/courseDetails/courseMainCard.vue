@@ -1,8 +1,8 @@
 <template>
   <div class="asid">
     <!-- User: {{ user.affiliateSet.edges[0].node.affiliateLink }} -->
-    {{!lodash.isEmpty( lodash.get(user,'[affiliateSet][edges]'))}}
-    <div class="rate">
+    <!-- {{!lodash.isEmpty( lodash.get(user,'[affiliateSet][edges]'))}} -->
+    <div class="rate" style="display: none">
       <img src="~assets/img/raha.png" alt="" />
     </div>
     <div class="vidd">

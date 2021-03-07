@@ -67,7 +67,11 @@ export default {
     courseUnits,
     courseInstructors
   },
-  computed: {},
+  mounted () {
+    this.$jquery('.hedd > .point > img').css({
+        'transform': 'translateX(-1rem)'
+    })
+  },
   watch: {
     '$route.params': {
       handler: async function (params) {
@@ -133,7 +137,7 @@ export default {
             font-size: 22px;
             font-family: 'cairoB';
             line-height: 1.7;
-            margin: 0 -10px 0 0;
+            // margin: 0 -10px 0 0;
             display: inline-block;
             width: 94%;
             padding: 10px 20px 8px 0;
@@ -152,6 +156,7 @@ export default {
         //maxMobile
         @media(max-width:767px){
             margin: -31px 0 0 0;
+            padding-top: 4rem;
         }
         .rate{
             position: relative;

@@ -210,6 +210,18 @@ export default {
     background-color: #fcfcfc;
     .search {
         display: block;
+        //maxMobile
+        @media(max-width:767px){
+            display: none;
+        }
+        //minSmall
+        @media(min-width:768px){
+            display: none;
+        }
+        //minLarg
+        @media(min-width:1200px){
+            display: block;
+        }
         form {
             input {
                 background-color: #fafafa;
