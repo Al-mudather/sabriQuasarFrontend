@@ -17,21 +17,21 @@
                             <div class="lii active" data-cart="cartCourses">
                                 <img src="~assets/img/cart.png" alt="">
                             </div>
-                            <div class="arrow show" style="transform: translate(-3px, -2px)">
+                            <div class="arrow show" data-cart="arrowOfCartCourses" style="transform: translate(-3px, -2px)">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
                             <div class="lii" style="transform: translateX(-4px)" data-cart="loginCart">
                                 <img src="~assets/img/acc.png" alt="">
                             </div>
-                            <div class="arrow" style="transform: translate(-9px, -1px)">
+                            <div class="arrow" data-cart="arrowOfLoginCart" style="transform: translate(-9px, -1px)">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
                             <div class="lii" style="transform: translateX(-9px)" data-cart="paymentData">
                                 <img src="~assets/img/payment.png" alt="">
                             </div>
-                            <div class="arrow" style="transform: translate(-7px, -7px)">
+                            <div class="arrow" data-cart="arrowOfPaymentData" style="transform: translate(-7px, -7px)">
                                 <img src="~assets/img/nexxx.png" alt="">
                             </div>
 
@@ -124,10 +124,40 @@ export default {
     
     if (_isEnglish) {
         // TODO: Change the shopping cart elements style when english
+        this.changeTheShoppingCarLinksToEnglish ()
+        
+    } else {
+        // TODO: Change the shopping cart elements style when arabic
+        this.changeTheShoppingCarLinksToArabic ()
+    }
+  },
+
+  beforeDestroy () {
+    this.$root.$off('activateShoppingProgress')
+  },
+
+  methods: {
+    ...mapActions('shoppingCart', ['setShoppinCartDialogAction']),
+
+    changeTheShoppingCarLinksToEnglish () {
         this.$jquery('.tabb svg').css({
             'transform': 'rotateY(180deg)'
         })
+
+        // TODO: Change the shopping cart arrows
+        this.$jquery('[data-cart=arrowOfCartCourses]').css({
+            'transform': 'rotateY(180deg) translate(-50%, -7%)'
+        })
+
+        this.$jquery('[data-cart=arrowOfLoginCart]').css({
+            'transform': 'rotateY(180deg) translate(-120%, -5%)'
+        })
         
+        this.$jquery('[data-cart=arrowOfPaymentData]').css({
+            'transform': 'rotateY(180deg) translate(-125%, -30%)'
+        })
+
+        // TODO: Change the divs
         this.$jquery('[data-cart=loginCart]').css({
             'transform': 'translateX(15%)'
         })
@@ -143,18 +173,44 @@ export default {
         this.$jquery('[data-cart=successMessage]').css({
             'transform': 'translate(25%, -1%)'
         })
-        // this.$jquery('.link > .arrow').css({
-        //     'transform': 'rotateY(180deg) translate(-3px, -2px)'
-        // })
-    }
-  },
+    },
 
-  beforeDestroy () {
-    this.$root.$off('activateShoppingProgress')
-  },
+    changeTheShoppingCarLinksToArabic () {
+        // TODO: Change the shopping cart elements style when arabic
+        this.$jquery('.tabb svg').css({
+            'transform': 'rotateY(360deg)'
+        })
 
-  methods: {
-    ...mapActions('shoppingCart', ['setShoppinCartDialogAction']),
+        // TODO: Change the shopping cart arrows
+        this.$jquery('[data-cart=arrowOfCartCourses]').css({
+            'transform': 'rotateY(360deg) translate(-3px, -2px)'
+        })
+
+        this.$jquery('[data-cart=arrowOfLoginCart]').css({
+            'transform': 'rotateY(360deg) translate(-9px, -1px)'
+        })
+        
+        this.$jquery('[data-cart=arrowOfPaymentData]').css({
+            'transform': 'rotateY(360deg) translate(-7px, -7px)'
+        })
+
+        // TODO: Change the divs
+        this.$jquery('[data-cart=loginCart]').css({
+            'transform': 'translateX(-15%)'
+        })
+    
+        this.$jquery('[data-cart=paymentData]').css({
+            'transform': 'translateX(-30%)'
+        })
+    
+        this.$jquery('[data-cart=paymentData]').css({
+            'transform': 'translateX(-30%)'
+        })
+    
+        this.$jquery('[data-cart=successMessage]').css({
+            'transform': 'translate(-25%, 1%)'
+        })
+    },
 
     closeShoppingCart () {
     //   this.$router.go(-1)
