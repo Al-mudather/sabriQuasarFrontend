@@ -1,7 +1,8 @@
 import { LocalStorage } from 'quasar'
 
 const state = {
-  isEnglish:  LocalStorage.getItem('isEnglish')|| false
+  isEnglish:  LocalStorage.getItem('isEnglish')|| false,
+  openMenu: false
 }
 
 const mutations = {
@@ -9,10 +10,18 @@ const mutations = {
   updateIsEnglish (state, value) {
     LocalStorage.set('isEnglish', value)
     state.isEnglish = value
+  },
+
+  updateOpenMenu (state, value) {
+    state.openMenu = value
   }
 }
 
 const actions = {
+
+  setOpenMenuAction ({ commit }, value) {
+    commit('updateOpenMenu', value)
+  },
 
   setIsEnglishAction ({ commit }, value) {
     commit('updateIsEnglish', value)
@@ -20,7 +29,7 @@ const actions = {
 }
 
 const getters = {
-  isEnglish: state => state.isEnglish
+  isEnglish:  state => state.isEnglish
 }
 
 export default {

@@ -4,25 +4,24 @@
             <div class="row">
                 <div class="col-lg-2">
                     <!--menu & logo -->
-                    <div class="minlog">
+                    <div class="minlog" @click="changeMenuState" style="cursor: pointer">
                         <div class="menu">
                             <img src="~assets/img/menu.png" alt="" />
                         </div>
                         <!--logo-->
                         <div class="logo">
-                            <img src="~assets/img/logoB.png" alt="" />
+                            <img src="~assets/img/logo.png" alt="" />
                         </div>
                     </div>
                 </div>
                 <!-- search box -->
                 <div class="col-lg-6">
                     <div class="search">
-                        <form v-if="navbarSearch"  @submit="showTheSearchingResult">
+                        <form @submit="showTheSearchingResult">
                             <input
-                                type="text"
                                 v-model="search"
-                                placeholder="ما الذي تبحث عنة؟"
-                                style="color: #7B7B7B"
+                                type="text"
+                                v-bind:placeholder="$t('ما الذي تبحث عنه؟')"
                             />
                             <button>
                                 <img src="~assets/img/search.png" />
@@ -32,27 +31,36 @@
                 </div>
                 <!--login $ sign-->
                 <div class="col-lg-3">
-                    <div class="account">
+                    <div class="account" v-if="!token">
                         <div class="sign">
                             <a @click="goToSignUpPage" style="cursor: pointer">
                                 <img src="~assets/img/sign.png" alt="" />
-                                <h3 class="q-pr-sm">تسجيل حساب</h3>
+                                <h3 class="q-pr-sm">{{ $t('تسجيل حساب') }}</h3>
                             </a>
                         </div>
                         <div class="login">
                             <a @click="goToLoginPage" style="cursor: pointer">
                                 <img src="~assets/img/login.png" alt="" />
-                                <h3 class="q-pr-sm">دخول</h3>
+                                <h3 class="q-pr-sm">{{ $t('دخول') }}</h3>
                             </a>
+                        </div>
+                    </div>
+                    <div class="account" v-else>
+                        <div @click="logUserOut" style="cursor: pointer" class="sign logOutBtn mag">
+                            <div class="mag">
+                                <img src="~assets/img/enter.png" alt="">
+                            </div>
+                            <h3 class="q-pr-sm">{{ $t('خروج') }}</h3>
                         </div>
                     </div>
                 </div>
                 <!-- Language -->
-                <div class="col-lg-1" style="display: none">
+                <div class="col-lg-1">
                     <div class="lang">
-                        <q-toggle v-model="isEnglish" icon="language" unchecked-icon="clear" label="English"/>
+                        <q-toggle v-model="_isEnglish" icon="language" unchecked-icon="clear" class="text-black" label="Eng"/>
                         <!-- <img src="~assets/img/doown.png" alt="" />
-                        <h3>Ar</h3>
+                        <q-toggle v-model="englishLang"/>
+                        <h3 class="q-pq-sm">Ar</h3>
                         <div class="contry">
                             <img src="~assets/img/ar.png" alt="" />
                         </div> -->
@@ -62,64 +70,115 @@
         </div>
     </section>
 </template>
-
+ 
 <script>
-import { mapGetters } from "vuex";
-import { LocalStorage } from 'quasar'
+import { mapGetters, mapState, mapActions } from "vuex";
 import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
+import { Quasar } from 'quasar'
 
 export default {
     name: "NavBar",
     data() {
         return {
-            search: "",
-            isEnglish: false
+            search: ""
         };
     },
 
     props: {},
 
     computed: {
-        ...mapGetters("authentication", ["token", "navbarSearch"])
-    },
-
-    created () {
-        const _isEnglish = LocalStorage.getItem('isEnglish') || false
-        this.isEnglish = _isEnglish
-
-        // TODO: Listen to the language change
-        // this.$root.$on('SetEnglishLanguage', (value) => {
-        //     if (value) {
-        //         this.$i18n.locale = 'en'
-        //         // TODO: emit The data to the main nav bar
-        //         LocalStorage.set('isEnglish', true)
-        //         this.$root.$emit('SetEnglishLanguage', true)
-        //     } else {
-        //         this.$i18n.locale = 'ar'
-        //         // TODO: emit The data to the main nav bar
-        //         this.$root.$emit('SetEnglishLanguage', false)
-        //         LocalStorage.set('isEnglish', false)
-        //     }
-        // })
+        ...mapGetters("authentication", ["token", "navbarSearch"]),
+        ...mapState("settings", ["isEnglish"]),
+        _isEnglish: {
+            get () {
+                return this.isEnglish
+            },
+            set (newVlaue) {
+                return this.setIsEnglishAction(newVlaue)
+            }
+        }
     },
 
     watch: {
-        isEnglish (value) {
+        async isEnglish (value) {
             if (value) {
                 this.$i18n.locale = 'en'
-                // TODO: emit The data to the main nav bar
-                LocalStorage.set('isEnglish', true)
-                // this.$root.$emit('SetEnglishLanguage', true)
+                this.setIsEnglishAction(value)
+                const langIso = 'en-us'
+
+                try {
+                    await import(
+                    /* webpackInclude: /(de|en-us)\.js$/ */
+                    'quasar/lang/' + langIso
+                    )
+                    .then(lang => {
+                        Quasar.lang.set({
+                            ...lang.default,
+                            rtl: true,
+                        })
+                    })
+
+                    // TODO: Change the style of the backet when English
+                    this.$jquery('.backgroun').css({
+                        'transform': 'rotate(180deg)'
+                    })
+                    // TODO: Change the style of the backet when English
+                    this.$jquery('.shoppgCart > .cart svg').css({
+                        'transform': 'translate(-20%, -30%)'
+                    })
+                    
+                    this.$jquery('.shoppgCart > .cart h3').css({
+                        'transform': 'translate(35%, -100%)'
+                    })
+
+
+                }
+                catch (err) {
+                    // Requested Quasar Language Pack does not exist,
+                    // let's not break the app, so catching
+                }
+                
             } else {
                 this.$i18n.locale = 'ar'
-                // TODO: emit The data to the main nav bar
-                // this.$root.$emit('SetEnglishLanguage', false)
-                LocalStorage.set('isEnglish', false)
+                // TODO: Save the language
+                this.setIsEnglishAction(value)
+
+                try {
+                    Quasar.lang.set({
+                        isoName: 'ar',
+                        nativeName: 'العربية',
+                        // rtl: true,
+                    })
+
+                    this.$jquery('.backgroun').css({
+                        'transform': 'rotate(360deg)'
+                    })
+
+                    // TODO: Change the style of the backet when English
+                    this.$jquery('.shoppgCart > .cart svg').css({
+                        'transform': 'translate(0%, 0%)'
+                    })
+                    
+                    this.$jquery('.shoppgCart > .cart h3').css({
+                        'transform': 'translate(0%, 0%)'
+                    })
+                }
+                catch (err) {
+                }
             }
         }
     },
 
     methods: {
+        ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction']),
+
+        changeMenuState () {
+            this.setOpenMenuAction(true)
+        },
+
+        logUserOut () {
+            this.logOutAction()
+        },
 
         showTheSearchingResult (event) {
             event.preventDefault();
@@ -159,7 +218,7 @@ export default {
                             position: 'top',
                             progress: true,
                             multiLine: true,
-                            message: 'No result'
+                            message: $('لا توجد نتائج')
                         })
                     }
                 })
@@ -169,7 +228,7 @@ export default {
                     position: 'top',
                     progress: true,
                     multiLine: true,
-                    message: 'ما الذي تبحث عنه'
+                    message: $t('ما الذي تبحث عنه')
                 })
             }
         },
@@ -206,6 +265,33 @@ export default {
 <style lang="scss" scoped>
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
+.logOutBtn {
+    height: 41px;
+    width: 137px;
+    color: #fff;
+    background-color: #1C508D;
+    border-radius: 50px;
+    padding: 8px 16px;
+    text-align: center;
+    margin:0 auto 26px auto;
+    overflow: hidden;
+    .mag{
+        background: #E57E6D;
+        padding: 4px;
+        border-radius: 50%;
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        line-height: 1.2;
+        margin: -3px 0 0 0;
+
+    }
+    h3{
+        display: inline-block;
+        font-size: 16px;
+        font-family: 'cairoR';
+    }
+}
 .top {
     background-color: #fcfcfc;
     .search {

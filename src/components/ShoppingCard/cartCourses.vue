@@ -19,6 +19,10 @@
                     <img src="~assets/img/delete.png" alt="" />
                 </div>
             </div>
+            <div v-if="lodash.isEmpty(shoppingCartDataList)" class="notCources">
+                <img src="~assets/img/inbox(1).png" alt="">
+                <p>السلة فارغة قم بتعبئتها</p>
+            </div>
         </div>
         <!--Total Price-->
         <div class="total">

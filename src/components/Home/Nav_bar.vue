@@ -4,7 +4,7 @@
             <div class="row">
                 <div class="col-lg-2">
                     <!--menu & logo -->
-                    <div class="minlog">
+                    <div class="minlog" @click="changeMenuState" style="cursor: pointer">
                         <div class="menu">
                             <img src="~assets/img/menu.png" alt="" />
                         </div>
@@ -31,7 +31,7 @@
                 </div>
                 <!--login $ sign-->
                 <div class="col-lg-3">
-                    <div class="account">
+                    <div class="account" v-if="!token">
                         <div class="sign">
                             <a @click="goToSignUpPage" style="cursor: pointer">
                                 <img src="~assets/img/sign.png" alt="" />
@@ -45,11 +45,19 @@
                             </a>
                         </div>
                     </div>
+                    <div class="account" v-else>
+                        <div @click="logUserOut" style="cursor: pointer" class="sign logOutBtn mag">
+                            <div class="mag">
+                                <img src="~assets/img/enter.png" alt="">
+                            </div>
+                            <h3 class="q-pr-sm">{{ $t('خروج') }}</h3>
+                        </div>
+                    </div>
                 </div>
                 <!-- Language -->
                 <div class="col-lg-1">
                     <div class="lang">
-                        <q-toggle v-model="isEnglish" icon="language" unchecked-icon="clear" class="text-white" label="English"/>
+                        <q-toggle v-model="_isEnglish" icon="language" unchecked-icon="clear" class="text-white" label="Eng"/>
                         <!-- <img src="~assets/img/doown.png" alt="" />
                         <q-toggle v-model="englishLang"/>
                         <h3 class="q-pq-sm">Ar</h3>
@@ -64,9 +72,9 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapState, mapActions } from "vuex";
 import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
-import { LocalStorage, Quasar } from 'quasar'
+import { Quasar } from 'quasar'
 
 export default {
     name: "NavBar",
@@ -74,25 +82,28 @@ export default {
         return {
             search: "",
             visible: false,
-            isEnglish: true,
             courses: []
         };
     },
     props: {},
     computed: {
-        ...mapGetters("authentication", ["token"])
-    },
-
-    created () {
-        const _isEnglish = LocalStorage.getItem('isEnglish') || false
-        this.isEnglish = _isEnglish
+        ...mapGetters("authentication", ["token"]),
+        ...mapState("settings", ["isEnglish"]),
+        _isEnglish: {
+            get () {
+                return this.isEnglish
+            },
+            set (newVlaue) {
+                return this.setIsEnglishAction(newVlaue)
+            }
+        }
     },
 
     watch: {
         async isEnglish (value) {
             if (value) {
                 this.$i18n.locale = 'en'
-                LocalStorage.set('isEnglish', true)
+                this.setIsEnglishAction(value)
                 const langIso = 'en-us'
 
                 try {
@@ -131,7 +142,7 @@ export default {
                 const langIso = 'ar'
                 this.$i18n.locale = 'ar'
                 // TODO: Save the language
-                LocalStorage.set('isEnglish', false)
+                this.setIsEnglishAction(value)
 
                 try {
                     Quasar.lang.set({
@@ -158,8 +169,18 @@ export default {
             }
         }
     },
-
+ 
     methods: {
+        ...mapActions('authentication', ['logOutAction']),
+        ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction']),
+
+        changeMenuState () {
+            this.setOpenMenuAction(true)
+        },
+
+        logUserOut () {
+            this.logOutAction()
+        },
 
         showTheSearchingResult (event) {
             event.preventDefault();
@@ -199,11 +220,18 @@ export default {
                             position: 'top',
                             progress: true,
                             multiLine: true,
-                            message: 'No result'
+                            message: $('لا توجد نتائج')
                         })
                     }
                 })
-
+            } else {
+                this.$q.notify({
+                    type: 'warning',
+                    position: 'top',
+                    progress: true,
+                    multiLine: true,
+                    message: $t('ما الذي تبحث عنه')
+                })
             }
         },
 
@@ -217,3 +245,32 @@ export default {
     }
 };
 </script>
+<style lang="scss">
+.logOutBtn {
+    height: 41px;
+    width: 137px;
+    color: #fff;
+    background-color: #1C508D;
+    border-radius: 50px;
+    padding: 8px 16px;
+    text-align: center;
+    margin:0 auto 26px auto;
+    overflow: hidden;
+    .mag{
+        background: #E57E6D;
+        padding: 4px;
+        border-radius: 50%;
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        line-height: 1.2;
+        margin: -3px 0 0 0;
+
+    }
+    h3{
+        display: inline-block;
+        font-size: 16px;
+        font-family: 'cairoR';
+    }
+}
+</style>

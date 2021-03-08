@@ -4,7 +4,6 @@
     </div>
 </template>
 <script>
-
 import { mapActions, mapState } from "vuex";
 import {WOW} from 'wowjs'
 import 'animate.css'

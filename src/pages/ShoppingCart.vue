@@ -76,33 +76,7 @@ export default {
 
         checkoutSubscription: {
 
-          query: CheckoutSubscription,
-
-          result({data}) {
-            console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
-            // this.myNotifications = data.notificationCreated.notifications;
-            console.log('lllllllllll')
-            console.log(data.checkoutSubscription)
-            console.log('lllllllllll')
-            // console.log()
-            // if (this.$_.get(this.myNotifications, '[edges]')) {
-            //   this.myNotifications.edges.push({
-            //     node: data.notificationCreated.notification
-            //   })
-            //   this.myNotifications.totalCount++
-            // } else {
-            //   this.myNotifications = {
-            //     totalCount: 1,
-            //     edges: {
-            //       node: data.notificationCreated.notification
-            //     }
-            //   }
-            // }
-
-            // console.log(this.notificationCreated)
-            console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
-          },
-
+          query: CheckoutSubscription
         },
 
       },
@@ -110,7 +84,10 @@ export default {
     },
 
 
-  mounted () {
+    mounted () {
+    
+    // TODO: import the shooping cart animation    
+
     this.$el.querySelector('.lii.active').nextSibling.classList.add('show')
     this.$root.$on('activateShoppingProgress', (cart_name) => {
         if (cart_name) {
@@ -404,6 +381,20 @@ export default {
                         top: 18px;
                         left: -17px;
                     }
+                }
+            }
+            .notCources{
+                padding:10px;
+                margin: 30px auto 30px auto;
+                text-align: center;
+                img{
+                    width: auto;
+                }
+                p{
+                    font-size: 18px;
+                    color: $textColor;
+                    font-family: 'cairoR';
+                    margin: 30px 0 20px 0;
                 }
             }
         }

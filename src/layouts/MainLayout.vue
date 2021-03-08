@@ -1,6 +1,13 @@
 <template>
   <div>
     <MainNavBar />
+    <transition
+      appear
+      enter-active-class="animated lightSpeedInRight"
+      leave-active-class="animated lightSpeedOutRight"
+    >
+      <Menu v-if="openMenu"/>
+    </transition>
     <ShoppingCart />
     <transition
       appear
@@ -12,41 +19,65 @@
     <Footer />
   </div>
 </template>
-
+ 
 <script>
 import MainNavBar from "components/utils/MainNavBar";
+import Menu from 'components/Home/Menu'
 import Footer from "src/components/utils/Footer";
 import ShoppingCart from "components/Home/Shopping_cart";
 import { LocalStorage, Quasar } from 'quasar'
+import { mapState, mapActions } from 'vuex'
 
 export default {
     name: "MainLayout",
+
     data() {
         return {};
     },
+
     components: {
         MainNavBar,
+        Menu,
         Footer,
         ShoppingCart
     },
+
+    computed: {
+      ...mapState('settings',['openMenu', 'isEnglish'])
+    },
+
     mounted () {
-        const _isEnglish = LocalStorage.getItem('isEnglish') || false
+        const _isEnglish = LocalStorage.getItem('isEnglish')
 
         if (_isEnglish) {
             // TODO: Change the shopping cart elements style when english
-            this.changeTheShoppingCarLinksToEnglish ()
+            this.changeTheShoppingCarLinksToEnglish (_isEnglish)
             
         } else {
             // TODO: Change the shopping cart elements style when arabic
-            this.changeTheShoppingCarLinksToArabic ()
+            this.changeTheShoppingCarLinksToArabic (_isEnglish)
         }
     },
-    methods: {
-        async changeTheShoppingCarLinksToEnglish () {
-            this.$i18n.locale = 'en'
-            LocalStorage.set('isEnglish', true)
-            const langIso = 'en-us'
 
+    watch: {
+      isEnglish (value) {
+        if (value) {
+            // TODO: Change the shopping cart elements style when english
+            this.changeTheShoppingCarLinksToEnglish (value)
+            
+        } else {
+            // TODO: Change the shopping cart elements style when arabic
+            this.changeTheShoppingCarLinksToArabic (value)
+        }
+      }
+    },
+    methods: {
+      ...mapActions('settings', ['setIsEnglishAction']),
+
+        async changeTheShoppingCarLinksToEnglish (value) {
+            this.$i18n.locale = 'en'
+            this.setIsEnglishAction(value)
+            const langIso = 'en-us'
             try {
                 await import(
                 /* webpackInclude: /(de|en-us)\.js$/ */
@@ -80,11 +111,11 @@ export default {
             }
         },
 
-        changeTheShoppingCarLinksToArabic () {
+        changeTheShoppingCarLinksToArabic (value) {
             const langIso = 'ar'
             this.$i18n.locale = 'ar'
             // TODO: Save the language
-            LocalStorage.set('isEnglish', false)
+            this.setIsEnglishAction(value)
 
             try {
                 Quasar.lang.set({
@@ -119,28 +150,6 @@ export default {
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
-// .top{
-//     background-color: #fff;
-//     .search{
-//         form{
-//             input{
-//                 background-color:#FAFAFA;
-//             }
-//             button{
-//             }
-//         }
-//     }
-//     .lang{
-//         background-color: #fff;
-//         border: 2px solid #ECEAEA;
-//         padding: 3px 1px 0 0;
-//         h3{
-//             color: #474747;
-//         }
-//     }
-// }
-/*--- End navbar ---*/
-
 /*--- START cources ---*/
 .cources {
   padding: 50px 0;
