@@ -13,5 +13,7 @@
 </template>
 
 <script>
-export default {}
+export default {
+    name: 'skeletonCard'
+}
 </script>

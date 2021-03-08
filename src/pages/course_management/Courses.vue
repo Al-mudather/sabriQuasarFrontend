@@ -102,19 +102,29 @@
                           <div class="tab-content" id="myTabContent">
                             <div class="cn fadeIn" id="home" role="tabpanel" aria-labelledby="home-tab">
                                 <div class="row justify-center" v-if="lodash.isEmpty(courses.edges)">
-                                    <skeletonCard
-                                      class="col-lg-3 col-md-6 col-sm-6 col-xs-12"
-                                      v-for="sk in 8"
-                                      :key="sk"
-                                    />
+                                  <transition
+                                    appear
+                                    enter-active-class="animated fadeIn"
+                                    leave-active-class="animated fadeOut"
+                                  >
+                                    <!-- satrt not result -->
+                                    <div class="col col-lg-3 col-md-6 col-sm-6 col-xs-12 notResult">
+                                        <img src="~assets/img/search(1).png" alt="">
+                                        <p>{{$t('لا توجد نتائج للبحث')}}
+                                            <br>
+                                            {{$t('حاول الكتابة بشكل مختلف')}}
+                                        </p>
+                                    </div>
+                                    <!-- End not result -->
+                                  </transition>
                                 </div>
                                 <div class="row justify-center" v-else>
                                 <!-- <div class="row justify-center" v-if="courses.edgeCount > 0"> -->
                                     <div  v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
                                         <transition
-                                        appear
-                                        enter-active-class="animated fadeIn"
-                                        leave-active-class="animated fadeOut"
+                                          appear
+                                          enter-active-class="animated fadeIn"
+                                          leave-active-class="animated fadeOut"
                                         >
                                             <course-card
                                                 :course="course.node"
@@ -124,7 +134,6 @@
                                                 unit="SDG"
                                             />
                                         </transition>
-
                                     </div>
                                 </div>
                             </div>
@@ -140,7 +149,6 @@
 
 <script>
 import courseCard from 'components/utils/courseCard'
-import skeletonCard from "src/components/skeleton/skeletonCard";
 import skeletonChip from 'components/skeleton/skeletonChip'
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
 import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
@@ -183,7 +191,6 @@ export default {
   },
   components: {
     courseCard,
-    skeletonCard,
     skeletonChip,
     Swiper,
     SwiperSlide
