@@ -110,6 +110,10 @@ export default {
         this.$jquery('.shoppgCart > .cart h3').css({
             'transform': 'translate(35%, -100%)'
         })
+
+        this.$jquery('.shoppgCart > .cart > .notifc').css({
+            'transform': 'translate(-5%,-43%)'
+        })
     },
 
     changeTheShoppingCarLinksToArabic () {
@@ -125,6 +129,10 @@ export default {
       
       this.$jquery('.shoppgCart > .cart h3').css({
           'transform': 'translate(0%, 0%)'
+      })
+
+      this.$jquery('.shoppgCart > .cart > .notifc').css({
+          'transform': 'translate(0%,0%)'
       })
     }
   }

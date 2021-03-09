@@ -5,7 +5,7 @@
     <!-- <ViewData /> -->
     <!-- <Evaluation /> -->
     <Training />
-    <!-- <SwiperData /> -->
+    <SwiperData />
     <Account />
   </section>
 </template>

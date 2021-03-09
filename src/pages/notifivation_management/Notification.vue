@@ -1,35 +1,27 @@
 <template>
-  <section class="web">
-    <!--=============== START navbar ===============-->
-    <user-nav-bar />
-    <!--=============== End navbar ===============-->
-    <!--=============== START My Courses ===============-->
-    <section class="Notific">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="titel">
-              <img src="~assets/img/tit.png" alt="" />
-              <h3>{{$t('الإشعارات')}}</h3>
-            </div>
-          </div>
-          <div class="notifi">
-            <!-- {{notificationData.edges}} -->
-            <Notification-Card 
-              v-for="notification in notificationData.edges"
-              :key="notification.node.pk"
-              :notification="notification.node"
-            />
-
+  <section class="Notific" style="min-height: 44vh">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="titel">
+            <img src="~assets/img/tit.png" alt="" />
+            <h3>{{$t('الإشعارات')}}</h3>
           </div>
         </div>
+        <div class="notifi">
+          <Notification-Card 
+            v-for="notification in notificationData.edges"
+            :key="notification.node.pk"
+            :notification="notification.node"
+          />
+
+        </div>
       </div>
-    </section>
+    </div>
   </section>
 </template>
 
 <script>
-import UserNavBar from "src/components/utils/UserNavBar"
 import NotificationCard from 'src/components/notifivation_management/NotificationCard'
 
 export default {
@@ -40,8 +32,7 @@ export default {
     }
   },
   components: {
-    UserNavBar,
-    NotificationCard
+    // NotificationCard
   },
 
   mounted () {

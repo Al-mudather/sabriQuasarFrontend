@@ -17,14 +17,14 @@ const routes = [
     ]
   },
   {
-    path: '/class/:pk/:id',
-    name: 'course-class',
-    component: () => import('pages/course_management/CourseClass.vue')
-  },
-  {
-    path: '/myCourses',
-    name: 'my-courses',
-    component: () => import('pages/course_management/MyCourses.vue')
+    path: '/user',
+    component: () => import('src/layouts/UserLayout'),
+    children: [
+      { path: '/notification', name: 'notification', component: () => import('pages/notifivation_management/Notification.vue') },
+      { path: '/profile', name: 'user-profile', component: () => import('pages/account_management/Profile') },
+      { path: '/myCourses', name: 'my-courses', component: () => import('pages/course_management/MyCourses.vue') },
+      { path: '/class/:pk/:id', name: 'course-class', component: () => import('pages/course_management/CourseClass.vue') }
+    ]
   },
   {
     path: '/verify/email/:token',
@@ -36,9 +36,7 @@ const routes = [
     name: 'reset-password-form',
     component: () => import('pages/account_management/PasswordResetForm.vue')
   },
-  { path: '/notification', name: 'notification', component: () => import('pages/notifivation_management/Notification.vue') },
   { path: '/account/confirm', name: 'account-confirm', component: () => import('components/Account/Confirm') },
-  { path: '/user/profile', name: 'user-profile', component: () => import('pages/account_management/Profile') },
   {
     path: '/account',
     component: () => import('pages/account_management/Account'),

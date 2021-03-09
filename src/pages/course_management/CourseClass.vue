@@ -1,189 +1,181 @@
 <template>
-  <section class="web">
-    <!--=============== START navbar ===============-->
-    <user-nav-bar />
-    <!--=============== End navbar ===============-->
-
-    <!--=============== START Lecture ===============-->
-    <section class="Lecture">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="hedeer">
-              <div class="percent">
-                <h3>{{ calculateTheTotalProgress }}%</h3>
-                <span>{{$t('التقدم')}}</span>
-              </div>
-              <div class="titel">
-                <img src="~assets/img/tit.png" alt="" />
-                <h3>{{ lodash.get(courseData, "[title]") }}</h3>
-              </div>
+  <section class="Lecture">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="hedeer">
+            <div class="percent">
+              <h3>{{ calculateTheTotalProgress }}%</h3>
+              <span>{{$t('التقدم')}}</span>
             </div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="15.103"
-              height="9.192"
-              viewBox="0 0 15.103 9.192"
-            >
-              <path
-                id="Path_998"
-                data-name="Path 998"
-                d="M8447.5,1553.75s.75,7.625,5.25,5.875,7.125-2.75,8.875,3.125"
-                transform="translate(-8447.002 -1553.701)"
-                fill="none"
-                stroke="#fcd462"
-                stroke-width="1"
-              />
-            </svg>
-            <div class="progress">
-              <div
-                class="progress-bar"
-                role="progressbar"
-                :style="{ width: calculateTheTotalProgress + '%' }"
-                aria-valuenow="75"
-                aria-valuemin="0"
-                aria-valuemax="100"
-              ></div>
+            <div class="titel">
+              <img src="~assets/img/tit.png" alt="" />
+              <h3>{{ lodash.get(courseData, "[title]") }}</h3>
             </div>
           </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="15.103"
+            height="9.192"
+            viewBox="0 0 15.103 9.192"
+          >
+            <path
+              id="Path_998"
+              data-name="Path 998"
+              d="M8447.5,1553.75s.75,7.625,5.25,5.875,7.125-2.75,8.875,3.125"
+              transform="translate(-8447.002 -1553.701)"
+              fill="none"
+              stroke="#fcd462"
+              stroke-width="1"
+            />
+          </svg>
+          <div class="progress">
+            <div
+              class="progress-bar"
+              role="progressbar"
+              :style="{ width: calculateTheTotalProgress + '%' }"
+              aria-valuenow="75"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            ></div>
+          </div>
         </div>
-        <!-- start tab lec -->
-        <div class="tabLect">
-          <div class="row">
-            <div class="col-lg-12">
-              <q-tabs
-                v-model="tab"
-                narrow-indicator
-                dense
-                id="myTab"
-                role="tablist"
-                active-color="warning"
-                align="center"
-                class="nav nav-tabs"
-              >
-                <!-- <q-tab :ripple="false" name="mails" icon="mail" label="Mails" /> -->
-                <q-tab :ripple="false" name="tutorial">
-                  <template v-slot:default>
-                    <li class="nav-item">
-                      <a
-                        class="nav-link"
-                        id="tutorial-tab"
-                        data-toggle="tab"
-                        role="tab"
-                        aria-controls="tutorial"
-                        aria-selected="true"
-                        >{{$t('الـدروس')}}</a
-                      >
-                    </li>
-                  </template>
-                </q-tab>
-                <q-tab :ripple="false" name="download">
-                  <template v-slot:default>
-                    <li class="nav-item">
-                      <a
-                        class="nav-link"
-                        id="download-tab"
-                        data-toggle="tab"
-                        role="tab"
-                        aria-controls="download"
-                        aria-selected="false"
-                        >{{$t('المادة التعليمية')}}</a
-                      >
-                    </li>
-                  </template>
-                </q-tab>
-                <q-tab :ripple="false" name="question">
-                  <template v-slot:default>
-                    <li class="nav-item">
-                      <a
-                        class="nav-link"
-                        id="question-tab"
-                        data-toggle="tab"
-                        role="tab"
-                        aria-controls="question"
-                        aria-selected="false"
-                        >{{$t('بوابة الاسئلة')}}</a
-                      >
-                    </li>
-                  </template>
-                </q-tab>
-                <q-tab :ripple="false" name="tech">
-                  <template v-slot:default>
-                    <li class="nav-item">
-                      <a
-                        class="nav-link"
-                        id="tech-tab"
-                        data-toggle="tab"
-                        role="tab"
-                        aria-controls="tech"
-                        aria-selected="false"
-                        >{{$t('مقدمين الدورة')}}</a
-                      >
-                    </li>
-                  </template>
-                </q-tab>
-              </q-tabs>
-            </div>
-            <!-- Tab Content -->
-            <div class="col-lg-12 col-xs-12">
-              <div class="tab-content" id="myTabContent">
-                <q-tab-panels v-model="tab" animated>
-                  <!-- start tutorial -->
-                  <q-tab-panel
-                    name="tutorial"
-                    class="cn"
-                    id="tutorial"
-                    role="tabpanel"
-                    aria-labelledby="tutorial-tab"
-                  >
-                    <classUnits :course="courseData" />
-                  </q-tab-panel>
+      </div>
+      <!-- start tab lec -->
+      <div class="tabLect">
+        <div class="row">
+          <div class="col-lg-12">
+            <q-tabs
+              v-model="tab"
+              narrow-indicator
+              dense
+              id="myTab"
+              role="tablist"
+              active-color="warning"
+              align="center"
+              class="nav nav-tabs"
+            >
+              <!-- <q-tab :ripple="false" name="mails" icon="mail" label="Mails" /> -->
+              <q-tab :ripple="false" name="tutorial">
+                <template v-slot:default>
+                  <li class="nav-item">
+                    <a
+                      class="nav-link"
+                      id="tutorial-tab"
+                      data-toggle="tab"
+                      role="tab"
+                      aria-controls="tutorial"
+                      aria-selected="true"
+                      >{{$t('الـدروس')}}</a
+                    >
+                  </li>
+                </template>
+              </q-tab>
+              <q-tab :ripple="false" name="download">
+                <template v-slot:default>
+                  <li class="nav-item">
+                    <a
+                      class="nav-link"
+                      id="download-tab"
+                      data-toggle="tab"
+                      role="tab"
+                      aria-controls="download"
+                      aria-selected="false"
+                      >{{$t('المادة التعليمية')}}</a
+                    >
+                  </li>
+                </template>
+              </q-tab>
+              <q-tab :ripple="false" name="question">
+                <template v-slot:default>
+                  <li class="nav-item">
+                    <a
+                      class="nav-link"
+                      id="question-tab"
+                      data-toggle="tab"
+                      role="tab"
+                      aria-controls="question"
+                      aria-selected="false"
+                      >{{$t('بوابة الاسئلة')}}</a
+                    >
+                  </li>
+                </template>
+              </q-tab>
+              <q-tab :ripple="false" name="tech">
+                <template v-slot:default>
+                  <li class="nav-item">
+                    <a
+                      class="nav-link"
+                      id="tech-tab"
+                      data-toggle="tab"
+                      role="tab"
+                      aria-controls="tech"
+                      aria-selected="false"
+                      >{{$t('مقدمين الدورة')}}</a
+                    >
+                  </li>
+                </template>
+              </q-tab>
+            </q-tabs>
+          </div>
+          <!-- Tab Content -->
+          <div class="col-lg-12 col-xs-12">
+            <div class="tab-content" id="myTabContent">
+              <q-tab-panels v-model="tab" animated>
+                <!-- start tutorial -->
+                <q-tab-panel
+                  name="tutorial"
+                  class="cn"
+                  id="tutorial"
+                  role="tabpanel"
+                  aria-labelledby="tutorial-tab"
+                >
+                  <classUnits :course="courseData" />
+                </q-tab-panel>
 
-                  <!-- start download -->
-                  <q-tab-panel
-                    name="download"
-                    class="cn"
-                    id="download"
-                    role="tabpanel"
-                    aria-labelledby="download-tab"
-                  > 
-                    <classMaterials :course="courseData" />
-                  </q-tab-panel>
+                <!-- start download -->
+                <q-tab-panel
+                  name="download"
+                  class="cn"
+                  id="download"
+                  role="tabpanel"
+                  aria-labelledby="download-tab"
+                > 
+                  <classMaterials :course="courseData" />
+                </q-tab-panel>
 
-                  <!-- start question -->
-                  <q-tab-panel
-                    name="question"
-                    class="cn"
-                    id="question"
-                    role="tabpanel"
-                    aria-labelledby="question-tab"
-                  >
-                    <classQuestionAndAnswer :course="courseData" />
-                    <!-- <router-view></router-view> -->
-                  </q-tab-panel>
+                <!-- start question -->
+                <q-tab-panel
+                  name="question"
+                  class="cn"
+                  id="question"
+                  role="tabpanel"
+                  aria-labelledby="question-tab"
+                >
+                  <classQuestionAndAnswer :course="courseData" />
+                  <!-- <router-view></router-view> -->
+                </q-tab-panel>
 
-                  <!-- start Tetch -->
-                  <q-tab-panel
-                    name="tech"
-                    class="cn"
-                    id="tech"
-                    role="tabpanel"
-                    aria-labelledby="tech-tab"
-                  >
-                    <classinstructors
-                      :instructors="
-                        lodash.get(courseData, '[courseinstructorSet]')
-                      "
-                    />
-                  </q-tab-panel>
-                </q-tab-panels>
-              </div>
+                <!-- start Tetch -->
+                <q-tab-panel
+                  name="tech"
+                  class="cn"
+                  id="tech"
+                  role="tabpanel"
+                  aria-labelledby="tech-tab"
+                >
+                  <classinstructors
+                    :instructors="
+                      lodash.get(courseData, '[courseinstructorSet]')
+                    "
+                  />
+                </q-tab-panel>
+              </q-tab-panels>
             </div>
           </div>
         </div>
       </div>
-    </section>
-    <!--=============== End Lecture ===============-->
+    </div>
   </section>
 </template>
 
@@ -195,7 +187,6 @@ import classUnits from "src/components/courseClass/classUnits";
 import classMaterials from "src/components/courseClass/classMaterials";
 import classinstructors from "src/components/courseClass/classinstructors";
 import classQuestionAndAnswer from "src/components/courseClass/question_and_answer_managements/classQuestionAndAnswer";
-import UserNavBar from "src/components/utils/UserNavBar";
 
 export default {
   name: "CourseClass",
@@ -212,8 +203,7 @@ export default {
     classUnits,
     classMaterials,
     classQuestionAndAnswer,
-    classinstructors,
-    UserNavBar
+    classinstructors
   },
 
   methods: {

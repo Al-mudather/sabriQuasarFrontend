@@ -162,7 +162,7 @@
 
 <script>
 export default {
-  name: "SwiperData",
+  name: "SwiperHeader",
   data() {
     return {};
   },

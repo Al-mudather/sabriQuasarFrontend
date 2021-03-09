@@ -1,14 +1,7 @@
 <template>
-  <div>
-    <MainNavBar />
-    <transition
-      appear
-      enter-active-class="animated lightSpeedInRight"
-      leave-active-class="animated lightSpeedOutRight"
-    >
-      <Menu v-if="openMenu"/>
-    </transition>
-    <ShoppingCart />
+  <div class="web">
+    <user-nav-bar />
+    <Menu v-if="openMenu"/>
     <transition
       appear
       enter-active-class="animated fadeIn"
@@ -21,10 +14,9 @@
 </template>
  
 <script>
-import MainNavBar from "components/utils/MainNavBar";
+import UserNavBar from "src/components/utils/UserNavBar";
+import Footer from 'src/components/utils/Footer'
 import Menu from 'components/Home/Menu'
-import Footer from "src/components/utils/Footer";
-import ShoppingCart from "components/Home/Shopping_cart";
 import { LocalStorage, Quasar } from 'quasar'
 import { mapState, mapActions } from 'vuex'
 
@@ -32,14 +24,13 @@ export default {
     name: "MainLayout",
 
     data() {
-        return {};
+      return {};
     },
 
     components: {
-        MainNavBar,
-        Menu,
-        Footer,
-        ShoppingCart
+      Menu,
+      Footer,
+      UserNavBar
     },
 
     computed: {

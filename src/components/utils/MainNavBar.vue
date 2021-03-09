@@ -131,6 +131,10 @@ export default {
                         'transform': 'translate(35%, -100%)'
                     })
 
+                    this.$jquery('.shoppgCart > .cart > .notifc').css({
+                        'transform': 'translate(-5%,-43%)'
+                    })
+
 
                 }
                 catch (err) {

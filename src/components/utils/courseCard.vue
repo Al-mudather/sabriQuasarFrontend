@@ -12,9 +12,8 @@
             <div class="detai">
                 <h3><span>{{unit}}</span>{{parseInt(price)}}</h3>
             </div>
-            <button @click="AddTheCourseToTheBasket">أحصل علية</button>
-            <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">Details</button>
-            <div class="cart">
+            <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">{{$t('التفاصيل')}}</button>
+            <div class="cart" @click="AddTheCourseToTheBasket" style="cursor: pointer">
                 <svg class="sala" xmlns="http://www.w3.org/2000/svg" width="36.023" height="33.215" viewBox="0 0 36.023 33.215">
                     <g id="Group_282" data-name="Group 282" transform="translate(-24.557 -104.864)">
                         <path id="Path_406" data-name="Path 406" d="M93.284-112.494a14.141,14.141,0,0,1,1.508,1.164.4.4,0,0,0,.565-.034.4.4,0,0,0-.034-.565,14.92,14.92,0,0,0-1.594-1.23.4.4,0,0,0-.555.11A.4.4,0,0,0,93.284-112.494Z" transform="translate(-39.767 219.317)" fill="#fafafa" fill-rule="evenodd"/>

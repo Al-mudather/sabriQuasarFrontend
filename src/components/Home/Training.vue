@@ -43,29 +43,42 @@
                     </div>
                     <!-- start rate -->
                     <div class="rate" v-if="courses.edgeCount > 0">
-                        <div class="container-fluid">
-                            <div class="cn fadeIn">
-                                <div class="row">
-                                    <div
-                                        v-for="course in courses.edges"
-                                        :key="course.node.id"
-                                        class="col-2 col-lg-2 col-md-3 col-sm-6 col-xs-12"
+                        <div class="container">
+                            <div class="cn fadeIn row justify-center">
+                                <div v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-5 col-sm-5 col-xs-12">
+                                    <transition
+                                        appear
+                                        enter-active-class="animated fadeIn"
+                                        leave-active-class="animated fadeOut"
                                     >
-                                        <transition
-                                            appear
-                                            enter-active-class="animated fadeIn"
-                                            leave-active-class="animated fadeOut"
-                                        >
-                                            <course-card
-                                                :course="course.node"
-                                                :name="course.node.title"
-                                                instructor="د.صبري أبوقرون"
-                                                :price="course.node.courseFee"
-                                                unit="SDG"
-                                            />
-                                        </transition>
-                                    </div>
+                                        <course-card
+                                            :course="course.node"
+                                            :name="course.node.title"
+                                            instructor="د.صبري أبوقرون"
+                                            :price="course.node.courseFee"
+                                            unit="SDG"
+                                        />
+                                    </transition>
                                 </div>
+                                <!-- <div
+                                    v-for="course in courses.edges"
+                                    :key="course.node.id"
+                                    class="col-2 col-lg-2 col-md-3 col-sm-6 col-xs-12"
+                                > 
+                                    <transition
+                                        appear
+                                        enter-active-class="animated fadeIn"
+                                        leave-active-class="animated fadeOut"
+                                    >
+                                        <course-card
+                                            :course="course.node"
+                                            :name="course.node.title"
+                                            instructor="د.صبري أبوقرون"
+                                            :price="course.node.courseFee"
+                                            unit="SDG"
+                                        />
+                                    </transition>
+                                </div> -->
                             </div>
                             <div class="butDown">
                                 <svg
@@ -267,6 +280,20 @@ export default {
                 pagination: {
                     el: '.swiper-pagination'
                 },
+            },
+
+            swiperCoursesOptions: {
+                effect: 'coverflow',
+                grabCursor: true,
+                centeredSlides: true,
+                slidesPerView: 'auto',
+                coverflowEffect: {
+                rotate: 500,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+                slideShadows: false
+                }
             }
         };
     },
@@ -276,6 +303,31 @@ export default {
         Swiper,
         SwiperSlide
         // catItem
+    },
+
+    created () {
+        new Swiper('.swiper-container', {
+            // Optional parameters
+            direction: 'vertical',
+            loop: true,
+
+            // If we need pagination
+            pagination: {
+                el: '.swiper-pagination',
+            },
+
+            // Navigation arrows
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+
+            // And if we need scrollbar
+            scrollbar: {
+                el: '.swiper-scrollbar',
+            },
+        });
+
     },
 
     apollo: {
@@ -359,6 +411,10 @@ export default {
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
+
+.cn {
+    right: 0% !important;
+}
 /*--- Start Training ---*/
 .nav-item {
     width: max-content !important;

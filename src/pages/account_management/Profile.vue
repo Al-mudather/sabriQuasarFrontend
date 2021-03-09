@@ -1,8 +1,5 @@
 <template>
-  <section class="web">
-    <!--=============== START navbar ===============-->
-    <user-nav-bar />
-    <!--=============== End navbar ===============-->
+  <div>
     <div lass="row justify-center" v-if="lodash.isEmpty(myAffiliateLink)">
       <q-btn @click="AddMeToTheAffiliateProgram" class="col-3" color="primary" label="Join affillite programe" />
     </div>
@@ -23,7 +20,7 @@
           <div class="row">
             <div class="col-lg-3">
               <div class="user">
-                <img src="~assets/img/man.png" alt="" />
+                <img src="~assets/img/big_man.png" alt="" />
               </div>
             </div>
             <div class="col-lg-7">
@@ -113,13 +110,11 @@
       </div>
     </section>
     <!--=============== End profile ===============-->
-  </section>
+  </div>
 </template>
 
 <script>
 import PasswordResetProfile from 'src/components/Profile_managements/PasswordResetProfile'
-import UserNavBar from "src/components/utils/UserNavBar";
-
 
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { UpdateUserProfile } from "src/queries/account_management/mutation/UpdateUserProfile";
@@ -140,7 +135,6 @@ export default {
     }
   },
   components: {
-    UserNavBar,
     'Password-Reset-Profile': PasswordResetProfile
   },
 

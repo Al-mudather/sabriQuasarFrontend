@@ -3,44 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div ref="col" class="col-lg-12">
-                    <!-- <q-tabs
-                        v-model="navTab"
-                        narrow-indicator
-                        dense
-                        id="myTab"
-                        role="tablist"
-                        active-color="warning"
-                        align="center"
-                        class="nav nav-tabs"
-                    >
-                        <q-tab
-                            ref="cat"
-                            v-for="spec in allCourseSpecialities.edges" :key="spec.node.id"
-                            :ripple="false"
-                            :name="spec.node.speciality">
-                            <template v-slot:default>
-                                <li class="nav-item">
-                                    <a
-                                        class="nav-link"
-                                        style="outline: 0"
-                                        :data-course="JSON.stringify(spec.node.courseSet)"
-                                        @click="changeCourseData(spec.node.courseSet)"
-                                        id="home-tab"
-                                        data-toggle="tab"
-                                        role="tab"
-                                        aria-controls="home"
-                                        aria-selected="true"
-                                    >
-                                        <img src="~assets/img/brain.png" alt="">
-                                        {{spec.node.speciality}}
-                                    </a
-                                    >
-                                </li>
-                            </template>
-                        </q-tab>
-
-                    </q-tabs> -->
-                    <div ref="cat" class="swiper-container">
+                    <div ref="cat" @click="changeTab" class="swiper-container">
                         <swiper
                             ref="mySwiper"
                             class="nav nav-tabs"
@@ -67,76 +30,119 @@
                                 }}
                             </a>
                             </swiper-slide>
+                            <div class="swiper-pagination" slot="pagination"></div>
                         </swiper>
                     </div>
                     
-                    <!-- <ul
-                        ref="cat"
-                        class="nav nav-tabs"
-                        @click="changeTab"
-                        id="myTab"
-                        role="tablist"
-                    >
-                        <li
-                            class="nav-item"
-                            v-for="spec in allCourseSpecialities.edges"
-                            :key="spec.node.id"
-                        >
-                            <a
-                                style="outline: 0"
-                                :data-course="
-                                    JSON.stringify(spec.node.courseSet)
-                                "
-                                @click="changeCourseData(spec.node.courseSet)"
-                                class="nav-link"
-                                id="home-tab"
-                                data-toggle="tab"
-                                href=""
-                                role="tab"
-                                aria-controls="home"
-                                aria-selected="true"
-                            >
-                                <img src="~assets/img/brain.png" alt="" />{{
-                                    spec.node.speciality
-                                }}
-                            </a>
-                        </li>
-                    </ul> -->
                     <div class="txt">
-                        <h3>الــــدورات</h3>
+                        <h3>{{$t('الــــدورات')}}</h3>
                         <h4>
-                            عرض <span>{{ courses.edgeCount || 0 }}</span> من اصل
+                            {{$t('عرض')}} <span>{{ courses.edgeCount || 0 }}</span> {{$t('من اصل')}}
                             {{ courses.totalCount || 0 }}
                         </h4>
                     </div>
                     <!-- start rate -->
-                    <div class="rate">
+                    <div class="rate" v-if="courses.edgeCount > 0">
                         <div class="container-fluid">
                             <div class="cn fadeIn">
-                                <div class="row" v-if="courses.edgeCount > 0">
-                                    <div
-                                        v-for="course in courses.edges"
-                                        :key="course.node.id"
-                                        class="col-lg-2 col-md-3 col-sm-6 col-xs-12"
+
+                                <!-- Slider main container -->
+                                <div class="swiper-container">
+                                <!-- Additional required wrapper -->
+                                <div class="swiper-wrapper">
+                                    <!-- Slides -->
+
+
+                                        <div class="swiper-slide">Slide 1</div>
+                                        <div class="swiper-slide">Slide 2</div>
+                                        <div class="swiper-slide">Slide 3</div>
+                                        <div class="swiper-slide">Slide 4</div>
+                                        <div class="swiper-slide">Slide 5</div>
+                                        <div class="swiper-slide">Slide 6</div>
+                                        <div class="swiper-slide">Slide 7</div>
+                                        <div class="swiper-slide">Slide 8</div>
+                                        <div class="swiper-slide">Slide 9</div>
+                                        <div class="swiper-slide">Slide 10</div>
+
+
+                                    <!-- <div 
+                                    
+                                    v-for="course in courses.edges" 
+                                    :key="course.node.id"
+                                    class="swiper-slide">
+                                    
+                                         <course-card
+                                            :course="course.node"
+                                            :name="course.node.title"
+                                            instructor="د.صبري أبوقرون"
+                                            :price="course.node.courseFee"
+                                            unit="SDG"
+                                        />
+
+                                    </div> -->
+                                    
+                                </div>
+                                <!-- If we need pagination -->
+                                <div class="swiper-pagination"></div>
+
+                                <!-- If we need navigation buttons -->
+                                <div class="swiper-button-prev"></div>
+                                <div class="swiper-button-next"></div>
+
+                                <!-- If we need scrollbar -->
+                                <div class="swiper-scrollbar"></div>
+                                </div>
+
+
+                                <!-- <div class="swiper-container">
+                                    <swiper
+                                        :slides-per-view="3"
+                                        :space-between="50"
+                                        ref="courseSwiper"
+                                        :options="swiperCoursesOptions"
                                     >
-                                        <transition
-                                            appear
-                                            enter-active-class="animated fadeIn"
-                                            leave-active-class="animated fadeOut"
-                                        >
-                                            <course-card
-                                                :course="course.node"
-                                                :name="course.node.title"
-                                                instructor="د.صبري أبوقرون"
-                                                :price="course.node.courseFee"
-                                                unit="SDG"
-                                            />
-                                        </transition>
-                                    </div>
-                                </div>
-                                <div class="txt" v-else>
-                                    لا توجد دورات في هذا القسم حاليا
-                                </div>
+                                        <div class="row">
+                                            <swiper-slide 
+                                               
+                                               
+                                                class="col-2 col-lg-2 col-md-3 col-sm-6 col-xs-12"
+                                            >
+                                               <transition
+                                                    appear
+                                                    enter-active-class="animated fadeIn"
+                                                    leave-active-class="animated fadeOut"
+                                                >
+                                                    <course-card
+                                                        :course="course.node"
+                                                        :name="course.node.title"
+                                                        instructor="د.صبري أبوقرون"
+                                                        :price="course.node.courseFee"
+                                                        unit="SDG"
+                                                    />
+                                                </transition>
+                                            </swiper-slide>
+                                        </div>
+                                    </swiper>
+                                </div> -->
+                                <!-- <div
+                                    v-for="course in courses.edges"
+                                    :key="course.node.id"
+                                    class="col-2 col-lg-2 col-md-3 col-sm-6 col-xs-12"
+                                > 
+                                    <transition
+                                        appear
+                                        enter-active-class="animated fadeIn"
+                                        leave-active-class="animated fadeOut"
+                                    >
+                                        <course-card
+                                            :course="course.node"
+                                            :name="course.node.title"
+                                            instructor="د.صبري أبوقرون"
+                                            :price="course.node.courseFee"
+                                            unit="SDG"
+                                        />
+                                    </transition>
+                                </div> -->
                             </div>
                             <div class="butDown">
                                 <svg
@@ -290,10 +296,14 @@
                                     </g>
                                 </svg>
                                 <button @click="gotTocoursesPage">
-                                    جمــــيع الدورات
+                                    {{$t('جمــــيع الدورات')}}
                                 </button>
                             </div>
                         </div>
+                    </div>
+                    <div class="notCources" v-else>
+                        <img src="~assets/img/Blue.png" alt="">
+                        <p>{{$t('لا توجد دورات في هذا القسم في الوقت الحالي')}}</p>
                     </div>
                 </div>
             </div>
@@ -302,7 +312,7 @@
 </template>
 
 <script>
-import courseCard from "components/utils/courseCard";
+// import courseCard from "components/utils/courseCard";
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
 import 'swiper/swiper-bundle.css'
 import 'swiper/swiper.min.css'
@@ -316,12 +326,27 @@ export default {
         return {
             counter: 0,
             navTab: "",
-            totalNumberOfCourses: 150,
-            numOfSelectedCourses: 5,
             allCourseSpecialities: "",
             courses: [],
             allCourses: null,
             swiperOptions: {
+                effect: 'coverflow',
+                grabCursor: true,
+                centeredSlides: true,
+                slidesPerView: 'auto',
+                coverflowEffect: {
+                    rotate: 500,
+                    stretch: 0,
+                    depth: 100,
+                    modifier: 1,
+                    slideShadows: false
+                },
+                pagination: {
+                    el: '.swiper-pagination'
+                },
+            },
+
+            swiperCoursesOptions: {
                 effect: 'coverflow',
                 grabCursor: true,
                 centeredSlides: true,
@@ -338,7 +363,7 @@ export default {
     },
     props: {},
     components: {
-        courseCard,
+        // courseCard,
         Swiper,
         SwiperSlide
         // catItem
@@ -419,6 +444,32 @@ export default {
                 clickedLiParent.firstChild.classList.add("active");
             }
         }
+    },
+    created() {
+
+        const swiper = new Swiper('.swiper-container', {
+            // Optional parameters
+            direction: 'vertical',
+            loop: true,
+
+            // If we need pagination
+            pagination: {
+                el: '.swiper-pagination',
+            },
+
+            // Navigation arrows
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+
+            // And if we need scrollbar
+            scrollbar: {
+                el: '.swiper-scrollbar',
+            },
+        });
+
+
     }
 };
 </script>
@@ -426,7 +477,33 @@ export default {
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
 /*--- Start Training ---*/
-.swiper-slide {
+
+.swiper-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .swiper-slide {
+      text-align: center;
+      font-size: 18px;
+      background: #fff;
+
+      /* Center slide text vertically */
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      -webkit-box-pack: center;
+      -ms-flex-pack: center;
+      -webkit-justify-content: center;
+      justify-content: center;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      -webkit-align-items: center;
+      align-items: center;
+    }
+
+.nav-item {
     width: max-content !important;
 }
 .training {

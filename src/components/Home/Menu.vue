@@ -159,7 +159,7 @@ export default {
         },
 
         logTheUserOut() {
-            this.logOutAction;
+            this.logOutAction();
         },
 
         goToMyProfilePage() {

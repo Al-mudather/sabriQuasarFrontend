@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="menu">
+                    <div class="menu" @click="changeMenuState" style="cursor: pointer">
                         <img src="~assets/img/menu.png" alt="" />
                     </div>
                     <div class="user" v-if="lodash.get(user,'[firstName]')">
@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { NotificationCreatedSubscription } from 'src/queries/notification_management/subscription/NotificationCreatedSubscription'
 import { GetAllMyNotifications } from 'src/queries/notification_management/query/GetAllMyNotifications'
 
@@ -86,7 +86,15 @@ export default {
       }
     },
     computed: {
-        ...mapState('authentication', ['user'])
+      ...mapState('authentication', ['user'])
+    },
+
+    methods: {
+      ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction']),
+
+      changeMenuState () {
+        this.setOpenMenuAction(true)
+      },
     }
 };
 </script>
