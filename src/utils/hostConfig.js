@@ -1,8 +1,8 @@
 let baseURL = ""
 // let host = '192.168.8.102'
 let host = location.origin
-// let ws_host = location.host
-let ws_host = "127.0.0.1:8000"
+let ws_host = location.host
+// let ws_host = "127.0.0.1:8000"
 let port = '80'
 
 if (process.env.NODE_ENV === 'development') {
