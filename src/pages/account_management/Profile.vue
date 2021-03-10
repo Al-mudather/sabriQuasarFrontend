@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div lass="row justify-center" v-if="lodash.isEmpty(myAffiliateLink)">
+    <!-- <div lass="row justify-center" v-if="lodash.isEmpty(myAffiliateLink)">
       <q-btn @click="AddMeToTheAffiliateProgram" class="col-3" color="primary" label="Join affillite programe" />
-    </div>
+    </div> -->
     <!--=============== START profile ===============-->
     <section class="profile">
       <div class="container-fluid">

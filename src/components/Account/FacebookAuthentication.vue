@@ -1,6 +1,9 @@
 <template>
     <div class="social" @click="helloFacebookAuth">
         <img src="~assets/img/facebook.png" alt="" />
+        <q-inner-loading :showing="visible">
+            <q-spinner-hourglass color="primary" size="70px" />
+        </q-inner-loading>
     </div>
 </template>
 
@@ -10,6 +13,11 @@ import { mapActions } from "vuex";
 
 export default {
     name: "FacebookAuthentication",
+    data () {
+        return {
+            visible: false
+        }
+    },
     methods: {
         ...mapActions("authentication", [
             "loginAction"
@@ -20,6 +28,7 @@ export default {
         // TODO: Google and Facebook Register
         loginAuthMutation(accessToken, provider, email = "") {
             console.log(" Triggering Apollo ");
+            this.visible = true
 
             this.$apollo
                 .mutate({
@@ -31,16 +40,20 @@ export default {
                     }
                 })
                 .then(result => {
-                    //TODO: There is a network error go and solve it
-                    //TODO: There is a network error go and solve it
-                    //TODO: There is a network error go and solve it
-
+                    this.visible = false
                     if (result.data.socialAuth) {
                         this.loginAction(result.data.socialAuth).then(() => {
                             // TODO: Go To the home page
-                            this.$router.push({ name: "Home" });
+                            if (result.data.socialAuth.token) {
+                                this.$router.go(-1);
+                            }
                         });
                     }
+                }).catch((error) => {
+                    this.visible = false
+                    console.log('eeeeeeeeeeeeeee')
+                    console.log(error)
+                    console.log('eeeeeeeeeeeeeee')
                 });
         },
 

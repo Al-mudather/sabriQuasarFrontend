@@ -1,3 +1,25 @@
+import { Notify, LocalStorage } from 'quasar'
+
+const requireAuthentication = (to, from, next) => {
+  // ...
+  const authorized = LocalStorage.getItem('userAccessToken')
+
+  if (authorized) {
+    next()
+  } else {
+    // TODO: show error notification
+    Notify.create({
+      color: 'negative',
+      message: 'Ooops! You need to login first to access the page',
+      icon: 'report_problem'
+    })
+    next({
+      name: 'login',
+      query: { redirect: to.path }
+    })
+  }
+}
+
 
 const routes = [
   {
@@ -20,15 +42,16 @@ const routes = [
     path: '/user',
     component: () => import('src/layouts/UserLayout'),
     children: [
-      { path: '/notification', name: 'notification', component: () => import('pages/notifivation_management/Notification.vue') },
-      { path: '/profile', name: 'user-profile', component: () => import('pages/account_management/Profile') },
-      { path: '/myCourses', name: 'my-courses', component: () => import('pages/course_management/MyCourses.vue') },
-      { path: '/class/:pk/:id', name: 'course-class', component: () => import('pages/course_management/CourseClass.vue') }
+      { path: '/notification', name: 'notification', beforeEnter: requireAuthentication, component: () => import('pages/notifivation_management/Notification.vue') },
+      { path: '/profile', name: 'user-profile', beforeEnter: requireAuthentication, component: () => import('pages/account_management/Profile') },
+      { path: '/myCourses', name: 'my-courses', beforeEnter: requireAuthentication, component: () => import('pages/course_management/MyCourses.vue') },
+      { path: '/class/:pk/:id', name: 'course-class', beforeEnter: requireAuthentication, component: () => import('pages/course_management/CourseClass.vue') }
     ]
   },
   {
     path: '/verify/email/:token',
     name: 'verify-email',
+    beforeEnter: requireAuthentication,
     component: () => import('pages/account_management/VerifyEmail.vue')
   },
   {
@@ -53,8 +76,8 @@ const routes = [
     children: [
       { path: '', name: 'cart', component: () => import('components/ShoppingCard/cartCourses') },
       { path: 'loginCart', name: 'login-cart', component: () => import('components/ShoppingCard/loginCart') },
-      { path: 'payment', name: 'payment', component: () => import('components/ShoppingCard/payment') },
-      { path: 'success', name: 'cart-success', component: () => import('components/ShoppingCard/successMessage') }
+      { path: 'payment', name: 'payment', beforeEnter: requireAuthentication, component: () => import('components/ShoppingCard/payment') },
+      { path: 'success', name: 'cart-success', beforeEnter: requireAuthentication, component: () => import('components/ShoppingCard/successMessage') }
     ]
   },
 

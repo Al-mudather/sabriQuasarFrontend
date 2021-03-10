@@ -199,6 +199,9 @@ export default {
                 
             } catch (error) {
                 this.visible = false
+                console.log('gggggggggggggggggggggg')
+                console.log(error)
+                console.log('gggggggggggggggggggggg')
             }
         }
     }
@@ -209,4 +212,8 @@ export default {
 // @import 'src/assets/css/sass/helpers/_variabels.scss';
 // @import 'src/assets/css/sass/helpers/_mixins.scss';
 // @import 'src/assets/css/account.scss';
+.social {
+    position: relative;
+    z-index: 100;
+}
 </style>

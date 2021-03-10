@@ -23,6 +23,7 @@
 
 <script>
 import NotificationCard from 'src/components/notifivation_management/NotificationCard'
+import { DoneReadingNotification } from 'src/queries/notification_management/mutation/DoneReadingNotification'
 
 export default {
   name: "Notification",
@@ -32,12 +33,16 @@ export default {
     }
   },
   components: {
-    // NotificationCard
+    NotificationCard
   },
 
   mounted () {
     // TODO: Get the notification from the [ UserNavBar ] component
     this.$root.$on('NotificationData', this.getNotificationDataHnadler)
+    // TODO: Finish reading the notification
+    this.$apollo.mutate({
+      mutations: DoneReadingNotification
+    })
   },
   methods: {
     getNotificationDataHnadler (Data) {

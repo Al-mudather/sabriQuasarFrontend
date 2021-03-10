@@ -114,6 +114,18 @@ export default {
         this.$jquery('.shoppgCart > .cart > .notifc').css({
             'transform': 'translate(-5%,-43%)'
         })
+
+        // console.log('llllllllllllllllllllllllll')
+        // console.log(this.$jquery('#students > .details'))
+        // console.log('llllllllllllllllllllllllll')
+
+        // this.$jquery('#students > .details').css({
+        //     'transform': 'translate(6rem, -5rem);'
+        // })
+
+        // this.$jquery('#number_of_hours').css({
+        //     'transform': 'translate(6rem, -5rem);'
+        // })
     },
 
     changeTheShoppingCarLinksToArabic () {
