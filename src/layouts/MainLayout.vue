@@ -78,6 +78,8 @@ export default {
             this.$i18n.locale = 'en'
             this.setIsEnglishAction(value)
             const langIso = 'en-us'
+            
+            
             try {
                 await import(
                 /* webpackInclude: /(de|en-us)\.js$/ */
@@ -106,8 +108,10 @@ export default {
                 this.$jquery('.shoppgCart > .cart > .notifc').css({
                     'transform': 'translate(0%,0%)'
                 })
+                
+               
 
-
+ 
             }
             catch (err) {
                 // Requested Quasar Language Pack does not exist,

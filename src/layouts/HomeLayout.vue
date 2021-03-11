@@ -63,6 +63,11 @@ export default {
                     rtl: true,
                 })
             })
+            // console.log('gggggggggggggggggggggggggg')
+            // this.$jquery('#students > .details').css({
+            //       'transform': 'translate(60%, -100%)'
+            //   })
+            // console.log('gggggggggggggggggggggggggg')
         }
         catch (err) {
             // Requested Quasar Language Pack does not exist,
@@ -150,3 +155,16 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.dector {
+  display: flex;
+
+  .details {
+
+    @media (min-width: 320px) and (max-width: 700px){
+      flex: 1 0 auto !important;
+    }
+  }
+}
+</style>

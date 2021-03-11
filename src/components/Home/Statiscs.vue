@@ -4,18 +4,18 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="chart">
-                        <div class="row">
-                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                                <dectors id="students" :name="$t('طالب و طالبه')" number="500"><span>K</span></dectors>
+                        <div class="row justify-center">
+                            <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
+                                <dectors :name="$t('طالب و طالبه')" number="500"><span>K</span></dectors>
                             </div>
-                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                            <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
                                 <dectors :name="$t('دكتور متخصص')" :query="GetAllInstructorsStatiscs"></dectors>
                             </div>
-                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                            <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
                                 <dectors :name="$t('دوره تدريبيه')" :query="GetAllCoursesStatiscs"></dectors>
                             </div>
-                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                                <dectors id="number_of_hours" :name="$t('عدد الساعات التدريبيه')" number="10"><span>K</span></dectors>
+                            <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
+                                <dectors :name="$t('عدد الساعات التدريبيه')" number="10"><span>K</span></dectors>
                             </div>
                         </div>
                     </div>

@@ -5,7 +5,7 @@
         </svg>
         <div class="cart" @click="OpenShoppingCartSection">
             <!--notifation-->
-            <div v-if="!lodash.isEmpty(shoppingCartDataList)" class="notifc"> 
+            <div v-show="!lodash.isEmpty(shoppingCartDataList)" class="notifc"> 
                 <span>{{lodash.size(shoppingCartDataList)}}</span>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" width="45.206" height="40.979" viewBox="0 0 45.206 40.979">
