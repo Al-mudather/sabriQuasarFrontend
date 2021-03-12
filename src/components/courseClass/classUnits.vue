@@ -1,141 +1,269 @@
 <template>
-    <div class="row unint">
-        <div class="col-lg-5 ">
-            <div class="asid">
-                <div class="titel">
-                    <img src="~assets/img/tit2.png" alt="" />
-                    <h3>{{$t('المحتــوى')}}</h3>
-                    <div class="butt">
-                        <img src="~assets/img/visibility.png" alt="" />
-                        <img src="~assets/img/full screen.png" alt="" />
+<section>
+    <!-- 
+        larg Screen 
+    -->
+    <!-- <div class="largScreen"> -->
+        <div class="row unitContent">
+            <div class="col-lg-4 col-xs-12">
+                <div class="asid">
+                    <div class="titel">
+                        <img src="~assets/img/tit2.png" alt="" />
+                        <h3>{{$t('المحتــوى')}}</h3>
+                        <div class="butt">
+                            <img src="~assets/img/visibility.png" alt="" />
+                            <img src="~assets/img/full screen.png" alt="" />
+                        </div>
                     </div>
-                </div>
-                <!--colapss-->
-                <skeletonList v-if="lodash.isEmpty(allCourseUnits.edges)" />
-                <div class="accord" id="accordion">
-                    <q-list ref="contentList" class="rounded-borders">
-                        <transition-group
-                            appear
-                            enter-active-class="animated fadeIn"
-                            leave-active-class="animated fadeOut"
-                        >
-                            <q-expansion-item
-                                header-class="text-white"
-                                class="card"
-                                ref="card"
-                                v-for="unit in allCourseUnits.edges"
-                                :key="unit.node.id"
+                    <!--colapss-->
+                    <skeletonList v-if="lodash.isEmpty(allCourseUnits.edges)" />
+                    <div class="accord" id="accordion">
+                        <q-list ref="contentList" class="rounded-borders">
+                            <transition-group
+                                appear
+                                enter-active-class="animated fadeIn"
+                                leave-active-class="animated fadeOut"
                             >
-                                <template slot="header">
-                                    <contentHeader
-                                        :headerText="unit.node.title"
-                                    />
-                                </template>
-
-                                <div
-                                    id="collapseOne"
-                                    class="collapse show"
-                                    aria-labelledby="headingOne"
-                                    data-parent="#accordion"
+                                <q-expansion-item
+                                    header-class="text-white"
+                                    class="card"
+                                    ref="card"
+                                    v-for="unit in allCourseUnits.edges"
+                                    :key="unit.node.id"
                                 >
-                                    <div @click="clickedItem" class="card-body">
-                                        <q-item
-                                            style="width: 95%"
-                                            v-for="content in unit.node
-                                                .courseunitcontentSet.edges"
-                                            :key="content.node.id"
-                                            clickable
-                                            v-ripple
-                                        >
-                                            <classContentItem
-                                                :content="content.node"
-                                                :courseId="course.pk"
-                                            />
-                                        </q-item>
-                                    </div>
-                                </div>
-                            </q-expansion-item>
-                        </transition-group>
-                    </q-list>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-7 ">
-            <q-skeleton
-                v-if="lodash.isEmpty(currentContent)"
-                height="500px"
-                square
-            />
-            <div v-else class="vedio">
-                <q-inner-loading :showing="visible">
-                    <q-spinner-gears size="50px" color="primary" />
-                </q-inner-loading>
-                <div
-                    class="megx"
-                    v-if="!lodash.isEmpty(currentContent)"
-                    disable="1"
-                >
-                    <!-- <q-video
-                        :ratio="13 / 11"
-                        controls = "false"
-                        @play="StartPlayingTheLesson"
-                        :src="
-                            prepareVideoUrl(
-                                JSON.parse(currentContent.modelValue).video
-                            )
-                        "
-                    /> -->
-                    <vimeo-player
-                        ref="player"
-                        class="megx"
-                        @loaded="visible = false"
-                        @play="startlearningUnitTraking"
-                        @ended="endlearningUnitTraking"
-                        :video-id="vimoID"
-                    ></vimeo-player>
+                                    <template slot="header">
+                                        <contentHeader
+                                            :headerText="unit.node.title"
+                                        />
+                                    </template>
 
-                    <!-- <vimeo-player
-                        ref="player"
-                        class="megx"
-                        heigth="100%"
-                        width="100%"
-                        @play="StartPlayingTheLesson"
-                        @pause="StartPlayingTheLesson"
-                        @progress="StartPlayingTheLesson"
-                        @ended="StartPlayingTheLesson"
-                        :video-id="507727334"
-                    ></vimeo-player> -->
-                </div>
-                <div v-else class="megx">
-                    <img src="~assets/img/pexels.png" alt="" />
-                    <img
-                        class="play"
-                        @click="startlearningUnitTraking"
-                        src="~assets/img/player.png"
-                        alt=""
-                    />
-                </div>
-                <div class="arrow">
-                    <div
-                        @click="GoToThePrevLesson"
-                        :disabled="!hasPrevContent"
-                        class="next"
-                    >
-                        <img src="~assets/img/previous.png" alt="" />
-                        <h3>{{$t('الدرس السابق')}}</h3>
+                                    <div
+                                        id="collapseOne"
+                                        class="collapse show"
+                                        aria-labelledby="headingOne"
+                                        data-parent="#accordion"
+                                    >
+                                        <div @click="clickedItem" class="card-body">
+                                            <q-item
+                                                style="width: 95%"
+                                                v-for="content in unit.node
+                                                    .courseunitcontentSet.edges"
+                                                :key="content.node.id"
+                                                clickable
+                                                v-ripple
+                                            >
+                                                <classContentItem
+                                                    :content="content.node"
+                                                    :courseId="course.pk"
+                                                />
+                                            </q-item>
+                                        </div>
+                                    </div>
+                                </q-expansion-item>
+                            </transition-group>
+                        </q-list>
                     </div>
+                </div>
+            </div>
+            <div class="col-lg-8 col-xs-12">
+                <q-skeleton
+                    v-if="lodash.isEmpty(currentContent)"
+                    height="500px"
+                    square
+                />
+                <div v-else class="vedio">
+                    <q-inner-loading :showing="visible">
+                        <q-spinner-gears size="50px" color="primary" />
+                    </q-inner-loading>
                     <div
-                        @click="GoToTheNexLesson"
-                        :disabled="!hasNextContent"
-                        class="next"
+                        class="megx"
+                        v-if="!lodash.isEmpty(currentContent)"
+                        disable="1"
                     >
-                        <h3>{{$t('الدرس التالي')}}</h3>
-                        <img src="~assets/img/next.png" alt="" />
+                        <!-- <q-video
+                            :ratio="13 / 11"
+                            controls = "false"
+                            @play="StartPlayingTheLesson"
+                            :src="
+                                prepareVideoUrl(
+                                    JSON.parse(currentContent.modelValue).video
+                                )
+                            "
+                        /> -->
+                        <vimeo-player
+                            ref="player"
+                            class="megx"
+                            @loaded="visible = false"
+                            @play="startlearningUnitTraking"
+                            @ended="endlearningUnitTraking"
+                            :video-id="vimoID"
+                        ></vimeo-player>
+
+                        <!-- <vimeo-player
+                            ref="player"
+                            class="megx"
+                            heigth="100%"
+                            width="100%"
+                            @play="StartPlayingTheLesson"
+                            @pause="StartPlayingTheLesson"
+                            @progress="StartPlayingTheLesson"
+                            @ended="StartPlayingTheLesson"
+                            :video-id="507727334"
+                        ></vimeo-player> -->
+                    </div>
+                    <div v-else class="megx">
+                        <img src="~assets/img/pexels.png" alt="" />
+                        <img
+                            class="play"
+                            @click="startlearningUnitTraking"
+                            src="~assets/img/player.png"
+                            alt=""
+                        />
+                    </div>
+                    <div class="arrow">
+                        <div
+                            @click="GoToThePrevLesson"
+                            :disabled="!hasPrevContent"
+                            class="next"
+                        >
+                            <img src="~assets/img/previous.png" alt="" />
+                            <h3>{{$t('الدرس السابق')}}</h3>
+                        </div>
+                        <div
+                            @click="GoToTheNexLesson"
+                            :disabled="!hasNextContent"
+                            class="next"
+                        >
+                            <h3>{{$t('الدرس التالي')}}</h3>
+                            <img src="~assets/img/next.png" alt="" />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    <!-- </div> -->
+    <!-- 
+        mobile Screen 
+    -->
+    <!-- <div class="mobailScreen">
+        <div class="row">
+            <div class="col-lg-8 col-xs-12">
+                <q-skeleton
+                    v-if="lodash.isEmpty(currentContent)"
+                    height="500px"
+                    square
+                />
+                <div v-else class="vedio">
+                    <q-inner-loading :showing="visible">
+                        <q-spinner-gears size="50px" color="primary" />
+                    </q-inner-loading>
+                    <div
+                        class="megx"
+                        v-if="!lodash.isEmpty(currentContent)"
+                        disable="1"
+                    >
+                        <vimeo-player
+                            ref="player"
+                            class="megx"
+                            @loaded="visible = false"
+                            @play="startlearningUnitTraking"
+                            @ended="endlearningUnitTraking"
+                            :video-id="vimoID"
+                        ></vimeo-player>
+
+                    </div>
+                    <div v-else class="megx">
+                        <img src="~assets/img/pexels.png" alt="" />
+                        <img
+                            class="play"
+                            @click="startlearningUnitTraking"
+                            src="~assets/img/player.png"
+                            alt=""
+                        />
+                    </div>
+                    <div class="arrow">
+                        <div
+                            @click="GoToThePrevLesson"
+                            :disabled="!hasPrevContent"
+                            class="next"
+                        >
+                            <img src="~assets/img/previous.png" alt="" />
+                            <h3>{{$t('الدرس السابق')}}</h3>
+                        </div>
+                        <div
+                            @click="GoToTheNexLesson"
+                            :disabled="!hasNextContent"
+                            class="next"
+                        >
+                            <h3>{{$t('الدرس التالي')}}</h3>
+                            <img src="~assets/img/next.png" alt="" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-xs-12">
+                <div class="asid">
+                    <div class="titel">
+                        <img src="~assets/img/tit2.png" alt="" />
+                        <h3>{{$t('المحتــوى')}}</h3>
+                        <div class="butt">
+                            <img src="~assets/img/visibility.png" alt="" />
+                            <img src="~assets/img/full screen.png" alt="" />
+                        </div>
+                    </div>
+
+                    <skeletonList v-if="lodash.isEmpty(allCourseUnits.edges)" />
+                    <div class="accord" id="accordion">
+                        <q-list ref="contentList" class="rounded-borders">
+                            <transition-group
+                                appear
+                                enter-active-class="animated fadeIn"
+                                leave-active-class="animated fadeOut"
+                            >
+                                <q-expansion-item
+                                    header-class="text-white"
+                                    class="card"
+                                    ref="card"
+                                    v-for="unit in allCourseUnits.edges"
+                                    :key="unit.node.id"
+                                >
+                                    <template slot="header">
+                                        <contentHeader
+                                            :headerText="unit.node.title"
+                                        />
+                                    </template>
+
+                                    <div
+                                        id="collapseOne"
+                                        class="collapse show"
+                                        aria-labelledby="headingOne"
+                                        data-parent="#accordion"
+                                    >
+                                        <div @click="clickedItem" class="card-body">
+                                            <q-item
+                                                style="width: 95%"
+                                                v-for="content in unit.node
+                                                    .courseunitcontentSet.edges"
+                                                :key="content.node.id"
+                                                clickable
+                                                v-ripple
+                                            >
+                                                <classContentItem
+                                                    :content="content.node"
+                                                    :courseId="course.pk"
+                                                />
+                                            </q-item>
+                                        </div>
+                                    </div>
+                                </q-expansion-item>
+                            </transition-group>
+                        </q-list>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+</section>
 </template>
 
 <script>
@@ -460,9 +588,10 @@ export default {
     background-color: #fcd462 !important;
     color: #fff;
 }
-// .unint {
-//     @media(max-width:767px){
-//         flex-direction: column-reverse !important;  
-//     }
-// }
+.unitContent {
+    height: 100%;
+    @media(max-width:991px){
+        flex-direction: column-reverse !important;  
+    }
+}
 </style>

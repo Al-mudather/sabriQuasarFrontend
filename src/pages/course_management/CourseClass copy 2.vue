@@ -366,10 +366,6 @@ export default {
         line-height: 1.7;
         margin: 0 11px 0 0;
         display: inline-block;
-        //maxMobile
-        @media(max-width:767px){
-            font-size: 18px;
-        }
       }
     }
   }
@@ -417,11 +413,6 @@ export default {
         border-bottom-left-radius: 42px;
         border-bottom-right-radius: 42px;
         margin: 0 0 30px 0;
-        //maxMobile
-        @media(max-width:767px){
-            height: auto;
-            margin: 0 0 50px 0;
-        }
         .titel {
           display: inline-block;
           background-color: #7b86fa;
@@ -466,9 +457,6 @@ export default {
                 font-size: 16px;
                 font-family: "cairoR";
                 cursor: pointer;
-                @media(max-width:767px){
-                  font-size: 15px;
-                }
                 .linke {
                   background-color: #0c7ad8;
                   width: 35px;
@@ -507,10 +495,6 @@ export default {
         }
       }
       .vedio {
-        //maxMobile
-        @media(max-width:767px){
-            margin: 0 0 25px 0;
-        }
         .megx {
           width: 100%;
           height: 611px;
@@ -518,11 +502,6 @@ export default {
           overflow: hidden;
           position: relative;
           margin: 0 0 30px 0;
-          //maxMobile
-          @media(max-width:767px){
-              margin: 0;
-              height: auto;
-          }
           img {
             width: 100%;
           }
@@ -532,97 +511,27 @@ export default {
             top: 43%;
             left: 46%;
             cursor: pointer;
-            //maxMobile
-            @media(max-width:767px){
-                left:98px
-            }
           }
         }
         .arrow {
           margin: 47px 0 0 0;
-          text-align: center;
-          //maxMobile
-          @media(max-width:767px){
-              text-align: center;
-              margin: 25px 0 25px 0;
-              position: fixed;
-              bottom: 56px;
-              background: #fff;
-              left: 0;
-              z-index: 3;
-              width: 100%;
-              padding: 12px;
-              box-shadow: 3px 3px 15px #c5c5c5e3;
-              display: flex;
-              justify-content: space-around;
-          }
-          //maxSmall
-          @media(max-width:991px){
-              text-align: center;
-              margin: 25px 0 25px 0;
-              position: fixed;
-              bottom: -23px;
-              background: #fff;
-              left: 0;
-              z-index: 3;
-              width: 100%;
-              padding: 12px;
-              box-shadow: 3px 3px 15px #c5c5c5e3;
-              display: flex;
-              justify-content: space-around;
-          }
           .next {
             display: inline-block;
             margin: 0 0 0 36px;
-            //maxMobile
-            @media(max-width:767px){
-                margin: 0;
-            }
             img {
               display: inline-block;
               margin: 0 10px 0 10px;
               cursor: pointer;
-              //maxMobile
-              @media(max-width:767px){
-                  margin: 0;
-                  width: 40px;
-              }
             }
             h3 {
               display: inline-block;
               font-size: 15px;
               font-family: "cairoR";
               color: $textColor;
-              //maxMobile
-              @media(max-width:767px){
-                  display: block;
-                  display:unset
-              }
             }
           }
         }
       }
-      // .mobailScreen{
-      //   display: none;
-      //   //maxMobile
-      //   @media(max-width:767px){
-      //       display: block;
-      //   }
-      //   //maxSmall
-      //   @media(max-width:991px){
-      //       display: block;
-      //   }
-      // }
-      // .largScreen{
-      //     //maxMobile
-      //     @media(max-width:767px){
-      //         display: none;
-      //     }
-      //     //maxSmall
-      //     @media(max-width:991px){
-      //         display: none;
-      //     }
-      // }
       /* start download */
       .download {
         .down {
