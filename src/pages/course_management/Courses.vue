@@ -15,6 +15,7 @@
                         <form @submit="GetAllCoursesByTitle">
                             <input
                                 v-model="search"
+                                @keydown.enter.prevent="GetAllCoursesByTitle"
                                 type="text"
                                 :placeholder="$t('ما الذي تبحث عنة في التخصص المختار ادناه؟')"
                             />
@@ -48,7 +49,7 @@
                                 </h3>
                                 <ul @click="ChangeFilter">
                                     <li @click="GetAllCoursesWithoutFilter" class="active">{{$t('الكل')}}</li>
-                                    <li @click="GetAllFreeCourses">{{$t('مجاني')}}</li>
+                                    <li @click="GetAllFreeCourses">{{$t('مجاناً')}}</li>
                                     <li @click="GetAllPayeedCourses">{{$t('مدفوع')}}</li>
                                 </ul>
                             </div>
@@ -82,11 +83,8 @@
                                   "
                                   @click="changeCourseData(spec.node.id)"
                                   class="nav-link"
-                                  id="home-tab"
                                   data-toggle="tab"
                                   role="tab"
-                                  aria-controls="home"
-                                  aria-selected="true"
                                 >
                                   <img src="~assets/img/brain.png" alt="" />{{
                                       spec.node.speciality
@@ -101,24 +99,7 @@
                         <div class="container-fluid">
                           <div class="tab-content" id="myTabContent">
                             <div class="cn fadeIn" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                <div class="row justify-center" v-if="lodash.isEmpty(courses.edges)">
-                                  <transition
-                                    appear
-                                    enter-active-class="animated fadeIn"
-                                    leave-active-class="animated fadeOut"
-                                  >
-                                    <!-- satrt not result -->
-                                    <div class="col col-lg-3 col-md-6 col-sm-6 col-xs-12 notResult">
-                                        <img src="~assets/img/search(1).png" alt="">
-                                        <p>{{$t('لا توجد نتائج للبحث')}}
-                                            <br>
-                                            {{$t('حاول الكتابة بشكل مختلف')}}
-                                        </p>
-                                    </div>
-                                    <!-- End not result -->
-                                  </transition>
-                                </div>
-                                <div class="row justify-center" v-else>
+                                <div class="row justify-center" v-if="!lodash.isEmpty(courses.edges)">
                                 <!-- <div class="row justify-center" v-if="courses.edgeCount > 0"> -->
                                     <div  v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
                                         <transition
@@ -135,6 +116,23 @@
                                             />
                                         </transition>
                                     </div>
+                                </div>
+                                <div class="row justify-center" v-else>
+                                  <transition
+                                    appear
+                                    enter-active-class="animated fadeIn"
+                                    leave-active-class="animated fadeOut"
+                                  >
+                                    <!-- satrt not result -->
+                                    <div class="col col-lg-3 col-md-6 col-sm-6 col-xs-12 notResult">
+                                        <img src="~assets/img/search(1).png" alt="">
+                                        <p>{{$t('لا توجد نتائج للبحث')}}
+                                            <br>
+                                            {{$t('حاول الكتابة بشكل مختلف')}}
+                                        </p>
+                                    </div>
+                                    <!-- End not result -->
+                                  </transition>
                                 </div>
                             </div>
                           </div>

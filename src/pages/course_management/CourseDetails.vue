@@ -48,6 +48,7 @@ import coursePreRequisites from 'components/courseDetails/coursePreRequisites'
 import courseUnits from 'components/courseDetails/courseUnits'
 import courseInstructors from 'components/courseDetails/courseInstructors'
 import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
+import { mapState } from 'vuex'
 
 export default {
   name: 'CourseDetails',
@@ -67,12 +68,18 @@ export default {
     courseUnits,
     courseInstructors
   },
+  computed: {
+    ...mapState('authentication',['token']),
+    ...mapState('settings',['isEnglish']),
+  },
   mounted () {
-    this.$jquery('.hedd > .point > img').css({
-        'transform': 'translateX(-1rem)'
-    })
+    this.changeTheLayoutStyle(this.isEnglish)
   },
   watch: {
+    isEnglish (val) {
+        this.changeTheLayoutStyle(val)
+    },
+
     '$route.params': {
       handler: async function (params) {
         this.courseID = params.id
@@ -89,7 +96,21 @@ export default {
       deep: true,
       immediate: true
     }
+  },
+  methods: {
+    changeTheLayoutStyle(value) {
+        if (value) {
+            this.$jquery('.hedd > .point > img').css({
+                'transform': 'translateX(-1rem)'
+            })
+        } else {
+            this.$jquery('.hedd > .point > img').css({
+                'transform': 'translateX(0rem)'
+            })
+        }
+    }
   }
+
 }
 </script>
 <style lang="scss">

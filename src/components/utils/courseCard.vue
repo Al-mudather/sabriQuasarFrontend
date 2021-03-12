@@ -45,11 +45,31 @@ export default {
 
   computed: {
     ...mapState('authentication', ['user']),
-    ...mapState('shoppingCart', ['shoppingCartDataList'])
+    ...mapState('shoppingCart', ['shoppingCartDataList']),
+    ...mapState('settings',['isEnglish'])
   },
-
+  mounted () {
+    this.changeTheLayoutStyle(this.isEnglish)
+  },
+  watch: {
+    isEnglish (val) {
+      this.changeTheLayoutStyle(val)
+    },
+  },
   methods: {
     ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
+
+    changeTheLayoutStyle(value) {
+        if (value) {
+            this.$jquery('.cart > img').css({
+                'transform': 'translateX(48%)'
+            })
+        } else {
+            this.$jquery('.cart > img').css({
+                'transform': 'translateX(0)'
+            })
+        }
+    },
 
     AddTheCourseToTheBasket (course) {
       const data = {

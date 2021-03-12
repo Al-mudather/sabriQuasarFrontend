@@ -10,7 +10,7 @@
                         </div>
                         <!--logo-->
                         <div class="logo">
-                            <img src="~assets/img/logo.png" alt="" />
+                            <img src="~assets/img/logoB.png" alt="" />
                         </div>
                     </div>
                 </div>
@@ -174,11 +174,12 @@ export default {
     },
 
     methods: {
+        ...mapActions('authentication', ['logOutAction']),
         ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction']),
 
         changeMenuState () {
             this.setOpenMenuAction(true)
-        },
+        }, 
 
         logUserOut () {
             this.logOutAction()
@@ -311,10 +312,11 @@ export default {
         //minLarg
         @media(min-width:1200px){
             display: block;
-        }
+        } 
         form {
             input {
                 background-color: #fafafa;
+                color: #7B7B7B;
             }
         }
     }

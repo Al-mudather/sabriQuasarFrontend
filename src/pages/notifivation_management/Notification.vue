@@ -1,7 +1,7 @@
 <template>
   <section class="Notific" style="min-height: 44vh">
     <div class="container-fluid">
-      <div class="row">
+      <div class="row justify-center">
         <div class="col-lg-12">
           <div class="titel">
             <img src="~assets/img/tit.png" alt="" />
@@ -15,6 +15,10 @@
             :notification="notification.node"
           />
 
+        </div>
+        <div v-if="$_.isEmpty(notificationData.edges)" class="empty">
+            <img src="~assets/img/no_notification.png" alt="">
+            <h3> عذرا لا تـوجد إشــعارات فــي الوقــت الحـالــي </h3>
         </div>
       </div>
     </div>
@@ -40,9 +44,9 @@ export default {
     // TODO: Get the notification from the [ UserNavBar ] component
     this.$root.$on('NotificationData', this.getNotificationDataHnadler)
     // TODO: Finish reading the notification
-    this.$apollo.mutate({
-      mutations: DoneReadingNotification
-    })
+    // this.$apollo.mutate({
+    //   mutation: DoneReadingNotification
+    // })
   },
   methods: {
     getNotificationDataHnadler (Data) {
@@ -126,6 +130,19 @@ export default {
                     }
                 }
             }
+        }
+    }
+    .empty{
+        display: block;
+        text-align: center;
+        img{
+            width:auto;
+        }
+        h3{
+            font-size: 19px;
+            font-family: 'cairoR';
+            color: $textColor;
+            margin: 35px 0 0 0;
         }
     }
 }

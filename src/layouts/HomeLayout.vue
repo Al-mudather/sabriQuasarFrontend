@@ -159,12 +159,24 @@ export default {
 <style lang="scss">
 .dector {
   display: flex;
+  @media (min-width: 320px) and (max-width: 700px){ 
+    padding-right: 1rem;
 
+  }
   .details {
-
+    transform: translateY(3rem);
     @media (min-width: 320px) and (max-width: 700px){
-      flex: 1 0 auto !important;
+      flex: 1 0 60% !important;
+      transform: translate(3rem,1rem);
     }
   }
 }
+// [dir] .dector {
+//   .details {
+//     transform: translateY(0rem);
+//     @media (min-width: 320px) and (max-width: 700px){
+//       transform: translate(-4rem,-1rem);
+//     }
+//   }
+// }
 </style>
