@@ -521,7 +521,7 @@ export default {
           //maxMobile
           @media(max-width:767px){
               margin: 0;
-              height: auto;
+              height: 411px;
           }
           img {
             width: 100%;
