@@ -11,6 +11,12 @@ const state = {
 }
 
 const mutations = {
+  updateUserAffiliateLink (state, link) {
+    let customUser = state.user
+    customUser.affiliateSet.edges.push({ node: link })
+    state.user = customUser 
+    userProfileStorage.setUser(customUser)
+  },
   updateUser (state, user) {
     state.user = user
   },
@@ -31,6 +37,10 @@ const mutations = {
 }
 
 const actions = {
+
+  setUserAffiliateLinkAction ({ commit }, link) {
+    commit('updateUserAffiliateLink', link)
+  },
 
   setNavbarSearchAction ({ commit }, value) {
     commit('updateNavebarSearcgDialog', value)

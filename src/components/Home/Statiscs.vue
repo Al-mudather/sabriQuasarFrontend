@@ -6,7 +6,7 @@
                     <div class="chart">
                         <div class="row justify-center">
                             <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
-                                <dectors :name="$t('طالب و طالبه')" number="500"><span>K</span></dectors>
+                                <dectors :name="$t('طالب')" number="500"><span>K</span></dectors>
                             </div>
                             <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
                                 <dectors :name="$t('دكتور متخصص')" :query="GetAllInstructorsStatiscs"></dectors>
@@ -15,7 +15,7 @@
                                 <dectors :name="$t('دوره تدريبيه')" :query="GetAllCoursesStatiscs"></dectors>
                             </div>
                             <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
-                                <dectors :name="$t('عدد الساعات التدريبيه')" number="10"><span>K</span></dectors>
+                                <dectors :name="$t('ساعه تدريبيه')" number="10"><span>K</span></dectors>
                             </div>
                         </div>
                     </div>

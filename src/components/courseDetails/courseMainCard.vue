@@ -1,6 +1,7 @@
 <template>
   <div class="asid">
-    <!-- User: {{ user.affiliateSet.edges[0].node.affiliateLink }} -->
+        {{preparTheSharingLink}}
+    <!-- User: {{ user.affiliateSet.edges }} -->
     <!-- {{!lodash.isEmpty( lodash.get(user,'[affiliateSet][edges]'))}} -->
     <div class="rate" style="display: none">
       <img src="~assets/img/raha.png" alt="" />
@@ -83,13 +84,18 @@
           <button @click="AddTheCourseToTheBasket">{{$t('أمتلك الأن')}}</button>
         </div>
         <img
-          @click="ShareTheCourseLandingPage"
           class="share"
           src="~assets/img/share.png"
           alt=""
         />
         <img class="addCou" src="~assets/img/addCou.png" alt="" />
       </div>
+      <div class="share">
+        <form>
+          <input id="shar-link" type="text" :value="preparTheSharingLink">
+          <button @click="CopyTheLinkHandler"><img src="~assets/img/copy.png"><q-tooltip>{{message}}</q-tooltip></button>
+        </form>
+    </div>
     </div>
   </div>
 </template>
@@ -101,22 +107,28 @@ export default {
   name: "CourseMainCard",
   data() {
     return {
-      lodash: this.$_,
+      message: $t('انسخ الرابط'),
       fab2: true
     };
   },
   props: ["courseData"],
 
-  methods: {
-    ...mapActions("shoppingCart", ["setShoppingCartDataListAction"]),
-    onClick () {},
-    ShareTheCourseLandingPage() {
-      //   user.affiliateSet.edges[0].node.affiliateLink
-      if ( !this.lodash.isEmpty( this.lodash.get(this.user, "[affiliateSet][edges]") ) ) {
+  computed: {
+    ...mapState("authentication", ["user"]),
+
+    formatCoureFee() {
+      if (this.courseData.courseFee) {
+        return this.courseData.courseFee.split(".")[0];
+      }
+      return "";
+    },
+
+    preparTheSharingLink () {
+      if ( !this.$_.isEmpty( this.$_.get(this.user, "[affiliateSet][edges]") ) ) {
         const aff =
           location.origin +
           "/#/course/" +
-          this.lodash.get(
+          this.$_.get(
             this.user,
             "[affiliateSet][edges[0]][node][affiliateLink]"
           ) +
@@ -124,10 +136,28 @@ export default {
           this.courseData.pk +
           "/" +
           this.courseData.id;
-        console.log("FFFFFFFFFFFFFFFFFFFFFFFFF");
-        console.log(aff);
-        console.log("FFFFFFFFFFFFFFFFFFFFFFFFF");
+        return aff
       }
+      return ''
+    }
+  },
+
+  methods: {
+    ...mapActions("shoppingCart", ["setShoppingCartDataListAction"]),
+
+    CopyTheLinkHandler(e) {
+      e.preventDefault();
+
+      let copyText = document.getElementById("shar-link");
+
+      /* Select the text field */
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+      /* Copy the text inside the text field */
+      document.execCommand("copy");
+      this.message = $t('تم النسخ')
+
     },
 
     AddTheCourseToTheBasket() {
@@ -141,15 +171,6 @@ export default {
 
       // TODO: Go to the shopping cart
       this.$router.push({ name: 'cart' })
-    }
-  },
-  computed: {
-    ...mapState("authentication", ["user"]),
-    formatCoureFee() {
-      if (this.courseData.courseFee) {
-        return this.courseData.courseFee.split(".")[0];
-      }
-      return "";
     }
   }
 };

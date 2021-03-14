@@ -155,7 +155,6 @@ export default {
         margin: 18px 5% 16px 5%;
         img{
             display: inline-block;
-            // display: inline-block;
             margin: -9px 0 0 0;
         }
         h3{
@@ -196,6 +195,7 @@ export default {
             }
         }
         .bord{
+            display: block;
             padding: 15px;
             background-color: #7B86FA;
             border-radius: 14px;
@@ -207,124 +207,159 @@ export default {
                 width: auto;
                 position: absolute;
                 left: 0;
-                right: -31px;
-                bottom: -43px;
+                right: -29px;
+                bottom: -46px;
             }
-            .price{
+            .all{
+                display: block;
                 position: relative;
-                display: inline-block;
-                top: 0;
-                width: 100%;
-                img{
-                    position:absolute;
-                    top: 0;
-                }
-                .hrcooo{
-                    right: -16px;
-                }
-                .hrColor{
-                    left: 0;
-                }
-                h2{
-                    color: #fff;
-                    font-family: 'cairoR';
-                    font-size: 17px;
-                }
-                h3{
-                    color: #FFF067;
-                    font-size: 31px;
-                    font-family: 'cairoR';
-                }
-                span{
+                .price{
+                    position: relative;
                     display: inline-block;
-                    font-size: 13px;
-                    font-family: 'cairoR';
-                    color: #fff;
-                    margin: 0 0 0 6px;
-                }
-                .box{
-                    text-align: center;
-                    width: 78px;
-                    background-color: #fff;
-                    border-radius: 11px;
-                    margin: 12px auto;
-                    height: 64px;
+                    top: 0;
+                    width: 100%;
+                    img{
+                        position:absolute;
+                        top: 0;
+                    }
+                    .hrcooo{
+                        right: -16px;
+                    }
+                    .hrColor{
+                        left: 0;
+                    }
+                    h2{
+                        color: #fff;
+                        font-family: 'cairoR';
+                        font-size: 17px;
+                    }
                     h3{
-                        font-size: 28px;
-                        color: #7B86F8;
-                        font-family: 'cairoB';
-                        margin: 2px 0 3px 0;
-                        text-align: center;
+                        color: #FFF067;
+                        font-size: 31px;
+                        font-family: 'cairoR';
                     }
                     span{
-                        display: block;
-                        color: $textColor;
-                        margin: 0;
-                    }
-                }
-            }
-            .right{
-                h2{
-                    text-align: center;
-                }
-            }
-            .linke{
-                text-decoration: none;
-                margin: 0 20px 0 0;
-                position: absolute;
-                width: 86px;
-                cursor: pointer;
-                h3{
-                    font-size: 12px;
-                    display: inline-block;
-                    color: #ffff;
-                    font-family: 'cairoR';
-                    .mage{
-                        width: auto;
                         display: inline-block;
-                        margin: 0;
-                        position: unset;
-                    }
-                }
-            }
-            .share{
-                text-align: center;
-                margin: 0 0 7px 0;
-                padding: 10px;
-                form{
-                    position: relative;
-                    text-align: center;
-                    width: 78%;
-                    margin: 0 auto;
-                    top: 17px;
-                    //maxMobile
-                    @media(max-width:767px){
-                        width: 100%;
-                    }
-                    input{
-                        background-color: #8d96ff;
-                        border: none;
-                        width: 100%;
-                        height: 37px;
-                        outline: 0;
-                        padding: 0px 29px 0 0;
-                        overflow: hidden;
-                        border-radius: 100px;
+                        font-size: 13px;
                         font-family: 'cairoR';
                         color: #fff;
+                        margin: 0 0 0 6px;
                     }
-                    button{
-                        width: 41px;
-                        height: 33px;
-                        background-color: #fcc74c;
-                        position: absolute;
-                        left: 5px;
-                        top: 2px;
-                        font-size: 16px;
-                        outline: 0;
-                        img{
-                            width: 20px;
+                    .box{
+                        text-align: center;
+                        width: 78px;
+                        background-color: #fff;
+                        border-radius: 11px;
+                        margin: 12px auto;
+                        height: 64px;
+                        h3{
+                            font-size: 28px;
+                            color: #7B86F8;
+                            font-family: 'cairoB';
+                            margin: 2px 0 3px 0;
+                            text-align: center;
                         }
+                        span{
+                            display: block;
+                            color: $textColor;
+                            margin: 0;
+                        }
+                    }
+                }
+                .right{
+                    h2{
+                        text-align: center;
+                    }
+                }
+                .linke{
+                    text-decoration: none;
+                    margin: 0 20px 0 0;
+                    position: absolute;
+                    width: 86px;
+                    cursor: pointer;
+                    h3{
+                        font-size: 12px;
+                        display: inline-block;
+                        color: #ffff;
+                        font-family: 'cairoR';
+                        .mage{
+                            width: auto;
+                            display: inline-block;
+                            margin: 0;
+                            position: unset;
+                        }
+                    }
+                }
+                .share{
+                    text-align: center;
+                    margin: 0 0 7px 0;
+                    padding: 10px;
+                    form{
+                        position: relative;
+                        text-align: center;
+                        width: 78%;
+                        margin: 0 auto;
+                        top: 17px;
+                        //maxMobile
+                        @media(max-width:767px){
+                            width: 100%;
+                        }
+                        input{
+                            background-color: #8d96ff;
+                            border: none;
+                            width: 100%;
+                            height: 37px;
+                            outline: 0;
+                            padding: 0px 29px 0 0;
+                            overflow: hidden;
+                            border-radius: 100px;
+                            font-family: 'cairoR';
+                            color: #fff;
+                        }
+                        button{
+                            width: 41px;
+                            height: 33px;
+                            background-color: #fcc74c;
+                            position: absolute;
+                            left: 5px;
+                            top: 2px;
+                            font-size: 16px;
+                            outline: 0;
+                            img{
+                                width: 20px;
+                            }
+                        }
+                    }
+                }
+            }
+            /*button*/
+            .avvil{
+                position: relative;
+                display: block;
+                text-align: center;
+                h3{
+                    font-family: 'cairoR';
+                    font-size: 16px;
+                    line-height: 1.5;
+                    color: #fcfcfc;
+                    display: inline-block;
+                    margin: 5px 0 20px 0;
+                }
+                button{
+                    width: 170px;
+                    height: 47px;
+                    margin: 0 0 5px 0;
+                    background-color:#fcc74c;
+                    color: #fff;
+                    text-align: center;
+                    display: inline-block;
+                    outline: 0;
+                    transition: all .3s ease-in-out;
+                    &:hover{
+                        background-color: #fcfcfc;
+                        color: #fcc74c;
+                        border: 1px solid #fcc74c;
+                        transform: scale(0.9);
                     }
                 }
             }
@@ -332,7 +367,7 @@ export default {
         .load{
             img{
                 width: 100%;
-                height: 207px;
+                height: 147px;
                 //maxMobile
                 @media(max-width:767px){
                     height: 207px;
@@ -394,6 +429,7 @@ export default {
                 }
                 .card-body{
                     padding: 8px; 
+                    height: 200px;
                     h5{
                         font-size: 17px;
                         font-family: 'cairoR';
@@ -404,7 +440,7 @@ export default {
                     .btn{
                         width: 100%;
                         height: 44px;
-                        margin: 0 auto;
+                        margin: 43px auto;
                         border-radius: 50px;
                         background-color:#7b86fa;
                         h3{

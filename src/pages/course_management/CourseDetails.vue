@@ -158,7 +158,7 @@ export default {
             font-size: 22px;
             font-family: 'cairoB';
             line-height: 1.7;
-            // margin: 0 -10px 0 0;
+            margin: 0 -10px 0 0;
             display: inline-block;
             width: 94%;
             padding: 10px 20px 8px 0;
@@ -177,7 +177,6 @@ export default {
         //maxMobile
         @media(max-width:767px){
             margin: -31px 0 0 0;
-            padding-top: 4rem;
         }
         .rate{
             position: relative;
@@ -257,6 +256,7 @@ export default {
             margin: 22px 0 0 0;
             border-radius: 43px;
             background-color: #fff;
+            height: 335px;
             @include prefixer(box-shadow, 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14), webkit moz o ms);
             .uper{
                 position: relative;
@@ -318,7 +318,7 @@ export default {
             .more{
                 position: relative;
                 width: 250px;
-                height: 167px;
+                height: 171px;
                 margin: 0 auto;
                 svg{
                     position: absolute;
@@ -363,6 +363,47 @@ export default {
                     left: 16px;
                     width: auto;
                     cursor: pointer;
+                }
+            }
+            /*share linke*/
+            .share{
+                text-align: center;
+                margin: 0 0 7px 0;
+                form{
+                    position: relative;
+                    text-align: center;
+                    width: 80%;
+                    margin: 0 auto;
+                    top: 0;
+                    //maxMobile
+                    @media(max-width:767px){
+                        width: 100%;
+                    }
+                    input{
+                        background-color: #5868b8e6;
+                        border: none;
+                        width: 100%;
+                        height: 41px;
+                        outline: 0;
+                        padding: 0px 29px 0 0;
+                        overflow: hidden;
+                        border-radius: 100px;
+                        font-family: 'cairoR';
+                        color: #fff;
+                    }
+                    button{
+                        width: 41px;
+                        height: 33px;
+                        background-color: #fcc74c;
+                        position: absolute;
+                        left: 5px;
+                        top: 4px    ;
+                        font-size: 16px;
+                        outline: 0;
+                        img{
+                            width: 20px;
+                        }
+                    }
                 }
             }
         }
@@ -412,6 +453,8 @@ export default {
             }
             .pluse{
                 margin: 0 50px 17px 0;
+                display: flex;
+                width: 100%;
                 //maxMobile
                 @media(max-width:767px){
                     margin: 0 0px 17px 0;
@@ -419,12 +462,16 @@ export default {
                 img{
                     width: auto;
                     display: inline-block;
+                    width: 25px;
+                    height: 25px;
                 }
                 h3{
                     display: inline-block;
                     color: #9C9C9C;
                     font-size: 16px;
                     font-family: 'cairoR';  
+                    margin: 0 11px 0 0;
+                    line-height: 1.7;
                 }
             }
             /*colaps*/
