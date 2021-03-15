@@ -677,7 +677,7 @@ export default {
       }
       /*-- details Payment --*/
       .details {
-        display: none;
+        display: block;
         .error {
           background-color: #f67a66;
           padding: 10px;

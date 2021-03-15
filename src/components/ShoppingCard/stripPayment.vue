@@ -115,6 +115,7 @@ export default {
                 mutation: CreateStripeCheckout,
                 variables: {
                     orderId: orderResult.order.pk,
+                    currency: 'SAR',
                     successUrl: location.origin + "/#/cart/success",
                     cancelUrl: location.origin + "/#/cart/cancel"
                 }

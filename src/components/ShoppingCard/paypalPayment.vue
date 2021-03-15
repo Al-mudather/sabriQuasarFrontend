@@ -89,47 +89,22 @@ export default {
 
                     // Call your server to finalize the transaction
                     onApprove: async (data, actions) => {
-                        console.log('kkkkkkkkkkkkkkkkkkkkk')
-                        console.log(data)
-                        console.log('kkkkkkkkkkkkkkkkkkkkk')
+                        // console.log('kkkkkkkkkkkkkkkkkkkkk')
+                        // console.log(data)
+                        // console.log('kkkkkkkkkkkkkkkkkkkkk')
                         const paypalResult = await this.$apollo.mutate({
                             mutation: CapturePaypalCheckout,
                             variables: {
                                 orderId: data.orderID
                             }
                         });
-                        console.log('kkkkkkkkkkkkkkkkkkkkk')
-                        console.log(paypalResult)
-                        console.log('kkkkkkkkkkkkkkkkkkkkk')
-                        // return fetch('/demo/checkout/api/paypal/order/' + data.orderID + '/capture/', {
-                        //     method: 'post'
-                        // }).then(function(res) {
-                        //     return res.json();
-                        // }).then(function(orderData) {
-                        //     // Three cases to handle:
-                        //     //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-                        //     //   (2) Other non-recoverable errors -> Show a failure message
-                        //     //   (3) Successful transaction -> Show confirmation or thank you
-
-                        //     // This example reads a v2/checkout/orders capture response, propagated from the server
-                        //     // You could use a different API or structure for your 'orderData'
-                        //     var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
-
-                        //     if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
-                        //         return actions.restart(); // Recoverable state, per:
-                        //         // https://developer.paypal.com/docs/checkout/integration-features/funding-failure/
-                        //     }
-
-                        //     if (errorDetail) {
-                        //         var msg = 'Sorry, your transaction could not be processed.';
-                        //         if (errorDetail.description) msg += '\n\n' + errorDetail.description;
-                        //         if (orderData.debug_id) msg += ' (' + orderData.debug_id + ')';
-                        //         return alert(msg); // Show a failure message
-                        //     }
-
-                        //     // Show a success message
-                        //     alert('Transaction completed by ' + orderData.payer.name.given_name);
-                        // });
+                        console.log('kkkkkkkkk Payment kkkkkkkkkkkk')
+                        console.log(paypalResult.data)
+                        console.log('kkkkkkkkkk Payment kkkkkkkkkkk')
+                        if (paypalResult.data.capturePaypalCheckout.success) {
+                            this.$router.push({ name: 'cart-success' })
+                        }
+                        
                     }
 
                 }).render('#paypal-button-container');
@@ -150,9 +125,6 @@ export default {
 
                 this.visible = false;
             } catch (error) {
-                console.log('lllllllllllllllllll')
-                console.log(error)
-                console.log('lllllllllllllllllll')
                 this.visible = false
                 this.btnVisible = true
             }         
@@ -185,9 +157,6 @@ export default {
 
             if (this.$_.get(dataObj, "[errors]")) {
                 this.visible = false;
-                console.log('gggggggggggggggggggg')
-                console.log(dataObj.errors)
-                console.log('gggggggggggggggggggg')
                 this.errorHandler(dataObj.errors)
                 // alert(dataObj.errors.nonFieldErrors);
             }
