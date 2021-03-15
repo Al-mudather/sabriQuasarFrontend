@@ -22,6 +22,92 @@
 **prefixes Mixin
 **Auto add prefixes To Propret
 */
+
+/*--- START currency ---*/
+.currency {
+  background-color: #FCC74C;
+  position: relative;
+}
+
+.currency .switch .point {
+  position: relative;
+  display: inline-block;
+}
+
+.currency .switch .point svg {
+  top: 0;
+  right: -15px;
+}
+
+.currency .switch .point img {
+  position: absolute;
+  top: 17px;
+  right: 14px;
+}
+
+.currency .switch .dropdown {
+  display: inline-block;
+  position: relative;
+  z-index: 2;
+}
+
+.currency .switch .dropdown h3 {
+  cursor: pointer;
+  display: inline-block;
+  color: #fff;
+  font-size: 16px;
+  font-family: 'cairoR';
+}
+
+.currency .switch .dropdown .listt {
+  display: block;
+  position: absolute;
+  top: -4px;
+  right: 106px;
+  left: 0;
+  background-color: #e9eef3;
+  padding: 10px;
+  border-radius: 13px;
+  width: 218px;
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+  -webkit-transform: translateY(45px);
+          transform: translateY(45px);
+}
+
+.currency .switch .dropdown .listt .arrow {
+  position: absolute;
+  top: -11px;
+  left: 112px;
+}
+
+.currency .switch .dropdown .listt ul {
+  list-style: none;
+  margin: 0;
+}
+
+.currency .switch .dropdown .listt ul li {
+  cursor: pointer;
+  background-color: #fff;
+  color: #104982;
+  padding: 3px 8px;
+  height: 30px;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+.currency .switch .dropdown .listt ul li img {
+  margin-left: 5px;
+}
+
+.currency .switch .dropdown .listt ul li:active {
+  background-color: #1049824d;
+  color: #fff;
+}
+
+/*--- end currency ---*/
+
 .navv {
   background-color: #fcfcfc;
   padding: 10px;

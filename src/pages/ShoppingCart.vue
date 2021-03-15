@@ -127,7 +127,6 @@ export default {
 
   mounted() {
     // TODO: import the shooping cart animation
-
     this.$el.querySelector(".lii.active").nextSibling.classList.add("show");
     this.$root.$on("activateShoppingProgress", cart_name => {
       if (cart_name) {
@@ -229,8 +228,12 @@ export default {
     },
 
     closeShoppingCart() {
-      this.$router.go(-1);
-      //   this.$router.push({ name: 'Home' })
+      // TODO: if you are in the payment page, go to the page before the shopping page
+      if ( this.$route.fullPath === '/cart/payment') {
+        this.$router.go(-4)
+      } else {
+        this.$router.go(-1)
+      }
     }
   }
 };

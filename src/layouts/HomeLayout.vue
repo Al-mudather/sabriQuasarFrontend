@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Currency />
     <NavBar />
     <transition
       appear
@@ -21,6 +22,7 @@
 </template>
 
 <script>
+import Currency from 'components/Home/Currency'
 import NavBar from 'components/Home/Nav_bar'
 import Menu from 'components/Home/Menu'
 import Footer from 'src/components/utils/Footer'
@@ -31,6 +33,7 @@ import { Quasar } from 'quasar'
 export default {
   name: 'MainLayout',
   components: {
+    Currency,
     NavBar,
     Menu,
     Footer,

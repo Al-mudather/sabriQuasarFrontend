@@ -1,8 +1,5 @@
 <template>
   <div class="asid">
-        {{preparTheSharingLink}}
-    <!-- User: {{ user.affiliateSet.edges }} -->
-    <!-- {{!lodash.isEmpty( lodash.get(user,'[affiliateSet][edges]'))}} -->
     <div class="rate" style="display: none">
       <img src="~assets/img/raha.png" alt="" />
     </div>
@@ -90,10 +87,10 @@
         />
         <img class="addCou" src="~assets/img/addCou.png" alt="" />
       </div>
-      <div class="share">
+      <div class="share" v-if="!$_.isEmpty( $_.get(user, '[affiliateSet][edges]') )">
         <form>
           <input id="shar-link" type="text" :value="preparTheSharingLink">
-          <button @click="CopyTheLinkHandler"><img src="~assets/img/copy.png"><q-tooltip>{{message}}</q-tooltip></button>
+          <button @click="CopyTheLinkHandler"><q-tooltip>{{message}}</q-tooltip><img src="~assets/img/copy.png"></button>
         </form>
     </div>
     </div>
@@ -107,7 +104,7 @@ export default {
   name: "CourseMainCard",
   data() {
     return {
-      message: $t('انسخ الرابط'),
+      message: this.$t('انسخ الرابط'),
       fab2: true
     };
   },
@@ -156,7 +153,7 @@ export default {
 
       /* Copy the text inside the text field */
       document.execCommand("copy");
-      this.message = $t('تم النسخ')
+      this.message = this.$t('تم النسخ')
 
     },
 
