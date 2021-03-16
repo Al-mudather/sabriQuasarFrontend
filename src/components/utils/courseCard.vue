@@ -10,7 +10,7 @@
         </div>
         <div class="pric">
             <div class="detai">
-                <h3><span>{{unit}}</span>{{parseInt(price)}}</h3>
+                <h3><span>{{currency}}</span>{{parseInt(JSON.parse(course.currency)[currency])}}</h3>
             </div>
             <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">{{$t('التفاصيل')}}</button>
             <div class="cart" @click="AddTheCourseToTheBasket" style="cursor: pointer">
@@ -46,7 +46,7 @@ export default {
   computed: {
     ...mapState('authentication', ['user']),
     ...mapState('shoppingCart', ['shoppingCartDataList']),
-    ...mapState('settings',['isEnglish'])
+    ...mapState('settings',['isEnglish', 'currency'])
   },
   mounted () {
     this.changeTheLayoutStyle(this.isEnglish)

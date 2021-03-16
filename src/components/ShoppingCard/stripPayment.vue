@@ -37,7 +37,8 @@ export default {
         }
     },
     computed: {
-        ...mapState("shoppingCart", ["shoppingCartDataList"])
+        ...mapState("shoppingCart", ["shoppingCartDataList"]),
+        ...mapState('settings',['currency'])
     },
     methods: {
         ...mapActions('shoppingCart', ['setSaveCheckoutOrderIDAction']),
@@ -88,11 +89,8 @@ export default {
 
             if (this.$_.get(dataObj,'[errors]')) {
                 this.visible = false
-                console.log('kkkkkkkkkkkkkkk')
-                console.log(dataObj.errors)
-                console.log('kkkkkkkkkkkkkkk')
                 this.errorHandler(dataObj.errors)
-                // alert(dataObj.errors.nonFieldErrors);
+
             }
 
             if (this.$_.get(dataObj,'[success]')) {
@@ -115,7 +113,7 @@ export default {
                 mutation: CreateStripeCheckout,
                 variables: {
                     orderId: orderResult.order.pk,
-                    currency: 'SAR',
+                    currency: this.currency,
                     successUrl: location.origin + "/#/cart/success",
                     cancelUrl: location.origin + "/#/cart/cancel"
                 }

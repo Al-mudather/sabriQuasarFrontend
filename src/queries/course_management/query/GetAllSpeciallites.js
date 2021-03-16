@@ -19,7 +19,8 @@ query GetAllSpecialities($courseNumber:Int) {
               pk,
               title,
               isPaid,
-              courseFee
+              courseFee,
+              currency
             }
           }
         }

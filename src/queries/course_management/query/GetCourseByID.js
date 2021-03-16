@@ -7,6 +7,7 @@ query GetCourseByID($coursePk:Int) {
     pk,
     title,
     courseFee,
+    currency,
     brief,
     isPaid,
     courseinstructorSet {

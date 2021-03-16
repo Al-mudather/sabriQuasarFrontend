@@ -9,7 +9,7 @@
             </div>
         </div>
         <!--details Payment-->
-        <div class="details" v-if="enableSudaniesBank">
+        <div class="details q-mt-md" v-if="enableSudaniesBank">
             <!-- <div class="error">
                 <h3>
                     <img src="~assets/img/error.png" alt="" />رقم البطاقة غير
@@ -70,7 +70,6 @@ import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
 import stripPayment from 'src/components/ShoppingCard/stripPayment'
 import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
-// import { openURL } from 'quasar'
 
 export default {
   name:  "paymentCartpage",
@@ -131,9 +130,6 @@ export default {
             const smartNodePayment = await this.makeSmartNodePayment(
                 orderResult
             );
-            console.log('kkkkkkkkkkkkkkkkkkkkkk')
-            console.log(smartNodePayment)
-            console.log('kkkkkkkkkkkkkkkkkkkkkk')
             if (smartNodePayment) {
                 this.enableSudaniesBank = false
                 this.$router.push({ name: 'cart-success' })
@@ -176,9 +172,6 @@ export default {
                 }
             });
             const smartNodeDetails = await smartNoderesult.data.createSmartNodeCheckout;
-            console.log('sssssssssssssssssssss')
-            console.log(smartNodeDetails)
-            console.log('sssssssssssssssssssss')
             if (this.$_.get(smartNodeDetails, "[errors]")) {
                 this.visible = false;
                 this.errorHandler(smartNodeDetails.errors)

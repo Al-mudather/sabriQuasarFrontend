@@ -77,7 +77,7 @@
           </g>
         </svg>
         <div class="pric">
-          <h3>{{ formatCoureFee }}<span>SDG</span></h3>
+          <h3>{{parseInt(JSON.parse(courseData.currency)[currency])}}<span>{{currency}}</span></h3>
           <button @click="AddTheCourseToTheBasket">{{$t('أمتلك الأن')}}</button>
         </div>
         <img
@@ -112,6 +112,7 @@ export default {
 
   computed: {
     ...mapState("authentication", ["user"]),
+    ...mapState('settings',['currency']),
 
     formatCoureFee() {
       if (this.courseData.courseFee) {

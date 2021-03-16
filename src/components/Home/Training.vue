@@ -56,29 +56,9 @@
                                             :name="course.node.title"
                                             instructor="د.صبري أبوقرون"
                                             :price="course.node.courseFee"
-                                            unit="SDG"
                                         />
                                     </transition>
                                 </div>
-                                <!-- <div
-                                    v-for="course in courses.edges"
-                                    :key="course.node.id"
-                                    class="col-2 col-lg-2 col-md-3 col-sm-6 col-xs-12"
-                                > 
-                                    <transition
-                                        appear
-                                        enter-active-class="animated fadeIn"
-                                        leave-active-class="animated fadeOut"
-                                    >
-                                        <course-card
-                                            :course="course.node"
-                                            :name="course.node.title"
-                                            instructor="د.صبري أبوقرون"
-                                            :price="course.node.courseFee"
-                                            unit="SDG"
-                                        />
-                                    </transition>
-                                </div> -->
                             </div>
                             <div class="butDown">
                                 <svg

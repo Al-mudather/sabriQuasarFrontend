@@ -18,9 +18,9 @@
                         <div class="listt" v-if="showCurrency">
                             <img class="arrow" src="~assets/img/arrow.png" alt="">
                             <ul>
-                                <li><img src="~assets/img/sudan.png" alt="">{{$t('الجنيه السوداني')}}</li>
-                                <li><img src="~assets/img/united-states .png" alt="">{{$t('الدولار الامريكي')}}</li>
-                                <li><img src="~assets/img/saudi-arabia.png" alt="">{{$t('الريال السعودي')}}</li>
+                                <li @click="currencySelectionHandler('SDG')"><img src="~assets/img/sudan.png" data-currency="SDG"  alt="">{{$t('الجنيه السوداني')}}</li>
+                                <li @click="currencySelectionHandler('USD')"><img src="~assets/img/united-states .png" data-currency="USD"  alt="">{{$t('الدولار الامريكي')}}</li>
+                                <li @click="currencySelectionHandler('SAR')"><img src="~assets/img/saudi-arabia.png" data-currency="SAR"  alt="">{{$t('الريال السعودي')}}</li>
                             </ul>
                         </div>
                     </div>
@@ -32,14 +32,25 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+
 export default {
   name: 'Currency',
   data () {
     return {
-      showCurrency: false
+      showCurrency: false,
+      options: [
+        'USD', 'SDG', 'EUR', 'GBP', 'SAR'
+      ]
     }
   },
-  props: {
+  methods: {
+    ...mapActions('settings', ['setCurrencyAction']),
+
+    currencySelectionHandler (currency) {
+      // const name = `[data-cart="${currency}"]`
+      this.setCurrencyAction(currency)
+    }
   }
 }
 </script>
