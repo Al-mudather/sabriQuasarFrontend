@@ -15,8 +15,14 @@ export default {
     name: "GoogleAuthentication",
     data () {
         return {
-            visible: false
+            visible: false,
+            prevRoute: null
         }
+    },
+    beforeRouteEnter(to, from, next) {
+        next(vm => {
+        vm.prevRoute = from
+        })
     },
     methods: {
         ...mapActions("authentication", [
@@ -44,7 +50,7 @@ export default {
                     if (result.data.socialAuth) {
                         this.loginAction(result.data.socialAuth).then(() => {
                             if (result.data.socialAuth.token) {
-                                this.$router.go(-1);
+                                this.$router.push( this.prevRoute.path || { name: 'Home' })
                             }
                         });
                     }
@@ -74,9 +80,6 @@ export default {
                     console.log(r);
 
                     var google = hello("google").getAuthResponse();
-
-                    // console.log(google)
-                    // console.log(google.access_token)
 
                     this.loginAuthMutation(
                         google.access_token,

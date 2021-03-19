@@ -15,8 +15,14 @@ export default {
     name: "FacebookAuthentication",
     data () {
         return {
-            visible: false
+            visible: false,
+            prevRoute: null
         }
+    },
+    beforeRouteEnter(to, from, next) {
+        next(vm => {
+        vm.prevRoute = from
+        })
     },
     methods: {
         ...mapActions("authentication", [
@@ -29,7 +35,6 @@ export default {
         loginAuthMutation(accessToken, provider, email = "") {
             console.log(" Triggering Apollo ");
             this.visible = true
-
             this.$apollo
                 .mutate({
                     mutation: SocialAuth,
@@ -45,7 +50,7 @@ export default {
                         this.loginAction(result.data.socialAuth).then(() => {
                             // TODO: Go To the home page
                             if (result.data.socialAuth.token) {
-                                this.$router.go(-1);
+                                this.$router.push( this.prevRoute.path || { name: 'Home' })
                             }
                         });
                     }

@@ -109,12 +109,14 @@
 import { CheckoutSubscription } from "src/queries/notification_management/subscription/CheckoutSubscription";
 import { LocalStorage, Quasar } from "quasar";
 
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "ShoppingCartPage",
   data() {
-    return {};
+    return {
+      prevRoute: null
+    };
   },
 
   apollo: {
@@ -149,6 +151,12 @@ export default {
 
   beforeDestroy() {
     this.$root.$off("activateShoppingProgress");
+  },
+
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      vm.prevRoute = from
+    })
   },
 
   methods: {
@@ -232,7 +240,7 @@ export default {
       if ( this.$route.fullPath === '/cart/payment') {
         this.$router.go(-4)
       } else {
-        this.$router.go(-1)
+        this.$router.push( this.prevRoute.path || { name: 'Home' })
       }
     }
   }

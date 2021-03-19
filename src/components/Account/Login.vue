@@ -133,6 +133,7 @@ export default {
         return {
             email: "",
             password: "",
+            prevRoute: null,
             visible: false,
             errorMessages: []
         };
@@ -141,6 +142,12 @@ export default {
         AccountHeader,
         GoogleAuthentication,
         FacebookAuthentication
+    },
+
+    beforeRouteEnter(to, from, next) {
+        next(vm => {
+        vm.prevRoute = from
+        })
     },
 
     methods: {
@@ -187,8 +194,7 @@ export default {
 
                             this.loginAction(result.data.tokenAuth).then(() => {
                                 // TODO: Go to the page that you came from
-                                this.$router.go(-1);
-                                // this.$router.push(redirectUrl || { name: 'Home' })
+                                this.$router.push( this.prevRoute.path || { name: 'Home' })
                             });
                         } else if (result.data.tokenAuth.errors) {
                             this.errorHandler(result.data.tokenAuth.errors);
