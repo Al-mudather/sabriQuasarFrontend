@@ -23,16 +23,17 @@
                     <q-toggle v-model="_isEnglish" icon="language"/>
                 </div> 
                 <div class="profile">
-                    <img src="~assets/img/user(4).png" alt="">  
+                    <img src="~assets/img/user(4).png" alt="">
+                    <h3>{{$_.get(user,'[username]')}}</h3>
                 </div>
                 <div class="account" v-if="!token">
                     <div class="sign">
-                        <a @click="goToSignUpPage" style="cursor: pointer">
+                        <a @click="GO_TO_SIGNUP_PAGE" style="cursor: pointer">
                             <h3><img src="~assets/img/sign.png" alt="">{{$t('إنشاء حساب')}}</h3>
                         </a>
                     </div>
                     <div class="login">
-                        <a @click="goToLoginPage" style="cursor: pointer">
+                        <a @click="GO_TO_LOGIN_PAGE" style="cursor: pointer">
                             <img src="~assets/img/login.png" alt="">
                             <h3>{{$t('دخول')}}</h3>
                         </a>
@@ -40,40 +41,40 @@
                 </div>
             </div>
             <!--satrt Link Button-->
-            <div class="butgro" id="butgro">
-                <div class="but" @click="goToHomePage">
+            <div class="butgro" id="butgro" style="margin-top: 1rem;">
+                <div class="but" @click="GO_TO_HOME_PAGE">
                     <img src="~assets/img/bordText.png" alt="">
-                    <h3>الرئيسية</h3>
+                    <h3>{{$t('الرئيسية')}}</h3>
                 </div>
-                <div class="but" @click="goToCoursesPage">
+                <div class="but" @click="GOT_TO_COURSES_PAGE">
                     <img src="~assets/img/bordText.png" alt="">
-                    <h3>الــدورات</h3>
+                    <h3>{{$t('الــدورات')}}</h3>
                 </div>
-                <div class="but" @click="goToMyCoursesPage">
+                <div class="but" v-if="token" @click="GO_TO_MY_COURSES_PAGE">
                     <img src="~assets/img/bordText.png" alt="">
-                    <h3>لوحتي التعليمية</h3>
+                    <h3>{{$t('لوحتي التعليمية')}}</h3>
                 </div>
-                <!-- <div class="but" @click="">
+                <div class="but" v-if="token" @click="GO_TO_MY_NOTIFICATIONS_PAGE">
                     <img src="~assets/img/bordText.png" alt="">
-                    <h3>عن المركز</h3>
-                </div> -->
-                <div class="but" @click="goToMyProfilePage">
+                    <h3>{{$t('الإشعارت')}}</h3>
+                </div>
+                <div class="but" v-if="token" @click="GO_TO_MY_PROFILE_PAGE">
                     <img src="~assets/img/bordText.png" alt="">
-                    <h3>الملف الشخصي</h3>
+                    <h3>{{$t('الملف الشخصي')}}</h3>
                 </div>
             </div>
             <div class="exit" v-if="token" @click="logTheUserOut" style="cursor: pointer">
                 <div class="mag">
                     <img src="~assets/img/enter.png" alt="">
                 </div>
-                <h3 class="q-mr-sm">خــروج</h3>
+                <h3 class="q-mr-sm">{{$t('خــروج')}}</h3>
             </div>
         </div>
     </section>
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 
 export default {
     name: "Menu",
@@ -84,7 +85,7 @@ export default {
     },
 
     computed: {
-        ...mapState('authentication', ['token']),
+        ...mapGetters("authentication", ["token", "user"]),
         ...mapState("settings", ["isEnglish"]),
         _isEnglish: {
             get () {
@@ -162,27 +163,31 @@ export default {
             this.logOutAction();
         },
 
-        goToMyProfilePage() {
+        GO_TO_MY_NOTIFICATIONS_PAGE() {
+            this.$router.push({ name: "notification" });
+        },
+
+        GO_TO_MY_PROFILE_PAGE() {
             this.$router.push({ name: "user-profile" });
         },
 
-        goToMyCoursesPage() {
+        GO_TO_MY_COURSES_PAGE() {
             this.$router.push({ name: "my-courses" });
         },
 
-        goToCoursesPage() {
+        GOT_TO_COURSES_PAGE() {
             this.$router.push({ name: "courses" });
         },
 
-        goToHomePage() {
+        GO_TO_HOME_PAGE() {
             this.$router.push({ name: "Home" });
         },
 
-        goToSignUpPage() {
+        GO_TO_SIGNUP_PAGE() {
             this.$router.push({ name: "signUp" });
         },
 
-        goToLoginPage() {
+        GO_TO_LOGIN_PAGE() {
             this.$router.push({ name: "login" });
         }
     }
@@ -196,7 +201,6 @@ export default {
     position: fixed;
     width: 100%;
     height: 100%;
-    z-index: 2;
     top: 0;
     left: 0;
     right: 0;

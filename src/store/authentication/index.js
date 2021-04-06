@@ -108,7 +108,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       // Todo clear everything from window.LocalStorage
       tokenStorage.clearToken()
-      // LocalStorage.clear()
+      // localStorage.clear()
       commit('deleteData')
       resolve()
     })

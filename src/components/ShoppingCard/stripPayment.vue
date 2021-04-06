@@ -1,5 +1,27 @@
 <template>
     <div class="sele edit" @click="buyTheCoursesUsingStripe">
+        <!-- <q-dialog v-model="alert">
+            <q-card>
+                <q-card-section>
+                    <div class="text-h6">Please fix these <strong>error first</strong></div>
+                </q-card-section>
+
+                <q-card-section class="q-pt-none">
+                    <ul>
+                        <li
+                            v-for="(message, index) in errorMessages"
+                            :key="index"
+                        >
+                            {{ message }}<br />
+                        </li>
+                    </ul>
+                </q-card-section>
+
+                <q-card-actions align="right">
+                    <q-btn flat label="OK" color="primary" v-close-popup />
+                </q-card-actions>
+            </q-card>
+        </q-dialog> -->
         <div
             class=""
             style="text-align:left"
@@ -33,6 +55,7 @@ export default {
     data () {
         return {
             errorMessages: [],
+            alert: false,
             visible: false
         }
     },
@@ -40,37 +63,60 @@ export default {
         ...mapState("shoppingCart", ["shoppingCartDataList"]),
         ...mapState('settings',['currency'])
     },
+    watch : {
+        errorMessages (value) {
+            if (value.length > 0) {
+                this.alert = true
+            }
+        }
+    },
     methods: {
         ...mapActions('shoppingCart', ['setSaveCheckoutOrderIDAction']),
         errorHandler(errorsObj) {
-            console.log(errorsObj);
+            // console.log(errorsObj);
             for (const key in errorsObj) {
+                // console.log(errorsObj[key])
                 for (const val of errorsObj[key]) {
-                    this.errorMessages.push(val.message);
+                    console.log(val)
+                    this.errorMessages.push(val.message || val.PaymentUrl);
                 }
             }
         },
         async buyTheCoursesUsingStripe () {
-            this.visible = true
-            // TODO: Extract all courses ids
-            const courseIds = this.getOrdersIds();
-            // TODO: Make the order
-            const orderResult = await this.getOrderResult(courseIds);
-            // TODO: Save the order result to the store for the success checkout
-            this.setSaveCheckoutOrderIDAction(orderResult.order.pk)
-            // TODO: Get the stripe key from the backend
-            const stripKey = await this.getStripeKeyFromTheBackend();
-            // TODO: Intialize the stripe objct with strip key to make the payment
-            const stripe = this.$Stripe(stripKey);
-            // TODO: Get the stripe url from the backend
-            const stripPaymentUrl = await this.getStripPaymentUrlFromTheBackend(
-                orderResult
-            );
-            // TODO: Make the payment
-            stripe.redirectToCheckout({
-                sessionId: stripPaymentUrl
-            })
-            this.visible = false
+            try {
+                this.visible = true
+                // TODO: Extract all courses ids
+                const courseIds = this.getOrdersIds();
+                // TODO: Make the order
+                const orderResult = await this.getOrderResult(courseIds);
+                // TODO: Save the order result to the store for the success checkout
+                this.setSaveCheckoutOrderIDAction(orderResult.order.pk)
+                // TODO: Get the stripe key from the backend
+                const stripKey = await this.getStripeKeyFromTheBackend();
+                // TODO: Intialize the stripe objct with strip key to make the payment
+                const stripe = this.$Stripe(stripKey);
+                // TODO: Get the stripe url from the backend
+                const stripPaymentUrl = await this.getStripPaymentUrlFromTheBackend(
+                    orderResult
+                );
+                // TODO: Make the payment
+                stripe.redirectToCheckout({
+                    sessionId: stripPaymentUrl
+                })
+                this.visible = false
+                
+            } catch (error) {
+                this.visible = false
+                if (error.message === 'this.$Stripe is not a function') {
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
+                    })
+                }
+            }
         },
 
         getOrdersIds () {
@@ -89,7 +135,14 @@ export default {
 
             if (this.$_.get(dataObj,'[errors]')) {
                 this.visible = false
-                this.errorHandler(dataObj.errors)
+                // this.errorHandler(dataObj.errors)
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
+                })
 
             }
 
@@ -121,7 +174,14 @@ export default {
             const stripDetails = stripPaymentresult.data.createStripeCheckout;
             if (this.$_.get(stripDetails,'[errors]')) {
                 this.visible = false
-                this.errorHandler(dataObj.errors)
+                // this.errorHandler(stripDetails.errors)
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
+                })
             }
 
             if (this.$_.get(stripDetails,'[success]')) {
