@@ -23,23 +23,34 @@ export default {
     },
     methods: {
         async buyTheCoursesUsingSmartNode() {
-            this.visible = true;
-            // TODO: Extract all courses ids
-            const courseIds = this.getOrdersIds();
-            // TODO: Make the order
-            const orderResult = await this.getOrderResult(courseIds);
-            // TODO: get the syber pay key from the backend
-            // { code for the key here }
-            // TODO: Get the stripe url from the backend
-            const syberPayPaymentUrl = await this.makeSmartNodePayment(
-                orderResult
-            );
-            // TODO: Make the payment
-            openURL(syberPayPaymentUrl)
-            // stripe.redirectToCheckout({
-            //     sessionId: syberPayPaymentUrl
-            // });
-            this.visible = false;
+            try {
+                this.visible = true;
+                // TODO: Extract all courses ids
+                const courseIds = this.getOrdersIds();
+                // TODO: Make the order
+                const orderResult = await this.getOrderResult(courseIds);
+                // TODO: get the syber pay key from the backend
+                // { code for the key here }
+                // TODO: Get the stripe url from the backend
+                const syberPayPaymentUrl = await this.makeSmartNodePayment(
+                    orderResult
+                );
+                // TODO: Make the payment
+                openURL(syberPayPaymentUrl)
+                // stripe.redirectToCheckout({
+                //     sessionId: syberPayPaymentUrl
+                // });
+            } catch (error) {
+                this.visible = false;
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
+                })
+                
+            }
         },
 
         getOrdersIds() {

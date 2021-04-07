@@ -62,9 +62,7 @@ export default {
             this.visible = true
             this.btnVisible = false
             this.errorMessages = []
-            // console.log('lllllllllllllllllllllll')          
-            // console.log('chart')          
-            // console.log('lllllllllllllllllllllll')
+
             try {
                 const courseIds = this.getOrdersIds();
                 const orderResult = await this.getOrderResult(courseIds);
@@ -89,18 +87,14 @@ export default {
 
                     // Call your server to finalize the transaction
                     onApprove: async (data, actions) => {
-                        // console.log('kkkkkkkkkkkkkkkkkkkkk')
-                        // console.log(data)
-                        // console.log('kkkkkkkkkkkkkkkkkkkkk')
+
                         const paypalResult = await this.$apollo.mutate({
                             mutation: CapturePaypalCheckout,
                             variables: {
                                 orderId: data.orderID
                             }
                         });
-                        console.log('kkkkkkkkk Payment kkkkkkkkkkkk')
-                        console.log(paypalResult.data)
-                        console.log('kkkkkkkkkk Payment kkkkkkkkkkk')
+
                         if (paypalResult.data.capturePaypalCheckout.success) {
                             this.$router.push({ name: 'cart-success' })
                         }
@@ -127,6 +121,15 @@ export default {
             } catch (error) {
                 this.visible = false
                 this.btnVisible = true
+                if ( (error.message === 'Network error: Network Error') || (error.message === 'paypal is not defined')) {
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
+                    })
+                }
             }         
             
         },
@@ -178,7 +181,9 @@ export default {
                 paypalPaymentresult.data.createPaypalCheckout;
             if (this.$_.get(paypalDetails, "[errors]")) {
                 this.visible = false;
-                alert(details.errors.nonFieldErrors);
+                console.log('ddddddd')
+                console.log(paypalDetails)
+                console.log('ddddddd')
             }
 
             if (this.$_.get(paypalDetails, "[success]")) {
