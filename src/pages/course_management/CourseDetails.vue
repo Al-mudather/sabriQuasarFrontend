@@ -10,7 +10,7 @@
                     </div>
                 </div>
                 <div class="col-lg-4">
-                    <courseMainCard :courseData="courseData" />
+                    <courseMainCard :courseData="courseData" :affilitateLink="affilitateLink" /> 
                 </div>
                 <div class="col-lg-8">
                     <div class="detailes">
@@ -56,6 +56,7 @@ export default {
     return {
       courseID: '',
       coursePK: '',
+      affilitateLink: '',
       courseData: ''
     }
   },
@@ -84,6 +85,8 @@ export default {
       handler: async function (params) {
         this.courseID = params.id
         this.coursePK = params.pk
+        // TODO: Get the affilite link if exisist
+        this.affilitateLink = this.$_.get(params,'[link]')
         const res = await this.$apollo.query({
           query: GetCourseByID,
           variables: {

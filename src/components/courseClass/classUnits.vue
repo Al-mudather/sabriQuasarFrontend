@@ -88,11 +88,21 @@
                     <vimeo-player
                         ref="player"
                         class="megx"
-                        @loaded="visible = false"
+                        @loaded="VIMO_PLAYER_IS_LOADED"
                         @play="startlearningUnitTraking"
                         @ended="endlearningUnitTraking"
                         :video-id="vimoID"
+                        :options="options"
                     ></vimeo-player>
+                    <!-- <iframe 
+                        :src="https:\/\/player.vimeo.com/video/vimoID"
+                        width="{video_width}" 
+                        height="{video_height}" 
+                        frameborder="0" 
+                        webkitallowfullscreen 
+                        mozallowfullscreen 
+                        allowfullscreen>
+                    </iframe> -->
 
                     <!-- <vimeo-player
                         ref="player"
@@ -157,7 +167,14 @@ export default {
             counter: 0,
             isOpen: false,
             visible: true,
-            vimoID: 507727334,
+            vimoID: '',
+            options: {
+				portrait: false,
+				pip: false,
+				title: false,
+				sharing: false,
+				byline: false
+			},
             startLearningTrackingID: "",
             courseEnrollment: "",
             hasNextContent: true,
@@ -191,7 +208,7 @@ export default {
 
     watch: {
         currentContent(value) {
-            this.vimoID = 76979871;
+            this.vimoID = JSON.parse(value.modelValue).video;
             this.visible = true;
 
             const currentContentIndex = _.indexOf(this.contentLists, value);
@@ -246,6 +263,15 @@ export default {
 
     methods: {
         ...mapActions("courseManagement", ["setCurrentContentAction"]),
+
+        VIMO_PLAYER_IS_LOADED () {
+            this.visible = false
+            const controls = document.querySelector('#player')
+            console.log('CCCCCCCCCCCCCCCC')
+            console.log(controls)
+            console.log('CCCCCCCCCCCCCCCC')
+            
+        },
         /////////////////////////////////////////////////////////////
         // Start Learning Tracking
         /////////////////////////////////////////////////////////////
@@ -272,13 +298,6 @@ export default {
                         "[data][startLearningUnit][success]"
                     )
                 ) {
-                    // this.$q.notify({
-                    //     color: "success",
-                    //     textColor: "white",
-                    //     position: "top",
-                    //     icon: "cloud_done",
-                    //     message: "بدا الدرس"
-                    // });
                     this.startLearningTrackingID = this.$_.get(
                         startTrackingResult,
                         "[data][startLearningUnit][learning][pk]"
@@ -436,6 +455,11 @@ export default {
 </script>
 
 <style lang="scss">
+.hide-controls {
+    display: none;
+    visibility: hidden;
+    width: 0;
+}
 .q-inner-loading {
     top: 10% !important;
     right: 50% !important;

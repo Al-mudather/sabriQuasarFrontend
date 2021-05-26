@@ -79,17 +79,21 @@ const actions = {
     console.log("Refresh Apollo Client")
 
     return apolloClient.mutate({
-      mutation: RefreshLoginUserWithEmail,
+      mutation: RefreshLoginUserWithEmail, 
       variables: {
         refreshToken: tokenStorage.getRefreshToken(),
       },
     }).then((data) => {
-
       // Result
-      tokenStorage.setToken({
-        token: data.data.refreshToken.token,
-        refresh: data.data.refreshToken.refreshToken
-      })
+      if (data.data.refreshToken.success) {
+        tokenStorage.setToken({
+          token: data.data.refreshToken.token,
+          refresh: data.data.refreshToken.refreshToken
+        })
+
+      } else {
+        return false
+      }
 
       // Notify.create({
       //   type: 'positive',
@@ -97,9 +101,7 @@ const actions = {
       // })
 
     }).catch(e => {
-      console.log('ggggggggggggggggg')
-      console.log(e)
-      console.log('ggggggggggggggggg')
+
     })
 
   },

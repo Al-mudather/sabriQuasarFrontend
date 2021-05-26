@@ -1,3 +1,14 @@
 {
-  "@quasar/qmediaplayer": {}
+  "@quasar/qmediaplayer": {},
+  "@quasar/testing": {
+    "harnesses": [
+      "unit-jest"
+    ]
+  },
+  "@quasar/testing-unit-jest": {
+    "babel": "babelrc",
+    "options": [
+      "scripts"
+    ]
+  }
 }

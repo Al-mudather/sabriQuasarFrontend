@@ -205,9 +205,6 @@ export default {
                 
             } catch (error) {
                 this.visible = false
-                console.log('gggggggggggggggggggggg')
-                console.log(error)
-                console.log('gggggggggggggggggggggg')
             }
         }
     }

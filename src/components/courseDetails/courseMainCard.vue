@@ -108,7 +108,7 @@ export default {
       fab2: true
     };
   },
-  props: ["courseData"],
+  props: ["courseData", "affilitateLink"],
 
   computed: {
     ...mapState("authentication", ["user"]),
@@ -160,10 +160,18 @@ export default {
 
     AddTheCourseToTheBasket() {
 
-      const data = {
+      let data = {
         user: this.user,
         course: this.courseData
-      };
+      }
+
+      //TODO: Add the affilitate link to the course basket
+      if (this.affilitateLink) {
+        data = {
+          ...data,
+          link: this.affilitateLink
+        }
+      }
 
       this.setShoppingCartDataListAction(data);
 

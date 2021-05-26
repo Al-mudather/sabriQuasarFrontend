@@ -19,8 +19,19 @@ export default {
     created() {
         // console.log({router: this.$router})
         // TODO: If There is a token, reLogin the user
-        if (this.token) {
-            this.RE_LOGIN_USER().catch(e => {
+        if (this.token) { 
+            this.RE_LOGIN_USER().then((re) => {
+                if (re === false) {
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: 'لقد انتهت صلاحية دخولك للموقع... الرجاء الدخول مره اخرى لتتمكن من تطوير مهاراتك'
+                    })
+                    this.$router.push({ name: "login" });
+                }
+            }).catch(e => {
               // console.log({ReloginError: e})
               this.$router.push({ name: "login" });
            });

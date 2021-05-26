@@ -71,7 +71,7 @@ export default {
         }
     },
 
-    AddTheCourseToTheBasket (course) {
+    AddTheCourseToTheBasket (){
       const data = {
         user: this.user,
         course: this.course

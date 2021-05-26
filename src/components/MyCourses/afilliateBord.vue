@@ -5,7 +5,6 @@
             <div class="col-lg-4 col-sm-12">
                 <div class="bord">
                     <img class="money" src="~assets/img/money.png" alt="">
-                    {{user}}
                     <div class="all" v-if="!$_.isEmpty($_.get(user,'[affiliateSet][edges]'))">
                         <div class="row">
                             <div class="col-lg-7">
