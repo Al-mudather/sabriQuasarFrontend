@@ -2,7 +2,7 @@
 FROM node:14
 
 # Create workdir app directory
-WORKDIR /dashboard
+WORKDIR /frontend
 
 # Copy all files to the app directory
 COPY . .
@@ -17,4 +17,4 @@ RUN quasar build
 
 EXPOSE 8090
 
-CMD ["quasar", "serve", "-p", "8090", "/dashboard/website"]
+CMD ["quasar", "serve", "-p", "8090", "/frontend/website"]
