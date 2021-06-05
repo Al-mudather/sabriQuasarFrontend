@@ -115,7 +115,14 @@ export default {
             console.log(errorsObj);
             for (const key in errorsObj) {
                 for (const val of errorsObj[key]) {
-                    this.errorMessages.push(val.message);
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: val.message
+                    })
+                    // this.errorMessages.push(val.message);
                 }
             }
         },
