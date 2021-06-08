@@ -8,6 +8,8 @@ WORKDIR /frontend
 COPY . .
 
 # use yarn to install package.json stuff
+RUN npm install subscriptions-transport-ws
+
 RUN npm install
 
 RUN npm install -g @quasar/cli
