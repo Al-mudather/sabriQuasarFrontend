@@ -1,4 +1,5 @@
 <template>
+
     <div class="row unitContent">
         <div class="col-lg-4 col-xs-12">
             <div class="asid">
@@ -67,9 +68,9 @@
                 square
             />
             <div v-else class="vedio">
-                <q-inner-loading :showing="visible">
+                <!-- <q-inner-loading :showing="visible">
                     <q-spinner-gears size="10vh" color="primary" />
-                </q-inner-loading>
+                </q-inner-loading> -->
                 <div
                     class="megx"
                     v-if="!lodash.isEmpty(currentContent)"
@@ -78,12 +79,9 @@
                     <!-- <q-video
                         :ratio="13 / 11"
                         controls = "false"
-                        @play="StartPlayingTheLesson"
-                        :src="
-                            prepareVideoUrl(
-                                JSON.parse(currentContent.modelValue).video
-                            )
-                        "
+                        @play="startlearningUnitTraking"
+                        @ended="endlearningUnitTraking"
+                        :src="viomURL"
                     /> -->
                     <vimeo-player
                         ref="player"
@@ -91,16 +89,22 @@
                         @loaded="VIMO_PLAYER_IS_LOADED"
                         @play="startlearningUnitTraking"
                         @ended="endlearningUnitTraking"
-                        :video-id="vimoID"
+                        :video-url="viomURL"
+                        :video-id="null"
                         :options="options"
                     ></vimeo-player>
+
+
                     <!-- <iframe 
-                        :src="https:\/\/player.vimeo.com/video/vimoID"
-                        width="{video_width}" 
-                        height="{video_height}" 
-                        frameborder="0" 
+                        :src="viomURL"
+                        width="100%" 
+                        height="100%" 
+                        frameborder="0"
+                        @loaded="VIMO_PLAYER_IS_LOADED"
+                        @play="startlearningUnitTraking"
+                        @ended="endlearningUnitTraking"
                         webkitallowfullscreen 
-                        mozallowfullscreen 
+                        mozallowfullscreen
                         allowfullscreen>
                     </iframe> -->
 
@@ -149,6 +153,7 @@
 </template>
 
 <script>
+
 import { StartLearningUnit } from "src/queries/learning_management/mutation/StartLearningUnit";
 import { EndLearningUnit } from "src/queries/learning_management/mutation/EndLearningUnit";
 import { GetAllLearningProgressByCourse } from "src/queries/learning_management/query/GetAllLearningProgressByCourse";
@@ -168,6 +173,8 @@ export default {
             isOpen: false,
             visible: true,
             vimoID: '',
+            viomURL: '',
+            player: '',
             options: {
 				portrait: false,
 				pip: false,
@@ -209,6 +216,10 @@ export default {
     watch: {
         currentContent(value) {
             this.vimoID = JSON.parse(value.modelValue).video;
+
+            this.viomURL = 'https://player.vimeo.com/video/' +  String(this.vimoID)
+            // ?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media
+
             this.visible = true;
 
             const currentContentIndex = _.indexOf(this.contentLists, value);
@@ -328,6 +339,9 @@ export default {
         // End Learning Tracking
         /////////////////////////////////////////////////////////////
         async endlearningUnitTraking() {
+            console.log('kkkkkkkkkkkkkkkkkkkkk')
+            console.log('NNNNNNNNNNNNNNNNNNNNNNN')
+            console.log('kkkkkkkkkkkkkkkkkkkkk')
             if (this.startLearningTrackingID) {
                 // TODO: 1) Fill the end learning tracker data
                 const progressData = {
@@ -455,6 +469,7 @@ export default {
 </script>
 
 <style lang="scss">
+
 .hide-controls {
     display: none;
     visibility: hidden;

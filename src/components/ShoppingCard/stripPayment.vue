@@ -78,7 +78,14 @@ export default {
                 // console.log(errorsObj[key])
                 for (const val of errorsObj[key]) {
                     console.log(val)
-                    this.errorMessages.push(val.message || val.PaymentUrl);
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: val.message
+                    })
+                    // this.errorMessages.push(val.message || val.PaymentUrl);
                 }
             }
         },
@@ -107,6 +114,9 @@ export default {
                 
             } catch (error) {
                 this.visible = false
+                // console.log('kkkkkkkkkkkkkkkkkkkkkkkkkk')
+                // console.log(error.message)
+                // console.log('kkkkkkkkkkkkkkkkkkkkkkkkkk')
                 if (error.message === 'this.$Stripe is not a function') {
                     this.$q.notify({
                         type: 'warning',
@@ -130,19 +140,21 @@ export default {
                     courseIds: courseIds
                 }
             });
-
             const dataObj = result.data.createNewOrderWithBulkOrderDetails;
+            console.log('kkkkkkkkkkkkkkkkkkkkkkkkkk')
+            console.log(dataObj)
+            console.log('kkkkkkkkkkkkkkkkkkkkkkkkkk')
 
             if (this.$_.get(dataObj,'[errors]')) {
                 this.visible = false
-                // this.errorHandler(dataObj.errors)
-                this.$q.notify({
-                    type: 'warning',
-                    progress: true,
-                    multiLine: true,
-                    position: 'top',
-                    message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
-                })
+                this.errorHandler(dataObj.errors)
+                // this.$q.notify({
+                //     type: 'warning',
+                //     progress: true,
+                //     multiLine: true,
+                //     position: 'top',
+                //     message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
+                // })
 
             }
 
