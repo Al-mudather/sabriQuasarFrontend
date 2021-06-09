@@ -6,7 +6,7 @@
                 <div class="titel">
                     <img src="~assets/img/tit2.png" alt="" />
                     <h3>{{$t('المحتــوى')}}</h3>
-                    <div class="butt">
+                    <div class="butt" v-if="false">
                         <img src="~assets/img/visibility.png" alt="" />
                         <img src="~assets/img/full screen.png" alt="" />
                     </div>
@@ -79,21 +79,59 @@
                     <!-- <q-video
                         :ratio="13 / 11"
                         controls = "false"
-                        @play="startlearningUnitTraking"
-                        @ended="endlearningUnitTraking"
+                        id="video"
+                        @onPlay="START_LEARNING_UNIT_TRAKING"
+                        @ended="END_LEARNING_UNIT_TRAKING"
                         :src="viomURL"
                     /> -->
-                    <vimeo-player
+
+                    <video-embed :src="viomURL"></video-embed>
+                    <!-- <video
+                        id="my-video"
+                        class="video-js"
+                        controls
+                        preload="auto"
+                        width="640"
+                        height="264"
+                        poster="MY_VIDEO_POSTER.jpg"
+                        :data-setup='{ "techOrder": ["vimeo"], "sources": [{ "type": "video/vimeo", "src": viomURL}], "vimeo": { "color": "#fbc51b"} }'
+                    >
+                    </video> -->
+                    <!-- <video-player ref="videoPlayer"
+                        class="vjs-custom-skin"
+                        :options="playerOptions"
+                        @play="START_LEARNING_UNIT_TRAKING"
+                        @ready="END_LEARNING_UNIT_TRAKING"
+                    >
+                    </video-player> -->
+                    <!-- <video
+                        id="my-video"
+                        class="video-js"
+                        controls
+                        preload="auto"
+                        width="640"
+                        height="264"
+                        poster="MY_VIDEO_POSTER.jpg"
+                        data-setup="{}"
+                    >
+                        <source :src="viomURL" type="video/vimeo" />
+                        <p class="vjs-no-js">
+                            To view this video please enable JavaScript.
+                        </p>
+                    </video> -->
+                    <!-- <div id="made-in-ny" :data-vimeo-url="GET_VIMO_VIDEO_URL" class="megx"></div> -->
+                    <!-- <iframe :src="GET_VIMO_VIDEO_URL"  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe> -->
+                    <!-- <vimeo-player
                         ref="player"
                         class="megx"
                         @loaded="VIMO_PLAYER_IS_LOADED"
-                        @play="startlearningUnitTraking"
-                        @ended="endlearningUnitTraking"
-                        :video-url="viomURL"
+                        @play="START_LEARNING_UNIT_TRAKING"
+                        @ended="END_LEARNING_UNIT_TRAKING"
+                        @playbackratechange="DATA_CHANGED"
+                        :video-url="GET_VIMO_VIDEO_URL"
                         :video-id="null"
                         :options="options"
-                    ></vimeo-player>
-
+                    ></vimeo-player> -->
 
                     <!-- <iframe 
                         :src="viomURL"
@@ -101,8 +139,8 @@
                         height="100%" 
                         frameborder="0"
                         @loaded="VIMO_PLAYER_IS_LOADED"
-                        @play="startlearningUnitTraking"
-                        @ended="endlearningUnitTraking"
+                        @play="START_LEARNING_UNIT_TRAKING"
+                        @ended="END_LEARNING_UNIT_TRAKING"
                         webkitallowfullscreen 
                         mozallowfullscreen
                         allowfullscreen>
@@ -124,14 +162,14 @@
                     <img src="~assets/img/pexels.png" alt="" />
                     <img
                         class="play"
-                        @click="startlearningUnitTraking"
+                        @click="START_LEARNING_UNIT_TRAKING"
                         src="~assets/img/player.png"
                         alt=""
                     />
                 </div>
                 <div class="arrow">
                     <div
-                        @click="GoToThePrevLesson"
+                        @click="GO_TO_THE_PREVIOUS_LESSON"
                         :disabled="!hasPrevContent"
                         class="next"
                     >
@@ -139,7 +177,7 @@
                         <h3>{{$t('الدرس السابق')}}</h3>
                     </div>
                     <div
-                        @click="GoToTheNexLesson"
+                        @click="GOT_TO_THE_NEXT_LESSON"
                         :disabled="!hasNextContent"
                         class="next"
                     >
@@ -166,6 +204,7 @@ import { GetAllCourseUnitsByCourseID } from "src/queries/course_management/query
 import { mapState, mapActions } from "vuex";
 import _ from "lodash";
 
+
 export default {
     data() {
         return {
@@ -174,7 +213,7 @@ export default {
             visible: true,
             vimoID: '',
             viomURL: '',
-            player: '',
+            VideoPlayer: '',
             options: {
 				portrait: false,
 				pip: false,
@@ -182,6 +221,14 @@ export default {
 				sharing: false,
 				byline: false
 			},
+            playerOptions: {
+                autoplay: true,
+                controls: true,
+                controlBar: {
+                    timeDivider: false,
+                    durationDisplay: false
+                }
+            },
             startLearningTrackingID: "",
             courseEnrollment: "",
             hasNextContent: true,
@@ -196,7 +243,7 @@ export default {
     components: {
         classContentItem,
         skeletonList,
-        contentHeader
+        contentHeader        
     },
 
     computed: {
@@ -205,12 +252,21 @@ export default {
             "contentLists",
             "currentContent"
         ]),
-        ...mapState("learningProgress", ["enrollmentId"])
+        ...mapState("learningProgress", ["enrollmentId"]),
+        GET_VIMO_VIDEO_URL () {
+            console.log('uuuuuuuuuuuuuuuuuuu')
+            console.log(this.viomURL)
+            console.log('uuuuuuuuuuuuuuuuuuu')
+            return this.viomURL
+        },
+        // player () {
+        //     return this.$refs.videoPlayer.player
+        // }
     },
 
     beforeDestroy() {
         // TODO: If the learning tracker is started, end it
-        this.endlearningUnitTraking();
+        this.END_LEARNING_UNIT_TRAKING();
     },
 
     watch: {
@@ -219,7 +275,6 @@ export default {
 
             this.viomURL = 'https://player.vimeo.com/video/' +  String(this.vimoID)
             // ?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media
-
             this.visible = true;
 
             const currentContentIndex = _.indexOf(this.contentLists, value);
@@ -238,7 +293,7 @@ export default {
             }
 
             // TODO: If the learning tracker is started, end it
-            this.endlearningUnitTraking();
+            this.END_LEARNING_UNIT_TRAKING();
         },
 
         contentLists(val) {
@@ -268,25 +323,53 @@ export default {
             // TODO: When the page is updated, select the first content and activate it
             const infoes = document.querySelectorAll(".info");
             infoes[0].classList.add("active");
+
             this.counter += 10;
         }
+    },
+
+    mounted () {
+        const src = 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8'
+        console.log(this.viomURL)
+        // this.playVideo(src)
     },
 
     methods: {
         ...mapActions("courseManagement", ["setCurrentContentAction"]),
 
+        playVideo: function (source) {
+            const video = {
+                withCredentials: false,
+                type: 'application/x-mpegurl',
+                src: source
+            }
+            // this.player.reset() // in IE11 (mode IE10) direct usage of src() when <src> is already set, generated errors,
+            // this.player.src(video)
+            // this.player.load()
+            // this.player.play()
+        },
+
         VIMO_PLAYER_IS_LOADED () {
             this.visible = false
-            const controls = document.querySelector('#player')
-            console.log('CCCCCCCCCCCCCCCC')
-            console.log(controls)
-            console.log('CCCCCCCCCCCCCCCC')
+            // const controls = document.querySelector('#player')
+            // console.log('CCCCCCCCCCCCCCCC')
+            // console.log(controls)
+            // console.log('CCCCCCCCCCCCCCCC')
             
+        },
+
+        DATA_CHANGED () {
+            console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
+            console.log('changed')
+            console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
         },
         /////////////////////////////////////////////////////////////
         // Start Learning Tracking
         /////////////////////////////////////////////////////////////
-        async startlearningUnitTraking() {
+        async START_LEARNING_UNIT_TRAKING() {
+            console.log('ggggggggggggggggggggg')
+            console.log('Starting')
+            console.log('ggggggggggggggggggggg')
             if (!this.startLearningTrackingID) {
                 // TODO: 1) Fill the progress data
                 const progressData = {
@@ -338,9 +421,9 @@ export default {
         /////////////////////////////////////////////////////////////
         // End Learning Tracking
         /////////////////////////////////////////////////////////////
-        async endlearningUnitTraking() {
+        async END_LEARNING_UNIT_TRAKING() {
             console.log('kkkkkkkkkkkkkkkkkkkkk')
-            console.log('NNNNNNNNNNNNNNNNNNNNNNN')
+            console.log('Ending')
             console.log('kkkkkkkkkkkkkkkkkkkkk')
             if (this.startLearningTrackingID) {
                 // TODO: 1) Fill the end learning tracker data
@@ -408,9 +491,10 @@ export default {
         },
 
         // TODO: Go to the next lesson
-        GoToTheNexLesson() {
+        GOT_TO_THE_NEXT_LESSON() {
+            // this.player.setVideoUrl(this.viomURL)
             // TODO: End the learning tracker vido
-            this.endlearningUnitTraking();
+            this.END_LEARNING_UNIT_TRAKING();
             // TODO: Go to next lesson
             const currentContentIndex = _.indexOf(
                 this.contentLists,
@@ -434,9 +518,9 @@ export default {
         },
 
         // TODO: Go to the previouse lesson
-        GoToThePrevLesson() {
+        GO_TO_THE_PREVIOUS_LESSON() {
             // TODO: End the learning tracker vido
-            this.endlearningUnitTraking();
+            this.END_LEARNING_UNIT_TRAKING();
             // TODO: Got to previouse lesson
             const currentContentIndex = _.indexOf(
                 this.contentLists,

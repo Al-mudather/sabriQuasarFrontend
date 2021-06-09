@@ -284,7 +284,7 @@ export default {
     opacity: 0 !important;
 }
 .q-tab--active {
-    background-color: 2px solid #FCD462;
+    border-bottom: 2px solid #FCD462;
 }
 .navv {
   background-color: #fcfcfc;
@@ -654,6 +654,27 @@ export default {
             border-radius: 17px;
             margin: 0 -16px 0 4px;
           }
+        }
+      }
+      .notice{
+        display: block;
+        margin: 20px 0 20px 0;
+        text-align: center;
+        .imageees{
+            img{
+                width: auto;
+            }
+            h3{
+                font-size: 17px;
+                font-family: 'cairoR';
+                width: 433px;
+                margin: 21px auto;
+                line-height: 1.7;
+                a{
+                    color: #fcc74c;
+                    text-decoration: none;
+                }
+            }
         }
       }
       /* start Question */

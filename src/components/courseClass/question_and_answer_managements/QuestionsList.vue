@@ -4,13 +4,15 @@
       <div class="send">
         <form @submit="createNewQuestion">
           <input
+            class="input"
             type="text"
             v-model="question"
             style="outline: none"
             :placeholder="$t('أسئل لتجد الاجابة')"
           />
-          <button type="submit">
-            <img src="~assets/img/send.png" />
+          <button type="submit" class="m_btn">
+            <img class="m_btn__visible" src="~assets/img/send.png" />
+            <span class="m_btn__invisible">Ask</span>
           </button>
         </form>
       </div>
@@ -73,4 +75,78 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss">
+.m_btn {
+    min-height: 2rem;
+    width: 3rem;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+
+    & > * {
+        display: inline-block;
+        transition: all .4s;
+    }
+
+    // &__visible {
+    //     padding: 2rem 7.5rem;
+    // }
+
+    &__invisible {
+        position: absolute;
+        padding-left: 0.3rem;
+        padding-top: 0.3rem;
+        padding-right: 0.3rem;
+        width: 100%;
+        left: 0;
+        top: -100%;
+    }
+
+    &:hover &__visible {
+        transform: translateY(100%);
+    }
+
+    &:hover &__invisible {
+        top: 0;
+        background-color: $color-primary-dark;
+        color: $color-grey-light-2;
+    }
+
+    &:focus {
+        outline: none;
+        animation: pulsate 1s infinite;
+    }
+}
+
+.input {
+    font-size: 1.5rem;
+    font-family: inherit;
+    color: inherit;
+    padding: 1.5rem 2rem;
+    border-radius: 2px;
+    background-color: rgba($color-white, .5);
+    // border: none;
+    border-bottom: 3px solid transparent;
+    width: 90%;
+    display: block;
+    transition: all .3s;
+
+    // @include respond(tab-port) {
+    //     width: 100%;
+    // }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 1rem 2rem rgba($color-black, .1);
+        border-bottom: 3px solid $color-primary;
+    }
+
+    &:focus:invalid {
+        border-bottom: 3px solid $color-secondary-dark;
+    }
+
+    &::-webkit-input-placeholder {
+        color: $color-grey-dark-2;
+    }
+}
+</style>

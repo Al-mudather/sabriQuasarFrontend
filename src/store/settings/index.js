@@ -1,12 +1,19 @@
 import { LocalStorage } from 'quasar'
 
+
 const state = {
   isEnglish:  LocalStorage.getItem('isEnglish')|| false,
   currency:  'USD',
-  openMenu: false
+  openMenu: false,
+  activeNav: LocalStorage.getItem('activeNav')|| ''
 }
 
 const mutations = {
+
+  updateActiveNav (state, value) {
+    LocalStorage.set('activeNav', JSON.stringify(value))
+    state.activeNav = value
+  },
 
   updateIsEnglish (state, value) {
     LocalStorage.set('isEnglish', value)
@@ -23,6 +30,10 @@ const mutations = {
 }
 
 const actions = {
+
+  setActiveNavAction ({ commit }, value) {
+    commit('updateActiveNav', value)
+  },
 
   setCurrencyAction ({ commit }, value) {
     commit('updateCurrency', value)

@@ -30,6 +30,7 @@
             </svg>
             <!-- <img src="~assets/img/user-13.jpg" alt="" /> -->
             <img :src="'http://localhost:8000' + '/media/' + image" alt="" />
+            <!-- <img :src="CALCULATE_IMAGE_URL" alt="" /> -->
         </div>
         <h3>
             {{ firstName }}
@@ -44,7 +45,7 @@
             data-type="more"
             @click="togelMoreOrLessData"
         >
-            <h3> {{$t('المزيــد')}}<img src="~assets/img/moree.png" alt="" /></h3>
+            <h3> {{ $t('المزيــد') }}<img src="~assets/img/moree.png" alt="" /></h3>
         </a>
     </div>
 </template>
@@ -56,6 +57,11 @@ export default {
         return {};
     },
     props: ["firstName", "lastName", "qualification", "image"],
+    computed: {
+        CALCULATE_IMAGE_URL () {
+            return location.host + '/media/' + this.image
+        }
+    },
     methods: {
         togelMoreOrLessData() {
             const btn = this.$refs.togleBtn;
@@ -63,11 +69,11 @@ export default {
             if (btnType === "more") {
                 btn.previousSibling.classList.add("show_more_data");
                 btn.attributes["data-type"].nodeValue = "less";
-                btn.firstChild.firstChild.textContent = $t('إخفاء');
+                btn.firstChild.firstChild.textContent = this.$t('إخفاء');
             } else if (btnType === "less") {
                 btn.previousSibling.classList.remove("show_more_data");
                 btn.attributes["data-type"].nodeValue = "more";
-                btn.firstChild.firstChild.textContent = $t('المزيــد');
+                btn.firstChild.firstChild.textContent = this.$t('المزيــد');
             }
         }
     }
@@ -87,11 +93,12 @@ export default {
     height: 54px;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: all 8s ;
+    transition: all 0.5s ;
 
 }
 .show_more_data {
-    height: 40vh !important;
+    display: block;
+    height: 100% !important;
 }
 
 </style>

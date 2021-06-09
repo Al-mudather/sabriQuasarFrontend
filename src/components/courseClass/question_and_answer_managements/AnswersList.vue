@@ -17,13 +17,15 @@
       <div class="send">
         <form @submit="createNewReplay">
           <input
+          class="input"
             type="text"
             v-model="answer"
             style="outline: none"
             :placeholder="$t('ما هي إيجابتك')"
           />
-          <button type="submit">
-            <img src="~assets/img/send.png" />
+          <button type="submit" class="m_btn">
+            <img class="m_btn__visible" src="~assets/img/send.png" />
+            <span class="m_btn__invisible">Ans</span>
           </button>
         </form>
       </div>

@@ -11,7 +11,7 @@
 // It's highly recommended to change the default colors
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
-
+ 
 $primary   : #1976D2;
 $secondary : #26A69A;
 $accent    : #9C27B0;
@@ -29,6 +29,26 @@ $secondColor:#0c7ad8;
 $textColor:#7B7B7B;
 $yalloColor:#FCC74C;
 
+// From Jonas css course
+$color-primary: #55c57a;
+$color-primary-light: #7ed56f;
+$color-primary-dark: #28b485;
+
+$color-secondary-light: #ffb900;
+$color-secondary-dark: #ff7730;
+
+$color-tertiary-light: #2998ff;
+$color-tertiary-dark: #5643fa;
+
+$color-grey-light-1: #f7f7f7;
+$color-grey-light-2: #eee;
+
+$color-grey-dark: #777;
+$color-grey-dark-2: #999;
+$color-grey-dark-3: #333;
+
+$color-white: #fff;
+$color-black: #000;
 
 //buttons
 $mainButtonSize:18px;

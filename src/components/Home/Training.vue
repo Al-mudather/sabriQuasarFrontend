@@ -45,20 +45,20 @@
                     <div class="rate" v-if="courses.edgeCount > 0">
                         <div class="container">
                             <div class="cn fadeIn row justify-center">
-                                <div v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-5 col-sm-5 col-xs-12">
-                                    <transition
+                                <q-intersection transition="scale" v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-5 col-sm-5 col-xs-12">
+                                    <!-- <transition
                                         appear
                                         enter-active-class="animated fadeIn"
                                         leave-active-class="animated fadeOut"
-                                    >
+                                    > -->
                                         <course-card
                                             :course="course.node"
                                             :name="course.node.title"
                                             instructor="د.صبري أبوقرون"
                                             :price="course.node.courseFee"
                                         />
-                                    </transition>
-                                </div>
+                                    <!-- </transition> -->
+                                </q-intersection>
                             </div>
                             <div class="butDown">
                                 <svg

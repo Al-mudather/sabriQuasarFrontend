@@ -41,27 +41,27 @@
                 </div>
             </div>
             <!--satrt Link Button-->
-            <div class="butgro" id="butgro" style="margin-top: 1rem;">
-                <div class="but" @click="GO_TO_HOME_PAGE">
+            <div class="butgro side-nav" id="butgro" style="margin-top: 1rem;">
+                <a class="but side-nav__item side-nav__item--active" data-link="HOME" @click="GO_TO_HOME_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الرئيسية')}}</h3>
-                </div>
-                <div class="but" @click="GOT_TO_COURSES_PAGE">
+                </a>
+                <a class="but side-nav__item" data-link="COURSES" @click="GOT_TO_COURSES_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الــدورات')}}</h3>
-                </div>
-                <div class="but" v-if="token" @click="GO_TO_MY_COURSES_PAGE">
+                </a>
+                <a class="but side-nav__item" data-link="BORD" v-if="token" @click="GO_TO_MY_COURSES_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('لوحتي التعليمية')}}</h3>
-                </div>
-                <div class="but" v-if="token" @click="GO_TO_MY_NOTIFICATIONS_PAGE">
+                </a>
+                <a class="but side-nav__item" data-link="NOVIFICATION" v-if="token" @click="GO_TO_MY_NOTIFICATIONS_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الإشعارت')}}</h3>
-                </div>
-                <div class="but" v-if="token" @click="GO_TO_MY_PROFILE_PAGE">
+                </a>
+                <a class="but side-nav__item" data-link="PROFILE" v-if="token" @click="GO_TO_MY_PROFILE_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الملف الشخصي')}}</h3>
-                </div>
+                </a>
             </div>
             <div class="exit" v-if="token" @click="logTheUserOut" style="cursor: pointer">
                 <div class="mag">
@@ -74,7 +74,9 @@
 </template>
 
 <script>
+
 import { mapActions, mapGetters, mapState } from "vuex";
+import { LocalStorage } from 'quasar'
 
 export default {
     name: "Menu",
@@ -98,6 +100,36 @@ export default {
     },
 
     mounted () {
+        let nav_items = this.$jquery(".side-nav__item");
+        let link_attr = JSON.parse(LocalStorage.getItem('activeNav')) || ''
+        
+        if (link_attr) {
+            for (let nav of nav_items) {
+                nav = this.$jquery(nav)
+                nav.removeClass('side-nav__item--active')
+            }
+            let active_link = this.$jquery(`[data-link="${link_attr}"]`)
+            active_link.addClass('side-nav__item--active')
+
+        }
+
+        nav_items.map(i => {
+            let nav = this.$jquery(nav_items[i])
+            nav.on('click', () => {
+
+                for (let n of nav_items) {
+                    n = this.$jquery(n)
+                    n.removeClass('side-nav__item--active')
+                }
+
+                nav.addClass('side-nav__item--active')
+            })
+
+        })
+        
+        for (let nav of nav_items) {
+        }
+
         if (!this.$_.isEmpty(this.token)) {
             this.$jquery('#butgro').css({
                 'margin-top': '5rem'
@@ -153,7 +185,16 @@ export default {
 
     methods: {
         ...mapActions('authentication', ['logOutAction']),
-        ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction']),
+        ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction', 'setActiveNavAction']),
+
+        MAKE_ACTIVE (e) {
+            let active_nav = this.$jquery(e.target).parent().closest('a')
+            if (active_nav.length == 0) {
+                active_nav = this.$jquery(e.target).closest('a')
+            }
+            //TODO: Save the active link so when render it will be make active again
+            this.setActiveNavAction(active_nav.attr('data-link'))
+        },
 
         changeMenuState () {
             this.setOpenMenuAction(false)
@@ -163,23 +204,28 @@ export default {
             this.logOutAction();
         },
 
-        GO_TO_MY_NOTIFICATIONS_PAGE() {
+        GO_TO_MY_NOTIFICATIONS_PAGE(e) {
+            this.MAKE_ACTIVE(e)
             this.$router.push({ name: "notification" });
         },
 
-        GO_TO_MY_PROFILE_PAGE() {
+        GO_TO_MY_PROFILE_PAGE(e) {
+            this.MAKE_ACTIVE(e)
             this.$router.push({ name: "user-profile" });
         },
 
-        GO_TO_MY_COURSES_PAGE() {
+        GO_TO_MY_COURSES_PAGE(e) {
+            this.MAKE_ACTIVE(e)
             this.$router.push({ name: "my-courses" });
         },
 
-        GOT_TO_COURSES_PAGE() {
+        GOT_TO_COURSES_PAGE(e) {
+            this.MAKE_ACTIVE(e)
             this.$router.push({ name: "courses" });
         },
 
-        GO_TO_HOME_PAGE() {
+        GO_TO_HOME_PAGE(e) {
+            this.MAKE_ACTIVE(e)
             this.$router.push({ name: "Home" });
         },
 
@@ -196,6 +242,81 @@ export default {
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
+////////////////////////////////////
+///Sid Navigation
+.side-nav {
+    list-style: none;
+    font-size: 1.4rem;
+    // font-weight: 300;
+    margin-top: 3.5rem;
+    display: flex;
+    flex-direction: column;
+
+    &__item {
+        position: relative;
+        
+        & > h3 {
+            transition: transform 0.2s,
+                    width 0.4s cubic-bezier(1,0,0,1) 0.2s;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 0.5rem;
+        }
+    }
+ 
+    &__item::before {
+        content: "";
+        position: absolute;
+        bottom: 50%;
+        left: 0;
+        width: 3px;
+        height: 10%;
+        background-color: $color-secondary-light;
+        transform: scaleY(0);
+        transition: transform 0.2s,
+                    width 0.4s cubic-bezier(1,0,0,1) 0.2s,
+                    background-color 0.1s
+                    ; 
+    }
+    
+    &__item:hover::before ,
+    &__item--active::before {
+        transform: scaleY(1);
+        width: 15%;
+    }
+
+
+    &__item:active::before {
+        background-color: $color-secondary-light;
+    }
+
+    &__item:hover > h3 {
+        transform: translateX(-1rem);
+    }
+
+    &__link:link,
+    &__link:visited {
+        text-decoration: none;
+        color: $color-grey-light-1;
+        background-color: $color-secondary-light;
+        text-transform: uppercase;
+        display: block;
+        padding:  1.5rem 3rem;
+        position: relative;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+    }
+
+    &__icon {
+        width: 1.75rem;
+        height: 1.75rem;
+        margin-right: 2rem;
+        fill: currentColor; // The color of the current element or the parent
+    }
+}
+
 /*--- START menu ---*/
 .menuu{
     position: fixed;
