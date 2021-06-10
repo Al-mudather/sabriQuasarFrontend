@@ -31,7 +31,7 @@
                         </g>
                     </svg>
                     <h3>{{dialogName}}</h3>
-                    <img @click="goBackToThePreviousePage"  src="~assets/img/bacck.png" alt="">
+                    <img class="hvr-float-shadow" style="cursor: pointer;" @click="goBackToThePreviousePage"  src="~assets/img/bacck.png" alt="">
                 </div>
 
                 <slot/>

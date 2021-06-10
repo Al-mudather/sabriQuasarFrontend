@@ -52,6 +52,8 @@
                                         leave-active-class="animated fadeOut"
                                     > -->
                                         <course-card
+                                            class="hvr-bounce-in"
+                                            style="cursor: pointer"
                                             :course="course.node"
                                             :name="course.node.title"
                                             instructor="د.صبري أبوقرون"

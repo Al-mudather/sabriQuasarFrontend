@@ -44,4 +44,7 @@ export default {
 }
 </script>
 <style lang="scss">
+.cart > img {
+  transform: translate(-50%, -40%) !important;
+}
 </style>

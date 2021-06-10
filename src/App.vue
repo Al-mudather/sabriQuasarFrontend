@@ -5,6 +5,7 @@
 </template>
 <script>
 import { mapActions, mapState } from "vuex";
+import { LocalStorage } from 'quasar'
 import {WOW} from 'wowjs'
 import 'animate.css'
 
@@ -18,6 +19,8 @@ export default {
     },
     created() {
         // console.log({router: this.$router})
+        //TODO: Empty the nav bar 
+        LocalStorage.set('activeNav', '')
         // TODO: If There is a token, reLogin the user
         if (this.token) { 
             this.RE_LOGIN_USER().then((re) => {

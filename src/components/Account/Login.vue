@@ -5,8 +5,8 @@
     -->
         <div class="login">
             <div class="logBy">
-                <FacebookAuthentication />
-                <GoogleAuthentication />
+                <FacebookAuthentication class="hvr-pulse-grow"/>
+                <GoogleAuthentication class="hvr-pulse-grow"/>
             </div>
             <form>
                 <div class="row">
@@ -29,6 +29,7 @@
                         <div class="inp">
                             <img src="~assets/img/gmail.png" alt="" />
                             <input
+                                class="input"
                                 v-model="email"
                                 type="email"
                                 :placeholder="$t('الإيميل')"
@@ -37,6 +38,7 @@
                         <div class="inp">
                             <img src="~assets/img/password.png" alt="" />
                             <input
+                                class="input"
                                 v-model="password"
                                 type="password"
                                 :placeholder="$t('كلمة المرور')"
@@ -46,14 +48,14 @@
                             <h3>
                                 {{$t('هل نسيت كلمة')}}
                                 <a @click="goToPasswordResetPage"
-                                    ><span>{{$t('السر ؟')}}</span></a
+                                    ><span class="hvr-float-shadow">{{$t('السر ؟')}}</span></a
                                 >
                             </h3>
                         </div>
                     </div>
                 </div>
                 <div class="next" style="cursor: pointer">
-                    <a @click="LoginUser">
+                    <a class="action_btn" @click="LoginUser">
                         <svg
                             class="nexx"
                             xmlns="http://www.w3.org/2000/svg"
@@ -111,7 +113,7 @@
                     <span>{{$t('أو')}}</span>
                 </div>
                 <a @click="goToSignUpPage" style="cursor: pointer">
-                    <h3>{{$t('إنشـاء حســاب')}}</h3>
+                    <h3 class="hvr-float-shadow">{{$t('إنشـاء حســاب')}}</h3>
                 </a>
             </div>
             <q-inner-loading :showing="visible">
@@ -215,6 +217,51 @@ export default {
 // @import 'src/assets/css/sass/helpers/_variabels.scss';
 // @import 'src/assets/css/sass/helpers/_mixins.scss';
 // @import 'src/assets/css/account.scss';
+
+.action_btn {
+    
+    & > svg > g > path {
+        transition: all .3s;
+    }
+    
+    &:hover > svg > g > path{
+        fill: $color-primary;
+    }
+
+}
+
+.input {
+    font-size: 1.5rem;
+    font-family: inherit;
+    color: inherit;
+    padding: 1.5rem 2rem;
+    border-radius: 2px;
+    background-color: rgba($color-white, .5);
+    // border: none;
+    border-bottom: 3px solid transparent;
+    width: 90%;
+    display: block;
+    transition: all .3s;
+
+    // @include respond(tab-port) {
+    //     width: 100%;
+    // }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 1rem 2rem rgba($color-black, .1);
+        border-bottom: 3px solid $color-primary !important;
+    }
+
+    &:focus:invalid {
+        border-bottom: 3px solid $color-secondary-dark !important;
+    }
+
+    &::-webkit-input-placeholder {
+        color: $color-grey-dark-2;
+    }
+}
+
 .social {
     position: relative;
     z-index: 100;

@@ -14,7 +14,7 @@
             </div>
             <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">{{$t('التفاصيل')}}</button>
             <div class="cart" @click="AddTheCourseToTheBasket" style="cursor: pointer">
-                <svg class="sala" xmlns="http://www.w3.org/2000/svg" width="36.023" height="33.215" viewBox="0 0 36.023 33.215">
+                <!-- <svg class="sala" xmlns="http://www.w3.org/2000/svg" width="36.023" height="33.215" viewBox="0 0 36.023 33.215">
                     <g id="Group_282" data-name="Group 282" transform="translate(-24.557 -104.864)">
                         <path id="Path_406" data-name="Path 406" d="M93.284-112.494a14.141,14.141,0,0,1,1.508,1.164.4.4,0,0,0,.565-.034.4.4,0,0,0-.034-.565,14.92,14.92,0,0,0-1.594-1.23.4.4,0,0,0-.555.11A.4.4,0,0,0,93.284-112.494Z" transform="translate(-39.767 219.317)" fill="#fafafa" fill-rule="evenodd"/>
                         <path id="Path_407" data-name="Path 407" d="M98.226-108.142a14.025,14.025,0,0,1,3.462,9.243,14.045,14.045,0,0,1-.884,4.92,14.035,14.035,0,0,1-.924,1.985.4.4,0,0,0,.152.545.4.4,0,0,0,.545-.152,14.83,14.83,0,0,0,.977-2.1,14.84,14.84,0,0,0,.935-5.2,14.823,14.823,0,0,0-3.658-9.769.4.4,0,0,0-.564-.038A.4.4,0,0,0,98.226-108.142Z" transform="translate(-41.907 217.433)" fill="#fafafa" fill-rule="evenodd"/>
@@ -23,8 +23,8 @@
                         <path id="Path_410" data-name="Path 410" d="M94.15-62.188a1.57,1.57,0,0,0-1.57-1.57h0a1.57,1.57,0,0,0-1.57,1.57v.461a1.57,1.57,0,0,0,1.57,1.57h0a1.57,1.57,0,0,0,1.57-1.57Z" transform="translate(-38.873 198.236)" fill="#fff" fill-rule="evenodd"/>
                         <path id="Path_412" data-name="Path 412" d="M43.352-104.159l2.606,1.278a1.224,1.224,0,0,1,.671,1.285,20.857,20.857,0,0,0,.092,8.157.719.719,0,0,0,.89.49.719.719,0,0,0,.49-.89,19.211,19.211,0,0,1-.053-7.534,2.664,2.664,0,0,0-1.458-2.8l-2.607-1.277a.718.718,0,0,0-.961.329A.719.719,0,0,0,43.352-104.159Z" transform="translate(-18.392 216.034)" fill="#fff" fill-rule="evenodd"/>
                     </g>
-                    </svg>
-                    <img src="~assets/img/add.png" alt="">
+                    </svg> -->
+                    <img src="~assets/img/addCou.png" alt="">
             </div>
         </div>
         <div class="name">

@@ -7,8 +7,8 @@
         -->
         <div class="signup">
             <div class="logBy">
-                <FacebookAuthentication />
-                <GoogleAuthentication />
+                <FacebookAuthentication class="hvr-pulse-grow" />
+                <GoogleAuthentication class="hvr-pulse-grow" />
             </div>
             <form>
                 <div class="row">
@@ -29,8 +29,9 @@
                             </ul>
                         </div>
                         <div class="inp">
-                            <img src="~assets/img/gmail.png" alt="" />
+                            <!-- <img src="~assets/img/gmail.png" alt="" /> -->
                             <input
+                                class="input"
                                 v-model="fullName"
                                 type="text"
                                 :placeholder="$t('الاسم الحقيقي')"
@@ -39,6 +40,7 @@
                         <div class="inp">
                             <img src="~assets/img/gmail.png" alt="" />
                             <input
+                                class="input"
                                 v-model="email"
                                 type="email"
                                 :placeholder="$t('الإيميل')"
@@ -47,6 +49,7 @@
                         <div class="inp">
                             <img src="~assets/img/password.png" alt="" />
                             <input
+                                class="input"
                                 v-model="password1"
                                 type="password"
                                 :placeholder="$t('كلمة المرور')"
@@ -60,6 +63,7 @@
                         <div class="inp">
                             <img src="~assets/img/password.png" alt="" />
                             <input
+                                class="input"
                                 v-model="password2"
                                 type="password"
                                 :placeholder="$t('إعادة كلمة المرور')"
@@ -68,7 +72,7 @@
                     </div>
                 </div>
                 <div class="next">
-                    <a @click="RegisterNewUser" style="cursor: pointer">
+                    <a class="action_btn" @click="RegisterNewUser" style="cursor: pointer">
                         <svg
                             class="nexx neex_1"
                             xmlns="http://www.w3.org/2000/svg"

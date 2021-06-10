@@ -4,7 +4,6 @@
       <div class="send">
         <form @submit="createNewQuestion">
           <input
-            class="input"
             type="text"
             v-model="question"
             style="outline: none"
@@ -134,6 +133,13 @@ export default {
     // @include respond(tab-port) {
     //     width: 100%;
     // }
+
+    &-search {
+
+      &:focus {
+          border-bottom: 3px solid #FCC74C;
+      }
+    }
 
     &:focus {
         outline: none;

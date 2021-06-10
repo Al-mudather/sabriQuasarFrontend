@@ -39,7 +39,7 @@
                             </a>
                         </div>
                         <div class="login">
-                            <a @click="goToLoginPage" style="cursor: pointer">
+                            <a  @click="goToLoginPage" style="cursor: pointer">
                                 <img src="~assets/img/login.png" alt="" />
                                 <h3 class="q-pr-sm">{{ $t('دخول') }}</h3>
                             </a>
