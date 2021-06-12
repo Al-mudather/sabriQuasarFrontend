@@ -52,7 +52,6 @@ query GetAllCourses(
               }
             }
           }
-          
         }
       }
     }

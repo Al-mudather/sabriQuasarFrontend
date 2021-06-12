@@ -3,9 +3,9 @@
         <div v-if="!token" class="creatt">
             <div class="linkss">
                 <div class="logBy">
-                    <FacebookAuthentication />
-                    <GoogleAuthentication />
-                    <div class="login" style="cursor: pointer">
+                    <FacebookAuthentication class="hvr-shadow-radial" />
+                    <GoogleAuthentication class="hvr-shadow-radial"/>
+                    <div class="login hvr-shadow-radial q-mr-sm" style="cursor: pointer">
                         <a @click="GoToLoginPage">
                             <img src="~assets/img/login.png" alt="" />&nbsp;
                             <h3>{{$t('دخول')}}</h3>
@@ -36,7 +36,7 @@
                         </svg>
                         <span>{{$t('أو')}}</span>
                     </div>
-                    <h3>{{$t('إنشـاء حســاب')}}</h3>
+                    <h3 class="hvr-shadow-radial">{{$t('إنشـاء حســاب')}}</h3>
                 </div>
             </div>
             <form>
@@ -62,7 +62,7 @@
                         </div>
                     </div>
                 </div> -->
-                <div class="terms">
+                <!-- <div class="terms">
                     <div class="check">
                         <input type="checkbox" v-mode="checked" name="hana" id="ck" />
                         <label for="ck">
@@ -85,7 +85,7 @@
                         </svg>
                     </div>
                     <h3 style="display: none">{{$t('أنا أوافق علي')}} <span>{{$t('شروط الخدمة')}}</span></h3>
-                </div>
+                </div> -->
                 <div class="but" @click="GoToSignUpPage">
                     <h3>
                         <img src="~assets/img/Path 478.png" alt="" />{{$t('إنشـاء حســاب')}}
@@ -194,4 +194,5 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss">
+</style>

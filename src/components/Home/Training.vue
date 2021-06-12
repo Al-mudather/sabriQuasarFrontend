@@ -56,7 +56,7 @@
                                             style="cursor: pointer"
                                             :course="course.node"
                                             :name="course.node.title"
-                                            instructor="د.صبري أبوقرون"
+                                            instructor="مركز صبري ابو قرون"
                                             :price="course.node.courseFee"
                                         />
                                     <!-- </transition> -->
@@ -213,7 +213,7 @@
                                         </g>
                                     </g>
                                 </svg>
-                                <button @click="gotTocoursesPage">
+                                <button class="hvr-float-shadow" @click="gotTocoursesPage">
                                     {{$t('جمــــيع الدورات')}}
                                 </button>
                             </div>

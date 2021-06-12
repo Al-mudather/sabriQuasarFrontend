@@ -28,7 +28,7 @@
                 <img src="~assets/img/addCou.png" alt="">
             </div>
         </div>
-        <div v-if="instructor.edges.length > 1" class="name">
+        <!-- <div v-if="instructor.edges.length > 1" class="name">
             <div v-for="instructor in instructor.edges" :key="instructor.node.id" class="user">
                 <img src="~assets/img/user.png" alt="">
                 <h3 >{{instructor.node.instructor.firstName}}</h3>
@@ -39,6 +39,12 @@
                 <img src="~assets/img/user.png" alt="">
                 <h3 v-if="instructor.edges.length == 1">{{instructor.edges[0].node.instructor.firstName || "Not defined"}}</h3>
                 <h3 v-else>Not defined</h3>
+            </div>
+        </div> -->
+        <div class="name">
+            <div class="user">
+                <img src="~assets/img/user.png" alt="">
+                <h3>مركز صبري ابو قرون</h3>
             </div>
         </div>
     </div>
