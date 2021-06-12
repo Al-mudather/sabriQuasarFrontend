@@ -10,14 +10,13 @@
         </div>
         <div class="notifi">
           <Notification-Card 
-            v-for="notification in notificationData.edges"
+            v-for="notification in GET_NOTIFICATION_DATA.edges"
             :key="notification.node.pk"
             :notification="notification.node"
           />
 
         </div>
-        {{notificationData}}
-        <div v-if="$_.isEmpty(notificationData.edges)" class="empty">
+        <div v-if="$_.isEmpty(GET_NOTIFICATION_DATA.edges)" class="empty">
             <img src="~assets/img/no_notification.png" alt="">
             <h3> عذرا لا تـوجد إشــعارات فــي الوقــت الحـالــي </h3>
         </div>
@@ -44,21 +43,23 @@ export default {
  
   mounted () {
     // TODO: Get the notification from the [ UserNavBar ] component
-    this.$root.$on('NotificationData', this.getNotificationDataHnadler)
-    // TODO: Finish reading the notification
-    // this.$apollo.query({
-    //   query: GetAllMyNotifications
-    // }).then( data => {
-    //   console.log('ddddddddddd')
-    //   console.log(data)
-    //   console.log('ddddddddddd')
-    // } )
+    // this.$root.$on('NotificationData', this.GET_NOTIFICATION_DATA)
+    // TODO: Get the notification
+    this.$apollo.query({
+      query: GetAllMyNotifications,
+      variables: {
+        orderBy: ['-id']
+      }
+    }).then( res => {
+      this.notificationData = res.data.myNotifications
+    } )
   },
-  methods: {
-    getNotificationDataHnadler (Data) {
-      this.notificationData = Data
+  computed: {
+    GET_NOTIFICATION_DATA () {
+      return this.notificationData
     }
   }
+
 };
 </script>
 <style lang="scss">
