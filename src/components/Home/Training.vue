@@ -56,7 +56,7 @@
                                             style="cursor: pointer"
                                             :course="course.node"
                                             :name="course.node.title"
-                                            instructor="مركز صبري ابو قرون"
+                                            instructor="مركز دكتور صبري ابو قرون"
                                             :price="course.node.courseFee"
                                         />
                                     <!-- </transition> -->

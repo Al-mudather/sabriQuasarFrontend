@@ -112,7 +112,7 @@
                                               style="cursor: pointer"
                                                 :course="course.node"
                                                 :name="course.node.title"
-                                                instructor="د.صبري أبوقرون"
+                                                instructor="مركز دكتور صبري ابو قرون"
                                                 :price="course.node.courseFee"
                                                 unit="SDG"
                                             />
@@ -449,7 +449,8 @@ export default {
             overflow: hidden;
             position: relative;
             top: 9px;
-
+            height: 2rem;
+            
             &-filter {
                 cursor: pointer;
                 transition: all 0.2s ease-in-out;
@@ -561,6 +562,12 @@ export default {
                 background-color: #fff;
                 color: #7B7B7B;
                 outline: 0;
+                transition: all ease-in-out 0.3s;
+
+                &:focus {
+	                border-bottom: 3px solid #fcc74c;
+                }
+
                 @include prefixer(box-shadow, 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14), webkit moz o ms);
             }
             input::placeholder {
@@ -627,37 +634,7 @@ export default {
             }
         }
     }
-    // .nav-tabs{
-    //     margin: 0 0 59px 0;
-    //     padding: 15px;
-    //     border: 0;
-    //     background-color: #FAFAFA;
-    //     border-radius: 50px;
-    //     .nav-link{
-    //         //maxMobile
-    //         @media(max-width:767px){
-    //             margin: 0 9px 10px 0;
-    //         }
-    //         img{
-    //            margin: -3px -3px 0 2px;
-    //         }
-    //         font-size: 18px;
-    //         font-family: 'cairoR';
-    //         width: 100%;
-    //         height: 44px;
-    //         margin-left: 10px;
-    //         border-radius: 50px;
-    //         color:$textColor;
-    //         border: 1px solid #F6F6F6;
-    //         padding: 7px 10px 0 0;
-    //         background-color: #fff;
-    //         @include prefixer(box-shadow, 2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14), webkit moz o ms);
-    //         &.active{
-    //             background-color: #2D77D8;
-    //             color: #fff;
-    //         }
-    //     }
-    // }
+
     .rate {
         margin-top: 30px;
 

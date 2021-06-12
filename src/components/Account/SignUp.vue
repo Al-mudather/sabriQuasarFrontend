@@ -13,7 +13,7 @@
             <form>
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
-                        <div
+                        <!-- <div
                             class=""
                             style="text-align:left"
                             v-if="errorMessages.length > 0"
@@ -27,7 +27,7 @@
                                     {{ message }}<br />
                                 </li>
                             </ul>
-                        </div>
+                        </div> -->
                         <div class="inp">
                             <!-- <img src="~assets/img/gmail.png" alt="" /> -->
                             <input
@@ -146,41 +146,64 @@ export default {
             console.log(errorsObj);
             for (const key in errorsObj) {
                 for (const val of errorsObj[key]) {
-                    this.errorMessages.push(val.message);
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: val.message
+                    })
+                    // this.errorMessages.push(val.message);
                 }
             }
         },
         RegisterNewUser() {
             try {
-                if (this.password1 === this.password2) {
-                    // Start the loder
-                    this.visible = true
-                    this.errorMessages = [];
-                    this.$apollo
-                        .mutate({
-                            mutation: RegisterNewUser,
-                            variables: {
-                                email: this.email,
-                                fullName: this.fullName,
-                                password1: this.password1,
-                                password2: this.password2
-                            }
+                if (this.fullName && this.this.email&& this.this.password1 ) {
+                    if (this.password1 === this.password2) {
+                        // Start the loder
+                        this.visible = true
+                        this.errorMessages = [];
+                        this.$apollo
+                            .mutate({
+                                mutation: RegisterNewUser,
+                                variables: {
+                                    email: this.email,
+                                    fullName: this.fullName,
+                                    password1: this.password1,
+                                    password2: this.password2
+                                }
+                            })
+                            .then(result => {
+                                // Close the loder
+                                this.visible = false
+                                if (result.data.register.success) {
+                                    this.GotToConfirmationPage();
+                                } else if (result.data.register.errors) {
+                                    this.errorHandler(result.data.register.errors);
+                                }
+                            }).catch((error) => {
+                                // Close the loder
+                                this.visible = false
+                                this.errorHandler(error.errors);
+                            });
+                    } else {
+                        this.$q.notify({
+                            type: 'warning',
+                            progress: true,
+                            multiLine: true,
+                            position: 'top',
+                            message: "passwords are not the same"
                         })
-                        .then(result => {
-                            // Close the loder
-                            this.visible = false
-                            if (result.data.register.success) {
-                                this.GotToConfirmationPage();
-                            } else if (result.data.register.errors) {
-                                this.errorHandler(result.data.register.errors);
-                            }
-                        }).catch((error) => {
-                            // Close the loder
-                            this.visible = false
-                            this.errorHandler(error.errors);
-                        });
+                    }
                 } else {
-                    this.errorMessages.push("passwords are not the same");
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: "All Fields are required"
+                    })
                 }
                 
             } catch (error) {
@@ -195,9 +218,41 @@ export default {
     }
 };
 </script>
-
+ 
 <style lang="scss">
 @import "src/assets/css/sass/helpers/_variabels.scss";
 @import "src/assets/css/sass/helpers/_mixins.scss";
 @import "src/assets/css/account.scss";
+
+.input {
+    font-size: 1.5rem;
+    font-family: inherit;
+    color: inherit;
+    padding: 1.5rem 2rem;
+    border-radius: 2px;
+    background-color: rgba($color-white, .5);
+    // border: none;
+    border-bottom: 3px solid transparent;
+    width: 90%;
+    display: block;
+    transition: all .3s;
+
+    // @include respond(tab-port) {
+    //     width: 100%;
+    // }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 1rem 2rem rgba($color-black, .1);
+        border-bottom: 3px solid $color-primary !important;
+    }
+
+    &:focus:invalid {
+        border-bottom: 3px solid $color-secondary-dark !important;
+    }
+
+    &::-webkit-input-placeholder {
+        color: $color-grey-dark-2;
+    }
+}
 </style>

@@ -16,6 +16,7 @@
           />
 
         </div>
+        {{notificationData}}
         <div v-if="$_.isEmpty(notificationData.edges)" class="empty">
             <img src="~assets/img/no_notification.png" alt="">
             <h3> عذرا لا تـوجد إشــعارات فــي الوقــت الحـالــي </h3>
@@ -27,7 +28,8 @@
 
 <script>
 import NotificationCard from 'src/components/notifivation_management/NotificationCard'
-import { DoneReadingNotification } from 'src/queries/notification_management/mutation/DoneReadingNotification'
+import { GetAllMyNotifications } from 'src/queries/notification_management/query/GetAllMyNotifications'
+// import { DoneReadingNotification } from 'src/queries/notification_management/mutation/DoneReadingNotification'
 
 export default {
   name: "Notification",
@@ -39,14 +41,18 @@ export default {
   components: {
     NotificationCard
   },
-
+ 
   mounted () {
     // TODO: Get the notification from the [ UserNavBar ] component
     this.$root.$on('NotificationData', this.getNotificationDataHnadler)
     // TODO: Finish reading the notification
-    // this.$apollo.mutate({
-    //   mutation: DoneReadingNotification
-    // })
+    // this.$apollo.query({
+    //   query: GetAllMyNotifications
+    // }).then( data => {
+    //   console.log('ddddddddddd')
+    //   console.log(data)
+    //   console.log('ddddddddddd')
+    // } )
   },
   methods: {
     getNotificationDataHnadler (Data) {
