@@ -33,7 +33,7 @@
               class="col-lg-3 col-md-6 col-sm-6 col-xs-12"
             >
               <relatedCourseCard
-                class="hvr-bounce-in"
+                class="hvr-grow"
                 style="cursor: pointer"
                 :name="course.node.title"
                 :instructor="course.node.courseinstructorSet"

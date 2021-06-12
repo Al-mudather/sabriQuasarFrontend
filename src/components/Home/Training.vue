@@ -52,7 +52,7 @@
                                         leave-active-class="animated fadeOut"
                                     > -->
                                         <course-card
-                                            class="hvr-bounce-in"
+                                            class="hvr-grow"
                                             style="cursor: pointer"
                                             :course="course.node"
                                             :name="course.node.title"

@@ -107,9 +107,9 @@
 
 <script>
 import { CheckoutSubscription } from "src/queries/notification_management/subscription/CheckoutSubscription";
-import { LocalStorage, Quasar } from "quasar";
+import { LocalStorage } from "quasar";
 
-import { mapActions, mapState } from "vuex";
+import { mapActions } from "vuex";
 
 export default {
   name: "ShoppingCartPage",
@@ -272,11 +272,20 @@ export default {
     height: 52px;
     width: 38px;
     cursor: pointer;
+
+    &:hover > svg > path {
+      fill: $red-5;   
+    }
+
     svg {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
+      
+      & > path {
+        transition: all ease-in-out 0.3s;
+      }
     }
     img {
       position: absolute;

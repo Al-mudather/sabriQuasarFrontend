@@ -31,7 +31,7 @@
                 <h3>{{ calculateTheTotalFees }}<span>SDG</span></h3>
             </div>
             <div class="next" @click="goToAuthenticationCartPage">
-                <a href="#">
+                <a class="">
                     <svg
                         class="nexx"
                         xmlns="http://www.w3.org/2000/svg"
@@ -97,7 +97,17 @@ export default {
     ]),
 
     goToAuthenticationCartPage () {
-      this.$router.push({ name: 'login-cart' })
+      if (this.calculateTheTotalFees > 0) {
+        this.$router.push({ name: 'login-cart' })
+      } else {
+        this.$q.notify({
+          type: 'warning',
+          progress: true,
+          multiLine: true,
+          position: 'top',
+          message: "Please fill the basket first"
+      })
+      }
     },
 
     removeCourseFromCart (item) {
@@ -118,4 +128,24 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="scss">
+
+.next {
+  cursor: pointer;
+  & > a > svg > g > * {
+    transition: all ease-in-out 0.3s;
+  }
+  &:hover > a > svg > g > * {
+    fill: $green-4 !important;
+  }
+}
+
+.delate {
+  transition: all ease-in-out 0.3s;
+  background-color: $color-grey-dark-2 !important;
+  &:hover {
+    transform: scale(1.1);
+    background-color: $red !important;
+  }
+}
+</style>
