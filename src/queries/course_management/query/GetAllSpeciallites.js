@@ -21,6 +21,8 @@ query GetAllSpecialities($courseNumber:Int) {
               isPaid,
               courseFee,
               currency,
+              profile,
+              cover,
               courseinstructorSet {
                 edges{
                   node{

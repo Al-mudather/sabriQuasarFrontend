@@ -6,6 +6,8 @@ query GetCourseByID($coursePk:Int) {
     id,
     pk,
     title,
+    profile,
+    cover,
     courseFee,
     currency,
     brief,

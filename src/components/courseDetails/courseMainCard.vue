@@ -5,7 +5,8 @@
     </div>
     <div class="vidd">
       <div class="mag">
-        <img src="~assets/img/Mask Group 5.png" alt="" />
+        <img v-if="courseData.profile" :src="CALCULATE_IMAGE_URL" alt="">
+        <img v-else src="~assets/img/Mask Group 5.png" alt="" />
       </div>
       <img class="playy" src="~assets/img/playy.png" alt="" />
     </div>
@@ -113,6 +114,10 @@ export default {
   computed: {
     ...mapState("authentication", ["user"]),
     ...mapState('settings',['currency']),
+
+    CALCULATE_IMAGE_URL () {
+      return location.host + '/media/' + this.courseData.profile
+    },
 
     formatCoureFee() {
       if (this.courseData.courseFee) {

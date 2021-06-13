@@ -30,6 +30,8 @@ query GetAllCourses(
         title,
         isPaid,
         courseFee,
+        profile,
+        cover,
         currency,
         courseSpeciality {
           id,

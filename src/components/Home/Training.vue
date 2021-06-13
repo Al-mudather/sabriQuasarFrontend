@@ -51,7 +51,7 @@
                                         enter-active-class="animated fadeIn"
                                         leave-active-class="animated fadeOut"
                                     > -->
-                                        <course-card
+                                        <course-card 
                                             class="hvr-grow"
                                             style="cursor: pointer"
                                             :course="course.node"
@@ -236,7 +236,7 @@ import 'swiper/swiper-bundle.css'
 import 'swiper/swiper.min.css'
 // import catItem from 'components/utils/category_item'
 // import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
-import { GetSpecialities } from "src/queries/course_management/query/GetAllSpeciallites";
+import { GetSpecialities } from "src/queries/course_management/query/GetAllSpeciallites"; 
 
 export default {
     name: "Training",

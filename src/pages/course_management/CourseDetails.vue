@@ -151,10 +151,12 @@ export default {
         //maxMobile
         @media(max-width:767px){
             margin: 0 0 -16px 0;
+            min-height: 10rem;
         }
         img{
             display: inline-block;
             margin: -9px 0 0 0;
+            margin-left: 1rem;
         }
         h3{
             color: $textColor;

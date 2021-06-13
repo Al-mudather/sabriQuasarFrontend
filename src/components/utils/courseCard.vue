@@ -1,9 +1,9 @@
 <template>
     <div class="parent">
-      <!-- {{course.courseinstructorSet}} -->
         <div class="imag">
             <div class="overlay"></div>
-            <img src="~assets/img/person.png" alt="">
+            <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt="">
+            <img v-else src="~assets/img/person.png" alt="">
             <div class="magtxt">
                 <h4>{{name}}</h4>
                 <img src="~assets/img/play.png" alt="">
@@ -37,7 +37,10 @@ export default {
   computed: {
     ...mapState('authentication', ['user']),
     ...mapState('shoppingCart', ['shoppingCartDataList']),
-    ...mapState('settings',['isEnglish', 'currency'])
+    ...mapState('settings',['isEnglish', 'currency']),
+    CALCULATE_IMAGE_URL () {
+      return location.host + '/media/' + this.course.cover
+    }
   },
   mounted () {
     this.changeTheLayoutStyle(this.isEnglish)

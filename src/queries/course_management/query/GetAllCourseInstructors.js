@@ -8,6 +8,8 @@ query GetAllCourseInstructors($courseID: ID) {
         id,
         instructor{
           id,
+          image,
+          qualification,
           user {
             id,
             username,

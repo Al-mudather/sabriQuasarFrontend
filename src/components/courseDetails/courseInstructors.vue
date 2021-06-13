@@ -54,9 +54,9 @@
                                     <path id="Path_980" data-name="Path 980" d="M27.281-51.273a37.037,37.037,0,0,1,1.688-4.053,37.354,37.354,0,0,1,27.8-20.535A1.217,1.217,0,0,0,57.79-77.25,1.217,1.217,0,0,0,56.4-78.266,39.792,39.792,0,0,0,26.782-56.393a39.478,39.478,0,0,0-1.8,4.32,1.217,1.217,0,0,0,.749,1.549A1.217,1.217,0,0,0,27.281-51.273Z" fill="#fbc74b" fill-rule="evenodd"/>
                                   </g>
                               </svg>
-                              <img src="~assets/img/user-13.jpg" alt="" />
+                              <img v-if="lodash.get(instructor,'[node][instructor][image]')" :src="GET_IMAGE_URL(lodash.get(instructor,'[node][instructor][image]'))" alt="" />
+                              <img v-else src="~assets/img/user-13.jpg" alt="" />
                             </div>
-                            <!-- {{instructor.node.instructor.user.fullName }}  -->
                             {{ lodash.get(instructor,'[node][instructor][user][fullName]') || lodash.get(instructor,'[node][instructor][user][username]').split('@')[0] }} 
                             <!-- <h3>{{instructor.node.instructor.user.firstName}} {{instructor.node.instructor.user.lastName}}</h3> -->
                             <p>
@@ -85,6 +85,11 @@ export default {
   props: ['course_id'],
   components: {
     skeletonUserInfo
+  },
+  methods: {
+    GET_IMAGE_URL (instructorImage) {
+      return location.host + '/media/' + instructorImage
+    }
   },
   apollo: {
     allCourseInstructors: {
