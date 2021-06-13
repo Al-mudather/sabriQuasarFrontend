@@ -271,9 +271,19 @@ export default {
 
     watch: {
         currentContent(value) {
-            this.vimoID = JSON.parse(value.modelValue).video;
+            // this.vimoID = JSON.parse(value.modelValue).video;
+            const video = JSON.parse(content.modelValue).video;
 
-            this.viomURL = 'https://player.vimeo.com/video/' +  String(this.vimoID)
+            // this.viomURL = 'https://player.vimeo.com/video/' +  String(video)
+            //TODO: If the video from the youtube git it
+            const i = video.indexOf("v");
+            const videoKey = video.slice(i + 2);
+            if ( video.indexOf('youtube') > 0) {
+                this.viomURL =  "https://www.youtube.com/embed?=" + videoKey;
+            } else {
+                //TODO: if the video from the vimeo git it
+                this.viomURL =  'https://player.vimeo.com/video/' +  String(video);
+            }
             // ?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media
             this.visible = true;
 

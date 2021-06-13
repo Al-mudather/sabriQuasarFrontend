@@ -63,12 +63,13 @@
                             data-parent="#accordion"
                         >
                             <div class="card-body">
-                                <contentItem
+                                <contentItem 
                                     v-for="content in unit.node
                                         .courseunitcontentSet.edges"
                                     :key="content.node.id"
                                     :content="content.node"
                                 />
+
                             </div>
                         </div>
                     </q-expansion-item>
