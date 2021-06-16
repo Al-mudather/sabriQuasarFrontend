@@ -36,7 +36,8 @@
             </div>
             <h3>{{$t('ماهي متطلبات الدوره ؟')}}</h3>
         </div>
-        <div class="pluse" v-for="preReq in lodash.get(allPreRequisitesByCourse, '[edges]')" :key="preReq.node.id">
+
+        <div class="pluse" v-for="preReq in lodash.get(data, '[allPrerequisiteByCourse][edges]')" :key="preReq.node.id">
             <img src="~assets/img/adedd.png" alt="" />
             <h3 class="q-pr-sm">{{preReq.node.prerequisite}}</h3>
         </div>
@@ -54,6 +55,7 @@ export default {
   data () {
     return {
       lodash: this.$_,
+      data: '',
       loading: true
     }
   },
@@ -76,6 +78,7 @@ export default {
         }
       },
       result (data) {
+        this.data = data.data
         this.loading = data.loading
       }
     }

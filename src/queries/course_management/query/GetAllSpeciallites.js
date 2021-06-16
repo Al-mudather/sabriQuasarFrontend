@@ -22,25 +22,7 @@ query GetAllSpecialities($courseNumber:Int) {
               courseFee,
               currency,
               profile,
-              cover,
-              courseinstructorSet {
-                edges{
-                  node{
-                    id,
-                    isMainInstructor,
-                    instructor{
-                      id,
-                      user {
-                        id,
-                        username,
-                        fullName,
-                        firstName,
-                        lastName
-                      }
-                    }
-                  }
-                }
-              }
+              cover            
             }
           }
         }

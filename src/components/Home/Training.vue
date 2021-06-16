@@ -51,7 +51,7 @@
                                         enter-active-class="animated fadeIn"
                                         leave-active-class="animated fadeOut"
                                     > -->
-                                        <course-card 
+                                        <course-card
                                             class="hvr-grow"
                                             style="cursor: pointer"
                                             :course="course.node"

@@ -29,6 +29,10 @@ const mutations = {
 
   updateContentLists (state, value) {
     state.contentLists.push(value)
+  },
+
+  resetContentLists (state) {
+    state.contentLists = []
   }
 }
 
@@ -56,6 +60,10 @@ const actions = {
 
   setContentListsAction ({ commit }, value) {
     commit('updateContentLists', value)
+  },
+
+  resetContentListsAction ({ commit }) {
+    commit('resetContentLists')
   }
 }
 

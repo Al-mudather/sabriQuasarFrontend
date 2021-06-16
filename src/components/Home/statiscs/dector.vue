@@ -43,7 +43,7 @@
     </div>
     <div class="details">
       <div class="tow">
-        <slot></slot>
+        <!-- <slot></slot> -->
         <h3>{{ number }}</h3>
         <h3 v-if="query">{{ totalCount }}</h3>
         <p>{{ name }}</p>
@@ -69,7 +69,7 @@ export default {
         })
         .then(res => {
           const key = Object.keys(res.data);
-          this.totalCount = res.data[key].totalCount;
+          this.totalCount = res.data[key].totalCount || res.data[key];          
         });
     }
   }

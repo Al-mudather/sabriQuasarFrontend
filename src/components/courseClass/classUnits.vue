@@ -76,16 +76,16 @@
                     v-if="!lodash.isEmpty(currentContent)"
                     disable="1"
                 >
-                    <!-- <q-video
+                    <q-video
                         :ratio="13 / 11"
                         controls = "false"
                         id="video"
+                        @loaded="PLAYER_IS_LOADED"
                         @onPlay="START_LEARNING_UNIT_TRAKING"
                         @ended="END_LEARNING_UNIT_TRAKING"
                         :src="viomURL"
-                    /> -->
+                    />
 
-                    <video-embed :src="viomURL"></video-embed>
                     <!-- <video
                         id="my-video"
                         class="video-js"
@@ -192,17 +192,17 @@
 
 <script>
 
-import { StartLearningUnit } from "src/queries/learning_management/mutation/StartLearningUnit";
-import { EndLearningUnit } from "src/queries/learning_management/mutation/EndLearningUnit";
-import { GetAllLearningProgressByCourse } from "src/queries/learning_management/query/GetAllLearningProgressByCourse";
-// import { GetCourseByID } from "src/queries/course_management/query/GetCourseByID";
+import { StartLearningUnit } from 'src/queries/learning_management/mutation/StartLearningUnit';
+import { EndLearningUnit } from 'src/queries/learning_management/mutation/EndLearningUnit';
+import { GetAllLearningProgressByCourse } from 'src/queries/learning_management/query/GetAllLearningProgressByCourse';
+// import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID';
 
-import skeletonList from "src/components/skeleton/skeletonList";
-import contentHeader from "components/utils/contentHeader";
-import classContentItem from "components/courseClass/classContentItem";
-import { GetAllCourseUnitsByCourseID } from "src/queries/course_management/query/GetAllCourseUnitsByCourseID";
-import { mapState, mapActions } from "vuex";
-import _ from "lodash";
+import skeletonList from 'src/components/skeleton/skeletonList';
+import contentHeader from 'components/utils/contentHeader';
+import classContentItem from 'components/courseClass/classContentItem';
+import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID';
+import { mapState, mapActions } from 'vuex';
+import _ from 'lodash';
 
 
 export default {
@@ -229,8 +229,8 @@ export default {
                     durationDisplay: false
                 }
             },
-            startLearningTrackingID: "",
-            courseEnrollment: "",
+            startLearningTrackingID: '',
+            courseEnrollment: '',
             hasNextContent: true,
             hasPrevContent: false,
             lodash: _,
@@ -247,43 +247,25 @@ export default {
     },
 
     computed: {
-        ...mapState("courseManagement", [
-            "selectedClassUnitContent",
-            "contentLists",
-            "currentContent"
+        ...mapState('courseManagement', [
+            'selectedClassUnitContent',
+            'contentLists',
+            'currentContent'
         ]),
-        ...mapState("learningProgress", ["enrollmentId"]),
-        GET_VIMO_VIDEO_URL () {
-            console.log('uuuuuuuuuuuuuuuuuuu')
-            console.log(this.viomURL)
-            console.log('uuuuuuuuuuuuuuuuuuu')
-            return this.viomURL
-        },
-        // player () {
-        //     return this.$refs.videoPlayer.player
-        // }
+        ...mapState('learningProgress', ['enrollmentId']),
     },
 
     beforeDestroy() {
         // TODO: If the learning tracker is started, end it
         this.END_LEARNING_UNIT_TRAKING();
+        //TODO: reset the content list, so the video player can be initialized
+        this.resetContentListsAction()
     },
 
     watch: {
-        currentContent(value) {
-            // this.vimoID = JSON.parse(value.modelValue).video;
-            const video = JSON.parse(content.modelValue).video;
 
-            // this.viomURL = 'https://player.vimeo.com/video/' +  String(video)
-            //TODO: If the video from the youtube git it
-            const i = video.indexOf("v");
-            const videoKey = video.slice(i + 2);
-            if ( video.indexOf('youtube') > 0) {
-                this.viomURL =  "https://www.youtube.com/embed?=" + videoKey;
-            } else {
-                //TODO: if the video from the vimeo git it
-                this.viomURL =  'https://player.vimeo.com/video/' +  String(video);
-            }
+        currentContent(value) {
+            this.viomURL = this.GET_VIMO_VIDEO_URL(value.modelValue)
             // ?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media
             this.visible = true;
 
@@ -331,48 +313,39 @@ export default {
     updated() {
         if (this.counter === 0) {
             // TODO: When the page is updated, select the first content and activate it
-            const infoes = document.querySelectorAll(".info");
-            infoes[0].classList.add("active");
+            const infoes = document.querySelectorAll('.info');
+            infoes[0].classList.add('active');
 
             this.counter += 10;
         }
     },
 
-    mounted () {
-        const src = 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8'
-        console.log(this.viomURL)
-        // this.playVideo(src)
-    },
-
     methods: {
-        ...mapActions("courseManagement", ["setCurrentContentAction"]),
+        ...mapActions('courseManagement', ['setCurrentContentAction', 'resetContentListsAction']),
 
-        playVideo: function (source) {
-            const video = {
-                withCredentials: false,
-                type: 'application/x-mpegurl',
-                src: source
+        GET_VIMO_VIDEO_URL (data) {
+            const video = JSON.parse(data).video;
+            // this.viomURL = 'https://player.vimeo.com/video/' +  String(video)
+            //TODO: If the video from the youtube git it
+            const i = video.indexOf('v');
+            const videoKey = video.slice(i + 2);
+            if ( video.indexOf('youtube') > 0) {
+               return 'https://www.youtube.com/embed?=' + videoKey;
+            } else {
+                //TODO: if the video from the vimeo git it
+               return 'https://player.vimeo.com/video/' +  String(video);
             }
-            // this.player.reset() // in IE11 (mode IE10) direct usage of src() when <src> is already set, generated errors,
-            // this.player.src(video)
-            // this.player.load()
-            // this.player.play()
         },
 
-        VIMO_PLAYER_IS_LOADED () {
+        PLAYER_IS_LOADED () {
             this.visible = false
             // const controls = document.querySelector('#player')
-            // console.log('CCCCCCCCCCCCCCCC')
-            // console.log(controls)
-            // console.log('CCCCCCCCCCCCCCCC')
+            console.log('CCCCCCCCCCCCCCCC')
+            console.log('ssssssssssssssssssssssssssssssssssssssss')
+            console.log('CCCCCCCCCCCCCCCC')
             
         },
 
-        DATA_CHANGED () {
-            console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
-            console.log('changed')
-            console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
-        },
         /////////////////////////////////////////////////////////////
         // Start Learning Tracking
         /////////////////////////////////////////////////////////////
@@ -399,19 +372,19 @@ export default {
                 if (
                     this.$_.get(
                         startTrackingResult,
-                        "[data][startLearningUnit][success]"
+                        '[data][startLearningUnit][success]'
                     )
                 ) {
                     this.startLearningTrackingID = this.$_.get(
                         startTrackingResult,
-                        "[data][startLearningUnit][learning][pk]"
+                        '[data][startLearningUnit][learning][pk]'
                     );
                     this.isOpen = true;
                 }
                 if (
                     this.$_.get(
                         startTrackingResult,
-                        "[data][startLearningUnit][errors]"
+                        '[data][startLearningUnit][errors]'
                     )
                 ) {
                     this.$q.notify({
@@ -421,7 +394,7 @@ export default {
                         icon: "cloud_done",
                         message: this.$_.get(
                             startTrackingResult,
-                            "[data][startLearningUnit][errors]"
+                            '[data][startLearningUnit][errors]'
                         ).nonFieldErrors
                     });
                 }
@@ -469,33 +442,33 @@ export default {
                 if (
                     this.$_.get(
                         endTrackingResult,
-                        "[data][endLearningUnit][success]"
+                        '[data][endLearningUnit][success]'
                     )
                 ) {
                     // TODO: empty the start tracking progress id
-                    this.startLearningTrackingID = "";
+                    this.startLearningTrackingID = '';
                 }
             }
         },
 
         clickedItem(e) {
             // TODO: remove the active class from all the contents
-            const infoes = document.querySelectorAll(".info");
+            const infoes = document.querySelectorAll('.info');
             for (const info of infoes) {
-                info.classList.remove("active");
+                info.classList.remove('active');
             }
 
             // TODO: if the clicked item is the class info make it active
-            if (_.indexOf(e.target.classList, "info") === 0) {
-                e.target.classList.add("active");
+            if (_.indexOf(e.target.classList, 'info') === 0) {
+                e.target.classList.add('active');
             }
 
             // TODO: if the clicked item is not class info, search about it and make it active
-            if (_.indexOf(e.target.classList, "q-item") === -1) {
-                e.target.parentNode.classList.add("active");
+            if (_.indexOf(e.target.classList, 'q-item') === -1) {
+                e.target.parentNode.classList.add('active');
             } else {
                 for (const item of e.target.childNodes) {
-                    item.classList.add("active");
+                    item.classList.add('active');
                 }
             }
         },
@@ -554,9 +527,9 @@ export default {
         },
 
         prepareVideoUrl(videoUrl) {
-            const i = videoUrl.indexOf("v");
+            const i = videoUrl.indexOf('v');
             const videoKey = videoUrl.slice(i + 2);
-            return "https://www.youtube.com/embed?=" + videoKey;
+            return 'https://www.youtube.com/embed?=' + videoKey;
         }
     }
 };
