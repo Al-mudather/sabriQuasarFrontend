@@ -44,10 +44,10 @@
 
 <script>
 export default {
-  props: ['dialogName', 'reviewDetail'],
+  props: ['dialogName', 'prevRoute'],
   methods: {
     goBackToThePreviousePage () {
-      this.$router.go(-1)
+      this.$router.push(prevRoute || { name: 'Home' })
     }
   }
 }

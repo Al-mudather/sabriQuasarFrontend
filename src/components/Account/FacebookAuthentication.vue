@@ -18,6 +18,9 @@ export default {
             visible: false
         }
     },
+
+    props:['prevRoute'],
+
     methods: {
         ...mapActions("authentication", [
             "loginAction"
@@ -44,11 +47,7 @@ export default {
                         this.loginAction(result.data.socialAuth).then(() => {
                             // TODO: Go To the home page
                             if (result.data.socialAuth.token) {
-                                if (this.$route.params.redirect) {
-                                    this.$router.push(this.$route.params.redirect)
-                                } else {
-                                    this.$router.push({ name: 'Home' })
-                                }
+                                this.$router.push( this.prevRoute || { name: 'Home' })
                             }
                         });
                     }

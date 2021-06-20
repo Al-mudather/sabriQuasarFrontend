@@ -9,7 +9,7 @@
           </div>
         </div>
         <div class="notifi">
-          <Notification-Card 
+          <Notification-Card
             v-for="notification in GET_NOTIFICATION_DATA.edges"
             :key="notification.node.pk"
             :notification="notification.node"

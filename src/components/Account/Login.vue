@@ -1,12 +1,12 @@
 <template>
-    <AccountHeader :dialogName="$t('تسجيل الدخول')">
+    <AccountHeader :prevRoute="prevRoute" :dialogName="$t('تسجيل الدخول')">
         <!--
       Login Section
     -->
         <div class="login">
             <div class="logBy">
-                <FacebookAuthentication class="hvr-pulse-grow"/>
-                <GoogleAuthentication class="hvr-pulse-grow"/>
+                <FacebookAuthentication :prevRoute="prevRoute" class="hvr-pulse-grow"/>
+                <GoogleAuthentication :prevRoute="prevRoute" class="hvr-pulse-grow"/>
             </div>
             <form>
                 <div class="row">
@@ -147,8 +147,9 @@ export default {
     },
 
     beforeRouteEnter(to, from, next) {
+
         next(vm => {
-            vm.prevRoute = from
+            vm.prevRoute = from.fullPath
         })
     },
 
@@ -204,15 +205,9 @@ export default {
   
                             this.loginAction(result.data.tokenAuth).then(() => {
                                 // TODO: Go to the page that you came from
-                                console.log('mmmmmmmmmmmmmmmmmm')
-                                console.log(this.$route)
-                                console.log('mmmmmmmmmmmmmmmmmm')
+
                                 this.$router.push( this.prevRoute || { name: 'Home' })
-                                // if (this.$route.params.redirect) {
-                                //     this.$router.push(this.$route.params.redirect)
-                                // } else {
-                                //     this.$router.push(  { name: 'Home' })
-                                // }
+
                             });
                         } else if (result.data.tokenAuth.errors) {
                             this.errorHandler(result.data.tokenAuth.errors);

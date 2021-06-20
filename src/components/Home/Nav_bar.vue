@@ -250,7 +250,7 @@ export default {
         },
 
         GO_TO_LOG_IN_PAGE() {
-            this.$router.push({ name: "login", query: { redirect: this.$route.fullPath } })
+            this.$router.push({ name: "login", query: { redirect: this.$route.fullPath } });
         }
     }
 };

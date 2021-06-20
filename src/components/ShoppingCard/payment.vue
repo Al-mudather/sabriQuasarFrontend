@@ -37,17 +37,17 @@
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
                         <div class="inp">
-                            <input v-model="card" placeholder="رقم البطاقة">
+                            <q-input v-model="card" placeholder="رقم البطاقة" />
                         </div>
                     </div>
                     <div class="col-lg-12 col-xs-12 ">
                         <div class="inp">
-                            <input v-model="expDate" placeholder="تاريخ الإنتهاء">
+                            <q-input v-model="expDate" placeholder="تاريخ الإنتهاء" />
                         </div>
                     </div>
                     <div class="col-lg-12 col-xs-12 ">
                         <div class="inp">
-                            <input v-model="ipin" placeholder="CCV">
+                            <input v-model="ipin" placeholder="ipin">
                             <img src="~assets/img/question.png" alt="">
                         </div>
                     </div>

@@ -15,20 +15,11 @@ export default {
     name: "GoogleAuthentication",
     data () {
         return {
-            visible: false,
-            prevRoute: null
+            visible: false
         }
     },
 
-
-    beforeRouteEnter(to, from, next) {
-        console.log('4444444444444444444444444444444444444')
-        console.log(from)
-        console.log('4444444444444444444444444444444444444')
-        // next(vm => {
-        //     vm.prevRoute = from
-        // })
-    },
+    props:['prevRoute'],
 
     methods: {
         ...mapActions("authentication", [
@@ -56,15 +47,7 @@ export default {
                     if (result.data.socialAuth) {
                         this.loginAction(result.data.socialAuth).then(() => {
                             if (result.data.socialAuth.token) {
-                                console.log('mmmmmmmmmmmmmmmmmm')
-                                console.log(this.$route)
-                                console.log('mmmmmmmmmmmmmmmmmm')
-                                // this.$router.push( this.prevRoute || { name: 'Home' })
-                                // if (this.$route.params.redirect) {
-                                //     this.$router.push(this.$route.params.redirect)
-                                // } else {
-                                //     this.$router.push({ name: 'Home' })
-                                // }
+                                this.$router.push( this.prevRoute || { name: 'Home' })
                             }
                         });
                     }

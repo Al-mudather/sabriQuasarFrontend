@@ -265,7 +265,7 @@ export default {
         },
 
         GO_TO_LOG_IN_PAGE() {
-            this.$router.push({ name: "login", params: { editMode: 'new' }, query: { redirect: this.$route.fullPath } });
+            this.$router.push({ name: "login", params: { redirect: this.$route.fullPath }, query: { redirect: this.$route.fullPath } });
         }
     }
 };

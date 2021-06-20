@@ -155,7 +155,7 @@ export default {
 
   beforeRouteEnter(to, from, next) {
     next(vm => {
-      vm.prevRoute = from
+      vm.prevRoute = from.fullPath
     })
   },
 
@@ -240,7 +240,7 @@ export default {
       if ( this.$route.fullPath === '/cart/payment') {
         this.$router.go(-4)
       } else {
-        this.$router.push( this.prevRoute.path || { name: 'Home' })
+        this.$router.push( this.prevRoute || { name: 'Home' })
       }
     }
   }
