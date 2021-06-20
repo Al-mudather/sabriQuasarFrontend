@@ -36,19 +36,35 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
-                        <div class="inp">
-                            <q-input v-model="card" placeholder="رقم البطاقة" />
+                        <div class="">
+                            <q-input
+                                rounded
+                                outlined
+                                v-model="card"
+                                mask="#### #### #### ####"
+                                fill-mask="#"
+                                hint="card number: #### #### #### ####"
+                                placeholder="card number"
+                            />
                         </div>
                     </div>
                     <div class="col-lg-12 col-xs-12 ">
-                        <div class="inp">
-                            <q-input v-model="expDate" placeholder="تاريخ الإنتهاء" />
+                        <div class="">
+                            <q-input rounded outlined v-model="expDate" placeholder="تاريخ الإنتهاء" />
                         </div>
                     </div>
                     <div class="col-lg-12 col-xs-12 ">
-                        <div class="inp">
-                            <input v-model="ipin" placeholder="ipin">
-                            <img src="~assets/img/question.png" alt="">
+                        <div class="">
+                            <q-input
+                                rounded 
+                                outlined 
+                                v-model="ipin" 
+                                placeholder="ipin"
+                                mask="####"
+                                fill-mask
+                                hint="ipin: ####"
+                            />
+                            <!-- <img src="~assets/img/question.png" alt=""> -->
                         </div>
                     </div>
                 </div>
@@ -189,4 +205,13 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="scss">
+.q-field {
+    margin-right: 0rem;
+    direction: initial;
+}
+
+.q-field__native {
+    margin-right: 2rem;
+}
+</style>
