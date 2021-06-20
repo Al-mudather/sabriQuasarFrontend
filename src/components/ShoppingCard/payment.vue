@@ -2,7 +2,6 @@
     <div class="msPayment">
         <div class="options">
             <paypal-payment />
-            <strip-payment />
             <div class="sele edit" @click="enableSudaniesBank = true">
                 <img src="~assets/img/credit-cards.png" alt="" />
                 <h3>Sudanies Bank</h3>
@@ -68,7 +67,6 @@
 import { mapState } from 'vuex'
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
-import stripPayment from 'src/components/ShoppingCard/stripPayment'
 import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
 
 export default {
@@ -83,8 +81,7 @@ export default {
         ipin: ''
     }
   },
-  components: {
-    'strip-payment': stripPayment,
+  components: {    
     'paypal-payment': paypalPayment
   },
 

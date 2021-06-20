@@ -1,7 +1,8 @@
 <template>
     <div class="tetch">
+        {{instructors}}
         <div class="row justify-center">
-            <div
+            <!-- <div
                 class="col-lg-3 col-xs-12"
                 v-for="inst in instructors.edges"
                 :key="inst.node.id"
@@ -13,13 +14,13 @@
                   :image="inst.node.instructor.image"
                 />
 
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
 
 <script>
-import instructor from 'src/components/courseClass/instructor'
+// import instructor from 'src/components/courseClass/instructor'
 
 export default {
   data () {
@@ -28,7 +29,7 @@ export default {
   },
   props: ['instructors'],
   components: {
-    instructor
+    // instructor
   }
 }
 </script>

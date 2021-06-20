@@ -46,20 +46,14 @@
                         <div class="container">
                             <div class="cn fadeIn row justify-center">
                                 <q-intersection transition="scale" v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-5 col-sm-5 col-xs-12">
-                                    <!-- <transition
-                                        appear
-                                        enter-active-class="animated fadeIn"
-                                        leave-active-class="animated fadeOut"
-                                    > -->
-                                        <course-card
-                                            class="hvr-grow"
-                                            style="cursor: pointer"
-                                            :course="course.node"
-                                            :name="course.node.title"
-                                            instructor="مركز دكتور صبري ابو قرون"
-                                            :price="course.node.courseFee"
-                                        />
-                                    <!-- </transition> -->
+                                    <course-card
+                                        class="hvr-grow"
+                                        style="cursor: pointer"
+                                        :course="course.node"
+                                        :name="course.node.title"
+                                        instructor="مركز دكتور صبري ابو قرون"
+                                        :price="course.node.courseFee"
+                                    />
                                 </q-intersection>
                             </div>
                             <div class="butDown">
@@ -321,6 +315,13 @@ export default {
                 return {
                     courseNumber: 5
                 };
+            },
+            result (data) {
+                if (!data.loading) {
+                    console.log('bbbbbbbbbbbbbbbbbbbbb')
+                    console.log(data)
+                    console.log('bbbbbbbbbbbbbbbbbbbbb')
+                }
             }
         }
     },

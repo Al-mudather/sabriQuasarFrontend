@@ -28,9 +28,8 @@
                     />
                 </g>
             </svg>
-            <!-- <img src="~assets/img/user-13.jpg" alt="" /> -->
-            <img :src="'http://localhost:8000' + '/media/' + image" alt="" />
-            <!-- <img :src="CALCULATE_IMAGE_URL" alt="" /> -->
+            <!-- <img :src="'http://localhost:8000' + '/media/' + image" alt="" /> -->
+            <img :src="CALCULATE_IMAGE_URL" alt="" />
         </div>
         <h3>
             {{ firstName }}
@@ -59,7 +58,10 @@ export default {
     props: ["firstName", "lastName", "qualification", "image"],
     computed: {
         CALCULATE_IMAGE_URL () {
-            return location.host + '/media/' + this.image
+            if (this.image) {
+                return location.host + '/media/' + this.image
+            }
+            return '~assets/img/big_man.png'
         }
     },
     methods: {

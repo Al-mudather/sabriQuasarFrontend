@@ -148,9 +148,10 @@ export default {
 
     beforeRouteEnter(to, from, next) {
         next(vm => {
-        vm.prevRoute = from
+            vm.prevRoute = from
         })
     },
+
 
     methods: {
         ...mapActions("authentication", ["loginAction"]),
@@ -172,7 +173,14 @@ export default {
             console.log(errorsObj);
             for (const key in errorsObj) {
                 for (const val of errorsObj[key]) {
-                    this.errorMessages.push(val.message);
+                    // this.errorMessages.push(val.message);
+                    this.$q.notify({
+                        type: 'warning',
+                        position: 'top',
+                        progress: true,
+                        multiLine: true,
+                        message: val.message
+                    })
                 }
             }
         },
@@ -193,10 +201,18 @@ export default {
                         if (result.data.tokenAuth.success) {
                             // TODO: reset the data
                             this.reset()
-
+  
                             this.loginAction(result.data.tokenAuth).then(() => {
                                 // TODO: Go to the page that you came from
-                                this.$router.push( this.prevRoute.path || { name: 'Home' })
+                                console.log('mmmmmmmmmmmmmmmmmm')
+                                console.log(this.$route)
+                                console.log('mmmmmmmmmmmmmmmmmm')
+                                this.$router.push( this.prevRoute || { name: 'Home' })
+                                // if (this.$route.params.redirect) {
+                                //     this.$router.push(this.$route.params.redirect)
+                                // } else {
+                                //     this.$router.push(  { name: 'Home' })
+                                // }
                             });
                         } else if (result.data.tokenAuth.errors) {
                             this.errorHandler(result.data.tokenAuth.errors);
@@ -214,9 +230,6 @@ export default {
 </script>
 
 <style lang="scss">
-// @import 'src/assets/css/sass/helpers/_variabels.scss';
-// @import 'src/assets/css/sass/helpers/_mixins.scss';
-// @import 'src/assets/css/account.scss';
 
 .action_btn {
     

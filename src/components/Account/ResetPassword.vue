@@ -51,12 +51,19 @@ export default {
     AccountHeader
   },
   methods: {
-
+ 
     errorHandler (errorsObj) {
       console.log(errorsObj)
       for (const key in errorsObj) {
         for (const val of errorsObj[key]) {
-          this.errorMessages.push(val.message)
+          // this.errorMessages.push(val.message)
+          this.$q.notify({
+            type: 'warning',
+            position: 'top',
+            progress: true,
+            multiLine: true,
+            message: val.message
+          })
         }
       }
     },
@@ -83,7 +90,16 @@ export default {
       }).catch((error) => {
         // Close the loder
         this.visible = false
-        if (error.message === 'GraphQL error: [Errno 11001] getaddrinfo failed') this.errorMessages.push('I can\'t send to your email, please try again')
+        if (error.message === 'GraphQL error: [Errno 11001] getaddrinfo failed') {
+          // this.errorMessages.push('I can\'t send to your email, please try again')
+          this.$q.notify({
+            type: 'warning',
+            position: 'top',
+            progress: true,
+            multiLine: true,
+            message: $('I can\'t send to your email, please try again')
+          })
+        }
       })
     }
   }

@@ -15,14 +15,8 @@ export default {
     name: "FacebookAuthentication",
     data () {
         return {
-            visible: false,
-            prevRoute: null
+            visible: false
         }
-    },
-    beforeRouteEnter(to, from, next) {
-        next(vm => {
-        vm.prevRoute = from
-        })
     },
     methods: {
         ...mapActions("authentication", [
@@ -50,7 +44,11 @@ export default {
                         this.loginAction(result.data.socialAuth).then(() => {
                             // TODO: Go To the home page
                             if (result.data.socialAuth.token) {
-                                this.$router.push( this.prevRoute.path || { name: 'Home' })
+                                if (this.$route.params.redirect) {
+                                    this.$router.push(this.$route.params.redirect)
+                                } else {
+                                    this.$router.push({ name: 'Home' })
+                                }
                             }
                         });
                     }

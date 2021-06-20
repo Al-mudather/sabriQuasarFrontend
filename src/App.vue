@@ -15,7 +15,8 @@ export default {
         ...mapState('authentication', ['token'])
     },
     methods: {
-        ...mapActions('authentication', ['RE_LOGIN_USER'])
+        ...mapActions('authentication', ['RE_LOGIN_USER']),
+        ...mapActions('authentication', ['logOutAction']),
     },
     created() {
         // console.log({router: this.$router})
@@ -32,6 +33,9 @@ export default {
                         position: 'top',
                         message: 'لقد انتهت صلاحية دخولك للموقع... الرجاء الدخول مره اخرى لتتمكن من تطوير مهاراتك'
                     })
+                    //TODO: Delete the user data
+                    this.logOutAction()
+                    //TODO: Go to login page
                     this.$router.push({ name: "login" });
                 }
             }).catch(e => {

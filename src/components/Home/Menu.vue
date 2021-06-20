@@ -24,7 +24,7 @@
                 </div> 
                 <div class="profile">
                     <img src="~assets/img/user(4).png" alt="">
-                    <h3>{{$_.get(user,'[username]')}}</h3>
+                    <h3>{{$_.get(user,'[email]')}}</h3>
                 </div>
                 <div class="account" v-if="!token">
                     <div class="sign">

@@ -33,20 +33,20 @@
                 <div class="col-lg-3">
                     <div class="account" v-if="!token">
                         <div class="sign">
-                            <a @click="goToSignUpPage" style="cursor: pointer">
+                            <a @click="GO_TO_SIGN_UP_PAGE" style="cursor: pointer">
                                 <img src="~assets/img/sign.png" alt="" />
                                 <h3 class="q-pr-sm">{{ $t('تسجيل حساب') }}</h3>
                             </a>
                         </div>
                         <div class="login">
-                            <a  @click="goToLoginPage" style="cursor: pointer">
+                            <a  @click="GO_TO_LOG_IN_PAGE" style="cursor: pointer">
                                 <img src="~assets/img/login.png" alt="" />
                                 <h3 class="q-pr-sm">{{ $t('دخول') }}</h3>
                             </a>
                         </div>
                     </div>
                     <div class="account" v-else>
-                        <div @click="logUserOut" style="cursor: pointer" class="sign logOutBtn mag">
+                        <div @click="LOG_USER_OUT" style="cursor: pointer" class="sign logOutBtn mag">
                             <div class="mag">
                                 <img src="~assets/img/enter.png" alt="">
                             </div>
@@ -181,8 +181,10 @@ export default {
             this.setOpenMenuAction(true)
         }, 
 
-        logUserOut () {
+        LOG_USER_OUT () {
             this.logOutAction()
+            //TODO: redirect the user to the home page
+            this.$router.push({ name: "Home" });
         },
 
         showTheSearchingResult (event) {
@@ -243,7 +245,8 @@ export default {
             if (this.search) {
                 this.$router.push({
                     name: "courses",
-                    params: { search: this.search }
+                    params: { search: this.search },
+                    query: { redirect: this.$route.fullPath }
                 });
 
             } else {
@@ -257,12 +260,12 @@ export default {
             }
         },
 
-        goToSignUpPage() {
-            this.$router.push({ name: "signUp" });
+        GO_TO_SIGN_UP_PAGE() {
+            this.$router.push({ name: "signUp", query: { redirect: this.$route.fullPath } });
         },
 
-        goToLoginPage() {
-            this.$router.push({ name: "login" });
+        GO_TO_LOG_IN_PAGE() {
+            this.$router.push({ name: "login", params: { editMode: 'new' }, query: { redirect: this.$route.fullPath } });
         }
     }
 };

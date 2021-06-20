@@ -44,7 +44,6 @@
     <div class="details">
       <div class="tow">
         <!-- <slot></slot> -->
-        <h3>{{ number }}</h3>
         <h3 v-if="query">{{ totalCount }}</h3>
         <p>{{ name }}</p>
       </div>
@@ -60,7 +59,7 @@ export default {
       totalCount: ""
     };
   },
-  props: ["name", "number", "query"],
+  props: ["name", "query"],
   mounted() {
     if (this.query) {
       this.$apollo
@@ -69,7 +68,11 @@ export default {
         })
         .then(res => {
           const key = Object.keys(res.data);
-          this.totalCount = res.data[key].totalCount || res.data[key];          
+          if (typeof res.data[key] == 'string') {            
+            this.totalCount = res.data[key]
+          } else if (typeof res.data[key] == 'object') {
+            this.totalCount = res.data[key].totalCount;
+          }
         });
     }
   }
