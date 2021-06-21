@@ -6,7 +6,7 @@
         <div class="imaagg">
             <img src="~assets/img/success.png" alt="">
             <h2>{{$t('تهانينا لك')}}</h2>
-            <p @click="goToMyCourses">{{$t('الأن الكورسات التي قمت بإمتلاكها أصبحت متاحة يمكنك الإطلاع عليها من خلال')}} <span style="coursor: pointer">{{$t('لوحتك التعليمية')}}</span> </p>
+            <p @click="GO_TO_MY_COURSES_page">{{$t('الأن الكورسات التي قمت بإمتلاكها أصبحت متاحة يمكنك الإطلاع عليها من خلال')}} <span style="coursor: pointer">{{$t('لوحتك التعليمية')}}</span> </p>
         </div>
     </div>
 </template>
@@ -60,6 +60,8 @@ export default {
             document.querySelector(name).classList.add('active')
             document.querySelector(name).nextSibling.classList.add('show')
         })
+        // TODO: If the user pay for the courses , delete the shooping cart data
+        // this.deleteShoppinCartDataListAction()
     },
 
     computed: {
@@ -71,14 +73,9 @@ export default {
     methods: {
         ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction']),
 
-        goToMyCourses () {
+        GO_TO_MY_COURSES_page () {
             this.$router.push({ name: 'my-courses' })
         }
-    },
-
-    mounted () {
-        // TODO: If the user pay for the courses , delete the shooping cart data
-        // this.deleteShoppinCartDataListAction()
     }
 }
 </script>

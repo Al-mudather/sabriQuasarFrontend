@@ -15,7 +15,7 @@
                                 <span> 2021&copy; </span>
                             </h3>
                             <div class="logos">
-                                <img src="~assets/img/suppo.png" alt="" />
+                                <img src="~assets/img/stc.training_logo.png" alt="" />
                             </div>
                         </div>
                         <div class="method">

@@ -21,7 +21,8 @@ import Training from 'components/Home/Training'
 
 
 import Account from 'pages/account_management/Account'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
+import { LocalStorage } from 'quasar'
 
 export default {
   name: 'Home',
@@ -40,6 +41,15 @@ export default {
   },
   computed: {
     ...mapState('authentication', ['loginDialog'])
+  },
+  methods: {
+    ...mapActions('settings', ['setActiveNavAction'])
+  },
+  mounted () {
+
+    //TODO: Save the active link so when render it will be make active again
+    this.setActiveNavAction('HOME')
+
   }
 }
 </script>

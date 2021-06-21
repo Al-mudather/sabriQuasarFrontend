@@ -1,23 +1,34 @@
 <template>
     <section class="myCourses">
         <div class="container-fluid">
-            <div class="row">
+            <!-- <div class="row">
                 <div class="col-lg-12">
                     <div class="titel titel2">
                         <img src="~assets/img/tit.png" alt="">
                         <h3>{{$t('لوحتي التعليمية')}}</h3>
                     </div>
-                    <!-- start afilliate bord -->
+
                     <afilliateBord />
-                    <!-- end afilliate bord -->
+
                     <div class="titel">
                         <img src="~assets/img/tit.png" alt="">
                         <h3>{{$t('كورساتـي')}}</h3>
                     </div>
                 </div>
+            </div> -->
+            <div v-if="lodash.isEmpty(lodash.get(allEnrollmentsForCurrentUser, '[edges]'))" class="notice">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="imageees">
+                                <img src="~assets/img/notCores.png" alt="">
+                                <h3>ليس لديك أي اشتراك في الوقت الحالي الرجاء الدخول الي صفحة <a @click="GO_TO_COURSES_PAGE" style="cursor: pointer">الكورسات</a> للاشتراك </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <!-- start card -->
-            <div class="cards">
+            <div v-else class="cards">
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-12">
@@ -77,8 +88,9 @@
 
 <script>
 import courseCard from 'src/components/MyCourses/courseCard'
-import afilliateBord from 'src/components/MyCourses/afilliateBord'
+// import afilliateBord from 'src/components/MyCourses/afilliateBord'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
+import { mapActions } from "vuex"
 
 export default {
     name: 'MyCourses',
@@ -90,8 +102,8 @@ export default {
     },
 
 	components: {
-		courseCard,
-        afilliateBord,
+		courseCard
+        // afilliateBord
 	},
 
     apollo: {
@@ -102,7 +114,14 @@ export default {
       }
     },
 
+    mounted () {
+        //TODO: Save the active link so when render it will be make active again
+        this.setActiveNavAction('BORD')
+    },
+
     methods: {
+        ...mapActions('settings', ['setActiveNavAction']),
+
         async loadMoreData () {
             await this.$apollo.queries.allEnrollmentsForCurrentUser.fetchMore({
                 variables: {
@@ -128,6 +147,11 @@ export default {
                 return previousResult
                 }
             })
+        },
+
+        GO_TO_COURSES_PAGE () {
+
+            this.$router.push({ name: "courses" });
         }
     }
 }
@@ -481,6 +505,27 @@ export default {
                     width: 197px;
                     height: 53px;
                     border: 2px solid #ECECEC;
+                }
+            }
+        }
+    }
+    .notice{
+        display: block;
+        margin: 20px 0 20px 0;
+        text-align: center;
+        .imageees{
+            img{
+                width: auto;
+            }
+            h3{
+                font-size: 17px;
+                font-family: 'cairoR';
+                width: 433px;
+                margin: 21px auto;
+                line-height: 1.7;
+                a{
+                    color: #fcc74c;
+                    text-decoration: none;
                 }
             }
         }

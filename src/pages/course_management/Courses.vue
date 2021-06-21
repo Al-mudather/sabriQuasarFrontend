@@ -237,6 +237,8 @@ export default {
   },
 
   mounted () {
+    //TODO: Save the active link so when render it will be make active again
+    this.setActiveNavAction('COURSES')
     // TODO: Adjest the swiper
     this.swiper.slideTo(3, 1000, false)
     // TODO: Disable the navebar
@@ -306,6 +308,8 @@ export default {
     ...mapActions('authentication', [
       'setNavbarSearchAction'
     ]),
+    ...mapActions('settings', ['setActiveNavAction']),
+
     // TODO: Get All courses by Title from search
     GetAllCoursesByOrderingDecendinOrAcending (type) {
       if (type === 'DEC') {

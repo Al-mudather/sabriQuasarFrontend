@@ -54,7 +54,7 @@
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('لوحتي التعليمية')}}</h3>
                 </a>
-                <a class="but side-nav__item" data-link="NOVIFICATION" v-if="token" @click="GO_TO_MY_NOTIFICATIONS_PAGE($event)">
+                <a class="but side-nav__item" data-link="NOTIFICATION" v-if="token" @click="GO_TO_MY_NOTIFICATIONS_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الإشعارت')}}</h3>
                 </a>

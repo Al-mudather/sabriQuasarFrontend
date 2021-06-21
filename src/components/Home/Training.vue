@@ -230,7 +230,8 @@ import 'swiper/swiper-bundle.css'
 import 'swiper/swiper.min.css'
 // import catItem from 'components/utils/category_item'
 // import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
-import { GetSpecialities } from "src/queries/course_management/query/GetAllSpeciallites"; 
+import { GetSpecialities } from "src/queries/course_management/query/GetAllSpeciallites";
+import { mapActions } from "vuex";
 
 export default {
     name: "Training",
@@ -357,6 +358,8 @@ export default {
     },
 
     methods: {
+        ...mapActions('settings', ['setActiveNavAction']),
+
         next() {
             this.$refs.flickity.next();
         },
@@ -366,7 +369,9 @@ export default {
         },
 
         gotTocoursesPage() {
-            this.$router.push({ name: "courses" });
+            //TODO: Save the active link so when render it will be make active again
+            this.setActiveNavAction('COURSES')
+            this.$router.push({ name: "courses" }); 
         },
 
         changeCourseData(courses) {

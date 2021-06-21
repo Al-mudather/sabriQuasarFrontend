@@ -29,6 +29,7 @@
 import NotificationCard from 'src/components/notifivation_management/NotificationCard'
 import { GetAllMyNotifications } from 'src/queries/notification_management/query/GetAllMyNotifications'
 // import { DoneReadingNotification } from 'src/queries/notification_management/mutation/DoneReadingNotification'
+import { mapActions } from 'vuex'
 
 export default {
   name: "Notification",
@@ -42,6 +43,8 @@ export default {
   },
  
   mounted () {
+    //TODO: Save the active link so when render it will be make active again
+    this.setActiveNavAction('NOTIFICATION')
     // TODO: Get the notification from the [ UserNavBar ] component
     // this.$root.$on('NotificationData', this.GET_NOTIFICATION_DATA)
     // TODO: Get the notification
@@ -54,10 +57,15 @@ export default {
       this.notificationData = res.data.myNotifications
     } )
   },
+
   computed: {
     GET_NOTIFICATION_DATA () {
       return this.notificationData
     }
+  },
+
+  methods: {
+    ...mapActions('settings', ['setActiveNavAction'])
   }
 
 };

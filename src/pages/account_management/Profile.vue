@@ -119,6 +119,7 @@ import PasswordResetProfile from 'src/components/Profile_managements/PasswordRes
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { UpdateUserProfile } from "src/queries/account_management/mutation/UpdateUserProfile";
 import { JoinAffiliateProgram } from "src/queries/afilliate_management/mutation/JoinAffiliateProgram";
+import { mapActions } from 'vuex'
 
 export default {
   name: "Home",
@@ -168,6 +169,8 @@ export default {
   },
 
   methods: {
+    ...mapActions('settings', ['setActiveNavAction']),
+
     errorHandler(errorsObj) {
       console.log(errorsObj);
       for (const key in errorsObj) {
@@ -243,6 +246,9 @@ export default {
   },
 
   mounted() {
+    //TODO: Save the active link so when render it will be make active again
+    this.setActiveNavAction('PROFILE')
+
     const userTypes = this.$el.querySelectorAll(".type .male");
 
     let getSiblings = function(e) {
