@@ -44,13 +44,24 @@
                                 mask="#### #### #### ####"
                                 fill-mask="#"
                                 hint="card number: #### #### #### ####"
-                                placeholder="card number"
+                                label="card number"
+                                :rules="[
+                                    val => !!val || '* Required',
+                                    val => val.length >= 14 || 'You must inter 14 numbers at least',
+                                ]"
                             />
                         </div>
                     </div>
                     <div class="col-lg-12 col-xs-12 ">
                         <div class="">
-                            <q-input rounded outlined v-model="expDate" placeholder="تاريخ الإنتهاء" />
+                            <q-input
+                                rounded
+                                outlined
+                                mask="##/####"
+                                hint="expiration date: 03/2021"
+                                v-model="expDate"
+                                label="تاريخ الإنتهاء"
+                            />
                         </div>
                     </div>
                     <div class="col-lg-12 col-xs-12 ">
@@ -59,7 +70,7 @@
                                 rounded 
                                 outlined 
                                 v-model="ipin" 
-                                placeholder="ipin"
+                                label="ipin"
                                 mask="####"
                                 fill-mask
                                 hint="ipin: ####"
@@ -101,6 +112,12 @@ export default {
     'paypal-payment': paypalPayment
   },
 
+  watch: {
+    expDate (val) {
+        
+    }
+  },
+
   mounted () {
     this.$root.$emit('activateShoppingProgress', 'paymentData')
     
@@ -120,7 +137,21 @@ export default {
   },
 
   computed: {
-    ...mapState('shoppingCart', ['shoppingCartDataList'])
+    ...mapState('shoppingCart', ['shoppingCartDataList']),
+    FORMAT_EXPIRATION_DATE () {
+        try {
+            let day= val.split('/')[0]
+            let year= val.split('/')[1]
+            let last2digits;
+
+            last2digits = year.substr(2,2)
+ 
+            return String(day) + String(last2digits)
+
+        } catch {
+            return ''
+        }
+    }
   },
 
   methods: {
@@ -128,13 +159,23 @@ export default {
             console.log(errorsObj);
             for (const key in errorsObj) {
                 for (const val of errorsObj[key]) {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: val.message
-                    })
+                    if (typeof val.message == 'object') {
+                        this.$q.notify({
+                            type: 'warning',
+                            progress: true,
+                            multiLine: true,
+                            position: 'top',
+                            message: val.message.msg
+                        })
+                    } else {
+                        this.$q.notify({
+                            type: 'warning',
+                            progress: true,
+                            multiLine: true,
+                            position: 'top',
+                            message: val.message
+                        })
+                    }
                     // this.errorMessages.push(val.message);
                 }
             }
@@ -142,19 +183,30 @@ export default {
 
         async buyTheCoursesUsingSmartNode() {
             this.visible = true;
-            // TODO: Extract all courses ids
-            const courseIds = this.getOrdersIds();
-            // TODO: Make the order
-            const orderResult = await this.getOrderResult(courseIds);
-            // TODO: make the smart node payment
-            const smartNodePayment = await this.makeSmartNodePayment(
-                orderResult
-            );
-            if (smartNodePayment) {
-                this.enableSudaniesBank = false
-                this.$router.push({ name: 'cart-success' })
+            if (this.expDate < 7) {
+                this.visible = false;
+                this.$q.notify({
+                        type: 'negative',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: 'Please add the expiration data'
+                    })
+            } else {
+                // TODO: Extract all courses ids
+                const courseIds = this.getOrdersIds();
+                // TODO: Make the order
+                const orderResult = await this.getOrderResult(courseIds);
+                // TODO: make the smart node payment
+                const smartNodePayment = await this.makeSmartNodePayment(
+                    orderResult
+                );
+                if (smartNodePayment) {
+                    this.enableSudaniesBank = false
+                    this.$router.push({ name: 'cart-success' })
+                }
+                this.visible = false;
             }
-            this.visible = false;
         },
 
         getOrdersIds() {
@@ -186,7 +238,7 @@ export default {
                 mutation: CreateSmartNodeCheckout,
                 variables: {
                     card: this.card,
-                    expDate: this.expDate,
+                    expDate: this.FORMAT_EXPIRATION_DATE,
                     ipin: this.ipin,
                     orderId: orderResult.order.pk,
                 }
@@ -194,6 +246,7 @@ export default {
             const smartNodeDetails = await smartNoderesult.data.createSmartNodeCheckout;
             if (this.$_.get(smartNodeDetails, "[errors]")) {
                 this.visible = false;
+
                 this.errorHandler(smartNodeDetails.errors)
             }
 
@@ -206,6 +259,10 @@ export default {
 </script>
 
 <style lang="scss">
+.q-field__label {
+    margin-left: 1rem;
+}
+
 .q-field {
     margin-right: 0rem;
     direction: initial;
