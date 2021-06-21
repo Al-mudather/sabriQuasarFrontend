@@ -72,7 +72,7 @@
                     </div>
                 </div>
                 <div class="next">
-                    <a class="action_btn" @click="RegisterNewUser" style="cursor: pointer">
+                    <a class="action_btn" @click="REGISTER_NEW_USER" style="cursor: pointer">
                         <svg
                             class="nexx neex_1"
                             xmlns="http://www.w3.org/2000/svg"
@@ -157,9 +157,9 @@ export default {
                 }
             }
         },
-        RegisterNewUser() {
+        REGISTER_NEW_USER() {
             try {
-                if (this.fullName && this.this.email&& this.this.password1 ) {
+                if (this.fullName && this.email&& this.password1 ) {
                     if (this.password1 === this.password2) {
                         // Start the loder
                         this.visible = true
