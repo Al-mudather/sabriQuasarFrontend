@@ -39,9 +39,32 @@
                 <div class="confirm">
                     <div class="imaagg">
                         <img src="~assets/img/success.png" alt="">
-                        <p>{{ $t('تم إرسال رابط تعيين كلمة المرور علي بريدك الالكتروني') }}</p>
+                        <p>{{ $t('تم إرسال رابط تفعيل حسابك علي بريدك الالكتروني') }}</p>
+                        <br/>
+                        <p>{{ $t('اذا لم تقم باستلام الرابط يرجى اعادة ارسال ايميلك مره اخرى') }}</p>
+                        <q-btn outline class="q-ma-sm" @click="prompt = true" color="primary" label="Resend" />
                     </div>
                 </div>
+
+                <q-dialog v-model="prompt" persistent>
+                  <q-card style="min-width: 350px">
+                    <q-card-section>
+                      <div class="text-h6 text-center">Your email</div>
+                    </q-card-section>
+
+                    <q-card-section class="q-pt-none">
+                      <q-input dense type="email" v-model="email" autofocus @keyup.enter="prompt = false" />
+                    </q-card-section>
+
+                    <q-card-actions align="right" class="text-primary row justify-center">
+                      <q-btn outline class="q-ma-sm" color="negative" label="Cancel" v-close-popup />
+                      <q-btn outline class="q-ma-sm" @click="RESEND_USER_EMAIL" color="success" label="Send" />
+                    </q-card-actions>
+                    <q-inner-loading :showing="loader">
+                      <q-spinner-hourglass color="primary" size="70px"/>
+                    </q-inner-loading>
+                  </q-card>
+                </q-dialog>
           </div>
         </div>
       </div>
@@ -50,10 +73,83 @@
 </template>
 
 <script>
+import { ResendActivationEmail } from "src/queries/account_management/mutation/ResendActivationEmail";
+
 export default {
+  data () {
+    return {
+      prompt: false,
+      loader: false,
+      email: ''
+    }
+  },
   methods: {
     GoToHomePage () {
       this.$router.push({ name: 'Home' })
+    },
+
+    errorHandler(errorsObj) {
+        for (const key in errorsObj) {
+            for (const val of errorsObj[key]) {
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: val.message
+                })
+            }
+        }
+    },
+
+    RESEND_USER_EMAIL() {
+        try {
+            if (this.email) {
+
+              // Start the loder
+              this.loader = true
+              this.$apollo
+                  .mutate({
+                      mutation: ResendActivationEmail,
+                      variables: {
+                          email: this.email
+                      }
+                  })
+                  .then(result => {
+                      // Close the loder
+                      this.loader = false
+                      if (result.data.resendActivationEmail.success) {
+                          this.$q.notify({
+                              type: 'positive',
+                              progress: true,
+                              multiLine: true,
+                              position: 'top',
+                              message: "The email was sent successfully"
+                          })
+                          this.prompt = false
+                      } else if (result.data.resendActivationEmail.errors) {
+                          this.errorHandler(result.data.resendActivationEmail.errors);
+                          this.loader = false
+                      }
+                  }).catch((error) => {
+                      // Close the loder
+                      this.loader = false
+                      this.errorHandler(error.errors);
+                  });
+            } else {
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: "What is your email address ?"
+                })
+            }
+            
+        } catch (error) {
+            // Close the loder
+            this.visible = false
+        }
     }
   }
 }
@@ -63,5 +159,19 @@ export default {
 @import 'src/assets/css/sass/helpers/_variabels.scss';
 @import 'src/assets/css/sass/helpers/_mixins.scss';
 @import 'src/assets/css/account.scss';
+
+.q-btn__wrapper.row {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  padding-right: 2rem !important;
+}
+
+.q-field {
+  margin-right: 1rem;
+}
+
+.q-field.row {
+  margin-left: 0 !important;
+}
 
 </style>
