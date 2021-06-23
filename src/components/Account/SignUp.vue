@@ -157,7 +157,7 @@ export default {
                 }
             }
         },
-        REGISTER_NEW_USER() {
+        REGISTER_NEW_USER() { 
             try {
                 if (this.fullName && this.email&& this.password1 ) {
                     if (this.password1 === this.password2) {
@@ -178,6 +178,20 @@ export default {
                                 // Close the loder
                                 this.visible = false
                                 if (result.data.register.success) {
+                                    //TODO: Save the user data
+                                    const tokenAuth = {
+                                        token: result.data.register.token,
+                                        refresh: result.data.register.refreshToken
+                                    } 
+                                    this.loginAction(tokenAuth).then(() => {
+                                        this.$q.notify({
+                                            type: 'warning',
+                                            progress: true,
+                                            multiLine: true,
+                                            position: 'top',
+                                            message: "You must verify your email account"
+                                        })
+                                    });
                                     this.GotToConfirmationPage();
                                 } else if (result.data.register.errors) {
                                     this.errorHandler(result.data.register.errors);

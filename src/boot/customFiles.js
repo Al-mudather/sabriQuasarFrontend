@@ -8,10 +8,10 @@ import VueSocialSharing from 'vue-social-sharing'
 import jQuery from 'jquery'
 import _ from 'lodash'
 import vueVimeoPlayer from 'vue-vimeo-player'
-import Embed from 'v-video-embed'
+import videoPlayer from 'vue-videojs7'
 
 // global register
-Vue.use(Embed)
+Vue.use(videoPlayer)
 
 Vue.use(vueVimeoPlayer)
 // TODO: Adding vue share

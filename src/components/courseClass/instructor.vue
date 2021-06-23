@@ -28,11 +28,12 @@
                     />
                 </g>
             </svg>
-            <!-- <img :src="'http://localhost:8000' + '/media/' + image" alt="" /> -->
-            <img :src="CALCULATE_IMAGE_URL" alt="" />
+
+            <img v-if="image" :src="CALCULATE_IMAGE_URL" alt="" />
+            <img v-else style="width:100%; height: 100%; margin-top: -2rem;" src="~assets/img/avtar.png" alt="" />
         </div>
         <h3>
-            {{ firstName }}
+            {{ firstName || username.split('@')[0] }}
             {{ lastName }}
         </h3>
         <p id="p_data" class="">
@@ -55,13 +56,10 @@ export default {
     data() {
         return {};
     },
-    props: ["firstName", "lastName", "qualification", "image"],
+    props: ["firstName", "lastName", "username", "qualification", "image"],
     computed: {
         CALCULATE_IMAGE_URL () {
-            if (this.image) {
-                return location.host + '/media/' + this.image
-            }
-            return '~assets/img/big_man.png'
+            return location.host + '/media/' + this.image
         }
     },
     methods: {

@@ -246,9 +246,9 @@ export default {
           })
           .then(res => {``
             this.courseData = res.data.course;
-            console.log('mmmmmmmmmmmmmmmm')
-            console.log(res.data.course)
-            console.log('mmmmmmmmmmmmmmmm')
+            // console.log('mmmmmmmmmmmmmmmm')
+            // console.log(res.data.course)
+            // console.log('mmmmmmmmmmmmmmmm')
             if (res.data.course.pk) {
               // TODO: Get the enrollment of the course
               this.$apollo

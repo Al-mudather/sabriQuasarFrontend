@@ -76,7 +76,7 @@
                     v-if="!lodash.isEmpty(currentContent)"
                     disable="1"
                 >
-                    <q-video
+                    <!-- <q-video
                         :ratio="13 / 11"
                         controls = "false"
                         id="video"
@@ -84,7 +84,7 @@
                         @onPlay="START_LEARNING_UNIT_TRAKING"
                         @ended="END_LEARNING_UNIT_TRAKING"
                         :src="viomURL"
-                    />
+                    /> -->
 
                     <!-- <video
                         id="my-video"
@@ -97,13 +97,13 @@
                         :data-setup='{ "techOrder": ["vimeo"], "sources": [{ "type": "video/vimeo", "src": viomURL}], "vimeo": { "color": "#fbc51b"} }'
                     >
                     </video> -->
-                    <!-- <video-player ref="videoPlayer"
+                    <video-player ref="videoPlayer"
                         class="vjs-custom-skin"
                         :options="playerOptions"
                         @play="START_LEARNING_UNIT_TRAKING"
                         @ready="END_LEARNING_UNIT_TRAKING"
                     >
-                    </video-player> -->
+                    </video-player>
                     <!-- <video
                         id="my-video"
                         class="video-js"
@@ -265,7 +265,10 @@ export default {
     watch: {
 
         currentContent(value) {
+
             this.viomURL = this.GET_VIMO_VIDEO_URL(value.modelValue)
+            //TODO: Play the video
+            this.playVideo(this.viomURL)
             // ?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media
             this.visible = true;
 
@@ -322,6 +325,19 @@ export default {
 
     methods: {
         ...mapActions('courseManagement', ['setCurrentContentAction', 'resetContentListsAction']),
+
+        playVideo (source) {
+            const video = {
+                withCredentials: false,
+                type: 'application/x-mpegurl',
+                src: source
+            }
+
+            this.player.reset()
+            this.player.src(video)
+            this.player.play()
+        },
+
 
         GET_VIMO_VIDEO_URL (data) {
             const video = JSON.parse(data).video;

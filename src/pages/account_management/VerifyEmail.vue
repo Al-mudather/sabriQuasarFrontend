@@ -37,7 +37,15 @@ export default {
             token: params.token
           }
         }).then((res) => {
-          if (res.data.success) console.log(res.data.success)
+          if (res.data.success) {
+            this.$q.notify({
+                type: 'positive',
+                progress: true,
+                multiLine: true,
+                position: 'top',
+                message: "Your accout has been verified :)"
+            })
+          }
         })
       },
       deep: true,
