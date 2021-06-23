@@ -11,7 +11,7 @@
         </div>
         <div class="pric">
             <div class="detai">
-                <h3><span>{{unit}}</span>{{ parseInt(price)}}</h3>
+                <h3><span>{{unit}}</span>{{parseFloat(JSON.parse(course.currency)[currency]).toFixed(3) }}</h3>
             </div>
             <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">{{$t('التفاصيل')}}</button>
             <div class="cart" @click="AddTheCourseToTheBasket">
@@ -54,7 +54,10 @@ export default {
     ...mapState('settings',['isEnglish', 'currency']),
 
     CALCULATE_IMAGE_URL () {
-      return location.host + '/media/' + this.course.cover
+        if (process.env.NODE_ENV == 'development') {
+            return 'http://localhost:8000/media/' + this.course.cover
+        }
+        return location.oragin + '/media/' + this.course.cover
     }
   },
   mounted () {

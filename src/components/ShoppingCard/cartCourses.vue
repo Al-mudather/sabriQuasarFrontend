@@ -12,7 +12,7 @@
                             <img src="~assets/img/cart-img.png" alt="" />
                         </div>
                         <h2>{{ item.course.title }}</h2>
-                        <h3>{{ item.course.courseFee }}<span>SDG</span></h3>
+                        <h3>{{ parseFloat(JSON.parse(item.course.currency)[currency]).toFixed(3) }}<span>{{currency}}</span></h3>
                     </div>
                 </div>
                 <div class="delate" @click="removeCourseFromCart(item)">
@@ -28,7 +28,7 @@
         <div class="total">
             <div class="price">
                 <h2>{{$t('المجمــوع')}}</h2>
-                <h3>{{ calculateTheTotalFees }}<span>SDG</span></h3>
+                <h3>{{ calculateTheTotalFees }}<span>{{currency}}</span></h3>
             </div>
             <div class="next" @click="goToAuthenticationCartPage">
                 <a class="">
@@ -80,13 +80,14 @@ export default {
 
   computed: {
     ...mapState('shoppingCart', ['shoppingCartDataList']),
+    ...mapState('settings',['isEnglish', 'currency']),
 
     calculateTheTotalFees () {
-      let totalFees = 0
+      let totalFees = 0.0
       for (const item of this.shoppingCartDataList) {
-        totalFees = totalFees + parseInt(item.course.courseFee)
+        totalFees = totalFees + parseFloat(JSON.parse(item.course.currency)[this.currency])
       }
-      return totalFees
+      return totalFees.toFixed(3)
     }
   },
 
@@ -97,7 +98,7 @@ export default {
     ]),
 
     goToAuthenticationCartPage () {
-      if (this.calculateTheTotalFees > 0) {
+      if (this.shoppingCartDataList.length > 0) {
         this.$router.push({ name: 'login-cart' })
       } else {
         this.$q.notify({

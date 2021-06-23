@@ -873,7 +873,7 @@ export default {
           font-family: "cairoR";
           margin: -33px 0 0px -2px;
           background-color: #f2f2f2;
-          width: 90px;
+          // width: 90px;
           text-align: center;
           padding: 9px;
           float: left;

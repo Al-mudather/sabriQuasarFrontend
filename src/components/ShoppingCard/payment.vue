@@ -1,14 +1,14 @@
 <template>
     <div class="msPayment">
         <div class="options">
-            <paypal-payment />
-            <div class="sele edit" @click="enableSudaniesBank = true">
+            <paypal-payment v-if=" currency != 'SDG'"/>
+            <div v-if=" currency != 'SDG'" class="sele edit" @click="enableSudaniesBank = true">
                 <img src="~assets/img/credit-cards.png" alt="" />
                 <h3>Sudanies Bank</h3>
             </div>
         </div>
         <!--details Payment-->
-        <div class="details q-mt-md" v-if="enableSudaniesBank">
+        <div class="details q-mt-md" v-if="enableSudaniesBank || currency == 'SDG' ">
             <!-- <div class="error">
                 <h3>
                     <img src="~assets/img/error.png" alt="" />رقم البطاقة غير
@@ -138,6 +138,8 @@ export default {
 
   computed: {
     ...mapState('shoppingCart', ['shoppingCartDataList']),
+    ...mapState('settings',['currency']),
+
     FORMAT_EXPIRATION_DATE () {
         try {
             let day= val.split('/')[0]

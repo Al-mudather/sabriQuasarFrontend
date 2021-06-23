@@ -13,22 +13,22 @@
                         >
                             <swiper-slide class="nav-item" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
                                 <a
-                                style="outline: 0"
-                                :data-course="
-                                    JSON.stringify(spec.node.courseSet)
-                                "
-                                @click="changeCourseData(spec.node.courseSet)"
-                                class="nav-link"
-                                id="home-tab"
-                                data-toggle="tab"
-                                role="tab"
-                                aria-controls="home"
-                                aria-selected="true"
-                            >
-                                <img src="~assets/img/brain.png" alt="" />{{
-                                    spec.node.speciality
-                                }}
-                            </a>
+                                    style="outline: 0"
+                                    :data-course="
+                                        JSON.stringify(spec.node.courseSet)
+                                    "
+                                    @click="changeCourseData(spec.node.courseSet)"
+                                    class="nav-link"
+                                    id="home-tab"
+                                    data-toggle="tab"
+                                    role="tab"
+                                    aria-controls="home"
+                                    aria-selected="true"
+                                >
+                                    <img src="~assets/img/brain.png" alt="" />{{
+                                        spec.node.speciality
+                                    }}
+                                </a>
                             </swiper-slide>
                             <div class="swiper-pagination" slot="pagination"></div>
                         </swiper>
@@ -239,6 +239,7 @@ export default {
         return {
             counter: 0,
             navTab: "",
+            loading: false,
             allCourseSpecialities: "",
             courses: [],
             allCourses: null,
@@ -317,21 +318,20 @@ export default {
                     courseNumber: 5
                 };
             },
-            result (data) {
-                if (!data.loading) {
-                    console.log('bbbbbbbbbbbbbbbbbbbbb')
-                    console.log(data)
-                    console.log('bbbbbbbbbbbbbbbbbbbbb')
+            result (res) {
+                if (!res.loading) {
+                    this.navTab = res.data.allCourseSpecialities.edges[0].node.speciality
+                    this.loading = true
                 }
             }
         }
     },
 
-    watch: {
-        allCourseSpecialities(val) {
-            this.navTab = val.edges[0].node.speciality;
-        }
-    },
+    // watch: {
+    //     allCourseSpecialities(val) {
+    //         this.navTab = val.edges[0].node.speciality;
+    //     }
+    // },
 
     computed: {
       swiper() {

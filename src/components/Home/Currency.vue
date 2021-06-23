@@ -20,7 +20,7 @@
                             <ul>
                                 <li @click="currencySelectionHandler('SDG')"><img src="~assets/img/sudan.png" data-currency="SDG"  alt="">{{$t('الجنيه السوداني')}}</li>
                                 <li @click="currencySelectionHandler('USD')"><img src="~assets/img/united-states .png" data-currency="USD"  alt="">{{$t('الدولار الامريكي')}}</li>
-                                <li @click="currencySelectionHandler('SAR')"><img src="~assets/img/saudi-arabia.png" data-currency="SAR"  alt="">{{$t('الريال السعودي')}}</li>
+                                <!-- <li @click="currencySelectionHandler('SAR')"><img src="~assets/img/saudi-arabia.png" data-currency="SAR"  alt="">{{$t('الريال السعودي')}}</li> -->
                             </ul>
                         </div>
                     </div>

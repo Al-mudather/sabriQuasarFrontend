@@ -116,6 +116,9 @@ export default {
     ...mapState('settings',['currency']),
 
     CALCULATE_IMAGE_URL () {
+      if (process.env.NODE_ENV == 'development') {
+        return 'http://localhost:8000/media/' + this.courseData.profile
+      }
       return location.host + '/media/' + this.courseData.profile
     },
 

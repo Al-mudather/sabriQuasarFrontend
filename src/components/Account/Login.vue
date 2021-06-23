@@ -155,19 +155,19 @@ export default {
 
 
     methods: {
-        ...mapActions("authentication", ["loginAction"]),
+        ...mapActions('authentication', ['loginAction']),
 
         goToPasswordResetPage() {
-            this.$router.push({ name: "password-reset" });
+            this.$router.push({ name: 'password-reset' });
         },
 
         goToSignUpPage() {
-            this.$router.push({ name: "signUp" });
+            this.$router.push({ name: 'signUp' });
         },
 
         reset () {
-            this.email = ""
-            this.password = ""
+            this.email = ''
+            this.password = ''
         },
 
         errorHandler(errorsObj) {
@@ -204,8 +204,14 @@ export default {
                             this.reset()
   
                             this.loginAction(result.data.tokenAuth).then(() => {
+                                this.$q.notify({
+                                    type: 'positive',
+                                    progress: true,
+                                    multiLine: true,
+                                    position: 'top',
+                                    message: 'logged in successfully'
+                                })
                                 // TODO: Go to the page that you came from
-
                                 this.$router.push( this.prevRoute || { name: 'Home' })
 
                             });

@@ -221,6 +221,7 @@ export default {
                 width: 330px;
                 height: 243px;
                 border-radius: 47px;
+                overflow: hidden;
                 //maxMobile
                 @media(max-width:767px){
                     width: 100%;
@@ -233,7 +234,8 @@ export default {
                     overflow: hidden;
                 }
                 img{
-                    width: 330px;
+                    height: 100%;
+                    width: 100%;
                     //maxMobile
                     @media(max-width:767px){
                         width: 100%;
