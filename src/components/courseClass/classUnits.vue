@@ -76,7 +76,7 @@
                     v-if="!lodash.isEmpty(currentContent)"
                     disable="1"
                 >
-                    <!-- <q-video
+                    <q-video
                         :ratio="13 / 11"
                         controls = "false"
                         id="video"
@@ -84,7 +84,7 @@
                         @onPlay="START_LEARNING_UNIT_TRAKING"
                         @ended="END_LEARNING_UNIT_TRAKING"
                         :src="viomURL"
-                    /> -->
+                    />
 
                     <!-- <video
                         id="my-video"
@@ -97,13 +97,14 @@
                         :data-setup='{ "techOrder": ["vimeo"], "sources": [{ "type": "video/vimeo", "src": viomURL}], "vimeo": { "color": "#fbc51b"} }'
                     >
                     </video> -->
-                    <video-player ref="videoPlayer"
-                        class="vjs-custom-skin"
+                    <!-- <videojsVimeo
+                        ref="videoPlayer"
+                        class="video-player-box"
                         :options="playerOptions"
                         @play="START_LEARNING_UNIT_TRAKING"
                         @ready="END_LEARNING_UNIT_TRAKING"
                     >
-                    </video-player>
+                    </videojsVimeo> -->
                     <!-- <video
                         id="my-video"
                         class="video-js"
@@ -189,7 +190,8 @@
         </div>
     </div>
 </template>
-
+<script src="../../../node_modules/video.js/dist/video.min.js"></script> 
+<script src="../dist/Vimeo.min.js"></script> 
 <script>
 
 import { StartLearningUnit } from 'src/queries/learning_management/mutation/StartLearningUnit';
@@ -222,12 +224,10 @@ export default {
 				byline: false
 			},
             playerOptions: {
-                autoplay: true,
+                autoplay: false,
                 controls: true,
-                controlBar: {
-                    timeDivider: false,
-                    durationDisplay: false
-                }
+                techOrder: [ 'vimeo'],
+                sources:[]
             },
             startLearningTrackingID: '',
             courseEnrollment: '',
@@ -268,7 +268,12 @@ export default {
 
             this.viomURL = this.GET_VIMO_VIDEO_URL(value.modelValue)
             //TODO: Play the video
-            this.playVideo(this.viomURL)
+            this.playerOptions.sources.push({
+                type: 'video/vimo',
+                src: this.viomURL
+            })
+            console.log(this.playerOptions.sources)
+            // this.playVideo(this.viomURL)
             // ?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media
             this.visible = true;
 
