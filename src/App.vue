@@ -22,6 +22,7 @@ export default {
         // console.log({router: this.$router})
         //TODO: Empty the nav bar 
         LocalStorage.set('activeNav', '')
+
         // TODO: If There is a token, reLogin the user
         if (this.token) { 
             this.RE_LOGIN_USER().then((re) => {

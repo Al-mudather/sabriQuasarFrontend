@@ -50,6 +50,13 @@ export default {
     currencySelectionHandler (currency) {
       // const name = `[data-cart="${currency}"]`
       this.setCurrencyAction(currency)
+      this.$q.notify({
+        type: 'positive',
+        progress: true,
+        multiLine: true,
+        position: 'top',
+        message: this.$t(`currency has been changed to: ${currency}`)
+    })
     }
   }
 }

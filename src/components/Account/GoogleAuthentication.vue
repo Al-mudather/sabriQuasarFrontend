@@ -47,6 +47,13 @@ export default {
                     if (result.data.socialAuth) {
                         this.loginAction(result.data.socialAuth).then(() => {
                             if (result.data.socialAuth.token) {
+                                this.$q.notify({
+                                    type: 'positive',
+                                    progress: true,
+                                    multiLine: true,
+                                    position: 'top',
+                                    message: this.$t('تم تسجيل الدخول بنجاح')
+                                })
                                 this.$router.push( this.prevRoute || { name: 'Home' })
                             }
                         });
