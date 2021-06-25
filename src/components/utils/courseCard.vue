@@ -67,10 +67,6 @@ export default {
         { value: 1e18, symbol: "E" }
       ];
 
-      console.log('nnnnnnnnnnnnnnnnn')
-      console.log(num)
-      console.log(num < 0.0)
-      console.log('nnnnnnnnnnnnnnnnn')
       if ( (num.toString().split('.')[0] == 0) || num == 0 ) {
         return num
       }

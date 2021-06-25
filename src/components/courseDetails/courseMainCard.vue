@@ -119,7 +119,7 @@ export default {
       if (process.env.NODE_ENV == 'development') {
         return 'http://localhost:8000/media/' + this.courseData.profile
       }
-      return location.host + '/media/' + this.courseData.profile
+      return location.origin + '/media/' + this.courseData.profile
     },
 
     formatCoureFee() {
