@@ -22,7 +22,6 @@ import Training from 'components/Home/Training'
 
 import Account from 'pages/account_management/Account'
 import { mapState, mapActions } from 'vuex'
-import { LocalStorage } from 'quasar'
 
 export default {
   name: 'Home',

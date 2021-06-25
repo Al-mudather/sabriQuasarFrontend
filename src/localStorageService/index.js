@@ -16,7 +16,7 @@ const tokenStorage = {
     return localStorage.getItem("userRefreshToken");
   },
   clearToken() {
-    localStorage.removeItem("user");
+    localStorage.removeItem("Frontend_user");
     localStorage.removeItem("userAccessToken");
     localStorage.removeItem("userRefreshToken");
   }
@@ -25,20 +25,20 @@ const tokenStorage = {
 const userProfileStorage = {
   setUser(user) {
     try {
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("Frontend_user", JSON.stringify(user));
     } catch (e) {
       // Pass Don't Set Any Thing
     }
   },
   getUser() {
     try {
-      return JSON.parse(localStorage.getItem("user"));
+      return JSON.parse(localStorage.getItem("Frontend_user"));
     } catch (e) {
       return {}
     }
   },
   clearUserProfileStorage() {
-    localStorage.removeItem("user");
+    localStorage.removeItem("Frontend_user");
   }
 };
 

@@ -1,5 +1,6 @@
 <template>
     <AccountHeader
+        :prevRoute="prevRoute"
         :dialogName="$t('إنشاء حساب جديد')"
     >
         <!--
@@ -114,15 +115,18 @@
 
 <script>
 import { RegisterNewUser } from "src/queries/account_management/mutation/RegisterNewUser";
+import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { mapActions } from "vuex";
 import AccountHeader from "src/components/utils/accountHeader";
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication';
 import FacebookAuthentication from 'src/components/Account/FacebookAuthentication';
 
 export default {
+
     data() {
         return {
             visible: false,
+            prevRoute: null,
             fullName: "",
             email: "",
             password1: "",
@@ -130,16 +134,26 @@ export default {
             errorMessages: []
         };
     },
+
     components: {
         AccountHeader,
         GoogleAuthentication,
         FacebookAuthentication
     },
+
+    beforeRouteEnter(to, from, next) {
+
+        next(vm => {
+            vm.prevRoute = from.fullPath
+        })
+    },
+
     methods: {
         ...mapActions("authentication", [
             "loginAction",
             "setSignUpDialogAction",
-            "setRegisterationDialogAction"
+            "setRegisterationDialogAction",
+            "SET_USER_DATA_ACTION"
         ]),
 
         errorHandler(errorsObj) {
@@ -153,54 +167,57 @@ export default {
                         position: 'top',
                         message: val.message
                     })
-                    // this.errorMessages.push(val.message);
                 }
             }
         },
-        REGISTER_NEW_USER() { 
+
+        async REGISTER_NEW_USER() { 
             try {
                 if (this.fullName && this.email&& this.password1 ) {
                     if (this.password1 === this.password2) {
                         // Start the loder
                         this.visible = true
                         this.errorMessages = [];
-                        this.$apollo
-                            .mutate({
-                                mutation: RegisterNewUser,
-                                variables: {
-                                    email: this.email,
-                                    fullName: this.fullName,
-                                    password1: this.password1,
-                                    password2: this.password2
-                                }
-                            })
-                            .then(result => {
-                                // Close the loder
-                                this.visible = false
-                                if (result.data.register.success) {
-                                    //TODO: Save the user data
-                                    const tokenAuth = {
-                                        token: result.data.register.token,
-                                        refresh: result.data.register.refreshToken
-                                    } 
-                                    this.loginAction(tokenAuth).then(() => {
+                        const signUp_res = await this.$apollo.mutate({
+                            mutation: RegisterNewUser,
+                            variables: {
+                                email: this.email,
+                                fullName: this.fullName,
+                                password1: this.password1,
+                                password2: this.password2
+                            }
+                        })
+                        
+                        if (signUp_res.data.register.success){
+                            const tokenAuth = {
+                                token: signUp_res.data.register.token,
+                                refresh: signUp_res.data.register.refreshToken
+                            }
+
+                            this.loginAction(tokenAuth).then(() => {
+
+                                try {
+                                    this.$apollo.query({
+                                        query: GetMyProfileData
+                                    }).then(res => {
+                                        this.SET_USER_DATA_ACTION(res.data.me)
                                         this.$q.notify({
                                             type: 'warning',
                                             progress: true,
                                             multiLine: true,
                                             position: 'top',
-                                            message: "You must verify your email account"
+                                            message: this.$t('يجب ان تقوم بتفعيل حسابك الإلكتروني')
                                         })
-                                    });
-                                    this.GotToConfirmationPage();
-                                } else if (result.data.register.errors) {
-                                    this.errorHandler(result.data.register.errors);
+                                    })
+                                } catch (error) {
                                 }
-                            }).catch((error) => {
-                                // Close the loder
-                                this.visible = false
-                                this.errorHandler(error.errors);
                             });
+                            this.GotToConfirmationPage();
+                        } else if (signUp_res.data.register.errors) {
+                            this.visible = false
+                            this.errorHandler(signUp_res.data.register.errors);
+                        }
+
                     } else {
                         this.$q.notify({
                             type: 'warning',
@@ -221,6 +238,23 @@ export default {
                 }
                 
             } catch (error) {
+                if (error.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: this.$t('هذا الحساب مسجل مسبقا')
+                    })
+                } else {
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: 'There were some errors please try again latter'
+                    })
+                }
                 // Close the loder
                 this.visible = false
             }

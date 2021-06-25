@@ -88,7 +88,7 @@ export default {
   },
   methods: {
     GET_IMAGE_URL (instructorImage) {
-      return location.host + '/media/' + instructorImage
+      return location.origin + '/media/' + instructorImage
     }
   },
   apollo: {

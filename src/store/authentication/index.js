@@ -18,6 +18,8 @@ const mutations = {
     userProfileStorage.setUser(customUser)
   },
   updateUser (state, user) {
+    // Set the user
+    userProfileStorage.setUser(user)
     state.user = user
   },
   updateToken (state, token) {
@@ -50,17 +52,24 @@ const actions = {
     commit('updatePasswordResetDialog', value)
   },
 
+  SET_USER_DATA_ACTION ({ commit }, value) {
+    commit('updateUser', value)
+  },
+
   loginAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      const user = payload.user || payload.social.user || ''
+      let user = ''
+      if (payload.user) {
+        user = payload.user
+      } else {
+        user = payload.social ? payload.social.user: ''
+      }
       const token = payload.token
       const refresh =  payload.refreshToken || ''
       const tokenObj = {
         token,
         refresh
       }
-      // Set the user
-      userProfileStorage.setUser(user)
       // Set the token and the refreshToken authentication
       tokenStorage.setToken(tokenObj)
       // commit the change to the store
@@ -93,14 +102,7 @@ const actions = {
         } else {
           return false
         }
-  
-        // Notify.create({
-        //   type: 'positive',
-        //   message: `logged in successfully`
-        // })
-  
       }).catch(e => {
-  
       })
       
     } else {
@@ -120,7 +122,7 @@ const actions = {
         multiLine: true,
         position: 'top',
         message: 'Logged Out Successfully'
-    })
+      })
       resolve()
     })
   }

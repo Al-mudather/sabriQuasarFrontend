@@ -12,7 +12,7 @@
                             <img src="~assets/img/cart-img.png" alt="" />
                         </div>
                         <h2>{{ item.course.title }}</h2>
-                        <h3>{{ parseFloat(JSON.parse(item.course.currency)[currency]).toFixed(3) }}<span>{{currency}}</span></h3>
+                        <h3>{{FORMAT_COUSRE_PRICE(JSON.parse(item.course.currency)[currency], 3) }}<span>{{currency}}</span></h3>
                     </div>
                 </div>
                 <div class="delate" @click="removeCourseFromCart(item)">
@@ -87,7 +87,7 @@ export default {
       for (const item of this.shoppingCartDataList) {
         totalFees = totalFees + parseFloat(JSON.parse(item.course.currency)[this.currency])
       }
-      return totalFees.toFixed(3)
+      return totalFees
     }
   },
 
@@ -96,6 +96,28 @@ export default {
       'deleteShoppinCartDataListAction',
       'setShoppinCartDataListAction'
     ]),
+
+    FORMAT_COUSRE_PRICE(num, digits) {
+      const lookup = [
+        { value: 1, symbol: "" },
+        { value: 1e3, symbol: "k" },
+        { value: 1e6, symbol: "M" },
+        { value: 1e9, symbol: "G" },
+        { value: 1e12, symbol: "T" },
+        { value: 1e15, symbol: "P" },
+        { value: 1e18, symbol: "E" }
+      ];
+
+      if ( (num.toString().split('.')[0] == 0) || num == 0 ) {
+        return num
+      }
+      const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+      var item = lookup.slice().reverse().find(function(item) {
+        return num >= item.value;
+      });
+
+      return item ? (num / item.value).toFixed(digits).replace(rx, "$1") + item.symbol : "0";
+    },
 
     goToAuthenticationCartPage () {
       if (this.shoppingCartDataList.length > 0) {

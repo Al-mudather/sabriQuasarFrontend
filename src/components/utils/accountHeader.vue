@@ -47,7 +47,11 @@ export default {
   props: ['dialogName', 'prevRoute'],
   methods: {
     goBackToThePreviousePage () {
-      this.$router.push(prevRoute || { name: 'Home' })
+      if ( this.prevRoute != '/account/signUp') {
+        this.$router.push(this.prevRoute || { name: 'Home' })
+      } else {
+        this.$router.push({ name: 'Home' })
+      }
     }
   }
 }

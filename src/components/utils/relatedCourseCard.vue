@@ -11,7 +11,8 @@
         </div>
         <div class="pric">
             <div class="detai">
-                <h3><span>{{unit}}</span>{{parseFloat(JSON.parse(course.currency)[currency]).toFixed(3) }}</h3>
+                <!-- <h3><span>{{unit}}</span>{{parseFloat(JSON.parse(course.currency)[currency]).toFixed(3) }}</h3> -->
+                <h3><span>{{currency}}</span>{{FORMAT_COUSRE_PRICE(parseFloat(JSON.parse(course.currency)[currency]), 3)}}</h3>
             </div>
             <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">{{$t('التفاصيل')}}</button>
             <div class="cart" @click="AddTheCourseToTheBasket">
@@ -70,6 +71,32 @@ export default {
   },
   methods: {
     ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
+
+    FORMAT_COUSRE_PRICE(num, digits) {
+      const lookup = [
+        { value: 1, symbol: "" },
+        { value: 1e3, symbol: "k" },
+        { value: 1e6, symbol: "M" },
+        { value: 1e9, symbol: "G" },
+        { value: 1e12, symbol: "T" },
+        { value: 1e15, symbol: "P" },
+        { value: 1e18, symbol: "E" }
+      ];
+
+      console.log('nnnnnnnnnnnnnnnnn')
+      console.log(num)
+      console.log(num < 0.0)
+      console.log('nnnnnnnnnnnnnnnnn')
+      if ( (num.toString().split('.')[0] == 0) || num == 0 ) {
+        return num
+      }
+      const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+      var item = lookup.slice().reverse().find(function(item) {
+        return num >= item.value;
+      });
+
+      return item ? (num / item.value).toFixed(digits).replace(rx, "$1") + item.symbol : "0";
+    },
 
     changeTheLayoutStyle(value) {
         if (value) {

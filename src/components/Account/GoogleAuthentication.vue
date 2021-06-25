@@ -29,9 +29,38 @@ export default {
             this.$router.push({ name: "Home" });
         },
         // TODO: Google and Facebook Register
-        loginAuthMutation(accessToken, provider, email = "") {
+        async loginAuthMutation(accessToken, provider, email = "") {
             console.log(" Triggering Apollo ");
+            try {
+                
+            } catch (error) {
+                
+            }
             this.visible = true
+
+            const auth_res = await this.$apollo.mutate({
+                    mutation: SocialAuth,
+                    variables: {
+                        provider: provider,
+                        accessToken: accessToken,
+                        email: email
+                    }
+            })
+
+            if (result.data.socialAuth) {
+                this.loginAction(result.data.socialAuth).then(() => {
+                    if (result.data.socialAuth.token) {
+                        this.$q.notify({
+                            type: 'positive',
+                            progress: true,
+                            multiLine: true,
+                            position: 'top',
+                            message: this.$t('تم تسجيل الدخول بنجاح')
+                        })
+                        this.$router.push( this.prevRoute || { name: 'Home' })
+                    }
+                });
+            }
 
             this.$apollo
                 .mutate({
