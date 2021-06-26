@@ -32,11 +32,7 @@ export default {
         async loginAuthMutation(accessToken, provider, email = "") {
             console.log(" Triggering Apollo ");
             try {
-                
-            } catch (error) {
-                
-            }
-            this.visible = true
+                this.visible = true
 
             const auth_res = await this.$apollo.mutate({
                     mutation: SocialAuth,
@@ -47,9 +43,9 @@ export default {
                     }
             })
 
-            if (result.data.socialAuth) {
-                this.loginAction(result.data.socialAuth).then(() => {
-                    if (result.data.socialAuth.token) {
+            if (auth_res.data.socialAuth) {
+                this.loginAction(auth_res.data.socialAuth).then(() => {
+                    if (auth_res.data.socialAuth.token) {
                         this.$q.notify({
                             type: 'positive',
                             progress: true,
@@ -99,6 +95,19 @@ export default {
                         })
                     }
                 });
+            } catch (error) {
+                this.visible = false
+                if (error.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: this.$t('هذا الحساب مسجل مسبقا')
+                    })
+                }
+            }
+            
         },
 
         helloGoogleAuth(network = "google") {

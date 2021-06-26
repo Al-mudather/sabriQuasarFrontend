@@ -3,8 +3,8 @@
         <div v-if="!token" class="creatt">
             <div class="linkss">
                 <div class="logBy">
-                    <FacebookAuthentication class="hvr-shadow-radial" />
-                    <GoogleAuthentication class="hvr-shadow-radial"/>
+                    <!-- <FacebookAuthentication class="hvr-shadow-radial" />
+                    <GoogleAuthentication class="hvr-shadow-radial"/> -->
                     <div class="login hvr-shadow-radial q-mr-sm" style="cursor: pointer">
                         <a @click="GoToLoginPage">
                             <img src="~assets/img/login.png" alt="" />&nbsp;
@@ -134,8 +134,8 @@
 
 <script>
 import { mapState } from "vuex";
-import GoogleAuthentication from "src/components/Account/GoogleAuthentication";
-import FacebookAuthentication from "src/components/Account/FacebookAuthentication";
+// import GoogleAuthentication from "src/components/Account/GoogleAuthentication";
+// import FacebookAuthentication from "src/components/Account/FacebookAuthentication";
 
 export default {
     name:  "loginCartpage",
@@ -161,10 +161,10 @@ export default {
             this.$router.push({ name: 'payment' })
         }
     },
-    components: {
-        GoogleAuthentication,
-        FacebookAuthentication
-    },
+    // components: {
+    //     GoogleAuthentication,
+    //     FacebookAuthentication
+    // },
     methods: {
         GoToLoginPage () {
             this.$router.push({ name: 'login' })
