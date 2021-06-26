@@ -112,12 +112,6 @@ export default {
     'paypal-payment': paypalPayment
   },
 
-  watch: {
-    expDate (val) {
-        
-    }
-  },
-
   mounted () {
     this.$root.$emit('activateShoppingProgress', 'paymentData')
     
@@ -138,22 +132,7 @@ export default {
 
   computed: {
     ...mapState('shoppingCart', ['shoppingCartDataList']),
-    ...mapState('settings',['currency']),
-
-    FORMAT_EXPIRATION_DATE () {
-        try {
-            let day= val.split('/')[0]
-            let year= val.split('/')[1]
-            let last2digits;
-
-            last2digits = year.substr(2,2)
- 
-            return String(day) + String(last2digits)
-
-        } catch {
-            return ''
-        }
-    }
+    ...mapState('settings',['currency'])
   },
 
   methods: {
@@ -235,12 +214,27 @@ export default {
             }
         },
 
+        FORMAT_EXPIRATION_DATE () {
+            try {
+                let day= this.expDate.split('/')[0]
+                let year= this.expDate.split('/')[1]
+                let last2digits;
+
+                last2digits = year.substr(2,2)
+    
+                return String(day) + String(last2digits)
+
+            } catch {
+                return ''
+            }
+        },
+
         async makeSmartNodePayment(orderResult) {
             const smartNoderesult = await this.$apollo.mutate({
                 mutation: CreateSmartNodeCheckout,
                 variables: {
                     card: this.card,
-                    expDate: this.FORMAT_EXPIRATION_DATE,
+                    expDate: this.FORMAT_EXPIRATION_DATE(),
                     ipin: this.ipin,
                     orderId: orderResult.order.pk,
                 }
