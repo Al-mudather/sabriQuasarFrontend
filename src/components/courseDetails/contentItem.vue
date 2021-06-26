@@ -5,7 +5,7 @@
             <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" />
             <img v-else src="~assets/img/padlock.png" alt="" />
         </div>
-        <h3 class="video" v-if="content.isFree"  @click="OPEN_FREE_VIDEO_COURSE(content)">{{ formatTitle }}</h3>
+        <h3 class="video" v-if="content.isFree"  @click="OPEN_FREE_VIDEO_COURSE($event ,content)">{{ formatTitle }}</h3>
         <h3 v-else >{{ formatTitle }}</h3>
     </div>
 
@@ -47,7 +47,8 @@ export default {
     }
   },
   methods: {
-    OPEN_FREE_VIDEO_COURSE (content) {
+    OPEN_FREE_VIDEO_COURSE (e, content) {
+      e.preventDefault();
       //TODO: Open the video card dialog
       this.card = true
       const video = JSON.parse(content.modelValue).video 

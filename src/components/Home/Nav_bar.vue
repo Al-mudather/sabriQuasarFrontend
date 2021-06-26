@@ -187,9 +187,9 @@ export default {
         },
 
         LOG_USER_OUT () {
-            this.logOutAction()
             //TODO: redirect the user to the home page
             this.$router.push({ name: "Home" });
+            this.logOutAction()
         },
 
         showTheSearchingResult (event) {

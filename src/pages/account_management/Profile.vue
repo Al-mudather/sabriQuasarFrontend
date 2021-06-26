@@ -192,7 +192,7 @@ export default {
 
     setTheGenderToFemale () {
       this.gender = 'female'
-    },
+    }, 
 
     ///////////////////////////////////
     // JOIN to the affilliate programme
@@ -220,13 +220,16 @@ export default {
       this.visible = true
       try {
         this.$apollo
-          .mutate({
+          .mutate({ 
             mutation: UpdateUserProfile,
             variables: {
               fullName: this.fullName,
               phoneNumber: this.phoneNumber,
               gender: this.gender
-            }
+            },
+            refetchQueries: [{
+              query: GetMyProfileData,
+            }]
           })
           .then(result => {
             if (result.data.updateAccount.success) {
