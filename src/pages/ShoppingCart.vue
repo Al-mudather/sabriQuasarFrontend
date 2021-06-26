@@ -237,11 +237,12 @@ export default {
 
     closeShoppingCart() {
       // TODO: if you are in the payment page, go to the page before the shopping page
-      if ( this.$route.fullPath === '/cart/payment') {
-        this.$router.go(-4)
-      } else {
-        this.$router.push( this.prevRoute || { name: 'Home' })
-      }
+      this.$router.push({ name: 'Home' })
+      // if ( this.$route.fullPath === '/cart/payment') {
+      //   this.$router.go(-4)
+      // } else {
+      //   this.$router.push( this.prevRoute || { name: 'Home' })
+      // }
     }
   }
 };
