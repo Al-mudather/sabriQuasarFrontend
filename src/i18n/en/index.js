@@ -15,12 +15,16 @@ export default {
    
       "تأكيد" : "emphasis",
  
-      "تم إرسال رابط تعيين كلمة المرور علي بريدك الالكتروني" : "A password-set link has been sent to your email",
+      "تم إرسال رابط تفعيل حسابك علي بريدك الالكتروني" : "A link to activate your account has been sent to your email",
+ 
+      "اذا لم تقم باستلام الرابط يرجى اعادة ارسال ايميلك مره اخرى" : "If you did not receive the link, please send your email again",
  
         
   "_comment_src_components_Account_GoogleAuthentication.vue": "src_components_Account_GoogleAuthentication.vue",
         
    
+      "تم تسجيل الدخول بنجاح" : "You are logged in successfully",
+ 
       "هذا الحساب مسجل مسبقا" : "This account is already registered",
  
         
@@ -56,6 +60,8 @@ export default {
       "الاسم الحقيقي" : "real name",
  
       "إعادة كلمة المرور" : "Password reset",
+ 
+      "يجب ان تقوم بتفعيل حسابك الإلكتروني" : "You must activate your online account",
  
         
   "_comment_src_components_courseClass_classUnits copy.vue": "src_components_courseClass_classUnits copy.vue",
@@ -153,6 +159,8 @@ export default {
  
       "الريال السعودي" : "Saudi riyal",
  
+      "تم تغيير العمله الى:" : "The currency has been changed to:",
+ 
         
   "_comment_src_components_Home_Evaluation.vue": "src_components_Home_Evaluation.vue",
         
@@ -182,6 +190,18 @@ export default {
       "إنشاء حساب" : "Create an account",
  
       "دخول" : "Login",
+ 
+      "الرئيسية" : "Main",
+ 
+      "الــدورات" : "courses",
+ 
+      "لوحتي التعليمية" : "My educational board",
+ 
+      "الإشعارت" : "Notice",
+ 
+      "الملف الشخصي" : "Profile personly",
+ 
+      "خــروج" : "exit",
  
         
   "_comment_src_components_Home_Nav_bar.vue": "src_components_Home_Nav_bar.vue",
@@ -336,6 +356,10 @@ export default {
         
    
         
+  "_comment_src_components_utils_relatedCourseCard.vue": "src_components_utils_relatedCourseCard.vue",
+        
+   
+        
   "_comment_src_layouts_MainLayout.vue": "src_layouts_MainLayout.vue",
         
    
@@ -387,8 +411,6 @@ export default {
   "_comment_src_pages_account_management_Profile.vue": "src_pages_account_management_Profile.vue",
         
    
-      "الملف الشخصي" : "Profile personly",
- 
       "بياناتــي" : "My data",
  
       "البريد الالكتروني" : "E-mail",
@@ -426,7 +448,7 @@ export default {
         
    
         
-  "_comment_src_pages_course_management_CourseClass copy 2.vue": "src_pages_course_management_CourseClass copy 2.vue",
+  "_comment_src_pages_course_management_CourseClass.vue": "src_pages_course_management_CourseClass.vue",
         
    
       "التقدم" : "Progress",
@@ -439,12 +461,6 @@ export default {
  
       "مقدمين الدورة" : "Course presenters",
  
-      "extColor;    }  }}/*--- End navbar ---*//*--- START lecture ---*/.Lecture {  padding: 10px;  margin: 20px 0 45px 0;  position: relative;  svg {    position: absolute;    top: 57px;    right: 27px;    width: auto;  }  .hedeer {    height: 56px;    margin: 0 0 12px 0;    .percent {      display: inline-block;      width: 54px;      height: 54px;      border: 2px solid #fcd462;      border-radius: 4px;      text-align: center;      margin-left: 14px;      h3 {        font-size: 18px;        font-family: cairoR;        margin: 2px 0 4px 0;        color: extColor;      }      span {        font-size: 13px;        font-family: cairoR;        display: block;        color: #a1a1a1;      }    }    .titel {      display: inline-block;      position: relative;      top: -6px;      img {        display: inline-block;        margin: -9px 0 0 0;      }      h3 {        color: extColor;        font-size: 22px;        font-family: cairoB;        line-height: 1.7;        margin: 0 11px 0 0;        display: inline-block;      }    }  }  /*progress*/  .progress {    margin: 17px 0 0 0;    height: 7px;    .progress-bar {      background: linear-gradient        90deg,        rgba123, 134, 250, 1" : "extColor; }}} / * --- End navbar --- * // * --- START lecture --- * /. Lecture {padding: 10px; margin: 20px 0 45px 0; position: relative; svg {position: absolute; top: 57px; right: 27px; width: auto; } .hedeer {height: 56px; margin: 0 0 12px 0; .percent {display: inline-block; width: 54px; height: 54px; border: 2px solid # fcd462; border-radius: 4px; text-align: center; margin-left: 14px; h3 {font-size: 18px; font-family: cairoR; margin: 2px 0 4px 0; color: extColor; } span {font-size: 13px; font-family: cairoR; display: block; color: # a1a1a1; }} .titel {display: inline-block; position: relative; top: -6px; img {display: inline-block; margin: -9px 0 0 0; } h3 {color: extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; }}} / * progress * / .progress {margin: 17px 0 0 0; height: 7px; .progress-bar {background: linear-gradient 90deg, rgba123, 134, 250, 1",
- 
-        
-  "_comment_src_pages_course_management_CourseClass.vue": "src_pages_course_management_CourseClass.vue",
-        
-   
       "extColor;    }  }}/*--- End navbar ---*//*--- START lecture ---*/.Lecture {  padding: 10px;  margin: 20px 0 45px 0;  position: relative;  svg {    position: absolute;    top: 57px;    right: 27px;    width: auto;  }  .hedeer {    height: 56px;    margin: 0 0 12px 0;    .percent {      display: inline-block;      width: 54px;      height: 54px;      border: 2px solid #fcd462;      border-radius: 4px;      text-align: center;      margin-left: 14px;      h3 {        font-size: 18px;        font-family: cairoR;        margin: 2px 0 4px 0;        color: extColor;      }      span {        font-size: 13px;        font-family: cairoR;        display: block;        color: #a1a1a1;      }    }    .titel {      display: inline-block;      position: relative;      top: -6px;      img {        display: inline-block;        margin: -9px 0 0 0;      }      h3 {        color: extColor;        font-size: 22px;        font-family: cairoB;        line-height: 1.7;        margin: 0 11px 0 0;        display: inline-block;        //maxMobile        @mediamax-width:767px" : "extColor; }}} / * --- End navbar --- * // * --- START lecture --- * /. Lecture {padding: 10px; margin: 20px 0 45px 0; position: relative; svg {position: absolute; top: 57px; right: 27px; width: auto; } .hedeer {height: 56px; margin: 0 0 12px 0; .percent {display: inline-block; width: 54px; height: 54px; border: 2px solid # fcd462; border-radius: 4px; text-align: center; margin-left: 14px; h3 {font-size: 18px; font-family: cairoR; margin: 2px 0 4px 0; color: extColor; } span {font-size: 13px; font-family: cairoR; display: block; color: # a1a1a1; }} .titel {display: inline-block; position: relative; top: -6px; img {display: inline-block; margin: -9px 0 0 0; } h3 {color: extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; // maxMobile @ mediamax-width: 767px",
  
       "extColor;        font-size: 17px;        font-family: cairoB;        border: 0;        &.active {          border-bottom: 2px solid #fcd462;        }      }    }    .tab-content {      margin: 20px 0 0 0;      .asid {        width: 100%;        background: #fff;        // height: 409px;        border-bottom-left-radius: 42px;        border-bottom-right-radius: 42px;        margin: 0 0 30px 0;        //maxMobile        @mediamax-width:767px" : "extColor; font-size: 17px; font-family: cairoB; border: 0; & .active {border-bottom: 2px solid # fcd462; }}} .tab-content {margin: 20px 0 0 0; .asid {width: 100%; background: #fff; // height: 409px; border-bottom-left-radius: 42px; border-bottom-right-radius: 42px; margin: 0 0 30px 0; // maxMobile @ mediamax-width: 767px",
@@ -493,16 +509,12 @@ export default {
  
       "extColor;                border: 1px solid #F6F6F6;                padding: 7px 10px 0 0;                background-color: #fff;                @include prefixerbox-shadow, 2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14" : "extColor; border: 1px solid # F6F6F6; padding: 7px 10px 0 0; background-color: #fff; @include prefixerbox-shadow, 2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14",
  
-      "extColor;    //         border: 1px solid #F6F6F6;    //         padding: 7px 10px 0 0;    //         background-color: #fff;    //         @include prefixerbox-shadow, 2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14" : "extColor; // border: 1px solid # F6F6F6; // padding: 7px 10px 0 0; // background-color: #fff; // @include prefixerbox-shadow, 2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14",
- 
       "extColor;                        font-size: 14px;                        outline: 0;                        margin: 8px 0 0 0;                        @include prefixerbox-shadow, 8px 3px 7px #9e9e9e36, webkit moz ms" : "extColor; font-size: 14px; outline: 0; margin: 8px 0 0 0; @include prefixerbox-shadow, 8px 3px 7px # 9e9e9e36, webkit moz ms",
  
         
   "_comment_src_pages_course_management_MyCourses.vue": "src_pages_course_management_MyCourses.vue",
         
    
-      "لوحتي التعليمية" : "My educational board",
- 
       "كورساتـي" : "Courses",
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    /* لوحتي التعليمية */    .move{        margin: 30px 0 30px 0;        padding: 0 1% 0 1%;        .col-lg-7{            //maxMobile            @mediamax-width:767px" : "extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; }} / * My Learning Board * / .move {margin: 30px 0 30px 0; padding: 0 1% 0 1%; .col-lg-7 {// maxMobile @ mediamax-width: 767px",

@@ -55,7 +55,7 @@ export default {
         progress: true,
         multiLine: true,
         position: 'top',
-        message: this.$t(`currency has been changed to: ${currency}`)
+        message: this.$t('تم تغيير العمله الى:') + currency
     })
     }
   }
