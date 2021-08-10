@@ -87,6 +87,7 @@ export default {
       for (const item of this.shoppingCartDataList) {
         totalFees = totalFees + parseFloat(JSON.parse(item.course.currency)[this.currency])
       }
+      this.setTotalPaymentFeesAction(totalFees)
       return totalFees
     }
   },
@@ -94,7 +95,8 @@ export default {
   methods: {
     ...mapActions('shoppingCart', [
       'deleteShoppinCartDataListAction',
-      'setShoppinCartDataListAction'
+      'setShoppinCartDataListAction',
+      'setTotalPaymentFeesAction'
     ]),
 
     FORMAT_COUSRE_PRICE(num, digits) {

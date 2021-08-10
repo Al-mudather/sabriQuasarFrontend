@@ -46,8 +46,8 @@ const wsLink = new WebSocketLink({
 })
 
 const httpLink = createUploadLink({
-  // uri: "http://127.0.0.1:8000" + '/api/graphql/',
-  uri: API_URI + '/api/graphql/',
+  uri: "http://127.0.0.1:8000" + '/api/graphql/',
+  // uri: API_URI + '/api/graphql/',
   fetch: buildAxiosFetch(axios, (config, input, init) => ({
     ...config,
     onUploadProgress: init.onUploadProgress,

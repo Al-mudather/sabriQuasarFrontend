@@ -11,28 +11,14 @@
                 <FacebookAuthentication class="hvr-pulse-grow" />
                 <GoogleAuthentication class="hvr-pulse-grow" />
             </div>
-            <form>
+            <form @submit="REGISTER_NEW_USER($event)">
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
-                        <!-- <div
-                            class=""
-                            style="text-align:left"
-                            v-if="errorMessages.length > 0"
-                        >
-                            Please fix these <strong>error first</strong>
-                            <ul>
-                                <li
-                                    v-for="(message, index) in errorMessages"
-                                    :key="index"
-                                >
-                                    {{ message }}<br />
-                                </li>
-                            </ul>
-                        </div> -->
                         <div class="inp">
                             <!-- <img src="~assets/img/gmail.png" alt="" /> -->
                             <input
                                 class="input"
+                                id="fullName"
                                 v-model="fullName"
                                 type="text"
                                 :placeholder="$t('الاسم الحقيقي')"
@@ -42,6 +28,7 @@
                             <img src="~assets/img/gmail.png" alt="" />
                             <input
                                 class="input"
+                                id="regEmail"
                                 v-model="email"
                                 type="email"
                                 :placeholder="$t('الإيميل')"
@@ -51,6 +38,7 @@
                             <img src="~assets/img/password.png" alt="" />
                             <input
                                 class="input"
+                                id="regPassword"
                                 v-model="password1"
                                 type="password"
                                 :placeholder="$t('كلمة المرور')"
@@ -65,6 +53,7 @@
                             <img src="~assets/img/password.png" alt="" />
                             <input
                                 class="input"
+                                id="regPassword2"
                                 v-model="password2"
                                 type="password"
                                 :placeholder="$t('إعادة كلمة المرور')"
@@ -73,7 +62,7 @@
                     </div>
                 </div>
                 <div class="next">
-                    <a class="action_btn" @click="REGISTER_NEW_USER" style="cursor: pointer">
+                    <button class="action_btn" type="submit" id="siginUpAction" style="outline: none; border: none; background: transparent; box-shadow: none; cursor: pointer">
                         <svg
                             class="nexx neex_1"
                             xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +92,7 @@
                             </g>
                         </svg>
                         <img src="~assets/img/back.png" alt="" />
-                    </a>
+                    </button>
                 </div>
             </form>
             <q-inner-loading :showing="visible">
@@ -171,7 +160,8 @@ export default {
             }
         },
 
-        async REGISTER_NEW_USER() { 
+        async REGISTER_NEW_USER(event) {
+            event.preventDefault();
             try {
                 if (this.fullName && this.email&& this.password1 ) {
                     if (this.password1 === this.password2) {
@@ -210,6 +200,9 @@ export default {
                                         })
                                     })
                                 } catch (error) {
+                                    console.log('333333333333333333333333')
+                                    console.log(error.message)
+                                    console.log('333333333333333333333333')
                                 }
                             });
                             this.GotToConfirmationPage();

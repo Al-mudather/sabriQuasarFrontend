@@ -64,6 +64,7 @@ const routes = [
     path: '/account',
     component: () => import('pages/account_management/Account'),
     children: [
+      { path: 'registerationCode', name: 'registeration-code', alias:'', component: () => import('pages/account_management/RegisterationCode.vue') },
       { path: 'login', name: 'login', component: () => import('components/Account/Login') },
       { path: 'signUp', name: 'signUp', component: () => import('components/Account/SignUp') },
       { path: 'passwordReset', name: 'password-reset', component: () => import('components/Account/ResetPassword') },

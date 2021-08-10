@@ -8,7 +8,7 @@
                 <FacebookAuthentication :prevRoute="prevRoute" class="hvr-pulse-grow"/>
                 <GoogleAuthentication :prevRoute="prevRoute" class="hvr-pulse-grow"/>
             </div>
-            <form>
+            <form id="loginForm" @submit="LoginUser($event)">
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
                         <div
@@ -30,6 +30,7 @@
                             <img src="~assets/img/gmail.png" alt="" />
                             <input
                                 class="input"
+                                id="email"
                                 v-model="email"
                                 type="email"
                                 :placeholder="$t('الإيميل')"
@@ -39,6 +40,7 @@
                             <img src="~assets/img/password.png" alt="" />
                             <input
                                 class="input"
+                                id="password"
                                 v-model="password"
                                 type="password"
                                 :placeholder="$t('كلمة المرور')"
@@ -55,7 +57,8 @@
                     </div>
                 </div>
                 <div class="next" style="cursor: pointer">
-                    <a class="action_btn" @click="LoginUser">
+                    <!-- <button type="submit" style="outline: none; border: none; background: transparent; box-shadow: none;" id="loginBtn" class="action_btn" @click="LoginUser"> -->
+                    <button type="submit" style="outline: none; border: none; background: transparent; box-shadow: none;" id="loginBtn" class="action_btn">
                         <svg
                             class="nexx"
                             xmlns="http://www.w3.org/2000/svg"
@@ -85,7 +88,7 @@
                             </g>
                         </svg>
                         <img src="~assets/img/back.png" alt="" />
-                    </a>
+                    </button>
                 </div>
             </form>
             <div class="creat">
@@ -126,6 +129,8 @@
 <script>
 import { LoginUserWithEmail } from "src/queries/account_management/mutation/LoginUserWithEmail";
 import { mapActions } from "vuex";
+import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
+
 import AccountHeader from "src/components/utils/accountHeader";
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication';
 import FacebookAuthentication from 'src/components/Account/FacebookAuthentication';
@@ -171,10 +176,8 @@ export default {
         },
 
         errorHandler(errorsObj) {
-            console.log(errorsObj);
             for (const key in errorsObj) {
                 for (const val of errorsObj[key]) {
-                    // this.errorMessages.push(val.message);
                     this.$q.notify({
                         type: 'warning',
                         position: 'top',
@@ -185,10 +188,12 @@ export default {
                 }
             }
         },
-        LoginUser() {
+        LoginUser(event) {
+            event.preventDefault();
             try {
                 this.visible = true
                 this.errorMessages = []
+
                 this.$apollo
                     .mutate({
                         mutation: LoginUserWithEmail,
@@ -211,8 +216,8 @@ export default {
                                     position: 'top',
                                     message: 'logged in successfully'
                                 })
-                                // TODO: Go to the page that you came from
-                                this.$router.push( this.prevRoute || { name: 'Home' })
+                                // TODO: See if the user thas the reqisteration code
+                                this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
 
                             });
                         } else if (result.data.tokenAuth.errors) {
@@ -224,6 +229,29 @@ export default {
                 
             } catch (error) {
                 this.visible = false
+            }
+        },
+
+        async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
+            try {
+                const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+                console.log('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
+                console.log(join_permission_res)
+                console.log('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
+                this.$router.push({ name: 'Home' })
+            } catch (e) {
+                if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
+                    this.$q.notify({
+                        type: 'positive',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: 'You must inter the registeration code'
+                    })
+                    // TODO: Go to code registeration page
+                    this.$router.push({ name: 'registeration-code' })
+                }
+
             }
         }
     }

@@ -319,8 +319,11 @@ export default {
                 };
             },
             result (res) {
+                console.log('kkkkkkkkkkkkkkkkkkkkk')
+                console.log(res)
+                console.log('kkkkkkkkkkkkkkkkkkkkk')
                 if (!res.loading) {
-                    this.navTab = res.data.allCourseSpecialities.edges[0].node.speciality
+                    // this.navTab = res.data.allCourseSpecialities.edges[0].node.speciality
                     this.loading = true
                 }
             }

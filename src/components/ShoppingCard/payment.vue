@@ -1,23 +1,22 @@
 <template>
     <div class="msPayment">
+        <div class="text-h5">
+            إختر وسيلة الدفع اللتي تناسبك
+        </div>
         <div class="options">
-            <paypal-payment v-if=" currency != 'SDG'"/>
+            <paypal-payment v-if=" currency != 'SDG' "/>
+            <div v-if=" currency != 'SDG'" class="sele edit" @click="enableBankakPayment = true">
+                <img src="~assets/img/bankk.png" alt="" />
+                <h3>الدفع عن طريق بنكك</h3>
+            </div>
             <div v-if=" currency != 'SDG'" class="sele edit" @click="enableSudaniesBank = true">
                 <img src="~assets/img/credit-cards.png" alt="" />
                 <h3>Sudanies Bank</h3>
             </div>
         </div>
+        <bankak-payment v-if="enableBankakPayment"/>
         <!--details Payment-->
         <div class="details q-mt-md" v-if="enableSudaniesBank || currency == 'SDG' ">
-            <!-- <div class="error">
-                <h3>
-                    <img src="~assets/img/error.png" alt="" />رقم البطاقة غير
-                    صحيح أعد المحاولة
-                </h3>
-            </div>
-            <div class="logoPay">
-                <img src="~assets/img/discover.png" alt="" />
-            </div> -->
             <form>
                 <div
                     class=""
@@ -87,6 +86,13 @@
                 </q-inner-loading>
             </form>
         </div>
+        <div class="total">
+            <div class="price">
+                <h2>{{$t('المجمــوع')}}</h2>
+                <h3>{{ totalPaymentFees }}<span>{{currency}}</span></h3>
+                <!-- <h3><span>{{currency}}</span></h3> -->
+            </div>
+        </div>
     </div>
 </template>
 
@@ -95,12 +101,14 @@ import { mapState } from 'vuex'
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
 import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
+import bankakPayment from 'src/components/ShoppingCard/bankakPay'
 
 export default {
   name:  "paymentCartpage",
   data () {
     return {
         enableSudaniesBank: false,
+        enableBankakPayment: false,
         visible: false,
         errorMessages: [],
         card: '',
@@ -109,7 +117,8 @@ export default {
     }
   },
   components: {    
-    'paypal-payment': paypalPayment
+    'paypal-payment': paypalPayment,
+    'bankak-payment': bankakPayment
   },
 
   mounted () {
@@ -131,7 +140,7 @@ export default {
   },
 
   computed: {
-    ...mapState('shoppingCart', ['shoppingCartDataList']),
+    ...mapState('shoppingCart', ['shoppingCartDataList', 'totalPaymentFees']),
     ...mapState('settings',['currency'])
   },
 

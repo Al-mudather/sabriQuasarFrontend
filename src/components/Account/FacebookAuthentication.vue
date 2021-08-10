@@ -9,6 +9,7 @@
 
 <script>
 import { SocialAuth } from "src/queries/account_management/mutation/CreateSocailAuth";
+import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { mapActions } from "vuex";
 
 export default {
@@ -27,6 +28,25 @@ export default {
         ]),
         GoToHomePage() {
             this.$router.push({ name: "Home" });
+        },
+        async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
+            try {
+                const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+                this.$router.push({ name: 'Home' })
+            } catch (e) {
+                if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
+                    this.$q.notify({
+                        type: 'positive',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: 'You must inter the registeration code'
+                    })
+                    // TODO: Go to code registeration page
+                    this.$router.push({ name: 'registeration-code' })
+                }
+
+            }
         },
         // TODO: Google and Facebook Register
         loginAuthMutation(accessToken, provider, email = "") {
@@ -47,15 +67,14 @@ export default {
                         this.loginAction(result.data.socialAuth).then(() => {
                             // TODO: Go To the home page
                             if (result.data.socialAuth.token) {
-                                this.$router.push( this.prevRoute || { name: 'Home' })
+                                // TODO: See if the user thas the reqisteration code
+                                this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
+                                // this.$router.push({ name: 'registeration-code' })
                             }
                         });
                     }
                 }).catch((error) => {
                     this.visible = false
-                    console.log('eeeeeeeeeeeeeee')
-                    console.log(error)
-                    console.log('eeeeeeeeeeeeeee')
                 });
         },
 

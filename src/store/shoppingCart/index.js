@@ -2,6 +2,7 @@ import { Notify, LocalStorage } from 'quasar'
 
 const state = {
   shoppinCartDialog: false,
+  totalPaymentFees: LocalStorage.getItem('totalPaymentFees') || 0.0,
   checkoutOrderID: LocalStorage.getItem('orderID') || null,
   shoppingCartDataList: LocalStorage.getItem('shoppingCartList') || []
 }
@@ -35,6 +36,11 @@ const mutations = {
 
   updateShoppinCartDialog (state, value) {
     state.shoppinCartDialog = value
+  },
+
+  updateTotalPaymentFees (state, value) {
+    LocalStorage.set('totalPaymentFees', value)
+    state.totalPaymentFees = value
   },
 
   updateShoppingCartDataList (state, value) {
@@ -85,6 +91,10 @@ const actions = {
 
   setShoppingCartDataListAction ({ commit }, value) {
     commit('updateShoppingCartDataList', value)
+  },
+
+  setTotalPaymentFeesAction ({ commit }, value) {
+    commit('updateTotalPaymentFees', value)
   }
 }
 
