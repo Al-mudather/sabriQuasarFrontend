@@ -42,6 +42,7 @@ const routes = [
     path: '/user',
     component: () => import('src/layouts/UserLayout'),
     children: [
+      { path: '/myMarketingPage', name: 'my-marketing-page', beforeEnter: requireAuthentication, component: () => import('pages/pyramid_marketing_management/MyMarketingPage.vue') },
       { path: '/notification', name: 'notification', beforeEnter: requireAuthentication, component: () => import('pages/notifivation_management/Notification.vue') },
       { path: '/profile', name: 'user-profile', beforeEnter: requireAuthentication, component: () => import('pages/account_management/Profile') },
       { path: '/myCourses', name: 'my-courses', beforeEnter: requireAuthentication, component: () => import('pages/course_management/MyCourses.vue') },

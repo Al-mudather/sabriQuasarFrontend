@@ -1,7 +1,7 @@
 <template>
     <section class="myCourses">
         <div class="container-fluid">
-            <!-- <div class="row">
+            <div class="row">
                 <div class="col-lg-12">
                     <div class="titel titel2">
                         <img src="~assets/img/tit.png" alt="">
@@ -15,7 +15,7 @@
                         <h3>{{$t('كورساتـي')}}</h3>
                     </div>
                 </div>
-            </div> -->
+            </div>
             <div v-if="lodash.isEmpty(lodash.get(allEnrollmentsForCurrentUser, '[edges]'))" class="notice">
                 <div class="container">
                     <div class="row">
@@ -88,7 +88,7 @@
 
 <script>
 import courseCard from 'src/components/MyCourses/courseCard'
-// import afilliateBord from 'src/components/MyCourses/afilliateBord'
+import afilliateBord from 'src/components/MyCourses/afilliateBord.vue'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { mapActions } from "vuex"
 
@@ -102,8 +102,8 @@ export default {
     },
 
 	components: {
-		courseCard
-        // afilliateBord
+		courseCard,
+        afilliateBord
 	},
 
     apollo: {

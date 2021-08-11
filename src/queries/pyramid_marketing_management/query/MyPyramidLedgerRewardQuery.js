@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 
-export const GetTotalUsers = gql`
+export const MyPyramidLedgerReward = gql`
 query MyPyramidLedgerReward {
 
   myPyramidLedgerReward

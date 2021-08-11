@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 
-export const ArchiveUserAccount = gql`
+export const WithdrawPyramidBalance = gql`
 mutation WithdrawPyramidBalance($amount: Float!, $input: MakePyramidWithdrawInput!) {
 
   makePyramidWithdraw(amount:$amount, input: $input) {
@@ -8,9 +8,15 @@ mutation WithdrawPyramidBalance($amount: Float!, $input: MakePyramidWithdrawInpu
       success
       errors
       pyramidWithdraw: instance {
-
-          %s
-
+        id
+        pk
+        pyramidAccount {
+            pk
+        }
+        amount
+        isDone
+        created
+        updated
       }
 
   }

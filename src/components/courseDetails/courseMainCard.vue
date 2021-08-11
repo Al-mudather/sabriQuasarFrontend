@@ -88,12 +88,7 @@
         />
         <img class="addCou" src="~assets/img/addCou.png" alt="" /> -->
       </div>
-      <div class="share" v-if="!$_.isEmpty( $_.get(user, '[affiliateSet][edges]') )">
-        <form>
-          <input id="shar-link" type="text" :value="preparTheSharingLink">
-          <button @click="CopyTheLinkHandler"><q-tooltip>{{message}}</q-tooltip><img src="~assets/img/copy.png"></button>
-        </form>
-    </div>
+
     </div>
   </div>
 </template>
@@ -105,8 +100,6 @@ export default {
   name: "CourseMainCard",
   data() {
     return {
-      message: this.$t('انسخ الرابط'),
-      fab2: true
     };
   },
   props: ["courseData", "affilitateLink"],
@@ -171,21 +164,6 @@ export default {
       });
 
       return item ? (num / item.value).toFixed(digits).replace(rx, "$1") + item.symbol : "0";
-    },
-
-    CopyTheLinkHandler(e) {
-      e.preventDefault();
-
-      let copyText = document.getElementById("shar-link");
-
-      /* Select the text field */
-      copyText.select();
-      copyText.setSelectionRange(0, 99999); /* For mobile devices */
-
-      /* Copy the text inside the text field */
-      document.execCommand("copy");
-      this.message = this.$t('تم النسخ')
-
     },
 
     AddTheCourseToTheBasket() {

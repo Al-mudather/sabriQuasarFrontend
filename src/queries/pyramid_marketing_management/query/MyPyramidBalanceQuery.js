@@ -1,15 +1,15 @@
 import gql from 'graphql-tag'
 
-export const GetMyProfileData = gql`
+export const MyPyramidBalance = gql`
 query MyPyramidBalance {
 
   myPyramidBalance {
       
-      id
-      pk
-      balance
-      created
-      updated
+    id
+    pk
+    balance
+    created
+    updated
 
   }
 

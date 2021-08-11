@@ -1,17 +1,22 @@
 import gql from 'graphql-tag'
-
-export const ArchiveUserAccount = gql`
+ 
+export const JoinPyramidProgram = gql`
 mutation JoinPyramidProgram($input: JoinPyramidProgramInput!) {
 
   joinPyramidProgram(input: $input) {
 
       success
       errors
-      pyramid: instance {
-
-          %s
-
+      pyramidId
+      user {
+        pk
       }
+      parent {
+        pk
+      }
+      pyramidCode
+      created
+      updated
 
   }
 

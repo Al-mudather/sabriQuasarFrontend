@@ -55,6 +55,10 @@
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('لوحتي التعليمية')}}</h3>
                 </a>
+                <a class="but side-nav__item" data-link="MYMARKETINGPAGE" v-if="token" @click="GO_TO_MY_MARKETING_PAGE($event)">
+                    <img src="~assets/img/bordText.png" alt="">
+                    <h3>{{$t('صفحتي التسويقيه')}}</h3>
+                </a>
                 <a class="but side-nav__item" data-link="NOTIFICATION" v-if="token" @click="GO_TO_MY_NOTIFICATIONS_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الإشعارت')}}</h3>
@@ -210,6 +214,11 @@ export default {
         GO_TO_MY_NOTIFICATIONS_PAGE(e) {
             this.MAKE_ACTIVE(e)
             this.$router.push({ name: "notification" });
+        },
+
+        GO_TO_MY_MARKETING_PAGE(e) {
+            this.MAKE_ACTIVE(e)
+            this.$router.push({ name: "my-marketing-page" });
         },
 
         GO_TO_MY_PROFILE_PAGE(e) {

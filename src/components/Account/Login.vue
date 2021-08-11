@@ -235,11 +235,9 @@ export default {
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
-                console.log('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
-                console.log(join_permission_res)
-                console.log('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
                 this.$router.push({ name: 'Home' })
             } catch (e) {
+                //TODO: IF there is an error, then the user did not join the platform with a registeration code
                 if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
                     this.$q.notify({
                         type: 'positive',
@@ -248,7 +246,7 @@ export default {
                         position: 'top',
                         message: 'You must inter the registeration code'
                     })
-                    // TODO: Go to code registeration page
+                    // TODO: Go to registeration code page
                     this.$router.push({ name: 'registeration-code' })
                 }
 
