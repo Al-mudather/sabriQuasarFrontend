@@ -60,7 +60,6 @@ export default {
                         position: 'top',
                         message: val.message
                     })
-                    // this.errorMessages.push(val.message);
                 }
             }
         },
@@ -188,9 +187,6 @@ export default {
                 paypalPaymentresult.data.createPaypalCheckout;
             if (this.$_.get(paypalDetails, "[errors]")) {
                 this.visible = false;
-                console.log('ddddddd')
-                console.log(paypalDetails)
-                console.log('ddddddd')
             }
 
             if (this.$_.get(paypalDetails, "[success]")) {

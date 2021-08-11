@@ -1,27 +1,5 @@
 <template>
     <div class="sele edit" @click="buyTheCoursesUsingStripe">
-        <!-- <q-dialog v-model="alert">
-            <q-card>
-                <q-card-section>
-                    <div class="text-h6">Please fix these <strong>error first</strong></div>
-                </q-card-section>
-
-                <q-card-section class="q-pt-none">
-                    <ul>
-                        <li
-                            v-for="(message, index) in errorMessages"
-                            :key="index"
-                        >
-                            {{ message }}<br />
-                        </li>
-                    </ul>
-                </q-card-section>
-
-                <q-card-actions align="right">
-                    <q-btn flat label="OK" color="primary" v-close-popup />
-                </q-card-actions>
-            </q-card>
-        </q-dialog> -->
         <div
             class=""
             style="text-align:left"
@@ -141,21 +119,10 @@ export default {
                 }
             });
             const dataObj = result.data.createNewOrderWithBulkOrderDetails;
-            console.log('kkkkkkkkkkkkkkkkkkkkkkkkkk')
-            console.log(dataObj)
-            console.log('kkkkkkkkkkkkkkkkkkkkkkkkkk')
 
             if (this.$_.get(dataObj,'[errors]')) {
                 this.visible = false
                 this.errorHandler(dataObj.errors)
-                // this.$q.notify({
-                //     type: 'warning',
-                //     progress: true,
-                //     multiLine: true,
-                //     position: 'top',
-                //     message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
-                // })
-
             }
 
             if (this.$_.get(dataObj,'[success]')) {

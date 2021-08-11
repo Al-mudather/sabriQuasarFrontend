@@ -28,7 +28,7 @@ export default {
       this.$emit('File_Handler', val)
     }
   },
-  methods: {
+  methods: { 
     onRejected (rejected) {
       // Notify plugin needs to be installed
       // https://quasar.dev/quasar-plugins/notify#Installation

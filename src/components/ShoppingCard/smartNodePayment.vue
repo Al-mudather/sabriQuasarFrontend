@@ -88,9 +88,9 @@ export default {
                 }
             });
             const smartNodeDetails = smartNoderesult.data.createSmartNodeCheckout;
-            console.log('sssssssssssssssssssss')
-            console.log(smartNodeDetails)
-            console.log('sssssssssssssssssssss')
+            // console.log('sssssssssssssssssssss')
+            // console.log(smartNodeDetails)
+            // console.log('sssssssssssssssssssss')
             if (this.$_.get(smartNodeDetails, "[errors]")) {
                 this.visible = false;
                 alert(details.errors.nonFieldErrors);
