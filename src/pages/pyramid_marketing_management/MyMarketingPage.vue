@@ -45,7 +45,7 @@
 // import { mapActions } from 'vuex'
 import MyBalance from 'src/components/pyramid_marketing_management/MyBalance'
 import MyPyramid from 'src/components/pyramid_marketing_management/MyPyramid'
-import MyWithdrawsList from 'src/components/pyramid_marketing_management/MyWithdrawsList'
+import MyWithdrawsList from 'src/components/pyramid_marketing_management/MyWithdrawsList.vue'
 
 export default {
   name: "MyMarketingPage",
@@ -58,22 +58,6 @@ export default {
     'my-balance': MyBalance,
     'my-pyramid': MyPyramid,
     'my-withdraws-list': MyWithdrawsList
-  },
- 
-  mounted () {
-    //TODO: Save the active link so when render it will be make active again
-    // this.setActiveNavAction('NOTIFICATION')
-    // // TODO: Get the notification from the [ UserNavBar ] component
-    // // this.$root.$on('NotificationData', this.GET_NOTIFICATION_DATA)
-    // // TODO: Get the notification
-    // this.$apollo.query({
-    //   query: GetAllMyNotifications,
-    //   variables: {
-    //     orderBy: ['-id']
-    //   }
-    // }).then( res => {
-    //   this.notificationData = res.data.myNotifications
-    // } )
   },
 
   methods: {
