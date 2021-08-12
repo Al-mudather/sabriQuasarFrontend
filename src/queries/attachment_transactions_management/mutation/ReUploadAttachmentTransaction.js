@@ -1,9 +1,15 @@
 import gql from 'graphql-tag'
 
-export const UploadAttachmentTransaction = gql`
-mutation UploadAttachmentTransaction($input: UploadAttachmentTransactionInput!) {
+export const ReUploadAttachmentTransaction = gql`
+mutation ReUploadAttachmentTransaction(
+  $id: Int!, 
+  $input: ReUploadAttachmentTransactionInput!
+) {
 
-  uploadAttachmentTransaction(input: $input) {
+  reUploadAttachmentTransaction(
+      id: $id, 
+      input: $input
+  ) {
 
       success
       errors

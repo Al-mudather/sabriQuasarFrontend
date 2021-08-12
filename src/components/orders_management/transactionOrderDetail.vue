@@ -28,7 +28,7 @@
                 <h4>{{myOrder.order.totalAmount}}<span>{{myOrder.order.currency}}</span></h4>
             </div>
         </div>
-        <div class="viewpay" v-if="!myOrder.doneVerification">
+        <div class="viewpay" v-if="myOrder.retryPlease">
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 313.02 71.79" style="enable-background:new 0 0 313.02 71.79;" xml:space="preserve">
                 <g id="Bg">
                     <rect x="-1094.81" y="-761.75" class="Indicator0" style="opacity:0;fill:#FFFFFF;" width="2511" height="1593.05"></rect>
@@ -57,20 +57,22 @@
         <!--cn-->
         <div class="cn" style="3px 0 0 0">
             <div class="bmg">
-            <img class="bank" :src="FORMAT_IMAGE(myOrder.attachment)" alt="">
+                <img class="bank" :src="FORMAT_IMAGE(myOrder.attachment)" alt="">
+                <file-upload
+                    imgeSize="4000000"
+                    :accept="'.png,.jpg, image/*'"
+                    label="شعار بنكك"
+                    v-on:File_Handler='reuploadImageHandler'
+                ></file-upload>
             </div>
             <!--control-->
             <div class="control">
                 <!--bu-->
-                <div class="bu" style="cursor: pointer;" @click="CONFIRM_OR_REJECT_TRANSACTION(confirm)">
-                <img src="~assets/img/done.png" alt="">
-                <h2>تأكيد الدفع</h2>
+                <div class="bu" style="cursor: pointer;" @click="RE_UPLOAD_THE_TRANSACTION_BILL">
+                    <img src="~assets/img/done.png" alt="">
+                    <h2>إعادة ارفاق الاشعار</h2>
                 </div>
-                <!--bu-->
-                <div class="bu" style="cursor: pointer;" @click="CONFIRM_OR_REJECT_TRANSACTION(reject)">
-                    <img src="~assets/img/cansl.png" alt="">
-                    <h2>غير معتمد</h2>
-                </div>
+
                 <q-inner-loading :showing="loading">
                     <q-spinner-hourglass color="primary" size="70px" />
                 </q-inner-loading>
@@ -81,6 +83,9 @@
 </template>
 
 <script>
+import FileUpload from 'src/components/utils/FileUploader.vue'
+import { ReUploadAttachmentTransaction } from 'src/queries/attachment_transactions_management/mutation/ReUploadAttachmentTransaction'
+import { MyAttachmentTransactions } from 'src/queries/attachment_transactions_management/query/TheUserAttachmentTransactionsQuery'
 
 export default {
     name: 'transactionOrderDetail',
@@ -88,6 +93,7 @@ export default {
         return {
             bill: false,
             loading: false,
+            bankakBill: null,
             confirm: {
                 marketerEndorse: true,
                 retryPlease: false,
@@ -100,7 +106,12 @@ export default {
         }
     },
     props:['myOrder'],
+    components: { FileUpload },
     methods: {
+        reuploadImageHandler (val) {
+            this.bankakBill = val
+        },
+
         FORMAT_IMAGE (imageUrl) {
             if (process.env.NODE_ENV == 'development') {
                 return  `http://localhost:8000/media/${imageUrl}`
@@ -110,18 +121,49 @@ export default {
             }
         },
 
-        async CONFIRM_OR_REJECT_TRANSACTION (data) {
-            this.loading = true
-            const confirm_res = await this.$apollo.mutate({
-                mutation: MarketerConfirmAttachmentTransaction,
-                variables: {
-                    id: this.customerTrans.pk,
-                    input: data
-                }, 
-                refetchQueries: [{ query: AllMarketerAttachmentTransaction }]
+        errorHandler(errorsObj) {
+            if ( typeof errorsObj == 'Object' ) {
+                for (const key in errorsObj) {
+                    for (const val of errorsObj[key]) {
+                        this.$q.notify({
+                            type: 'warning',
+                            progress: true,
+                            multiLine: true,
+                            position: 'top',
+                            message: val.message
+                        })
+                    }
+                }
+            } else {
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: errorsObj.message
                 })
-            const errors = confirm_res.data.marketerAttachmentTransactionConfirmation.errors
-            const success = confirm_res.data.marketerAttachmentTransactionConfirmation.success
+                
+            }
+        },
+ 
+        async RE_UPLOAD_THE_TRANSACTION_BILL () {
+            this.loading = true
+            console.log(';;;;;;;;;;;;;;;;;;;;;;;')
+            console.log(this.myOrder.pk)
+            console.log(';;;;;;;;;;;;;;;;;;;;;;;')
+            const re_upload_res = await this.$apollo.mutate({
+                mutation: ReUploadAttachmentTransaction,
+                variables: {
+                    id: this.myOrder.pk,
+                    input: {
+                        attachment: this.bankakBill
+                    }
+                }, 
+                refetchQueries: [{ query: MyAttachmentTransactions }]
+                })
+
+            const errors = re_upload_res.data.reUploadAttachmentTransaction.errors
+            const success = re_upload_res.data.reUploadAttachmentTransaction.success
 
             if (success) {
                 this.loading = false
@@ -131,7 +173,7 @@ export default {
                     position: 'top',
                     progress: true,
                     multiLine: true,
-                    message: "The transaction has been confirmed by you"
+                    message: "The transaction has been reuploader"
                 })
             } else if (errors) {
                 this.loading = false

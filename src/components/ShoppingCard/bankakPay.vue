@@ -79,31 +79,39 @@ export default {
         },
 
         async SEND_THE_PAYMENT () {
-            this.visible = true
-            // TODO: Extract all courses ids
-            const courseIds = this.getOrdersIds();
-            // TODO: Make the order
-            const orderResult = await this.getOrderResult(courseIds);
-            // TODO: Make payment using bankak
-            const bankakPaymentResult = await this.$apollo.mutate({
-                mutation: UploadAttachmentTransaction,
-                variables: {
-                    order: orderResult.order.pk,
-                    attachment: this.bankakBill
+            try {
+                this.visible = true
+                // TODO: Extract all courses ids
+                const courseIds = this.getOrdersIds();
+                // TODO: Make the order
+                const orderResult = await this.getOrderResult(courseIds);
+                // TODO: Make payment using bankak
+                const bankakPaymentResult = await this.$apollo.mutate({
+                    mutation: UploadAttachmentTransaction,
+                    variables: {
+                        input: {
+                            order: orderResult.order.pk,
+                            attachment: this.bankakBill
+                        }
+                    }
+                });
+                const dataObj = bankakPaymentResult.data.uploadAttachmentTransaction;
+                if (this.$_.get(dataObj,'[errors]')) {
+                    this.visible = false
+                    this.errorHandler(dataObj.errors)
                 }
-            });
-            const dataObj = bankakPaymentResult.data.uploadAttachmentTransaction;
-            if (this.$_.get(dataObj,'[errors]')) {
+    
+                if (this.$_.get(dataObj,'[success]')) {
+                    this.visible = false
+                    //TODO: 
+                    this.deleteShoppinCartDataListAction()
+                    //TODO: Go to my orders page
+                    this.$router.push({ name: 'cart-success' })
+                }
+                
+            } catch (error) {
                 this.visible = false
-                this.errorHandler(dataObj.errors)
-            }
-
-            if (this.$_.get(dataObj,'[success]')) {
-                this.visible = false
-                //TODO: 
-                this.deleteShoppinCartDataListAction()
-                //TODO: Go to my orders page
-                this.$router.push({ name: 'cart-success' })
+                
             }
 
         }

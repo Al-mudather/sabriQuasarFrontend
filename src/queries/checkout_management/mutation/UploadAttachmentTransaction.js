@@ -1,9 +1,9 @@
 import gql from 'graphql-tag'
 
 export const UploadAttachmentTransaction = gql`
-mutation UploadAttachmentTransaction($order: Int!, $attachment: Upload!) {
+mutation UploadAttachmentTransaction($input: UploadAttachmentTransactionInput!) {
 
-  uploadAttachmentTransaction(order: $order, attachment: $attachment) {
+  uploadAttachmentTransaction(input: $input) {
 
       success
       errors
