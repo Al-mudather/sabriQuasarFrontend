@@ -42,6 +42,7 @@ const routes = [
     path: '/user',
     component: () => import('src/layouts/UserLayout'),
     children: [
+      { path: '/myOrders', name: 'my-orders', beforeEnter: requireAuthentication, component: () => import('pages/order_management/MyOrdersPage.vue') },
       { path: '/myCustomersPayment', name: 'my-customers-payment', beforeEnter: requireAuthentication, component: () => import('pages/pyramid_marketing_management/MyCustomersPaymentPage.vue') },
       { path: '/myMarketingPage', name: 'my-marketing-page', beforeEnter: requireAuthentication, component: () => import('pages/pyramid_marketing_management/MyMarketingPage.vue') },
       { path: '/notification', name: 'notification', beforeEnter: requireAuthentication, component: () => import('pages/notifivation_management/Notification.vue') },

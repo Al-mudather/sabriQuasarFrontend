@@ -11,6 +11,12 @@ import 'animate.css'
 
 export default {
     name: "App",
+    data () {
+        return {
+
+        }
+    },
+
     computed: {
         ...mapState('authentication', ['token'])
     },

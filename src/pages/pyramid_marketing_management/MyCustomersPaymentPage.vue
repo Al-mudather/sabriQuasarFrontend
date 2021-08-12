@@ -14,128 +14,10 @@
                             <div class="row">
                                 <!--box-pay--><!--box-done-->
                                 <div v-for="customerTrans in customersTransactionsList.edges" :key="customerTrans.node.pk" class="col-lg-3 col-md-6 col-sm-6">
-                                    <!-- {{Object.keys(customerTrans.node)}} -->
-                                    marketerEndorse =>>{{customerTrans.node.marketerEndorse}}
-                                    retryPlease =>>{{customerTrans.node.retryPlease}}
-                                    pyramidManager =>>{{customerTrans.node.pyramidManager}}
-                                    pyramidManagerEndorse =>>{{customerTrans.node.pyramidManagerEndorse}}
-                                    pyramidRetryPlease =>>{{customerTrans.node.pyramidRetryPlease}}
-                                    doneVerification =>>{{customerTrans.node.doneVerification}}
-                                    <div class="box-pay box-done">
-                                        <!--inv-->
-                                        <div class="inv">
-                                            <!--box-->
-                                            <div class="box">
-                                                <!-- <h2>INV<span>39284</span></h2> -->
-                                                <h2><span>{{customerTrans.node.order.invoiceNumber}}</span></h2>
-                                                <img src="~assets/img/hash.png" alt="#">
-                                            </div>
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                                                viewBox="0 0 313.02 71.79" style="enable-background:new 0 0 313.02 71.79;" xml:space="preserve">
-                                                <!-- <style type="text/css">
-                                                    .Indicator0{opacity:0;fill:#FFFFFF;}
-                                                    .Indicator1{fill:#FAD25E;}
-                                                </style> -->
-                                                <g id="Bg">
-                                                    <rect x="-1094.81" y="-761.75" class="Indicator0" width="2511" height="1593.05"/>
-                                                    <g id="Group_65624" transform="translate(17.292)">
-                                                        <path id="Path_151295" class="Indicator1" d="M167.86,59.92c-15.82,15.82-41.47,15.82-57.29,0L98.69,48.05C67.93,17.28,26.21,0-17.29,0
-                                                            h313.02c-43.51,0-85.23,17.28-115.99,48.05L167.86,59.92z"/>
-                                                    </g>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                        <!--data-->
-                                        <Transaction-completed />
-                                    </div>
-                                </div>
-                                <!--box-pay--><!--box-wait-->
-                                <div class="col-lg-3 col-md-6 col-sm-6">
-                                    <div class="box-pay box-wait">
-                                        <!--inv-->
-                                        <div class="inv">
-                                            <!--box-->
-                                            <div class="box">
-                                                <h2>INV<span>39284</span></h2>
-                                                <img src="~assets/img/hash.png" alt="#">
-                                            </div>
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                                                viewBox="0 0 313.02 71.79" style="enable-background:new 0 0 313.02 71.79;" xml:space="preserve">
-                                                <!-- <style type="text/css">
-                                                    .Indicator0{opacity:0;fill:#FFFFFF;}
-                                                    .Indicator1{fill:#FAD25E;}
-                                                </style> -->
-                                                <g id="Bg">
-                                                    <rect x="-1094.81" y="-761.75" class="Indicator0" width="2511" height="1593.05"/>
-                                                    <g id="Group_65624" transform="translate(17.292)">
-                                                        <path id="Path_151295" class="Indicator1" d="M167.86,59.92c-15.82,15.82-41.47,15.82-57.29,0L98.69,48.05C67.93,17.28,26.21,0-17.29,0
-                                                            h313.02c-43.51,0-85.23,17.28-115.99,48.05L167.86,59.92z"/>
-                                                    </g>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                        <!--data-->
-                                        <Transaction-under-processing />
-                                    </div>
-                                </div>
-                                <!--box-pay--><!--box-unacceptable-->
-                                <div class="col-lg-3 col-md-6 col-sm-6">
-                                    <div class="box-pay box-unacceptable">
-                                        <!--inv-->
-                                        <div class="inv">
-                                            <!--box-->
-                                            <div class="box">
-                                                <h2>INV<span>39284</span></h2>
-                                                <img src="~assets/img/hash.png" alt="#">
-                                            </div>
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                                                viewBox="0 0 313.02 71.79" style="enable-background:new 0 0 313.02 71.79;" xml:space="preserve">
-                                                <!-- <style type="text/css">
-                                                    .Indicator0{opacity:0;fill:#FFFFFF;}
-                                                    .Indicator1{fill:#FAD25E;}
-                                                </style> -->
-                                                <g id="Bg">
-                                                    <rect x="-1094.81" y="-761.75" class="Indicator0" width="2511" height="1593.05"/>
-                                                    <g id="Group_65624" transform="translate(17.292)">
-                                                        <path id="Path_151295" class="Indicator1" d="M167.86,59.92c-15.82,15.82-41.47,15.82-57.29,0L98.69,48.05C67.93,17.28,26.21,0-17.29,0
-                                                            h313.02c-43.51,0-85.23,17.28-115.99,48.05L167.86,59.92z"/>
-                                                    </g>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                        <!--data-->
-                                        <Transaction-rejected />
-                                    </div>
-                                </div>
-                                <!--box-pay--><!--pending-request-->
-                                <div class="col-lg-3 col-md-6 col-sm-6">
-                                    <div class="box-pay pending-request">
-                                        <!--inv-->
-                                        <div class="inv">
-                                            <!--box-->
-                                            <div class="box">
-                                                <h2>INV<span>39284</span></h2>
-                                                <img src="~assets/img/hash.png" alt="#">
-                                            </div>
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                                                viewBox="0 0 313.02 71.79" style="enable-background:new 0 0 313.02 71.79;" xml:space="preserve">
-                                                <!-- <style type="text/css">
-                                                    .Indicator0{opacity:0;fill:#FFFFFF;}
-                                                    .Indicator1{fill:#FAD25E;}
-                                                </style> -->
-                                                <g id="Bg">
-                                                    <rect x="-1094.81" y="-761.75" class="Indicator0" width="2511" height="1593.05"/>
-                                                    <g id="Group_65624" transform="translate(17.292)">
-                                                        <path id="Path_151295" class="Indicator1" d="M167.86,59.92c-15.82,15.82-41.47,15.82-57.29,0L98.69,48.05C67.93,17.28,26.21,0-17.29,0
-                                                            h313.02c-43.51,0-85.23,17.28-115.99,48.05L167.86,59.92z"/>
-                                                    </g>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                        <!--data-->
-                                        <!-- <Transaction-hanged :customerTrans="customerTrans.node" /> -->
-                                        <Transaction-hanged />
-                                    </div>
+                                    <Transaction-completed v-if="customerTrans.node.doneVerification " :customerTrans="customerTrans.node" />
+                                    <Transaction-under-processing v-else-if="customerTrans.node.marketerEndorse && !customerTrans.node.pyramidManager" :customerTrans="customerTrans.node" />
+                                    <Transaction-rejected v-else-if="customerTrans.node.retryPlease || customerTrans.node.pyramidManager" :customerTrans="customerTrans.node" />
+                                    <Transaction-hanged v-else :customerTrans="customerTrans.node" />
                                 </div>
                             </div>
                         </div>
@@ -187,7 +69,7 @@ export default {
     'Transaction-completed': Transaction_completed,
     'Transaction-under-processing': Transaction_under_processing,
     'Transaction-rejected': Transaction_rejected,
-    'Transaction-hanged': Transaction_hanged
+    'Transaction-hanged': Transaction_hanged,
   },
  
   methods: {

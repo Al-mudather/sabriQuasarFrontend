@@ -25,7 +25,7 @@ export default {
   data() {
     return {
       message: this.$t('انسخ الرابط'),
-      myPyramidAccount: null,
+      myPyramidAccount: '',
       myPyramidMarketersCount: 0.0
     };
   },
@@ -40,7 +40,7 @@ export default {
         }
       }
     },
-
+ 
     myPyramidAccount: {
       query () {
         return MyPyramidAccount
@@ -52,6 +52,7 @@ export default {
       }
     }
   },
+
   methods: {
     CopyTheLinkHandler(e) {
       e.preventDefault();

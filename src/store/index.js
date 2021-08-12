@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 // import example from './module-example'
 import settings from './settings'
+// import pyramidManagement from './pyramid_management'
 import authentication from './authentication'
 import shoppingCart from './shoppingCart'
 import courseManagement from './courseManagement'
@@ -23,6 +24,7 @@ export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
       settings,
+      // pyramidManagement,
       authentication,
       shoppingCart,
       courseManagement,

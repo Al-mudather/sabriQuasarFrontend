@@ -51,15 +51,19 @@
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الــدورات')}}</h3>
                 </a>
+                <a class="but side-nav__item" data-link="MYORDERS" v-if="token" @click="GO_TO_MY_ORDERS_PAGE($event)">
+                    <img src="~assets/img/bordText.png" alt="">
+                    <h3>{{$t('طلباتي')}}</h3>
+                </a>
                 <a class="but side-nav__item" data-link="BORD" v-if="token" @click="GO_TO_MY_COURSES_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('لوحتي التعليمية')}}</h3>
                 </a>
-                <a class="but side-nav__item" data-link="MYMARKETINGPAGE" v-if="token" @click="GO_TO_MY_MARKETING_PAGE($event)">
+                <a class="but side-nav__item" data-link="MYMARKETINGPAGE" v-if="token && myPyramidAccount.pyramidId" @click="GO_TO_MY_MARKETING_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('صفحتي التسويقيه')}}</h3>
-                </a>
-                <a class="but side-nav__item" data-link="MYCUSTOMERSPAYMENTPAGE" v-if="token" @click="GO_TO_MY_CUSTOMERS_PAYMENT_PAGE($event)">
+                </a> 
+                <a class="but side-nav__item" data-link="MYCUSTOMERSPAYMENTPAGE" v-if="token && myPyramidAccount.pyramidId" @click="GO_TO_MY_CUSTOMERS_PAYMENT_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('ادارة دفعيات العملاء')}}</h3>
                 </a>
@@ -83,6 +87,7 @@
 </template>
 
 <script>
+import { MyPyramidAccount } from 'src/queries/pyramid_marketing_management/query/MyPyramidAccount'
 
 import { mapActions, mapGetters, mapState } from "vuex";
 import { LocalStorage } from 'quasar'
@@ -92,6 +97,20 @@ export default {
 
     data () {
         return {
+            myPyramidAccount: ''
+        }
+    },
+
+    apollo: {
+        myPyramidAccount: {
+            query () {
+                return MyPyramidAccount
+            },
+            result (result) {
+                if (!result.loading) {
+                    this.myPyramidAccount = result.data.myPyramidAccount
+                }
+            }
         }
     },
 
@@ -213,6 +232,11 @@ export default {
             //TODO: redirect the user to the home page
             this.$router.push({ name: "Home" });
             this.logOutAction();
+        },
+
+        GO_TO_MY_ORDERS_PAGE(e) {
+            this.MAKE_ACTIVE(e)
+            this.$router.push({ name: "my-orders" });
         },
 
         GO_TO_MY_NOTIFICATIONS_PAGE(e) {

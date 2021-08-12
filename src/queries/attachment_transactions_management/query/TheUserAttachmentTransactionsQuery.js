@@ -1,9 +1,9 @@
 import gql from 'graphql-tag'
 
-export const AllMarketerAttachmentTransaction = gql`
-query AllMarketerAttachmentTransaction {
+export const MyAttachmentTransactions = gql`
+query MyAttachmentTransactions {
 
-  allMarketerAttachmentTransaction {
+  myAttachmentTransactions {
 
       edges {
 

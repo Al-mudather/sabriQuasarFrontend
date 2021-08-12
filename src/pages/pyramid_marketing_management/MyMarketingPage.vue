@@ -36,7 +36,7 @@
     </div>
     <!-- Withdrawal requests -->
     <div class="container">
-      <my-withdraws-list />
+      <my-withdraws-list /> 
     </div>
   </section>
 </template>
