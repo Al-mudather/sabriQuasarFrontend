@@ -11,11 +11,9 @@ const state = {
 }
 
 const mutations = {
-  updateUserAffiliateLink (state, link) {
-    let customUser = state.user
-    customUser.affiliateSet.edges.push({ node: link })
-    state.user = customUser 
-    userProfileStorage.setUser(customUser)
+  UPDATE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAM (state, data) {
+    state.user = data
+    userProfileStorage.setUser(data)
   },
   updateUser (state, user) {
     // Set the user
@@ -40,8 +38,8 @@ const mutations = {
 
 const actions = {
 
-  setUserAffiliateLinkAction ({ commit }, link) {
-    commit('updateUserAffiliateLink', link)
+  SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION ({ commit }, data) {
+    commit('UPDATE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAM', data)
   },
 
   setNavbarSearchAction ({ commit }, value) {

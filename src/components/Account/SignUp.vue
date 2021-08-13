@@ -200,9 +200,6 @@ export default {
                                         })
                                     })
                                 } catch (error) {
-                                    console.log('333333333333333333333333')
-                                    console.log(error.message)
-                                    console.log('333333333333333333333333')
                                 }
                             });
                             this.GotToConfirmationPage();

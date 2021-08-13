@@ -22,15 +22,6 @@ mutation LoginUser($email:String!, $password: String!){
       isPyramidAdmin
       isPyramidMarketer
       isInstructor
-      affiliateSet {
-        edges {
-          node {
-            id,
-            pk,
-            affiliateLink
-          }
-        }
-      }
     },
     refreshToken
   }

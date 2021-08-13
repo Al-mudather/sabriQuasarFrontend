@@ -1,5 +1,5 @@
 import gql from 'graphql-tag'
-
+ 
 export const GetMyProfileData = gql`
 query GetMyProfileData {
   me {
@@ -11,15 +11,9 @@ query GetMyProfileData {
     email,
     gender,
     phoneNumber,
-    affiliateSet {
-      edges {
-        node {
-          id,
-          pk,
-          affiliateLink
-        }
-      }
-    }
+    isAttachmentTransactionManager
+    isPyramidAdmin
+    isPyramidMarketer
   }
 }
 `

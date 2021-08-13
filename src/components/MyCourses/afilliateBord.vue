@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { mapState, mapActions } from "vuex";
 import { JoinPyramidProgram } from 'src/queries/pyramid_marketing_management/mutation/JoinPyramidProgram'
@@ -57,8 +58,8 @@ export default {
     }
   },
 
-  methods: {
-    ...mapActions('authentication', ['setUserAffiliateLinkAction']),
+  methods: { 
+    ...mapActions('authentication', ['SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION']),
 
     async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
       try {
@@ -92,10 +93,15 @@ export default {
         mutation: JoinPyramidProgram,
         variables: {
           input: {}
-        }
+        } 
       }).then((res) => {
         if (res.data.joinPyramidProgram.success) {
-          this.setUserAffiliateLinkAction(res.data.joinAffiliateProgram.affiliate)
+          //TODO: Update the user information
+          this.$apollo.query({
+            query: GetMyProfileData
+          }).then((res) => {
+            this.SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION(res.data.me)
+          })
         }
       })
     }

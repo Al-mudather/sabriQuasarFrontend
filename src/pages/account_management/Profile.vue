@@ -1,8 +1,5 @@
 <template>
   <div>
-    <!-- <div lass="row justify-center" v-if="lodash.isEmpty(myAffiliateLink)">
-      <q-btn @click="AddMeToTheAffiliateProgram" class="col-3" color="primary" label="Join affillite programe" />
-    </div> -->
     <!--=============== START profile ===============-->
     <section class="profile">
       <div class="container-fluid">
@@ -74,7 +71,6 @@
                       </div>
                     </div>
                     <div class="type">
-                      {{gender}}
                       <div class="male" data-gender="male" @click="setTheGenderToMale">
                         <img src="~assets/img/male.png" alt="" />
                         <h3>{{$t('ذكــر')}}</h3>
@@ -119,7 +115,6 @@ import PasswordResetProfile from 'src/components/Profile_managements/PasswordRes
 
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { UpdateUserProfile } from "src/queries/account_management/mutation/UpdateUserProfile";
-import { JoinAffiliateProgram } from "src/queries/afilliate_management/mutation/JoinAffiliateProgram";
 import { mapActions } from 'vuex'
 
 export default {
@@ -151,14 +146,10 @@ export default {
 
   watch: {
     me(value) {
-      console.log('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
-      console.log(value)
-      console.log('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
       this.email = value.email;
       this.fullName = value.fullName;
       this.gender = value.gender;
       this.phoneNumber = value.phoneNumber;
-      this.myAffiliateLink = value.affiliateSet.edges[0].node.affiliateLink;
       
       if (value.gender === "MALE") {
         document.querySelector('[data-gender="female"]').classList.remove("active");
@@ -199,24 +190,6 @@ export default {
     setTheGenderToFemale () {
       this.gender = 'female'
     }, 
-
-    ///////////////////////////////////
-    // JOIN to the affilliate programme
-    ///////////////////////////////////
-    AddMeToTheAffiliateProgram() {
-      this.errorMessages = [];
-      this.$apollo
-        .mutate({
-          mutation: JoinAffiliateProgram
-        })
-        .then(result => {
-          if ( this.$_.get(result,'[data][joinAffiliateProgram][success]') ) {
-            this.myAffiliateLink = location.origin + '/course/' + this.$_.get(result,'[data][joinAffiliateProgram][affiliate][affiliateLink]')
-          } else if ( this.$_.get(result,'[data][joinAffiliateProgram][errors]') ) {
-            this.errorHandler(this.$_.get(result,'[data][joinAffiliateProgram][errors]'));
-          }
-        });
-    },
 
     UpdateUserProfileData(e) {
       e.preventDefault();
