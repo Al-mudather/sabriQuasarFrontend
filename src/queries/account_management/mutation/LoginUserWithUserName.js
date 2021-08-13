@@ -14,9 +14,14 @@ mutation LoginUser($username: String!, $password: String!){
       id,
       username,
       fullName,
+      email,
       firstName,
       lastName,
       verified,
+      isAttachmentTransactionManager
+      isPyramidAdmin
+      isPyramidMarketer
+      isInstructor
       affiliateSet {
         edges {
           node {

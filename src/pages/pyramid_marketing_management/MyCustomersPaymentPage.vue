@@ -15,8 +15,9 @@
                                 <!--box-pay--><!--box-done-->
                                 <div v-for="customerTrans in customersTransactionsList.edges" :key="customerTrans.node.pk" class="col-lg-3 col-md-6 col-sm-6">
                                     <Transaction-completed v-if="customerTrans.node.doneVerification " :customerTrans="customerTrans.node" />
-                                    <Transaction-under-processing v-else-if="customerTrans.node.marketerEndorse && !customerTrans.node.pyramidManager" :customerTrans="customerTrans.node" />
-                                    <Transaction-rejected v-else-if="customerTrans.node.retryPlease || customerTrans.node.pyramidManager" :customerTrans="customerTrans.node" />
+                                    <Transaction-under-processing v-else-if="customerTrans.node.marketerEndorse && !customerTrans.node.pyramidManagerEndorse" :customerTrans="customerTrans.node" />
+                                    <Transaction-rejected label="الطلب مرفوض من الإداره" v-else-if="customerTrans.node.pyramidRetryPlease" :customerTrans="customerTrans.node" />
+                                    <Transaction-rejected label="الطلب مرفوض بواسطتي" v-else-if="customerTrans.node.retryPlease || customerTrans.node.pyramidRetryPlease" :customerTrans="customerTrans.node" />
                                     <Transaction-hanged v-else :customerTrans="customerTrans.node" />
                                 </div>
                             </div>

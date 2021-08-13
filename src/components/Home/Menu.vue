@@ -59,11 +59,11 @@
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('لوحتي التعليمية')}}</h3>
                 </a>
-                <a class="but side-nav__item" data-link="MYMARKETINGPAGE" v-if="token && myPyramidAccount.pyramidId" @click="GO_TO_MY_MARKETING_PAGE($event)">
+                <a class="but side-nav__item" data-link="MYMARKETINGPAGE" v-if="token && user.isPyramidMarketer" @click="GO_TO_MY_MARKETING_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('صفحتي التسويقيه')}}</h3>
                 </a> 
-                <a class="but side-nav__item" data-link="MYCUSTOMERSPAYMENTPAGE" v-if="token && myPyramidAccount.pyramidId" @click="GO_TO_MY_CUSTOMERS_PAYMENT_PAGE($event)">
+                <a class="but side-nav__item" data-link="MYCUSTOMERSPAYMENTPAGE" v-if="token && user.isPyramidMarketer" @click="GO_TO_MY_CUSTOMERS_PAYMENT_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('ادارة دفعيات العملاء')}}</h3>
                 </a>
@@ -158,15 +158,15 @@ export default {
         for (let nav of nav_items) {
         }
 
-        if (!this.$_.isEmpty(this.token)) {
-            this.$jquery('#butgro').css({
-                'margin-top': '5rem'
-            })
-        } else {
-            this.$jquery('#butgro').css({
-                'margin-top': '0'
-            })
-        }
+        // if (!this.$_.isEmpty(this.token)) {
+        //     this.$jquery('#butgro').css({
+        //         'margin-top': '5rem'
+        //     })
+        // } else {
+        //     this.$jquery('#butgro').css({
+        //         'margin-top': '0'
+        //     })
+        // }
 
         if (this.isEnglish) {
 
@@ -183,15 +183,15 @@ export default {
 
     watch: {
         token (value) {
-            if (!this.$_.isEmpty(value)) {
-                this.$jquery('#butgro').css({
-                    'margin-top': '5rem'
-                })
-            } else {
-                this.$jquery('#butgro').css({
-                    'margin-top': '0'
-                })
-            }
+            // if (!this.$_.isEmpty(value)) {
+            //     this.$jquery('#butgro').css({
+            //         'margin-top': '5rem'
+            //     })
+            // } else {
+            //     this.$jquery('#butgro').css({
+            //         'margin-top': '0'
+            //     })
+            // }
         },
 
         async _isEnglish (value) {
@@ -504,8 +504,9 @@ export default {
                 }
             }
         }
+
         .butgro{
-            padding: 118px 0 30px 0;
+            padding: 20px 0 30px 0;
             .but{
                 margin: 0 0 10px 0;
                 padding: 0 0 4px 0;

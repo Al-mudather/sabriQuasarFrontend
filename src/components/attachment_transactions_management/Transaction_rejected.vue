@@ -21,7 +21,7 @@
       <!--data-->
       <div class="data">
           <img src="~assets/img/cansl.png" alt="">
-          <h2>الطلب مرفوض</h2>
+          <h2>{{label}}</h2>
           <!-- <p>إذا تكرر سيتم حظرك من النظام</p> -->
       </div>
   </div>
@@ -35,7 +35,7 @@ export default {
     return {
     }
   },
-  props:['customerTrans']
+  props:['customerTrans', 'label']
 }
 </script>
 
