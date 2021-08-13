@@ -74,6 +74,7 @@
                       </div>
                     </div>
                     <div class="type">
+                      {{gender}}
                       <div class="male" data-gender="male" @click="setTheGenderToMale">
                         <img src="~assets/img/male.png" alt="" />
                         <h3>{{$t('ذكــر')}}</h3>
@@ -130,6 +131,7 @@ export default {
       fullName: "",
       phoneNumber: "",
       email: "",
+      gender: '',
       myAffiliateLink: "",
       errorMessages: [],
       genderOptions: ['male', 'female', 'not_set']
@@ -154,6 +156,7 @@ export default {
       console.log('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
       this.email = value.email;
       this.fullName = value.fullName;
+      this.gender = value.gender;
       this.phoneNumber = value.phoneNumber;
       this.myAffiliateLink = value.affiliateSet.edges[0].node.affiliateLink;
       

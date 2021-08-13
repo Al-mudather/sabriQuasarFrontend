@@ -26,7 +26,7 @@
 </template>
 
 <script>
-
+import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { mapState, mapActions } from "vuex";
 import { JoinPyramidProgram } from 'src/queries/pyramid_marketing_management/mutation/JoinPyramidProgram'
 import { MyPyramidAccount } from 'src/queries/pyramid_marketing_management/query/MyPyramidAccount'
@@ -56,16 +56,38 @@ export default {
       }
     }
   },
-  
 
   methods: {
     ...mapActions('authentication', ['setUserAffiliateLinkAction']),
+
+    async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
+      try {
+        const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+      } catch (e) {
+          //TODO: IF there is an error, then the user did not join the platform with a registeration code
+          if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
+              this.$q.notify({
+                  type: 'positive',
+                  progress: true,
+                  multiLine: true,
+                  position: 'top',
+                  message: 'You must inter the registeration code'
+              })
+              // TODO: Go to registeration code page
+              this.$router.push({ name: 'registeration-code' })
+          }
+
+      }
+  },
 
     GO_TO_MY_MARKETING_PAGE () {
       this.$router.push({ name: 'my-marketing-page' })
     },
 
     JOIN_THE_PYRAMID_PROGRAM () {
+      //TODO: Check if the user has the activation code
+      this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
+
       this.$apollo.mutate({
         mutation: JoinPyramidProgram,
         variables: {
