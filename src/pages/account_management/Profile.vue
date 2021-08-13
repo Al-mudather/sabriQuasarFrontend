@@ -149,6 +149,9 @@ export default {
 
   watch: {
     me(value) {
+      console.log('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
+      console.log(value)
+      console.log('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
       this.email = value.email;
       this.fullName = value.fullName;
       this.phoneNumber = value.phoneNumber;

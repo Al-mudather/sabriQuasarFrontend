@@ -106,6 +106,7 @@
 </template>
 
 <script>
+import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { CheckoutSubscription } from "src/queries/notification_management/subscription/CheckoutSubscription";
 import { LocalStorage } from "quasar";
 
@@ -128,6 +129,8 @@ export default {
   },
 
   mounted() {
+    //TODO: Check if the user has the activation code
+    this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
     // TODO: import the shooping cart animation
     this.$el.querySelector(".lii.active").nextSibling.classList.add("show");
     this.$root.$on("activateShoppingProgress", cart_name => {
@@ -161,6 +164,26 @@ export default {
 
   methods: {
     ...mapActions("shoppingCart", ["setShoppinCartDialogAction"]),
+
+    async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
+        try {
+          const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+        } catch (e) {
+            //TODO: IF there is an error, then the user did not join the platform with a registeration code
+            if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
+                this.$q.notify({
+                    type: 'positive',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: 'You must inter the registeration code'
+                })
+                // TODO: Go to registeration code page
+                this.$router.push({ name: 'registeration-code' })
+            }
+
+        }
+    },
 
     changeTheShoppingCarLinksToEnglish() {
       this.$jquery(".tabb svg").css({
