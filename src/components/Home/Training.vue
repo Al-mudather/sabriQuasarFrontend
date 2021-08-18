@@ -41,14 +41,13 @@
                             {{ courses.totalCount || 0 }}
                         </h4>
                     </div>
-                    <!-- start rate -->
+                    <!-- start rate --> 
                     <div class="rate" v-if="courses.edgeCount > 0">
                         <div class="container">
                             <div class="cn fadeIn row justify-center">
                                 <q-intersection transition="scale" v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-5 col-sm-5 col-xs-12">
                                     <course-card
                                         class="hvr-grow"
-                                        style="cursor: pointer"
                                         :course="course.node"
                                         :name="course.node.title"
                                         instructor="مركز دكتور صبري ابو قرون"
@@ -403,6 +402,7 @@ export default {
 
 .cn {
     right: 0% !important;
+    margin-bottom: 40px;
 }
 /*--- Start Training ---*/
 .nav-item {
@@ -461,7 +461,7 @@ export default {
             }
         }
     }
-
+ 
     .rate {
         margin-top: 30px;
 
@@ -472,146 +472,275 @@ export default {
             @media (min-width: 320px) and (max-width: 700px) {
                 right: 0;
             }
-            .parent {
-                margin-bottom: 20px;
-                @media (min-width: 320px) and (max-width: 700px) {
-                    margin-bottom: 0;
+            .card{
+                position: relative;
+                border: 0;
+                box-shadow: 3px 7px 15px #eceaea;
+                border-radius: 37px;
+                background: #E3EDFA;
+                width: 100%;
+                padding: 10px;
+                height: 441px;
+                .pattern{
+                    position: absolute;
+                    top: 0;
+                    width: 100%;
+                    left: 0;
+                    right: 0;
+                    height: 100%;
                 }
-                .imag {
+                .card-img-top{
                     position: relative;
-                    border-radius: 50px;
+                    padding: 14px;
+                    height: 294px;
+                    width: 100%;
                     overflow: hidden;
-                    margin: 0 auto 0 auto;
-                    height: 238px;
-                    width: 82%;
-
-                    .overlay {
-                        @include overlay;
-                        background-color: rgba(#fbfbff, 0.6);
+                    border-radius: 30px;
+                    .plays{
+                        position: absolute;
+                        width: auto;
+                        top: 45%;
+                        left: 0;
+                        right: 44%;
+                        height: unset;
+                        z-index: 5;
                     }
-
-                    img {
+                    img{
                         width: 100%;
+                        height: 100%;
+                        position: absolute;
+                        border-width: 0;
+                        left: 0;
+                        right: 0;
+                        top: 0;
                     }
-
-                    .magtxt {
-                        h4 {
-                            position: absolute;
-                            top: 25px;
-                            left: 0;
-                            color: #7b7b7b;
-                            font-size: 17px;
-                            font-family: "cairoR";
-                            width: 100%;
-                            padding: 0 8% 0 13%;
-                        }
-
-                        img {
-                            position: absolute;
-                            width: 26px;
-                            top: 45%;
-                            left: 44%;
-                        }
-                    }
-                }
-
-                .pric {
-                    background-color: #7b86fa;
-                    padding: 20px;
-                    border-radius: 107px 107px 27px 27px;
-                    height: 117px;
-                    width: 158px;
-                    margin: -59px auto;
+                } 
+                .card-body{
                     position: relative;
-                    z-index: 2;
-
-                    .detai {
-                        text-align: center;
-
-                        span {
+                    padding: unset;
+                    border-radius: 29px;
+                    background: #F78A78;
+                    margin: -37px auto 2px auto;
+                    width: 100%;
+                    top: -6px;
+                    height: 164px;
+                    .card-title{
+                        margin-bottom: 7px;
+                        color: #fff;
+                        font-size: 17px;
+                        font-family: cairoR;
+                        line-height: 1.8;
+                        background-color: #FC9685;
+                        padding: 8px;
+                        border-top-left-radius: 26px;
+                        border-top-right-radius: 26px;
+                        height: 72px;
+                        overflow: hidden;
+                        -webkit-line-clamp: 2;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                    }
+                    .detai{
+                        position: relative;
+                        width: 89px;
+                        .added{
                             display: inline-block;
-                            font-size: 13px;
-                            font-family: "cairoR";
-                            color: #fff;
-                            margin: 0 0 0 6px;
+                            position: absolute;
+                            left: 0;
+                            right: -7px;
+                            width: 148px;
+                            top: 40px;
+                            svg{
+                                path{
+                                    fill: #FFF067;
+                                }
+                                
+                            }
+                            button{
+                                color: #fff;
+                                font-size: 14px;
+                                font-family: cairoR;
+                                position: absolute;
+                                left: 0;
+                                right: 0;
+                                top: 16px;
+                                text-align: center;
+                                width: 129px;
+                                background-color: unset;
+                                box-shadow: none;
+                                height: unset;
+                                outline: 0;
+                                color: #7B7B7B;
+                            }
                         }
-
-                        h3 {
+                        h3{
                             display: inline-block;
                             color: #fff067;
                             font-size: 31px;
-                            font-family: "cairoR";
+                            font-family: cairoR;
+                            margin-right: 8px;
                         }
-                    }
-
-                    button {
-                        width: 85px;
-                        height: 33px;
-                        background-color: #fff067;
-                        color: $textColor;
-                        font-size: 14px;
-                        outline: 0;
-                        margin: 13px 0 0 0;
-                        @include prefixer(
-                            box-shadow,
-                            8px 3px 7px #9e9e9e36,
-                            webkit moz ms
-                        );
-                    }
-
-                    .cart {
-                        position: relative;
-                        cursor: pointer;
-                        right: 12px;
-                        margin: 0 0 0 0;
-
-                        .sala {
-                            position: absolute;
-                            left: 4px;
-                            top: -31px;
-                            width: auto;
-                        }
-
-                        img {
-                            width: auto;
-                            position: absolute;
-                            left: 19px;
-                            top: -21px;
-                        }
-                    }
-                }
-
-                .name {
-                    border-radius: 50px;
-                    background-color: #5666b9;
-                    width: 100%;
-                    padding-top: 178px;
-                    height: 222px;
-                    position: relative;
-                    top: -108px;
-                    z-index: -1;
-                    @include prefixer(
-                        box-shadow,
-                        8px 12px 8px #eceaea,
-                        webkit moz ms
-                    );
-
-                    .user {
-                        margin-right: 23px;
-
-                        img {
+                        span{
                             display: inline-block;
-                            width: 25px;
-                        }
-
-                        h3 {
-                            display: inline-block;
-                            font-size: 12px;
+                            font-size: 13px;
+                            font-family: cairoR;
                             color: #fff;
                         }
                     }
+                    .details{
+                        display: inline-block;
+                        background-color: unset;
+                        height: unset;
+                        box-shadow: unset;
+                        color: #fff;
+                        font-size: 14px;
+                        font-family: cairoR;
+                        outline: 0;
+                        float: left;
+                        margin: 4px 0 0 -38px;
+                    }
                 }
             }
+            // .parent {
+            //     margin-bottom: 20px;
+            //     @media (min-width: 320px) and (max-width: 700px) {
+            //         margin-bottom: 0;
+            //     }
+            //     .imag {
+            //         position: relative;
+            //         border-radius: 50px;
+            //         overflow: hidden;
+            //         margin: 0 auto 0 auto;
+            //         height: 238px;
+            //         width: 82%;
+
+            //         .overlay {
+            //             @include overlay;
+            //             background-color: rgba(#fbfbff, 0.6);
+            //         }
+
+            //         img {
+            //             width: 100%;
+            //         }
+
+            //         .magtxt {
+            //             h4 {
+            //                 position: absolute;
+            //                 top: 25px;
+            //                 left: 0;
+            //                 color: #7b7b7b;
+            //                 font-size: 17px;
+            //                 font-family: "cairoR";
+            //                 width: 100%;
+            //                 padding: 0 8% 0 13%;
+            //             }
+
+            //             img {
+            //                 position: absolute;
+            //                 width: 26px;
+            //                 top: 45%;
+            //                 left: 44%;
+            //             }
+            //         }
+            //     }
+
+            //     .pric {
+            //         background-color: #7b86fa;
+            //         padding: 20px;
+            //         border-radius: 107px 107px 27px 27px;
+            //         height: 117px;
+            //         width: 158px;
+            //         margin: -59px auto;
+            //         position: relative;
+            //         z-index: 2;
+
+            //         .detai {
+            //             text-align: center;
+
+            //             span {
+            //                 display: inline-block;
+            //                 font-size: 13px;
+            //                 font-family: "cairoR";
+            //                 color: #fff;
+            //                 margin: 0 0 0 6px;
+            //             }
+
+            //             h3 {
+            //                 display: inline-block;
+            //                 color: #fff067;
+            //                 font-size: 31px;
+            //                 font-family: "cairoR";
+            //             }
+            //         }
+
+            //         button {
+            //             width: 85px;
+            //             height: 33px;
+            //             background-color: #fff067;
+            //             color: $textColor;
+            //             font-size: 14px;
+            //             outline: 0;
+            //             margin: 13px 0 0 0;
+            //             @include prefixer(
+            //                 box-shadow,
+            //                 8px 3px 7px #9e9e9e36,
+            //                 webkit moz ms
+            //             );
+            //         }
+
+            //         .cart {
+            //             position: relative;
+            //             cursor: pointer;
+            //             right: 12px;
+            //             margin: 0 0 0 0;
+
+            //             .sala {
+            //                 position: absolute;
+            //                 left: 4px;
+            //                 top: -31px;
+            //                 width: auto;
+            //             }
+
+            //             img {
+            //                 width: auto;
+            //                 position: absolute;
+            //                 left: 19px;
+            //                 top: -21px;
+            //             }
+            //         }
+            //     }
+
+            //     .name {
+            //         border-radius: 50px;
+            //         background-color: #5666b9;
+            //         width: 100%;
+            //         padding-top: 178px;
+            //         height: 222px;
+            //         position: relative;
+            //         top: -108px;
+            //         z-index: -1;
+            //         @include prefixer(
+            //             box-shadow,
+            //             8px 12px 8px #eceaea,
+            //             webkit moz ms
+            //         );
+
+            //         .user {
+            //             margin-right: 23px;
+
+            //             img {
+            //                 display: inline-block;
+            //                 width: 25px;
+            //             }
+
+            //             h3 {
+            //                 display: inline-block;
+            //                 font-size: 12px;
+            //                 color: #fff;
+            //             }
+            //         }
+            //     }
+            // }
         }
 
         /*parent2*/

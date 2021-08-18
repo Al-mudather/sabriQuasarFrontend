@@ -111,7 +111,7 @@
 </template>
 
 <script>
-import PasswordResetProfile from 'src/components/Profile_managements/PasswordResetProfile'
+import PasswordResetProfile from 'src/components/Profile_managements/PasswordResetProfile.vue'
 
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { UpdateUserProfile } from "src/queries/account_management/mutation/UpdateUserProfile";

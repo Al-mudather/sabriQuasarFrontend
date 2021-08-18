@@ -1,30 +1,30 @@
 <template>
-    <div class="parent">
-        <div class="imag">
-            <div class="overlay"></div>
-            <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt="">
-            <img v-else src="~assets/img/person.png" alt="">
-            <div class="magtxt">
-                <h4>{{name}}</h4>
-                <img src="~assets/img/play.png" alt="">
-            </div>
+    <div class="card q-mb-lg">
+      <img class="pattern" src="~assets/img/patternn.png" alt="">
+      <div class="card-img-top">
+          <img class="plays" src="~assets/img/play.png" alt="">
+          <img src="~assets/img/moza.png" alt="Card image cap">
+          <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt="">
+          <img v-else src="~assets/img/moza.png" alt="Card image cap">
+      </div>
+      <div class="card-body">
+        <h5 class="card-title"> {{name}}</h5>
+        <div class="detai">
+          <h3><span>{{currency}}</span>{{FORMAT_COUSRE_PRICE(parseFloat(JSON.parse(course.currency)[currency]), 3)}}</h3>
+          <div class="added">
+              <svg xmlns="http://www.w3.org/2000/svg" width="148.279" height="45.39" viewBox="0 0 148.279 45.39">
+                  <g id="Group_65702" data-name="Group 65702" transform="translate(-1165.277 -153.588)">
+                    <path id="Path_158448" data-name="Path 158448" d="M788.9,564.961l-6.771-3.433v6.011h7.347v-1.617A1.093,1.093,0,0,0,788.9,564.961Z" transform="translate(524.077 -407.94)" fill="#4a5999"/>
+                    <path id="Path_158449" data-name="Path 158449" d="M641.2,606.918H752.779c20.945,0,36.7-15.751,36.7-35.18v-4.957H674.83a25.69,25.69,0,0,0-23.791,16Z" transform="translate(524.077 -407.94)" fill="#667bd1"/>
+                  </g>
+              </svg> 
+              <button @click="AddTheCourseToTheBasket"> <img src="~assets/img/add.png" alt=""> إضافة للسلة</button>
+          </div> 
         </div>
-        <div class="pric">
-            <div class="detai">
-                <h3><span>{{currency}}</span>{{FORMAT_COUSRE_PRICE(parseFloat(JSON.parse(course.currency)[currency]), 3)}}</h3>
-            </div>
-            <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">{{$t('التفاصيل')}}</button>
-            <div class="cart" @click="AddTheCourseToTheBasket" style="cursor: pointer">
-                <img src="~assets/img/addCou.png" alt="">
-            </div>
-        </div>
-        <div class="name">
-            <div class="user">
-                <img src="~assets/img/user.png" alt="">
-                <h3>{{instructor}}</h3>
-            </div>
-        </div>
+        <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) " class="details"> {{$t('التفاصيل')}} <img src="~assets/img/leftArraw.png" alt=""></button>                                                
+      </div>
     </div>
+    
 </template>
 
 <script>
