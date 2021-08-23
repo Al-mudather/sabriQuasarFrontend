@@ -63,12 +63,22 @@ export default {
 
     async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
       try {
-        const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+        const join_permission_res = await this.$apollo.query({
+          query: CheckTheUserPermissionToUsePlatforme,
+          refetchQueries: [{ query: MyPyramidAccount }]
+          })
+          this.$q.notify({
+                type: 'positive',
+                progress: true,
+                multiLine: true,
+                position: 'top',
+                message: 'You are now a marketer'
+            })
       } catch (e) {
           //TODO: IF there is an error, then the user did not join the platform with a registeration code
           if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
               this.$q.notify({
-                  type: 'positive',
+                  type: 'negative',
                   progress: true,
                   multiLine: true,
                   position: 'top',

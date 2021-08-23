@@ -4,23 +4,23 @@
       <div class="col-lg-12">
         <div class="oper" v-if="withdrawLists.edges.length > 0">
           <div class="row">
-            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
-              <div class="all" v-for="order in withdrawLists.edges" :key="order.node.pk">
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" v-for="order in $_.get(withdrawLists,'[edges]')" :key="order.node.pk">
+              <div class="all">
                 <img class="ground" src="~assets/img/sahb.png" alt="">
                 <div class="clock">
-                    <h3> <img src="~assets/img/clock.png" alt=""> {{ order.node.created }}</h3>
+                    <h3> <img src="~assets/img/clock.png" alt=""> {{ formatTime(order.node.created) }}</h3>
                     <svg xmlns="http://www.w3.org/2000/svg" width="43.415" height="9.957" viewBox="0 0 43.415 9.957">
                         <g id="Group_65624" data-name="Group 65624" transform="translate(17.292)">
                           <path id="Path_151295" data-name="Path 151295" d="M203.919,96.419a5.619,5.619,0,0,1-7.946,0l-1.648-1.647a22.747,22.747,0,0,0-16.086-6.664h43.415a22.752,22.752,0,0,0-16.088,6.664Z" transform="translate(-195.531 -88.107)" fill="#b1b1b1"/>
                         </g>
                     </svg>                                      
                 </div>
-                <h3 v-if="order.isDone"><img src="~assets/img/secces.png" alt=""> تم الدفع </h3>
-                <h3 v-else><img src="~assets/img/watinig.png" al t="">في إنتظار المعالجة</h3>
+                <h3 v-if="order.isDone"><img src="~assets/img/secces.png" alt="">{{$t('تم الدفع')}} </h3>
+                <h3 v-else><img src="~assets/img/watinig.png" al t="">{{$t('في إنتظار المعالجة')}}</h3>
                 <div class="amount">
                     <h3>USD <span>{{order.node.amount}}</span></h3>
                 </div>
-                <span>عن طريق</span>
+                <span>{{$t('عن طريق')}}</span>
                 <img src="~assets/img/esall.png" alt="">
               </div>
             </div>
@@ -29,7 +29,7 @@
 
         <div class="request" v-else>
           <img src="~assets/img/Plain_credit_card_bro.png" alt="">
-          <h3>ليس لديك سجل سحب في الوقت الحالي </h3>
+          <h3>{{$t('ليس لديك سجل سحب في الوقت الحالي')}} </h3>
         </div>
       </div>
     </div>
@@ -38,6 +38,7 @@
 
 <script>
 import { MyPyramidWithdraws } from 'src/queries/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
+import moment from 'moment'
 
 export default {
   name: "MyBalance",
@@ -60,6 +61,11 @@ export default {
     }
   },
   methods: {
+    formatTime (time) {
+			// if (time) return moment(time, 'HH:mm:ss').format('YYYY-MM-DD HH:mm a')
+			if (time) return moment(time, 'HH:mm:ss').format('YYYY-MM-DD')
+			return 'Not Defined'
+		},
       errorHandler(errorsObj) { 
         if (typeof errorsObj == 'object') {
           this.$q.notify({
@@ -123,7 +129,7 @@ export default {
           position: 'top',
           progress: true,
           multiLine: true,
-          message: "what is the amount that you want to withdraw"
+          message: this.$t('ماهي الكميه اللتي تريد سحبها')
         })
       }
     }

@@ -1,9 +1,9 @@
 <template>
   <div class="profit">
     <div class="taxt">
-      <h4>الأرباح المستحقة من الهرم</h4>
+      <h4>{{$t('الأرباح المستحقة من الهرم')}}</h4>
       <h3> <span>{{myRewards}}</span>USD </h3>
-      <button @click="COLLECT_MY_REWARDS"><img src="~assets/img/money.png" alt="">  تحصيل ارباحي  </button>
+      <button @click="COLLECT_MY_REWARDS"><img src="~assets/img/money.png" alt=""> {{$t('تحصيل ارباحي')}} </button>
     </div>
     <q-inner-loading :showing="visible">
       <q-spinner-hourglass color="primary" size="70px" />
@@ -36,6 +36,21 @@ export default {
     }
   },
   methods: {
+    errorHandler(errorsObj) {
+        for (const key in errorsObj) {
+            for (const val of errorsObj[key]) {
+                console.log(val)
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: val.message
+                })
+            }
+        }
+    },
+
     async COLLECT_MY_REWARDS () {
       try {
         this.visible = true
@@ -56,7 +71,7 @@ export default {
             position: 'top',
             progress: true,
             multiLine: true,
-            message: "Your rewards are been collected"
+            message: this.$t('تم تحصيل الارباح')
           })
         } else if (errors) {
           this.visible = false

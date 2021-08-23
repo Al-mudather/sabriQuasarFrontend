@@ -97,7 +97,7 @@
                     <!-- start rate -->
                     <div class="rate">
                         <div class="container-fluid">
-                          <div class="tab-content" id="myTabContent">
+                          <!-- <div class="tab-content" id="myTabContent"> -->
                             <div class="cn fadeIn" id="home" role="tabpanel" aria-labelledby="home-tab">
                                 <div class="row justify-center" v-if="!lodash.isEmpty(courses.edges)">
                                 <!-- <div class="row justify-center" v-if="courses.edgeCount > 0"> -->
@@ -106,15 +106,14 @@
                                           appear
                                           enter-active-class="animated fadeIn"
                                           leave-active-class="animated fadeOut"
-                                        >
+                                        > 
                                             <course-card
                                               class="hvr-grow"
-                                              style="cursor: pointer"
-                                                :course="course.node"
-                                                :name="course.node.title"
-                                                instructor="مركز دكتور صبري ابو قرون"
-                                                :price="course.node.courseFee"
-                                                unit="SDG"
+                                              :course="course.node"
+                                              :name="course.node.title"
+                                              instructor="مركز دكتور صبري ابو قرون"
+                                              :price="course.node.courseFee"
+                                              unit="SDG"
                                             />
                                         </transition>
                                     </div>
@@ -137,7 +136,7 @@
                                   </transition>
                                 </div>
                             </div>
-                          </div>
+                          <!-- </div> -->
                         </div>
                     </div>
                 </div>
@@ -647,6 +646,136 @@ export default {
             position: relative;
             @media (min-width: 320px) and (max-width: 700px){
                 right: 0;
+            }
+
+            .card{
+                position: relative;
+                border: 0;
+                box-shadow: 3px 7px 15px #eceaea;
+                border-radius: 37px;
+                background: #E3EDFA;
+                width: 100%;
+                padding: 10px;
+                height: 441px;
+                .pattern{
+                    position: absolute;
+                    top: 0;
+                    width: 100%;
+                    left: 0;
+                    right: 0;
+                    height: 100%;
+                }
+                .card-img-top{
+                    position: relative;
+                    padding: 14px;
+                    height: 294px;
+                    width: 100%;
+                    overflow: hidden;
+                    border-radius: 30px;
+                    .plays{
+                        position: absolute;
+                        width: auto;
+                        top: 45%;
+                        left: 0;
+                        right: 44%;
+                        height: unset;
+                        z-index: 5;
+                    }
+                    img{
+                        width: 100%;
+                        height: 100%;
+                        position: absolute;
+                        border-width: 0;
+                        left: 0;
+                        right: 0;
+                        top: 0;
+                    }
+                } 
+                .card-body{
+                    position: relative;
+                    padding: unset;
+                    border-radius: 29px;
+                    background: #F78A78;
+                    margin: -37px auto 2px auto;
+                    width: 100%;
+                    top: -6px;
+                    height: 164px;
+                    .card-title{
+                        margin-bottom: 7px;
+                        color: #fff;
+                        font-size: 17px;
+                        font-family: cairoR;
+                        line-height: 1.8;
+                        background-color: #FC9685;
+                        padding: 8px;
+                        border-top-left-radius: 26px;
+                        border-top-right-radius: 26px;
+                        height: 72px;
+                        overflow: hidden;
+                        -webkit-line-clamp: 2;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                    }
+                    .detai{
+                        position: relative;
+                        width: 89px;
+                        .added{
+                            display: inline-block;
+                            position: absolute;
+                            left: 0;
+                            right: -7px;
+                            width: 148px;
+                            top: 40px;
+                            svg{
+                                path{
+                                    fill: #FFF067;
+                                }
+                                
+                            }
+                            button{
+                                color: #fff;
+                                font-size: 14px;
+                                font-family: cairoR;
+                                position: absolute;
+                                left: 0;
+                                right: 0;
+                                top: 16px;
+                                text-align: center;
+                                width: 129px;
+                                background-color: unset;
+                                box-shadow: none;
+                                height: unset;
+                                outline: 0;
+                                color: #7B7B7B;
+                            }
+                        }
+                        h3{
+                            display: inline-block;
+                            color: #fff067;
+                            font-size: 31px;
+                            font-family: cairoR;
+                            margin-right: 8px;
+                        }
+                        span{
+                            display: inline-block;
+                            font-size: 13px;
+                            font-family: cairoR;
+                            color: #fff;
+                        }
+                    }
+                    .details{
+                        display: inline-block;
+                        background-color: unset;
+                        height: unset;
+                        box-shadow: unset;
+                        color: #fff;
+                        font-size: 14px;
+                        font-family: cairoR;
+                        outline: 0;
+                        float: left;
+                        margin: 4px 0 0 -38px;
+                    }
+                }
             }
             .parent {
                 @media (min-width: 320px) and (max-width: 700px){

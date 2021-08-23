@@ -11,7 +11,6 @@
         </div>
         <div class="pric">
             <div class="detai">
-                <!-- <h3><span>{{unit}}</span>{{parseFloat(JSON.parse(course.currency)[currency]).toFixed(3) }}</h3> -->
                 <h3><span>{{currency}}</span>{{FORMAT_COUSRE_PRICE(parseFloat(JSON.parse(course.currency)[currency]), 3)}}</h3>
             </div>
             <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) ">{{$t('التفاصيل')}}</button>
@@ -19,19 +18,7 @@
                 <img src="~assets/img/addCou.png" alt="">
             </div>
         </div>
-        <!-- <div v-if="instructor.edges.length > 1" class="name">
-            <div v-for="instructor in instructor.edges" :key="instructor.node.id" class="user">
-                <img src="~assets/img/user.png" alt="">
-                <h3 >{{instructor.node.instructor.firstName}}</h3>
-            </div>
-        </div>
-        <div v-else class="name">
-            <div class="user">
-                <img src="~assets/img/user.png" alt="">
-                <h3 v-if="instructor.edges.length == 1">{{instructor.edges[0].node.instructor.firstName || "Not defined"}}</h3>
-                <h3 v-else>Not defined</h3>
-            </div>
-        </div> -->
+
         <div class="name">
             <div class="user">
                 <img src="~assets/img/user.png" alt="">
@@ -39,6 +26,7 @@
             </div>
         </div>
     </div>
+
 </template>
 
 

@@ -2,15 +2,16 @@
     <div class="box-pay box-wait">
         <div class="ide" id="#model">
         <div class="tite">
-            <h3>ID - <span>{{myOrder.order.pk}}</span></h3>
-            <img src="~assets/img/hash.png" alt="">
+            <!-- <h3>ID - <span>{{myOrder.order.pk}}</span></h3> -->
+            <h3>ID - <span>{{myOrder.order.invoiceNumber}}</span></h3>
+            <!-- <img src="~assets/img/hash.png" alt=""> -->
         </div>
         <div class="chec">
-            <h3>شراء</h3>
+            <h3>{{$t('شراء')}}</h3>
             <img src="~assets/img/true.png" alt="">
         </div>
         <div class="chec">
-            <h3 class="colorr">معالجة</h3>
+            <h3 class="colorr">{{$t('معالجة')}}</h3>
             <img v-if="myOrder.marketerEndorse" src="~assets/img/true.png" alt="">
             <img v-else src="~assets/img/fulse.png" alt="">
         </div>
@@ -22,7 +23,7 @@
     </div>
     <div class="viwe">
         <div class="money">
-            <h3>المدفوع</h3>
+            <h3>{{$t('المدفوع')}}</h3>
             <!--price-->
             <div class="price">
                 <h4>{{myOrder.order.totalAmount}}<span>{{myOrder.order.currency}}</span></h4>
@@ -41,7 +42,7 @@
                 <!--box-->
                 <div class="box">
                 <!--<img src="~assets/img/hash.png" alt="#">-->
-                <button @click="bill = true"> <img src="~assets/img/eyes.png" alt=""> رؤية اشعار الدفع</button>
+                <button @click="bill = true"> <img src="~assets/img/eyes.png" alt="">{{$t('رؤية فاتورة الدفع')}}</button>
             </div>
             
         </div>
@@ -61,7 +62,7 @@
                 <file-upload
                     imgeSize="4000000"
                     :accept="'.png,.jpg, image/*'"
-                    label="شعار بنكك"
+                    :label="bankakBillName"
                     v-on:File_Handler='reuploadImageHandler'
                 ></file-upload>
             </div>
@@ -70,7 +71,7 @@
                 <!--bu-->
                 <div class="bu" style="cursor: pointer;" @click="RE_UPLOAD_THE_TRANSACTION_BILL">
                     <img src="~assets/img/done.png" alt="">
-                    <h2>إعادة ارفاق الاشعار</h2>
+                    <h2>{{$t('إعادة ارفاق الفاتوره')}}</h2>
                 </div>
 
                 <q-inner-loading :showing="loading">
@@ -94,6 +95,7 @@ export default {
             bill: false,
             loading: false,
             bankakBill: null,
+            bankakBillName: this.$t('فاتورة بنكك'),
             confirm: {
                 marketerEndorse: true,
                 retryPlease: false,
@@ -148,9 +150,6 @@ export default {
  
         async RE_UPLOAD_THE_TRANSACTION_BILL () {
             this.loading = true
-            console.log(';;;;;;;;;;;;;;;;;;;;;;;')
-            console.log(this.myOrder.pk)
-            console.log(';;;;;;;;;;;;;;;;;;;;;;;')
             const re_upload_res = await this.$apollo.mutate({
                 mutation: ReUploadAttachmentTransaction,
                 variables: {

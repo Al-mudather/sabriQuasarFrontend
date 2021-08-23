@@ -6,7 +6,7 @@
                     <div class="col-lg-12">
                         <div class="titel">
                             <img src="~assets/img/tit.png" alt="">
-                            <h3>طلبـاتي</h3>
+                            <h3>{{$t('طلبـاتي')}}</h3>
                         </div>
                     </div>
                 </div>
@@ -30,7 +30,7 @@ import { mapActions } from "vuex"
 import { MyAttachmentTransactions } from 'src/queries/attachment_transactions_management/query/TheUserAttachmentTransactionsQuery'
 import { MarketerConfirmAttachmentTransaction } from 'src/queries/attachment_transactions_management/mutation/marketerConfirmAttachmentTransaction'
 import { AllMarketerAttachmentTransaction } from 'src/queries/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
-import TransactionOrderDetail from 'src/components/orders_management/transactionOrderDetail'
+import TransactionOrderDetail from 'src/components/orders_management/transactionOrderDetail.vue'
 
 export default {
     name: 'MyOrders',

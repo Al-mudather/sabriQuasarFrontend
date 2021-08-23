@@ -5,7 +5,7 @@
             <div class="col-lg-12">
                 <div class="titel">
                     <img src="~assets/img/tit.png" alt="">
-                    <h3>حسابي التسويقي</h3>
+                    <h3>{{$t('حسابي التسويقي')}}</h3>
                 </div>
             </div>
         </div>
@@ -29,22 +29,22 @@
             <div class="col-lg-12">
                 <div class="titel">
                     <img src="~assets/img/tit.png" alt="">
-                    <h3>سجل السحب</h3>
+                    <h3>{{$t('سجل السحب')}}</h3>
                 </div>
             </div>
         </div>
     </div>
     <!-- Withdrawal requests -->
     <div class="container">
-      <my-withdraws-list /> 
+      <my-withdraws-list />  
     </div>
   </section>
 </template>
 
 <script>
 // import { mapActions } from 'vuex'
-import MyBalance from 'src/components/pyramid_marketing_management/MyBalance'
-import MyPyramid from 'src/components/pyramid_marketing_management/MyPyramid'
+import MyBalance from 'src/components/pyramid_marketing_management/MyBalance.vue'
+import MyPyramid from 'src/components/pyramid_marketing_management/MyPyramid.vue'
 import MyWithdrawsList from 'src/components/pyramid_marketing_management/MyWithdrawsList.vue'
 
 export default {
@@ -421,7 +421,7 @@ export default {
 .record{
     margin: 60px 0 0 0;
     .oper{
-        display: none;
+        display: block;
         .all{
             text-align: center;
             background-color: #fff;

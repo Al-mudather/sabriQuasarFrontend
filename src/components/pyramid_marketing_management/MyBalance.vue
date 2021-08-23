@@ -2,7 +2,7 @@
   <div class="account">
     <img src="~assets/img/sim.png" alt="">
     <div class="taxt">
-      <h4>حسابــي</h4>
+      <h4>{{$t('حسابــي')}}</h4>
       <h3> <span>{{myBalance}}</span>USD </h3>
       <!-- <h3> <span>{{myBalance}}</span> </h3> -->
     </div>
@@ -18,7 +18,7 @@
     <q-dialog v-model="withdraw" persistent>
       <q-card style="min-width: 350px">
         <q-card-section>
-          <div class="text-h6 text-center">The amount</div>
+          <div class="text-h6 text-center">{{$t('الكميه')}}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -43,7 +43,7 @@ export default {
       lodash: this.$_,
       withdraw: false,
       myBalance: 0.0,
-      amount: 300
+      amount: ''
     };
   },
   apollo: {
@@ -98,21 +98,24 @@ export default {
         const withdraw_res = await this.$apollo.mutate({
             mutation: WithdrawPyramidBalance,
             variables: {
-                amount: this.amount,
-                input: {}
-            }
+              amount: this.amount,
+              input: {}
+            },
+            refetchQueries: [{query: MyPyramidBalance}]
         })
         const errors = withdraw_res.data.makePyramidWithdraw.errors
         const success = withdraw_res.data.makePyramidWithdraw.success
 
         if (success) {
           this.$q.notify({
-            type: 'warning',
+            type: 'positive',
             position: 'top',
             progress: true,
             multiLine: true,
             message: "The withdraw order has been requested."
           })
+          //TODO: Close the withdraw
+          this.withdraw = false
         } else if (errors) {
           this.errorHandler(errors)
         }

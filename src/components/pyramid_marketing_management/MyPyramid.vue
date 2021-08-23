@@ -10,8 +10,8 @@
 </template>
 
 <script>
-import MyPyramidParticipants from 'src/components/pyramid_marketing_management/MyPyramidParticipants'
-import MyPyramidRewards from 'src/components/pyramid_marketing_management/MyPyramidRewards'
+import MyPyramidParticipants from 'src/components/pyramid_marketing_management/MyPyramidParticipants.vue'
+import MyPyramidRewards from 'src/components/pyramid_marketing_management/MyPyramidRewards.vue'
 
 export default {
   name: "MyPyramid",

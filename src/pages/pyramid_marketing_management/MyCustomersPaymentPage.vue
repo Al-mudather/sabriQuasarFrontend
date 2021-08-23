@@ -5,7 +5,7 @@
                     <div class="col-lg-12">
                         <div class="titel">
                             <img src="~assets/img/tit.png" alt="">
-                            <h3>عمـليات الدفع</h3>
+                            <h3>{{$t('عمـليات الدفع')}}</h3>
                         </div>
                     </div>
                     <!--cn-pay-->
@@ -16,15 +16,15 @@
                                 <div v-for="customerTrans in customersTransactionsList.edges" :key="customerTrans.node.pk" class="col-lg-3 col-md-6 col-sm-6">
                                     <Transaction-completed v-if="customerTrans.node.doneVerification " :customerTrans="customerTrans.node" />
                                     <Transaction-under-processing v-else-if="customerTrans.node.marketerEndorse && !customerTrans.node.pyramidManagerEndorse" :customerTrans="customerTrans.node" />
-                                    <Transaction-rejected label="الطلب مرفوض من الإداره" v-else-if="customerTrans.node.pyramidRetryPlease" :customerTrans="customerTrans.node" />
-                                    <Transaction-rejected label="الطلب مرفوض بواسطتي" v-else-if="customerTrans.node.retryPlease || customerTrans.node.pyramidRetryPlease" :customerTrans="customerTrans.node" />
+                                    <Transaction-rejected :label="rejectedByTheManager"  v-else-if="customerTrans.node.pyramidRetryPlease" :customerTrans="customerTrans.node" />
+                                    <Transaction-rejected :label="rejectedByTheMe" v-else-if="customerTrans.node.retryPlease || customerTrans.node.pyramidRetryPlease" :customerTrans="customerTrans.node" />
                                     <Transaction-hanged v-else :customerTrans="customerTrans.node" />
                                 </div>
                             </div>
                         </div>
                         <div v-else class="msPay">
                             <img src="~assets/img/Cash Payment-bro.png" alt="">
-                            <h3>ليس لديك عمليات دفع في الوقت الحالي </h3>
+                            <h3>{{$t('ليس لديك عمليات دفع في الوقت الحالي')}}</h3>
                         </div>
                     </div>
                 </div>
@@ -45,13 +45,15 @@ import { AllMarketerAttachmentTransaction } from 'src/queries/attachment_transac
 import Transaction_completed from 'src/components/attachment_transactions_management/Transaction_completed'
 import Transaction_under_processing from 'src/components/attachment_transactions_management/Transaction_under_processing'
 import Transaction_rejected from 'src/components/attachment_transactions_management/Transaction_rejected'
-import Transaction_hanged from 'src/components/attachment_transactions_management/Transaction_hanged'
+import Transaction_hanged from 'src/components/attachment_transactions_management/Transaction_hanged.vue'
 
 export default {
   name: "MyMarketingPage",
   data () {
     return {
-      customersTransactionsList: []
+        rejectedByTheManager: this.$t('الطلب مرفوض من الإداره'),
+        rejectedByTheMe: this.$t('الطلب مرفوض بواسطتي'),
+        customersTransactionsList: []
     }
   },
   apollo: {
