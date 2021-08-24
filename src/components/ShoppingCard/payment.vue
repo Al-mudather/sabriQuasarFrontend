@@ -1,25 +1,26 @@
 <template>
     <div class="msPayment">
-        <div class="text-h4 text-center q-ma-md">
+        <div v-if="currency == 'SDG'" class="text-h4 text-center q-ma-md">
             إختر وسيلة الدفع اللتي تناسبك
         </div>
         <div class="options">
             <!-- Paypal Payment -->
             <paypal-payment v-if="currency != 'SDG' "/>
             <!-- Bankak Payment -->
-            <div v-if="currency != 'SDG'" class="sele edit" @click="enableBankakPayment = true">
+            <div v-if="currency == 'SDG'" class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('bankak')">
                 <img src="~assets/img/bankk.png" alt="" />
                 <h3>الدفع عن طريق بنكك</h3>
             </div>
             <!-- Sudanies Payment -->
-            <div v-if="currency != 'SDG'" class="sele edit" @click="enableSudaniesBank = true">
+            <div v-if="currency == 'SDG'" class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('otherSudaniesBankas')">
                 <img src="~assets/img/credit-cards.png" alt="" />
                 <h3>Sudanies Bank</h3>
             </div>
         </div>
         <bankak-payment v-if="enableBankakPayment"/>
         <!--details Payment-->
-        <div class="details q-mt-md" v-if="enableSudaniesBank || currency == 'SDG' ">
+        <!-- <div class="details q-mt-md" v-if="enableSudaniesBank || currency == 'SDG' "> -->
+        <div class="details q-mt-md" v-if="enableSudaniesBank">
             <form>
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
@@ -77,7 +78,8 @@
         <div class="total">
             <div class="price">
                 <h2>{{$t('المجمــوع')}}</h2>
-                <h3>{{ totalPaymentFees }}<span>{{currency}}</span></h3>
+                <!-- <h3>{{ totalPaymentFees }}<span>{{currency}}</span></h3> -->
+                <h3>{{ FORMAT_COUSRE_PRICE(totalPaymentFees, 3) }}<span>{{currency}}</span></h3>
                 <!-- <h3><span>{{currency}}</span></h3> -->
             </div>
         </div>
@@ -134,7 +136,6 @@ export default {
 
   methods: {
         errorHandler(errorsObj) {
-            console.log(errorsObj);
             for (const key in errorsObj) {
                 for (const val of errorsObj[key]) {
                     if (typeof val.message == 'object') {
@@ -159,17 +160,49 @@ export default {
             }
         },
 
+        ENABLE_SUDANIES_PAYMENT (payment) {
+            if (payment === 'bankak') {
+                this.enableBankakPayment = true
+                this.enableSudaniesBank = false
+            } else if (payment === 'otherSudaniesBankas') {
+                this.enableSudaniesBank = true
+                this.enableBankakPayment = false
+            }
+        },
+
+        FORMAT_COUSRE_PRICE(num, digits) {
+            const lookup = [
+                { value: 1, symbol: "" },
+                { value: 1e3, symbol: "k" },
+                { value: 1e6, symbol: "M" },
+                { value: 1e9, symbol: "G" },
+                { value: 1e12, symbol: "T" },
+                { value: 1e15, symbol: "P" },
+                { value: 1e18, symbol: "E" }
+            ];
+
+            if ( (num.toString().split('.')[0] == 0) || num == 0 ) {
+                return num
+            }
+            const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+            var item = lookup.slice().reverse().find(function(item) {
+                return num >= item.value;
+            });
+
+            return item ? (num / item.value).toFixed(digits).replace(rx, "$1") + item.symbol : "0";
+        },
+
         async buyTheCoursesUsingSmartNode() {
             this.visible = true;
             if (this.expDate < 7) {
                 this.visible = false;
                 this.$q.notify({
-                        type: 'negative',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: 'Please add the expiration data'
-                    })
+                    type: 'negative',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: 'Please add the expiration data'
+                })
             } else {
                 // TODO: Extract all courses ids
                 const courseIds = this.getOrdersIds();

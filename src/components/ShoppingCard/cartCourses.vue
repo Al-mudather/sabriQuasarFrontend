@@ -28,7 +28,8 @@
         <div class="total">
             <div class="price">
                 <h2>{{$t('المجمــوع')}}</h2>
-                <h3>{{ calculateTheTotalFees }}<span>{{currency}}</span></h3>
+                <!-- <h3>{{ calculateTheTotalFees }}<span>{{currency}}</span></h3> -->
+                <h3>{{ FORMAT_COUSRE_PRICE(calculateTheTotalFees, 3) }}<span>{{currency}}</span></h3>
             </div>
             <div class="next" @click="goToAuthenticationCartPage">
                 <a class="">

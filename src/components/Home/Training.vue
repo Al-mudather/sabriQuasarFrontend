@@ -327,12 +327,6 @@ export default {
         }
     },
 
-    // watch: {
-    //     allCourseSpecialities(val) {
-    //         this.navTab = val.edges[0].node.speciality;
-    //     }
-    // },
-
     computed: {
       swiper() {
         return this.$refs.mySwiper.$swiper

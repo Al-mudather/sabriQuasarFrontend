@@ -15,7 +15,7 @@
                         </g>
                     </svg>                                      
                 </div>
-                <h3 v-if="order.isDone"><img src="~assets/img/secces.png" alt="">{{$t('تم الدفع')}} </h3>
+                <h3 v-if="order.node.isDone"><img src="~assets/img/secces.png" alt="">{{$t('تم الدفع')}} </h3>
                 <h3 v-else><img src="~assets/img/watinig.png" al t="">{{$t('في إنتظار المعالجة')}}</h3>
                 <div class="amount">
                     <h3>USD <span>{{order.node.amount}}</span></h3>
