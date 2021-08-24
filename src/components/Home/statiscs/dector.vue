@@ -68,10 +68,12 @@ export default {
         })
         .then(res => {
           const key = Object.keys(res.data);
-          if (typeof res.data[key] == 'string') {            
+          if (typeof res.data[key] == 'string') {  
             this.totalCount = res.data[key]
           } else if (typeof res.data[key] == 'object') {
             this.totalCount = res.data[key].totalCount;
+          } else if (typeof res.data[key] == 'number') {
+            this.totalCount = res.data[key]
           }
         });
     }

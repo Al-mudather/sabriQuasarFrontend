@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import Dectors from 'components/Home/statiscs/dector'
+import Dectors from 'components/Home/statiscs/dector.vue'
 import { GetAllCoursesStatiscs } from 'src/queries/course_management/query/GetAllCoursesStatiscs'
 import { GetAllCoursesHours } from 'src/queries/course_management/query/GetAllCoursesHours'
 import { GetAllInstructorsStatiscs } from 'src/queries/account_management/query/GetAllInstructorsStatiscs'

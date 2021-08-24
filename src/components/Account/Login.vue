@@ -11,21 +11,6 @@
             <form id="loginForm" @submit="LoginUser($event)">
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
-                        <div
-                            class=""
-                            style="text-align:left"
-                            v-if="errorMessages.length > 0"
-                        >
-                            Please fix these <strong>error first</strong>
-                            <ul>
-                                <li
-                                    v-for="(message, index) in errorMessages"
-                                    :key="index"
-                                >
-                                    {{ message }}<br />
-                                </li>
-                            </ul>
-                        </div>
                         <div class="inp">
                             <img src="~assets/img/gmail.png" alt="" />
                             <input

@@ -1,15 +1,18 @@
 <template>
     <div class="msPayment">
-        <div class="text-h5">
+        <div class="text-h4 text-center q-ma-md">
             إختر وسيلة الدفع اللتي تناسبك
         </div>
         <div class="options">
-            <paypal-payment v-if=" currency != 'SDG' "/>
-            <div v-if=" currency != 'SDG'" class="sele edit" @click="enableBankakPayment = true">
+            <!-- Paypal Payment -->
+            <paypal-payment v-if="currency != 'SDG' "/>
+            <!-- Bankak Payment -->
+            <div v-if="currency != 'SDG'" class="sele edit" @click="enableBankakPayment = true">
                 <img src="~assets/img/bankk.png" alt="" />
                 <h3>الدفع عن طريق بنكك</h3>
             </div>
-            <div v-if=" currency != 'SDG'" class="sele edit" @click="enableSudaniesBank = true">
+            <!-- Sudanies Payment -->
+            <div v-if="currency != 'SDG'" class="sele edit" @click="enableSudaniesBank = true">
                 <img src="~assets/img/credit-cards.png" alt="" />
                 <h3>Sudanies Bank</h3>
             </div>
@@ -18,21 +21,6 @@
         <!--details Payment-->
         <div class="details q-mt-md" v-if="enableSudaniesBank || currency == 'SDG' ">
             <form>
-                <div
-                    class=""
-                    style="text-align:left"
-                    v-if="errorMessages.length > 0"
-                >
-                    Please fix these <strong>error first</strong>
-                    <ul>
-                        <li
-                            v-for="(message, index) in errorMessages"
-                            :key="index"
-                        >
-                            {{ message }}<br />
-                        </li>
-                    </ul>
-                </div>
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
                         <div class="">

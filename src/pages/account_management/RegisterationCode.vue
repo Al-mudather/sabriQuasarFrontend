@@ -66,9 +66,27 @@ export default {
           //TODO: close the loader
           this.visible = false
           if (join_res.data.joinPlatform.success) {
+            this.$q.notify({
+                type: 'positive',
+                progress: true,
+                multiLine: true,
+                position: 'top',
+                message: this.$t('مرحبا بك')
+            })
             this.GO_TO_HOME_PAGE()
           }
-        } catch (error) {
+        } catch (e) {
+          if ( e.message == 'GraphQL error: Pyramid matching query does not exist.') {
+            this.$q.notify({
+                type: 'negative',
+                progress: true,
+                multiLine: true,
+                position: 'top',
+                message: this.$t('هذا الكود خاطئ ادخل الكود الصحيح')
+            })
+            // TODO: Go to code registeration page
+            this.$router.push({ name: 'registeration-code' })
+          }
           //TODO: close the loader
           this.visible = false
           

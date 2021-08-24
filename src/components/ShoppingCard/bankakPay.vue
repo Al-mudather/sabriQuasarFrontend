@@ -1,6 +1,7 @@
 <template>
     <div class="q-ma-lg">
-        <div class="text-h6 text-center">إشعار بنكك</div>
+        <div class="text-h4 text-center q-ma-sm">إشعار بنكك</div>
+        <div class="text-h6 text-center text-danger">ملاحظه: يجب كتابة الاسم رباعيا في اشعار بنكك لي يتم اعتماد الشعار</div>
         <file-upload
             imgeSize="4000000"
             :accept="'.png,.jpg, image/*'"

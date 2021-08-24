@@ -108,6 +108,9 @@ export default {
                     }
                 }).catch((err) => {
                     this.visible = false
+                    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx')
+                    console.log(err)
+                    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx')
                     if (err.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {
                         this.$q.notify({
                             type: 'warning',

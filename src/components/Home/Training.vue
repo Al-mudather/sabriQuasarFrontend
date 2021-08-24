@@ -542,7 +542,7 @@ export default {
                     }
                     .detai{
                         position: relative;
-                        width: 89px;
+                        width: 100%;
                         .added{
                             display: inline-block;
                             position: absolute;
