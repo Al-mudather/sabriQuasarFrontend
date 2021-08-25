@@ -26,10 +26,10 @@
           <hr />
         </div>
 
-        <div class="tow">
+        <!-- <div class="tow">
           <h3>42<span>H</span></h3>
           <P>{{$t('عدد الساعات')}}</P>
-        </div>
+        </div> -->
         <div v-if="courseData.courseLanguage" class="tow ordT">
           <img src="~assets/img/languages.png" alt="" />
           <P>{{ courseData.courseLanguage.languageName }}</P>
