@@ -191,20 +191,22 @@ export default {
                         this.visible = false
                         if (result.data.tokenAuth.success) {
                             // TODO: reset the data
-                            this.reset()
-  
-                            this.loginAction(result.data.tokenAuth).then(() => {
-                                this.$q.notify({
-                                    type: 'positive',
-                                    progress: true,
-                                    multiLine: true,
-                                    position: 'top',
-                                    message: 'logged in successfully'
-                                })
-                                // TODO: See if the user thas the reqisteration code
-                                this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
-
-                            });
+                            if (result.data.tokenAuth.user.verified) {
+                                this.loginAction(result.data.tokenAuth).then(() => {
+                                    this.$q.notify({
+                                        type: 'positive',
+                                        progress: true,
+                                        multiLine: true,
+                                        position: 'top',
+                                        message: 'logged in successfully'
+                                    })
+                                    // TODO: See if the user thas the reqisteration code
+                                    this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
+                                });
+                            } else {
+                                //TODO: Go to the Email verification page
+                                this.$router.push({ name: "password-confirm" });
+                            }
                         } else if (result.data.tokenAuth.errors) {
                             this.errorHandler(result.data.tokenAuth.errors);
                         }
@@ -216,7 +218,7 @@ export default {
                 this.visible = false
             }
         },
-
+ 
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})

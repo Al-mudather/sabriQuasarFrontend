@@ -21,7 +21,7 @@
                 <div class="lang">
                     <!-- <img src="~assets/img/ar.png" alt=""> -->
                     <q-toggle v-model="_isEnglish" icon="language"/>
-                </div> 
+                </div>
                 <div class="profile">
                     <img src="~assets/img/user(4).png" alt="">
                     <h3 v-if="$_.get(user,'[fullName]')" >{{$_.get(user,'[fullName]')}}</h3>

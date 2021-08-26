@@ -8,6 +8,7 @@ import { mapActions, mapState } from "vuex";
 import { LocalStorage } from 'quasar'
 import {WOW} from 'wowjs'
 import 'animate.css'
+import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 
 export default {
     name: "App",
@@ -22,7 +23,7 @@ export default {
     },
     methods: {
         ...mapActions('authentication', ['RE_LOGIN_USER']),
-        ...mapActions('authentication', ['logOutAction']),
+        ...mapActions('authentication', ['logOutAction'])
     },
     created() {
         // console.log({router: this.$router})

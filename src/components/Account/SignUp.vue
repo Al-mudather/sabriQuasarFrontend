@@ -12,13 +12,14 @@
                 <GoogleAuthentication class="hvr-pulse-grow" />
             </div>
             <form @submit="REGISTER_NEW_USER($event)">
+                <div class="text-h6">التسجيل عن طريق facebook أو Gmail فقط</div>
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
                         <div class="inp">
-                            <!-- <img src="~assets/img/gmail.png" alt="" /> -->
                             <input
                                 class="input"
                                 id="fullName"
+                                disabled
                                 v-model="fullName"
                                 type="text"
                                 :placeholder="$t('الاسم الحقيقي')"
@@ -29,6 +30,7 @@
                             <input
                                 class="input"
                                 id="regEmail"
+                                disabled
                                 v-model="email"
                                 type="email"
                                 :placeholder="$t('الإيميل')"
@@ -40,6 +42,7 @@
                                 class="input"
                                 id="regPassword"
                                 v-model="password1"
+                                disabled
                                 type="password"
                                 :placeholder="$t('كلمة المرور')"
                             />
@@ -55,6 +58,7 @@
                                 class="input"
                                 id="regPassword2"
                                 v-model="password2"
+                                disabled
                                 type="password"
                                 :placeholder="$t('إعادة كلمة المرور')"
                             />
@@ -62,7 +66,7 @@
                     </div>
                 </div>
                 <div class="next">
-                    <button class="action_btn" type="submit" id="siginUpAction" style="outline: none; border: none; background: transparent; box-shadow: none; cursor: pointer">
+                    <button disabled class="action_btn" type="submit" id="siginUpAction" style="outline: none; border: none; background: transparent; box-shadow: none; cursor: pointer">
                         <svg
                             class="nexx neex_1"
                             xmlns="http://www.w3.org/2000/svg"

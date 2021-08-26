@@ -67,6 +67,13 @@ export default {
                         this.loginAction(result.data.socialAuth).then(() => {
                             // TODO: Go To the home page
                             if (result.data.socialAuth.token) {
+                                this.$q.notify({
+                                    type: 'positive',
+                                    progress: true,
+                                    multiLine: true,
+                                    position: 'top',
+                                    message: this.$t('تم تسجيل الدخول بنجاح')
+                                })
                                 // TODO: See if the user thas the reqisteration code
                                 this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
                                 // this.$router.push({ name: 'registeration-code' })
