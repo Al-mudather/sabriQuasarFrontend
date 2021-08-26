@@ -14,7 +14,7 @@ def get_language_file_list():
   This function gets all the language translation targets in the i18 directory
   """
   base_path = Path('src\i18n\index.js')
-  default_lang = Path('src\i18n\en-us\index.js')
+  default_lang = Path('src\i18n\\ar\index.js')
   language_files_list = []
   for path in Path('src/i18n/').rglob('index.js'):
     if path != base_path and path != default_lang:
@@ -55,6 +55,7 @@ def get_file_translation_words(file):
   """
   This function gets a file and extract from it all the strings that require translation
   """
+  print("# Getting files to be translated")
   p = re.compile('\$t\(?.*?\)')
   # get translation keyword data
   to_translate = p.findall(open(file, 'r', encoding="utf8").read().replace('\n', ''))
@@ -62,7 +63,9 @@ def get_file_translation_words(file):
   JsonTranslate = {}
 
   for label in to_translate:
+    # print(label)
     lbl = label.replace('$t', '').replace('\'', '').replace('(', '').replace(')', '').replace('\"', '').strip()
+    # print(lbl)
     JsonTranslate[lbl] = ''
   return JsonTranslate
 
@@ -72,7 +75,7 @@ def create_translation_json_file_string(file, language, old_translations, to_tra
   This function takes a file and translate all the data within that file
   """
   json_file_string = ""
-
+  print("# Create json file")
   # translator = Translator(to_lang=language)
 
   print(file)
@@ -83,7 +86,7 @@ def create_translation_json_file_string(file, language, old_translations, to_tra
         
   "_comment_{file_name}": "{file_name}",
         
-"""
+  """
 
   for i, label in enumerate(to_translate):
     lbl = label.replace('$t', '').replace('\'', '').replace('(', '').replace(')', '').replace('\"', '').strip()
@@ -95,7 +98,7 @@ def create_translation_json_file_string(file, language, old_translations, to_tra
         translated = old_translations.get(lbl)
       else:
         print("[*] Translating using internet ...")
-        translated = GoogleTranslator(source='auto', target=language).translate(lbl)
+        translated = GoogleTranslator(source='ar', target=language).translate(lbl)
         # translated = translator.translate(lbl)
         if "MYMEMORY WARNING" in translated:
           print("[*] Memory warning ..")
@@ -111,6 +114,7 @@ def create_translation_json_file_string(file, language, old_translations, to_tra
 
 def write_translation(read_write_file, json_file_string):
   # START JS FILE
+  print("# Writing the translation")
   file_string = """
 
 /** 
@@ -140,30 +144,31 @@ def main():
 
   vue_files = get_vue_files('./src/')
 
-  # get all targeted files  
+  # get all targeted files
   target_tr_files = get_vue_files('./src/')
   for tr_file in tr_files:
     language = str(tr_file).split('\\')[-2]
-    # print(language)
-    # get the old translation in the tr file
-    old_translations = get_file_translations(read_write_file=tr_file)
+    if language != 'ar':
+      # print(language)
+      # get the old translation in the tr file
+      old_translations = get_file_translations(read_write_file=tr_file)
 
-    all_words = []
+      all_words = []
 
-    translation_json = "{\n"
-    # For every file get the translations needed and append it to the translation string
-    for file in vue_files:
-      to_translate = get_file_translation_words(file)
-      if to_translate:
-        translated = ''
+      translation_json = "{\n"
+      # For every file get the translations needed and append it to the translation string
+      for file in vue_files:
+        to_translate = get_file_translation_words(file)
+        if to_translate:
+          translated = ''
 
-        translated, all_words = create_translation_json_file_string(file,
-                                                                    language=language,
-                                                                    old_translations=old_translations,
-                                                                    to_translate=to_translate,
-                                                                    all_words=all_words)
+          translated, all_words = create_translation_json_file_string(file,
+                                                                      language=language,
+                                                                      old_translations=old_translations,
+                                                                      to_translate=to_translate,
+                                                                      all_words=all_words)
 
-        translation_json += translated
+          translation_json += translated
 
     translation_json = translation_json[:translation_json.rindex(',')] + "\n}"
 

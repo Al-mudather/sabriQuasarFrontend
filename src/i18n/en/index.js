@@ -12,7 +12,7 @@ export default {
         
   "_comment_src_components_Account_Confirm.vue": "src_components_Account_Confirm.vue",
         
-   
+ 
       "تأكيد" : "emphasis",
  
       "تم إرسال رابط تفعيل حسابك علي بريدك الالكتروني" : "A link to activate your account has been sent to your email",
@@ -22,7 +22,7 @@ export default {
         
   "_comment_src_components_Account_GoogleAuthentication.vue": "src_components_Account_GoogleAuthentication.vue",
         
-   
+ 
       "تم تسجيل الدخول بنجاح" : "You are logged in successfully",
  
       "هذا الحساب مسجل مسبقا" : "This account is already registered",
@@ -30,7 +30,7 @@ export default {
         
   "_comment_src_components_Account_Login.vue": "src_components_Account_Login.vue",
         
-   
+ 
       "تسجيل الدخول" : "sign in",
  
       "الإيميل" : "Email",
@@ -48,13 +48,13 @@ export default {
         
   "_comment_src_components_Account_ResetPassword.vue": "src_components_Account_ResetPassword.vue",
         
-   
+ 
       "إستعادة كلمة المرور" : "Restore password",
  
         
   "_comment_src_components_Account_SignUp.vue": "src_components_Account_SignUp.vue",
         
-   
+ 
       "إنشاء حساب جديد" : "Create a new account",
  
       "الاسم الحقيقي" : "real name",
@@ -66,7 +66,7 @@ export default {
         
   "_comment_src_components_courseClass_classUnits copy.vue": "src_components_courseClass_classUnits copy.vue",
         
-   
+ 
       "المحتــوى" : "Content",
  
       "الدرس السابق" : "Previous lesson",
@@ -76,11 +76,11 @@ export default {
         
   "_comment_src_components_courseClass_classUnits.vue": "src_components_courseClass_classUnits.vue",
         
-   
+ 
         
   "_comment_src_components_courseClass_instructor.vue": "src_components_courseClass_instructor.vue",
         
-   
+ 
       "المزيــد" : "More",
  
       "إخفاء" : "Hide",
@@ -88,69 +88,71 @@ export default {
         
   "_comment_src_components_courseClass_question_and_answer_managements_AnswersList.vue": "src_components_courseClass_question_and_answer_managements_AnswersList.vue",
         
-   
+ 
       "ما هي إيجابتك" : "What is your answer",
  
         
   "_comment_src_components_courseClass_question_and_answer_managements_QuestionCard.vue": "src_components_courseClass_question_and_answer_managements_QuestionCard.vue",
         
-   
+ 
       "عرض المزيد" : "Show more",
  
         
   "_comment_src_components_courseClass_question_and_answer_managements_QuestionsList.vue": "src_components_courseClass_question_and_answer_managements_QuestionsList.vue",
         
-   
+ 
       "أسئل لتجد الاجابة" : "Ask to find the answer",
  
         
   "_comment_src_components_courseDetails_aboutTheCourse.vue": "src_components_courseDetails_aboutTheCourse.vue",
         
-   
+ 
       "عن الكورس" : "About the course",
  
         
   "_comment_src_components_courseDetails_courseInstructors.vue": "src_components_courseDetails_courseInstructors.vue",
         
-   
+ 
       "المحاضرون" : "The Lecturers",
  
         
   "_comment_src_components_courseDetails_courseMainCard.vue": "src_components_courseDetails_courseMainCard.vue",
         
-   
+ 
       "الطلاب الملتحقين" : "Enrolled students",
  
       "عدد الساعات" : "The number of hours",
  
       "أمتلك الأن" : "I own it now",
  
-      "انسخ الرابط" : "Copy the link",
- 
-      "تم النسخ" : "Copied",
- 
         
   "_comment_src_components_courseDetails_coursePreRequisites.vue": "src_components_courseDetails_coursePreRequisites.vue",
         
-   
+ 
       "ماهي متطلبات الدوره ؟" : "What are the course requirements?",
  
         
   "_comment_src_components_courseDetails_courseUnits.vue": "src_components_courseDetails_courseUnits.vue",
         
-   
+ 
       "المحتويـات" : "The contents",
+ 
+        
+  "_comment_src_components_courseDetails_relatedCoureses.vue": "src_components_courseDetails_relatedCoureses.vue",
+        
+ 
+      "extColor;            border: 1px solid #f6f6f6;            background-color: #fff;            @include prefixer                box-shadow,                2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14" : "extColor; border: 1px solid # f6f6f6; background-color: #fff; @include prefixer box-shadow, 2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14",
  
         
   "_comment_src_components_courseDetails_whatIwillLearn.vue": "src_components_courseDetails_whatIwillLearn.vue",
         
-   
+ 
       "ما الذي سأتعلمه ؟" : "What will I learn?",
  
         
   "_comment_src_components_Home_Currency.vue": "src_components_Home_Currency.vue",
         
-   
+ 
       "حدد عملة الشراء" : "Select the purchase currency",
  
       "الجنيه السوداني" : "Sudanese pound",
@@ -164,7 +166,7 @@ export default {
         
   "_comment_src_components_Home_Evaluation.vue": "src_components_Home_Evaluation.vue",
         
-   
+ 
       "الأعلي تقيما" : "The highest rated",
  
       "extColor;            margin-right: 7px;        }    }    .rate {        margin-top: 30px;        .parent {            text-align: right; // Addedd by almudather            .imag {                position: relative;                border-radius: 50px;                overflow: hidden;                height: 327px;                .overlay {                    @include overlay;                    background-color: rgba#fbfbff, .6" : "extColor; margin-right: 7px; }} .rate {margin-top: 30px; .parent {text-align: right; // Addedd by almudather .imag {position: relative; border-radius: 50px; overflow: hidden; height: 327px; .overlay {@include overlay; background-color: rgba # fbfbff, .6",
@@ -174,19 +176,19 @@ export default {
         
   "_comment_src_components_Home_Footer.vue": "src_components_Home_Footer.vue",
         
-   
+ 
       "جميع الحقوق محفوظة لمنصة" : "All rights reserved to the platform",
  
         
   "_comment_src_components_Home_Header.vue": "src_components_Home_Header.vue",
         
-   
+ 
       "المنصة الأولى على مستوى الوطن العربي في التدريب الطبي" : "The first platform in the Arab world in medical training",
  
         
   "_comment_src_components_Home_Menu.vue": "src_components_Home_Menu.vue",
         
-   
+ 
       "إنشاء حساب" : "Create an account",
  
       "دخول" : "Login",
@@ -195,7 +197,13 @@ export default {
  
       "الــدورات" : "courses",
  
+      "طلباتي" : "My requests",
+ 
       "لوحتي التعليمية" : "My educational board",
+ 
+      "صفحتي التسويقيه" : "My marketing page",
+ 
+      "ادارة دفعيات العملاء" : "Customer payment management",
  
       "الإشعارت" : "Notice",
  
@@ -206,7 +214,7 @@ export default {
         
   "_comment_src_components_Home_Nav_bar.vue": "src_components_Home_Nav_bar.vue",
         
-   
+ 
       "ما الذي تبحث عنه؟" : "what are you looking for?",
  
       "تسجيل حساب" : "Register an account",
@@ -218,13 +226,13 @@ export default {
         
   "_comment_src_components_Home_Shopping_cart.vue": "src_components_Home_Shopping_cart.vue",
         
-   
+ 
       "السلة" : "The basket",
  
         
   "_comment_src_components_Home_Statiscs.vue": "src_components_Home_Statiscs.vue",
         
-   
+ 
       "طالب" : "Student",
  
       "دكتور متخصص" : "Specialist Doctor",
@@ -236,7 +244,7 @@ export default {
         
   "_comment_src_components_Home_SwiperData.vue": "src_components_Home_SwiperData.vue",
         
-   
+ 
       "بعضا من" : "Some of",
  
       "آراء الطــلاب" : "Students' opinions",
@@ -246,11 +254,11 @@ export default {
         
   "_comment_src_components_Home_SwiperHeader.vue": "src_components_Home_SwiperHeader.vue",
         
-   
+ 
         
   "_comment_src_components_Home_Training.vue": "src_components_Home_Training.vue",
         
-   
+ 
       "الــــدورات" : "Courses",
  
       "عرض" : "Show",
@@ -261,29 +269,23 @@ export default {
  
       "لا توجد دورات في هذا القسم في الوقت الحالي" : "There are no courses in this section at this time",
  
-      "extColor;            border: 1px solid #f6f6f6;            background-color: #fff;            @include prefixer                box-shadow,                2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14" : "extColor; border: 1px solid # f6f6f6; background-color: #fff; @include prefixer box-shadow, 2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14",
+      "extColor;            margin-right: 7px;        }        h4 {            font-family: cairoR;            font-size: 14px;            color: #bbbaba;            margin-right: 8px;            span {                color: $yalloColor;                font-family: cairoR;            }        }    }     .rate {        margin-top: 30px;        .cn {            padding: 0 0 0 0;            position: relative;            right: 8%;            @media min-width: 320px" : "extColor;            margin-right: 7px;        }        h4 {            font-family: cairoR;            font-size: 14px;            color: #bbbaba;            margin-right: 8px;            span {                color: $yalloColor;                font-family: cairoR;            }        }    }     .rate {        margin-top: 30px;        .cn {            padding: 0 0 0 0;            position: relative;            right: 8%;            @media min-width: 320px",
  
-      "extColor;            margin-right: 7px;        }        h4 {            font-family: cairoR;            font-size: 14px;            color: #bbbaba;            margin-right: 8px;            span {                color: $yalloColor;                font-family: cairoR;            }        }    }    .rate {        margin-top: 30px;        .cn {            padding: 0 0 0 0;            position: relative;            right: 8%;            @media min-width: 320px" : "extColor; margin-right: 7px; } h4 {font-family: cairoR; font-size: 14px; color: #bbbaba; margin-right: 8px; span {color: $ yalloColor; font-family: cairoR; }}} .rate {margin-top: 30px; .cn {padding: 0 0 0 0; position: relative; right: 8%; @media min-width: 320px",
- 
-      "extColor;                        font-size: 14px;                        outline: 0;                        margin: 13px 0 0 0;                        @include prefixer                            box-shadow,                            8px 3px 7px #9e9e9e36,                            webkit moz ms" : "extColor; font-size: 14px; outline: 0; margin: 13px 0 0 0; @include prefixer box-shadow, 8px 3px 7px # 9e9e9e36, webkit moz ms",
+      "extColor;            //             font-size: 14px;            //             outline: 0;            //             margin: 13px 0 0 0;            //             @include prefixer            //                 box-shadow,            //                 8px 3px 7px #9e9e9e36,            //                 webkit moz ms            //" : "extColor;            //             font-size: 14px;            //             outline: 0;            //             margin: 13px 0 0 0;            //             @include prefixer            //                 box-shadow,            //                 8px 3px 7px #9e9e9e36,            //                 webkit moz ms            //",
  
         
   "_comment_src_components_Home_ViewData.vue": "src_components_Home_ViewData.vue",
         
-   
+ 
       "مشــــاهده" : "Watch it",
  
         
   "_comment_src_components_MyCourses_afilliateBord.vue": "src_components_MyCourses_afilliateBord.vue",
         
-   
-      "الأرباح المستحقة" : "Earnings owed",
  
-      "طلب سحب" : "Withdrawal request",
+      "انت الان ضمن عائلة مسوقي المنصه التعليميه. الرجاء الذهاب الى صفحتك التسويقيه" : "You are now part of the educational platform marketers family. Please go to your marketing page",
  
-      "منضم من خلالي" : "Bound through me",
- 
-      "شخص" : "Person",
+      "الذهاب" : "going",
  
       "هيـا لنقم بإنشاء رابطك الخاص ومشاركتة مع الاصدقاء لتربح مع كل إنضمام مبلغ مالي" : "Let's create your own link and share it with friends to earn money with each joining",
  
@@ -292,13 +294,13 @@ export default {
         
   "_comment_src_components_MyCourses_courseCard.vue": "src_components_MyCourses_courseCard.vue",
         
-   
+ 
       "اذهب الى الدرس" : "Go to the lesson",
  
         
   "_comment_src_components_notifivation_management_NotificationCard.vue": "src_components_notifivation_management_NotificationCard.vue",
         
-   
+ 
       "السؤال :" : "the question :",
  
       "جواب سؤال :" : "Answer to question:",
@@ -308,9 +310,25 @@ export default {
       "تمت عملية الدفع بنجاح يمكنك الان التعلم من خلال لوحتك التعليميه" : "The payment process was successful. You can now learn through your educational board",
  
         
+  "_comment_src_components_orders_management_transactionOrderDetail.vue": "src_components_orders_management_transactionOrderDetail.vue",
+        
+ 
+      "شراء" : "Purchase",
+ 
+      "معالجة" : "Processing",
+ 
+      "المدفوع" : "paid up",
+ 
+      "رؤية فاتورة الدفع" : "See the payment invoice",
+ 
+      "إعادة ارفاق الفاتوره" : "Re-attach the invoice",
+ 
+      "فاتورة بنكك" : "your bank bill",
+ 
+        
   "_comment_src_components_Profile_managements_PasswordResetProfile.vue": "src_components_Profile_managements_PasswordResetProfile.vue",
         
-   
+ 
       "تعيين كلمة مرور جديدة" : "Set a new password",
  
       "كلمة المرور القديمة" : "Old Password",
@@ -320,23 +338,69 @@ export default {
       "تأكيد كلمة المرور الجديدة" : "Confirm the new password",
  
         
+  "_comment_src_components_pyramid_marketing_management_MyBalance.vue": "src_components_pyramid_marketing_management_MyBalance.vue",
+        
+ 
+      "حسابــي" : "arithmetic",
+ 
+      "الكميه" : "Quantity",
+ 
+        
+  "_comment_src_components_pyramid_marketing_management_MyPyramidParticipants.vue": "src_components_pyramid_marketing_management_MyPyramidParticipants.vue",
+        
+ 
+      "المنضمين من خلالي" : "affiliated with me",
+ 
+      "انسخ الرابط" : "Copy the link",
+ 
+      "تم النسخ" : "Copied",
+ 
+        
+  "_comment_src_components_pyramid_marketing_management_MyPyramidRewards.vue": "src_components_pyramid_marketing_management_MyPyramidRewards.vue",
+        
+ 
+      "الأرباح المستحقة من الهرم" : "Earnings accrued from the pyramid",
+ 
+      "تحصيل ارباحي" : "profit collection",
+ 
+      "تم تحصيل الارباح" : "Profits collected",
+ 
+        
+  "_comment_src_components_pyramid_marketing_management_MyWithdrawsList.vue": "src_components_pyramid_marketing_management_MyWithdrawsList.vue",
+        
+ 
+      "تم الدفع" : "The payment was made",
+ 
+      "في إنتظار المعالجة" : "Waiting for processing",
+ 
+      "عن طريق" : "by",
+ 
+      "ليس لديك سجل سحب في الوقت الحالي" : "You do not have a withdrawal history at the moment",
+ 
+      "ماهي الكميه اللتي تريد سحبها" : "What quantity do you want to withdraw?",
+ 
+        
   "_comment_src_components_ShoppingCard_cartCourses.vue": "src_components_ShoppingCard_cartCourses.vue",
         
-   
+ 
       "المجمــوع" : "The total",
  
         
   "_comment_src_components_ShoppingCard_loginCart.vue": "src_components_ShoppingCard_loginCart.vue",
         
-   
+ 
       "أنا أوافق علي" : "I agree with me",
  
       "شروط الخدمة" : "Terms of service",
  
         
+  "_comment_src_components_ShoppingCard_payment.vue": "src_components_ShoppingCard_payment.vue",
+        
+ 
+        
   "_comment_src_components_ShoppingCard_successMessage.vue": "src_components_ShoppingCard_successMessage.vue",
         
-   
+ 
       "شكرا لك !" : "Thank you !",
  
       "تهانينا لك" : "Congratulation",
@@ -348,21 +412,21 @@ export default {
         
   "_comment_src_components_utils_courseCard.vue": "src_components_utils_courseCard.vue",
         
-   
+ 
       "التفاصيل" : "the details",
  
         
   "_comment_src_components_utils_MainNavBar.vue": "src_components_utils_MainNavBar.vue",
         
-   
+ 
         
   "_comment_src_components_utils_relatedCourseCard.vue": "src_components_utils_relatedCourseCard.vue",
         
-   
+ 
         
   "_comment_src_layouts_MainLayout.vue": "src_layouts_MainLayout.vue",
         
-   
+ 
       "extColor;      font-size: 17px;      font-family: cairoB;      line-height: 1.7;      margin: 0;    }    .rate {      background-color: #fb9f94;      padding: 5px;      width: 133px;      height: 38px;      border-radius: 55px;      margin: 0 0 4px 0;      position: relative;      z-index: 2;      top: 28px;      right: 7px;      img {        width: auto;        display: inline-block;        position: relative;        top: -14px;      }      h3 {        font-size: 13px;        font-family: cairoR;        color: #fff;        display: inline-block;        margin: 0;        position: relative;        line-height: 0;        top: -13px;      }    }    .vidd {      position: relative;      right: 20px;      z-index: 1;      .mag {        width: 314px;        height: 243px;        border-radius: 47px;        img {          width: auto;        }      }      .playy {        position: absolute;        width: auto;        top: 39%;        left: 48%;        cursor: pointer;      }    }    .content {      color: #fff;      padding: 118px 8px 12px 8px;      top: -104px;      text-align: center;      position: relative;      margin: 22px 0 0 0;      border-radius: 43px;      background-color: #fff;      @include prefixer        box-shadow,        2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14" : "extColor; font-size: 17px; font-family: cairoB; line-height: 1.7; margin: 0; } .rate {background-color: # fb9f94; padding: 5px; width: 133px; height: 38px; border-radius: 55px; margin: 0 0 4px 0; position: relative; z-index: 2; top: 28px; right: 7px; img {width: auto; display: inline-block; position: relative; top: -14px; } h3 {font-size: 13px; font-family: cairoR; color: #fff; display: inline-block; margin: 0; position: relative; line-height: 0; top: -13px; }} .vidd {position: relative; right: 20px; z-index: 1; .mag {width: 314px; height: 243px; border-radius: 47px; img {width: auto; }} .playy {position: absolute; width: auto; top: 39%; left: 48%; cursor: pointer; }} .content {color: #fff; padding: 118px 8px 12px 8px; top: -104px; text-align: center; position: relative; margin: 22px 0 0 0; border-radius: 43px; background-color: #fff; @include prefixer box-shadow, 2px 9px 18.79px 2.21px rgba147, 147, 147, 0.14",
  
       "extColor;          margin: 0;          span {            color: $yalloColor;          }        }        p {          font-size: 16px;          color: extColor;          font-family: cairoR;        }        img {          width: auto;          margin: -24px 0 0 0;        }        hr {          border: 1px solid #eeeeee;          width: 41px;          position: absolute;          transform: rotate90deg" : "extColor; margin: 0; span {color: $ yalloColor; }} p {font-size: 16px; color: extColor; font-family: cairoR; } img {width: auto; margin: -24px 0 0 0; } hr {border: 1px solid #eeeeee; width: 41px; position: absolute; transform: rotate90deg",
@@ -372,17 +436,17 @@ export default {
         
   "_comment_src_layouts_UserLayout.vue": "src_layouts_UserLayout.vue",
         
-   
+ 
         
   "_comment_src_pages_Error404.vue": "src_pages_Error404.vue",
         
-   
+ 
       "إنتقال الي الواجهة الرئيسية" : "Move to the main interface",
  
         
   "_comment_src_pages_ShoppingCart.vue": "src_pages_ShoppingCart.vue",
         
-   
+ 
       "الســـلة" : "The basket",
  
       "extColor;        text-align: right;      }      hr {        margin: 21px auto 29px auto;        border: 0;        border-top: 2px solid #f2f2f2;        max-width: 666px;      }    }    /* courses step */    .courses {      display: block;      .groupp {        position: relative;        .man {          text-align: initial;          z-index: 1;          position: relative;          background-color: #fff;          padding: 9px 8px 10px 15px;          border-radius: 31px;          margin: 0px 0 27px 51px;          @include prefixerbox-shadow, 2px 7px 9px #9e9e9e36, webkit moz ms" : "extColor; text-align: right; } hr {margin: 21px auto 29px auto; border: 0; border-top: 2px solid # f2f2f2; max-width: 666px; }} / * courses step * / .courses {display: block; .groupp {position: relative; .man {text-align: initial; z-index: 1; position: relative; background-color: #fff; padding: 9px 8px 10px 15px; border-radius: 31px; margin: 0px 0 27px 51px; @include prefixerbox-shadow, 2px 7px 9px # 9e9e9e36, webkit moz ms",
@@ -404,13 +468,13 @@ export default {
         
   "_comment_src_pages_account_management_PasswordResetForm.vue": "src_pages_account_management_PasswordResetForm.vue",
         
-   
+ 
       "تعيين كلمــة مـرور" : "Set a password",
  
         
   "_comment_src_pages_account_management_Profile.vue": "src_pages_account_management_Profile.vue",
         
-   
+ 
       "بياناتــي" : "My data",
  
       "البريد الالكتروني" : "E-mail",
@@ -426,15 +490,25 @@ export default {
       "extColor;      font-size: 22px;      font-family: cairoB;      line-height: 1.7;      margin: 0 11px 0 0;      display: inline-block;    }  }  .details {    margin: 30px 0 30px 0;    .user {      //maxMobile      @media max-width: 767px" : "extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; }} .details {margin: 30px 0 30px 0; .user {// maxMobile @media max-width: 767px",
  
         
+  "_comment_src_pages_account_management_RegisterationCode.vue": "src_pages_account_management_RegisterationCode.vue",
+        
+ 
+      "قم بإدخال كود المسوق" : "Enter the marketer code",
+ 
+      "مرحبا بك" : "welcome",
+ 
+      "هذا الكود خاطئ ادخل الكود الصحيح" : "This code is wrong. Enter the correct code",
+ 
+        
   "_comment_src_pages_account_management_VerifyEmail.vue": "src_pages_account_management_VerifyEmail.vue",
         
-   
+ 
       "تم تفعيل حسابك يرجى تسجيل الدخول للموقع" : "Your account has been activated, please log in to the site",
  
         
   "_comment_src_pages_course_management_classAnswers.vue": "src_pages_course_management_classAnswers.vue",
         
-   
+ 
       "ما هي إجابتك" : "whats your answer",
  
       "extColor;      }      span {        font-size: 13px;        font-family: cairoR;        display: block;        color: #a1a1a1;      }    }    .titel {      display: inline-block;      position: relative;      top: -6px;      img {        display: inline-block;        margin: -9px 0 0 0;      }      h3 {        color: extColor;        font-size: 22px;        font-family: cairoB;        line-height: 1.7;        margin: 0 11px 0 0;        display: inline-block;      }    }  }  /*progress*/  .progress {    margin: 17px 0 0 0;    height: 7px;    .progress-bar {      background: linear-gradient        90deg,        rgba123, 134, 250, 1" : "extColor; } span {font-size: 13px; font-family: cairoR; display: block; color: # a1a1a1; }} .titel {display: inline-block; position: relative; top: -6px; img {display: inline-block; margin: -9px 0 0 0; } h3 {color: extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; }}} / * progress * / .progress {margin: 17px 0 0 0; height: 7px; .progress-bar {background: linear-gradient 90deg, rgba123, 134, 250, 1",
@@ -446,11 +520,11 @@ export default {
         
   "_comment_src_pages_course_management_classQuestions.vue": "src_pages_course_management_classQuestions.vue",
         
-   
+ 
         
   "_comment_src_pages_course_management_CourseClass.vue": "src_pages_course_management_CourseClass.vue",
         
-   
+ 
       "التقدم" : "Progress",
  
       "الـدروس" : "Lessons",
@@ -470,7 +544,7 @@ export default {
         
   "_comment_src_pages_course_management_CourseDetails.vue": "src_pages_course_management_CourseDetails.vue",
         
-   
+ 
       "دورات ذات صلة" : "Related courses",
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 -10px 0 0;            display: inline-block;            width: 94%;            padding: 10px 20px 8px 0;            background: #fefefe;            //maxMobile            @mediamax-width:767px" : "extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 -10px 0 0; display: inline-block; width: 94%; padding: 10px 20px 8px 0; background: #fefefe; // maxMobile @ mediamax-width: 767px",
@@ -486,7 +560,7 @@ export default {
         
   "_comment_src_pages_course_management_Courses.vue": "src_pages_course_management_Courses.vue",
         
-   
+ 
       "الـــدورات" : "Courses",
  
       "ما الذي تبحث عنة في التخصص المختار ادناه؟" : "What are you looking for in the below-selected major?",
@@ -514,7 +588,7 @@ export default {
         
   "_comment_src_pages_course_management_MyCourses.vue": "src_pages_course_management_MyCourses.vue",
         
-   
+ 
       "كورساتـي" : "Courses",
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    /* لوحتي التعليمية */    .move{        margin: 30px 0 30px 0;        padding: 0 1% 0 1%;        .col-lg-7{            //maxMobile            @mediamax-width:767px" : "extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; }} / * My Learning Board * / .move {margin: 30px 0 30px 0; padding: 0 1% 0 1%; .col-lg-7 {// maxMobile @ mediamax-width: 767px",
@@ -524,10 +598,44 @@ export default {
         
   "_comment_src_pages_notifivation_management_Notification.vue": "src_pages_notifivation_management_Notification.vue",
         
-   
+ 
       "الإشعارات" : "Notices",
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .notifi{        margin: 10px auto;        max-width: 600px;        .notf{            background-color: #fff;            padding: 18px;            border-radius: 15px;            margin: 20px 0 20px 0;            box-shadow: 0px 3px 20px #eae8e878;            .user{            //maxMobile            @mediamax-width:767px" : "extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; }} .notifi {margin: 10px auto; max-width: 600px; .notf {background-color: #fff; padding: 18px; border-radius: 15px; margin: 20px 0 20px 0; box-shadow: 0px 3px 20px # eae8e878; .user {// maxMobile @ mediamax-width: 767px",
  
-      "extColor;                    width: 398px;                    margin: 0;                    line-height: 1.8;                    //maxMobile                    @mediamax-width:767px" : "extColor; width: 398px; margin: 0; line-height: 1.8; // maxMobile @ mediamax-width: 767px"
+      "extColor;                    width: 398px;                    margin: 0;                    line-height: 1.8;                    //maxMobile                    @mediamax-width:767px" : "extColor; width: 398px; margin: 0; line-height: 1.8; // maxMobile @ mediamax-width: 767px",
+ 
+        
+  "_comment_src_pages_order_management_MyOrdersPage.vue": "src_pages_order_management_MyOrdersPage.vue",
+        
+ 
+      "طلبـاتي" : "my request",
+ 
+      "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .search {        padding: 0 18% 0 0;        width: 74%;        margin: -9px auto;        //maxMobile        @mediamax-width:767px" : "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .search {        padding: 0 18% 0 0;        width: 74%;        margin: -9px auto;        //maxMobile        @mediamax-width:767px",
+ 
+      "extColor;                            margin: 0 5px 10px 0;                            line-height: 1.7;                            @mediamax-width:767px" : "extColor;                            margin: 0 5px 10px 0;                            line-height: 1.7;                            @mediamax-width:767px",
+ 
+        
+  "_comment_src_pages_pyramid_marketing_management_MyCustomersPaymentPage.vue": "src_pages_pyramid_marketing_management_MyCustomersPaymentPage.vue",
+        
+ 
+      "عمـليات الدفع" : "Payments",
+ 
+      "ليس لديك عمليات دفع في الوقت الحالي" : "You have no payments at the moment",
+ 
+      "الطلب مرفوض من الإداره" : "The request was rejected by the administration",
+ 
+      "الطلب مرفوض بواسطتي" : "The request was rejected by me",
+ 
+        
+  "_comment_src_pages_pyramid_marketing_management_MyMarketingPage.vue": "src_pages_pyramid_marketing_management_MyMarketingPage.vue",
+        
+ 
+      "حسابي التسويقي" : "My Marketing Account",
+ 
+      "سجل السحب" : "raffle log",
+ 
+      "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .details{        margin: 30px 0 30px 0;        .user{            //maxMobile            @mediamax-width:767px" : "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .details{        margin: 30px 0 30px 0;        .user{            //maxMobile            @mediamax-width:767px",
+ 
+      "extColor;                            font-family: cairoR;                            text-align: center;                            margin: 8px 0 5px 0;                        }                    }                }                .but{                    margin: 30px auto 24px auto;                    background: #FCD462;                    padding: 5px;                    width: 130px;                    border-radius: 50px;                    text-align: center;                    cursor: pointer;                    h3{                        display: inline-block;                        color: extColor;                        font-size: 16px;                        font-family: cairoR;                        margin: 0;                    }                    img{                        display: inline-block;                        position: relative;                        left: 0;                        right: 21px;                    }                }            }        }    }}.marketing{    margin-top: 20px;    .account{        background-color: #FCD462;        padding: 10px;        background-image: url~assets/img/stc.png" : "extColor;                            font-family: cairoR;                            text-align: center;                            margin: 8px 0 5px 0;                        }                    }                }                .but{                    margin: 30px auto 24px auto;                    background: #FCD462;                    padding: 5px;                    width: 130px;                    border-radius: 50px;                    text-align: center;                    cursor: pointer;                    h3{                        display: inline-block;                        color: extColor;                        font-size: 16px;                        font-family: cairoR;                        margin: 0;                    }                    img{                        display: inline-block;                        position: relative;                        left: 0;                        right: 21px;                    }                }            }        }    }}.marketing{    margin-top: 20px;    .account{        background-color: #FCD462;        padding: 10px;        background-image: url~assets/img/stc.png"
 }
