@@ -88,7 +88,12 @@ export default {
   },
   methods: {
     GET_IMAGE_URL (instructorImage) {
-      return location.origin + '/media/' + instructorImage
+      if (process.env.NODE_ENV == 'development') {
+        return  'http://localhost:8000/media/' + instructorImage
+      } else {
+        return location.origin + '/media/' + instructorImage
+      }
+      
     }
   },
   apollo: {

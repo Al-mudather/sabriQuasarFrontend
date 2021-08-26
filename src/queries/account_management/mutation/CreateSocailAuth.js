@@ -9,15 +9,16 @@ mutation SocialAuth($provider: String!, $accessToken: String!, $email: String!) 
       user{
         email
         fullName,
-        affiliateSet {
-          edges {
-            node {
-              id,
-              pk,
-              affiliateLink
-            }
-          }
-        }
+        username,
+        email,
+        firstName,
+        lastName,
+        fullName,
+        verified,
+        isAttachmentTransactionManager
+        isPyramidAdmin
+        isPyramidMarketer
+        isInstructor
       }
       
       provider

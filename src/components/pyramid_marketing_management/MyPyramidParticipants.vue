@@ -9,7 +9,7 @@
         <div class="share">
             <form @submit="CopyTheLinkHandler($event)">
               <input id="shar-link" type="text" :value="myPyramidAccount.pyramidCode">
-              <button type="submit"><q-tooltip>{{message}}</q-tooltip><img src="~assets/img/copyed.png"></button>
+              <button style="cursor: pointer" type="submit"><q-tooltip>{{message}}</q-tooltip><img src="~assets/img/copyed.png"></button>
             </form>
         </div>
     </div>

@@ -8,7 +8,7 @@
         <img v-if="courseData.profile" :src="CALCULATE_IMAGE_URL" alt="">
         <img v-else src="~assets/img/Mask Group 5.png" alt="" />
       </div>
-      <img class="playy" src="~assets/img/playy.png" alt="" />
+      <!-- <img class="playy" src="~assets/img/playy.png" alt="" /> -->
     </div>
     <div class="content">
       <div class="uper">

@@ -5,7 +5,7 @@
             <div class="col-lg-4 col-sm-12">
                 <div class="bord">
                     <img class="money" src="~assets/img/money.png" alt="">
-                    <div class="avvil" v-if="myPyramidAccountID">
+                    <div class="avvil" v-if="myPyramidAccountID || amIAMarketer">
                       <h3>{{$t('انت الان ضمن عائلة مسوقي المنصه التعليميه. الرجاء الذهاب الى صفحتك التسويقيه')}}</h3>
                       <button @click="GO_TO_MY_MARKETING_PAGE">{{$t('الذهاب')}}</button>
                     </div>
@@ -37,7 +37,8 @@ export default {
 
   data() {
     return {
-      myPyramidAccountID: null
+      myPyramidAccountID: null,
+      amIAMarketer: false,
     };
   },
 
@@ -65,7 +66,7 @@ export default {
       try {
         const join_permission_res = await this.$apollo.query({
           query: CheckTheUserPermissionToUsePlatforme,
-          refetchQueries: [{ query: MyPyramidAccount }]
+            refetchQueries: [{ query: MyPyramidAccount }]
           })
           this.$q.notify({
                 type: 'positive',
@@ -103,9 +104,11 @@ export default {
         mutation: JoinPyramidProgram,
         variables: {
           input: {}
-        } 
+        }
       }).then((res) => {
         if (res.data.joinPyramidProgram.success) {
+          //TODO: Make me marketer
+          this.amIAMarketer = true
           //TODO: Update the user information
           this.$apollo.query({
             query: GetMyProfileData

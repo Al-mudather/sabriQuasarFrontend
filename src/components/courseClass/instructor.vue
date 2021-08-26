@@ -59,7 +59,11 @@ export default {
     props: ["firstName", "lastName", "username", "qualification", "image"],
     computed: {
         CALCULATE_IMAGE_URL () {
-            return location.host + '/media/' + this.image
+            if (process.env.NODE_ENV == 'development') {
+                return  'http://localhost:8000/media/' + this.image
+            } else {
+                return location.origin + '/media/' + this.image
+            }
         }
     },
     methods: {
