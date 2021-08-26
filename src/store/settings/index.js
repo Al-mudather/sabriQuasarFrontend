@@ -1,9 +1,9 @@
 import { LocalStorage } from 'quasar'
 
-
+ 
 const state = {
   isEnglish:  LocalStorage.getItem('isEnglish')|| false,
-  currency:  'USD',
+  currency:  'SDG',
   openMenu: false,
   activeNav: LocalStorage.getItem('activeNav')|| ''
 }
