@@ -26,8 +26,8 @@
           <div class="money">
               <h3>المدفوع</h3>
               <!--price-->
-              <div class="price">
-                  <h4>{{customerTrans.order.totalAmount}}<span>{{customerTrans.order.currency}}</span></h4>
+              <div class="price"> 
+                  <h4>{{ FORMAT_COUSRE_PRICE(customerTrans.order.orderTotal, 3) }}<span>{{customerTrans.order.currency}}</span></h4>
               </div>
           </div>
           <!--viewpay-->
@@ -86,6 +86,7 @@
 </template>
 
 <script>
+
 import { MarketerConfirmAttachmentTransaction } from 'src/queries/attachment_transactions_management/mutation/marketerConfirmAttachmentTransaction'
 import { AllMarketerAttachmentTransaction } from 'src/queries/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
 
@@ -108,6 +109,28 @@ export default {
   },
   props:['customerTrans'],
   methods: {
+    FORMAT_COUSRE_PRICE(num, digits) {
+      const lookup = [
+        { value: 1, symbol: "" },
+        { value: 1e3, symbol: "k" },
+        { value: 1e6, symbol: "M" },
+        { value: 1e9, symbol: "G" },
+        { value: 1e12, symbol: "T" },
+        { value: 1e15, symbol: "P" },
+        { value: 1e18, symbol: "E" }
+      ];
+
+      if ( (num.toString().split('.')[0] == 0) || num == 0 ) {
+        return num
+      }
+      const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+      var item = lookup.slice().reverse().find(function(item) {
+        return num >= item.value;
+      });
+
+      return item ? (num / item.value).toFixed(digits).replace(rx, "$1") + item.symbol : "0";
+    },
+
     FORMAT_IMAGE (imageUrl) {
       if (process.env.NODE_ENV == 'development') {
         return  `http://localhost:8000/media/${imageUrl}`

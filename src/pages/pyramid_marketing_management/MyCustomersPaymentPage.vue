@@ -43,7 +43,7 @@
 
 import { AllMarketerAttachmentTransaction } from 'src/queries/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
 import Transaction_completed from 'src/components/attachment_transactions_management/Transaction_completed'
-import Transaction_under_processing from 'src/components/attachment_transactions_management/Transaction_under_processing'
+import Transaction_under_processing from 'src/components/attachment_transactions_management/Transaction_under_processing.vue'
 import Transaction_rejected from 'src/components/attachment_transactions_management/Transaction_rejected'
 import Transaction_hanged from 'src/components/attachment_transactions_management/Transaction_hanged.vue'
 

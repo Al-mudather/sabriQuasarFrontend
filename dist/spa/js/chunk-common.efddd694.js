@@ -78,6 +78,7 @@ query AllMarketerAttachmentTransaction {
             order {
               pk
               totalAmount
+              orderTotal
               invoiceNumber
               currency
             }
