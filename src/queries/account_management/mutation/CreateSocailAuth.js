@@ -18,6 +18,7 @@ mutation SocialAuth($provider: String!, $accessToken: String!, $email: String!) 
         isAttachmentTransactionManager
         isPyramidAdmin
         isPyramidMarketer
+        userCurrency
         isInstructor
       }
       

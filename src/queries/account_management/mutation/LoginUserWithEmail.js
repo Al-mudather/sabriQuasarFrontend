@@ -22,6 +22,7 @@ mutation LoginUser($email:String!, $password: String!){
       isPyramidAdmin
       isPyramidMarketer
       isInstructor
+      userCurrency
     },
     refreshToken
   }

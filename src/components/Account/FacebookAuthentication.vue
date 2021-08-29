@@ -26,6 +26,7 @@ export default {
         ...mapActions("authentication", [
             "loginAction"
         ]),
+        ...mapActions('settings', ['setCurrencyAction']),
         GoToHomePage() {
             this.$router.push({ name: "Home" });
         },
@@ -63,10 +64,19 @@ export default {
                 })
                 .then(result => {
                     this.visible = false
-                    if (result.data.socialAuth) {
-                        this.loginAction(result.data.socialAuth).then(() => {
+                    const userData = result.data.socialAuth
+                    if (userData) {
+                        this.loginAction(userData).then(() => {
+                            
+                            try {
+                                const userCur = userData.social.user.userCurrency
+                                if (userCur) {
+                                    userCur == 'SDG' ? this.setCurrencyAction('SDG') : this.setCurrencyAction('USD')
+                                }
+                            } catch (error) {
+                            }
                             // TODO: Go To the home page
-                            if (result.data.socialAuth.token) {
+                            if (userData.token) {
                                 this.$q.notify({
                                     type: 'positive',
                                     progress: true,

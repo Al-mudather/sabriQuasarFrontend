@@ -14,6 +14,7 @@ query GetMyProfileData {
     isAttachmentTransactionManager
     isPyramidAdmin
     isPyramidMarketer
+    userCurrency
   }
 }
 `

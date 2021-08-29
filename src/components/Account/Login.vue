@@ -146,6 +146,7 @@ export default {
 
     methods: {
         ...mapActions('authentication', ['loginAction']),
+        ...mapActions('settings', ['setCurrencyAction']),
 
         goToPasswordResetPage() {
             this.$router.push({ name: 'password-reset' });
@@ -192,6 +193,14 @@ export default {
                         if (result.data.tokenAuth.success) {
                             // TODO: reset the data
                             if (result.data.tokenAuth.user.verified) {
+                                //TODO: Set the user currency
+                                try {
+                                    const userCur = result.data.tokenAuth.user.userCurrency
+                                    if (userCur) {
+                                        userCur == 'SDG' ? this.setCurrencyAction('SDG') : this.setCurrencyAction('USD')
+                                    }
+                                } catch (error) {
+                                }
                                 this.loginAction(result.data.tokenAuth).then(() => {
                                     this.$q.notify({
                                         type: 'positive',
