@@ -58,12 +58,6 @@
                 <div class="col-lg-1">
                     <div class="lang">
                         <q-toggle v-model="_isEnglish" icon="language" unchecked-icon="clear" class="text-black" label="Eng"/>
-                        <!-- <img src="~assets/img/doown.png" alt="" />
-                        <q-toggle v-model="englishLang"/>
-                        <h3 class="q-pq-sm">Ar</h3>
-                        <div class="contry">
-                            <img src="~assets/img/ar.png" alt="" />
-                        </div> -->
                     </div>
                 </div>
             </div>
