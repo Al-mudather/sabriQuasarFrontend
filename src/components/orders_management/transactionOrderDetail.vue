@@ -25,8 +25,10 @@
         <div class="money">
             <h3>{{$t('المدفوع')}}</h3>
             <!--price-->
-            <div class="price"> 
-                <h4>{{ FORMAT_COUSRE_PRICE(myOrder.order.orderTotal, 3)}}<span>{{myOrder.order.currency}}</span></h4>
+            <div class="price">
+                <!-- {{myOrder.order}} -->
+                <!-- <h4>{{ FORMAT_COUSRE_PRICE(myOrder.order, 3)}}<span>{{myOrder.order.currency}}</span></h4> -->
+                <h4>{{ FORMAT_COUSRE_PRICE(myOrder.order.totalAmount, 3)}}<span>{{myOrder.order.currency}}</span></h4>
             </div>
         </div>
         <div class="viewpay" v-if="myOrder.retryPlease">

@@ -26,8 +26,9 @@
           <div class="money">
               <h3>المدفوع</h3>
               <!--price-->
-              <div class="price"> 
-                  <h4>{{ FORMAT_COUSRE_PRICE(customerTrans.order.orderTotal, 3) }}<span>{{customerTrans.order.currency}}</span></h4>
+              <div class="price">
+                
+                  <h4>{{ FORMAT_COUSRE_PRICE(customerTrans.order.totalAmount, 3) }}<span>{{customerTrans.order.currency}}</span></h4>
               </div>
           </div>
           <!--viewpay-->
