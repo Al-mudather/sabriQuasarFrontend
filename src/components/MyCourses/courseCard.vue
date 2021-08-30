@@ -2,7 +2,8 @@
     <div class="card">
         <div class="card-img-top">
             <div class="overlay"></div>
-            <img src="~assets/img/imagback.png" alt="Card image cap" />
+            <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt="">
+            <img v-else src="~assets/img/imagback.png" alt="Card image cap" />
         </div>
         <div class="pro">
             <span>{{calculateTheTotalProgress}}%</span>
@@ -26,7 +27,7 @@
         </div>
     </div>
 </template>
-
+ 
 <script>
 export default {
     name: "CourseCard",
@@ -49,6 +50,13 @@ export default {
                 return parseInt( (this.totalFinishedCourseContents / totalCourseContents ) * 100 )
             }
             return 0
+        },
+
+        CALCULATE_IMAGE_URL () {
+            if (process.env.NODE_ENV == 'development') {
+                return 'http://localhost:8000/media/' + this.course.cover
+            }
+            return location.origin + '/media/' + this.course.cover
         }
     },
 

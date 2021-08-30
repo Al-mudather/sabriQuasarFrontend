@@ -8,13 +8,16 @@
                     <div class="avvil" v-if="myPyramidAccountID || amIAMarketer">
                       <h3>{{$t('انت الان ضمن عائلة مسوقي المنصه التعليميه. الرجاء الذهاب الى صفحتك التسويقيه')}}</h3>
                       <button @click="GO_TO_MY_MARKETING_PAGE">{{$t('الذهاب')}}</button>
+                      <q-inner-loading :showing="visible">
+                        <q-spinner-hourglass color="primary" size="70px" />
+                      </q-inner-loading>
                     </div>
                     <div class="avvil" v-else>
                         <h3>{{$t('هيـا لنقم بإنشاء رابطك الخاص ومشاركتة مع الاصدقاء لتربح مع كل إنضمام مبلغ مالي ')}}</h3>
                         <button @click="JOIN_THE_PYRAMID_PROGRAM">{{$t('طلب إنضمام')}}</button>
                         <q-inner-loading :showing="visible">
                           <q-spinner-hourglass color="primary" size="70px" />
-                      </q-inner-loading>
+                        </q-inner-loading>
                     </div>
                 </div>
             </div>
@@ -56,7 +59,9 @@ export default {
         return MyPyramidAccount
       },
       result (result) {
+        this.visible = true
         if (!result.loading) {
+          this.visible = false
           this.myPyramidAccountID = result.data.myPyramidAccount.pyramidId 
         }
       }

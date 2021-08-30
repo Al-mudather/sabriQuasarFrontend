@@ -17,6 +17,7 @@ query AllEnrollmentsForCurrentUser($cursor: String, $limit: Int){
           id,
           pk,
           title,
+          cover,
           courseunitSet{
             totalCount,
             edgeCount,
