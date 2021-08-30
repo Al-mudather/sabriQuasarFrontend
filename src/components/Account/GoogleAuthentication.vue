@@ -74,6 +74,12 @@ export default {
                         if (userCur) {
                             userCur == 'SDG' ? this.setCurrencyAction('SDG') : this.setCurrencyAction('USD')
                         }
+
+                        //TODO: Set the external user id for notification
+                        let externalUserId = userData.social.user.email; // You will supply the external user id to the OneSignal SDK 
+                        OneSignal.push(function() { 
+                            OneSignal.setExternalUserId(externalUserId); 
+                        });
                     } catch (error) {
                     }
                     if (userData.token) {
