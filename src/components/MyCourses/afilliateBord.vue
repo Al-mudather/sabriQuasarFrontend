@@ -12,6 +12,9 @@
                     <div class="avvil" v-else>
                         <h3>{{$t('هيـا لنقم بإنشاء رابطك الخاص ومشاركتة مع الاصدقاء لتربح مع كل إنضمام مبلغ مالي ')}}</h3>
                         <button @click="JOIN_THE_PYRAMID_PROGRAM">{{$t('طلب إنضمام')}}</button>
+                        <q-inner-loading :showing="visible">
+                          <q-spinner-hourglass color="primary" size="70px" />
+                      </q-inner-loading>
                     </div>
                 </div>
             </div>
@@ -39,6 +42,7 @@ export default {
     return {
       myPyramidAccountID: null,
       amIAMarketer: false,
+      visible: false
     };
   },
 
@@ -68,13 +72,6 @@ export default {
           query: CheckTheUserPermissionToUsePlatforme,
             refetchQueries: [{ query: MyPyramidAccount }]
           })
-          this.$q.notify({
-                type: 'positive',
-                progress: true,
-                multiLine: true,
-                position: 'top',
-                message: 'You are now a marketer'
-            })
       } catch (e) {
           //TODO: IF there is an error, then the user did not join the platform with a registeration code
           if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
@@ -97,6 +94,8 @@ export default {
     },
 
     JOIN_THE_PYRAMID_PROGRAM () {
+      //TODO: Waiting process
+      this.visible = true
       //TODO: Check if the user has the activation code
       this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
 
@@ -106,7 +105,16 @@ export default {
           input: {}
         }
       }).then((res) => {
-        if (res.data.joinPyramidProgram.success) {
+        const success = res.data.joinPyramidProgram.success
+        const errors = res.data.joinPyramidProgram.errors
+        if (success) {
+          this.$q.notify({
+              type: 'positive',
+              progress: true,
+              multiLine: true,
+              position: 'top',
+              message: 'You are now a marketer'
+          })
           //TODO: Make me marketer
           this.amIAMarketer = true
           //TODO: Update the user information
@@ -115,6 +123,12 @@ export default {
           }).then((res) => {
             this.SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION(res.data.me)
           })
+          //TODO: CLose the waiting
+          this.visible = false
+        } 
+        if (errors) {
+          //TODO: CLose the waiting
+          this.visible = false
         }
       })
     }

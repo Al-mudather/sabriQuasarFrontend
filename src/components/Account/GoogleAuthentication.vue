@@ -33,6 +33,7 @@ export default {
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+
                 this.$router.push({ name: 'Home' })
             } catch (e) {
                 if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {

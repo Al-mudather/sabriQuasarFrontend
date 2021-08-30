@@ -1,5 +1,5 @@
 import gql from 'graphql-tag'
-
+ 
 export const MyAttachmentTransactions = gql`
 query MyAttachmentTransactions {
 
@@ -12,6 +12,7 @@ query MyAttachmentTransactions {
             pk
             order {
               pk
+              orderTotal
               totalAmount
               invoiceNumber
               currency
