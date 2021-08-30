@@ -4,11 +4,10 @@
     </div>
 </template>
 <script>
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapState, mapGetters } from "vuex";
 import { LocalStorage } from 'quasar'
 import {WOW} from 'wowjs'
 import 'animate.css'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 
 export default {
     name: "App",
@@ -19,13 +18,60 @@ export default {
     },
 
     computed: {
-        ...mapState('authentication', ['token'])
+        ...mapState('authentication', ['token']),
+        ...mapGetters("authentication", ["user"]),
     },
     methods: {
         ...mapActions('authentication', ['RE_LOGIN_USER']),
         ...mapActions('authentication', ['logOutAction'])
     },
+
+
     created() {
+        window.addEventListener('DOMContentLoaded', (event) => {
+            window.OneSignal.push( () => {
+                window.OneSignal.on('popoverAllowClick', () => {
+                    //TODO: If the user allowed the subscription, set his email
+                    if (this.user) {
+                        //TODO: Set the external user id for notification
+                        let externalUserId = this.user.email; // You will supply the external user id to the OneSignal SDK 
+                        OneSignal.push(function() { 
+                            OneSignal.setExternalUserId(externalUserId); 
+                        });
+                    }
+                });
+
+                window.OneSignal.on('notificationPermissionChange', (permissionChange) => {
+                    var currentPermission = permissionChange.to;
+                    if (currentPermission == 'granted') {
+                        this.$q.notify({
+                            type: 'positive',
+                            progress: true,
+                            multiLine: true,
+                            position: 'center',
+                            message: this.$t('تهانينا, الان يمكنك ان تكون مطلعا على كل ماهو جديد في المنصه التعليميه')
+                        })
+
+                        if (this.user.email) {
+                            //TODO: Set the external user id for notification
+                            let externalUserId = this.user.email; // You will supply the external user id to the OneSignal SDK 
+                            window.OneSignal.push(function() { 
+                                window.OneSignal.setExternalUserId(externalUserId); 
+                            });
+                        }
+                    } else if (currentPermission == 'denied' || currentPermission == 'default') {
+                        this.$q.notify({
+                            type: 'negative',
+                            progress: true,
+                            multiLine: true,
+                            position: 'center',
+                            message: this.$t('بعدم قبولك للإشعارات, لايمكننا ان نخبرك بمراحل امتلاكك للدوره التدريبيه اللتي تريدها, من فضلك اقبل الإشعارات')
+                        })
+                    }
+                });
+            });
+        });
+
         // console.log({router: this.$router})
         //TODO: Empty the nav bar 
         LocalStorage.set('activeNav', '')

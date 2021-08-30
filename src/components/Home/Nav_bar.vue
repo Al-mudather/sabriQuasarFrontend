@@ -188,9 +188,9 @@ export default {
 
         LOG_USER_OUT () {
             //TODO: redirect the user to the home page
-            this.$apolloClient.provider.defaultClient.resetStore()
-            this.$router.push({ name: "Home" });
             this.logOutAction()
+            this.$apollo.provider.defaultClient.resetStore()
+            this.$router.push({ name: "Home" });
         },
 
         showTheSearchingResult (event) {
