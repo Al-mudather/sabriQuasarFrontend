@@ -3,13 +3,13 @@
     <div class="harm">
       <img src="~assets/img/harm.png" alt="">
     </div>
-    <div class="conten">
+    <div class="conten" style="z-index: 2;">
         <h3>{{$t('المنضمين من خلالي')}}</h3>
         <span>{{myPyramidMarketersCount}}</span>
         <div class="share">
             <form @submit="CopyTheLinkHandler($event)">
               <input id="shar-link" type="text" :value="myPyramidAccount.pyramidCode">
-              <button style="cursor: pointer" type="submit"><q-tooltip>{{message}}</q-tooltip><img src="~assets/img/copyed.png"></button>
+              <button style="cursor: pointer;" type="submit"><q-tooltip>{{message}}</q-tooltip><img src="~assets/img/copyed.png"></button>
             </form>
         </div>
     </div>
@@ -19,6 +19,7 @@
 <script>
 import { MyPyramidAccount } from 'src/queries/pyramid_marketing_management/query/MyPyramidAccount'
 import { MyPyramidMarketers } from 'src/queries/pyramid_marketing_management/query/MyPyramidMarketers'
+import { copyToClipboard } from 'quasar'
 
 export default {
   name: "MyPyramidParticipants",
@@ -54,19 +55,32 @@ export default {
   },
 
   methods: {
+
     CopyTheLinkHandler(e) {
       e.preventDefault();
 
       let copyText = document.getElementById("shar-link");
 
       /* Select the text field */
+      copyText.focus();
       copyText.select();
-      copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
-      /* Copy the text inside the text field */
-      document.execCommand("copy");
-      this.message = this.$t('تم النسخ')
+      copyToClipboard(copyText.value)
+        .then(() => {
+          // success!
+          this.message = this.$t('تم النسخ')
+          this.$q.notify({
+              type: 'positive',
+              progress: true,
+              multiLine: true,
+              position: 'top',
+              message: this.$t('تم النسخ')
+          })
 
+        })
+        .catch((e) => {
+          // fail
+        })
     },
   }
 };
