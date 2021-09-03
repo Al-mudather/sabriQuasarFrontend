@@ -30,6 +30,18 @@ export default {
     created() {
         window.addEventListener('DOMContentLoaded', (event) => {
             window.OneSignal.push( () => {
+
+                //TODO: IF the user not enabled the notification Show it again on visiting
+                window.OneSignal.isPushNotificationsEnabled(function(isEnabled) {
+                    if (isEnabled) {
+                    } else {
+                        window.OneSignal.showSlidedownPrompt();
+                        // console.log("////////////////////////////////////////");    
+                        // console.log("Push notifications are not enabled yet.");    
+                        // console.log("////////////////////////////////////////");    
+                    }
+                });
+
                 window.OneSignal.on('popoverAllowClick', () => {
                     //TODO: If the user allowed the subscription, set his email
                     if (this.user) {

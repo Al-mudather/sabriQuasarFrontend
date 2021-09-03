@@ -45,7 +45,7 @@
                     <div class="rate" v-if="courses.edgeCount > 0">
                         <div class="container">
                             <div class="cn fadeIn row justify-center">
-                                <q-intersection transition="scale" v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-5 col-sm-5 col-xs-12">
+                                <div v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-5 col-sm-5 col-xs-12">
                                     <course-card
                                         class="hvr-grow"
                                         :course="course.node"
@@ -53,7 +53,7 @@
                                         instructor="مركز دكتور صبري ابو قرون"
                                         :price="course.node.courseFee"
                                     />
-                                </q-intersection>
+                                </div>
                             </div>
                             <div class="butDown">
                                 <svg

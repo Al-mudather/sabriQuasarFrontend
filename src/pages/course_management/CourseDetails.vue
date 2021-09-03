@@ -615,138 +615,136 @@ export default {
     }
     .rate {
         margin-top: 30px;
-        .parent {
-            .imag {
-                position: relative;
-                border-radius: 50px;
-                overflow: hidden;
-                margin: 0 auto 0 auto;
-                height: 294px;
-                width: 82%;
-                @media (min-width: 320px) and (max-width: 700px){
-                    left: 0;
-                }
-                .overlay {
-                    @include overlay;
-                    background-color: rgba(#fbfbff, .6);
-                }
-
-                img {
-                    width: 100%;
-                }
-
-                .magtxt {
-                    h4 {
-                        position: absolute;
-                        top: 50px;
-                        left: 77px;
-                        color: #7B7B7B;
-                        font-size: 18px;
-                        font-family: 'cairoR';
-                        width: 59%;
-                    }
-
-                    img {
-                        position: absolute;
-                        width: auto;
-                        top: 50%;
-                        left: 44%;
-                    }
-                }
-            }
-
-            .pric {
-                background-color: #7B86FA;
-                padding: 20px;
-                border-radius: 107px 107px 27px 27px;
-                height: 117px;
-                width: 176px;
-                margin: -59px auto;
-                position: relative;
-                z-index: 2;
-                .detai {
-                    text-align: center;
-
-                    span {
-                        display: inline-block;
-                        font-size: 13px;
-                        font-family: 'cairoR';
-                        color: #fff;
-                        margin: 0 0 0 6px;
-                    }
-
-                    h3 {
-                        display: inline-block;
-                        color: #FFF067;
-                        font-size: 31px;
-                        font-family: 'cairoR';
-                    }
-                }
-
-                button {
-                    width: 85px;
-                    height: 33px;
-                    background-color: #FFF067;
-                    color: $textColor;
-                    font-size: 14px;
-                    outline: 0;
-                    margin: 8px 0 0 0;
-                    @include prefixer(box-shadow, 8px 3px 7px #9e9e9e36, webkit moz ms);
-                }
-
-                .cart {
-                    position: relative;
-                    cursor: pointer;
-                    right: 12px;
-                    margin: 0 0 0 0;
-
-                    .sala {
-                        position: absolute;
-                        left: 4px;
-                        top: -31px;
-                        width: auto;
-                    }
-
-                    img {
-                        width: auto;
-                        position: absolute;
-                        left: 19px;
-                        top: -21px;
-                    }
-                }
-            }
-            .name {
-                border-radius: 50px;
-                background-color: #5666B9;
+        .parent{
+            position: relative;
+            border: 0;
+            box-shadow: 3px 7px 15px #eceaea;
+            border-radius: 37px;
+            background: #E3EDFA;
+            width: 100%;
+            padding: 10px;
+            height: 441px;
+            .pattern{
+                position: absolute;
+                top: 0;
                 width: 100%;
-                padding-top: 178px;
-                height: 222px;
+                left: 0;
+                right: 0;
+                height: 100%;
+            }
+            .parent-img-top{
                 position: relative;
-                top: -108px;
-                z-index: -1;
-                @include prefixer(box-shadow, 8px 12px 8px #eceaea, webkit moz ms);
-                @media (min-width: 320px) and (max-width: 700px){
-                    width: 100%;
+                padding: 14px;
+                height: 294px;
+                width: 100%;
+                overflow: hidden;
+                border-radius: 30px;
+                .plays{
+                    position: absolute;
+                    width: auto;
+                    top: 45%;
+                    left: 0;
+                    right: 44%;
+                    height: unset;
+                    z-index: 5;
                 }
-                .user {
-                    margin-right: 23px;
-
-                    img {
+                img{
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    border-width: 0;
+                    left: 0;
+                    right: 0;
+                    top: 0;
+                }
+            } 
+            .parent-body{
+                position: relative;
+                padding: unset;
+                border-radius: 29px;
+                background: #F78A78;
+                margin: -37px auto 2px auto;
+                width: 100%;
+                top: -6px;
+                height: 164px;
+                .parent-title{
+                    margin-bottom: 7px;
+                    color: #fff;
+                    font-size: 17px;
+                    font-family: cairoR;
+                    line-height: 1.8;
+                    background-color: #FC9685;
+                    padding: 8px;
+                    border-top-left-radius: 26px;
+                    border-top-right-radius: 26px;
+                    height: 72px;
+                    overflow: hidden;
+                    -webkit-line-clamp: 2;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                }
+                .detai{
+                    position: relative;
+                    width: 100%;
+                    .added{
                         display: inline-block;
-                        width: auto;
+                        position: absolute;
+                        left: 0;
+                        right: -7px;
+                        width: 148px;
+                        top: 40px;
+                        svg{
+                            path{
+                                fill: #FFF067;
+                            }
+                            
+                        }
+                        button{
+                            color: #fff;
+                            font-size: 14px;
+                            font-family: cairoR;
+                            position: absolute;
+                            left: 0;
+                            right: 0;
+                            top: 16px;
+                            text-align: center;
+                            width: 129px;
+                            background-color: unset;
+                            box-shadow: none;
+                            height: unset;
+                            outline: 0;
+                            color: #7B7B7B;
+                        }
                     }
-
-                    h3 {
+                    h3{
+                        display: inline-block;
+                        color: #fff067;
+                        font-size: 31px;
+                        font-family: cairoR;
+                        margin-right: 8px;
+                    }
+                    span{
                         display: inline-block;
                         font-size: 13px;
+                        font-family: cairoR;
                         color: #fff;
                     }
                 }
-            }
-            .color{
-                background-color: #5666B9;
+                .details{
+                    display: inline-block;
+                    background-color: unset;
+                    height: unset;
+                    box-shadow: unset;
+                    color: #fff;
+                    font-size: 14px;
+                    font-family: cairoR;
+                    outline: 0;
+                    float: left;
+                    margin: 4px 0 0 -38px;
+                }
             }
         }
+
     }
 }
 /*---   End cources ---*/
