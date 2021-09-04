@@ -35,10 +35,7 @@ export default {
                 window.OneSignal.isPushNotificationsEnabled(function(isEnabled) {
                     if (isEnabled) {
                     } else {
-                        window.OneSignal.showSlidedownPrompt();
-                        // console.log("////////////////////////////////////////");    
-                        // console.log("Push notifications are not enabled yet.");    
-                        // console.log("////////////////////////////////////////");    
+                        window.OneSignal.showSlidedownPrompt({force: true}); 
                     }
                 });
 
