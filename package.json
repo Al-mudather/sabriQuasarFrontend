@@ -43,6 +43,7 @@
     "moment": "^2.29.1",
     "mux.js": "^5.11.1",
     "node-fetch": "^2.6.1",
+    "player.js": "^0.1.0",
     "quasar": "^1.15.1",
     "subscriptions-transport-ws": "^0.9.19",
     "swiper": "^6.6.2",

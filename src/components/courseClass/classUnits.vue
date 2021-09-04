@@ -78,6 +78,7 @@
                 >
                     <q-video
                         :ratio="13 / 11"
+                        ref="videoPlayer"
                         controls = "false"
                         id="video"
                         @loaded="PLAYER_IS_LOADED"
@@ -121,7 +122,7 @@
                         </p>
                     </video> -->
                     <!-- <div id="made-in-ny" :data-vimeo-url="GET_VIMO_VIDEO_URL" class="megx"></div> -->
-                    <!-- <iframe :src="GET_VIMO_VIDEO_URL"  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe> -->
+                    <!-- <iframe id="iframe" :src="viomURL"  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe> -->
                     <!-- <vimeo-player
                         ref="player"
                         class="megx"
@@ -205,7 +206,7 @@ import classContentItem from 'components/courseClass/classContentItem';
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID';
 import { mapState, mapActions } from 'vuex';
 import _ from 'lodash';
-
+import playerjs from 'player.js'
 
 export default {
     data() {
@@ -216,18 +217,31 @@ export default {
             vimoID: '',
             viomURL: '',
             VideoPlayer: '',
-            options: {
-				portrait: false,
-				pip: false,
-				title: false,
-				sharing: false,
-				byline: false
-			},
             playerOptions: {
-                autoplay: false,
-                controls: true,
-                techOrder: [ 'vimeo'],
-                sources:[]
+                playbackRates: [0.5, 1.0, 1.5, 2.0], //可选择的播放速度
+                height: '166', // 视频默认高度
+                autoplay: false, //如果true,浏览器准备好时开始回放。
+                muted: false, // 默认情况下将会消除任何音频。
+                loop: false, // 视频一结束就重新开始。
+                preload: 'auto', // 建议浏览器在<video>加载元素后是否应该开始下载视频数据。auto浏览器选择最佳行为,立即开始加载视频（如果浏览器支持）
+                language: 'zh-CN',
+                aspectRatio: '16:9', // 将播放器置于流畅模式，并在计算播放器的动态大小时使用该值。值应该代表一个比例 - 用冒号分隔的两个数字（例如"16:9"或"4:3"）
+                fluid: true, // 当true时，Video.js player将拥有流体大小。换句话说，它将按比例缩放以适应其容器。
+                sources: [
+                    {
+                        type: 'video/mp4', // 视频类型 ： type: "video/mp4",
+                        src: '' //视频源url地址
+                    }
+                ],
+                poster: '', //你的封面地址
+                // width: document.documentElement.clientWidth,
+                notSupportedMessage: '此视频暂无法播放，请稍后再试', //允许覆盖Video.js无法播放媒体源时显示的默认信息。
+                controlBar: {
+                    timeDivider: true, //当前时间和持续时间的分隔符
+                    durationDisplay: true, //显示持续时间
+                    remainingTimeDisplay: false, //是否显示剩余时间功能
+                    fullscreenToggle: true //全屏按钮
+                }
             },
             startLearningTrackingID: '',
             courseEnrollment: '',
@@ -255,6 +269,16 @@ export default {
         ...mapState('learningProgress', ['enrollmentId']),
     },
 
+    // mounted () {
+    //     document.on('load', () => {
+    //         const iframe = this.$_.get(this.$refs,'videoPlayer')
+    //         console.log('XXXXXXXXXXXX')
+    //         console.log(iframe)
+    //         console.log('XXXXXXXXXXXX')
+    //     })
+
+    // },
+
     beforeDestroy() {
         // TODO: If the learning tracker is started, end it
         this.END_LEARNING_UNIT_TRAKING();
@@ -267,12 +291,17 @@ export default {
         currentContent(value) {
 
             this.viomURL = this.GET_VIMO_VIDEO_URL(value.modelValue)
-            //TODO: Play the video
-            this.playerOptions.sources.push({
-                type: 'video/vimo',
-                src: this.viomURL
-            })
-            console.log(this.playerOptions.sources)
+
+            // const player = new playerjs.Player(iframe)
+            // //TODO: Play the video
+            this.playerOptions.sources = [
+                {
+                    type: 'video/vimeo',
+                    // type: 'video/mp4',
+                    src: this.viomURL
+                }
+            ]
+            // console.log(this.playerOptions.sources)
             // this.playVideo(this.viomURL)
             // ?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media
             this.visible = true;
@@ -318,6 +347,12 @@ export default {
         }
     },
 
+    // mounted () {
+    //     console.log('???????????????')
+    //     console.log(playerjs)
+    //     console.log('???????????????')
+    // },
+
     updated() {
         if (this.counter === 0) {
             // TODO: When the page is updated, select the first content and activate it
@@ -345,16 +380,20 @@ export default {
 
 
         GET_VIMO_VIDEO_URL (data) {
-            const video = JSON.parse(data).video;
-            // this.viomURL = 'https://player.vimeo.com/video/' +  String(video)
-            //TODO: If the video from the youtube git it
-            const i = video.indexOf('v');
-            const videoKey = video.slice(i + 2);
-            if ( video.indexOf('youtube') > 0) {
-               return 'https://www.youtube.com/embed?=' + videoKey;
-            } else {
-                //TODO: if the video from the vimeo git it
-               return 'https://player.vimeo.com/video/' +  String(video);
+            try {
+                const video = JSON.parse(data).video;
+                // this.viomURL = 'https://player.vimeo.com/video/' +  String(video)
+                //TODO: If the video from the youtube git it
+                const i = video.indexOf('v');
+                const videoKey = video.slice(i + 2);
+                if ( video.indexOf('youtube') > 0) {
+                   return 'https://www.youtube.com/embed?=' + videoKey;
+                } else {
+                    //TODO: if the video from the vimeo git it
+                   return 'https://player.vimeo.com/video/' +  String(video);
+                }
+            } catch (error) {
+                
             }
         },
 
