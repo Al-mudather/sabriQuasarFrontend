@@ -28,6 +28,17 @@ export default {
 
 
     created() {
+        //TODO: IF the user blocked the notification
+        if (Notification.permission == 'denied') {
+            this.$q.notify({
+                type: 'negative',
+                progress: true,
+                multiLine: true,
+                position: 'top',
+                message: this.$t('لقد قمت بحجب اللإشعارات , الرجاء السماح لها بالظهور لتتمتع باخر التحديثات على المنصه')
+            })
+        }
+
         window.addEventListener('DOMContentLoaded', (event) => {
             window.OneSignal.push( () => {
 
@@ -35,6 +46,7 @@ export default {
                 window.OneSignal.isPushNotificationsEnabled(function(isEnabled) {
                     if (isEnabled) {
                     } else {
+                        //TODO: Show the subscribe message again until the user accept it
                         window.OneSignal.showSlidedownPrompt({force: true}); 
                     }
                 });
@@ -86,7 +98,7 @@ export default {
         LocalStorage.set('activeNav', '')
 
         // TODO: If There is a token, reLogin the user
-        if (this.token) { 
+        if (this.token) {
             this.RE_LOGIN_USER().then((re) => {
                 if (re === false) {
                     this.$q.notify({
@@ -101,6 +113,13 @@ export default {
                     //TODO: Go to login page
                     this.$router.push({ name: "login" });
                 }
+                this.$q.notify({
+                    type: 'positive',
+                    progress: true,
+                    multiLine: true,
+                    position: 'bottom',
+                    message: this.$t('تم تسجيل الدخول')
+                })
             }).catch(e => {
               // console.log({ReloginError: e})
               this.$router.push({ name: "login" });
