@@ -9,10 +9,13 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> 
     <div class="container">
       <div class="marketing">
           <div class="row">
+              <div class="col-lg-12 col-md-12 col-sm-12">
+                    <who-joind-the-platform-throw-me />
+                </div>
               <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
                 <my-balance />
               </div>
@@ -43,6 +46,7 @@
 
 <script>
 // import { mapActions } from 'vuex'
+import WhoJoindThePlatformThrowMe from 'src/components/pyramid_marketing_management/WhoJoindThePlatformThrowMe.vue'
 import MyBalance from 'src/components/pyramid_marketing_management/MyBalance.vue'
 import MyPyramid from 'src/components/pyramid_marketing_management/MyPyramid.vue'
 import MyWithdrawsList from 'src/components/pyramid_marketing_management/MyWithdrawsList.vue'
@@ -55,6 +59,7 @@ export default {
     }
   },
   components: {
+    'who-joind-the-platform-throw-me': WhoJoindThePlatformThrowMe,
     'my-balance': MyBalance,
     'my-pyramid': MyPyramid,
     'my-withdraws-list': MyWithdrawsList
@@ -190,6 +195,24 @@ export default {
 
 .marketing{
     margin-top: 20px;
+    .who-joined-me {
+        width: 100%;
+        border: 3px solid #8a93fa;
+        border-radius: 39px;
+        padding: 7px 12px 4px 11px;
+        margin: 0 0 12px 0;
+        h2 {
+            font-family: 'cairoR';
+            color: #54535f;
+            font-size: 18px;
+            span {
+                font-family: 'cairoB';
+                color: #8a93fa;
+                font-size: 24px;
+                margin: 0 0 0 6px;
+            }
+        }
+    }
     .account{
         background-color: #FCD462;
         padding: 10px;

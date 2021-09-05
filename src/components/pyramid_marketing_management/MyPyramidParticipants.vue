@@ -4,7 +4,7 @@
       <img src="~assets/img/harm.png" alt="">
     </div>
     <div class="conten" style="z-index: 2;">
-        <h3>{{$t('المنضمين من خلالي')}}</h3>
+        <h3>{{$t('عدد المسوقين الذين اعمل معهم')}}</h3>
         <span>{{myPyramidMarketersCount}}</span>
         <div class="share">
             <form @submit="CopyTheLinkHandler($event)">
