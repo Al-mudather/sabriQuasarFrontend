@@ -16,6 +16,23 @@ query AllMarketerAttachmentTransaction {
               orderTotal
               invoiceNumber
               currency
+              user {
+                pk
+                username
+                email,
+                fullName
+              }
+              orderdetailsSet {
+                edges {
+                  node {
+                    pk,
+                    course{
+                      pk,
+                      title
+                    }
+                  }
+                }
+              }
             }
             attachment
             marketer {

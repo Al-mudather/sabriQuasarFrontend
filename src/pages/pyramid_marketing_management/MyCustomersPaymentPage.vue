@@ -11,7 +11,7 @@
                     <!--cn-pay-->
                     <div class="col-lg-12">
                         <div v-if="customersTransactionsList.edges.length > 0" class="cn-pay">
-                            <div class="row">
+                            <div class="row justify-center">
                                 <!--box-pay--><!--box-done-->
                                 <div v-for="customerTrans in customersTransactionsList.edges" :key="customerTrans.node.pk" class="col-lg-3 col-md-6 col-sm-6">
                                     <Transaction-completed v-if="customerTrans.node.doneVerification " :customerTrans="customerTrans.node" />
@@ -42,9 +42,9 @@
 // import { mapActions } from 'vuex'
 
 import { AllMarketerAttachmentTransaction } from 'src/queries/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
-import Transaction_completed from 'src/components/attachment_transactions_management/Transaction_completed'
+import Transaction_completed from 'src/components/attachment_transactions_management/Transaction_completed.vue'
 import Transaction_under_processing from 'src/components/attachment_transactions_management/Transaction_under_processing.vue'
-import Transaction_rejected from 'src/components/attachment_transactions_management/Transaction_rejected'
+import Transaction_rejected from 'src/components/attachment_transactions_management/Transaction_rejected.vue'
 import Transaction_hanged from 'src/components/attachment_transactions_management/Transaction_hanged.vue'
 
 export default {
@@ -72,7 +72,7 @@ export default {
     'Transaction-completed': Transaction_completed,
     'Transaction-under-processing': Transaction_under_processing,
     'Transaction-rejected': Transaction_rejected,
-    'Transaction-hanged': Transaction_hanged,
+    'Transaction-hanged': Transaction_hanged
   },
  
   methods: {
@@ -106,10 +106,11 @@ export default {
                 .box {
                     border: 1px solid #ddd;
                     border-radius: 62px;
-                    max-width: 135px;
-                    margin: 0 auto;
+                    max-width: 116px;
+                    display: inline-block;
                     height: 40px;
                     padding: 5px 0 0 0;
+
                     h2 {
                         display: inline-block;
                         font-family: "cairoR";
@@ -124,10 +125,30 @@ export default {
                         width: 30px;
                         margin: -9px 0 0 0;
                     }
+                    svg {  
+                        width: 46px;
+                        margin: -11px 0 0 0;
+                    }
                 }
-                svg {  
-                    width: 46px;
-                    margin: -20px 0 0 0;
+                .detaii {
+                    border-radius: 62px;
+                    max-width: 90px;
+                    display: inline-block;
+                    height: 40px;
+                    padding: 5px 0 0 0;
+                    background-color: #7b86fa;
+                    position: relative;
+                    top: -6px;
+                    a{
+                        display: inline-block;
+                        font-family: "cairoR";
+                        font-size: 15px;
+                        color: #fff;
+                        text-decoration: none;
+                    }
+                    svg {  
+                        margin: 0 0 0 0;
+                    }
                 }
             }
             .data {
@@ -347,7 +368,7 @@ export default {
         }
     }
     .msPay{
-        display: block;
+        display: none;
         margin: 0 auto;
         text-align: center;
         h3{
@@ -359,6 +380,15 @@ export default {
     }
 }
 .popay {
+    display: block;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: #fcd462ab;
+    top: 0;
+    right: 0;
+    text-align: center;
+    overflow: scroll;
     .clos {
         position: relative;
         margin: 0 auto;
@@ -378,14 +408,6 @@ export default {
             right: 11px;
         }
     }
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background: #fcd462ab;
-    top: 0;
-    right: 0;
-    text-align: center;
-    overflow: scroll;
     .cn {
         max-width: 384px;
         margin: 0 auto 50px auto;
@@ -420,6 +442,70 @@ export default {
                     font-family: "cairoB";
                     font-size: 18px;
                     color: #787878;
+                }
+            }
+        }
+    }
+}
+.popupDet{
+    display: block;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: #fcd462ab;
+    top: 0;
+    right: 0;
+    text-align: center;
+    overflow: scroll;
+    .clos {
+        position: relative;
+        margin: 0 auto;
+        height: 52px;
+        width: 38px;
+        cursor: pointer;
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+        img {
+            position: absolute;
+            width: auto;
+            top: 24px;
+            right: 11px;
+        }
+    }
+    .cn{
+        max-width: 800px;
+        margin: 20px auto 50px auto;
+        padding: 15PX;
+        opacity: 1;
+        background-color: #EFEFEF;
+        table{
+            margin: 0;
+            thead{
+                tr{
+                    background-color: #fff;
+                    padding: 6px;
+                    color: #3A3847;
+                    font-family: 'cairoR';
+                    font-size: 17px;
+                    th{
+                        padding: 19px;
+                    }
+                }
+            }
+            tbody{
+                tr{
+                    background-color: #fff;
+                    padding: 6px;
+                    color: #A7A7A7;
+                    font-family: 'cairoR';
+                    font-size: 16px;
+                    th{
+                        padding: 19px;
+                    }
                 }
             }
         }
