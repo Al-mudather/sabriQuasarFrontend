@@ -23,7 +23,7 @@
                     <q-toggle v-model="_isEnglish" icon="language"/>
                 </div>
                 <div class="profile">
-                    <img src="~assets/img/user(4).png" alt="">
+                    <img style="width: 5rem;" src="~assets/img/user(4).png" alt="">
                     <h3 v-if="$_.get(user,'[fullName]')" >{{$_.get(user,'[fullName]')}}</h3>
                     <h3 v-else>{{$_.get(user,'[email]')}}</h3>
                 </div>
@@ -42,7 +42,7 @@
                 </div>
             </div>
             <!--satrt Link Button-->
-            <div class="butgro side-nav" id="butgro" style="margin-top: 1rem;">
+            <div class="butgro side-nav" id="butgro" style="margin-top: -0.5rem;">
                 <a class="but side-nav__item side-nav__item--active" data-link="HOME" @click="GO_TO_HOME_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الرئيسية')}}</h3>
@@ -76,7 +76,7 @@
                     <h3>{{$t('الملف الشخصي')}}</h3>
                 </a>
             </div>
-            <div class="exit" v-if="token" @click="logTheUserOut" style="cursor: pointer">
+            <div class="exit" v-if="token" @click="logTheUserOut" style="cursor: pointer; margin-top: -1.5rem">
                 <div class="mag">
                     <img src="~assets/img/enter.png" alt="">
                 </div>
