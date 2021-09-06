@@ -71,17 +71,17 @@
                             :space-between="1"
                             :options="swiperOptions"
                             
-                        >
+                        > 
                             <div class="row" v-if="lodash.isEmpty(allCourseSpecialities.edges)">
                               <skeletonChip v-for="(chip, index) in 11" :key="index" class="col" />
                             </div>
                             <swiper-slide v-else class="nav-item q-pr-sm" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
                                 <a
                                   style="outline: 0"
-                                  :data-course="
-                                      JSON.stringify(spec.node.courseSet)
+                                  :data-pk="
+                                      spec.node.pk
                                   "
-                                  @click="changeCourseData(spec.node.id)"
+                                  @click="changeCourseData(spec.node.pk)"
                                   class="nav-link"
                                   data-toggle="tab"
                                   role="tab"
@@ -149,8 +149,9 @@
 <script>
 import courseCard from 'components/utils/courseCard'
 import skeletonChip from 'components/skeleton/skeletonChip'
+import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality.js'
+
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
-import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
 import { QSpinnerHourglass } from 'quasar'
 import { mapActions } from 'vuex'
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
@@ -162,6 +163,8 @@ export default {
   data () {
     return {
       counter: 0,
+      totalCount: 0,
+      edgeCount: 0,
       lodash: this.$_,
       search: '',
       tab: 'main',
@@ -294,11 +297,12 @@ export default {
       const targetedAncer = this.$refs.cat.firstChild.firstChild.firstChild.firstChild 
       // TODO: make the first category active
       targetedAncer.classList.add("active");
-      const data = JSON.parse(
-          targetedAncer.dataset.course
+      const specialityID = JSON.parse(
+          targetedAncer.dataset.pk
       );
-      this.activeSpecialityID = targetedAncer.dataset.id
-      this.courses = data
+      this.changeCourseData(specialityID)
+      this.activeSpecialityID = specialityID
+      // this.courses = data
       this.counter += 10
     }
   },
@@ -357,7 +361,7 @@ export default {
       this.$refs.flickity.previous()
     },
     // TODO: Get the related courses data when the selected speciality become active
-    changeCourseData (specialityID) {
+    async changeCourseData (specialityID) {
 
       this.activeSpecialityID = specialityID
       this.$q.loading.show({
@@ -367,20 +371,21 @@ export default {
       })
       // TODO: fill the varaibles
       try {
-        this.$apollo.query({
-          query: GetAllCourses,
-          variables: {
-            courseSpeciality: specialityID,
-            ...this.filter,
-            ...this.searchFilter,
-            ...this.orderingFilter
-          }
-        }).then((res) => {
-          this.courses = res.data.allCourses
-          this.$q.loading.hide()
-        }).catsh((e) => {
-          this.$q.loading.hide()
+
+        const res = await this.$apollo.query({
+            query: GetAllCoursesInSpeciality,
+            variables: {
+                specialityId: specialityID,
+                ...this.filter,
+                ...this.searchFilter,
+                ...this.orderingFilter
+            }
         })
+
+        this.courses = res.data.allCoursesInSpeciality
+        this.totalCount = res.data.allCoursesInSpeciality.totalCount
+        this.edgeCount = res.data.allCoursesInSpeciality.edgeCount
+        this.$q.loading.hide()
 
       } catch {
         this.$q.loading.hide()

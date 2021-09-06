@@ -12,12 +12,13 @@
                             
                         >
                             <swiper-slide class="nav-item" v-for="spec in allCourseSpecialities.edges" :key="spec.node.id">
+                                    <!-- @click="changeCourseData(spec.node.courseSet)" -->
                                 <a
                                     style="outline: 0"
                                     :data-course="
-                                        JSON.stringify(spec.node.courseSet)
+                                        spec.node.pk
                                     "
-                                    @click="changeCourseData(spec.node.courseSet)"
+                                    @click="changeCourseData(spec.node.pk)"
                                     class="nav-link"
                                     id="home-tab"
                                     data-toggle="tab"
@@ -37,8 +38,8 @@
                     <div class="txt">
                         <h3>{{$t('الــــدورات')}}</h3>
                         <h4>
-                            {{$t('عرض')}} <span>{{ courses.edgeCount || 0 }}</span> {{$t('من اصل')}}
-                            {{ courses.totalCount || 0 }}
+                            {{$t('عرض')}} <span>{{ edgeCount || 0 }}</span> {{$t('من اصل')}}
+                            {{ totalCount || 0 }}
                         </h4>
                     </div>
                     <!-- start rate --> 
@@ -230,6 +231,7 @@ import 'swiper/swiper.min.css'
 // import catItem from 'components/utils/category_item'
 // import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
 import { GetSpecialities } from "src/queries/course_management/query/GetAllSpeciallites";
+import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality.js'
 import { mapActions } from "vuex";
 
 export default {
@@ -237,6 +239,8 @@ export default {
     data() {
         return {
             counter: 0,
+            edgeCount: 0,
+            totalCount: 0,
             navTab: "",
             loading: false,
             allCourseSpecialities: "",
@@ -343,10 +347,10 @@ export default {
             // data courses to be viewd
             // this.$refs.cat.firstChild.firstChild.classList.add("active");
             this.$refs.cat.firstChild.firstChild.firstChild.firstChild.classList.add("active");
-            const data = JSON.parse(
+            const specialityId = JSON.parse(
                 this.$refs.cat.firstChild.firstChild.firstChild.firstChild.dataset.course
             );
-            this.courses = data;
+            this.changeCourseData(specialityId)
             this.counter += 10;
         }
     },
@@ -368,8 +372,20 @@ export default {
             this.$router.push({ name: "courses" }); 
         },
 
-        changeCourseData(courses) {
-            this.courses = courses;
+        async changeCourseData(specialityId) {
+
+            const res = await this.$apollo.query({
+                query: GetAllCoursesInSpeciality,
+                variables: {
+                   specialityId: specialityId
+                }
+            })
+
+            this.courses = res.data.allCoursesInSpeciality
+            this.totalCount = res.data.allCoursesInSpeciality.totalCount
+            this.edgeCount = res.data.allCoursesInSpeciality.edgeCount
+
+
         },
 
         changeTab(e) {

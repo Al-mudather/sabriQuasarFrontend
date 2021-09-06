@@ -18,21 +18,22 @@
     <q-dialog v-model="withdraw" persistent>
       <q-card style="min-width: 350px">
         <q-card-section>
-          <div class="text-h6 text-center">{{$t('الكميه')}}</div>
+          <div class="text-h6 text-center" style="color: grey-6">{{$t('الكميه')}}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
           <q-input dense v-model="amount" autofocus @keyup.enter="prompt = false" />
         </q-card-section>
-
-        <q-btn flate  style="margin-right: 6rem" flat borderd color="negative" label="Cancel" v-close-popup />
-        <q-btn flate class="q-ma-md" flat color="success" label="order" @click="ORDER_BALANCE_WITHDRAW" />
+ 
+        <q-btn  style="margin-right: 3rem" @click="amount = null " color="negative" label="Cancel" v-close-popup />
+        <q-btn class="q-ma-md" color="success" @click="ORDER_BALANCE_WITHDRAW" icon-right="send" label="order" />
       </q-card>
     </q-dialog>
   </div>
 </template>
 
 <script>
+import { MyPyramidWithdraws } from 'src/queries/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
 import { MyPyramidBalance } from 'src/queries/pyramid_marketing_management/query/MyPyramidBalanceQuery'
 import { WithdrawPyramidBalance } from 'src/queries/pyramid_marketing_management/mutation/MakePyramidWithdraw'
 
@@ -43,7 +44,7 @@ export default {
       lodash: this.$_,
       withdraw: false,
       myBalance: 0.0,
-      amount: ''
+      amount: null
     };
   },
   apollo: {
@@ -94,14 +95,17 @@ export default {
         }   
     },
     async ORDER_BALANCE_WITHDRAW () {
-      if (this.amount) {
+      if (this.amount <= this.myBalance && this.amount ) {
         const withdraw_res = await this.$apollo.mutate({
             mutation: WithdrawPyramidBalance,
             variables: {
               amount: this.amount,
               input: {}
             },
-            refetchQueries: [{query: MyPyramidBalance}]
+            refetchQueries: [
+              {query: MyPyramidBalance},
+              {query: MyPyramidWithdraws}
+            ]
         })
         const errors = withdraw_res.data.makePyramidWithdraw.errors
         const success = withdraw_res.data.makePyramidWithdraw.success
@@ -125,7 +129,7 @@ export default {
           position: 'top',
           progress: true,
           multiLine: true,
-          message: "what is the amount that you want to withdraw"
+          message: "You can't withdraw what you don't have (-_-), or 0 cash"
         })
       }
     }
@@ -134,6 +138,24 @@ export default {
 </script>
 
 <style lang="scss">
+
+.q-btn {
+    &> span {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        &> span {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+        }
+    }
+}
+
+.q-icon {
+    margin-left: 0 !important;
+    margin-right: 0.3rem;
+
+}
+
 .actionBtn {
   outline: none;
   border: none;
