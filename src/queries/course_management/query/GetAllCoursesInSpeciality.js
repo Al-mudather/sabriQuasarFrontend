@@ -4,6 +4,7 @@ export const GetAllCoursesInSpeciality = gql`
 query AllCoursesInSpeciality(
   $specialityId: Int!,
   $first:Int,
+  $cursor: String,
   $orderBy:[String],
   $execludeIds:[Int],
   $title: String,
@@ -15,6 +16,7 @@ query AllCoursesInSpeciality(
   allCoursesInSpeciality(
     specialityId: $specialityId,
     first:$first,
+    after: $cursor,
     orderBy:$orderBy,
     execludeIds:$execludeIds,
     title:$title,
@@ -22,11 +24,16 @@ query AllCoursesInSpeciality(
     title_Istartswith:$title_Istartswith,
     isPaid: $isPaid
     ) {
+      pageInfo {
+        startCursor, 
+        endCursor,
+        hasNextPage,
+        hasPreviousPage
+      },
       totalCount,
       edgeCount,
       edges {
           node {
-
             id,
             pk,
             title,

@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 
-export const GetAllCoursesHours = gql`
+export const GetAllCoursesHoursStatistics = gql`
 query AllCoursesHours{
   allCoursesHours
 }

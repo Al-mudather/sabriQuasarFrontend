@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import classQuestion from 'src/components/courseClass/classQuestion'
+import classQuestion from 'src/components/courseClass/classQuestion.vue'
 import { CreateCourseQuestion } from 'src/queries/question_management/mutation/CreateCourseQuestion'
 import { AllQuestionsByCourse } from 'src/queries/question_management/query/AllQuestionsByCourse'
 import gql from 'graphql-tag';

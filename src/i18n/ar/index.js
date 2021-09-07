@@ -10,6 +10,18 @@
 export default {
  
         
+  "_comment_src_App.vue": "src_App.vue",
+        
+ 
+      "لقد قمت بحجب اللإشعارات , الرجاء السماح لها بالظهور لتتمتع باخر التحديثات على المنصه" : "لقد قمت بحجب اللإشعارات , الرجاء السماح لها بالظهور لتتمتع باخر التحديثات على المنصه",
+ 
+      "تهانينا, الان يمكنك ان تكون مطلعا على كل ماهو جديد في المنصه التعليميه" : "تهانينا, الان يمكنك ان تكون مطلعا على كل ماهو جديد في المنصه التعليميه",
+ 
+      "بعدم قبولك للإشعارات, لايمكننا ان نخبرك بمراحل امتلاكك للدوره التدريبيه اللتي تريدها, من فضلك اقبل الإشعارات" : "بعدم قبولك للإشعارات, لايمكننا ان نخبرك بمراحل امتلاكك للدوره التدريبيه اللتي تريدها, من فضلك اقبل الإشعارات",
+ 
+      "تم تسجيل الدخول" : "تم تسجيل الدخول",
+ 
+        
   "_comment_src_components_Account_Confirm.vue": "src_components_Account_Confirm.vue",
         
  
@@ -20,10 +32,14 @@ export default {
       "اذا لم تقم باستلام الرابط يرجى اعادة ارسال ايميلك مره اخرى" : "اذا لم تقم باستلام الرابط يرجى اعادة ارسال ايميلك مره اخرى",
  
         
-  "_comment_src_components_Account_GoogleAuthentication.vue": "src_components_Account_GoogleAuthentication.vue",
+  "_comment_src_components_Account_FacebookAuthentication.vue": "src_components_Account_FacebookAuthentication.vue",
         
  
       "تم تسجيل الدخول بنجاح" : "تم تسجيل الدخول بنجاح",
+ 
+        
+  "_comment_src_components_Account_GoogleAuthentication.vue": "src_components_Account_GoogleAuthentication.vue",
+        
  
       "هذا الحساب مسجل مسبقا" : "هذا الحساب مسجل مسبقا",
  
@@ -349,7 +365,7 @@ export default {
   "_comment_src_components_pyramid_marketing_management_MyPyramidParticipants.vue": "src_components_pyramid_marketing_management_MyPyramidParticipants.vue",
         
  
-      "المنضمين من خلالي" : "المنضمين من خلالي",
+      "عدد المسوقين الذين اعمل معهم" : "عدد المسوقين الذين اعمل معهم",
  
       "انسخ الرابط" : "انسخ الرابط",
  
@@ -359,7 +375,7 @@ export default {
   "_comment_src_components_pyramid_marketing_management_MyPyramidRewards.vue": "src_components_pyramid_marketing_management_MyPyramidRewards.vue",
         
  
-      "الأرباح المستحقة من الهرم" : "الأرباح المستحقة من الهرم",
+      "الأرباح المستحقة" : "الأرباح المستحقة",
  
       "تحصيل ارباحي" : "تحصيل ارباحي",
  
@@ -417,6 +433,10 @@ export default {
  
         
   "_comment_src_components_utils_MainNavBar.vue": "src_components_utils_MainNavBar.vue",
+        
+ 
+        
+  "_comment_src_components_utils_relatedCourseCard copy.vue": "src_components_utils_relatedCourseCard copy.vue",
         
  
         
@@ -553,10 +573,6 @@ export default {
  
       "extColor;                    font-size: 18px;                    font-family: cairoR;                    display: inline-block;                    margin: 17px 55px 0 0;                }            }            p{               color: #9C9C9C;               font-size: 16px;               font-family: cairoR;                 line-height: 1.7;                  width: 90%;               margin-right: 39px;            }            .pluse{                margin: 0 50px 17px 0;                display: flex;                width: 100%;                //maxMobile                @mediamax-width:767px" : "extColor. حجم الخط: 18 بكسل ؛ عائلة الخطوط: cairoR؛ عرض: مضمنة كتلة ؛ الهامش: 17 بكسل 55 بكسل 0 0 ؛ }} ص {اللون: # 9C9C9C ؛ حجم الخط: 16 بكسل ؛ عائلة الخطوط: cairoR؛ ارتفاع الخط: 1.7 ؛ العرض: 90٪؛ الهامش الأيمن: 39 بكسل ؛ } .pluse {margin: 0 50px 17px 0؛ عرض: فليكس ؛ العرض: 100٪؛ // maxMobile @ mediamax-width: 767 بكسل",
  
-      "extColor;                        margin: 8px 0 14px 0;                    }                    p{                        margin:0 auto 34px auto;                        width: 82%;                    }                    a{                        text-decoration: none;                        h3{                            font-size:11px;                            color: extColor;                            font-family: cairoB;                            margin: 0;                            img{                                width: auto;                                                        height: auto;                                margin: 0 5px 0 0;                            }                        }                    }                }            }        }        .butDown{            position: relative;            margin: 64px auto 69px auto;            width: 205px;            text-align: center;            button{                outline: 0;                position: relative;                width: 143px;                height: 53px;                border: 2px solid #ECECEC;            }            .right{                position: absolute;                top: -19px;                right: -11px;                width: auto;            }            .left{                position: absolute;                top: 11px;                left: -11px;                width: auto;            }        }    }    .rate {        margin-top: 30px;        .parent {            .imag {                position: relative;                border-radius: 50px;                overflow: hidden;                margin: 0 auto 0 auto;                height: 294px;                width: 82%;                @media min-width: 320px" : "extColor. الهامش: 8 بكسل 0 14 بكسل 0 ؛ } p {margin: 0 auto 34px auto؛ العرض: 82٪؛ } a {text-decoration: none؛ h3 {حجم الخط: 11 بكسل ؛ اللون: extColor ؛ عائلة الخطوط: cairoB؛ الهامش: 0؛ img {width: auto؛ الارتفاع: تلقائي ؛ الهامش: 0 5 بكسل 0 0 ؛ }}}}}} .butDown {الموقف: نسبي؛ الهامش: 64px auto 69px auto؛ العرض: 205 بكسل ؛ محاذاة النص: مركز ؛ زر {مخطط تفصيلي: 0 ؛ الموقف: نسبي ؛ العرض: 143 بكسل ؛ الارتفاع: 53 بكسل ؛ الحد: 2 بكسل صلب #ECEC ؛ }. right {الموقف: مطلق؛ أعلى: -19 بكسل ؛ يمين: -11 بكسل ؛ العرض: تلقائي ؛ } .left {الموقف: مطلق؛ أعلى: 11 بكسل ؛ اليسار: -11 بكسل ؛ العرض: تلقائي ؛ }}} .rate {margin-top: 30px؛ .parent {.imag {position: النسبي؛ نصف قطر الحدود: 50 بكسل ؛ إخفاء الفائض؛ الهامش: 0 auto 0 auto؛ الارتفاع: 294 بكسل ؛ العرض: 82٪؛ media min-width: 320 بكسل",
- 
-      "extColor;                    font-size: 14px;                    outline: 0;                    margin: 8px 0 0 0;                    @include prefixerbox-shadow, 8px 3px 7px #9e9e9e36, webkit moz ms" : "extColor. حجم الخط: 14 بكسل ؛ المخطط التفصيلي: 0 ؛ الهامش: 8 بكسل 0 0 0 ؛ @ تضمين prefixerbox-shadow، 8px 3px 7px # 9e9e9e36، webkit moz ms",
- 
         
   "_comment_src_pages_course_management_Courses.vue": "src_pages_course_management_Courses.vue",
         
@@ -573,7 +589,7 @@ export default {
  
       "مجاناً" : "مجاناً",
  
-      "مدفوع" : "البراز",
+      "مدفوعه" : "مدفوعه",
  
       "لا توجد نتائج للبحث" : "لا توجد نتائج للبحث",
  
@@ -637,5 +653,5 @@ export default {
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .details{        margin: 30px 0 30px 0;        .user{            //maxMobile            @mediamax-width:767px" : "extColor. حجم الخط: 22 بكسل ؛ عائلة الخطوط: cairoB؛ ارتفاع الخط: 1.7 ؛ الهامش: 0 11px 0 0 ؛ عرض: مضمنة كتلة ؛ }} .details {margin: 30px 0 30px 0؛ .user {// maxMobile @ mediamax-width: 767px",
  
-      "extColor;                            font-family: cairoR;                            text-align: center;                            margin: 8px 0 5px 0;                        }                    }                }                .but{                    margin: 30px auto 24px auto;                    background: #FCD462;                    padding: 5px;                    width: 130px;                    border-radius: 50px;                    text-align: center;                    cursor: pointer;                    h3{                        display: inline-block;                        color: extColor;                        font-size: 16px;                        font-family: cairoR;                        margin: 0;                    }                    img{                        display: inline-block;                        position: relative;                        left: 0;                        right: 21px;                    }                }            }        }    }}.marketing{    margin-top: 20px;    .account{        background-color: #FCD462;        padding: 10px;        background-image: url~assets/img/stc.png" : "extColor. عائلة الخطوط: cairoR؛ محاذاة النص: مركز ؛ الهامش: 8 بكسل 0 5 بكسل 0 ؛ }}} .but {margin: 30px auto 24px auto؛ الخلفية: # FCD462 ؛ الحشو: 5 بكسل ؛ العرض: 130 بكسل ؛ نصف قطر الحدود: 50 بكسل ؛ محاذاة النص: مركز ؛ المؤشر: المؤشر. h3 {display: inline-block؛ اللون: extColor ؛ حجم الخط: 16 بكسل ؛ عائلة الخطوط: cairoR؛ الهامش: 0؛ } img {display: inline-block؛ الموقف: نسبي ؛ اليسار: 0؛ اليمين: 21 بكسل ؛ }}}}}}. marketing {margin-top: 20px؛ .account {background-color: # FCD462؛ الحشو: 10 بكسل ؛ صورة الخلفية: url ~ asset / img / stc.png"
+      "extColor;                            font-family: cairoR;                            text-align: center;                            margin: 8px 0 5px 0;                        }                    }                }                .but{                    margin: 30px auto 24px auto;                    background: #FCD462;                    padding: 5px;                    width: 130px;                    border-radius: 50px;                    text-align: center;                    cursor: pointer;                    h3{                        display: inline-block;                        color: extColor;                        font-size: 16px;                        font-family: cairoR;                        margin: 0;                    }                    img{                        display: inline-block;                        position: relative;                        left: 0;                        right: 21px;                    }                }            }        }    }}.marketing{    margin-top: 20px;    .who-joined-me {        width: 100%;        border: 3px solid #8a93fa;        border-radius: 39px;        padding: 7px 12px 4px 11px;        margin: 0 0 12px 0;        h2 {            font-family: cairoR;            color: #54535f;            font-size: 18px;            span {                font-family: cairoB;                color: #8a93fa;                font-size: 24px;                margin: 0 0 0 6px;            }        }    }    .account{        background-color: #FCD462;        padding: 10px;        background-image: url~assets/img/stc.png" : "extColor. عائلة الخطوط: cairoR؛ محاذاة النص: مركز ؛ الهامش: 8 بكسل 0 5 بكسل 0 ؛ }}} .but {margin: 30px auto 24px auto؛ الخلفية: # FCD462 ؛ الحشو: 5 بكسل ؛ العرض: 130 بكسل ؛ نصف قطر الحدود: 50 بكسل ؛ محاذاة النص: مركز ؛ المؤشر: المؤشر. h3 {display: inline-block؛ اللون: extColor ؛ حجم الخط: 16 بكسل ؛ عائلة الخطوط: cairoR؛ الهامش: 0؛ } img {display: inline-block؛ الموقف: نسبي ؛ اليسار: 0 ؛ اليمين: 21 بكسل ؛ }}}}}}. marketing {margin-top: 20px؛ . الذين انضموا إليّ {العرض: 100٪ ؛ الحدود: 3 بكسل صلب # 8a93fa ؛ نصف قطر الحدود: 39 بكسل ؛ الحشو: 7 بكسل 12 بكسل 4 بكسل 11 بكسل ؛ الهامش: 0 0 12px 0 ؛ h2 {font-family: cairoR؛ اللون: # 54535f ؛ حجم الخط: 18 بكسل ؛ تمتد {font-family: cairoB؛ اللون: # 8a93fa ؛ حجم الخط: 24 بكسل ؛ الهامش: 0 0 0 6px ؛ }}}. account {background-color: # FCD462؛ الحشو: 10 بكسل ؛ صورة الخلفية: url ~ asset / img / stc.png"
 }

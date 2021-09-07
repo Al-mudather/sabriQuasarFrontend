@@ -10,6 +10,18 @@
 export default {
  
         
+  "_comment_src_App.vue": "src_App.vue",
+        
+ 
+      "لقد قمت بحجب اللإشعارات , الرجاء السماح لها بالظهور لتتمتع باخر التحديثات على المنصه" : "You have blocked notifications, please allow them to appear to enjoy the latest updates on the platform",
+ 
+      "تهانينا, الان يمكنك ان تكون مطلعا على كل ماهو جديد في المنصه التعليميه" : "Congratulations, now you can be aware of everything new in the educational platform",
+ 
+      "بعدم قبولك للإشعارات, لايمكننا ان نخبرك بمراحل امتلاكك للدوره التدريبيه اللتي تريدها, من فضلك اقبل الإشعارات" : "By not accepting the notices, we cannot tell you the stages of taking the course you want, please accept the notices",
+ 
+      "تم تسجيل الدخول" : "Logged in",
+ 
+        
   "_comment_src_components_Account_Confirm.vue": "src_components_Account_Confirm.vue",
         
  
@@ -20,10 +32,14 @@ export default {
       "اذا لم تقم باستلام الرابط يرجى اعادة ارسال ايميلك مره اخرى" : "If you did not receive the link, please send your email again",
  
         
-  "_comment_src_components_Account_GoogleAuthentication.vue": "src_components_Account_GoogleAuthentication.vue",
+  "_comment_src_components_Account_FacebookAuthentication.vue": "src_components_Account_FacebookAuthentication.vue",
         
  
       "تم تسجيل الدخول بنجاح" : "You are logged in successfully",
+ 
+        
+  "_comment_src_components_Account_GoogleAuthentication.vue": "src_components_Account_GoogleAuthentication.vue",
+        
  
       "هذا الحساب مسجل مسبقا" : "This account is already registered",
  
@@ -349,7 +365,7 @@ export default {
   "_comment_src_components_pyramid_marketing_management_MyPyramidParticipants.vue": "src_components_pyramid_marketing_management_MyPyramidParticipants.vue",
         
  
-      "المنضمين من خلالي" : "affiliated with me",
+      "عدد المسوقين الذين اعمل معهم" : "The number of marketers I work with",
  
       "انسخ الرابط" : "Copy the link",
  
@@ -359,7 +375,7 @@ export default {
   "_comment_src_components_pyramid_marketing_management_MyPyramidRewards.vue": "src_components_pyramid_marketing_management_MyPyramidRewards.vue",
         
  
-      "الأرباح المستحقة من الهرم" : "Earnings accrued from the pyramid",
+      "الأرباح المستحقة" : "accrued profits",
  
       "تحصيل ارباحي" : "profit collection",
  
@@ -417,6 +433,10 @@ export default {
  
         
   "_comment_src_components_utils_MainNavBar.vue": "src_components_utils_MainNavBar.vue",
+        
+ 
+        
+  "_comment_src_components_utils_relatedCourseCard copy.vue": "src_components_utils_relatedCourseCard copy.vue",
         
  
         
@@ -553,10 +573,6 @@ export default {
  
       "extColor;                    font-size: 18px;                    font-family: cairoR;                    display: inline-block;                    margin: 17px 55px 0 0;                }            }            p{               color: #9C9C9C;               font-size: 16px;               font-family: cairoR;                 line-height: 1.7;                  width: 90%;               margin-right: 39px;            }            .pluse{                margin: 0 50px 17px 0;                display: flex;                width: 100%;                //maxMobile                @mediamax-width:767px" : "extColor; font-size: 18px; font-family: cairoR; display: inline-block; margin: 17px 55px 0 0; }} p {color: # 9C9C9C; font-size: 16px; font-family: cairoR; line-height: 1.7; width: 90%; margin-right: 39px; } .pluse {margin: 0 50px 17px 0; display: flex; width: 100%; // maxMobile @ mediamax-width: 767px",
  
-      "extColor;                        margin: 8px 0 14px 0;                    }                    p{                        margin:0 auto 34px auto;                        width: 82%;                    }                    a{                        text-decoration: none;                        h3{                            font-size:11px;                            color: extColor;                            font-family: cairoB;                            margin: 0;                            img{                                width: auto;                                                        height: auto;                                margin: 0 5px 0 0;                            }                        }                    }                }            }        }        .butDown{            position: relative;            margin: 64px auto 69px auto;            width: 205px;            text-align: center;            button{                outline: 0;                position: relative;                width: 143px;                height: 53px;                border: 2px solid #ECECEC;            }            .right{                position: absolute;                top: -19px;                right: -11px;                width: auto;            }            .left{                position: absolute;                top: 11px;                left: -11px;                width: auto;            }        }    }    .rate {        margin-top: 30px;        .parent {            .imag {                position: relative;                border-radius: 50px;                overflow: hidden;                margin: 0 auto 0 auto;                height: 294px;                width: 82%;                @media min-width: 320px" : "extColor; margin: 8px 0 14px 0; } p {margin: 0 auto 34px auto; width: 82%; } a {text-decoration: none; h3 {font-size: 11px; color: extColor; font-family: cairoB; margin: 0; img {width: auto; height: auto; margin: 0 5px 0 0; }}}}}} .butDown {position: relative; margin: 64px auto 69px auto; width: 205px; text-align: center; button {outline: 0; position: relative; width: 143px; height: 53px; border: 2px solid #ECECEC; } .right {position: absolute; top: -19px; right: -11px; width: auto; } .left {position: absolute; top: 11px; left: -11px; width: auto; }}} .rate {margin-top: 30px; .parent {.imag {position: relative; border-radius: 50px; overflow: hidden; margin: 0 auto 0 auto; height: 294px; width: 82%; @media min-width: 320px",
- 
-      "extColor;                    font-size: 14px;                    outline: 0;                    margin: 8px 0 0 0;                    @include prefixerbox-shadow, 8px 3px 7px #9e9e9e36, webkit moz ms" : "extColor; font-size: 14px; outline: 0; margin: 8px 0 0 0; @include prefixerbox-shadow, 8px 3px 7px # 9e9e9e36, webkit moz ms",
- 
         
   "_comment_src_pages_course_management_Courses.vue": "src_pages_course_management_Courses.vue",
         
@@ -573,7 +589,7 @@ export default {
  
       "مجاناً" : "Free",
  
-      "مدفوع" : "paid",
+      "مدفوعه" : "paid",
  
       "لا توجد نتائج للبحث" : "There are no search results",
  
@@ -637,5 +653,5 @@ export default {
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .details{        margin: 30px 0 30px 0;        .user{            //maxMobile            @mediamax-width:767px" : "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .details{        margin: 30px 0 30px 0;        .user{            //maxMobile            @mediamax-width:767px",
  
-      "extColor;                            font-family: cairoR;                            text-align: center;                            margin: 8px 0 5px 0;                        }                    }                }                .but{                    margin: 30px auto 24px auto;                    background: #FCD462;                    padding: 5px;                    width: 130px;                    border-radius: 50px;                    text-align: center;                    cursor: pointer;                    h3{                        display: inline-block;                        color: extColor;                        font-size: 16px;                        font-family: cairoR;                        margin: 0;                    }                    img{                        display: inline-block;                        position: relative;                        left: 0;                        right: 21px;                    }                }            }        }    }}.marketing{    margin-top: 20px;    .account{        background-color: #FCD462;        padding: 10px;        background-image: url~assets/img/stc.png" : "extColor;                            font-family: cairoR;                            text-align: center;                            margin: 8px 0 5px 0;                        }                    }                }                .but{                    margin: 30px auto 24px auto;                    background: #FCD462;                    padding: 5px;                    width: 130px;                    border-radius: 50px;                    text-align: center;                    cursor: pointer;                    h3{                        display: inline-block;                        color: extColor;                        font-size: 16px;                        font-family: cairoR;                        margin: 0;                    }                    img{                        display: inline-block;                        position: relative;                        left: 0;                        right: 21px;                    }                }            }        }    }}.marketing{    margin-top: 20px;    .account{        background-color: #FCD462;        padding: 10px;        background-image: url~assets/img/stc.png"
+      "extColor;                            font-family: cairoR;                            text-align: center;                            margin: 8px 0 5px 0;                        }                    }                }                .but{                    margin: 30px auto 24px auto;                    background: #FCD462;                    padding: 5px;                    width: 130px;                    border-radius: 50px;                    text-align: center;                    cursor: pointer;                    h3{                        display: inline-block;                        color: extColor;                        font-size: 16px;                        font-family: cairoR;                        margin: 0;                    }                    img{                        display: inline-block;                        position: relative;                        left: 0;                        right: 21px;                    }                }            }        }    }}.marketing{    margin-top: 20px;    .who-joined-me {        width: 100%;        border: 3px solid #8a93fa;        border-radius: 39px;        padding: 7px 12px 4px 11px;        margin: 0 0 12px 0;        h2 {            font-family: cairoR;            color: #54535f;            font-size: 18px;            span {                font-family: cairoB;                color: #8a93fa;                font-size: 24px;                margin: 0 0 0 6px;            }        }    }    .account{        background-color: #FCD462;        padding: 10px;        background-image: url~assets/img/stc.png" : "extColor;                            font-family: cairoR;                            text-align: center;                            margin: 8px 0 5px 0;                        }                    }                }                .but{                    margin: 30px auto 24px auto;                    background: #FCD462;                    padding: 5px;                    width: 130px;                    border-radius: 50px;                    text-align: center;                    cursor: pointer;                    h3{                        display: inline-block;                        color: extColor;                        font-size: 16px;                        font-family: cairoR;                        margin: 0;                    }                    img{                        display: inline-block;                        position: relative;                        left: 0;                        right: 21px;                    }                }            }        }    }}.marketing{    margin-top: 20px;    .who-joined-me {        width: 100%;        border: 3px solid #8a93fa;        border-radius: 39px;        padding: 7px 12px 4px 11px;        margin: 0 0 12px 0;        h2 {            font-family: cairoR;            color: #54535f;            font-size: 18px;            span {                font-family: cairoB;                color: #8a93fa;                font-size: 24px;                margin: 0 0 0 6px;            }        }    }    .account{        background-color: #FCD462;        padding: 10px;        background-image: url~assets/img/stc.png"
 }

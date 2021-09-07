@@ -12,14 +12,16 @@
                 <!-- strat Fltter-->
                 <div class="col-lg-12 col-md-6 col-xs-12">
                     <div class="search">
-                        <form @submit="GetAllCoursesByTitle">
-                            <input
+                        <form @submit="GetAllCoursesByTitle($event)">
+                            <q-input
                                 v-model="search"
-                                @keydown.enter.prevent="GetAllCoursesByTitle"
+                                borderless 
+                                @keydown.enter.prevent="GetAllCoursesByTitle($event)"
                                 type="text"
                                 :placeholder="$t('ما الذي تبحث عنة في التخصص المختار ادناه؟')"
-                            />
-                            <button type="submit"><img src="~assets/img/search.png" /></button>
+                            >
+                            </q-input>
+                            <button style="left: 10%" type="submit"><img src="~assets/img/search.png" /></button>
                         </form>
                     </div>
                 </div>
@@ -50,7 +52,7 @@
                                 <ul @click="ChangeFilter">
                                     <li @click="GetAllCoursesWithoutFilter" class="active">{{$t('الكل')}}</li>
                                     <li @click="GetAllFreeCourses">{{$t('مجاناً')}}</li>
-                                    <li @click="GetAllPayeedCourses">{{$t('مدفوع')}}</li>
+                                    <li @click="GetAllPayidCourses">{{$t('مدفوعه')}}</li>
                                 </ul>
                             </div>
                         </div>
@@ -97,46 +99,79 @@
                     <!-- start rate -->
                     <div class="rate">
                         <div class="container-fluid">
-                          <!-- <div class="tab-content" id="myTabContent"> -->
-                            <div class="cn fadeIn" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                <div class="row justify-center" v-if="!lodash.isEmpty(courses.edges)">
-                                <!-- <div class="row justify-center" v-if="courses.edgeCount > 0"> -->
-                                    <div  v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                                        <transition
-                                          appear
-                                          enter-active-class="animated fadeIn"
-                                          leave-active-class="animated fadeOut"
-                                        > 
-                                            <course-card
-                                              class="hvr-grow"
-                                              :course="course.node"
-                                              :name="course.node.title"
-                                              instructor="مركز دكتور صبري ابو قرون"
-                                              :price="course.node.courseFee"
-                                              unit="SDG"
-                                            />
-                                        </transition>
-                                    </div>
-                                </div>
-                                <div class="row justify-center" v-else>
-                                  <transition
-                                    appear
-                                    enter-active-class="animated fadeIn"
-                                    leave-active-class="animated fadeOut"
+                          
+                          <div class="cn fadeIn" id="home" role="tabpanel" aria-labelledby="home-tab">
+                              <!-- <div class="row justify-center" v-if="!lodash.isEmpty(courses.edges)"> -->
+                                  <ApolloQuery
+                                    :query="GetAllCoursesInSpeciality"
+                                    :variables="{ 
+                                      specialityId: activeSpecialityID,
+                                      first: 12,
+                                      ...filter,
+                                      ...searchFilter,
+                                      ...orderingFilter
+                                    }"
                                   >
-                                    <!-- satrt not result -->
-                                    <div class="col col-lg-3 col-md-6 col-sm-6 col-xs-12 notResult">
-                                        <img src="~assets/img/search(1).png" alt="">
-                                        <p>{{$t('لا توجد نتائج للبحث')}}
-                                            <br>
-                                            {{$t('حاول الكتابة بشكل مختلف')}}
-                                        </p>
-                                    </div>
-                                    <!-- End not result -->
-                                  </transition>
-                                </div>
-                            </div>
-                          <!-- </div> -->
+                                    <template v-slot="{ result: { loading, data }, query }">
+                                      <!-- Loading -->
+                                      <div v-if="loading" class="loading apollo row justify-center">
+                                        <q-card class="col-lg-4 col-md-4 col-sm-12 col-xs-12" v-for="i in 12" :key="i" flat style="max-width: 300px">
+                                          <q-skeleton height="150px" square />
+
+                                          <q-card-section>
+                                            <q-skeleton type="text" class="text-subtitle1" />
+                                            <q-skeleton type="text" width="50%" class="text-subtitle1" />
+                                            <q-skeleton type="text" class="text-caption" />
+                                          </q-card-section>
+                                        </q-card>
+                                      </div>
+
+                                      <div v-else-if="data.allCoursesInSpeciality.edgeCount <= 0" class="no-result apollo">
+                                        <div class="row justify-center">
+                                          <transition
+                                            appear
+                                            enter-active-class="animated fadeIn"
+                                            leave-active-class="animated fadeOut"
+                                          >
+                                            <div class="col col-lg-3 col-md-6 col-sm-6 col-xs-12 notResult">
+                                                <img src="~assets/img/search(1).png" alt="">
+                                                <p>{{$t('لا توجد نتائج للبحث')}}
+                                                    <br>
+                                                    {{$t('حاول الكتابة بشكل مختلف')}}
+                                                </p>
+                                            </div>
+                                          </transition>
+                                        </div>
+                                      </div>
+                                      <!-- Result -->
+                                      <div v-else-if="data" class="result apollo">
+                                          <div class="row justify-center">
+                                            <div  v-for="course in data.allCoursesInSpeciality.edges" :key="course.node.id" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                              <transition
+                                                appear
+                                                enter-active-class="animated fadeIn"
+                                                leave-active-class="animated fadeOut"
+                                              > 
+                                                  <course-card
+                                                    class="hvr-grow"
+                                                    :course="course.node"
+                                                    :name="course.node.title"
+                                                    instructor="مركز دكتور صبري ابو قرون"
+                                                    :price="course.node.courseFee"
+                                                    unit="SDG"
+                                                  />
+                                              </transition>
+                                            </div>
+                                          </div>
+
+                                          <div class="butDown text-center q-mt-md" v-if="data.allCoursesInSpeciality.pageInfo.hasNextPage">
+                                            <button @click="loadMoreData(query, data)">{{$t('عرض المزيد')}}<img class="q-mr-sm" src="~assets/img/moree.png" alt=""></button>
+                                          </div>
+                                        <!-- {{ data }} -->
+                                      </div>
+                                    </template>
+                                  </ApolloQuery>
+                          </div>
                         </div>
                     </div>
                 </div>
@@ -162,6 +197,7 @@ export default {
   name: 'Courses',
   data () {
     return {
+      GetAllCoursesInSpeciality: GetAllCoursesInSpeciality,
       counter: 0,
       totalCount: 0,
       edgeCount: 0,
@@ -171,8 +207,6 @@ export default {
       openFilter: true,
       activeSpecialityID: '',
       allCourseSpecialities: '',
-      courses: [],
-      allCourses: null,
       filter: {},
       searchFilter: {},
       orderingFilter: {},
@@ -245,44 +279,8 @@ export default {
     this.swiper.slideTo(3, 1000, false)
     // TODO: Disable the navebar
     this.setNavbarSearchAction(false)
-    // Drowp Down js
-    var
-      butFilter = document.querySelector('.dropdow .open'),
-      butClose = document.querySelector('.dropdow .end'),
-      control = document.querySelector('.listt')
-    butFilter.addEventListener('click', function () {
-      butFilter.style.opacity = '0'
-      setTimeout(function () {
-        butFilter.style.display = 'none'
-        butClose.style.display = 'block'
-        setTimeout(function () {
-          butClose.style.opacity = '1'
-        }, 50)
-      }, 50)
-      control.style.display = 'block'
-      setTimeout(function () {
-        control.style.opacity = '1'
-        control.style.transform = 'translateY(0)'
-        control.style.transition = 'all 0.2s ease-in-out'
-      }, 50)
-    })
-
-    // close
-    butClose.addEventListener('click', function () {
-      control.style.opacity = '0'
-      control.style.transform = 'translateY(45px)'
-      control.style.transition = 'all 0.3s ease-in-out'
-      setTimeout(function () {
-        control.style.display = 'none'
-      }, 100)
-      setTimeout(function () {
-        butClose.style.display = 'none'
-        butFilter.style.display = 'block'
-        setTimeout(function () {
-          butFilter.style.opacity = '1'
-        }, 50)
-      }, 50)
-    })
+    
+    this.TRANSITION_THE_FILTER()
   },
 
   destroyed () {
@@ -291,6 +289,7 @@ export default {
   },
 
   updated () {
+    this.TRANSITION_THE_FILTER()
     if (this.counter === 0) {
       // TODO: When the page is loadded, select the first category with it's
       // data courses to be viewd
@@ -313,6 +312,47 @@ export default {
     ]),
     ...mapActions('settings', ['setActiveNavAction']),
 
+    TRANSITION_THE_FILTER() {
+      // Drowp Down js
+      var
+        butFilter = document.querySelector('.dropdow .open'),
+        butClose = document.querySelector('.dropdow .end'),
+        control = document.querySelector('.listt')
+      butFilter.addEventListener('click', function () {
+        butFilter.style.opacity = '0'
+        setTimeout(function () {
+          butFilter.style.display = 'none'
+          butClose.style.display = 'block'
+          setTimeout(function () {
+            butClose.style.opacity = '1'
+          }, 50)
+        }, 50)
+        control.style.display = 'block'
+        setTimeout(function () {
+          control.style.opacity = '1'
+          control.style.transform = 'translateY(0)'
+          control.style.transition = 'all 0.2s ease-in-out'
+        }, 50)
+      })
+
+      // close
+      butClose.addEventListener('click', function () {
+        control.style.opacity = '0'
+        control.style.transform = 'translateY(45px)'
+        control.style.transition = 'all 0.3s ease-in-out'
+        setTimeout(function () {
+          control.style.display = 'none'
+        }, 100)
+        setTimeout(function () {
+          butClose.style.display = 'none'
+          butFilter.style.display = 'block'
+          setTimeout(function () {
+            butFilter.style.opacity = '1'
+          }, 50)
+        }, 50)
+      })
+    },
+
     // TODO: Get All courses by Title from search
     GetAllCoursesByOrderingDecendinOrAcending (type) {
       if (type === 'DEC') {
@@ -324,11 +364,14 @@ export default {
       }
     },
     // TODO: Get All courses by Title from search
-    GetAllCoursesByTitle () {
+    GetAllCoursesByTitle (e) {
+      try {
+        e.preventDefault()
+      } catch (error) {
+      }
       this.searchFilter = { title_Icontains: this.search }
       this.changeCourseData(this.activeSpecialityID)
       // TODO: Remove the search filter
-      this.searchFilter = {}
     },
     // TODO: Get Only the free courses
     GetAllFreeCourses () {
@@ -336,7 +379,7 @@ export default {
       this.changeCourseData(this.activeSpecialityID)
     },
     // TODO: Get only the payeed courses
-    GetAllPayeedCourses () {
+    GetAllPayidCourses () {
       this.filter = { isPaid: true }
       this.changeCourseData(this.activeSpecialityID)
     },
@@ -362,35 +405,37 @@ export default {
     },
     // TODO: Get the related courses data when the selected speciality become active
     async changeCourseData (specialityID) {
-
       this.activeSpecialityID = specialityID
-      this.$q.loading.show({
-        spinner: QSpinnerHourglass,
-        spinnerColor: 'primary',
-        delay: 400 // ms
-      })
-      // TODO: fill the varaibles
-      try {
-
-        const res = await this.$apollo.query({
-            query: GetAllCoursesInSpeciality,
-            variables: {
-                specialityId: specialityID,
-                ...this.filter,
-                ...this.searchFilter,
-                ...this.orderingFilter
-            }
-        })
-
-        this.courses = res.data.allCoursesInSpeciality
-        this.totalCount = res.data.allCoursesInSpeciality.totalCount
-        this.edgeCount = res.data.allCoursesInSpeciality.edgeCount
-        this.$q.loading.hide()
-
-      } catch {
-        this.$q.loading.hide()
-      }
     },
+
+    async loadMoreData (query, data) {
+      await query.fetchMore({
+        variables: {
+          specialityId: this.activeSpecialityID,
+          cursor: data.allCoursesInSpeciality.pageInfo.endCursor
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          const newEdges = fetchMoreResult.allCoursesInSpeciality.edges
+          const pageInfo = fetchMoreResult.allCoursesInSpeciality.pageInfo
+
+          if (newEdges.length) {
+           data = {
+              __typename:
+                                previousResult.allCoursesInSpeciality.__typename,
+              edges: [
+                ...previousResult.allCoursesInSpeciality.edges,
+                ...newEdges
+              ],
+              pageInfo
+            }
+
+            return { allCoursesInSpeciality: data }
+          }
+          return previousResult
+        }
+      })
+    },
+
     // TODO: Change the speciality when it been clicked
     changeTab (e) {
       e.preventDefault()
@@ -417,6 +462,10 @@ export default {
 
 .swiper-slide {
   width: max-content !important;
+}
+
+.q-field__before > i {
+  transform: translateX(1rem);
 }
 
 /*--- START cources ---*/

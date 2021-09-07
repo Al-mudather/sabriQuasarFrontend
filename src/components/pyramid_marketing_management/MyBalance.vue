@@ -22,7 +22,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <q-input dense v-model="amount" autofocus @keyup.enter="prompt = false" />
+          <q-input mask="###################" dense v-model="amount" autofocus @keyup.enter="prompt = false" />
         </q-card-section>
  
         <q-btn  style="margin-right: 3rem" @click="amount = null " color="negative" label="Cancel" v-close-popup />
@@ -95,7 +95,7 @@ export default {
         }   
     },
     async ORDER_BALANCE_WITHDRAW () {
-      if (this.amount <= this.myBalance && this.amount ) {
+      if (this.amount <= this.myBalance && this.amount > 0) {
         const withdraw_res = await this.$apollo.mutate({
             mutation: WithdrawPyramidBalance,
             variables: {
@@ -151,9 +151,13 @@ export default {
 }
 
 .q-icon {
-    margin-left: 0 !important;
-    margin-right: 0.3rem;
+  margin-left: 0 !important;
+  margin-right: 0.3rem;
 
+}
+
+.q-field__inner {
+  margin-right: 1rem;
 }
 
 .actionBtn {

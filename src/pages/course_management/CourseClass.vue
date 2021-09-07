@@ -246,9 +246,6 @@ export default {
           })
           .then(res => {``
             this.courseData = res.data.course;
-            // console.log('mmmmmmmmmmmmmmmm')
-            // console.log(res.data.course)
-            // console.log('mmmmmmmmmmmmmmmm')
             if (res.data.course.pk) {
               // TODO: Get the enrollment of the course
               this.$apollo
@@ -261,9 +258,6 @@ export default {
                 .then(res => {
                   const enrollmentID =
                     res.data.enrollmentByCourseForCurrentUser.pk;
-                    console.log('mmmmmmmmmmmmmmmm')
-                    console.log(enrollmentID)
-                    console.log('mmmmmmmmmmmmmmmm')
                   // TODO: Save the enrollmentId to the store
                   if (enrollmentID) {
                     this.setUpdateEnrollmentIdAction(enrollmentID);

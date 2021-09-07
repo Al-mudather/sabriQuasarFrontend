@@ -316,11 +316,6 @@ export default {
             query() {
                 return GetSpecialities;
             },
-            variables() {
-                return {
-                    courseNumber: 5
-                };
-            },
             result (res) {
 
                 if (!res.loading) {
@@ -377,7 +372,9 @@ export default {
             const res = await this.$apollo.query({
                 query: GetAllCoursesInSpeciality,
                 variables: {
-                   specialityId: specialityId
+                   specialityId: specialityId,
+                   first: 8,
+                   orderBy: ["-id"]
                 }
             })
 
