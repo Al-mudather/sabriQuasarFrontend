@@ -373,7 +373,7 @@ export default {
                 query: GetAllCoursesInSpeciality,
                 variables: {
                    specialityId: specialityId,
-                   first: 8,
+                   first: 4,
                    orderBy: ["-id"]
                 }
             })
