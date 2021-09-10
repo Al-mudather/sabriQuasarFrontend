@@ -352,6 +352,7 @@ query GetCourseByID($coursePk:Int) {
   course(id:$coursePk) {
     id,
     pk,
+    courseHours,
     title,
     profile,
     cover,

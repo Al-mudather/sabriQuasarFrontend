@@ -106,7 +106,7 @@
                                     :query="GetAllCoursesInSpeciality"
                                     :variables="{ 
                                       specialityId: activeSpecialityID,
-                                      first: 12,
+                                      first: 8,
                                       ...filter,
                                       ...searchFilter,
                                       ...orderingFilter

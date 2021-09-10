@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import NotificationCard from 'src/components/notifivation_management/NotificationCard'
+import NotificationCard from 'src/components/notifivation_management/NotificationCard.vue'
 import { GetAllMyNotifications } from 'src/queries/notification_management/query/GetAllMyNotifications'
 // import { DoneReadingNotification } from 'src/queries/notification_management/mutation/DoneReadingNotification'
 import { mapActions } from 'vuex'

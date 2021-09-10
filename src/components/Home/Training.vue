@@ -374,7 +374,7 @@ export default {
                 variables: {
                    specialityId: specialityId,
                    first: 4,
-                   orderBy: ["-id"]
+                   orderBy: ["id"]
                 }
             })
 

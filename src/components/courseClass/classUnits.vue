@@ -81,12 +81,13 @@
                         ref="videoPlayer"
                         controls = "false"
                         id="video"
+                        @playing="START_LEARNING_UNIT_TRAKING"
                         @loaded="PLAYER_IS_LOADED"
                         @onPlay="START_LEARNING_UNIT_TRAKING"
                         @ended="END_LEARNING_UNIT_TRAKING"
                         :src="viomURL"
                     />
-
+ 
                     <!-- <video
                         id="my-video"
                         class="video-js"
@@ -108,18 +109,15 @@
                     </videojsVimeo> -->
                     <!-- <video
                         id="my-video"
-                        class="video-js"
+                        ref="video-player"
+                        class="video-js vjs-big-play-centered"
                         controls
                         preload="auto"
                         width="640"
                         height="264"
-                        poster="MY_VIDEO_POSTER.jpg"
                         data-setup="{}"
                     >
-                        <source :src="viomURL" type="video/vimeo" />
-                        <p class="vjs-no-js">
-                            To view this video please enable JavaScript.
-                        </p>
+                        <source :src="viomURL" type="application/x-mpeg-url" />
                     </video> -->
                     <!-- <div id="made-in-ny" :data-vimeo-url="GET_VIMO_VIDEO_URL" class="megx"></div> -->
                     <!-- <iframe id="iframe" :src="viomURL"  frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe> -->
@@ -130,7 +128,7 @@
                         @play="START_LEARNING_UNIT_TRAKING"
                         @ended="END_LEARNING_UNIT_TRAKING"
                         @playbackratechange="DATA_CHANGED"
-                        :video-url="GET_VIMO_VIDEO_URL"
+                        :video-url="viomURL"
                         :video-id="null"
                         :options="options"
                     ></vimeo-player> -->
@@ -153,11 +151,11 @@
                         class="megx"
                         heigth="100%"
                         width="100%"
-                        @play="StartPlayingTheLesson"
-                        @pause="StartPlayingTheLesson"
-                        @progress="StartPlayingTheLesson"
-                        @ended="StartPlayingTheLesson"
-                        :video-id="507727334"
+                        @play="START_LEARNING_UNIT_TRAKING"
+                        @pause="START_LEARNING_UNIT_TRAKING"
+                        @progress="START_LEARNING_UNIT_TRAKING"
+                        @ended="START_LEARNING_UNIT_TRAKING"
+                        :video-id="'507727334'"
                     ></vimeo-player> -->
                 </div>
                 <div v-else class="megx">
@@ -206,7 +204,7 @@ import classContentItem from 'components/courseClass/classContentItem';
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID';
 import { mapState, mapActions } from 'vuex';
 import _ from 'lodash';
-import playerjs from 'player.js'
+// import playerjs from 'player.js'
 
 export default {
     data() {
@@ -217,32 +215,6 @@ export default {
             vimoID: '',
             viomURL: '',
             VideoPlayer: '',
-            playerOptions: {
-                playbackRates: [0.5, 1.0, 1.5, 2.0], //可选择的播放速度
-                height: '166', // 视频默认高度
-                autoplay: false, //如果true,浏览器准备好时开始回放。
-                muted: false, // 默认情况下将会消除任何音频。
-                loop: false, // 视频一结束就重新开始。
-                preload: 'auto', // 建议浏览器在<video>加载元素后是否应该开始下载视频数据。auto浏览器选择最佳行为,立即开始加载视频（如果浏览器支持）
-                language: 'zh-CN',
-                aspectRatio: '16:9', // 将播放器置于流畅模式，并在计算播放器的动态大小时使用该值。值应该代表一个比例 - 用冒号分隔的两个数字（例如"16:9"或"4:3"）
-                fluid: true, // 当true时，Video.js player将拥有流体大小。换句话说，它将按比例缩放以适应其容器。
-                sources: [
-                    {
-                        type: 'video/mp4', // 视频类型 ： type: "video/mp4",
-                        src: '' //视频源url地址
-                    }
-                ],
-                poster: '', //你的封面地址
-                // width: document.documentElement.clientWidth,
-                notSupportedMessage: '此视频暂无法播放，请稍后再试', //允许覆盖Video.js无法播放媒体源时显示的默认信息。
-                controlBar: {
-                    timeDivider: true, //当前时间和持续时间的分隔符
-                    durationDisplay: true, //显示持续时间
-                    remainingTimeDisplay: false, //是否显示剩余时间功能
-                    fullscreenToggle: true //全屏按钮
-                }
-            },
             startLearningTrackingID: '',
             courseEnrollment: '',
             hasNextContent: true,
@@ -269,16 +241,6 @@ export default {
         ...mapState('learningProgress', ['enrollmentId']),
     },
 
-    // mounted () {
-    //     document.on('load', () => {
-    //         const iframe = this.$_.get(this.$refs,'videoPlayer')
-    //         console.log('XXXXXXXXXXXX')
-    //         console.log(iframe)
-    //         console.log('XXXXXXXXXXXX')
-    //     })
-
-    // },
-
     beforeDestroy() {
         // TODO: If the learning tracker is started, end it
         this.END_LEARNING_UNIT_TRAKING();
@@ -289,18 +251,15 @@ export default {
     watch: {
 
         currentContent(value) {
+            // const el = this.$refs.videoPlayer
+            // console.log('???????????????????????')
+            // console.log(el)
+            // console.log('???????????????????????')
 
             this.viomURL = this.GET_VIMO_VIDEO_URL(value.modelValue)
 
             // const player = new playerjs.Player(iframe)
             // //TODO: Play the video
-            this.playerOptions.sources = [
-                {
-                    type: 'video/vimeo',
-                    // type: 'video/mp4',
-                    src: this.viomURL
-                }
-            ]
             // console.log(this.playerOptions.sources)
             // this.playVideo(this.viomURL)
             // ?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media
@@ -320,6 +279,8 @@ export default {
             } else {
                 this.hasPrevContent = true;
             }
+            //TODO: Temp: Start traking the learning
+            // this.START_LEARNING_UNIT_TRAKING()
 
             // TODO: If the learning tracker is started, end it
             this.END_LEARNING_UNIT_TRAKING();
@@ -347,13 +308,8 @@ export default {
         }
     },
 
-    // mounted () {
-    //     console.log('???????????????')
-    //     console.log(playerjs)
-    //     console.log('???????????????')
-    // },
-
     updated() {
+        
         if (this.counter === 0) {
             // TODO: When the page is updated, select the first content and activate it
             const infoes = document.querySelectorAll('.info');
@@ -400,19 +356,15 @@ export default {
         PLAYER_IS_LOADED () {
             this.visible = false
             // const controls = document.querySelector('#player')
-            console.log('CCCCCCCCCCCCCCCC')
-            console.log('ssssssssssssssssssssssssssssssssssssssss')
-            console.log('CCCCCCCCCCCCCCCC')
-            
         },
 
         /////////////////////////////////////////////////////////////
         // Start Learning Tracking
         /////////////////////////////////////////////////////////////
         async START_LEARNING_UNIT_TRAKING() {
-            console.log('ggggggggggggggggggggg')
-            console.log('Starting')
-            console.log('ggggggggggggggggggggg')
+            // console.log('ggggggggggggggggggggg')
+            // console.log('Starting')
+            // console.log('ggggggggggggggggggggg')
             if (!this.startLearningTrackingID) {
                 // TODO: 1) Fill the progress data
                 const progressData = {
@@ -465,9 +417,9 @@ export default {
         // End Learning Tracking
         /////////////////////////////////////////////////////////////
         async END_LEARNING_UNIT_TRAKING() {
-            console.log('kkkkkkkkkkkkkkkkkkkkk')
-            console.log('Ending')
-            console.log('kkkkkkkkkkkkkkkkkkkkk')
+            // console.log('kkkkkkkkkkkkkkkkkkkkk')
+            // console.log('Ending')
+            // console.log('kkkkkkkkkkkkkkkkkkkkk')
             if (this.startLearningTrackingID) {
                 // TODO: 1) Fill the end learning tracker data
                 const progressData = {
@@ -491,12 +443,6 @@ export default {
                                 courseId: this.course.pk
                             }
                         }
-                        // {
-                        //     query: GetCourseByID,
-                        //     variables: {
-                        //         courseId: this.course.pk
-                        //     }
-                        // }
                     ]
                 });
                 if (
