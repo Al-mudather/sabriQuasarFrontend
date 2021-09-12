@@ -14,6 +14,9 @@ mutation SocialAuth($provider: String!, $accessToken: String!, $email: String!) 
         firstName,
         lastName,
         fullName,
+        phoneNumber,
+        phoneNumber2,
+        phoneNumber3,
         verified,
         isAttachmentTransactionManager
         isPyramidAdmin

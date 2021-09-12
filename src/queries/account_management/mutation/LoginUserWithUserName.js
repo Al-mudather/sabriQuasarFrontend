@@ -17,6 +17,9 @@ mutation LoginUser($username: String!, $password: String!){
       email,
       firstName,
       lastName,
+      phoneNumber,
+      phoneNumber2,
+      phoneNumber3,
       verified,
       isAttachmentTransactionManager
       isPyramidAdmin

@@ -80,6 +80,7 @@ const routes = [
     children: [
       { path: '', name: 'cart', component: () => import('components/ShoppingCard/cartCourses') },
       { path: 'loginCart', name: 'login-cart', component: () => import('components/ShoppingCard/loginCart') },
+      { path: 'userInfo', name: 'user-info', component: () => import('components/ShoppingCard/userInformation') },
       { path: 'payment', name: 'payment', beforeEnter: requireAuthentication, component: () => import('components/ShoppingCard/payment') },
       { path: 'success', name: 'cart-success', beforeEnter: requireAuthentication, component: () => import('components/ShoppingCard/successMessage') }
     ]

@@ -241,6 +241,9 @@ export default {
         ...mapState('learningProgress', ['enrollmentId']),
     },
 
+    created() {
+    },
+
     beforeDestroy() {
         // TODO: If the learning tracker is started, end it
         this.END_LEARNING_UNIT_TRAKING();

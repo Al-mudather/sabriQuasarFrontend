@@ -6,7 +6,9 @@
         <div class="imaagg">
             <img src="~assets/img/success.png" alt="">
             <h2>{{$t('تهانينا لك')}}</h2>
-            <p @click="GO_TO_MY_COURSES_page">{{$t('الأن الكورسات التي قمت بإمتلاكها أصبحت متاحة يمكنك الإطلاع عليها من خلال')}} <span style="coursor: pointer">{{$t('لوحتك التعليمية')}}</span> </p>
+            <!-- <p @click="GO_TO_MY_COURSES_page">{{$t('الأن الكورسات التي قمت بإمتلاكها أصبحت متاحة يمكنك الإطلاع عليها من خلال')}} <span style="coursor: pointer">{{$t('لوحتك التعليمية')}}</span> </p> -->
+            <p @click="GO_TO_MY_ORDERS_page">{{$t('يمكنك متابعة حالة طلباتك في حالة الدفع عن طريق الأشعار من')}} <span style="coursor: pointer">{{$t('صفحة طلباتي')}}</span> </p>
+            <p @click="GO_TO_MY_COURSES_page">{{$t('او الذهاب الى لوحتك التعليميه في حالة الدفع المباشر لتبدأ التعلم فورا')}} <span style="coursor: pointer">{{$t('لوحتك التعليمية')}}</span> </p>
         </div>
     </div>
 </template>
@@ -75,6 +77,10 @@ export default {
 
         GO_TO_MY_COURSES_page () {
             this.$router.push({ name: 'my-courses' })
+        },
+
+        GO_TO_MY_ORDERS_page () {
+            this.$router.push({ name: 'my-orders' })
         }
     }
 }

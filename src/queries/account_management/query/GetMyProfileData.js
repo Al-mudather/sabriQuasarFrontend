@@ -11,6 +11,8 @@ query GetMyProfileData {
     email,
     gender,
     phoneNumber,
+    phoneNumber2,
+    phoneNumber3
     isAttachmentTransactionManager
     isPyramidAdmin
     isPyramidMarketer

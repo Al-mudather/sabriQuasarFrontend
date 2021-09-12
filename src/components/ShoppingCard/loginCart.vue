@@ -145,6 +145,7 @@ export default {
             lodash: this.$_
         }
     },
+
     computed: {
         ...mapState("authentication", ["user", "token"])
     },
@@ -158,7 +159,7 @@ export default {
             document.querySelector(name).nextSibling.classList.add('show')
         })
         if (this.token) {
-            this.$router.push({ name: 'payment' })
+            this.$router.push({ name: 'user-info' })
         }
     },
     // components: {
@@ -177,7 +178,8 @@ export default {
         GoToPaymentCartPage () {
 
             if (!this.$_.isEmpty(this.user)) {
-                this.$router.push({ name: 'payment' })
+                // this.$router.push({ name: 'payment' })
+                this.$router.push({ name: 'user-info' })
 
             } else {
                 

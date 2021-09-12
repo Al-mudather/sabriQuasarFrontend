@@ -143,7 +143,7 @@ export default {
       }
     }
   },
-
+ 
   watch: {
     me(value) {
       this.email = value.email;
