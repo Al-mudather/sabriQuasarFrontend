@@ -112,7 +112,7 @@ export default {
                     }
                 } else {
                     this.$q.notify({
-                        type: 'warning',
+                        type: 'negative',
                         progress: true,
                         multiLine: true,
                         position: 'top',
@@ -123,6 +123,13 @@ export default {
                 
             } catch (error) {
                 this.visible = false
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: "هناك خطأ في قبول الاشعار, يرجى مراجعة المركز"
+                })
                 
             }
 

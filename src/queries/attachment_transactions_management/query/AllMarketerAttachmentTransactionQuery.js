@@ -2,7 +2,7 @@ import gql from 'graphql-tag'
 
 export const AllMarketerAttachmentTransaction = gql`
 query AllMarketerAttachmentTransaction {
-
+ 
   allMarketerAttachmentTransaction {
 
       edges {
@@ -20,7 +20,9 @@ query AllMarketerAttachmentTransaction {
                 pk
                 username
                 email,
-                fullName
+                fullName,
+                phoneNumber2,
+                phoneNumber3,
               }
               orderdetailsSet {
                 edges {
