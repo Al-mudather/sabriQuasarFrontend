@@ -106,10 +106,11 @@ export default {
                 .box {
                     border: 1px solid #ddd;
                     border-radius: 62px;
-                    max-width: 116px;
-                    display: inline-block;
+                    max-width: 80%;
+                    display: block;
                     height: 40px;
                     padding: 5px 0 0 0;
+                    margin: 0 auto 12px auto;
 
                     h2 {
                         display: inline-block;
@@ -126,21 +127,24 @@ export default {
                         margin: -9px 0 0 0;
                     }
                     svg {  
+                        display: none;
                         width: 46px;
                         margin: -11px 0 0 0;
                     }
                 }
                 .detaii {
                     border-radius: 62px;
-                    max-width: 90px;
-                    display: inline-block;
-                    height: 40px;
-                    padding: 5px 0 0 0;
+                    max-width: 80%;
+                    display: block;
+                    height: 45px;
+                    padding: 11px 0 0 0;
                     background-color: #7b86fa;
                     position: relative;
                     top: -6px;
+                    text-align: center;
+                    margin: 0 auto;
                     a{
-                        display: inline-block;
+                        display: block;
                         font-family: "cairoR";
                         font-size: 15px;
                         color: #fff;
