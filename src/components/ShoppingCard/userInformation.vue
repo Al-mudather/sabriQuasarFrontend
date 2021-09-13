@@ -138,41 +138,51 @@ export default {
         },
 
         async UPDATE_THE_USER_PROFILE(e) {
+
             e.preventDefault();
             //////////////////////////////
             // TODO: Update the user data
             //////////////////////////////
             this.visible = true
             try {
-                //TODO: Make the updation
-                const res = await this.$apollo
-                    .mutate({ 
-                        mutation: UpdateUserProfile,
-                        variables: {
-                            fullName: this.fullName,
-                            phoneNumber2: this.whatsAppNumber,
-                            phoneNumber3: this.telegramNumber
-                        }
-                    })
-                //TODO: Get the success result
-                const success = res.data.updateAccount.success
-                //TODO: Get the errors result
-                const errors = res.data.updateAccount.errors
-
-                if (success) {
-                    this.visible = false
+                if (this.fullName && (this.whatsAppNumber || this.telegramNumber)) {
+                    //TODO: Make the updation
+                    const res = await this.$apollo
+                        .mutate({ 
+                            mutation: UpdateUserProfile,
+                            variables: {
+                                fullName: this.fullName,
+                                phoneNumber2: this.whatsAppNumber,
+                                phoneNumber3: this.telegramNumber
+                            }
+                        })
+                    //TODO: Get the success result
+                    const success = res.data.updateAccount.success
+                    //TODO: Get the errors result
+                    const errors = res.data.updateAccount.errors
+    
+                    if (success) {
+                        this.visible = false
+                        this.$q.notify({
+                            type: "positive",
+                            multiLine: true,
+                            progress: true,
+                            message: "Great the data wase updated"
+                        }) 
+                        this.$router.push({ name: 'payment' })
+                    }
+    
+                    if (errors) {
+                        this.visible = false
+                        this.errorHandler(errors);
+                    }
+                } else {
                     this.$q.notify({
                         type: "positive",
                         multiLine: true,
                         progress: true,
-                        message: "Great the data wase updated"
+                        message: "يجب ان تكمل بياناتك لكي نستطيع التواصل معك"
                     }) 
-                    this.$router.push({ name: 'payment' })
-                }
-
-                if (errors) {
-                    this.visible = false
-                    this.errorHandler(errors);
                 }
 
             } catch {
