@@ -128,7 +128,8 @@ export default {
                     progress: true,
                     multiLine: true,
                     position: 'top',
-                    message: "هناك خطأ في قبول الاشعار, يرجى مراجعة المركز"
+                    message: error.message,
+                    // message: "هناك خطأ في قبول الاشعار, يرجى مراجعة المركز"
                 })
                 
             }
