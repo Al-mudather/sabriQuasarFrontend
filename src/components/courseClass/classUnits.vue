@@ -72,7 +72,6 @@
                     <q-spinner-gears size="10vh" color="primary" />
                 </q-inner-loading> -->
                 <div
-                    class="megx"
                     v-if="!lodash.isEmpty(currentContent)"
                     disable="1"
                 >

@@ -48,7 +48,6 @@
                             <div class="cn fadeIn row justify-center">
                                 <div v-for="course in courses.edges" :key="course.node.id" class="col-lg-3 col-md-5 col-sm-5 col-xs-12">
                                     <course-card
-                                        class="hvr-grow"
                                         :course="course.node"
                                         :name="course.node.title"
                                         instructor="مركز دكتور صبري ابو قرون"

@@ -214,6 +214,7 @@ export default {
     methods: {
         ...mapActions('authentication', ['logOutAction']),
         ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction', 'setActiveNavAction']),
+        ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction']),
 
         MAKE_ACTIVE (e) {
             let active_nav = this.$jquery(e.target).parent().closest('a')
@@ -229,6 +230,8 @@ export default {
         },
 
         logTheUserOut() {
+            //TODO: Empty the shopping cart
+            this.deleteShoppinCartDataListAction()
             //TODO: redirect the user to the home page
             this.$router.push({ name: "Home" });
             this.logOutAction();

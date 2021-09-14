@@ -71,7 +71,7 @@ export default {
             visible: false,
         }
     },
-
+ 
     async created () {
         //TODO: Get my personal data
        const res = await this.$apollo.query({ 
@@ -177,8 +177,9 @@ export default {
                         this.errorHandler(errors);
                     }
                 } else {
+                    this.visible = false
                     this.$q.notify({
-                        type: "positive",
+                        type: "negative",
                         multiLine: true,
                         progress: true,
                         message: "يجب ان تكمل بياناتك لكي نستطيع التواصل معك"

@@ -71,7 +71,7 @@ export default {
         ...mapState("authentication", ["user"])
     },
 
-
+ 
     methods: {
         ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction']),
 

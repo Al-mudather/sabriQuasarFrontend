@@ -90,6 +90,7 @@
 import { mapState } from 'vuex'
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
+import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
 import bankakPayment from 'src/components/ShoppingCard/bankakPay'
 
@@ -110,8 +111,40 @@ export default {
     'paypal-payment': paypalPayment,
     'bankak-payment': bankakPayment
   },
+ 
+  async mounted () {
+    //TODO: If the user don't completed his profile data send him to the user info page
+    const res = await this.$apollo.query({ 
+            query: GetMyProfileData
+        })
 
-  mounted () {
+    if (res.data.me.pk) {
+        //TODO: IF the data exists go to payment page
+        if (res.data.me.fullName && (res.data.me.phoneNumber2 || res.data.me.phoneNumber3) ) {
+        } else {
+            this.$q.notify({
+                type: 'negative',
+                progress: true,
+                multiLine: true,
+                position: 'top',
+                message: "يجب ان تكمل بياناتك الشخصيه"
+            })
+            this.$router.push({ name: 'user-info' })
+        }
+    }
+
+    //TODO: IF the shopping cart empty redirect the user to the home page
+    if (this.shoppingCartDataList.length == 0) {
+        this.$q.notify({
+            type: 'negative',
+            progress: true,
+            multiLine: true,
+            position: 'top',
+            message: "لا يمكنك شراء لا شيء"
+        })
+        this.$router.push({ name: 'Home' })
+    }
+
     this.$root.$emit('activateShoppingProgress', 'paymentData')
     
     const shoopingProccess = ['cartCourses', 'loginCart', 'paymentData']
@@ -127,6 +160,7 @@ export default {
             
         }
     })
+
   },
 
   computed: {

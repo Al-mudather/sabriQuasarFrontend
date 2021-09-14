@@ -170,12 +170,15 @@ export default {
     methods: {
         ...mapActions('authentication', ['logOutAction']),
         ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction']),
+        ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction']),
 
         changeMenuState () {
             this.setOpenMenuAction(true)
         }, 
 
         LOG_USER_OUT () {
+            //TODO: Empty the shopping cart
+            this.deleteShoppinCartDataListAction()
             //TODO: redirect the user to the home page
             this.logOutAction()
             this.$apollo.provider.defaultClient.resetStore()

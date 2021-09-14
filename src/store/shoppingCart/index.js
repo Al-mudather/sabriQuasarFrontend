@@ -16,10 +16,10 @@ const mutations = {
   },
 
   deleteShoppinCartDataList (state) {
-    // TODO: Delete the shopping cart
-    state.shoppingCartDataList = []
-    LocalStorage.set('shoppingCartList', state.shoppingCartDataList)
+    // LocalStorage.set('shoppingCartList', state.shoppingCartDataList)
+    LocalStorage.set('shoppingCartList', [])
     // TODO: Delete the order
+    state.shoppingCartDataList = []
     state.checkoutOrderID = null
     // TODO: Delete the order from the localstorage
     LocalStorage.set('orderID', null)

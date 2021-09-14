@@ -153,7 +153,6 @@
                                                 leave-active-class="animated fadeOut"
                                               > 
                                                   <course-card
-                                                    class="hvr-grow"
                                                     :course="course.node"
                                                     :name="course.node.title"
                                                     instructor="مركز دكتور صبري ابو قرون"
