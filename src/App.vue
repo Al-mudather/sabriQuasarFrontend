@@ -5,6 +5,7 @@
 </template>
 <script>
 import { mapActions, mapState, mapGetters } from "vuex";
+import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { LocalStorage } from 'quasar'
 import {WOW} from 'wowjs'
 import 'animate.css'
@@ -126,12 +127,31 @@ export default {
            });
         }
     },
-    mounted () {
+    async mounted () {
         let options={
             //Default is true
             live:false
         }
         new WOW(options)
+
+        const res = await this.$apollo.query({ 
+            query: GetMyProfileData
+        })
+
+        if (res.data.me.pk) {
+            //TODO: IF the data exists go to payment page
+            if (res.data.me.fullName && (res.data.me.phoneNumber2 || res.data.me.phoneNumber3) ) {
+            } else {
+                this.$q.notify({
+                    type: 'negative',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: "عندما تقوم باكمال بياناتك الشخصيه, ستسهل لنا عملية الوصول اليك وحل جميع مشاكلك باسرع ما يمكن"
+                })
+                this.$router.push({ name: 'user-profile' })
+            }
+        }
     },
 };
 </script>

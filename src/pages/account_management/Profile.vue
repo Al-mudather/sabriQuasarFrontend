@@ -25,7 +25,7 @@
                 <div class="titel">
                   <img src="~assets/img/tit.png" alt="" />
                   <h3>{{$t('بياناتــي')}}</h3>
-                </div>
+                </div> 
                 <form>
                   <div class="row">
                     <div class="col-lg-6 col-xs-12">
@@ -46,16 +46,21 @@
                       </div>
                       <div class="inp">
                         <img src="~assets/img/usser.png" alt="" />
-                        <input
-                          v-model="fullName"
-                          type="text"
-                          :placeholder="$t('الاسم الحقيقي')"
+                        <q-input
+                            rounded
+                            outlined
+                            v-model="fullName"
+                            hint="Enter your Name in english"
+                            :label="$t('الاسم الحقيقي')"
+                            :rules="[
+                                val => !!val || '* Required',
+                            ]"
                         />
                       </div>
                     </div>
                     <div class="col-lg-6 col-xs-12">
                       <div class="inp">
-                        <img src="~assets/img/gmail.png" alt="" />
+                        <!-- <img src="~assets/img/gmail.png" alt="" /> -->
                         <input
                           v-model="email"
                           type="email"
@@ -66,8 +71,26 @@
                     </div>
                     <div class="col-lg-12 col-xs-12">
                       <div class="inp">
-                        <img src="~assets/img/phone-call.png" alt="" />
-                        <input type="text" v-model="phoneNumber" :placeholder="$t('رقم الهاتف')" />
+                        <!-- <img src="~assets/img/phone-call.png" alt="" /> -->
+                        <q-input
+                            rounded
+                            outlined
+                            :label="whatsAppLabel"
+                            :hint="$t('ادخل ارقام فقط')"
+                            mask="################"
+                            v-model="whatsAppNumber"
+                        />
+                      </div>
+                      <div class="inp">
+                        <!-- <img src="~assets/img/phone-call.png" alt="" /> -->
+                         <q-input
+                            rounded 
+                            outlined 
+                            v-model="telegramNumber" 
+                            :hint="$t('ادخل ارقام فقط')"
+                            :label="telegramLabel"
+                            mask="################"
+                        />
                       </div>
                     </div>
                     <div class="type">
@@ -96,7 +119,7 @@
                 <!-- 
                   Start of Passowrd Rest
                 -->
-                <Password-Reset-Profile />
+                <!-- <Password-Reset-Profile /> -->
                 <!-- 
                   End of Passowrd Rest
                 -->
@@ -111,7 +134,7 @@
 </template>
 
 <script>
-import PasswordResetProfile from 'src/components/Profile_managements/PasswordResetProfile.vue'
+// import PasswordResetProfile from 'src/components/Profile_managements/PasswordResetProfile.vue'
 
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { UpdateUserProfile } from "src/queries/account_management/mutation/UpdateUserProfile";
@@ -125,6 +148,10 @@ export default {
       visible: false,
       fullName: "",
       phoneNumber: "",
+      whatsAppNumber: null,
+      whatsAppLabel: this.$t('رقم الواتساب اذا وجد'),
+      telegramLabel: this.$t('رقم التلجرام اذا وجد'),
+      telegramNumber: null,
       email: "",
       gender: '',
       myAffiliateLink: "",
@@ -132,9 +159,9 @@ export default {
       genderOptions: ['male', 'female', 'not_set']
     }
   },
-  components: {
-    'Password-Reset-Profile': PasswordResetProfile
-  },
+  // components: {
+  //   'Password-Reset-Profile': PasswordResetProfile
+  // },
 
   apollo: {
     me: {
@@ -149,7 +176,8 @@ export default {
       this.email = value.email;
       this.fullName = value.fullName;
       this.gender = value.gender;
-      this.phoneNumber = value.phoneNumber;
+      this.whatsAppNumber = value.phoneNumber2;
+      this.telegramNumber = value.phoneNumber3;
       
       if (value.gender === "MALE") {
         document.querySelector('[data-gender="female"]').classList.remove("active");
@@ -203,7 +231,8 @@ export default {
             mutation: UpdateUserProfile,
             variables: {
               fullName: this.fullName,
-              phoneNumber: this.phoneNumber,
+              phoneNumber2: this.whatsAppNumber,
+              phoneNumber3: this.telegramNumber,
               gender: this.gender
             },
             refetchQueries: [{
@@ -216,8 +245,9 @@ export default {
                 type: "positive",
                 multiLine: true,
                 progress: true,
-                message: "Profile wase updated"
+                message: this.$t('تم تحديث بياناتك بنجاح')
               })
+              this.$router.push({ name: 'Home' })
             } else if (result.data.updateAccount.errors) {
               this.errorHandler(result.data.updateAccount.errors);
             }
