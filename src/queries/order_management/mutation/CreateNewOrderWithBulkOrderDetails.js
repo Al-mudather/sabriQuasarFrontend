@@ -6,17 +6,9 @@ mutation CreateNewOrderWithBulkOrderDetails($courseIds: [Int!]!){
     success,
     errors,
     order {
-        pk
+      pk
     }
-    orderDetails {
-        edges {
-            node {
-                
-                pk
-                
-            }
-        }
-    }
+
   }
 }
 `

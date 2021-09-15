@@ -56,6 +56,7 @@ export default {
     ...mapState('learningProgress',['enrollmentId']),
     formatTitle () {
       const title = JSON.parse(this.content.modelValue)
+
       if (this.content.modelName === 'ContentFile') {
         return title.attachment.split('/attachment/')[1]
       }
@@ -79,6 +80,21 @@ export default {
       'setContentListsAction',
       'setCourseFilesAction'
     ]),
+
+    // FORMAT_TITLE () {
+    //   const title = JSON.parse(this.content.modelValue)
+    //   console.log(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
+    //   console.log(this.content.modelName)
+    //   console.log(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
+    //   if (this.content.modelName === 'ContentFile') {
+    //     console.log(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
+    //     console.log(this.content.modelName)
+    //     console.log(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
+    //     // return title.attachment.split('/attachment/')[1]
+    //   } else {
+    //     return title.title
+    //   }
+    // },
 
     changeThecourseContent () {
       // TODO: Get the current selected content

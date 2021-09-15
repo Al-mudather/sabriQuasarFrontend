@@ -47,6 +47,7 @@
                                             :key="content.node.id"
                                             clickable
                                             v-ripple
+                                            v-show="content.node.modelName === 'ContentVideo'"
                                         >
                                             <classContentItem
                                                 :content="content.node"
@@ -544,6 +545,13 @@ export default {
 </script>
 
 <style lang="scss">
+
+.hideItem {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+}
 
 .hide-controls {
     display: none;
