@@ -123,14 +123,19 @@ export default {
                 
             } catch (error) {
                 this.visible = false
-                this.$q.notify({
-                    type: 'warning',
-                    progress: true,
-                    multiLine: true,
-                    position: 'top',
-                    // message: error.message,
-                    message: "هناك خطأ في قبول الاشعار, يرجى مراجعة المركز"
-                })
+                if ( error.message == 'User already has valid enrollment in the course ..') {
+                    // console.log('llllllllllllllllllllll')
+                    // console.log(error.message)
+                    // console.log('llllllllllllllllllllll')
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        // message: error.message,
+                        message: "لديك اشتراك مسبق في احد الكورسات اللتي قمت بشرائها, الرجاء قم بشراء كورس لم تمتلكه من قبل"
+                    })
+                }
                 
             }
 
