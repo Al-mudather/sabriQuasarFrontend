@@ -44,8 +44,9 @@ const mutations = {
   },
 
   updateShoppingCartDataList (state, value) {
-    // TODO: If the course is not exists in the cart, add it
+    // TODO: If the cart empty add the course to is
     if (state.shoppingCartDataList.length > 0) {
+      //TODO: Is this course exists in the basket
       const res = state.shoppingCartDataList.filter(item => {
         if (item.course.id === value.course.id) {
           return item
@@ -53,17 +54,29 @@ const mutations = {
       })
 
       if (res.length === 0) {
-        state.shoppingCartDataList.push(value)
-        LocalStorage.set('shoppingCartList', state.shoppingCartDataList)
-      } else {
         Notify.create({
           type: 'warning',
           progress: true,
           multiLine: true,
           position: 'top',
-          message: 'هذا الكورس موجود مسبقا في السله'
+          message: 'لديك طلب مسبق في السله, قم باكماله او افراغ السله من اجل طلب جديد'
         })
+      } else {
       }
+
+      // //TODO: if no add it, if yes refuse to add it
+      // if (res.length === 0) {
+      //   state.shoppingCartDataList.push(value)
+      //   LocalStorage.set('shoppingCartList', state.shoppingCartDataList)
+      // } else {
+      //   Notify.create({
+      //     type: 'warning',
+      //     progress: true,
+      //     multiLine: true,
+      //     position: 'top',
+      //     message: 'هذا الكورس موجود مسبقا في السله'
+      //   })
+      // }
     } else {
       state.shoppingCartDataList.push(value)
       LocalStorage.set('shoppingCartList', state.shoppingCartDataList)

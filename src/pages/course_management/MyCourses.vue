@@ -3,13 +3,6 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="titel titel2">
-                        <img src="~assets/img/tit.png" alt="">
-                        <h3>{{$t('لوحتي التعليمية')}}</h3>
-                    </div>
-
-                    <afilliateBord />
-
                     <div class="titel">
                         <img src="~assets/img/tit.png" alt="">
                         <h3>{{$t('كورساتـي')}}</h3>
@@ -86,9 +79,8 @@
     </section>
 </template>
 
-<script>
-import courseCard from 'src/components/MyCourses/courseCard'
-import afilliateBord from 'src/components/MyCourses/afilliateBord.vue'
+<script> 
+import courseCard from 'src/components/MyCourses/courseCard.vue'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { mapActions } from "vuex"
 
@@ -102,8 +94,7 @@ export default {
     },
 
 	components: {
-		courseCard,
-        afilliateBord
+		courseCard
 	},
 
     apollo: {

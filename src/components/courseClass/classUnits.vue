@@ -63,6 +63,12 @@
             </div>
         </div>
         <div class="col-lg-8 col-xs-12">
+            <!-- <div style="padding-top:56.25%;position:relative;">
+            <iframe src="https://player.vdocipher.com/playerAssets/1.x/vdo/embed/index.html#otp=20160313versUSE323ki2XFnmmzAwxxVxW3cJqivFXAvCSaIgvdgMOrpne9r6z4K&playbackInfo=eyJ2aWRlb0lkIjoiNTRkZWI0MmQ1ZGQ0NDk5NzlkMWJlNTY1NTg4MjExYjQifQ==" style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%;" allowFullScreen="true" allow="encrypted-media"></iframe>
+            </div> -->
+            <!-- <div ref="embedBox" v-html="VideoData">
+
+            </div> -->
             <q-skeleton
                 v-if="lodash.isEmpty(currentContent)"
                 height="500px"
@@ -76,7 +82,7 @@
                     v-if="!lodash.isEmpty(currentContent)"
                     disable="1"
                 >
-                    <q-video
+                    <!-- <q-video
                         :ratio="13 / 11"
                         ref="videoPlayer"
                         controls = "false"
@@ -86,10 +92,20 @@
                         @onPlay="START_LEARNING_UNIT_TRAKING"
                         @ended="END_LEARNING_UNIT_TRAKING"
                         :src="viomURL"
+                    /> -->
+                    <q-video
+                        :ratio="13 / 11"
+                        ref="videoPlayer"
+                        controls = "false"
+                        id="video"
+                        @playing="START_LEARNING_UNIT_TRAKING"
+                        @loaded="PLAYER_IS_LOADED"
+                        @onPlay="START_LEARNING_UNIT_TRAKING"
+                        @ended="END_LEARNING_UNIT_TRAKING"
+                        allow="encrypted-media"
+                        :src="viomURL"
                     />
-                    <!-- <div style="padding-top:56.25%;position:relative;">
-<iframe src="https://player.vdocipher.com/playerAssets/1.x/vdo/embed/index.html#otp=20160313versUSE323piDdqSaja8Z6Y7YGqNWg5OYgsb1EOehSjzNHTYmugCHshw&playbackInfo=eyJ2aWRlb0lkIjoiZWNkMGVmMjYzYjJiNDQxMGFmYTdjNWIwMjI5ODI5MjYifQ==" style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%;" allowFullScreen="true" allow="encrypted-media"></iframe>
-</div> -->
+                    
  
                     <!-- <video
                         id="my-video"
@@ -192,8 +208,8 @@
         </div>
     </div>
 </template>
-<script src="../../../node_modules/video.js/dist/video.min.js"></script> 
-<script src="../dist/Vimeo.min.js"></script> 
+<script src="https://player.vdocipher.com/playerAssets/1.6.10/vdo.js"></script>
+
 <script>
 
 import { StartLearningUnit } from 'src/queries/learning_management/mutation/StartLearningUnit';
@@ -218,6 +234,7 @@ export default {
             vimoID: '',
             viomURL: '',
             VideoPlayer: '',
+            VideoData: '',
             startLearningTrackingID: '',
             courseEnrollment: '',
             hasNextContent: true,
@@ -263,6 +280,11 @@ export default {
             // console.log('???????????????????????')
 
             this.viomURL = this.GET_VIMO_VIDEO_URL(value.modelValue)
+
+            // this.VideoData = JSON.parse(value.modelValue).video;
+            // console.log('llllllllllllllllllllllllllll')
+            // console.log(this.VideoData)
+            // console.log('llllllllllllllllllllllllllll')
 
             // const player = new playerjs.Player(iframe)
             // //TODO: Play the video
@@ -313,6 +335,34 @@ export default {
             }
         }
     },
+
+    // mounted () {
+
+    //     try {
+    //         const video = new VdoPlayer({
+    //             container: this.$refs['videoPlayer'],
+    //         });
+
+    //         console.log('????????????????')
+    //         console.log(video)
+    //         console.log('????????????????')
+
+    //         // you can directly call any methods of VdoPlayer class from here. e.g:// 
+    //         // video.addEventListener('load', () => {
+    //         //     video.play(); 
+    //         //     // this will auto-start the video//
+    //         //     console.log('????????????????')
+    //         //     console.log('loaded');//
+    //         //     console.log('????????????????') 
+    //         // });
+    //     } catch (error) {
+    //         console.log('eeeeeeeeeeeeeeeeeeeeeeeee')
+    //         console.log(error);//
+    //         console.log('eeeeeeeeeeeeeeeeeeeeeeeee')
+            
+    //     }
+        
+    // },
 
     updated() {
         

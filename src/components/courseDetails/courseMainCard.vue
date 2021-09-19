@@ -79,14 +79,9 @@
         </svg>
         <div class="pric">
           <h3>{{FORMAT_COUSRE_PRICE(JSON.parse(courseData.currency)[currency], 3) }}<span>{{currency}}</span></h3>
-          <button @click="AddTheCourseToTheBasket">{{$t('أمتلك الأن')}}</button>
+          <button v-if="openCourse" @click="GO_TO_THE_COURSE_LEARNING_CLASS">{{$t('الى الدرس')}}</button>
+          <button v-else @click="AddTheCourseToTheBasket">{{$t('أمتلك الأن')}}</button>
         </div>
-        <!-- <img
-          class="share"
-          src="~assets/img/share.png"
-          alt=""
-        />
-        <img class="addCou" src="~assets/img/addCou.png" alt="" /> -->
       </div>
 
     </div>
@@ -102,7 +97,7 @@ export default {
     return {
     };
   },
-  props: ["courseData", "affilitateLink"],
+  props: ["courseData", 'openCourse'],
 
   computed: {
     ...mapState("authentication", ["user"]),
@@ -144,6 +139,10 @@ export default {
   methods: {
     ...mapActions("shoppingCart", ["setShoppingCartDataListAction"]),
 
+    GO_TO_THE_COURSE_LEARNING_CLASS () {
+      this.$router.push({ name: 'course-class', params: { pk: this.$route.params.pk, id: this.$route.params.id }, query:{ tab: 'tutorial' } })
+    },
+
     FORMAT_COUSRE_PRICE(num, digits) {
       const lookup = [
         { value: 1, symbol: "" },
@@ -171,14 +170,6 @@ export default {
       let data = {
         user: this.user,
         course: this.courseData
-      }
-
-      //TODO: Add the affilitate link to the course basket
-      if (this.affilitateLink) {
-        data = {
-          ...data,
-          link: this.affilitateLink
-        }
       }
 
       this.setShoppingCartDataListAction(data);

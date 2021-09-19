@@ -1,4 +1,4 @@
-<template>
+<template> 
     <section class="courceDetails">
         <div class="container">
             <div class="row">
@@ -10,7 +10,7 @@
                     </div>
                 </div>
                 <div class="col-lg-4">
-                    <courseMainCard :courseData="courseData" :affilitateLink="affilitateLink" /> 
+                    <courseMainCard :courseData="courseData" :openCourse="openCourse" /> 
                 </div>
                 <div class="col-lg-8">
                     <div class="detailes">
@@ -41,13 +41,14 @@
 
 <script>
 import relatedCoureses from 'src/components/courseDetails/relatedCoureses'
-import courseMainCard from 'components/courseDetails/courseMainCard'
+import courseMainCard from 'components/courseDetails/courseMainCard.vue'
 import aboutTheCourse from 'components/courseDetails/aboutTheCourse'
 import whatIwillLearn from 'components/courseDetails/whatIwillLearn.vue'
 import coursePreRequisites from 'components/courseDetails/coursePreRequisites'
 import courseUnits from 'components/courseDetails/courseUnits.vue'
 import courseInstructors from 'components/courseDetails/courseInstructors'
 import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
+import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { mapState } from 'vuex'
 
 export default {
@@ -56,7 +57,7 @@ export default {
     return {
       courseID: '',
       coursePK: '',
-      affilitateLink: '',
+      openCourse: false,
       courseData: ''
     }
   },
@@ -85,8 +86,12 @@ export default {
       handler: async function (params) {
         this.courseID = params.id
         this.coursePK = params.pk
-        // TODO: Get the affilite link if exisist
-        this.affilitateLink = this.$_.get(params,'[link]')
+        
+        //TODO: Don't open the course yet
+        this.openCourse = false
+        // TODO: IS THE USER HAS VALED INROLLMENT IN THIS COURSE
+        this.IS_THE_USER_HAS_VALED_INROLLMENT_IN_THIS_COURSE(params.pk)
+        // TODO: GET THE COURSE BY PK
         const res = await this.$apollo.query({
           query: GetCourseByID,
           variables: {
@@ -101,6 +106,22 @@ export default {
     }
   },
   methods: {
+
+    async IS_THE_USER_HAS_VALED_INROLLMENT_IN_THIS_COURSE (coursePK) {
+        try {
+            const res = await this.$apollo.query({
+                query: AllEnrollmentsForCurrentUser,
+            })
+
+            res.data.allEnrollmentsForCurrentUser.edges.map(enroll => {
+                if (enroll.node.course.pk == coursePK) {
+                    this.openCourse = true
+                }
+            })
+        } catch (error) {
+        }
+    },
+    
     changeTheLayoutStyle(value) {
         if (value) {
             this.$jquery('.hedd > .point > img').css({

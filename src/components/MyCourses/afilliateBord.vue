@@ -13,7 +13,7 @@
                       </q-inner-loading>
                     </div>
                     <div class="avvil" v-else>
-                        <h3>{{$t('هيـا لنقم بإنشاء رابطك الخاص ومشاركتة مع الاصدقاء لتربح مع كل إنضمام مبلغ مالي ')}}</h3>
+                        <h3>{{$t('هل تريد ان تكون ضمن عائلة مسوقي المنصه التعليميه, اذا نعم قم بالضغط على طلب الإنضمام الان')}}</h3>
                         <button @click="JOIN_THE_PYRAMID_PROGRAM">{{$t('طلب إنضمام')}}</button>
                         <q-inner-loading :showing="visible">
                           <q-spinner-hourglass color="primary" size="70px" />
