@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
@@ -100,6 +100,7 @@ export default {
     return {
         enableSudaniesBank: false,
         enableBankakPayment: false,
+        totalFees: 0,
         visible: false,
         errorMessages: [],
         card: '',
@@ -134,6 +135,7 @@ export default {
     }
 
     //TODO: IF the shopping cart empty redirect the user to the home page
+    this.WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT()
     if (this.shoppingCartDataList.length == 0) {
         this.$q.notify({
             type: 'negative',
@@ -169,6 +171,38 @@ export default {
   },
 
   methods: {
+      ...mapActions('shoppingCart', [
+        'setShoppinCartDataListAction',
+        ]),
+
+        WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT () {
+            const re = this.shoppingCartDataList.map(item => {
+                if (parseInt(item.course.courseFee) == 0) {
+                    //TODO: delete the course from the cart
+                    this.removeCourseFromCart(item)
+                    //TODO: notify the user
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        message: "السله فارغه"
+                    })
+                }
+            })
+        },
+
+        removeCourseFromCart (item) {
+            // You don't allowed to change the data from the store directlly
+            const data = this.shoppingCartDataList
+            // TODO: remove the selected course
+            this.lodash.remove(data, element => {
+                return element.course.id === item.course.id
+            })
+
+            this.setShoppinCartDataListAction(data)
+        },
+
         errorHandler(errorsObj) {
             for (const key in errorsObj) {
                 for (const val of errorsObj[key]) {

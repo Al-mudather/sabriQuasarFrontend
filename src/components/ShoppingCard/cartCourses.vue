@@ -29,7 +29,7 @@
             <div class="price">
                 <h2>{{$t('المجمــوع')}}</h2>
                 <!-- <h3>{{ calculateTheTotalFees }}<span>{{currency}}</span></h3> -->
-                <h3>{{ FORMAT_COUSRE_PRICE(calculateTheTotalFees, 3) }}<span>{{currency}}</span></h3>
+                <h3>{{ FORMAT_COUSRE_PRICE(calculateTheTotalFees(), 3) }}<span>{{currency}}</span></h3>
             </div>
             <div class="next" @click="goToAuthenticationCartPage">
                 <a class="">
@@ -82,15 +82,10 @@ export default {
   computed: {
     ...mapState('shoppingCart', ['shoppingCartDataList']),
     ...mapState('settings',['isEnglish', 'currency']),
+  },
 
-    calculateTheTotalFees () {
-      let totalFees = 0.0
-      for (const item of this.shoppingCartDataList) {
-        totalFees = totalFees + parseFloat(JSON.parse(item.course.currency)[this.currency])
-      }
-      this.setTotalPaymentFeesAction(totalFees)
-      return totalFees
-    }
+  mounted () {
+    this.WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT()
   },
 
   methods: {
@@ -99,6 +94,32 @@ export default {
       'setShoppinCartDataListAction',
       'setTotalPaymentFeesAction'
     ]),
+
+    WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT () {
+      const re = this.shoppingCartDataList.map(item => {
+        if (parseInt(item.course.courseFee) == 0) {
+          //TODO: delete the course from the cart
+          this.removeCourseFromCart(item)
+          //TODO: notify the user
+          this.$q.notify({
+            type: 'warning',
+            progress: true,
+            multiLine: true,
+            position: 'top',
+            message: "السله فارغه"
+          })
+        }
+      })
+    },
+
+    calculateTheTotalFees () {
+      let sum = 0.0
+      for (const item of this.shoppingCartDataList) {
+        sum = sum + parseFloat(JSON.parse(item.course.currency)[this.currency])
+      }
+      this.setTotalPaymentFeesAction(sum)
+      return sum
+    },
 
     FORMAT_COUSRE_PRICE(num, digits) {
       const lookup = [
@@ -132,7 +153,7 @@ export default {
           multiLine: true,
           position: 'top',
           message: "Please fill the basket first"
-      })
+        })
       }
     },
 
