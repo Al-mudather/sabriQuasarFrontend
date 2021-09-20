@@ -1,9 +1,7 @@
 // colaps
 var cardHeader = document.querySelectorAll('.card .card-header .dowUp a')
 var num = cardHeader.length
-console.log('GGGGGGGGGGGGGGGGGGGGGG')
-console.log(cardHeader)
-console.log('GGGGGGGGGGGGGGGGGGGGGG')
+
 // console.log(cardHeader[0])
 for (var i = 0; i < num; i++) {
   cardHeader[i].addEventListener('click', function () {

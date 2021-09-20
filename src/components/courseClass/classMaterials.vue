@@ -76,9 +76,9 @@ export default {
     ...mapActions('courseManagement', [
       'setDeleteCourseFilesArrayAction',
     ]),
-
+ 
     downloadFile (fileURL) {
-      openURL('http://localhost:8000' + fileURL)
+      openURL(location.origin + fileURL)
     },
 
     formatTitle (file) {

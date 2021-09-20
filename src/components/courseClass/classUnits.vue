@@ -22,6 +22,7 @@
                         >
                             <q-expansion-item
                                 header-class="text-white"
+                                default-opened
                                 class="card"
                                 ref="card"
                                 v-for="unit in allCourseUnits.edges"
@@ -69,12 +70,15 @@
             <!-- <div ref="embedBox" v-html="VideoData">
 
             </div> -->
+            <div class="text-h4 q-mb-sm text-center">
+                {{VideoTitle}}
+            </div>
             <q-skeleton
-                v-if="lodash.isEmpty(currentContent)"
+                v-if="!videoLoaded"
                 height="500px"
                 square
             />
-            <div v-else class="vedio">
+            <div v-show="videoLoaded" class="vedio">
                 <!-- <q-inner-loading :showing="visible">
                     <q-spinner-gears size="10vh" color="primary" />
                 </q-inner-loading> -->
@@ -208,7 +212,6 @@
         </div>
     </div>
 </template>
-<script src="https://player.vdocipher.com/playerAssets/1.6.10/vdo.js"></script>
 
 <script>
 
@@ -218,7 +221,7 @@ import { GetAllLearningProgressByCourse } from 'src/queries/learning_management/
 // import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID';
 
 import skeletonList from 'src/components/skeleton/skeletonList';
-import contentHeader from 'components/utils/contentHeader';
+import contentHeader from 'components/utils/contentHeader.vue';
 import classContentItem from 'components/courseClass/classContentItem';
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID';
 import { mapState, mapActions } from 'vuex';
@@ -230,8 +233,10 @@ export default {
         return {
             counter: 0,
             isOpen: false,
+            videoLoaded: false,
             visible: true,
             vimoID: '',
+            VideoTitle: '',
             viomURL: '',
             VideoPlayer: '',
             VideoData: '',
@@ -261,9 +266,6 @@ export default {
         ...mapState('learningProgress', ['enrollmentId']),
     },
 
-    created() {
-    },
-
     beforeDestroy() {
         // TODO: If the learning tracker is started, end it
         this.END_LEARNING_UNIT_TRAKING();
@@ -274,6 +276,10 @@ export default {
     watch: {
 
         currentContent(value) {
+
+            //TODO: Show waiting point
+            this.videoLoaded = false
+            this.VideoTitle = JSON.parse(value.modelValue).title
             // const el = this.$refs.videoPlayer
             // console.log('???????????????????????')
             // console.log(el)
@@ -336,16 +342,38 @@ export default {
         }
     },
 
+    // created () {
+        
+    //     this.$jquery( document ).ready( () => {
+    //         const video = this.$refs['videoPlayer']
+    //         const child = video.$el.firstChild
+    //         console.log('????????????????')
+    //         console.log(child)
+    //         console.log('????????????????')
+    //         child.addEventListener('load', () => {
+    //             console.log('????????????????')
+    //             console.log('looooooooooooooaded')
+    //             console.log('????????????????')
+
+    //         })
+
+    //     } )
+    // },
+
     // mounted () {
 
     //     try {
-    //         const video = new VdoPlayer({
-    //             container: this.$refs['videoPlayer'],
-    //         });
+    //         window.addEventListener('DOMContentLoaded' ,(event) => {
+    //             const video = this.$refs['videoPlayer']
+    //             console.log('????????????????')
+    //             console.log(video)
+    //             console.log('????????????????')
 
-    //         console.log('????????????????')
-    //         console.log(video)
-    //         console.log('????????????????')
+    //         })
+    //         // const video = new VdoPlayer({
+    //         //     container: this.$refs['videoPlayer'],
+    //         // });
+
 
     //         // you can directly call any methods of VdoPlayer class from here. e.g:// 
     //         // video.addEventListener('load', () => {
@@ -365,6 +393,16 @@ export default {
     // },
 
     updated() {
+
+        const video = this.$refs['videoPlayer']
+        const child = video.$el.firstChild
+        console.log('????????????????')
+        console.log(child)
+        console.log('????????????????')
+        child.addEventListener('load', () => {
+            this.videoLoaded = true
+
+        })
         
         if (this.counter === 0) {
             // TODO: When the page is updated, select the first content and activate it

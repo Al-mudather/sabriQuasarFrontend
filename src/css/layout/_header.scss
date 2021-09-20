@@ -1,164 +1,3 @@
-/*--- start navbar ---*/
-// .top {
-//     background-color: $mainColor;
-//     width: 100%;
-//     height: auto;
-//     padding: 0 3% 0 3%;
-//     .minlog {
-//         width: 100%;
-//         display: inline-flex;
-//         margin-top: 14px;
-
-//         .menu {
-
-//             img {
-//                 width: auto;
-//                 margin-top: 15px;
-//             }
-//         }
-
-//         .logo {
-//             margin: 0 46px 0px 0;
-
-//             img {
-//                 width: auto;
-//             }
-//         }
-//     }
-
-//     .search {
-//         margin-top: 14px;
-//         padding: 0 13% 0 9%;
-
-//         form {
-//             position: relative;
-
-//             input {
-//                 width: 100%;
-//                 height: 48px;
-//                 padding: 15px;
-//                 font-size: 17px;
-//                 font-family: 'cairoR';
-//                 border-radius: 50px;
-//                 border: 0;
-//                 background-color: #4e78a2;
-//                 color: #fff;
-//                 outline: 0;
-//             }
-//             input::placeholder {
-//                 color: #CECECE !important;
-//                 font-size: 14px;
-//                 font-family: 'cairoR';
-//             }
-
-//             button {
-//                 width: 128px;
-//                 height: 40px;
-//                 color: $textColor;
-//                 position: absolute;
-//                 left: 6px;
-//                 top: 4px;
-//                 font-size: 16px;
-
-//                 img {
-//                     margin-left: 7px;
-//                 }
-//             }
-//         }
-//     }
-
-//     .account {
-//         margin-top: 17px;
-//         text-align: center;
-//         padding: 0 0% 0 14%;
-//         .sign {
-//             height: 41px;
-//             color: #fff;
-//             background-color: #1C508D;
-//             border-radius: 50px;
-//             padding: 8px 16px;
-//             text-align: center;
-//             display: inline-block;
-//             margin-left: 10px;
-//             overflow: hidden;
-
-//             a {
-//                 text-decoration: none;
-//                 font-size: 16px;
-//                 color: #fff;
-
-//                 img {
-//                     margin-left: 0;
-//                 }
-
-//                 h3 {
-//                     display: inline-block;
-//                     font-size: 16px;
-//                     font-family: 'cairoR';
-//                 }
-//             }
-//         }
-
-//         .login {
-//             height: 41px;
-//             color: #926D05;
-//             background-color: $yalloColor;
-//             border-radius: 50px;
-//             padding: 7px 15px;
-//             text-align: center;
-//             display: inline-block;
-//             overflow: hidden;
-
-//             a {
-//                 text-decoration: none;
-//                 font-size: 16px;
-//                 color: #926D05;
-
-//                 img {
-//                     margin-left: 0;
-//                 }
-
-//                 h3 {
-//                     display: inline-block;
-//                     font-size: 16px;
-//                     font-family: 'cairoR';
-//                 }
-//             }
-//         }
-//     }
-
-//     .lang {
-//         margin-top: 17px;
-//         background-color: #215296;
-//         cursor: pointer;
-//         width: 90px;
-//         height: 39px;
-//         border-radius: 50px;
-//         padding: 5px;
-//         overflow: hidden;
-//         text-align: center;
-//         float: left;
-
-//         img {
-//             display: inline-block;
-//             margin-right: 4px;
-//         }
-
-//         h3 {
-//             color: #fff;
-//             font-size: 16px;
-//             font-family: 'cairoR';
-//             display: inline-block;
-//         }
-
-//         .contry {
-//             display: inline-block;
-//         }
-//     }
-// }
-/*--- End navbar ---*/
-
-/*--- Start Header ---*/
 .header {
     position: relative;
     .svgDown {
@@ -166,60 +5,176 @@
         width: 100.2%;
         height: auto;
         left: 1px;
-        top: -40px;
+        top: 0;
     }
     .cn{
+        //maxMobile
+        @media(max-width:767px){
+
+            padding: 0;
+        }
+        //minSmall
+        @media(min-width:768px){
+
+        }
+        //minLarg
+        @media(min-width:1200px){
+
+        }
         position: relative;
         width: 100%;
-        height: 522px;
         overflow: hidden;
-        background-color: $mainColor;
+        //background-color: $mainColor;
         padding:0px 11% 0 0;
-        .swiper-container{
-            overflow: visible !important;
-            position: relative;
-            .swiper-pagination{
-                position: absolute;
-                top: 237px;
-                right: -99px;
-                span{
-                    width: 6.33px !important;
-                    height: 34px !important;
-                    background-color: #7999b9 !important;
-                    opacity: 100%;
-                    margin: 0 0 12px 0;
-                    border-radius: 5px !important;
-                    transition: all 0.3s ease-in !important;
-                }
-                .swiper-pagination-bullet-active{
-                    background-color: #fff !important;
-                    height: 50px !important;
-                    transition: all 0.3s ease-in !important;
-                }
+        .coloor{
+            background-color: $mainColor;
+            width: 100%;
+            height: 82%;
+            position:absolute;
+            top: 0;
+            right: 0;
+            //maxMobile
+            @media(max-width:767px){
+                height: 100%;
+            }
+            //minSmall
+            @media(min-width:768px){
+                height: 100%;
+            }
+            //minLarg
+            @media(min-width:1200px){
+                height: 82%;
             }
         }
-        .showImage{
-            position: relative;
-            margin: 8px 0 0 0;
-            .frame{
+        .toop{
+            position: absolute;
+            top: 0;
+        }
+        .doww{
+            position: absolute;
+            bottom: 0;
+        }
+        .carousel{
+            height: 100%;
+            margin: 77px 0 0 0;
+            .carousel-indicators{
                 position: absolute;
-                left: 0;
-                top: -21px;
-                width: auto;
+                right: 17px !important;
+                margin: 0 !important;
+                bottom: -21px !important;
+                display: block;
+                li{
+                    display: inline-block;
+                    background: #FCC74C !important;
+                    width: 43px;
+                    .active{
+                        width: 60px;
+                    }
+                }
             }
-            .box{
-                width: 513px;
-                height: 536px;
-                overflow: hidden;
-                margin: 0 -11px 0 0;
-                img{
-                    width:100%;
+            .carousel-inner{
+                overflow: unset;
+                .carousel-item{
+                    .itemImg{
+                        position: relative;
+                        margin-bottom: 50px;
+                        height: 370px;
+                        position: relative;
+                        overflow: hidden;
+                        border-radius: 24px;
+                        img{
+                            width: 100%;
+                        }
+                        .doww{
+                            position: absolute;
+                            bottom: 0;
+                        }
+                    }
+                    .allSize{
+                        width: 61%;
+                        //maxMobile
+                        @media(max-width:767px){
+                            width: 100%;
+                        }
+                        //minSmall
+                        @media(min-width:768px){
+                            width: 100%;
+                        }
+                        //minLarg
+                        @media(min-width:1200px){
+                            width: 61%;
+                        }
+                        .hedDet{
+                            h2{
+                                font-size: 20px;
+                                font-family: 'cairoB';
+                                color: #ffff;
+                                margin: 0 0 22px 0;
+                            }
+                            p{
+                                font-size: 16px;
+                                font-family: 'cairoR';
+                                overflow: hidden;
+                                -webkit-line-clamp: 4;
+                                display: -webkit-box;
+                                -webkit-box-orient: vertical;
+                                color: #ffff;
+                                width: 100%;
+                                line-height: 1.7;
+                            }
+                        }
+                        .conta{
+                            margin: 40px 0 10px 0;
+                            .numb{
+                                position: relative;
+                                width: 71px;
+                                text-align: center;
+                                display: inline-block;
+                                margin-left: 21px;
+                                svg{
+                                    position: absolute;
+                                    top: -10px;
+                                    right: -3px;    
+                                    left: 0;
+                                }
+                                h3{
+                                    font-size: 32px;
+                                    font-family: 'cairoB';
+                                    color: #FCC74C;
+                                    margin: 0 0 -10px 0;
+                                }
+                                span{
+                                    font-family: 'cairoB';
+                                    color: #FCC74C;
+                                    font-size: 12px;
+                                }
+                            }
+                        }
+                        button{
+                            background: unset;
+                            box-shadow: unset;
+                            color: #fff;
+                            width: 123px;
+                            float: left;
+                            outline: 0;
+                            position: relative;
+                            transition: all ease-in-out .3s;
+                            &:hover{
+                                color: #FCC74C;
+                            }
+                        }
+
+                    }
                 }
             }
         }
         .content{
             margin: 144px 0 0 0;
             position: relative;
+            //maxMobile
+            @media(max-width:767px){
+                margin: 87px 0 0 0;
+            }
             .point-1{
                 position: absolute;
                 top: -111px;
@@ -238,6 +193,24 @@
                 font-family: 'cairoR';
                 margin: 0 0 30px 0;
                 line-height: 40px;
+                //maxMobile
+                @media(max-width:767px){
+                    font-size: 18px;
+                    line-height: 1.7;
+                }
+                //minSmall
+                @media(min-width:768px){
+                    font-size: 18px;
+                    text-align: center;
+                }
+                //minLarg
+                @media(min-width:1200px){
+                    font-size: 25px;
+                    color: #ffff;
+                    font-family: 'cairoR';
+                    margin: 0 0 30px 0;
+                    line-height: 40px;
+                }
             }
             p{
                 color: #fff;
@@ -245,8 +218,357 @@
                 font-family: 'cairoR';
                 line-height: 1.8;
                 padding: 0 0 0 14%;
+                //maxMobile
+                @media(max-width:767px){
+                    padding: 0;
+                    font-size: 15px;
+                    text-align: center;
+                    width: 100%;
+                }
+                //minSmall
+                @media(min-width:768px){
+                    font-size: 14px;
+                    padding: 0;
+                    text-align: center;
+                }
+                //minLarg
+                @media(min-width:1200px){
+                    color: #fff;
+                    font-size: 18px;
+                    font-family: 'cairoR';
+                    line-height: 1.8;
+                    padding: 0 0 0 14%;
+                }
             }
         }
     }
 }
-/*--- End Header ---*/
+
+
+// /*--- Start Header ---*/
+// .header {
+//     position: relative;
+//     .svgDown {
+//         position: relative;
+//         width: 100.2%;
+//         height: auto;
+//         left: 1px;
+//         top: 0;
+//     }
+//     .cn{
+//         //maxMobile
+//         @media(max-width:767px){
+
+//             padding: 0;
+//         }
+//         //minSmall
+//         @media(min-width:768px){
+
+//         }
+//         //minLarg
+//         @media(min-width:1200px){
+
+//         }
+//         position: relative;
+//         width: 100%;
+//         overflow: hidden;
+//         //background-color: $mainColor;
+//         padding:0px 11% 0 0;
+//         .coloor{
+//             background-color: $mainColor;
+//             width: 100%;
+//             height: 82%;
+//             position:absolute;
+//             top: 0;
+//             right: 0;
+//             //maxMobile
+//             @media(max-width:767px){
+//                 height: 100%;
+//             }
+//             //minSmall
+//             @media(min-width:768px){
+//                 height: 100%;
+//             }
+//             //minLarg
+//             @media(min-width:1200px){
+//                 height: 82%;
+//             }
+//         }
+//         .toop{
+//             position: absolute;
+//             top: 0;
+//         }
+//         .doww{
+//             position: absolute;
+//             bottom: 0;
+//         }
+//         .carousel{
+//             height: 100%;
+//             margin: 77px 0 0 0;
+//             .carousel-indicators{
+//                 position: absolute;
+//                 right: 17px !important;
+//                 margin: 0 !important;
+//                 bottom: -21px !important;
+//                 display: block;
+//                 li{
+//                     display: inline-block;
+//                     background: #FCC74C !important;
+//                     width: 43px;
+//                     .active{
+//                         width: 60px;
+//                     }
+//                 }
+//             }
+//             .carousel-inner{
+//                 overflow: unset;
+//                 .carousel-item{
+//                     .itemImg{
+//                         position: relative;
+//                         margin-bottom: 50px;
+//                         height: 370px;
+//                         position: relative;
+//                         overflow: hidden;
+//                         border-radius: 24px;
+//                         img{
+//                             width: 100%;
+//                         }
+//                         .doww{
+//                             position: absolute;
+//                             bottom: 0;
+//                         }
+//                     }
+//                     .allSize{
+//                         width: 61%;
+//                         //maxMobile
+//                         @media(max-width:767px){
+//                             width: 100%;
+//                         }
+//                         //minSmall
+//                         @media(min-width:768px){
+//                             width: 100%;
+//                         }
+//                         //minLarg
+//                         @media(min-width:1200px){
+//                             width: 61%;
+//                         }
+//                         .hedDet{
+//                             h2{
+//                                 font-size: 20px;
+//                                 font-family: 'cairoB';
+//                                 color: #ffff;
+//                                 margin: 0 0 22px 0;
+//                             }
+//                             p{
+//                                 font-size: 16px;
+//                                 font-family: 'cairoR';
+//                                 overflow: hidden;
+//                                 -webkit-line-clamp: 4;
+//                                 display: -webkit-box;
+//                                 -webkit-box-orient: vertical;
+//                                 color: #ffff;
+//                                 width: 100%;
+//                                 line-height: 1.7;
+//                             }
+//                         }
+//                         .conta{
+//                             margin: 40px 0 10px 0;
+//                             .numb{
+//                                 position: relative;
+//                                 width: 71px;
+//                                 text-align: center;
+//                                 display: inline-block;
+//                                 margin-left: 21px;
+//                                 svg{
+//                                     position: absolute;
+//                                     top: -10px;
+//                                     right: -3px;    
+//                                     left: 0;
+//                                 }
+//                                 h3{
+//                                     font-size: 32px;
+//                                     font-family: 'cairoB';
+//                                     color: #FCC74C;
+//                                     margin: 0 0 -10px 0;
+//                                 }
+//                                 span{
+//                                     font-family: 'cairoB';
+//                                     color: #FCC74C;
+//                                     font-size: 12px;
+//                                 }
+//                             }
+//                         }
+//                         button{
+//                             background: unset;
+//                             box-shadow: unset;
+//                             color: #fff;
+//                             width: 123px;
+//                             float: left;
+//                             outline: 0;
+//                             position: relative;
+//                             transition: all ease-in-out .3s;
+//                             &:hover{
+//                                 color: #FCC74C;
+//                             }
+//                         }
+
+//                     }
+//                 }
+//             }
+//         }
+//         .content{
+//             margin: 144px 0 0 0;
+//             position: relative;
+//             //maxMobile
+//             @media(max-width:767px){
+//                 margin: 87px 0 0 0;
+//             }
+//             .point-1{
+//                 position: absolute;
+//                 top: -111px;
+//                 left: 7px;
+//                 width: auto;
+//             }
+//             .point-2{
+//                 position: absolute;
+//                 top: -22px;
+//                 right: -14px;
+//                 width: auto;
+//             }
+//             h2{
+//                 font-size: 25px;
+//                 color: #ffff;
+//                 font-family: 'cairoR';
+//                 margin: 0 0 30px 0;
+//                 line-height: 40px;
+//                 //maxMobile
+//                 @media(max-width:767px){
+//                     font-size: 18px;
+//                     line-height: 1.7;
+//                 }
+//                 //minSmall
+//                 @media(min-width:768px){
+//                     font-size: 18px;
+//                     text-align: center;
+//                 }
+//                 //minLarg
+//                 @media(min-width:1200px){
+//                     font-size: 25px;
+//                     color: #ffff;
+//                     font-family: 'cairoR';
+//                     margin: 0 0 30px 0;
+//                     line-height: 40px;
+//                 }
+//             }
+//             p{
+//                 color: #fff;
+//                 font-size: 18px;
+//                 font-family: 'cairoR';
+//                 line-height: 1.8;
+//                 padding: 0 0 0 14%;
+//                 //maxMobile
+//                 @media(max-width:767px){
+//                     padding: 0;
+//                     font-size: 15px;
+//                     text-align: center;
+//                     width: 100%;
+//                 }
+//                 //minSmall
+//                 @media(min-width:768px){
+//                     font-size: 14px;
+//                     padding: 0;
+//                     text-align: center;
+//                 }
+//                 //minLarg
+//                 @media(min-width:1200px){
+//                     color: #fff;
+//                     font-size: 18px;
+//                     font-family: 'cairoR';
+//                     line-height: 1.8;
+//                     padding: 0 0 0 14%;
+//                 }
+//             }
+//         }
+//     }
+//     // .cn{
+//     //     position: relative;
+//     //     width: 100%;
+//     //     height: 522px;
+//     //     overflow: hidden;
+//     //     background-color: $mainColor;
+//     //     padding:0px 11% 0 0;
+//     //     .swiper-container{
+//     //         overflow: visible !important;
+//     //         position: relative;
+//     //         .swiper-pagination{
+//     //             position: absolute;
+//     //             top: 237px;
+//     //             right: -99px;
+//     //             span{
+//     //                 width: 6.33px !important;
+//     //                 height: 34px !important;
+//     //                 background-color: #7999b9 !important;
+//     //                 opacity: 100%;
+//     //                 margin: 0 0 12px 0;
+//     //                 border-radius: 5px !important;
+//     //                 transition: all 0.3s ease-in !important;
+//     //             }
+//     //             .swiper-pagination-bullet-active{
+//     //                 background-color: #fff !important;
+//     //                 height: 50px !important;
+//     //                 transition: all 0.3s ease-in !important;
+//     //             }
+//     //         }
+//     //     }
+//     //     .showImage{
+//     //         position: relative;
+//     //         margin: 8px 0 0 0;
+//     //         .frame{
+//     //             position: absolute;
+//     //             left: 0;
+//     //             top: -21px;
+//     //             width: auto;
+//     //         }
+//     //         .box{
+//     //             width: 513px;
+//     //             height: 536px;
+//     //             overflow: hidden;
+//     //             margin: 0 -11px 0 0;
+//     //             img{
+//     //                 width:100%;
+//     //             }
+//     //         }
+//     //     }
+//     //     .content{
+//     //         margin: 144px 0 0 0;
+//     //         position: relative;
+//     //         .point-1{
+//     //             position: absolute;
+//     //             top: -111px;
+//     //             left: 7px;
+//     //             width: auto;
+//     //         }
+//     //         .point-2{
+//     //             position: absolute;
+//     //             top: -22px;
+//     //             right: -14px;
+//     //             width: auto;
+//     //         }
+//     //         h2{
+//     //             font-size: 25px;
+//     //             color: #ffff;
+//     //             font-family: 'cairoR';
+//     //             margin: 0 0 30px 0;
+//     //             line-height: 40px;
+//     //         }
+//     //         p{
+//     //             color: #fff;
+//     //             font-size: 18px;
+//     //             font-family: 'cairoR';
+//     //             line-height: 1.8;
+//     //             padding: 0 0 0 14%;
+//     //         }
+//     //     }
+//     // }
+// }
+// /*--- End Header ---*/

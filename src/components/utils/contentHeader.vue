@@ -10,11 +10,11 @@
                 <div class="linke">
                     <img
                         v-if="plussImage"
-                        src="~assets/img/pluus.png"
+                        src="~assets/img/mins.png"
                         alt="mins"
                     />
                     <img v-if="!plussImage"
-                        src="~assets/img/mins.png"
+                        src="~assets/img/pluus.png"
                         alt="pluss"
                     />
                 </div>
