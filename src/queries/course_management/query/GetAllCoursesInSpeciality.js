@@ -42,7 +42,7 @@ query AllCoursesInSpeciality(
             currency,
             profile,
             cover
-
+            enrolled
           }
 
       }

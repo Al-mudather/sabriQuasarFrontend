@@ -111,6 +111,7 @@
                                       ...searchFilter,
                                       ...orderingFilter
                                     }"
+                                    :skip="!activeSpecialityID"
                                   >
                                     <template v-slot="{ result: { loading, data }, query }">
                                       <!-- Loading -->
@@ -126,7 +127,8 @@
                                         </q-card>
                                       </div>
 
-                                      <div v-else-if="data.allCoursesInSpeciality.edgeCount <= 0" class="no-result apollo">
+                                      <!-- <div v-else-if="data.allCoursesInSpeciality.edgeCount <= 0" class="no-result apollo"> -->
+                                      <div v-else-if="$_.get(data,'[allCoursesInSpeciality][edgeCount]') <= 0" class="no-result apollo">
                                         <div class="row justify-center">
                                           <transition
                                             appear
@@ -146,7 +148,8 @@
                                       <!-- Result -->
                                       <div v-else-if="data" class="result apollo">
                                           <div class="row justify-center">
-                                            <div  v-for="course in data.allCoursesInSpeciality.edges" :key="course.node.id" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                            <!-- data.allCoursesInSpeciality.edges -->
+                                            <div v-for="course in $_.get(data,'[allCoursesInSpeciality][edges]')" :key="course.node.id" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
                                               <transition
                                                 appear
                                                 enter-active-class="animated fadeIn"
@@ -186,7 +189,6 @@ import skeletonChip from 'components/skeleton/skeletonChip'
 import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality.js'
 
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
-import { QSpinnerHourglass } from 'quasar'
 import { mapActions } from 'vuex'
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
 import 'swiper/swiper-bundle.css'
@@ -204,7 +206,7 @@ export default {
       search: '',
       tab: 'main',
       openFilter: true,
-      activeSpecialityID: '',
+      activeSpecialityID: null,
       allCourseSpecialities: '',
       filter: {},
       searchFilter: {},
@@ -232,7 +234,7 @@ export default {
   },
 
   computed: {},
-
+ 
   apollo: {
     allCourseSpecialities: {
       query () {

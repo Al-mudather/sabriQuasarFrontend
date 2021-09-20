@@ -248,6 +248,7 @@ export default {
                 }
 
             } catch (error) {
+                return false
             }
         },
  

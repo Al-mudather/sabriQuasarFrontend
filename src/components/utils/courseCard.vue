@@ -18,7 +18,7 @@
                     <path id="Path_158449" data-name="Path 158449" d="M641.2,606.918H752.779c20.945,0,36.7-15.751,36.7-35.18v-4.957H674.83a25.69,25.69,0,0,0-23.791,16Z" transform="translate(524.077 -407.94)" fill="#667bd1"/>
                   </g>
               </svg>
-              <button v-if="openCourse" @click="GO_TO_THE_COURSE_LEARNING_CLASS">{{$t('الى الدرس')}}</button>
+              <button v-if="course.enrolled" @click="GO_TO_THE_COURSE_LEARNING_CLASS">{{$t('الى الدرس')}}</button>
               <button v-else @click="AddTheCourseToTheBasket"> <img src="~assets/img/add.png" alt=""> إضافة للسلة</button>
           </div> 
         </div>
@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { mapState, mapActions } from 'vuex'
 
 export default {
@@ -55,9 +54,6 @@ export default {
   },
   mounted () {
     this.changeTheLayoutStyle(this.isEnglish)
-
-    // TODO: IS THE USER HAS VALED INROLLMENT IN THIS COURSE
-    this.IS_THE_USER_HAS_VALED_INROLLMENT_IN_THIS_COURSE()
   },
   watch: {
     isEnglish (val) {
@@ -66,21 +62,6 @@ export default {
   },
   methods: {
     ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
-
-    async IS_THE_USER_HAS_VALED_INROLLMENT_IN_THIS_COURSE () {
-      try {
-          const res = await this.$apollo.query({
-            query: AllEnrollmentsForCurrentUser,
-          })
-
-          res.data.allEnrollmentsForCurrentUser.edges.map(enroll => {
-            if (enroll.node.course.pk == this.course.pk) {
-              this.openCourse = true
-            }
-          })
-      } catch (error) {
-    }
-  },
 
     GO_TO_THE_COURSE_LEARNING_CLASS () {
       this.$router.push({ name: 'course-class', params: { pk: this.course.pk, id: this.course.id }, query:{ tab: 'tutorial' } })
