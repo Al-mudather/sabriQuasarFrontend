@@ -54,9 +54,7 @@ export default {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
                 //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
                 const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
-                console.log('llllllllllllllll')
-                console.log(res)
-                console.log('llllllllllllllll')
+
                 if (res) {
                     this.$router.push({ name: "my-courses" })
                 } else {
