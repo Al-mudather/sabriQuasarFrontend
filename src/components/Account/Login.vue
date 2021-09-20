@@ -115,6 +115,7 @@
 import { LoginUserWithEmail } from "src/queries/account_management/mutation/LoginUserWithEmail";
 import { mapActions } from "vuex";
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
+import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 
 import AccountHeader from "src/components/utils/accountHeader";
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication';
@@ -234,11 +235,33 @@ export default {
                 this.visible = false
             }
         },
+        async IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE () {
+            try {
+                const res = await this.$apollo.query({
+                    query: AllEnrollmentsForCurrentUser,
+                })
+
+                if (res.data.allEnrollmentsForCurrentUser.edges.length > 0) {
+                    return true
+                } else {
+                    return false
+                }
+
+            } catch (error) {
+            }
+        },
  
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
-                this.$router.push({ name: 'Home' })
+                //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
+                const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
+
+                if (res) {
+                    this.$router.push({ name: "my-courses" })
+                } else {
+                    this.$router.push({ name: "Home" })
+                }
             } catch (e) {
                 //TODO: IF there is an error, then the user did not join the platform with a registeration code
                 if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {

@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { SocialAuth } from "src/queries/account_management/mutation/CreateSocailAuth";
 import { mapActions } from "vuex";
@@ -30,11 +31,33 @@ export default {
         GoToHomePage() {
             this.$router.push({ name: "Home" });
         },
+
+        async IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE () {
+            try {
+                const res = await this.$apollo.query({
+                    query: AllEnrollmentsForCurrentUser,
+                })
+
+                if (res.data.allEnrollmentsForCurrentUser.edges.length > 0) {
+                    return true
+                } else {
+                    return false
+                }
+
+            } catch (error) {
+            }
+        },
+
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
-
-                this.$router.push({ name: 'Home' })
+                //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
+                const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
+                if (res) {
+                    this.$router.push({ name: "my-courses" })
+                } else {
+                    this.$router.push({ name: "Home" })
+                }
             } catch (e) {
                 if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
                     this.$q.notify({
@@ -56,86 +79,86 @@ export default {
             try {
                 this.visible = true
 
-            const auth_res = await this.$apollo.mutate({
-                    mutation: SocialAuth,
-                    variables: {
-                        provider: provider,
-                        accessToken: accessToken,
-                        email: email
-                    }
-            })
-
-            if (auth_res.data.socialAuth) {
-                this.loginAction(auth_res.data.socialAuth).then(() => {
-                    const userData = auth_res.data.socialAuth
-
-                    //TODO: Set the user currency
-                    try {
-                        const userCur = userData.social.user.userCurrency
-                        if (userCur) {
-                            userCur == 'SDG' ? this.setCurrencyAction('SDG') : this.setCurrencyAction('USD')
+                const auth_res = await this.$apollo.mutate({
+                        mutation: SocialAuth,
+                        variables: {
+                            provider: provider,
+                            accessToken: accessToken,
+                            email: email
                         }
-
-                        //TODO: Set the external user id for notification
-                        let externalUserId = userData.social.user.email; // You will supply the external user id to the OneSignal SDK 
-                        OneSignal.push(function() { 
-                            OneSignal.setExternalUserId(externalUserId); 
-                        });
-                    } catch (error) {
-                    }
-                    if (userData.token) {
-                        this.$q.notify({
-                            type: 'positive',
-                            progress: true,
-                            multiLine: true,
-                            position: 'top',
-                            message: this.$t('تم تسجيل الدخول بنجاح')
-                        })
-                        // TODO: See if the user thas the reqisteration code
-                        this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
-                    }
-                });
-            }
-
-            this.$apollo
-                .mutate({
-                    mutation: SocialAuth,
-                    variables: {
-                        provider: provider,
-                        accessToken: accessToken,
-                        email: email
-                    }
                 })
-                .then(result => {
-                    this.visible = false
-                    if (result.data.socialAuth) {
-                        this.loginAction(result.data.socialAuth).then(() => {
-                            if (result.data.socialAuth.token) {
-                                this.$q.notify({
-                                    type: 'positive',
-                                    progress: true,
-                                    multiLine: true,
-                                    position: 'top',
-                                    message: this.$t('تم تسجيل الدخول بنجاح')
-                                })
-                                // TODO: See if the user thas the reqisteration code
-                                this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
-                                // this.$router.push({ name: 'registeration-code' })
+
+                if (auth_res.data.socialAuth) {
+                    this.loginAction(auth_res.data.socialAuth).then(() => {
+                        const userData = auth_res.data.socialAuth
+
+                        //TODO: Set the user currency
+                        try {
+                            const userCur = userData.social.user.userCurrency
+                            if (userCur) {
+                                userCur == 'SDG' ? this.setCurrencyAction('SDG') : this.setCurrencyAction('USD')
                             }
-                        });
-                    }
-                }).catch((err) => {
-                    this.visible = false
-                    if (err.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {
-                        this.$q.notify({
-                            type: 'warning',
-                            progress: true,
-                            multiLine: true,
-                            position: 'top',
-                            message: this.$t('هذا الحساب مسجل مسبقا')
-                        })
-                    }
-                });
+
+                            //TODO: Set the external user id for notification
+                            let externalUserId = userData.social.user.email; // You will supply the external user id to the OneSignal SDK 
+                            OneSignal.push(function() { 
+                                OneSignal.setExternalUserId(externalUserId); 
+                            });
+                        } catch (error) {
+                        }
+                        if (userData.token) {
+                            this.$q.notify({
+                                type: 'positive',
+                                progress: true,
+                                multiLine: true,
+                                position: 'top',
+                                message: this.$t('تم تسجيل الدخول بنجاح')
+                            })
+                            // TODO: See if the user thas the reqisteration code
+                            this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
+                        }
+                    });
+                }
+
+                // this.$apollo
+                //     .mutate({
+                //         mutation: SocialAuth,
+                //         variables: {
+                //             provider: provider,
+                //             accessToken: accessToken,
+                //             email: email
+                //         }
+                //     })
+                //     .then(result => {
+                //         this.visible = false
+                //         if (result.data.socialAuth) {
+                //             this.loginAction(result.data.socialAuth).then(() => {
+                //                 if (result.data.socialAuth.token) {
+                //                     this.$q.notify({
+                //                         type: 'positive',
+                //                         progress: true,
+                //                         multiLine: true,
+                //                         position: 'top',
+                //                         message: this.$t('تم تسجيل الدخول بنجاح')
+                //                     })
+                //                     // TODO: See if the user thas the reqisteration code
+                //                     this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
+                //                     // this.$router.push({ name: 'registeration-code' })
+                //                 }
+                //             });
+                //         }
+                //     }).catch((err) => {
+                //         this.visible = false
+                //         if (err.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {
+                //             this.$q.notify({
+                //                 type: 'warning',
+                //                 progress: true,
+                //                 multiLine: true,
+                //                 position: 'top',
+                //                 message: this.$t('هذا الحساب مسجل مسبقا')
+                //             })
+                //         }
+                //     });
             } catch (error) {
                 this.visible = false
                 if (error.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {

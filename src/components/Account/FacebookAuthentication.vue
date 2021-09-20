@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { SocialAuth } from "src/queries/account_management/mutation/CreateSocailAuth";
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { mapActions } from "vuex";
@@ -30,10 +31,33 @@ export default {
         GoToHomePage() {
             this.$router.push({ name: "Home" });
         },
+
+        async IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE () {
+            try {
+                const res = await this.$apollo.query({
+                    query: AllEnrollmentsForCurrentUser,
+                })
+
+                if (res.data.allEnrollmentsForCurrentUser.edges.length > 0) {
+                    return true
+                } else {
+                    return false
+                }
+
+            } catch (error) {
+            }
+        },
+
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
-                this.$router.push({ name: 'Home' })
+                //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
+                const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
+                if (res) {
+                    this.$router.push({ name: "my-courses" })
+                } else {
+                    this.$router.push({ name: "Home" })
+                }
             } catch (e) {
                 if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
                     this.$q.notify({
