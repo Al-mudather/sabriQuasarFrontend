@@ -10,12 +10,12 @@
     .cn{
         //maxMobile
         @media(max-width:767px){
-
             padding: 0;
+            height: 835px !important;
         }
         //minSmall
         @media(min-width:768px){
-
+            // height: 810.2px !important;
         }
         //minLarg
         @media(min-width:1200px){
@@ -75,6 +75,7 @@
             .carousel-inner{
                 overflow: unset;
                 .carousel-item{
+                    display: block;
                     .itemImg{
                         position: relative;
                         margin-bottom: 50px;
