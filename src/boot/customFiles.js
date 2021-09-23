@@ -16,6 +16,9 @@ import vueVimeoPlayer from 'vue-vimeo-player'
 // // // global register
 // Vue.use(videojsVimeo)
 
+import VueCountdownTimer from 'vuejs-countdown-timer';
+Vue.use(VueCountdownTimer);
+
 Vue.use(vueVimeoPlayer)
 // TODO: Adding vue share
 Vue.use(VueSocialSharing);

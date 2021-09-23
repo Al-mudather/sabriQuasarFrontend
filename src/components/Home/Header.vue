@@ -3,7 +3,7 @@
 
         <div class="cn">
             <span class="coloor"></span>
-            <PromotionSection />
+            <PromotionSection :allSlidersData="data"/>
         </div>
     </section>
 </template>
@@ -11,13 +11,24 @@
 <script>
 // import SwiperHeader from 'src/components/Home/SwiperHeader.vue'
 import PromotionSection from 'src/components/Home/PromotionSection.vue'
+import {AllHomePageSliders} from 'src/queries/marketing_management/query/AllHomePageSliders.js'
+
 export default {
   name: 'Header',
   data() {
     return {
+      data: ''
     };
     },
-  props: {
+  apollo: {
+    allHomePageSliders: {
+      query: AllHomePageSliders,
+      result (res) {
+        if (!res.loading) {
+          this.data = res.data.allHomePageSliders.edges
+        }
+      }
+    }
   },
   components: {
       // SwiperHeader
