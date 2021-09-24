@@ -15,7 +15,7 @@ query AllHomePageSliders(
 ) {
 
   allHomePageSliders(
-    isPublished: true,
+    #isPublished: true,
     orderBy: $orderBy
   ) {
 

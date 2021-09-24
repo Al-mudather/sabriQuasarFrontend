@@ -2,7 +2,7 @@
   <div class="profit">
     <div class="taxt">
       <h4>{{$t('الأرباح المستحقة')}}</h4>
-      <h3> <span>{{myRewards}}</span>USD </h3>
+      <h3> <span>{{myRewards}}</span>SDG </h3>
       <button @click="COLLECT_MY_REWARDS"><img src="~assets/img/money.png" alt=""> {{$t('تحصيل ارباحي')}} </button>
     </div>
     <q-inner-loading :showing="visible">

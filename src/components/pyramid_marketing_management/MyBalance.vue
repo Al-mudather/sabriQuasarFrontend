@@ -3,7 +3,7 @@
     <img src="~assets/img/sim.png" alt="">
     <div class="taxt">
       <h4>{{$t('حسابــي')}}</h4>
-      <h3> <span>{{myBalance}}</span>USD </h3>
+      <h3> <span>{{myBalance}}</span>SDG </h3>
       <!-- <h3> <span>{{myBalance}}</span> </h3> -->
     </div>
     <div class="taslsl">
