@@ -10,14 +10,9 @@ fragment CourseFragments on CourseNode {
 }    
   
 
-query AllHomePageSliders(
-  $orderBy: [String]
-) {
+query AllHomePageSliders{
 
-  allHomePageSliders(
-    #isPublished: true,
-    #orderBy: $orderBy
-  ) {
+  allHomePageSliders{
 
       edges {
 
