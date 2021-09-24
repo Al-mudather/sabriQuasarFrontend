@@ -1,15 +1,23 @@
 <template>
  <section class="header">
-
-        <div class="cn">
-            <span class="coloor"></span>
-            <PromotionSection :allSlidersData="data"/>
-        </div>
+      <div v-if="$_.isEmpty(data)" class="cn text-center">
+          <div class="swiper-container">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide full_width">
+                <Swiper-Header />
+              </div>
+            </div>
+          </div>
+      </div>
+      <div v-else class="cn">
+          <span class="coloor"></span>
+          <PromotionSection :allSlidersData="data"/>
+      </div>
     </section>
 </template>
 
 <script>
-// import SwiperHeader from 'src/components/Home/SwiperHeader.vue'
+import SwiperHeader from 'src/components/Home/SwiperHeader.vue'
 import PromotionSection from 'src/components/Home/PromotionSection.vue'
 import {AllHomePageSliders} from 'src/queries/marketing_management/query/AllHomePageSliders.js'
 
@@ -31,7 +39,7 @@ export default {
     }
   },
   components: {
-      // SwiperHeader
+      SwiperHeader,
       PromotionSection
     },
 }
