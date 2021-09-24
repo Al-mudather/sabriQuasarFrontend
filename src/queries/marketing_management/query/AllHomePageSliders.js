@@ -16,7 +16,7 @@ query AllHomePageSliders(
 
   allHomePageSliders(
     #isPublished: true,
-    orderBy: $orderBy
+    #orderBy: $orderBy
   ) {
 
       edges {
