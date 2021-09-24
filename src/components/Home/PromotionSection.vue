@@ -1,35 +1,66 @@
 <template>
   <div class="container">
-    <div class="carousel">
-      <div class="carousel-inner parientSlider">
+      <!-- <q-carousel
+        swipeable
+        animated
+        v-model="slide"
+        :autoplay="autoplay"
+        ref="carousel"
+        infinite
+        arrows
+        transition-prev="slide-right"
+        transition-next="slide-left"
+        @mouseenter="autoplay = false"
+        @mouseleave="autoplay = true"
+        
+      >
+      <div class="carousel">
+            <div class="carousel-item slide active">
+          <q-carousel-slide :name="slide.node.pk" v-for="slide in allSlidersData" :key="slide.node.pk">
+              <Slider-item :slider="slide.node" />
+          </q-carousel-slide>
+            </div>
+          
+      </div>
+      </q-carousel> -->
+      <!-- <div class="carousel-inner parientSlider">
           <div class="carousel-item slide" v-for="slide in allSlidersData" :key="slide.node.pk">
             <Slider-item :slider="slide.node" />
           </div>
-      </div>
-
-    </div>
+      </div> -->
   </div>
 </template>
 
 <script>
-import SliderItem from 'src/components/Home/SliderItem.vue'
+// import SliderItem from 'src/components/Home/SliderItem.vue'
 
 export default {
   name: "PromotionSection",
   data() {
     return {
+      autoplay: false,
+      slide: 0
     };
   },
 
   props:['allSlidersData'],
   
   mounted () {
-    window.setTimeout(() => {
-      this.START_THE_SLIDER()
-    }, 2000);
+    // window.setTimeout(() => {
+    //   this.START_THE_SLIDER()
+    // }, 2000);
   },
   components: {
-    "Slider-item": SliderItem
+    // "Slider-item": SliderItem
+  },
+
+  watch: {
+    allSlidersData (val) {
+      console.log('////////////')
+      console.log(val)
+      console.log('////////////')
+      this.slide = val[0].node.pk
+    }
   },
   methods: {
 

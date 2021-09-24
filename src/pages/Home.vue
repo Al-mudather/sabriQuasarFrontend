@@ -11,8 +11,8 @@
 </template>
 
 <script>
- 
-import Header from 'src/components/Home/Header.vue'
+
+import Header from 'src/components/Home/Header22.vue'
 import Statiscs from 'components/Home/Statiscs'
 // import ViewData from 'components/Home/ViewData'
 // import Evaluation from 'components/Home/Evaluation'

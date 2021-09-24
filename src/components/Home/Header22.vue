@@ -26,7 +26,6 @@
 
 <script>
 import SwiperHeader from 'src/components/Home/SwiperHeader.vue'
-// import PromotionSection from 'src/components/Home/PromotionSection.vue'
 export default {
   name: 'Header',
   data() {
@@ -36,8 +35,7 @@ export default {
   props: {
   },
   components: {
-      SwiperHeader,
-      // PromotionSection
+      SwiperHeader
     },
 }
 </script>
