@@ -31,6 +31,9 @@ export default {
   apollo: {
     allHomePageSliders: {
       query: AllHomePageSliders,
+      variables: {
+        orderBy: ["-id"]
+      },
       result (res) {
         if (!res.loading) {
           this.data = res.data.allHomePageSliders.edges
