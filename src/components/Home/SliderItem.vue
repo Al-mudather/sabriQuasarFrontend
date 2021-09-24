@@ -149,21 +149,5 @@ export default {
 </script>
 
 <style lang="scss">
-.parientSlider {
-  position: relative;
-}
-
-.slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: none !important;
-
-  transition: 0.5 all ease-in-out;
-}
-
-.active {
-  display: block !important;
-}
 
 </style>

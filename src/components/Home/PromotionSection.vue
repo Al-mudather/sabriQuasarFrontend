@@ -1,38 +1,26 @@
 <template>
   <div class="container">
-      <!-- <q-carousel
-        swipeable
-        animated
-        v-model="slide"
-        :autoplay="autoplay"
-        ref="carousel"
-        infinite
-        arrows
-        transition-prev="slide-right"
-        transition-next="slide-left"
-        @mouseenter="autoplay = false"
-        @mouseleave="autoplay = true"
-        
-      >
-      <div class="carousel">
-            <div class="carousel-item slide active">
-          <q-carousel-slide :name="slide.node.pk" v-for="slide in allSlidersData" :key="slide.node.pk">
-              <Slider-item :slider="slide.node" />
-          </q-carousel-slide>
-            </div>
-          
-      </div>
-      </q-carousel> -->
-      <!-- <div class="carousel-inner parientSlider">
-          <div class="carousel-item slide" v-for="slide in allSlidersData" :key="slide.node.pk">
-            <Slider-item :slider="slide.node" />
-          </div>
-      </div> -->
+    <b-carousel
+      id="carousel-fade"
+      style="text-shadow: 0px 0px 2px #000"
+      fade
+      indicators
+      img-width="1024"
+      img-height="480"
+      class="carousel"
+    >
+        <div class="carousel-item slide active" v-for="slide in allSlidersData" :key="slide.node.pk">
+          <Slider-item :slider="slide.node" />
+        </div>
+    </b-carousel>
   </div>
 </template>
 
 <script>
-// import SliderItem from 'src/components/Home/SliderItem.vue'
+import SliderItem from 'src/components/Home/SliderItem.vue'
+
+// import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 export default {
   name: "PromotionSection",
@@ -44,38 +32,30 @@ export default {
   },
 
   props:['allSlidersData'],
-  
-  mounted () {
-    // window.setTimeout(() => {
-    //   this.START_THE_SLIDER()
-    // }, 2000);
-  },
+
   components: {
-    // "Slider-item": SliderItem
+    "Slider-item": SliderItem
   },
 
   watch: {
     allSlidersData (val) {
-      console.log('////////////')
-      console.log(val)
-      console.log('////////////')
       this.slide = val[0].node.pk
     }
   },
   methods: {
 
-    START_THE_SLIDER () {
-      //TODO: Make the first child of the slider active
-      const parent = this.$jquery('.parientSlider')
-      const children = parent.children()
-      //TODO: Make the first child active
-      children.first().addClass('active')
-      if (children.length > 1) {
-        window.setInterval(() => {
-          this.CHANGE_THE_SLIDER()
-        }, 10000);
-      }
-    },
+    // START_THE_SLIDER () {
+    //   //TODO: Make the first child of the slider active
+    //   const parent = this.$jquery('.parientSlider')
+    //   const children = parent.children()
+    //   //TODO: Make the first child active
+    //   children.first().addClass('active')
+    //   if (children.length > 1) {
+    //     window.setInterval(() => {
+    //       this.CHANGE_THE_SLIDER()
+    //     }, 10000);
+    //   }
+    // },
 
     CHANGE_THE_SLIDER () {
       const parent = this.$jquery('.parientSlider')
@@ -102,14 +82,14 @@ export default {
   position: relative;
 }
 
-.slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: none !important;
+// .slide {
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   display: none !important;
 
-  transition: 0.5 all ease-in-out;
-}
+//   transition: 0.5 all ease-in-out;
+// }
 
 .active {
   display: block !important;

@@ -15,8 +15,11 @@ import vueVimeoPlayer from 'vue-vimeo-player'
 // import videojsVimeo from '../../node_modules/videojs-vimeo/dist/videojs-vimeo'
 // // // global register
 // Vue.use(videojsVimeo)
-
+import { BootstrapVue } from 'bootstrap-vue'
 import VueCountdownTimer from 'vuejs-countdown-timer';
+
+Vue.use(BootstrapVue)
+
 Vue.use(VueCountdownTimer);
 
 Vue.use(vueVimeoPlayer)
