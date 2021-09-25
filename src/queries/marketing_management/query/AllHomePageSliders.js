@@ -12,7 +12,10 @@ fragment CourseFragments on CourseNode {
 
 query AllHomePageSliders{
 
-  allHomePageSliders{
+  allHomePageSliders(
+    orderBy: ["-id"],
+    isPublished: true
+  ){
 
       edges {
 
