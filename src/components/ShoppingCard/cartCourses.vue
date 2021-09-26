@@ -97,17 +97,32 @@ export default {
 
     WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT () {
       const re = this.shoppingCartDataList.map(item => {
-        if (parseInt(item.course.courseFee) == 0 || parseInt(item.course.courseFeeInSdg) == 0  ) {
-          //TODO: delete the course from the cart
-          this.removeCourseFromCart(item)
-          //TODO: notify the user
-          this.$q.notify({
-            type: 'warning',
-            progress: true,
-            multiLine: true,
-            position: 'top',
-            message: "السله فارغه"
-          })
+        if (this.currency != 'SDG') {
+          if (parseInt(item.course.courseFee) == 0) {
+            //TODO: delete the course from the cart
+            this.removeCourseFromCart(item)
+            //TODO: notify the user
+            this.$q.notify({
+              type: 'warning',
+              progress: true,
+              multiLine: true,
+              position: 'top',
+              message: "السله فارغه"
+            })
+          }
+        } else {
+          if (parseInt(item.course.courseFeeInSdg) == 0 ) {
+            //TODO: delete the course from the cart
+            this.removeCourseFromCart(item)
+            //TODO: notify the user
+            this.$q.notify({
+              type: 'warning',
+              progress: true,
+              multiLine: true,
+              position: 'top',
+              message: "السله فارغه"
+            })
+          }
         }
       })
     },
