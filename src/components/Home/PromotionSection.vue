@@ -20,7 +20,7 @@
 import SliderItem from 'src/components/Home/SliderItem.vue'
 
 // import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+// import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 export default {
   name: "PromotionSection",

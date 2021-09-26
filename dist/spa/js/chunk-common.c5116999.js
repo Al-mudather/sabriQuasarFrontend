@@ -119,6 +119,7 @@ query GetAllCourses(
         title,
         isPaid,
         courseFee,
+        courseFeeInSdg,
         profile,
         cover,
         currency,
@@ -284,6 +285,7 @@ query AllCoursesInSpeciality(
             title,
             isPaid,
             courseFee,
+            courseFeeInSdg,
             currency,
             profile,
             cover
@@ -329,6 +331,7 @@ query GetCourseByID($coursePk:Int) {
     profile,
     cover,
     courseFee,
+    courseFeeInSdg,
     currency,
     brief,
     isPaid,

@@ -30,6 +30,7 @@ query GetAllCourses(
         title,
         isPaid,
         courseFee,
+        courseFeeInSdg,
         profile,
         cover,
         currency,

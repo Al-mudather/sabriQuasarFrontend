@@ -177,7 +177,7 @@ export default {
 
         WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT () {
             const re = this.shoppingCartDataList.map(item => {
-                if (parseInt(item.course.courseFee) == 0) {
+                if (parseInt(item.course.courseFee) == 0 || parseInt(item.course.courseFeeInSdg) == 0) {
                     //TODO: delete the course from the cart
                     this.removeCourseFromCart(item)
                     //TODO: notify the user

@@ -39,6 +39,7 @@ query AllCoursesInSpeciality(
             title,
             isPaid,
             courseFee,
+            courseFeeInSdg,
             currency,
             profile,
             cover

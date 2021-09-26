@@ -330,67 +330,67 @@ export default {
       left: 0;
     }
     .link {
-      position: absolute;
-      width: 310px;
-      backface-visibility: hidden;
+      position: absolute !important;
+      width: 310px !important;
+      backface-visibility: hidden !important;
       .arrow {
-        position: absolute;
-        display: inline-block;
-        top: 36px;
-        margin: 0 -15px 0 0;
-        opacity: 0;
-        transition: all ease-in-out 0.5s;
+        position: absolute !important;
+        display: inline-block !important;
+        top: 36px !important;
+        margin: 0 -15px 0 0 !important;
+        opacity: 0 !important;
+        transition: all ease-in-out 0.5s !important;
         img {
-          width: auto;
+          width: auto !important;
         }
       }
       .show {
-        opacity: 1;
-        transition: all ease-in-out 0.5s;
+        opacity: 1 !important;
+        transition: all ease-in-out 0.5s !important;
       }
       .lii {
         // cursor: pointer;
-        position: relative;
-        top: 33px;
-        right: 8px;
-        background: #f2f2f9;
-        width: 33px;
-        height: 33px;
-        text-align: center;
-        border-radius: 100px;
-        line-height: 1.8;
-        margin-left: 34px;
-        display: inline-block;
+        position: relative !important;
+        top: 33px !important;
+        right: 8px !important;
+        background: #f2f2f9 !important;
+        width: 33px !important;
+        height: 33px !important;
+        text-align: center !important;
+        border-radius: 100px !important;
+        line-height: 1.8 !important;
+        margin-left: 34px !important;
+        display: inline-block !important;
       }
       .active {
-        background-color: $yalloColor;
+        background-color: $yalloColor !important;
         // cursor: pointer;
       }
       .upp {
-        top: 18px;
-        width: 50px;
-        right: 1px;
-        height: 50px;
+        top: 18px !important;
+        width: 50px !important;
+        right: 1px !important;
+        height: 50px !important;
         img {
-          position: relative;
-          top: 9px;
+          position: relative !important;
+          top: 9px !important;
         }
       }
     }
   }
   .contt {
-    background-color: #fff;
-    margin: 34px auto;
-    max-width: 666px;
-    border-radius: 45px;
-    height: auto;
-    padding: 33px;
+    background-color: #fff !important;
+    margin: 34px auto !important;
+    max-width: 666px !important;
+    border-radius: 45px !important;
+    height: auto !important;
+    padding: 33px !important;
     .titell {
       h3 {
-        font-size: 18px;
-        font-family: "cairoR";
-        color: $textColor;
-        text-align: right;
+        font-size: 18px !important;
+        font-family: "cairoR" !important;
+        color: $textColor !important;
+        text-align: right !important;
       }
       hr {
         margin: 21px auto 29px auto;

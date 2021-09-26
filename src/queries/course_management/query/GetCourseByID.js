@@ -10,6 +10,7 @@ query GetCourseByID($coursePk:Int) {
     profile,
     cover,
     courseFee,
+    courseFeeInSdg,
     currency,
     brief,
     isPaid,
