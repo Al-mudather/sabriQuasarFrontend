@@ -280,6 +280,8 @@ export default {
     watch: {
 
         currentContent(value) {
+            //TODO: Start the learning prograss
+            this.START_LEARNING_UNIT_TRAKING()
             //TODO: empty the cipher
             this.cipherVideo = null
             //TODO: Show waiting point
