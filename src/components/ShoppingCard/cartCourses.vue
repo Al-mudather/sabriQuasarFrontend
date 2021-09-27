@@ -9,7 +9,8 @@
                 <div class="man">
                     <div class="compon">
                         <div class="mag">
-                            <img src="~assets/img/cart-img.png" alt="" />
+                            <img v-if="item.course.cover" :src="FORMAT_IMAGE(item.course.cover)" alt="" />
+                            <img v-else src="~assets/img/cart-img.png" alt="" />
                         </div>
                         <h2>{{ item.course.title }}</h2>
                         <h3>{{FORMAT_COUSRE_PRICE(JSON.parse(item.course.currency)[currency], 3) }}<span>{{currency}}</span></h3>
@@ -23,7 +24,7 @@
                 <img src="~assets/img/inbox(1).png" alt="">
                 <p>السلة فارغة قم بتعبئتها</p>
             </div>
-        </div>
+        </div> 
         <!--Total Price-->
         <div class="total">
             <div class="price">
@@ -94,6 +95,15 @@ export default {
       'setShoppinCartDataListAction',
       'setTotalPaymentFeesAction'
     ]),
+
+    FORMAT_IMAGE (imageUrl) {
+      if (process.env.NODE_ENV == 'development') {
+        return  `http://localhost:8000/media/${imageUrl}`
+        
+      } else {
+        return location.origin  + `/media/${imageUrl}`
+      }
+    },
 
     WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT () {
       const re = this.shoppingCartDataList.map(item => {
