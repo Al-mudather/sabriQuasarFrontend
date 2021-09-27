@@ -292,7 +292,7 @@ export default {
             const cipher = contentData.cipher_iframe
             if (cipher) {
                 this.cipherVideo = cipher
-                this.videoLoaded = false
+                this.videoLoaded = true
             }
 
             this.viomURL = this.GET_VIMO_VIDEO_URL(contentData)
