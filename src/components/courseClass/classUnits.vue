@@ -97,7 +97,10 @@
                         @ended="END_LEARNING_UNIT_TRAKING"
                         :src="viomURL"
                     /> -->
+                    <div v-if="cipherVideo" v-html="cipherVideo"></div>
+
                     <q-video
+                        v-show="!cipherVideo"
                         :ratio="13 / 11"
                         ref="videoPlayer"
                         controls = "false"
@@ -238,6 +241,7 @@ export default {
             vimoID: '',
             VideoTitle: '',
             viomURL: '',
+            cipherVideo: null,
             VideoPlayer: '',
             VideoData: '',
             startLearningTrackingID: '',
@@ -276,16 +280,22 @@ export default {
     watch: {
 
         currentContent(value) {
-
+            //TODO: empty the cipher
+            this.cipherVideo = null
             //TODO: Show waiting point
             this.videoLoaded = false
-            this.VideoTitle = JSON.parse(value.modelValue).title
+            const contentData = JSON.parse(value.modelValue)
+            this.VideoTitle = contentData.title
             // const el = this.$refs.videoPlayer
-            // console.log('???????????????????????')
-            // console.log(el)
-            // console.log('???????????????????????')
 
-            this.viomURL = this.GET_VIMO_VIDEO_URL(value.modelValue)
+            //TODO: Check if the vidcipher iframe is exists
+            const cipher = contentData.cipher_iframe
+            if (cipher) {
+                this.cipherVideo = cipher
+                this.videoLoaded = false
+            }
+
+            this.viomURL = this.GET_VIMO_VIDEO_URL(contentData)
 
             // this.VideoData = JSON.parse(value.modelValue).video;
             // console.log('llllllllllllllllllllllllllll')
@@ -396,12 +406,8 @@ export default {
 
         const video = this.$refs['videoPlayer']
         const child = video.$el.firstChild
-        console.log('????????????????')
-        console.log(child)
-        console.log('????????????????')
         child.addEventListener('load', () => {
             this.videoLoaded = true
-
         })
         
         if (this.counter === 0) {
@@ -431,7 +437,7 @@ export default {
 
         GET_VIMO_VIDEO_URL (data) {
             try {
-                const video = JSON.parse(data).video;
+                const video = data.video;
                 // this.viomURL = 'https://player.vimeo.com/video/' +  String(video)
                 //TODO: If the video from the youtube git it
                 const i = video.indexOf('v');
