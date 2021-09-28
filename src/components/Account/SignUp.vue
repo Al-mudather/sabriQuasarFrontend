@@ -7,12 +7,13 @@
         Signup Section
         -->
         <div class="signup">
-            <div class="logBy">
-                <FacebookAuthentication class="hvr-pulse-grow" />
-                <GoogleAuthentication class="hvr-pulse-grow" />
+            <!-- <div class="logBy"> -->
+            <div class="row q-ma-md q-pt-xl justify-center">
+                <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
+                <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
             </div>
             <!-- <form @submit="REGISTER_NEW_USER($event)"> -->
-            <form>
+            <!-- <form>
                 <div class="text-h6">التسجيل عن طريق facebook أو Gmail فقط</div>
                 <div class="row">
                     <div class="col-lg-12 col-xs-12">
@@ -99,7 +100,7 @@
                         <img src="~assets/img/back.png" alt="" />
                     </button>
                 </div>
-            </form>
+            </form> -->
             <q-inner-loading :showing="visible">
                 <q-spinner-hourglass color="primary" size="70px" />
             </q-inner-loading>
@@ -119,6 +120,8 @@ export default {
 
     data() {
         return {
+            facebookLabel: "إنشاء حساب جديد بإستخدام FACEBOOK",
+            googleLabel: "إنشاء حساب جديد بإستخدام Google",
             visible: false,
             prevRoute: null,
             fullName: "",

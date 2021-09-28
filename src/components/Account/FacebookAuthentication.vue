@@ -1,6 +1,7 @@
 <template>
-    <div class="social" @click="helloFacebookAuth">
-        <img src="~assets/img/facebook.png" alt="" />
+    <div class="social">
+        <!-- <img src="~assets/img/facebook.png" alt="" /> -->
+        <q-btn class="full-width" :label="label" icon="la la-facebook" @click="helloFacebookAuth" color="primary" />
         <q-inner-loading :showing="visible">
             <q-spinner-hourglass color="primary" size="70px" />
         </q-inner-loading>
@@ -21,7 +22,7 @@ export default {
         }
     },
 
-    props:['prevRoute'],
+    props:['prevRoute', 'label'],
 
     methods: {
         ...mapActions("authentication", [
@@ -168,4 +169,26 @@ export default {
 @import "src/assets/css/sass/helpers/_variabels.scss";
 @import "src/assets/css/sass/helpers/_mixins.scss";
 @import "src/assets/css/account.scss";
+
+.q-btn__content {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+.q-btn {
+    &> span {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        &> span {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+        }
+    }
+}
+
+.q-icon {
+    margin-left: 0 !important;
+    margin-right: 0.3rem;
+
+}
 </style>

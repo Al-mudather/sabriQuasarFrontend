@@ -4,9 +4,12 @@
       Login Section
     -->
         <div class="login">
-            <div class="logBy">
-                <FacebookAuthentication :prevRoute="prevRoute" class="hvr-pulse-grow"/>
-                <GoogleAuthentication :prevRoute="prevRoute" class="hvr-pulse-grow"/>
+            <div class="row q-ma-md justify-center">
+                <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
+                <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
+            </div> 
+            <div class="text-center textStyle text-h4 q-mb-md">
+                OR
             </div>
             <form id="loginForm" @submit="LoginUser($event)">
                 <div class="row">
@@ -117,13 +120,15 @@ import { mapActions } from "vuex";
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 
-import AccountHeader from "src/components/utils/accountHeader";
+import AccountHeader from "src/components/utils/accountHeader.vue";
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication';
 import FacebookAuthentication from 'src/components/Account/FacebookAuthentication';
 
 export default {
     data() {
         return {
+            facebookLabel: "تسجيل الدخول عن طريق ال Facebook",
+            googleLabel: "تسجيل الدخول عن طريق ال Google",
             email: "",
             password: "",
             prevRoute: null,
@@ -295,6 +300,12 @@ export default {
         fill: $color-primary;
     }
 
+}
+
+.textStyle {
+    color: #7B7B7B;
+    font-size: 19px;
+    font-family: "cairoR";
 }
 
 .input {
