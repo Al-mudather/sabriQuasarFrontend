@@ -9,8 +9,8 @@
         <div class="signup">
             <!-- <div class="logBy"> -->
             <div class="row q-ma-md q-pt-xl justify-center">
-                <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
                 <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
+                <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
             </div>
             <!-- <form @submit="REGISTER_NEW_USER($event)"> -->
             <!-- <form>

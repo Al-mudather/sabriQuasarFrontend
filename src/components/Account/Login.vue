@@ -5,8 +5,8 @@
     -->
         <div class="login">
             <div class="row q-ma-md justify-center">
-                <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
                 <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
+                <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
             </div> 
             <div class="text-center textStyle text-h4 q-mb-md">
                 OR
