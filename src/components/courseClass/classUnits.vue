@@ -217,7 +217,7 @@
 </template>
 
 <script>
-
+import { GetCourseByID } from "src/queries/course_management/query/GetCourseByID";
 import { StartLearningUnit } from 'src/queries/learning_management/mutation/StartLearningUnit';
 import { EndLearningUnit } from 'src/queries/learning_management/mutation/EndLearningUnit';
 import { GetAllLearningProgressByCourse } from 'src/queries/learning_management/query/GetAllLearningProgressByCourse';
@@ -244,7 +244,7 @@ export default {
             cipherVideo: null,
             VideoPlayer: '',
             VideoData: '',
-            startLearningTrackingID: '',
+            startLearningTrackingID: null,
             courseEnrollment: '',
             hasNextContent: true,
             hasPrevContent: false,
@@ -280,8 +280,11 @@ export default {
     watch: {
 
         currentContent(value) {
-            //TODO: Start the learning prograss
+            //TODO: Empty the learning tracking id
+            this.startLearningTrackingID = null
+            //TODO: Temp: Start traking the learning
             this.START_LEARNING_UNIT_TRAKING()
+            
             //TODO: empty the cipher
             this.cipherVideo = null
             //TODO: Show waiting point
@@ -300,15 +303,7 @@ export default {
             this.viomURL = this.GET_VIMO_VIDEO_URL(contentData)
 
             // this.VideoData = JSON.parse(value.modelValue).video;
-            // console.log('llllllllllllllllllllllllllll')
-            // console.log(this.VideoData)
-            // console.log('llllllllllllllllllllllllllll')
-
-            // const player = new playerjs.Player(iframe)
-            // //TODO: Play the video
-            // console.log(this.playerOptions.sources)
-            // this.playVideo(this.viomURL)
-            // ?loop=false&amp;byline=false&amp;portrait=false&amp;title=false&amp;speed=true&amp;transparent=0&amp;gesture=media
+            
             this.visible = true;
 
             const currentContentIndex = _.indexOf(this.contentLists, value);
@@ -325,9 +320,9 @@ export default {
             } else {
                 this.hasPrevContent = true;
             }
-            //TODO: Temp: Start traking the learning
-            // this.START_LEARNING_UNIT_TRAKING()
+        },
 
+        startLearningTrackingID (val) {
             // TODO: If the learning tracker is started, end it
             this.END_LEARNING_UNIT_TRAKING();
         },
@@ -463,11 +458,8 @@ export default {
         /////////////////////////////////////////////////////////////
         // Start Learning Tracking
         /////////////////////////////////////////////////////////////
-        async START_LEARNING_UNIT_TRAKING() {
-            // console.log('ggggggggggggggggggggg')
-            // console.log('Starting')
-            // console.log('ggggggggggggggggggggg')
-            if (!this.startLearningTrackingID) {
+        START_LEARNING_UNIT_TRAKING() {
+            if (this.$_.isEmpty(this.startLearningTrackingID)) {
                 // TODO: 1) Fill the progress data
                 const progressData = {
                     courseId: this.course.pk,
@@ -476,42 +468,42 @@ export default {
                     courseUnitContentId: this.currentContent.pk
                 };
                 // TODO: 2) Start lesson tracking
-                const startTrackingResult = await this.$apollo.mutate({
+                this.$apollo.mutate({
                     mutation: StartLearningUnit,
                     variables: {
                         progressData: progressData
                     }
-                });
-
-                if (
+                }).then(startTrackingResult => {
+                    if (
                     this.$_.get(
                         startTrackingResult,
                         '[data][startLearningUnit][success]'
                     )
-                ) {
-                    this.startLearningTrackingID = this.$_.get(
-                        startTrackingResult,
-                        '[data][startLearningUnit][learning][pk]'
-                    );
-                    this.isOpen = true;
-                }
-                if (
-                    this.$_.get(
-                        startTrackingResult,
-                        '[data][startLearningUnit][errors]'
-                    )
-                ) {
-                    this.$q.notify({
-                        color: "negative",
-                        textColor: "white",
-                        position: "top",
-                        icon: "cloud_done",
-                        message: this.$_.get(
+                    ) {
+                        this.startLearningTrackingID = this.$_.get(
+                            startTrackingResult,
+                            '[data][startLearningUnit][learning][pk]'
+                        );
+                        this.isOpen = true;
+                    }
+                    if (
+                        this.$_.get(
                             startTrackingResult,
                             '[data][startLearningUnit][errors]'
-                        ).nonFieldErrors
-                    });
-                }
+                        )
+                    ) {
+                        this.$q.notify({
+                            color: "negative",
+                            textColor: "white",
+                            position: "top",
+                            icon: "cloud_done",
+                            message: this.$_.get(
+                                startTrackingResult,
+                                '[data][startLearningUnit][errors]'
+                            ).nonFieldErrors
+                        });
+                    }
+                })
             }
         },
 
@@ -519,9 +511,6 @@ export default {
         // End Learning Tracking
         /////////////////////////////////////////////////////////////
         async END_LEARNING_UNIT_TRAKING() {
-            // console.log('kkkkkkkkkkkkkkkkkkkkk')
-            // console.log('Ending')
-            // console.log('kkkkkkkkkkkkkkkkkkkkk')
             if (this.startLearningTrackingID) {
                 // TODO: 1) Fill the end learning tracker data
                 const progressData = {
@@ -536,7 +525,7 @@ export default {
                     variables: {
                         progressData: progressData,
                         progressId: this.startLearningTrackingID
-                    },
+                    }, 
                     refetchQueries: [
                         {
                             query: GetAllLearningProgressByCourse,
@@ -547,6 +536,8 @@ export default {
                         }
                     ]
                 });
+
+
                 if (
                     this.$_.get(
                         endTrackingResult,
@@ -554,7 +545,7 @@ export default {
                     )
                 ) {
                     // TODO: empty the start tracking progress id
-                    this.startLearningTrackingID = '';
+                    this.startLearningTrackingID = null;
                 }
             }
         },

@@ -236,7 +236,7 @@ export default {
         if (route.query) {
           this.tab = route.query.tab 
         }
-
+ 
         this.$apollo
           .query({
             query: GetCourseByID,

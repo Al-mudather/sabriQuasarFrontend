@@ -60,22 +60,36 @@ export default {
         },
 
         async getOrderResult (courseIds) {
-            const result = await this.$apollo.mutate({
-                mutation: CreateNewOrderWithBulkOrderDetails,
-                variables: {
-                    courseIds: courseIds
+            try {
+                const result = await this.$apollo.mutate({
+                    mutation: CreateNewOrderWithBulkOrderDetails,
+                    variables: {
+                        courseIds: courseIds
+                    }
+                });
+                const dataObj = result.data.createNewOrderWithBulkOrderDetails;
+    
+    
+                if (this.$_.get(dataObj,'[errors]')) {
+                    this.visible = false
+                    this.errorHandler(dataObj.errors)
                 }
-            });
-            const dataObj = result.data.createNewOrderWithBulkOrderDetails;
-
-
-            if (this.$_.get(dataObj,'[errors]')) {
-                this.visible = false
-                this.errorHandler(dataObj.errors)
-            }
-
-            if (this.$_.get(dataObj,'[success]')) {
-                return dataObj;
+    
+                if (this.$_.get(dataObj,'[success]')) {
+                    return dataObj;
+                }
+                
+            } catch (error) {
+                if ( error.message == 'GraphQL error: User already has valid enrollment in the course ...') {
+                    this.$q.notify({
+                        type: 'warning',
+                        progress: true,
+                        multiLine: true,
+                        position: 'top',
+                        // message: error.message,
+                        message: "لديك اشتراك مسبق في هذا الكورس"
+                    })
+                }
             }
         },
 
@@ -123,7 +137,7 @@ export default {
                 
             } catch (error) {
                 this.visible = false
-                if ( error.message == 'User already has valid enrollment in the course ..') {
+                if ( error.message == 'GraphQL error: User already has valid enrollment in the course ...') {
                     // console.log('llllllllllllllllllllll')
                     // console.log(error.message)
                     // console.log('llllllllllllllllllllll')

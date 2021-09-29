@@ -71,11 +71,15 @@ export default {
 
             try {
                 const courseIds = this.getOrdersIds();
+
                 const orderResult = await this.getOrderResult(courseIds);
+
                 const paypalPaymentUrl = await this.getpaypalPaymentUrlFromTheBackend(
                     orderResult
                 );
-                paypal.Buttons({
+
+                // window.setTimeout( () =>{
+                    paypal.Buttons({
 
                     // Call your server to set up the transaction
                     createOrder: async (data, actions) => {
@@ -108,6 +112,8 @@ export default {
                     }
 
                 }).render('#paypal-button-container');
+                // }, 5000);
+               
 
                 // this.visible = true;
                 // TODO: Extract all courses ids
