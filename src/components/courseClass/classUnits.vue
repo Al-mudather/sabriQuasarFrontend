@@ -48,8 +48,8 @@
                                             :key="content.node.id"
                                             clickable
                                             v-ripple
-                                            v-show="content.node.modelName === 'ContentVideo'"
                                         >
+                                            <!-- v-show="content.node.modelName === 'ContentVideo'" -->
                                             <classContentItem
                                                 :content="content.node"
                                                 :courseId="course.pk"
@@ -71,7 +71,7 @@
 
             </div> -->
             <div class="text-h4 q-mb-sm text-center">
-                {{VideoTitle}}
+                {{ContentTitle}}
             </div>
             <q-skeleton
                 v-if="!videoLoaded"
@@ -217,7 +217,6 @@
 </template>
 
 <script>
-import { GetCourseByID } from "src/queries/course_management/query/GetCourseByID";
 import { StartLearningUnit } from 'src/queries/learning_management/mutation/StartLearningUnit';
 import { EndLearningUnit } from 'src/queries/learning_management/mutation/EndLearningUnit';
 import { GetAllLearningProgressByCourse } from 'src/queries/learning_management/query/GetAllLearningProgressByCourse';
@@ -229,6 +228,7 @@ import classContentItem from 'components/courseClass/classContentItem';
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID';
 import { mapState, mapActions } from 'vuex';
 import _ from 'lodash';
+import { openURL } from 'quasar'
 // import playerjs from 'player.js'
 
 export default {
@@ -239,9 +239,10 @@ export default {
             videoLoaded: false,
             visible: true,
             vimoID: '',
-            VideoTitle: '',
+            ContentTitle: '',
             viomURL: '',
             cipherVideo: null,
+            fileData: null,
             VideoPlayer: '',
             VideoData: '',
             startLearningTrackingID: null,
@@ -287,24 +288,35 @@ export default {
             
             //TODO: empty the cipher
             this.cipherVideo = null
+            //TODO: empty the file data
+            this.fileData = null
             //TODO: Show waiting point
             this.videoLoaded = false
+            //TODO: Get the content data
             const contentData = JSON.parse(value.modelValue)
-            this.VideoTitle = contentData.title
+            this.ContentTitle = contentData.title
+            /// If the modelName is a video ///
+            if (value.modelName === 'ContentVideo') {
+                //TODO: Check if the vidcipher iframe is exists
+                const cipher = contentData.cipher_iframe
+                if (cipher) {
+                    this.cipherVideo = cipher
+                    this.videoLoaded = true
+                }
+                //TODO: get the vimeo data
+                this.viomURL = this.GET_VIMO_VIDEO_URL(contentData)
+    
+                // this.VideoData = JSON.parse(value.modelValue).video;
+                
+                this.visible = true;
+            } else if ( value.modelName === 'ContentFile' ) {
+                // If the modelName is a file //
+                //TODO: Get the file data
+                this.fileData = contentData
+            }
+            
             // const el = this.$refs.videoPlayer
 
-            //TODO: Check if the vidcipher iframe is exists
-            const cipher = contentData.cipher_iframe
-            if (cipher) {
-                this.cipherVideo = cipher
-                this.videoLoaded = true
-            }
-
-            this.viomURL = this.GET_VIMO_VIDEO_URL(contentData)
-
-            // this.VideoData = JSON.parse(value.modelValue).video;
-            
-            this.visible = true;
 
             const currentContentIndex = _.indexOf(this.contentLists, value);
             // TODO: Is this content has NEXT content
@@ -418,6 +430,10 @@ export default {
 
     methods: {
         ...mapActions('courseManagement', ['setCurrentContentAction', 'resetContentListsAction']),
+
+        downloadFile (fileURL) {
+            openURL(location.origin + fileURL)
+        },
 
         playVideo (source) {
             const video = {
@@ -551,6 +567,10 @@ export default {
         },
 
         clickedItem(e) {
+
+            if (this.fileData) {
+                this.downloadFile(this.fileData.attachment)
+            }
             // TODO: remove the active class from all the contents
             const infoes = document.querySelectorAll('.info');
             for (const info of infoes) {

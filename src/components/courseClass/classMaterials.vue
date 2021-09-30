@@ -41,7 +41,7 @@
 <script>
 import _ from 'lodash'
 import { AllCourseUnitContentsByCourseContentFile } from 'src/queries/course_management/query/GetAllCourseUnitContentsByCourseContentFile'
-import { mapState, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 import { openURL } from 'quasar'
 
 export default {
