@@ -288,7 +288,7 @@ export default {
   display: block;
   min-height: 100vh;
   width: 100%;
-  padding: 0 5%;
+  // padding: 0 5%;
   background-color: #f5f6ff;
   .clos {
     position: relative;
@@ -687,6 +687,7 @@ export default {
       display: block;
       .options {
         display: block;
+        margin: 0 -26px;
         .sele {
           background-color: #fff;
           cursor: pointer;
