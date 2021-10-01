@@ -1,11 +1,14 @@
 <template>
     <div class="q-ma-lg">
-        <div class="text-h4 text-center q-ma-sm">إشعار بنكك</div>
-        <div class="text-h6 text-center text-danger" style="font-family:'cairoR'">ملاحظه: يجب كتابة الاسم رباعيا في اشعار بنكك لكي يتم اعتماد الشعار</div>
+        <div class="text-h4 text-center q-ma-sm" v-if="currency != 'SDG' ">{{$t('ارفق فاتورة الدفع')}}</div>
+        <div v-else>
+            <div class="text-h4 text-center q-ma-sm">إشعار بنكك</div>
+            <div class="text-h6 text-center text-danger" style="font-family:'cairoR'">ملاحظه: يجب كتابة الاسم رباعيا في اشعار بنكك لكي يتم اعتماد الشعار</div>
+        </div>
         <file-upload
             imgeSize="4000000"
             :accept="'.png,.jpg, image/*'"
-            label="شعار بنكك"
+            :label=" currency === 'SDG' ? bankakLabel : othersLabel"
             v-on:File_Handler='paymentImageHandler'
         ></file-upload>
         <q-btn color="red" @click="SEND_THE_PAYMENT" icon-right="send" label="إرسال" />
@@ -25,12 +28,16 @@ export default {
     data() {
         return {
             visible: false,
-            bankakBill: ''
+            bankakBill: '',
+            bankakLabel:'إضغط للإرفاق إشعار بنكك',
+            othersLabel: this.$t('اضغط للإرفاق فاتورة الدفع'),
         };
     },
     components: { FileUpload },
     computed: {
-        ...mapState("shoppingCart", ["shoppingCartDataList"])
+        ...mapState("shoppingCart", ["shoppingCartDataList"]),
+        ...mapState('settings',['currency'])
+
     },
 
     methods: {

@@ -1,20 +1,21 @@
 <template>
     <div class="msPayment">
-        <div v-if="currency == 'SDG'" class="text-h4 text-center q-ma-md">
-            إختر وسيلة الدفع اللتي تناسبك
+        <div class="text-h4 text-center q-ma-md">
+            {{$t('إختر طريقة الدفع اللتي تناسبك')}}
         </div>
         <div class="options">
             <!-- Paypal Payment -->
             <paypal-payment v-if="currency != 'SDG' "/>
             <!-- Bankak Payment -->
-            <div v-if="currency == 'SDG'" class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('bankak')">
+            <!-- <div v-if="currency == 'SDG'" class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('bankak')"> -->
+            <div class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('bankak')">
                 <img src="~assets/img/bankk.png" alt="" />
-                <h3>الدفع عن طريق بنكك</h3>
+                <h3>{{$t('الدفع عن طريق ارفاق فاتورة البنك')}}</h3>
             </div>
             <!-- Sudanies Payment -->
             <div v-if="currency == 'SDG'" class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('otherSudaniesBankas')">
                 <img src="~assets/img/credit-cards.png" alt="" />
-                <h3>Sudanies Bank</h3>
+                <h3>{{$t('البنوك السودانيه')}}</h3>
             </div>
         </div>
         <bankak-payment v-if="enableBankakPayment"/>
@@ -92,7 +93,7 @@ import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
-import bankakPayment from 'src/components/ShoppingCard/bankakPay'
+import bankakPayment from 'src/components/ShoppingCard/bankakPay.vue'
 
 export default {
   name:  "paymentCartpage",
