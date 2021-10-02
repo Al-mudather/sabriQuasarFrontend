@@ -21,7 +21,7 @@
 </template>
  
 <script>
-import MainNavBar from "components/utils/MainNavBar";
+import MainNavBar from "components/utils/MainNavBar.vue";
 import Menu from 'components/Home/Menu'
 import Footer from "src/components/utils/Footer";
 import ShoppingCart from "components/Home/Shopping_cart";
