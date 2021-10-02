@@ -223,7 +223,7 @@ export default {
                             position: 'top',
                             progress: true,
                             multiLine: true,
-                            message: this.$t('لا توجد نتائج')
+                            message: 'No results (-_-)'
                         })
                     }
                 })
@@ -233,7 +233,7 @@ export default {
                     position: 'top',
                     progress: true,
                     multiLine: true,
-                    message: this.$t('ما الذي تبحث عنه')
+                    message: 'what are you looking for'
                 })
             }
         },
