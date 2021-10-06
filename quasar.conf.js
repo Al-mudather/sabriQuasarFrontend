@@ -131,7 +131,7 @@ module.exports = function (/* ctx */) {
       manifest: {
         name: 'Medical trainng center',
         short_name: 'Medical Training Center',
-        description: 'Medical Training Center',
+        description: 'The First Medical Training Platform in Sudan, Africa and the Middle East',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',

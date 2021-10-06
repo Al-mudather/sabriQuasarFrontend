@@ -110,7 +110,7 @@ import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_market
 import { CheckoutSubscription } from "src/queries/notification_management/subscription/CheckoutSubscription";
 import { LocalStorage } from "quasar";
 
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "ShoppingCartPage",
@@ -151,6 +151,10 @@ export default {
       this.changeTheShoppingCarLinksToArabic();
     }
   },
+
+  computed: {
+    ...mapState("shoppingCart", ["shoppingCartDataList"])
+  }, 
 
   beforeDestroy() {
     this.$root.$off("activateShoppingProgress");

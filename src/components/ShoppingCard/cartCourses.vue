@@ -73,6 +73,9 @@
 import { mapState, mapActions } from 'vuex'
 import _ from 'lodash'
 
+import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
+import { CreateBraintreeCheckout } from 'src/queries/checkout_management/mutation/CreateBraintreeCheckout.js'
+
 export default {
   data () {
     return {
@@ -87,14 +90,87 @@ export default {
 
   mounted () {
     this.WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT()
+    //TODO: Get the autherization For braintree payment
+    // this.buyTheCoursesUsingBraintree()
   },
 
   methods: {
     ...mapActions('shoppingCart', [
       'deleteShoppinCartDataListAction',
       'setShoppinCartDataListAction',
-      'setTotalPaymentFeesAction'
+      'setTotalPaymentFeesAction',
+      "SET_BRAINTREE_CLIENT_TOKEN_Action",
+      "SET_ORDER_DATA_Action"
     ]),
+
+     async getBraintreePaymentUrlFromTheBackend (orderResult) {
+      // TODO: Get the braintree url
+      const braintreePaymentresult = await this.$apollo.mutate({
+          mutation: CreateBraintreeCheckout,
+          variables: {
+              orderId: orderResult.order.pk
+          }
+      });
+
+      const braintreeDetails =
+          braintreePaymentresult.data.createBraintreeCheckout;
+      // if (this.$_.get(braintreeDetails, "[errors]")) {
+      // }
+
+      if (this.$_.get(braintreeDetails, "[success]")) {
+          return braintreeDetails.braintreeClientToken
+      }
+    },
+
+    async buyTheCoursesUsingBraintree () {
+        try {
+            //TODO: Get all the courses ids
+            const courseIds = this.getOrdersIds();
+            //TODO: Get the order id
+            const orderResult = await this.getOrderResult(courseIds);
+
+            //TODO: Get the braintree client token
+            const braintreeClientToken = await this.getBraintreePaymentUrlFromTheBackend(
+                orderResult
+            );
+            //TODO: Set the client token
+            this.SET_BRAINTREE_CLIENT_TOKEN_Action(braintreeClientToken)
+            //TODO: Set the order data
+            this.SET_ORDER_DATA_Action(orderResult)
+
+            // this.visible = false;
+        } catch (error) {
+            // console.log('kkkkkkkkkkk')
+            // console.log(error)
+            // console.log('kkkkkkkkkkk')
+        }         
+        
+    },
+
+    getOrdersIds () {
+        return this.$_.map(this.shoppingCartDataList, "[course][pk]");
+    },
+
+    async getOrderResult (courseIds) {
+        const result = await this.$apollo.mutate({
+            mutation: CreateNewOrderWithBulkOrderDetails,
+            variables: {
+                courseIds: courseIds
+            }
+        });
+
+        const dataObj = result.data.createNewOrderWithBulkOrderDetails;
+
+        if (this.$_.get(dataObj, "[errors]")) {
+            this.visible = false;
+            // this.errorHandler(dataObj.errors)
+            // alert(dataObj.errors.nonFieldErrors);
+        }
+
+        if (this.$_.get(dataObj, "[success]")) {
+            return dataObj;
+        }
+    },
 
     FORMAT_IMAGE (imageUrl) {
       if (process.env.NODE_ENV == 'development') {
@@ -119,33 +195,6 @@ export default {
             message: "هذا الكورس تحت التحضير"
           })
         }
-        // if (this.currency != 'SDG') {
-        //   if (parseInt(item.course.courseFee) == 0) {
-        //     //TODO: delete the course from the cart
-        //     this.removeCourseFromCart(item)
-        //     //TODO: notify the user
-        //     this.$q.notify({
-        //       type: 'warning',
-        //       progress: true,
-        //       multiLine: true,
-        //       position: 'top',
-        //       message: "السله فارغه"
-        //     })
-        //   }
-        // } else {
-        //   if (parseInt(item.course.courseFeeInSdg) == 0 ) {
-        //     //TODO: delete the course from the cart
-        //     this.removeCourseFromCart(item)
-        //     //TODO: notify the user
-        //     this.$q.notify({
-        //       type: 'warning',
-        //       progress: true,
-        //       multiLine: true,
-        //       position: 'top',
-        //       message: "السله فارغه"
-        //     })
-        //   }
-        // }
       })
     },
 

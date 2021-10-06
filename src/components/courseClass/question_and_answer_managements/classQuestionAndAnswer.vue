@@ -3,7 +3,7 @@
         <div class="row justify-center">
            <!-- 
             Start of Questions List
-          -->
+          --> 
             <Questions-List 
               v-if="showQuestions"
               v-on:questionData="showQuestionAnswersHandler"
@@ -31,8 +31,8 @@
 </template>
 
 <script>
-import QuestionsList from 'src/components/courseClass/question_and_answer_managements/QuestionsList'
-import AnswersList from 'src/components/courseClass/question_and_answer_managements/AnswersList'
+import QuestionsList from 'src/components/courseClass/question_and_answer_managements/QuestionsList.vue'
+import AnswersList from 'src/components/courseClass/question_and_answer_managements/AnswersList.vue'
 import { AllQuestionsByCourse } from 'src/queries/question_management/query/AllQuestionsByCourse'
 import { QuestionAndAnswerSubscription } from 'src/queries/question_management/subscription/QuestionAndAnswerSubscription'
 

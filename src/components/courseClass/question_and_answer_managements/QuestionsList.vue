@@ -1,5 +1,5 @@
 <template>
-  <div class="col-lg-5 col-xs-12">
+  <div class="col-lg-12 col-xs-12">
     <div class="pernt">
       <div class="send">
         <form @submit="createNewQuestion">
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import QuestionCard from "src/components/courseClass/question_and_answer_managements/QuestionCard";
+import QuestionCard from "src/components/courseClass/question_and_answer_managements/QuestionCard.vue";
 import { CreateCourseQuestion } from "src/queries/question_management/mutation/CreateCourseQuestion";
 
 export default {

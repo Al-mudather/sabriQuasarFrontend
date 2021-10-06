@@ -29,7 +29,7 @@
                 <div class="col-lg-12">
                     <div class="imageees">
                         <img src="~assets/img/noText.png" alt="">
-                        <h3>There is no, text matterial here yeat</h3>
+                        <h3 style="transform: translateX(5.5rem)">There is no, text matterial here yeat</h3>
                     </div>
                 </div>
             </div>

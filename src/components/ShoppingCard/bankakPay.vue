@@ -128,7 +128,7 @@ export default {
                         this.visible = false
                         //TODO: 
                         this.deleteShoppinCartDataListAction()
-                        //TODO: Go to my orders page
+                        //TODO: Go to the Success page
                         this.$router.push({ name: 'cart-success' })
                     }
                 } else {

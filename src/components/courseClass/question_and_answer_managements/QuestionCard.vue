@@ -53,14 +53,14 @@
                         </svg>
                     </h4>
                 </div>
-                <div class="reply" style="cursor: pointer" @click="sendQuestionData">
+                <div class="reply" style="cursor: pointer">
                     <h4>{{question.questionreplySet.totalCount}} رد</h4>
                     <img class="person" src="~assets/img/hassbo.png" alt="" style="display: none" />
                     <img src="~assets/img/reply.png" alt="" />
                 </div>
-                <div class="more" style="display: none">
+                <div class="more" @click="sendQuestionData" style="display: block">
                     <h4>
-                        {{$t('عرض المزيد')}}
+                        {{$t('عرض الردود')}}
                         <img src="~assets/img/moree.png" alt="" />
                     </h4>
                 </div>

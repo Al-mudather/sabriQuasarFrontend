@@ -1,6 +1,6 @@
 <template>
-  <div class="row col-lg-5 col-xs-12">
-    <div class="col-12 text-right">
+  <div class="row col-lg-12 col-xs-12">
+    <div class="col-12 text-right" style="z-index: 9">
       <span class="text-overline">
         {{ selectedQuestionData.question }}
       </span>
@@ -13,7 +13,7 @@
         <img src="~assets/img/send.png" />
       </button>
     </div>
-    <div class="col-12 pernt">
+    <div class="col-12 pernt" style="margin: -55px 0 20px 0;">
       <div class="send">
         <form @submit="createNewReplay">
           <input

@@ -1,7 +1,7 @@
 <template>
 <div class="marketing">
       <img src="~assets/img/OBJECTS.png" alt="">
-      <h3>كود المسوق (الإحالة)</h3>
+      <h3>كود الدخول (الإحالة)</h3>
       <div class="inp">
            <q-input
               class="r_code-input registerationInputCode"

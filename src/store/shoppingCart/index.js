@@ -2,6 +2,8 @@ import { Notify, LocalStorage } from 'quasar'
 
 const state = {
   shoppinCartDialog: false,
+  braintreeClientToken: null,
+  orderData: null,
   totalPaymentFees: LocalStorage.getItem('totalPaymentFees') || 0.0,
   checkoutOrderID: LocalStorage.getItem('orderID') || null,
   shoppingCartDataList: LocalStorage.getItem('shoppingCartList') || []
@@ -9,10 +11,17 @@ const state = {
 
 const mutations = {
 
+  ORDER_DATA_MUTATION (state, value) {
+    state.orderData = value
+  },
+
+  BRAINTREE_CLIENT_TOKEN_MUTATION (state, value) {
+    state.braintreeClientToken = value
+  },
+
   saveCheckoutOrderID (state, value) {
     LocalStorage.set('orderID', value) || []
     state.checkoutOrderID = value
-    
   },
 
   deleteShoppinCartDataList (state) {
@@ -85,6 +94,14 @@ const mutations = {
 }
 
 const actions = {
+
+  SET_ORDER_DATA_Action ({ commit }, value) {
+    commit('ORDER_DATA_MUTATION', value)
+  },
+
+  SET_BRAINTREE_CLIENT_TOKEN_Action ({ commit }, value) {
+    commit('BRAINTREE_CLIENT_TOKEN_MUTATION', value)
+  },
 
   setSaveCheckoutOrderIDAction ({ commit }, value) {
     commit('saveCheckoutOrderID', value)

@@ -14,9 +14,6 @@
                                 v-model="fullName"
                                 hint="Enter your Name in english"
                                 label="Full Name"
-                                :rules="[
-                                    val => !!val || '* Required',
-                                ]"
                             />
                         </div>
                     </div>
@@ -81,8 +78,22 @@ export default {
         if (res.data.me.pk) {
             //TODO: IF the data exists go to payment page
             if (res.data.me.fullName && (res.data.me.phoneNumber2 || res.data.me.phoneNumber3) ) {
+                this.$q.notify({
+                    type: 'positive',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: 'بياناتك الشخصيه مكتمله'
+                })
                 this.$router.push({ name: 'payment' })
             } else {
+                this.$q.notify({
+                    type: 'warning',
+                    progress: true,
+                    multiLine: true,
+                    position: 'top',
+                    message: 'الرجاء اكمال بياناتك الشخصيه'
+                })
                 this.fullName = res.data.me.fullName
                 this.whatsAppNumber = res.data.me.phoneNumber2
                 this.telegramNumber = res.data.me.phoneNumber3

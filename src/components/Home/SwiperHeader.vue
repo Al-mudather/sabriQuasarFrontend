@@ -60,7 +60,7 @@
                 </g>
               </svg>
               <div class="box">
-                <img src="~assets/img/image1.png" alt="" />
+                <img src="~assets/img/image1.png" alt="Medical Training Platform" />
               </div>
             </div>
           </div>

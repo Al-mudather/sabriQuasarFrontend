@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Vue from 'vue'
 import '../assets/css/_bootstrap.min.css'
 import '../assets/css/_bootstrap-rtl.css'
@@ -17,6 +18,9 @@ import vueVimeoPlayer from 'vue-vimeo-player'
 // Vue.use(videojsVimeo)
 import { BootstrapVue } from 'bootstrap-vue'
 import VueCountdownTimer from 'vuejs-countdown-timer';
+import vueBraintree from 'vue-braintree'
+
+Vue.use(vueBraintree)
 
 Vue.use(BootstrapVue)
 

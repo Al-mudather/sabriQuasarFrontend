@@ -1,9 +1,9 @@
 {
   "name": "sabri_quasar_frontend",
   "version": "0.0.1",
-  "description": "Medical Training Center",
-  "productName": "Medical Training Center",
-  "author": "Al-mudather <wollof8@gmail.com>",
+  "description": "The First Medical Training Platform in Sudan, Africa and the Middle East",
+  "productName": "STC | Medical Training Platform",
+  "author": "Alhasif International Company <https://alhasif.com>",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
@@ -57,6 +57,7 @@
     "vue-apollo": "^3.0.5",
     "vue-authenticate": "^1.4.1",
     "vue-awesome-swiper": "^4.1.1",
+    "vue-braintree": "^2.1.0",
     "vue-flickity": "^1.2.1",
     "vue-hellojs": "0.0.4",
     "vue-i18n": "^8.0.0",

@@ -1,11 +1,13 @@
 <template>
     <div class="msPayment">
-        <div class="text-h4 text-center q-ma-md">
+        <!-- <div  v-if="currency == 'SDG'" class="text-h4 text-center q-ma-md">
             {{$t('إختر طريقة الدفع اللتي تناسبك')}}
-        </div>
+        </div> -->
         <div class="options">
             <!-- Paypal Payment -->
-            <paypal-payment v-if="currency != 'SDG' "/>
+            <!-- <paypal-payment v-if="currency != 'SDG' "/> -->
+            <!-- Brain Tree payment -->
+            <!-- <brain-tree-payment/> -->
             <!-- Bankak Payment -->
             <!-- <div v-if="currency == 'SDG'" class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('bankak')"> -->
             <div class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('bankak')">
@@ -13,10 +15,10 @@
                 <h3>{{$t('الدفع عن طريق ارفاق فاتورة البنك')}}</h3>
             </div>
             <!-- Sudanies Payment -->
-            <div v-if="currency == 'SDG'" class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('otherSudaniesBankas')">
+            <!-- <div v-if="currency == 'SDG'" class="sele edit" @click="ENABLE_SUDANIES_PAYMENT('otherSudaniesBankas')">
                 <img src="~assets/img/credit-cards.png" alt="" />
                 <h3>{{$t('البنوك السودانيه')}}</h3>
-            </div>
+            </div> -->
         </div>
         <bankak-payment v-if="enableBankakPayment"/>
         <!--details Payment-->
@@ -30,9 +32,9 @@
                                 rounded
                                 outlined
                                 v-model="card"
-                                mask="#### #### #### ####"
+                                mask="#### #### #### #### #### #### ####"
                                 fill-mask="#"
-                                hint="card number: #### #### #### ####"
+                                hint="card number: #### #### #### #### #### ####"
                                 label="card number"
                                 :rules="[
                                     val => !!val || '* Required',
@@ -92,8 +94,9 @@ import { mapState, mapActions } from 'vuex'
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
-import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
+// import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
 import bankakPayment from 'src/components/ShoppingCard/bankakPay.vue'
+// import brainTreePayment from 'src/components/ShoppingCard/brainTreePayment.vue'
 
 export default {
   name:  "paymentCartpage",
@@ -110,7 +113,8 @@ export default {
     }
   },
   components: {    
-    'paypal-payment': paypalPayment,
+    // 'brain-tree-payment': brainTreePayment,
+    // 'paypal-payment': paypalPayment,
     'bankak-payment': bankakPayment
   },
  

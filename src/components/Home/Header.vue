@@ -1,19 +1,19 @@
 <template>
  <section class="header">
-      <div v-if="$_.isEmpty(data)" class="cn text-center">
-          <div class="swiper-container">
-            <div class="swiper-wrapper">
-              <div class="swiper-slide full_width">
-                <Swiper-Header />
-              </div>
-            </div>
+    <div v-show="$_.isEmpty(data)" class="cn text-center">
+      <div class="swiper-container">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide full_width">
+            <Swiper-Header />
           </div>
+        </div>
       </div>
-      <div v-else class="cn">
-          <span class="coloor"></span>
-          <PromotionSection :allSlidersData="data"/>
-      </div>
-    </section>
+    </div>
+    <div v-show="!$_.isEmpty(data)" class="cn">
+        <span class="coloor"></span>
+        <PromotionSection :allSlidersData="data"/>
+    </div>
+  </section>
 </template>
 
 <script>

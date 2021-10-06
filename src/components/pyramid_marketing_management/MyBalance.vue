@@ -22,7 +22,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <q-input mask="###################" dense v-model="amount" autofocus @keyup.enter="prompt = false" />
+          <q-input dense v-model="amount" autofocus @keyup.enter="prompt = false" />
         </q-card-section>
  
         <q-btn  style="margin-right: 3rem" @click="amount = null " color="negative" label="Cancel" v-close-popup />
