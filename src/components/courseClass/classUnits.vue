@@ -32,7 +32,7 @@
                                     aria-labelledby="headingOne"
                                     data-parent="#accordion"
                                 >
-                                    <div @click="clickedItem" class="card-body">
+                                    <div @click="clickedItem($event)" class="card-body">
                                         <q-item
                                             style="width: 95%"
                                             v-for="content in unit.node

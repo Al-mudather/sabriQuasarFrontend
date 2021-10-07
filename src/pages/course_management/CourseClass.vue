@@ -210,7 +210,9 @@ import classUnits from "src/components/courseClass/classUnits.vue";
 import classMaterials from "src/components/courseClass/classMaterials";
 import classinstructors from "src/components/courseClass/classinstructors.vue";
 import classQuestionAndAnswer from "src/components/courseClass/question_and_answer_managements/classQuestionAndAnswer.vue";
+import { scroll } from 'quasar'
 
+const { getScrollTarget, setScrollPosition } = scroll
 export default {
   name: "CourseClass",
   data() {
@@ -295,6 +297,14 @@ export default {
       'resetContentListsAction'
       ]
     ),
+
+    handleScroll () {
+        const ele = document.getElementById('video') // You need to get your element here
+        const target = getScrollTarget(ele)
+        const offset = ele.offsetTop - ele.scrollHeight
+        const duration = 1000
+        setScrollPosition(target, offset, duration)
+    },
 
     /////////////////////////////////////////////////////////////
     // Start Learning Tracking
@@ -459,6 +469,9 @@ export default {
           // this.VideoData = JSON.parse(value.modelValue).video;
           
           this.visible = true;
+
+          //TODO: GO to the video location
+          this.handleScroll()
       } else if ( value.modelName === 'ContentFile' ) {
           // If the modelName is a file //
           //TODO: set the file data
