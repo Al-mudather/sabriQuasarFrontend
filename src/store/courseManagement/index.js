@@ -10,6 +10,7 @@ import _ from 'lodash';
 const state = {
   dataCreated: true,
   startLearningTrackingID: null,
+  fileData: null,
   selectedClassUnitContent: {},
   currentContent: {},
   contentLists: [],
@@ -17,6 +18,10 @@ const state = {
 }
 
 const mutations = {
+  SET_FILE_DATA_MUTATION (state, value) {
+    state.fileData = value
+  },
+
   SET_START_LEARNING_TRACKING_ID_MUTATION (state, value) {
     state.startLearningTrackingID = value
   },
@@ -106,6 +111,10 @@ const actions = {
             }
         })
     })
+  },
+
+  SET_FILE_DATA_ACTION ({ commit }, value) {
+    commit('SET_FILE_DATA_MUTATION', value)
   },
 
   SET_START_LEARNING_TRACKING_ID_ACTION ({ commit }, value) {

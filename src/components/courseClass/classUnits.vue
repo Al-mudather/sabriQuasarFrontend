@@ -96,6 +96,7 @@ export default {
 
     computed: {
         ...mapState('courseManagement', [
+            'fileData',
             'selectedClassUnitContent',
             'startLearningTrackingID',
             'contentLists',

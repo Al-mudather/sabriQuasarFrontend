@@ -235,7 +235,7 @@
 
 <script>
 import contentHeader from 'components/utils/contentHeader'
-import contentItem from 'components/courseDetails/contentItem'
+import contentItem from 'components/courseDetails/contentItem.vue'
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
 import skeletonList from 'src/components/skeleton/skeletonList'
 

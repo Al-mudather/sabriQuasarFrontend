@@ -290,6 +290,7 @@ export default {
       'START_LEARNING_UNIT_TRAKING_ACTION',
       'SET_START_LEARNING_TRACKING_ID_ACTION',
       'END_LEARNING_UNIT_TRAKING_ACTION',
+      'SET_FILE_DATA_ACTION',
       'setCurrentContentAction',
       'resetContentListsAction'
       ]
@@ -438,7 +439,7 @@ export default {
       //TODO: empty the cipher
       this.cipherVideo = null
       //TODO: empty the file data
-      this.fileData = null
+      this.SET_FILE_DATA_ACTION(null)
       //TODO: Show waiting point
       this.videoLoaded = false
       //TODO: Get the content data
@@ -460,8 +461,8 @@ export default {
           this.visible = true;
       } else if ( value.modelName === 'ContentFile' ) {
           // If the modelName is a file //
-          //TODO: Get the file data
-          this.fileData = contentData
+          //TODO: set the file data
+          this.SET_FILE_DATA_ACTION(contentData)
       }
       
       // const el = this.$refs.videoPlayer
