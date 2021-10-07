@@ -109,7 +109,7 @@ export default {
         // TODO: If the learning tracker is started, end it
         // this.END_LEARNING_UNIT_TRAKING();
         //TODO: reset the content list, so the video player can be initialized
-        this.resetContentListsAction()
+        this.resetContentListsAction() 
     },
 
     watch: {
@@ -154,7 +154,8 @@ export default {
 
     methods: {
         ...mapActions('courseManagement', [
-            'setCurrentContentAction'
+            'setCurrentContentAction',
+            'resetContentListsAction'
         ]),
 
         downloadFile (fileURL) {

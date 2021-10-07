@@ -298,7 +298,7 @@ export default {
       ]
     ),
 
-    handleScroll () {
+    GO_TO_THE_VIDEO_LOCATION () {
         const ele = document.getElementById('video') // You need to get your element here
         const target = getScrollTarget(ele)
         const offset = ele.offsetTop - ele.scrollHeight
@@ -471,7 +471,7 @@ export default {
           this.visible = true;
 
           //TODO: GO to the video location
-          this.handleScroll()
+          this.GO_TO_THE_VIDEO_LOCATION()
       } else if ( value.modelName === 'ContentFile' ) {
           // If the modelName is a file //
           //TODO: set the file data

@@ -8,17 +8,22 @@
             <h3>{{$t('الإشعارات')}}</h3>
           </div>
         </div>
-        <div class="notifi">
+        <div v-if="$_.get(GET_NOTIFICATION_DATA, 'totalCount') == 0" class="empty">
+            <img src="~assets/img/no_notification.png" alt="">
+            <h3> عذرا لا تـوجد إشــعارات فــي الوقــت الحـالــي </h3>
+        </div>
+        <div v-if="$_.isEmpty(GET_NOTIFICATION_DATA, 'edges')" style="width: 55%">
+          <q-skeleton class="q-mt-sm" v-for="i in 7" :key="i" height="100px" />
+        </div>
+        <div v-else class="notifi">
           <Notification-Card
             v-for="notification in GET_NOTIFICATION_DATA.edges"
             :key="notification.node.pk"
             :notification="notification.node"
           />
-
-        </div>
-        <div v-if="$_.isEmpty(GET_NOTIFICATION_DATA.edges)" class="empty">
-            <img src="~assets/img/no_notification.png" alt="">
-            <h3> عذرا لا تـوجد إشــعارات فــي الوقــت الحـالــي </h3>
+          <div class="butDown text-center" v-if='$_.get(myNotifications,"[pageInfo][hasNextPage]")'>
+            <button @click="LOAD_MORE_DATA">{{$t('عرض المزيد')}}<img class="q-mr-sm" src="~assets/img/moree.png" alt=""></button>
+          </div>
         </div>
       </div>
     </div>
@@ -35,7 +40,24 @@ export default {
   name: "Notification",
   data () {
     return {
+      myNotifications: '',
+      loading: false,
       notificationData: []
+    }
+  },
+  apollo: {
+    myNotifications: {
+      query: GetAllMyNotifications,
+      variables: {
+        orderBy: ['-id'],
+        limit: 2
+      },
+      result (res) {
+        this.loading = res.loading 
+        if (!res.loading) {
+          this.notificationData = res.data.myNotifications
+        }
+      }
     }
   },
   components: {
@@ -47,15 +69,16 @@ export default {
     this.setActiveNavAction('NOTIFICATION')
     // TODO: Get the notification from the [ UserNavBar ] component
     // this.$root.$on('NotificationData', this.GET_NOTIFICATION_DATA)
-    // TODO: Get the notification
-    this.$apollo.query({
-      query: GetAllMyNotifications,
-      variables: {
-        orderBy: ['-id']
-      }
-    }).then( res => {
-      this.notificationData = res.data.myNotifications
-    } )
+    // TODO: Get the notification 
+    // this.$apollo.query({
+    //   query: GetAllMyNotifications,
+    //   variables: {
+    //     orderBy: ['-id'],
+    //     limit: 2
+    //   }
+    // }).then( res => {
+      
+    // } )
   },
 
   computed: {
@@ -65,7 +88,33 @@ export default {
   },
 
   methods: {
-    ...mapActions('settings', ['setActiveNavAction'])
+    ...mapActions('settings', ['setActiveNavAction']),
+    async LOAD_MORE_DATA () {
+      await this.$apollo.queries.myNotifications.fetchMore({
+        variables: {
+          cursor: this.myNotifications.pageInfo.endCursor
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          const newEdges = fetchMoreResult.myNotifications.edges
+          const pageInfo = fetchMoreResult.myNotifications.pageInfo
+
+          if (newEdges.length) {
+            this.myNotifications = {
+              __typename:
+                                previousResult.myNotifications.__typename,
+              edges: [
+                ...previousResult.myNotifications.edges,
+                ...newEdges
+              ],
+              pageInfo
+            }
+
+            return { myNotifications: this.myNotifications }
+          }
+          return previousResult
+        }
+      })
+    },
   }
 
 };

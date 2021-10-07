@@ -3,10 +3,11 @@
         <div class="row justify-center">
            <!-- 
             Start of Questions List
-          --> 
+          -->
             <Questions-List 
               v-if="showQuestions"
               v-on:questionData="showQuestionAnswersHandler"
+              v-on:loadMoreQuestions="LOAD_MORE_DATA"
               :course="course"
               :allQuestionsByCourse="allQuestionsByCourse"
             />
@@ -61,7 +62,8 @@ export default {
       variables () {
         return {
           courseId: this.course.pk,
-          orderBy: '-id'
+          orderBy: '-id',
+          limit: 10
         }
       }
     },
@@ -81,7 +83,7 @@ export default {
 
             const { notification, answer, question } = data.questionAnswerSubscription;
 
-            console.log(notification, answer, question)
+            // console.log(notification, answer, question)
             if (notification.type === "QUESTION_ASK") {
               // console.log(question)
               this.allQuestionsByCourse.edges.unshift({
@@ -113,6 +115,36 @@ export default {
   },
 
   methods: {
+
+    async LOAD_MORE_DATA () {
+      await this.$apollo.queries.allQuestionsByCourse.fetchMore({
+        variables: {
+          courseId: this.course.pk,
+           orderBy: '-id',
+          cursor: this.allQuestionsByCourse.pageInfo.endCursor
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          const newEdges = fetchMoreResult.allQuestionsByCourse.edges
+          const pageInfo = fetchMoreResult.allQuestionsByCourse.pageInfo
+
+          if (newEdges.length) {
+            this.allQuestionsByCourse = {
+              __typename:
+                                previousResult.allQuestionsByCourse.__typename,
+              edges: [
+                ...previousResult.allQuestionsByCourse.edges,
+                ...newEdges
+              ],
+              pageInfo
+            }
+
+            return { allQuestionsByCourse: this.allQuestionsByCourse }
+          }
+          return previousResult
+        }
+      })
+    },
+
     showQuestionAnswersHandler (question) {
       // TODO: Save the related question
       this.selectedQuestionData = question

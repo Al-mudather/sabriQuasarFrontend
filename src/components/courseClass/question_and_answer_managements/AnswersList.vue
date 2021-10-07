@@ -32,7 +32,7 @@
 
       <div
         class="ask"
-        v-for="replay in selectedQuestionData.questionreplySet.edges"
+        v-for="replay in allQuestionRepliesForQuestion.edges"
         :key="replay.node.id"
       >
         <transition
@@ -43,6 +43,9 @@
           <Answer-card :replay="replay.node" />
         </transition>
       </div>
+      <div class="butDown text-center" v-if='$_.get(allQuestionRepliesForQuestion,"[pageInfo][hasNextPage]")'>
+        <button @click="LOAD_MORE_DATA">{{$t('عرض المزيد')}}<img class="q-mr-sm" src="~assets/img/moree.png" alt=""></button>
+      </div>
     </div>
   </div>
 </template>
@@ -50,22 +53,66 @@
 <script>
 import AnswerCard from "src/components/courseClass/question_and_answer_managements/AnswerCard";
 import { CreateQuestionReply } from "src/queries/question_management/mutation/CreateQuestionReply";
+import { AllQuestionRepliesForQuestion } from "src/queries/question_management/query/AllQuestionRepliesForQuestion.js"
 
 export default {
   data() {
     return {
       lodash: this.$_,
+      allQuestionRepliesForQuestion: "",
       answer: ""
     };
   },
   components: {
     AnswerCard
   },
+  apollo: {
+    allQuestionRepliesForQuestion: {
+      query () {
+        return AllQuestionRepliesForQuestion
+      },
+      variables () {
+        return {
+          questionId: this.selectedQuestionData.pk,
+          orderBy: '-id',
+          limit: 10
+        }
+      }
+    }
+  },
   props: ["selectedQuestionData"],
   methods: {
     closeTheAnswers() {
       this.showQuestions = true;
       this.$emit("closeTheAnswersList", true);
+    },
+    async LOAD_MORE_DATA () {
+      await this.$apollo.queries.allQuestionRepliesForQuestion.fetchMore({
+        variables: {
+          questionId: this.selectedQuestionData.pk,
+          orderBy: '-id',
+          cursor: this.allQuestionRepliesForQuestion.pageInfo.endCursor
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          const newEdges = fetchMoreResult.allQuestionRepliesForQuestion.edges
+          const pageInfo = fetchMoreResult.allQuestionRepliesForQuestion.pageInfo
+
+          if (newEdges.length) {
+            this.allQuestionRepliesForQuestion = {
+              __typename:
+                                previousResult.allQuestionRepliesForQuestion.__typename,
+              edges: [
+                ...previousResult.allQuestionRepliesForQuestion.edges,
+                ...newEdges
+              ],
+              pageInfo
+            }
+
+            return { allQuestionRepliesForQuestion: this.allQuestionRepliesForQuestion }
+          }
+          return previousResult
+        }
+      })
     },
     async createNewReplay(e) {
       e.preventDefault();

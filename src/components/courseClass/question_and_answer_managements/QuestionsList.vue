@@ -31,6 +31,9 @@
           />
         </transition>
       </div>
+      <div class="butDown text-center" v-if='$_.get(allQuestionsByCourse,"[pageInfo][hasNextPage]")'>
+        <button @click="LOAD_MORE_DATA">{{$t('عرض المزيد')}}<img class="q-mr-sm" src="~assets/img/moree.png" alt=""></button>
+      </div>
     </div>
   </div>
 </template>
@@ -51,6 +54,9 @@ export default {
   },
   props: ["course", "allQuestionsByCourse"],
   methods: {
+    LOAD_MORE_DATA () {
+      this.$emit('loadMoreQuestions')
+    },
     showQuestionAnswersHandleer (question) {
       // TODO: Save the related question
       this.$emit('questionData', question)

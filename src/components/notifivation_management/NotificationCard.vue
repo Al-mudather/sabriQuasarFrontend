@@ -1,5 +1,10 @@
 <template>
-    <div class="notf" @click="goToTheNotificationSource" style="cursor: pointer">
+    <transition
+        appear
+        enter-active-class="animated fadeIn"
+        leave-active-class="animated fadeOut"
+    >
+        <div class="notf" @click="goToTheNotificationSource" style="cursor: pointer">
         <div class="row">            
             <div class="col-lg-2">
                 <div class="user">
@@ -13,7 +18,7 @@
                     <span>{{notification.title}}</span>
                 </h3>
                 <h3 v-else-if="notification.type === 'QUESTION_ANS' ">
-                    {{$t('جواب سؤال :')}} 
+                    {{$t('جواب السؤال :')}} 
                     <span>{{notification.title}}</span>
                     {{$t('هو :')}} 
                     <span>{{notification.description}}</span>
@@ -25,7 +30,8 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
+    </transition>
 </template>
 
 <script>

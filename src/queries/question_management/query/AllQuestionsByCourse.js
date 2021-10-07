@@ -1,9 +1,15 @@
 import gql from 'graphql-tag'
-
+ 
 export const AllQuestionsByCourse = gql`
-query AllQuestionsByCourse($courseId: Int!, $orderBy:[String]){
-  allQuestionsByCourse(courseId: $courseId, orderBy: $orderBy) {
+query AllQuestionsByCourse($courseId: Int!, $orderBy:[String], $cursor: String, $limit: Int){
+  allQuestionsByCourse(courseId: $courseId, orderBy: $orderBy, after: $cursor, first: $limit) {
     totalCount,
+    pageInfo {
+      startCursor, 
+      endCursor,
+      hasNextPage,
+      hasPreviousPage
+    },
     edges {
         node {
           id,
