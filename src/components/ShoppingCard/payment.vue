@@ -93,7 +93,7 @@
 import { mapState, mapActions } from 'vuex'
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
-import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
+// import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 // import paypalPayment from 'src/components/ShoppingCard/paypalPayment'
 import bankakPayment from 'src/components/ShoppingCard/bankakPay.vue'
 // import brainTreePayment from 'src/components/ShoppingCard/brainTreePayment.vue'
@@ -120,24 +120,24 @@ export default {
  
   async mounted () {
     //TODO: If the user don't completed his profile data send him to the user info page
-    const res = await this.$apollo.query({ 
-            query: GetMyProfileData
-        })
+    // const res = await this.$apollo.query({ 
+    //         query: GetMyProfileData
+    //     })
 
-    if (res.data.me.pk) {
-        //TODO: IF the data exists go to payment page
-        if (res.data.me.fullName && (res.data.me.phoneNumber2 || res.data.me.phoneNumber3) ) {
-        } else {
-            this.$q.notify({
-                type: 'negative',
-                progress: true,
-                multiLine: true,
-                position: 'top',
-                message: "يجب ان تكمل بياناتك الشخصيه"
-            })
-            this.$router.push({ name: 'user-info' })
-        }
-    }
+    // if (res.data.me.pk) {
+    //     //TODO: IF the data exists go to payment page
+    //     if (res.data.me.fullName && (res.data.me.phoneNumber2 || res.data.me.phoneNumber3) ) {
+    //     } else {
+    //         this.$q.notify({
+    //             type: 'negative',
+    //             progress: true,
+    //             multiLine: true,
+    //             position: 'top',
+    //             message: "يجب ان تكمل بياناتك الشخصيه"
+    //         })
+    //         this.$router.push({ name: 'user-info' })
+    //     }
+    // }
 
     //TODO: IF the shopping cart empty redirect the user to the home page
     this.WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT()
