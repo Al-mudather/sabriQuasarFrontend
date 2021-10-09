@@ -162,15 +162,17 @@ export default {
                         .mutate({ 
                             mutation: UpdateUserProfile,
                             variables: {
-                                fullName: this.fullName,
-                                phoneNumber2: this.whatsAppNumber,
-                                phoneNumber3: this.telegramNumber
+                                input: {
+                                    fullName: this.fullName,
+                                    phoneNumber2: this.whatsAppNumber,
+                                    phoneNumber3: this.telegramNumber
+                                }
                             }
                         })
                     //TODO: Get the success result
-                    const success = res.data.updateAccount.success
+                    const success = res.data.updateUserProfile.success
                     //TODO: Get the errors result
-                    const errors = res.data.updateAccount.errors
+                    const errors = res.data.updateUserProfile.errors
     
                     if (success) {
                         this.visible = false

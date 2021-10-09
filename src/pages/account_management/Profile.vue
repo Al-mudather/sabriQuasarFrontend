@@ -31,16 +31,12 @@
                   <div class="row">
                     <div class="col-lg-6 col-xs-12">
                       <div class="inp">
-                        <img src="~assets/img/usser.png" alt="" />
                         <q-input
                             rounded
                             outlined
                             v-model="fullName"
                             hint="Enter your Name in english"
                             :label="$t('الاسم الحقيقي')"
-                            :rules="[
-                                val => !!val || '* Required',
-                            ]"
                         />
                       </div>
                     </div>
@@ -217,17 +213,19 @@ export default {
           .mutate({ 
             mutation: UpdateUserProfile,
             variables: {
-              fullName: this.fullName,
-              phoneNumber2: this.whatsAppNumber,
-              phoneNumber3: this.telegramNumber,
-              gender: this.gender
+              input: {
+                fullName: this.fullName,
+                phoneNumber2: this.whatsAppNumber,
+                phoneNumber3: this.telegramNumber,
+                gender: this.gender
+              }
             },
             refetchQueries: [{
               query: GetMyProfileData,
             }]
           })
           .then(result => {
-            if (result.data.updateAccount.success) {
+            if (result.data.updateUserProfile.success) {
               this.$q.notify({
                 type: "positive",
                 multiLine: true,
@@ -235,8 +233,8 @@ export default {
                 message: this.$t('تم تحديث بياناتك بنجاح')
               })
               this.$router.push({ name: 'Home' })
-            } else if (result.data.updateAccount.errors) {
-              this.errorHandler(result.data.updateAccount.errors);
+            } else if (result.data.updateUserProfile.errors) {
+              this.errorHandler(result.data.updateUserProfile.errors);
             }
             this.visible = false
           })

@@ -33,7 +33,7 @@
                               height="500px"
                               square
                             />
-                              <div v-show="videoLoaded">
+                              <div v-show="videoLoaded" style="margin-bottom: 2rem;">
                                 <div v-if="cipherVideo" v-html="cipherVideo"></div>
                                 <q-video
                                     v-show="!cipherVideo"
