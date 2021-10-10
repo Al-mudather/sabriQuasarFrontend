@@ -211,6 +211,8 @@ export default {
         ...mapActions('authentication', ['logOutAction']),
         ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction', 'setActiveNavAction']),
         ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction']),
+        ...mapActions('pyramidManagement', ['SET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
+
 
         MAKE_ACTIVE (e) {
             let active_nav = this.$jquery(e.target).parent().closest('a')
@@ -226,6 +228,8 @@ export default {
         },
 
         logTheUserOut() {
+            //TODO: Delete the marketer code
+            this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION('')
             //TODO: Empty the shopping cart
             this.deleteShoppinCartDataListAction()
             //TODO: redirect the user to the home page

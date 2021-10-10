@@ -31,6 +31,7 @@
 
 <script>
 import { JoinPlatform } from 'src/queries/pyramid_marketing_management/mutation/JoinPlatform'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   data () {
@@ -40,14 +41,24 @@ export default {
     }
   },
 
+  computed: {
+    ...mapState('pyramidManagement',['registerationCode']),
+  },
+
   mounted() {
     this.$q.notify({
       type: 'warning',
       progress: true,
       multiLine: true,
       position: 'top',
-      message: this.$t('قم بإدخال كود المسوق')
-  })
+      message: this.$t('قم بإدخال كود التسجيل')
+    })
+    
+    if (this.registerationCode) {
+      this.r_code = this.registerationCode
+      //TODO: Register the student under the marketer
+      // this.REGISTER_THE_USER_WITH_REGISTERATION_CODE()
+    }
   },
   methods: {
     async REGISTER_THE_USER_WITH_REGISTERATION_CODE (event) {

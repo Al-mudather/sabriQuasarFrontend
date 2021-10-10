@@ -49,7 +49,7 @@ import courseUnits from 'components/courseDetails/courseUnits.vue'
 import courseInstructors from 'components/courseDetails/courseInstructors'
 import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'CourseDetails',
@@ -86,7 +86,10 @@ export default {
       handler: async function (params) {
         this.courseID = params.id
         this.coursePK = params.pk
-        
+        //TODO: Get the registeration code from the link
+        const marketerCode = this.$_.get(params, "[code]")
+        //TODO: Set the registerstion code to the stoare
+        this.SET_REGISTERATION_CODE_ACTION(marketerCode)
         //TODO: Don't open the course yet
         this.openCourse = false
         // TODO: IS THE USER HAS VALED INROLLMENT IN THIS COURSE
@@ -106,6 +109,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions("pyramidManagement", ["SET_REGISTERATION_CODE_ACTION"]),
 
     async IS_THE_USER_HAS_VALED_INROLLMENT_IN_THIS_COURSE (coursePK) {
         try {

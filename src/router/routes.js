@@ -34,8 +34,8 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: 'course/:pk/:id', name: 'course-details', component: () => import('pages/course_management/CourseDetails.vue') },
-      { path: '/course/:link/:pk/:id', name: 'course-affilliate-details', component: () => import('pages/course_management/CourseDetails.vue') },
-      { path: '/courses', name: 'courses', component: () => import('pages/course_management/Courses.vue') }
+      { path: 'course/:code/:pk/:id', name: 'course-affilliate-details', component: () => import('pages/course_management/CourseDetails.vue') },
+      { path: 'courses', name: 'courses', component: () => import('pages/course_management/Courses.vue') }
     ]
   },
   {

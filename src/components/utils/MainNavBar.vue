@@ -171,12 +171,15 @@ export default {
         ...mapActions('authentication', ['logOutAction']),
         ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction']),
         ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction']),
+        ...mapActions('pyramidManagement', ['SET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
         changeMenuState () {
             this.setOpenMenuAction(true)
         }, 
 
         LOG_USER_OUT () {
+            //TODO: Delete the marketer code
+            this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION('')
             //TODO: Empty the shopping cart
             this.deleteShoppinCartDataListAction()
             //TODO: redirect the user to the home page

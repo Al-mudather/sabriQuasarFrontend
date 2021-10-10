@@ -2,6 +2,7 @@ import { Notify, LocalStorage } from 'quasar'
 import {apolloClient} from 'src/apollo/client'
 import {tokenStorage, userProfileStorage} from "src/localStorageService";
 import {RefreshLoginUserWithEmail} from 'src/queries/account_management/mutation/RefreshUserToken'
+import Vuex from 'vuex'
 
 const state = {
   navbarSearch: true,

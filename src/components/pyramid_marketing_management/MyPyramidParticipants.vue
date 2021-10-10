@@ -19,7 +19,7 @@
 <script>
 import { MyPyramidMarketers } from 'src/queries/pyramid_marketing_management/query/MyPyramidMarketers'
 import { copyToClipboard } from 'quasar'
-import { mapActions, mapState } from "vuex";
+import { mapState } from "vuex"
 export default {
   name: "MyPyramidParticipants",
   data() {
@@ -43,7 +43,7 @@ export default {
   },
 
   computed: {
-    ...mapState('pyramidManagement', ['myMarketingCode']),
+    ...mapState('pyramidManagement', ['myMarketingCode'])
   },
 
   // async mounted () {

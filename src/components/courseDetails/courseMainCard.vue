@@ -74,7 +74,7 @@
                 fill="#fbc74b"
                 fill-rule="evenodd"
               />
-            </g>
+            </g> 
           </g>
         </svg>
         <div class="pric">
@@ -84,17 +84,27 @@
         </div>
       </div>
 
+      <div class="share" v-if="!$_.isEmpty(myMarketingCode)">
+      <!-- <div class="share"> -->
+          <form @submit="COPY_THE_SHARING_LINK($event)">
+            <input id="shar-link" type="text" :value="PREPARE_THE_COURSE_SHARING_LINK">
+            <button style="cursor: pointer;" type="submit"><q-tooltip>{{message}}</q-tooltip><img src="~assets/img/copyed.png"></button>
+          </form>
+        </div>
+
     </div>
   </div>
 </template>
 
 <script>
+import { copyToClipboard } from 'quasar'
 import { mapState, mapActions } from "vuex";
 
 export default {
   name: "CourseMainCard",
   data() {
     return {
+      message: this.$t('انسخ الرابط')
     };
   },
   props: ["courseData", 'openCourse'],
@@ -102,12 +112,17 @@ export default {
   computed: {
     ...mapState("authentication", ["user"]),
     ...mapState('settings',['currency']),
+    ...mapState('pyramidManagement', ['myMarketingCode']),
 
     CALCULATE_IMAGE_URL () {
       if (process.env.NODE_ENV == 'development') {
         return 'http://localhost:8000/media/' + this.courseData.profile
       }
       return location.origin + '/media/' + this.courseData.profile
+    },
+
+    PREPARE_THE_COURSE_SHARING_LINK () {
+      return `${location.origin}/#/course/${this.myMarketingCode}/${this.$_.get(this.$route, "[params][pk]")}/${this.$_.get(this.$route, "[params][id]")}`
     },
 
     formatCoureFee() {
@@ -138,6 +153,33 @@ export default {
 
   methods: {
     ...mapActions("shoppingCart", ["setShoppingCartDataListAction"]),
+
+    COPY_THE_SHARING_LINK(e) {
+      e.preventDefault();
+
+      let copyText = document.getElementById("shar-link");
+
+      /* Select the text field */
+      copyText.focus();
+      copyText.select();
+
+      copyToClipboard(copyText.value)
+        .then(() => {
+          // success!
+          this.message = this.$t('تم النسخ')
+          this.$q.notify({
+              type: 'positive',
+              progress: true,
+              multiLine: true,
+              position: 'top',
+              message: this.$t('تم النسخ')
+          })
+
+        })
+        .catch((e) => {
+          // fail
+        })
+    },
 
     GO_TO_THE_COURSE_LEARNING_CLASS () {
       this.$router.push({ name: 'course-class', params: { pk: this.$route.params.pk, id: this.$route.params.id }, query:{ tab: 'tutorial' } })
