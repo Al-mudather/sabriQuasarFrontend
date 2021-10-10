@@ -178,8 +178,8 @@ export default {
         GoToPaymentCartPage () {
 
             if (!this.$_.isEmpty(this.user)) {
-                // this.$router.push({ name: 'payment' })
-                this.$router.push({ name: 'user-info' })
+                this.$router.push({ name: 'payment' })
+                // this.$router.push({ name: 'user-info' })
 
             } else {
                 
