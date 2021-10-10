@@ -2,7 +2,7 @@
   <div class="record">
     <div class="row">
       <div class="col-lg-12">
-        <div class="oper" v-if="withdrawLists.edges.length > 0">
+        <div class="oper" v-if="$_.get(withdrawLists,'[edges]').length > 0">
           <div class="row">
             <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" v-for="order in $_.get(withdrawLists,'[edges]')" :key="order.node.pk">
               <div class="all">

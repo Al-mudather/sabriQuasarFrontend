@@ -121,8 +121,8 @@ import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_market
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 
 import AccountHeader from "src/components/utils/accountHeader.vue";
-import GoogleAuthentication from 'src/components/Account/GoogleAuthentication';
-import FacebookAuthentication from 'src/components/Account/FacebookAuthentication';
+import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue';
+import FacebookAuthentication from 'src/components/Account/FacebookAuthentication.vue';
 
 export default {
     data() {
@@ -153,6 +153,7 @@ export default {
     methods: {
         ...mapActions('authentication', ['loginAction']),
         ...mapActions('settings', ['setCurrencyAction']),
+        ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
         goToPasswordResetPage() {
             this.$router.push({ name: 'password-reset' });
@@ -260,6 +261,8 @@ export default {
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+                //TODO: IF the user is a marketer. Get his network cocde
+                this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
                 //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
                 const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
 

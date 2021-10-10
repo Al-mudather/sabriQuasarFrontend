@@ -174,21 +174,21 @@ export default {
                     //TODO: Get the errors result
                     const errors = res.data.updateUserProfile.errors
     
-                    if (success) {
-                        this.visible = false
-                        this.$q.notify({
-                            type: "positive",
-                            multiLine: true,
-                            progress: true,
-                            message: "Great the data wase updated"
-                        }) 
-                        this.$router.push({ name: 'payment' })
-                    }
-    
-                    if (errors) {
-                        this.visible = false
-                        this.errorHandler(errors);
-                    }
+                    this.$q.notify({
+                        type: "positive",
+                        multiLine: true,
+                        progress: true,
+                        message: "Great the data wase updated"
+                    }) 
+                    this.$router.push({ name: 'payment' })
+                    // if (success) {
+                    //     this.visible = false
+                    // }
+
+                    // if (errors) {
+                    //     this.visible = false
+                    //     this.errorHandler(errors);
+                    // }
                 } else {
                     this.visible = false
                     this.$q.notify({

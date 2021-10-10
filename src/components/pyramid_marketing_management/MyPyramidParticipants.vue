@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div> 
     <div class="harm">
       <img src="~assets/img/harm.png" alt="">
     </div>
@@ -8,7 +8,7 @@
         <span>{{myPyramidMarketersCount}}</span>
         <div class="share">
             <form @submit="CopyTheLinkHandler($event)">
-              <input id="shar-link" type="text" :value="myPyramidAccount.pyramidCode">
+              <input id="shar-link" type="text" :value="myMarketingCode">
               <button style="cursor: pointer;" type="submit"><q-tooltip>{{message}}</q-tooltip><img src="~assets/img/copyed.png"></button>
             </form>
         </div>
@@ -17,16 +17,15 @@
 </template>
 
 <script>
-import { MyPyramidAccount } from 'src/queries/pyramid_marketing_management/query/MyPyramidAccount'
 import { MyPyramidMarketers } from 'src/queries/pyramid_marketing_management/query/MyPyramidMarketers'
 import { copyToClipboard } from 'quasar'
-
+import { mapActions, mapState } from "vuex";
 export default {
   name: "MyPyramidParticipants",
   data() {
     return {
       message: this.$t('انسخ الرابط'),
-      myPyramidAccount: '',
+      // myMarketingCode: '',
       myPyramidMarketersCount: 0.0
     };
   },
@@ -40,21 +39,21 @@ export default {
           this.myPyramidMarketersCount = result.data.myPyramidMarketers
         }
       }
-    },
- 
-    myPyramidAccount: {
-      query () {
-        return MyPyramidAccount
-      },
-      result (result) {
-        if (!result.loading) {
-          this.myPyramidAccount = result.data.myPyramidAccount
-        }
-      }
     }
   },
 
+  computed: {
+    ...mapState('pyramidManagement', ['myMarketingCode']),
+  },
+
+  // async mounted () {
+  //   //TODO: Get my marketing code
+  //   const res = await this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+  //   this.myMarketingCode = res
+  // },
+
   methods: {
+    // ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
     CopyTheLinkHandler(e) {
       e.preventDefault();
