@@ -57,7 +57,7 @@ export default {
     if (this.registerationCode) {
       this.r_code = this.registerationCode
       //TODO: Register the student under the marketer
-      // this.REGISTER_THE_USER_WITH_REGISTERATION_CODE()
+      this.REGISTER_THE_USER_WITH_REGISTERATION_CODE()
     }
   },
   methods: {

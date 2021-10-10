@@ -19,7 +19,7 @@
 <script>
 import { MyPyramidMarketers } from 'src/queries/pyramid_marketing_management/query/MyPyramidMarketers'
 import { copyToClipboard } from 'quasar'
-import { mapState } from "vuex"
+import { mapState, mapActions } from "vuex"
 export default {
   name: "MyPyramidParticipants",
   data() {
@@ -46,14 +46,13 @@ export default {
     ...mapState('pyramidManagement', ['myMarketingCode'])
   },
 
-  // async mounted () {
-  //   //TODO: Get my marketing code
-  //   const res = await this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
-  //   this.myMarketingCode = res
-  // },
+  mounted () {
+    //TODO: Get my marketing code
+    this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+  },
 
   methods: {
-    // ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
+    ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
     CopyTheLinkHandler(e) {
       e.preventDefault();

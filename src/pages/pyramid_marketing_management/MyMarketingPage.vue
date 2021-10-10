@@ -45,7 +45,6 @@
 </template>
 
 <script>
-// import { mapActions } from 'vuex'
 import WhoJoindThePlatformThrowMe from 'src/components/pyramid_marketing_management/WhoJoindThePlatformThrowMe.vue'
 import MyBalance from 'src/components/pyramid_marketing_management/MyBalance.vue'
 import MyPyramid from 'src/components/pyramid_marketing_management/MyPyramid.vue'

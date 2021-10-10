@@ -29,7 +29,6 @@ export default {
             "loginAction"
         ]),
         ...mapActions('settings', ['setCurrencyAction']),
-        ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
         GoToHomePage() {
             this.$router.push({ name: "Home" });
@@ -55,8 +54,6 @@ export default {
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
-                //TODO: if the user is a marketer. save his marketing code
-                await this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
                 //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
                 const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
                 if (res) {

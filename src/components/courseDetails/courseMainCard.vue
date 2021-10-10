@@ -109,6 +109,11 @@ export default {
   },
   props: ["courseData", 'openCourse'],
 
+  mounted() {
+    //TODO: Get the marketer code
+    this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+  },
+
   computed: {
     ...mapState("authentication", ["user"]),
     ...mapState('settings',['currency']),
@@ -153,6 +158,7 @@ export default {
 
   methods: {
     ...mapActions("shoppingCart", ["setShoppingCartDataListAction"]),
+    ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
     COPY_THE_SHARING_LINK(e) {
       e.preventDefault();
