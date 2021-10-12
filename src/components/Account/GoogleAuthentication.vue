@@ -63,13 +63,13 @@ export default {
                 }
             } catch (e) {
                 if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-                    this.$q.notify({
-                        type: 'positive',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: 'You must enter the registeration code'
-                    })
+                    // this.$q.notify({
+                    //     type: 'positive',
+                    //     progress: true,
+                    //     multiLine: true,
+                    //     position: 'top',
+                    //     message: 'You must enter the registeration code'
+                    // })
                     // TODO: Go to code registeration page
                     this.$router.push({ name: 'registeration-code' })
                 }
@@ -78,7 +78,6 @@ export default {
         },
         // TODO: Google and Facebook Register
         async loginAuthMutation(accessToken, provider, email = "") {
-            console.log(" Triggering Apollo ");
             try {
                 this.visible = true
 
@@ -122,46 +121,6 @@ export default {
                         }
                     });
                 }
-
-                // this.$apollo
-                //     .mutate({
-                //         mutation: SocialAuth,
-                //         variables: {
-                //             provider: provider,
-                //             accessToken: accessToken,
-                //             email: email
-                //         }
-                //     })
-                //     .then(result => {
-                //         this.visible = false
-                //         if (result.data.socialAuth) {
-                //             this.loginAction(result.data.socialAuth).then(() => {
-                //                 if (result.data.socialAuth.token) {
-                //                     this.$q.notify({
-                //                         type: 'positive',
-                //                         progress: true,
-                //                         multiLine: true,
-                //                         position: 'top',
-                //                         message: this.$t('تم تسجيل الدخول بنجاح')
-                //                     })
-                //                     // TODO: See if the user thas the reqisteration code
-                //                     this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
-                //                     // this.$router.push({ name: 'registeration-code' })
-                //                 }
-                //             });
-                //         }
-                //     }).catch((err) => {
-                //         this.visible = false
-                //         if (err.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {
-                //             this.$q.notify({
-                //                 type: 'warning',
-                //                 progress: true,
-                //                 multiLine: true,
-                //                 position: 'top',
-                //                 message: this.$t('هذا الحساب مسجل مسبقا')
-                //             })
-                //         }
-                //     });
             } catch (error) {
                 this.visible = false
                 if (error.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {

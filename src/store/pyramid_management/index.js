@@ -11,17 +11,11 @@ const mutations = {
   UPDATE_MY_MARKETING_CODE_MUTATION (state, value) {
     localStorage.setItem('myMarketingCode', value)
     state.myMarketingCode = value
-    console.log('llllllllllllllllll')
-    console.log('myMarketing code: ', value)
-    console.log('llllllllllllllllll')
   },
 
   UPDATE_REGISTERATION_CODE_MUTATION (state, value) {
     localStorage.setItem('registerationCode', value)
     state.registerationCode = value
-    console.log('llllllllllllllllll')
-    console.log('Registration code: ', value)
-    console.log('llllllllllllllllll')
   }
 
 }

@@ -108,21 +108,24 @@ export default {
       immediate: true
     }
   },
-  methods: {
+  methods: { 
     ...mapActions("pyramidManagement", ["SET_REGISTERATION_CODE_ACTION"]),
 
     async IS_THE_USER_HAS_VALED_INROLLMENT_IN_THIS_COURSE (coursePK) {
-        try {
-            const res = await this.$apollo.query({
-                query: AllEnrollmentsForCurrentUser,
-            })
-
-            res.data.allEnrollmentsForCurrentUser.edges.map(enroll => {
-                if (enroll.node.course.pk == coursePK) {
-                    this.openCourse = true
-                }
-            })
-        } catch (error) {
+        //TODO: IF the user is loged in
+        if (token) {
+            try {
+                const res = await this.$apollo.query({
+                    query: AllEnrollmentsForCurrentUser,
+                })
+    
+                res.data.allEnrollmentsForCurrentUser.edges.map(enroll => {
+                    if (enroll.node.course.pk == coursePK) {
+                        this.openCourse = true
+                    }
+                })
+            } catch (error) {
+            }
         }
     },
     

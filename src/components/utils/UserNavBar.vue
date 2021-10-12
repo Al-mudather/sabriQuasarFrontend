@@ -31,8 +31,8 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import { NotificationCreatedSubscription } from 'src/queries/notification_management/subscription/NotificationCreatedSubscription'
-import { GetAllMyNotifications } from 'src/queries/notification_management/query/GetAllMyNotifications'
-
+import { GetAllMyNotificationsCount } from 'src/queries/notification_management/query/GetAllMyNotificationsCount'
+ 
 export default {
     name: "CoursesNavBar",
     data () {
@@ -44,12 +44,11 @@ export default {
 
     apollo: {
 
-        myNotifications: {
-        query: GetAllMyNotifications,
-        variables: {
-          orderBy: ['-id']
+      myNotifications: {
+        query: GetAllMyNotificationsCount,
+        skip () {
+          return !token
         }
-        
       },
 
       $subscribe: {
@@ -86,7 +85,7 @@ export default {
       }
     },
     computed: {
-      ...mapState('authentication', ['user'])
+      ...mapState('authentication', ['user', 'token'])
     },
 
     methods: {

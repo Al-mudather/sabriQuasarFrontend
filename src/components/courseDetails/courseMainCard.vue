@@ -84,7 +84,7 @@
         </div>
       </div>
 
-      <div class="share" v-if="!$_.isEmpty(myMarketingCode)">
+      <div class="share" v-if="myMarketingCode.length > 4">
       <!-- <div class="share"> -->
           <form @submit="COPY_THE_SHARING_LINK($event)">
             <input id="shar-link" type="text" :value="PREPARE_THE_COURSE_SHARING_LINK">
@@ -110,12 +110,14 @@ export default {
   props: ["courseData", 'openCourse'],
 
   mounted() {
-    //TODO: Get the marketer code
-    this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+    if (this.toekn) {
+      //TODO: Get the marketer code
+      this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+    }
   },
 
   computed: {
-    ...mapState("authentication", ["user"]),
+    ...mapState("authentication", ["user", 'toekn']),
     ...mapState('settings',['currency']),
     ...mapState('pyramidManagement', ['myMarketingCode']),
 

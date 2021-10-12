@@ -45,6 +45,10 @@ export default {
     ...mapState('pyramidManagement',['registerationCode']),
   },
 
+  beforeDestroy () {
+    this.SET_REGISTERATION_CODE_ACTION('')
+  },
+
   mounted() {
     this.$q.notify({
       type: 'warning',
@@ -53,16 +57,20 @@ export default {
       position: 'top',
       message: this.$t('قم بإدخال كود التسجيل')
     })
-    
-    if (this.registerationCode) {
+
+    if (this.registerationCode.length > 4) {
       this.r_code = this.registerationCode
       //TODO: Register the student under the marketer
       this.REGISTER_THE_USER_WITH_REGISTERATION_CODE()
     }
   },
   methods: {
+    ...mapActions('pyramidManagement', ['SET_REGISTERATION_CODE_ACTION']),
+
     async REGISTER_THE_USER_WITH_REGISTERATION_CODE (event) {
-      event.preventDefault();
+      if (event) {
+        event.preventDefault();
+      }
       if (this.r_code) {
         //TODO: show the lodder
         try {
@@ -73,7 +81,7 @@ export default {
                 marketingCode: this.r_code,
                 input: {}
               }
-            })
+            }) 
           //TODO: close the loader
           this.visible = false
           if (join_res.data.joinPlatform.success) {
@@ -84,6 +92,9 @@ export default {
                 position: 'top',
                 message: this.$t('مرحبا بك')
             })
+            //TODO: Delete the registeration code
+            this.SET_REGISTERATION_CODE_ACTION('')
+            //TODO: Go to the home page after complete the registeration
             this.GO_TO_HOME_PAGE()
           }
         } catch (e) {
