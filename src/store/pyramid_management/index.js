@@ -42,7 +42,8 @@ const actions = {
       }
       } 
     ).catch( (error) => {
-      throw Error(error)
+      commit('UPDATE_MY_MARKETING_CODE_MUTATION', '')
+      // throw Error(error)
     })
   }
 }
