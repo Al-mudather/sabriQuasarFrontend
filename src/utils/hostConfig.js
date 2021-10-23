@@ -1,4 +1,4 @@
-let baseURL = ""
+let baseURL = "https://api.stc.training"
 // let host = '192.168.8.102'
 // let host = location.origin
 let host = "https://api.stc.training"
