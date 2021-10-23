@@ -125,7 +125,8 @@ export default {
       if (process.env.NODE_ENV == 'development') {
         return 'http://localhost:8000/media/' + this.slider.slide.cover
       } else {
-        return  location.origin + '/media/' + this.slider.slide.cover 
+        // return  location.origin + '/media/' + this.slider.slide.cover 
+        return  'https://api.stc.training' + '/media/' + this.slider.slide.cover 
       }
     },
 

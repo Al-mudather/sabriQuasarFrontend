@@ -177,7 +177,8 @@ export default {
         return  `http://localhost:8000/media/${imageUrl}`
         
       } else {
-        return location.origin  + `/media/${imageUrl}`
+        return `https://api.stc.training/media/${imageUrl}`
+        // return location.origin  + `/media/${imageUrl}`
       }
     },
 

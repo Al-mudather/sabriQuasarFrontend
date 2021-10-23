@@ -62,7 +62,8 @@ export default {
             if (process.env.NODE_ENV == 'development') {
                 return  'http://localhost:8000/media/' + this.image
             } else {
-                return location.origin + '/media/' + this.image
+                return 'https://api.stc.training' + '/media/' + this.image
+                // return location.origin + '/media/' + this.image
             }
         }
     },

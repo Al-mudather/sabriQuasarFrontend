@@ -56,7 +56,8 @@ export default {
             if (process.env.NODE_ENV == 'development') {
                 return 'http://localhost:8000/media/' + this.course.cover
             }
-            return location.origin + '/media/' + this.course.cover
+            // return location.origin + '/media/' + this.course.cover
+            return 'https://api.stc.training' + '/media/' + this.course.cover
         }
     },
 
