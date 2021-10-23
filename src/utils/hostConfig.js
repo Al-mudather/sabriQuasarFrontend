@@ -1,7 +1,9 @@
 let baseURL = ""
 // let host = '192.168.8.102'
-let host = location.origin
-let ws_host = location.host
+// let host = location.origin
+let host = "https://api.stc.training"
+// let ws_host = location.host
+let ws_host = "https://api.stc.training/ws/graphql"
 // let ws_host = "127.0.0.1:8000"
 let port = '80'
 
