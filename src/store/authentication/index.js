@@ -112,19 +112,23 @@ const actions = {
  
   logOutAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      // Todo clear everything from window.LocalStorage
-      tokenStorage.clearToken()
-      //TODO: Cleare the cart
-      LocalStorage.set('shoppingCartList', [])
-      commit('deleteData')
-      Notify.create({
-        type: 'positive',
-        progress: true,
-        multiLine: true,
-        position: 'top',
-        message: 'Logged Out Successfully'
+      axios
+      .get(`${location.origin}/api/drf/logout/`)
+      .then(res => {
+        // Todo clear everything from window.LocalStorage
+        tokenStorage.clearToken()
+        //TODO: Cleare the cart
+        LocalStorage.set('shoppingCartList', [])
+        commit('deleteData')
+        Notify.create({
+          type: 'positive',
+          progress: true,
+          multiLine: true,
+          position: 'top',
+          message: 'Logged Out Successfully'
+        })
+        resolve()
       })
-      resolve()
     })
   }
 }

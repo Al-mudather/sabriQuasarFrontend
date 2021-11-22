@@ -47,7 +47,9 @@ const routes = [
       { path: '/notification', name: 'notification', beforeEnter: requireAuthentication, component: () => import('pages/notifivation_management/Notification.vue') },
       { path: '/profile', name: 'user-profile', beforeEnter: requireAuthentication, component: () => import('pages/account_management/Profile') },
       { path: '/myCourses', name: 'my-courses', beforeEnter: requireAuthentication, component: () => import('pages/course_management/MyCourses.vue') },
-      { path: '/class/:pk/:id', name: 'course-class', beforeEnter: requireAuthentication, component: () => import('pages/course_management/CourseClass.vue') }
+      { path: '/class/:pk/:id', name: 'course-class', beforeEnter: requireAuthentication, component: () => import('pages/course_management/CourseClass.vue') },
+      // { path: '/Certificates', name: 'my-certificate', beforeEnter: requireAuthentication, component: () => import('src/pages/certificate_management/CertificatePage.vue') },
+      { path: '/Certificates', name: 'my-certificate', component: () => import('src/pages/certificate_management/CertificatePage.vue') },
     ]
   },
   {
