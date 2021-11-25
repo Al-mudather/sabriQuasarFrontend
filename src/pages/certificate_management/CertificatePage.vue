@@ -11,25 +11,10 @@
                         </div>
                         <div class="courc">
                             <h3>شهادتـــي</h3>
-                            <div class="tabl">
-                                <h3>الكورس التأهيلي لطلاب الشهادة السودانية</h3>
+                            <div class="tabl" v-for="certificate in myCertificate.edges" :key="certificate.node.pk">
+                                <h3>{{certificate.node.enrollment.course.title}}</h3>
                                 <div class="butt">
-                                    <button class="">تحميـل <img src="img/download.png" alt=""></button>
-                                    <button class="blue">عـرض <img src="img/eyess.png" alt=""></button>
-                                </div>
-                            </div>
-                            <div class="tabl">
-                                <h3>الكورس التأهيلي لطلاب الشهادة السودانية</h3>
-                                <div class="butt">
-                                    <button>تحميـل <img src="img/download.png" alt=""></button>
-                                    <button class="blue">عـرض <img src="img/eyess.png" alt=""></button>
-                                </div>
-                            </div>
-                            <div class="tabl">
-                                <h3>الكورس التأهيلي لطلاب الشهادة السودانية</h3>
-                                <div class="butt">
-                                    <button>تحميـل <img src="img/download.png" alt=""></button>
-                                    <button class="blue">عـرض <img src="img/eyess.png" alt=""></button>
+                                    <button @click="DOWNLOAD_MY_CERTIFICATE(certificate.node.pk)" class="">تحميـل <img src="img/download.png" alt=""></button>
                                 </div>
                             </div>
                         </div>
@@ -41,29 +26,64 @@
 </template>
 
 <script>
+import axios from 'axios'
+import {AllCertificates} from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
+import { mapGetters } from "vuex";
 
 export default {
     name: 'CertificatePage',
     data () {
-        return {
-        }
+      return {
+        myCertificate: []
+      }
     },
  
 	components: {
 	},
 
-    apollo: {
-    //   myAttachmentTransactions: {
-    //     query () {
-    //         return MyAttachmentTransactions
-    //     },
-    //     result (result) {
-    //         if (!result.loading) {
-    //         this.myTransactionsOrders = result.data.myAttachmentTransactions
-    //         }
-    //     }
-    //     }
+  computed: {
+    ...mapGetters("authentication", ["user", "token"]),
+  },
+
+  apollo: {
+    allCertificates: {
+      query () {
+        return AllCertificates
+      },
+      variables () {
+        return {
+          filters: JSON.stringify({
+            'enrollment__user__id': this.user.pk
+          })
+        }
+      },
+      result (result) {
+          if (!result.loading) {
+          this.myCertificate = result.data.allCertificates
+          }
+      }
+      }
+  },
+
+  methods: {
+    async DOWNLOAD_MY_CERTIFICATE (certificatePk) {
+      // 'certificate/download/<int:certificate_id>'
+      console.log(';;;;;;;;;;;;;;;;;;;;;;;')
+      console.log(this.token)
+      console.log(';;;;;;;;;;;;;;;;;;;;;;;')
+      // const res = await axios.get(`${location.origin}/certificate/download/${certificatePk}`)
+      const res = await axios.get(`http://localhost:8000/api/enrollment/certificate/download/${certificatePk}`, {
+        headers: {
+          'Authorization': `JWT ${this.token}`
+        }
+      })
+      console.log(';;;;;;;;;;;;;;;;;;;;;;;')
+      console.log(res)
+      console.log(';;;;;;;;;;;;;;;;;;;;;;;')
+      // openURL(location.origin + fileURL)
+
     }
+  }
 }
 </script>
 

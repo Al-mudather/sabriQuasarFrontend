@@ -15,8 +15,8 @@
  
 <script>
 import UserNavBar from "src/components/utils/UserNavBar.vue";
-import Footer from 'src/components/utils/Footer'
-import Menu from 'components/Home/Menu'
+import Footer from 'src/components/utils/Footer.vue'
+import Menu from 'components/Home/Menu.vue'
 import { LocalStorage, Quasar } from 'quasar'
 import { mapState, mapActions } from 'vuex'
 
