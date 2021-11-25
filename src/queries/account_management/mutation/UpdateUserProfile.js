@@ -7,7 +7,8 @@ mutation UpdateUserProfile($input: UpdateUserInput!){
     success
     errors
     user: instance {
-
+      id
+      pk
       fullName
       phoneNumber
       phoneNumber2

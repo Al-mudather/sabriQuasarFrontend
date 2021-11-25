@@ -4,17 +4,22 @@
            <div class="container">
                <div class="row">
                    <div class="col-lg-12">
-                        <div class="tittel">
+                        <!-- <div class="tittel">
                             <a href="#">
                                 <h3>طلب شهادة جديدة</h3>
                             </a>
-                        </div>
+                        </div> -->
                         <div class="courc">
                             <h3>شهادتـــي</h3>
                             <div class="tabl" v-for="certificate in myCertificate.edges" :key="certificate.node.pk">
                                 <h3>{{certificate.node.enrollment.course.title}}</h3>
                                 <div class="butt">
-                                    <button @click="DOWNLOAD_MY_CERTIFICATE(certificate.node.pk)" class="">تحميـل <img src="img/download.png" alt=""></button>
+                                  <q-spinner-clock
+                                    color="primary"
+                                    size="2em"
+                                    v-if="loading"
+                                  />
+                                  <button v-else @click="DOWNLOAD_MY_CERTIFICATE(certificate)" class="">تحميـل <img src="img/download.png" alt=""></button>
                                 </div>
                             </div>
                         </div>
@@ -27,6 +32,7 @@
 
 <script>
 import axios from 'axios'
+const FileDownload = require('js-file-download');
 import {AllCertificates} from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
 import { mapGetters } from "vuex";
 
@@ -34,6 +40,7 @@ export default {
     name: 'CertificatePage',
     data () {
       return {
+        loading: false,
         myCertificate: []
       }
     },
@@ -52,35 +59,59 @@ export default {
       },
       variables () {
         return {
-          filters: JSON.stringify({
+          'filters': JSON.stringify({
             'enrollment__user__id': this.user.pk
           })
         }
       },
       result (result) {
-          if (!result.loading) {
+        if (!result.loading) {
           this.myCertificate = result.data.allCertificates
-          }
+        }
       }
-      }
+    }
   },
 
   methods: {
-    async DOWNLOAD_MY_CERTIFICATE (certificatePk) {
+    async DOWNLOAD_MY_CERTIFICATE (certificate) {
       // 'certificate/download/<int:certificate_id>'
-      console.log(';;;;;;;;;;;;;;;;;;;;;;;')
-      console.log(this.token)
-      console.log(';;;;;;;;;;;;;;;;;;;;;;;')
-      // const res = await axios.get(`${location.origin}/certificate/download/${certificatePk}`)
-      const res = await axios.get(`http://localhost:8000/api/enrollment/certificate/download/${certificatePk}`, {
-        headers: {
-          'Authorization': `JWT ${this.token}`
+      // console.log(';;;;;;;;;;;;;;;;;;;;;;;')
+      // console.log(this.token)
+      // console.log(';;;;;;;;;;;;;;;;;;;;;;;')
+      // const res = await axios.get(`${location.origin}api/enrollment/certificate/download/${certificatePk}`,{
+      //   headers: {
+      //     'Authorization': `JWT ${this.token}`
+      //   }
+      // })
+      
+      //TODO: Start the loading
+      this.loading = true
+      try {
+        const res = await axios(
+        {
+          method: 'GET',
+          // url: `http://localhost:8000/api/enrollment/certificate/download/${certificate.node.pk}`,
+          url: `${location.origin}/api/enrollment/certificate/download/${certificate.node.pk}`,
+          responseType: 'arraybuffer',
+          // responseType: 'blob',
+          headers: {
+            'Authorization': `JWT ${this.token}`,
+            'Content-Type': 'application/json',
+          }
+
         }
-      })
-      console.log(';;;;;;;;;;;;;;;;;;;;;;;')
-      console.log(res)
-      console.log(';;;;;;;;;;;;;;;;;;;;;;;')
-      // openURL(location.origin + fileURL)
+      )
+
+      if (res.data) {
+        FileDownload(res.data, `${certificate.node.enrollment.course.title}-${this.user.username}.pdf`);
+        this.loading = false
+      } else {
+        this.loading = false
+      }
+      } catch (error) {
+        this.loading = false
+      }
+      
 
     }
   }

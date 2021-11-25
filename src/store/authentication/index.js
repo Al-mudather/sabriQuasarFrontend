@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { Notify, LocalStorage } from 'quasar'
 import {apolloClient} from 'src/apollo/client'
 import {tokenStorage, userProfileStorage} from "src/localStorageService";
@@ -113,6 +114,7 @@ const actions = {
   logOutAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
       axios
+      // .get(`http://localhost:8000/api/drf/logout/`)
       .get(`${location.origin}/api/drf/logout/`)
       .then(res => {
         // Todo clear everything from window.LocalStorage

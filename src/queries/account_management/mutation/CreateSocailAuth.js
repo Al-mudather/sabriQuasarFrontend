@@ -7,7 +7,9 @@ mutation SocialAuth($provider: String!, $accessToken: String!, $email: String!) 
     social{
     
       user{
-        email
+        id,
+        pk,
+        email,
         fullName,
         username,
         email,

@@ -10,19 +10,20 @@ query AllCertificates($filters: JSONString) {
       edges {
 
           node {
-
-            pk
             id
+            pk
             enrollment {
               pk
               id
               user {
+                id
                 pk
                 email
                 fullName
               }
               
               course {
+                id
                 pk
                 title
               }

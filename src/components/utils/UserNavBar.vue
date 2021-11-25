@@ -47,7 +47,7 @@ export default {
       myNotifications: {
         query: GetAllMyNotificationsCount,
         skip () {
-          return !token
+          return !this.token
         }
       },
 

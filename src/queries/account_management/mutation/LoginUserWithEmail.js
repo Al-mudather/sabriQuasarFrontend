@@ -12,6 +12,7 @@ mutation LoginUser($email:String!, $password: String!){
     token,
     user {
       id,
+      pk
       username,
       email,
       firstName,
