@@ -67,10 +67,10 @@
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الإشعارت')}}</h3>
                 </a>
-                <a class="but side-nav__item" data-link="NOTIFICATION" v-if="token" @click="GO_TO_MY_CERTIFICATE_PAGE($event)">
+                <!-- <a class="but side-nav__item" data-link="NOTIFICATION" v-if="token" @click="GO_TO_MY_CERTIFICATE_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('شهاداتي')}}</h3>
-                </a>
+                </a> -->
                 <a class="but side-nav__item" data-link="PROFILE" v-if="token" @click="GO_TO_MY_PROFILE_PAGE($event)">
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الملف الشخصي')}}</h3>
