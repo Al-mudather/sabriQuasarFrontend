@@ -44,6 +44,7 @@
     "js-file-download": "^0.4.12",
     "json-graphql-server": "^2.2.3",
     "lodash": "^4.17.21",
+    "logrocket": "^2.1.2",
     "moment": "^2.29.1",
     "mux.js": "^5.11.1",
     "node-fetch": "^2.6.1",

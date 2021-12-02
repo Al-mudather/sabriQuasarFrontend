@@ -5,6 +5,7 @@
 </template>
 <script>
 import { mapActions, mapState, mapGetters } from "vuex";
+import LogRocket from 'logrocket';
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { LocalStorage } from 'quasar'
 import {WOW} from 'wowjs'
@@ -29,6 +30,18 @@ export default {
 
 
     created() {
+        //TODO: logrocket
+        LogRocket.init('3bybms/stc');
+
+        // This is an example script - don't forget to change it!
+        LogRocket.identify('THE_USER_ID_IN_YOUR_APP', {
+            name: 'STC User',
+            email: `1@stc.com`,
+
+            // Add your own custom user variables here, ie:
+            subscriptionType: 'customer'
+        });
+
         //TODO: IF the user blocked the notification
         if (Notification.permission == 'denied') {
             this.$q.notify({

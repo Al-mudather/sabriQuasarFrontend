@@ -1,12 +1,12 @@
-import { Notify, LocalStorage } from 'quasar'
+import { Notify, SessionStorage } from 'quasar'
 
 const state = {
   shoppinCartDialog: false,
   braintreeClientToken: null,
   orderData: null,
-  totalPaymentFees: LocalStorage.getItem('totalPaymentFees') || 0.0,
-  checkoutOrderID: LocalStorage.getItem('orderID') || null,
-  shoppingCartDataList: LocalStorage.getItem('shoppingCartList') || []
+  totalPaymentFees: SessionStorage.getItem('totalPaymentFees') || 0.0,
+  checkoutOrderID: SessionStorage.getItem('orderID') || null,
+  shoppingCartDataList: SessionStorage.getItem('shoppingCartList') || []
 }
 
 const mutations = {
@@ -20,18 +20,18 @@ const mutations = {
   },
 
   saveCheckoutOrderID (state, value) {
-    LocalStorage.set('orderID', value) || []
+    SessionStorage.set('orderID', value) || []
     state.checkoutOrderID = value
   },
 
   deleteShoppinCartDataList (state) {
-    // LocalStorage.set('shoppingCartList', state.shoppingCartDataList)
-    LocalStorage.set('shoppingCartList', [])
+    // SessionStorage.set('shoppingCartList', state.shoppingCartDataList)
+    SessionStorage.set('shoppingCartList', [])
     // TODO: Delete the order
     state.shoppingCartDataList = []
     state.checkoutOrderID = null
-    // TODO: Delete the order from the localstorage
-    LocalStorage.set('orderID', null)
+    // TODO: Delete the order from the SessionStorage
+    SessionStorage.set('orderID', null)
   },
 
   updateShoppinCartDataList (state, value) {
@@ -40,7 +40,7 @@ const mutations = {
     // TODO: assign the new data
     state.shoppingCartDataList = value
     // TODO: save the data to the local storage
-    LocalStorage.set('shoppingCartList', state.shoppingCartDataList)
+    SessionStorage.set('shoppingCartList', state.shoppingCartDataList)
   },
 
   updateShoppinCartDialog (state, value) {
@@ -48,7 +48,7 @@ const mutations = {
   },
 
   updateTotalPaymentFees (state, value) {
-    LocalStorage.set('totalPaymentFees', value)
+    SessionStorage.set('totalPaymentFees', value)
     state.totalPaymentFees = value
   },
 
@@ -76,7 +76,7 @@ const mutations = {
       // //TODO: if no add it, if yes refuse to add it
       // if (res.length === 0) {
       //   state.shoppingCartDataList.push(value)
-      //   LocalStorage.set('shoppingCartList', state.shoppingCartDataList)
+      //   SessionStorage.set('shoppingCartList', state.shoppingCartDataList)
       // } else {
       //   Notify.create({
       //     type: 'warning',
@@ -88,7 +88,7 @@ const mutations = {
       // }
     } else {
       state.shoppingCartDataList.push(value)
-      LocalStorage.set('shoppingCartList', state.shoppingCartDataList)
+      SessionStorage.set('shoppingCartList', state.shoppingCartDataList)
     }
   }
 }
