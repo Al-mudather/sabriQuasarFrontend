@@ -16,6 +16,7 @@ const tokenStorage = {
     return sessionStorage.getItem("userRefreshToken");
   },
   clearToken() {
+    sessionStorage.clear();
     sessionStorage.removeItem("Frontend_user");
     sessionStorage.removeItem("userAccessToken");
     sessionStorage.removeItem("userRefreshToken");

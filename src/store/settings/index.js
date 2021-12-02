@@ -1,22 +1,22 @@
-import { LocalStorage } from 'quasar'
+import { SessionStorage } from 'quasar'
 
  
 const state = {
-  isEnglish:  LocalStorage.getItem('isEnglish')|| false,
+  isEnglish:  SessionStorage.getItem('isEnglish')|| false,
   currency:  'SDG',
   openMenu: false,
-  activeNav: LocalStorage.getItem('activeNav')|| ''
+  activeNav: SessionStorage.getItem('activeNav')|| ''
 }
 
 const mutations = {
 
   updateActiveNav (state, value) {
-    LocalStorage.set('activeNav', JSON.stringify(value))
+    SessionStorage.set('activeNav', JSON.stringify(value))
     state.activeNav = value
   },
 
   updateIsEnglish (state, value) {
-    LocalStorage.set('isEnglish', value)
+    SessionStorage.set('isEnglish', value)
     state.isEnglish = value
   },
 

@@ -30,6 +30,9 @@ export default {
 
 
     created() {
+        //TODO: Clear the localStorage
+        localStorage.clear()
+
         //TODO: logrocket
         LogRocket.init('3bybms/stc');
 

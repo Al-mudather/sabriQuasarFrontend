@@ -235,10 +235,16 @@ export default {
                             this.errorHandler(result.data.tokenAuth.errors);
                         }
                     }).catch((error) => {
+                        console.log('lllllllllllllllll')
+                        console.log(error)
+                        console.log('lllllllllllllllll')
                         this.visible = false
                     });
                 
             } catch (error) {
+                console.log('lllllllllllllllll')
+                console.log(error)
+                console.log('lllllllllllllllll')
                 this.visible = false
             }
         },
