@@ -33,6 +33,7 @@
     "axios": "^0.21.1",
     "bootstrap": "^5.1.1",
     "bootstrap-vue": "^2.21.2",
+    "caniuse-lite": "^1.0.30001284",
     "core-js": "^3.8.3",
     "dotenv": "^8.2.0",
     "fetch-mock": "^9.11.0",

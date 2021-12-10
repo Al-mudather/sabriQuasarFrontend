@@ -148,15 +148,25 @@ export default {
                     scope: "email",
                     force: true
                 })
-                .then(r => {
-                    console.log(r);
-
-                    var google = hello("google").getAuthResponse();
-
-                    this.loginAuthMutation(
-                        google.access_token,
-                        "google-oauth2"
-                    );
+                .then( (r) => {
+                    // console.log('/////////////////');
+                    // console.log(r.authResponse.access_token);
+                    // console.log('/////////////////');
+                    try {
+                        // var google = hello("google").getAuthResponse();
+                        this.loginAuthMutation(
+                            r.authResponse.access_token,
+                            "google-oauth2"
+                        );
+                        // this.loginAuthMutation(
+                        //     google.access_token,
+                        //     "google-oauth2"
+                        // );
+                    } catch (error) {
+                        // console.log('EEEEEEEEEEEEEE')
+                        // console.log(error.message)
+                        // console.log('EEEEEEEEEEEEEE')
+                    }
                 });
         }
     }

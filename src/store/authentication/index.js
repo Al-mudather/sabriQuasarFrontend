@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Notify, LocalStorage } from 'quasar'
+import { Notify, LocalStorage, SessionStorage } from 'quasar'
 import {apolloClient} from 'src/apollo/client'
 import {tokenStorage, userProfileStorage} from "src/localStorageService";
 import {RefreshLoginUserWithEmail} from 'src/queries/account_management/mutation/RefreshUserToken'
@@ -113,13 +113,13 @@ const actions = {
   logOutAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
       axios
-      // .get(`http://localhost:8000/api/drf/logout/`)
-      .get(`${location.origin}/api/drf/logout/`)
+      .get(`http://localhost:8000/api/drf/logout/`)
+      // .get(`${location.origin}/api/drf/logout/`)
       .then(res => {
         // Todo clear everything from window.LocalStorage
         tokenStorage.clearToken()
         //TODO: Cleare the cart
-        LocalStorage.set('shoppingCartList', [])
+        SessionStorage.set('shoppingCartList', [])
         commit('deleteData')
         Notify.create({
           type: 'positive',

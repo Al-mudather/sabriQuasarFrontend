@@ -28,6 +28,10 @@ export default {
         ...mapActions('authentication', ['logOutAction'])
     },
 
+    destroyed () {
+        //TODO: Delete the user data
+        this.logOutAction()
+    },
 
     created() {
         //TODO: Clear the localStorage
