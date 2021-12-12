@@ -33,20 +33,25 @@
                                     data-parent="#accordion"
                                 >
                                     <div @click="clickedItem($event)" class="card-body">
-                                        <q-item
-                                            style="width: 95%"
-                                            v-for="content in unit.node
-                                                .courseunitcontentSet.edges"
+                                        <div
+                                            v-for="content in unit.node.courseunitcontentSet.edges"
                                             :key="content.node.id"
-                                            clickable
-                                            v-ripple
                                         >
-                                            <!-- v-show="content.node.modelName === 'ContentVideo'" -->
-                                            <classContentItem
-                                                :content="content.node"
-                                                :courseId="course.pk"
-                                            />
-                                        </q-item>
+                                            <q-item
+                                                style="width: 95%"
+                                                clickable
+                                                v-ripple
+                                                v-if=" ($_.get(content, '[node][modelName]') === 'ContentVideo') || 
+                                                ($_.get(content, '[node][modelName]') === 'ContentFile') || 
+                                                ($_.get(content, '[node][modelName]') === 'ContentQuiz') "
+                                            >
+                                                <!-- v-show="content.node.modelName === 'ContentVideo'" -->
+                                                <classContentItem
+                                                    :content="content.node"
+                                                    :courseId="course.pk"
+                                                />
+                                            </q-item>
+                                        </div>
                                     </div>
                                 </div>
                             </q-expansion-item>

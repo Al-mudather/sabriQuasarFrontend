@@ -113,8 +113,8 @@ const actions = {
   logOutAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
       axios
-      .get(`http://localhost:8000/api/drf/logout/`)
-      // .get(`${location.origin}/api/drf/logout/`)
+      // .get(`http://localhost:8000/api/drf/logout/`)
+      .get(`${location.origin}/api/drf/logout/`)
       .then(res => {
         // Todo clear everything from window.LocalStorage
         tokenStorage.clearToken()

@@ -11,7 +11,11 @@
 
     <q-dialog v-model="card">
       <q-card class="my-card">
+        <div v-show="player" style="padding-top:56.25%;position:relative;">
+          <div style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%; padding-bottom: 2rem;"  id="videoPlayer" :data-id="$_.get(content, '[pk]')"></div>
+        </div>
         <q-video
+          v-if="!player"
           :ratio="16/9"
           :src="videoUrl"
         />
@@ -29,15 +33,21 @@
 </template>
 
 <script>
+import videoPlayer from 'src/utils/video-client.js'
+import {mapGetters} from 'vuex'
+
 export default {
   data () {
     return {
       card: false,
+      player: null,
       videoUrl: ''
     }
   },
   props: ['content'],
   computed: {
+    ...mapGetters("authentication", ["token"]),
+
     formatTitle () {
       const result = JSON.parse(this.content.modelValue)
       if (this.content.modelName === 'ContentFile') {
@@ -46,20 +56,57 @@ export default {
       return result.title
     }
   },
+
   methods: {
+    PREPARE_THE_SMART_NOD_VIDEO (video_metadata) {
+      this.videoLoaded = true
+
+      setTimeout(() => {
+        this.UNINITIALIZE_THE_VIDEO ()
+        const key = this.$_.get(video_metadata, "[path]") ? this.$_.get(video_metadata, "[path]") : this.$_.get(video_metadata, "[id]")
+        this.player= new videoPlayer('dev', `http://localhost:8000/api/course/video/auth`)
+        //TODO: The play function take =>> the video key / the inrollment / the course pk
+        try {
+          this.player.play(`[data-id="${this.$_.get(this.content, '[pk]')}"]`,key, 7 , this.$_.get(this.$route, '[params][pk]'), this.token)              
+        } catch (error) {
+          this.$q.notify({
+              type: 'warning',
+              multiLine: true,
+              progress: true,
+              message: "هنالك ضعف في الشبكه, من فضلك اعد تحميل الصفحه و قم بشغيل الفيديو مجددا"
+          })
+        }
+      }, 1000);
+    },
+
+    UNINITIALIZE_THE_VIDEO () {
+      try {
+        this.player.uninitializeTheVideo()
+        } catch (error) {
+      }
+    },
+
     OPEN_FREE_VIDEO_COURSE (e, content) {
       e.preventDefault();
+      //TODO: Unintialize the player
+      this.player = null
       //TODO: Open the video card dialog
       this.card = true
-      const video = JSON.parse(content.modelValue).video 
-      //TODO: If the video from the youtube git it
-      const i = video.indexOf("v");
-      const videoKey = video.slice(i + 2);
-      if ( video.indexOf('youtube') > 0) {
-        this.videoUrl =  "https://www.youtube.com/embed?=" + videoKey;
+      const contentData = JSON.parse(content.modelValue)
+      const video_metadata = this.$_.get(contentData, '[video_metadata]')
+      if (video_metadata) {
+        this.PREPARE_THE_SMART_NOD_VIDEO(video_metadata)
       } else {
-        //TODO: if the video from the vimeo git it
-        this.videoUrl =  'https://player.vimeo.com/video/' +  String(video);
+        const video = this.$_.get(contentData, '[video]') 
+        //TODO: If the video from the youtube git it
+        const i = video.indexOf("v");
+        const videoKey = video.slice(i + 2);
+        if ( video.indexOf('youtube') > 0) {
+          this.videoUrl =  "https://www.youtube.com/embed?=" + videoKey;
+        } else {
+          //TODO: if the video from the vimeo git it
+          this.videoUrl =  'https://player.vimeo.com/video/' +  String(video);
+        }
       }
 
     }
@@ -68,6 +115,10 @@ export default {
 </script>
 
 <style lang="scss">
+.vjs-button {
+  background-color: transparent !important;
+}
+
 .my-card {
   width: 100rem;
   min-width: 23rem;

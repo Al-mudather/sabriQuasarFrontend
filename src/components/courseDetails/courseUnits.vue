@@ -63,12 +63,17 @@
                             data-parent="#accordion"
                         >
                             <div class="card-body">
-                                <contentItem 
-                                    v-for="content in unit.node
-                                        .courseunitcontentSet.edges"
+                                <div
+                                    v-for="content in unit.node.courseunitcontentSet.edges"
                                     :key="content.node.id"
-                                    :content="content.node"
-                                />
+                                >
+                                    <contentItem 
+                                        :content="content.node"
+                                        v-if=" ($_.get(content, '[node][modelName]') === 'ContentVideo') || 
+                                                    ($_.get(content, '[node][modelName]') === 'ContentFile') || 
+                                                    ($_.get(content, '[node][modelName]') === 'ContentQuiz') "
+                                    />
+                                </div>
 
                             </div>
                         </div>

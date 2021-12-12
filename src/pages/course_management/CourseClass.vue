@@ -28,23 +28,31 @@
                            <div class="text-h4 q-mb-sm text-center">
                               {{ContentTitle}}
                             </div>
+
                             <q-skeleton
                               v-if="!videoLoaded"
                               height="500px"
                               square
                             />
-                              <div v-show="videoLoaded" style="margin-bottom: 2rem;">
-                                <div v-if="cipherVideo" v-html="cipherVideo"></div>
-                                <q-video
-                                    v-show="!cipherVideo"
-                                    :ratio="13 / 11"
-                                    ref="videoPlayer"
-                                    controls = "false"
-                                    id="video"
-                                    allow="encrypted-media"
-                                    :src="viomURL"
-                                />
-                              </div>
+                            <div v-show="player" style="padding-top:56.25%;position:relative;">
+                                <div style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%; padding-bottom: 2rem;"  id="videoPlayer" :data-id="$_.get(progressData, '[courseUnitContentId]')"></div>
+                            </div>
+
+                            <div v-show="!player">
+                                <div v-show="videoLoaded" style="margin-bottom: 2rem;">
+                                    <div v-if="cipherVideo" v-html="cipherVideo"></div>
+                                    <q-video
+                                        v-show="!cipherVideo"
+                                        :ratio="13 / 11"
+                                        ref="playerVideo"
+                                        controls = "false"
+                                        id="video"
+                                        allow="encrypted-media"
+                                        :src="viomURL"
+                                    />
+                                </div>
+                            </div>
+
                             <div class="vedio">
                                 
                                 <div class="arrow">
@@ -203,7 +211,9 @@
 </template>
 
 <script>
-import { mapActions, mapState} from "vuex";
+import videoPlayer from 'src/utils/video-client.js'
+
+import { mapActions, mapState, mapGetters} from "vuex";
 import { GetCourseByID } from "src/queries/course_management/query/GetCourseByID";
 import { GetEnrollmentByCourseForCurrentUser } from "src/queries/enrollment_management/query/GetEnrollmentByCourseForCurrentUser";
 import classUnits from "src/components/courseClass/classUnits.vue";
@@ -217,26 +227,27 @@ export default {
   name: "CourseClass",
   data() {
     return {
-      tab: "tutorial",
-      videoLoaded: false,
-      ContentTitle: '',
-      viomURL: '',
-      cipherVideo: null,
-      fileData: null,
-      hasNextContent: true,
-      activateNext: true,
-      hasPrevContent: false,
-      enrollmentId: null,
-      courseID: "",
-      courseData: "",
-      totalFinishedCourseContents: 0,
-      lodash: this.$_,
-      progressData: {
-        courseId: null,
+        tab: "tutorial",
+        player: null,
+        videoLoaded: false,
+        ContentTitle: '',
+        viomURL: '',
+        cipherVideo: null,
+        fileData: null,
+        hasNextContent: true,
+        activateNext: true,
+        hasPrevContent: false,
         enrollmentId: null,
-        courseUnitId: null,
-        courseUnitContentId: null
-      }
+        courseID: "",
+        courseData: "",
+        totalFinishedCourseContents: 0,
+        lodash: this.$_,
+        progressData: {
+            courseId: null,
+            enrollmentId: null,
+            courseUnitId: null,
+            courseUnitContentId: null
+        }
     };
   },
   components: {
@@ -254,7 +265,7 @@ export default {
   },
 
   updated () {
-    const video = this.$refs['videoPlayer']
+    const video = this.$refs['playerVideo']
     const child = video.$el.firstChild
     child.addEventListener('load', () => {
         this.videoLoaded = true
@@ -262,10 +273,11 @@ export default {
   },
 
   computed: {
+    ...mapGetters("authentication", ["token"]),
     ...mapState('courseManagement', [
-          'startLearningTrackingID',
-          'currentContent',
-          'contentLists',
+        'startLearningTrackingID',
+        'currentContent',
+        'contentLists',
       ]),
 
     calculateTheTotalProgress() {
@@ -297,6 +309,35 @@ export default {
       'resetContentListsAction'
       ]
     ),
+
+    PREPARE_THE_SMART_NOD_VIDEO (video_metadata) {
+        this.videoLoaded = true
+
+        setTimeout(() => {
+            this.UNINITIALIZE_THE_VIDEO ()
+          const key = this.$_.get(video_metadata, "[path]") ? this.$_.get(video_metadata, "[path]") : this.$_.get(video_metadata, "[id]")
+          this.player= new videoPlayer('dev', `http://localhost:8000/api/course/video/auth`)
+          //TODO: The play function take =>> the video key / the inrollment / the course pk
+          try {
+            this.player.play(`[data-id="${this.$_.get(this.progressData, '[courseUnitContentId]')}"]`,key, this.$_.get(this.progressData, '[enrollmentId]'), this.$_.get(this.$route, '[params][pk]'), this.token)              
+          } catch (error) {
+            this.$q.notify({
+                type: 'warning',
+                multiLine: true,
+                progress: true,
+                message: "هنالك ضعف في الشبكه, من فضلك اعد تحميل الصفحه و قم بشغيل الفيديو مجددا"
+            })
+          }
+        }, 1000);
+        
+    },
+
+    UNINITIALIZE_THE_VIDEO () {
+        try {
+          this.player.uninitializeTheVideo()
+        } catch (error) {
+        }
+    },
 
     GO_TO_THE_VIDEO_LOCATION () {
         const ele = document.getElementById('video') // You need to get your element here
@@ -445,6 +486,10 @@ export default {
       window.setTimeout( () => {
         this.START_LEARNING_UNIT_TRAKING()
       },5000 )
+
+      //TODO: Unintialize the smartNode video player
+      this.UNINITIALIZE_THE_VIDEO()
+      this.player = null
       
       //TODO: empty the cipher
       this.cipherVideo = null
@@ -457,18 +502,29 @@ export default {
       this.ContentTitle = contentData.title
       /// If the modelName is a video ///
       if (value.modelName === 'ContentVideo') {
-          //TODO: Check if the vidcipher iframe is exists
-          const cipher = contentData.cipher_iframe
-          if (cipher) {
-              this.cipherVideo = cipher
-              this.videoLoaded = true
-          }
-          //TODO: get the vimeo data
-          this.viomURL = this.GET_VIMO_VIDEO_URL(contentData)
+          //TODO: Check if the video meta data exists
+          const video_metadata = this.$_.get(contentData, '[video_metadata]')
+          if (video_metadata) {
+            //TODO: run the video
+            this.PREPARE_THE_SMART_NOD_VIDEO(video_metadata)
+          } else {
+            //TODO: Check if the vidcipher iframe is exists
+            console.log('lllllllllllllllllllllll')
+            console.log(contentData)
+            console.log('lllllllllllllllllllllll')
+            const cipher = contentData.cipher_iframe
+            if (cipher) {
+                this.cipherVideo = cipher
+                this.videoLoaded = true
+            } else {
+                //TODO: get the vimeo data
+                this.viomURL = this.GET_VIMO_VIDEO_URL(contentData)
+            }
 
-          // this.VideoData = JSON.parse(value.modelValue).video;
-          
-          this.visible = true;
+            // this.VideoData = JSON.parse(value.modelValue).video;
+            
+            this.visible = true;
+          }
 
           //TODO: GO to the video location
           this.GO_TO_THE_VIDEO_LOCATION()
@@ -548,6 +604,11 @@ export default {
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
+
+.vjs-button {
+    background-color: transparent !important;
+}
+
 // @import "src/assets/css/Lecture.scss";
 /*--- start navbar ---*/
 .q-tab__indicator {
