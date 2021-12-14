@@ -113,7 +113,7 @@ export default {
 
     async IS_THE_USER_HAS_VALED_INROLLMENT_IN_THIS_COURSE (coursePK) {
         //TODO: IF the user is loged in
-        if (token) {
+        if (this.token) {
             try {
                 const res = await this.$apollo.query({
                     query: AllEnrollmentsForCurrentUser,

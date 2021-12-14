@@ -9,7 +9,7 @@
         <h3 v-else >{{ formatTitle }}</h3>
     </div>
 
-    <q-dialog v-model="card">
+    <q-dialog v-model="card" persistent>
       <q-card class="my-card">
         <div v-show="player" style="padding-top:56.25%;position:relative;">
           <div style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%; padding-bottom: 2rem;"  id="videoPlayer" :data-id="$_.get(content, '[pk]')"></div>
@@ -27,6 +27,10 @@
             </div>
           </div>
         </q-card-section>
+ 
+        <q-card-actions align="center">
+          <q-btn label="Stop the video" @click="UNINITIALIZE_THE_VIDEO" color="primary" v-close-popup />
+        </q-card-actions>
       </q-card>
     </q-dialog>
 </div>
@@ -68,7 +72,7 @@ export default {
         this.player= new videoPlayer('prod', `${location.origin}/api/course/video/auth`)
         //TODO: The play function take =>> the video key / the inrollment / the course pk
         try {
-          this.player.play(`[data-id="${this.$_.get(this.content, '[pk]')}"]`,key, 7 , this.$_.get(this.$route, '[params][pk]'), this.token)              
+          this.player.play(`[data-id="${this.$_.get(this.content, '[pk]')}"]`,key, 7 , this.$_.get(this.$route, '[params][pk]'))              
         } catch (error) {
           this.$q.notify({
               type: 'warning',

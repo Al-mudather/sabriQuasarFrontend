@@ -64,22 +64,15 @@ class videoPlayer {
                 }
               }
         });
-        // console.log(';;;;;;;;;;;;')
-        // console.log(self.player)
-        // console.log(';;;;;;;;;;;;')
+
         self.player.eme();
         videojs.Hls.xhr.beforeRequest = function (options) {
-            // console.log('1) ;;;;;;;;;;;;')
-            // console.log('Options ...', options.uri)
-            // console.log(';;;;;;;;;;;;')
+
             if(options.uri.includes('get_hls'))
                 options.uri=self.auth_url+`/${path}/${enrolment_id}/${course_id}`;
                 options.headers = options.headers || {};
-                options.headers.Authorization = `JWT ${token}`;
-            
-            // console.log('2) ;;;;;;;;;;;;')
-            // console.log('Options ...', options.uri)
-            // console.log(';;;;;;;;;;;;')
+                if (token) options.headers.Authorization = `JWT ${token}`;
+
             return options;
         };
         self.player.ready(function() {
