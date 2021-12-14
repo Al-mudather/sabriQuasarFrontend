@@ -40,6 +40,28 @@
                         />
                       </div>
                     </div>
+                    <!-- <div class="col-lg-6 col-xs-12">
+                      <div class="inp">
+                        <q-input
+                            rounded
+                            outlined
+                            v-model="certificateName"
+                            hint="The certificat Name"
+                            :label="$t('الإسم رباعيا باللغه الإنجليزيه للإستخراج الشهاده')"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-lg-6 col-xs-12">
+                      <div class="inp">
+                        <q-input
+                            rounded
+                            outlined
+                            v-model="certificateNameConfirm"
+                            hint="The certificat Name Confirm"
+                            :label="$t('تأكيد الإسم باللغه الإنجليزيه')"
+                        />
+                      </div>
+                    </div> -->
                     <div class="col-lg-6 col-xs-12">
                       <div class="inp">
                         <!-- <img src="~assets/img/gmail.png" alt="" /> -->
@@ -129,6 +151,8 @@ export default {
       lodash: this.$_,
       visible: false,
       fullName: "",
+      // certificateName: "",
+      // certificateNameConfirm: "",
       phoneNumber: "",
       whatsAppNumber: null,
       whatsAppLabel: this.$t('رقم الواتساب اذا وجد'),
@@ -215,6 +239,8 @@ export default {
             variables: {
               input: {
                 fullName: this.fullName,
+                certificateName: this.certificateName,
+                certificateNameConfirm: this.certificateNameConfirm,
                 phoneNumber2: this.whatsAppNumber,
                 phoneNumber3: this.telegramNumber,
                 gender: this.gender

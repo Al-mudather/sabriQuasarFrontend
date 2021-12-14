@@ -64,7 +64,8 @@ export default {
       setTimeout(() => {
         this.UNINITIALIZE_THE_VIDEO ()
         const key = this.$_.get(video_metadata, "[path]") ? this.$_.get(video_metadata, "[path]") : this.$_.get(video_metadata, "[id]")
-        this.player= new videoPlayer('dev', `http://localhost:8000/api/course/video/auth`)
+        // this.player= new videoPlayer('dev', `http://localhost:8000/api/course/video/auth`)
+        this.player= new videoPlayer('prod', `${location.origin}/api/course/video/auth`)
         //TODO: The play function take =>> the video key / the inrollment / the course pk
         try {
           this.player.play(`[data-id="${this.$_.get(this.content, '[pk]')}"]`,key, 7 , this.$_.get(this.$route, '[params][pk]'), this.token)              

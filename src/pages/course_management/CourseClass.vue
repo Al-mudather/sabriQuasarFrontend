@@ -316,7 +316,8 @@ export default {
         setTimeout(() => {
             this.UNINITIALIZE_THE_VIDEO ()
           const key = this.$_.get(video_metadata, "[path]") ? this.$_.get(video_metadata, "[path]") : this.$_.get(video_metadata, "[id]")
-          this.player= new videoPlayer('dev', `http://localhost:8000/api/course/video/auth`)
+        //   this.player= new videoPlayer('dev', `http://localhost:8000/api/course/video/auth`)
+          this.player= new videoPlayer('prod', `${location.origin}/api/course/video/auth`)
           //TODO: The play function take =>> the video key / the inrollment / the course pk
           try {
             this.player.play(`[data-id="${this.$_.get(this.progressData, '[courseUnitContentId]')}"]`,key, this.$_.get(this.progressData, '[enrollmentId]'), this.$_.get(this.$route, '[params][pk]'), this.token)              
@@ -509,9 +510,9 @@ export default {
             this.PREPARE_THE_SMART_NOD_VIDEO(video_metadata)
           } else {
             //TODO: Check if the vidcipher iframe is exists
-            console.log('lllllllllllllllllllllll')
-            console.log(contentData)
-            console.log('lllllllllllllllllllllll')
+            // console.log('lllllllllllllllllllllll')
+            // console.log(contentData)
+            // console.log('lllllllllllllllllllllll')
             const cipher = contentData.cipher_iframe
             if (cipher) {
                 this.cipherVideo = cipher
