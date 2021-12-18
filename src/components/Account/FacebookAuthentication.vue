@@ -1,10 +1,11 @@
 <template>
     <div class="social">
         <!-- <img src="~assets/img/facebook.png" alt="" /> -->
-        <q-btn class="full-width" :label="label" icon="la la-facebook" @click="helloFacebookAuth" color="primary" />
+        <!-- <q-btn class="full-width" :label="label" icon="la la-facebook" @click="helloFacebookAuth" color="primary" />
         <q-inner-loading :showing="visible">
             <q-spinner-hourglass color="primary" size="70px" />
-        </q-inner-loading>
+        </q-inner-loading> -->
+        <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false"></div>
     </div>
 </template>
 
