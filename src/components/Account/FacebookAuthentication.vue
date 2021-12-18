@@ -167,9 +167,9 @@ export default {
                 force: true
             })
             .then(r => {
-                // console.log("Facebook");
-                // console.log(r);
-                // console.log("Facebook");
+                console.log("Facebook");
+                console.log(r);
+                console.log("Facebook");
 
                 // this.loginAuthMutation(
                 //     r.authResponse.access_token,
@@ -185,9 +185,9 @@ export default {
 
                     // var facebookRes = hello('facebook').getAuthResponse();
                     // var facebook = hello.getAuthResponse('facebook')
-                    console.log("lllllllllllllllll");
-                    console.log(res);
-                    console.log("lllllllllllllllll");
+                    // console.log("lllllllllllllllll");
+                    // console.log(res);
+                    // console.log("lllllllllllllllll");
 
                     // this.loginAuthMutation(
                     //     r.authResponse.access_token,
