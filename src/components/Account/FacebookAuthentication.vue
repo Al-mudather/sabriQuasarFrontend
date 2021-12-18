@@ -155,17 +155,17 @@ export default {
                         .api(`/me?access_token=${r.authResponse.access_token}`)
                         .then(res => {
                             
-                            // var facebook = hello("facebook").getAuthResponse();
+                            var facebook = hello("facebook").getAuthResponse();
                             console.log("lllllllllllllllll");
                             console.log(res);
                             console.log("lllllllllllllllll");
 
                             // console.log('')
-                            // console.log(facebook)
+                            console.log(facebook)
                             // console.log(facebook.access_token)
 
                             this.loginAuthMutation(
-                                r.authResponse.access_token,
+                                facebook.access_token,
                                 "facebook",
                                 res.email
                             );
