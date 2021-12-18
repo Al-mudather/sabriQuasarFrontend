@@ -28,7 +28,7 @@
           </div>
         </q-card-section>
  
-        <q-card-actions align="center">
+        <q-card-actions align="center" style="width: 100%;">
           <q-btn label="Stop the video" @click="UNINITIALIZE_THE_VIDEO" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>

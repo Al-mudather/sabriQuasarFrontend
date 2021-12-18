@@ -148,8 +148,9 @@ export default {
                     hello("facebook")
                         .api("/me")
                         .then(r => {
-                            // console.log("r.email = " + r.email);
-                            // console.log("r.name== = " + r.name);
+                            console.log("lllllllllllllllll");
+                            console.log("r" + r);
+                            console.log("lllllllllllllllll");
 
                             var facebook = hello("facebook").getAuthResponse();
 
