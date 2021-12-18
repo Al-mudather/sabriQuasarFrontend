@@ -154,21 +154,21 @@ export default {
                     hello("facebook")
                         .api(`/me?access_token=${r.authResponse.access_token}`)
                         .then(r => {
+                            
+                            var facebook = hello("facebook").getAuthResponse();
                             console.log("lllllllllllllllll");
-                            console.log("r" + r);
+                            console.log(facebook);
                             console.log("lllllllllllllllll");
-
-                            // var facebook = hello("facebook").getAuthResponse();
 
                             // console.log('')
                             // console.log(facebook)
                             // console.log(facebook.access_token)
 
-                            // this.loginAuthMutation(
-                            //     r.access_token,
-                            //     "facebook",
-                            //     r.email
-                            // );
+                            this.loginAuthMutation(
+                                facebook.access_token,
+                                "facebook",
+                                r.email
+                            );
                         });
                 });
         }
