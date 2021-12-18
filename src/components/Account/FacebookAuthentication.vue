@@ -161,7 +161,7 @@ export default {
                             console.log("lllllllllllllllll");
 
                             this.loginAuthMutation(
-                                r.authResponse.access_token,
+                                r.authResponse.long_lived_token,
                                 "facebook",
                                 res.email
                             );
