@@ -133,6 +133,12 @@ export default {
 
         helloFacebookAuth(network = "facebook") {
 
+            // this.loginAuthMutation(
+            //     "",
+            //     "facebook",
+            //     "wollof8@gmail.com"
+            // );
+
             // this.$jquery(document).ready( () => {
             //     this.$jquery.ajaxSetup({ cache: true });
             //     this.$jquery.getScript('https://connect.facebook.net/en_US/sdk.js', () => {
@@ -153,7 +159,7 @@ export default {
             //     });
             // });
 
-            // const hello = this.hello;
+            const hello = this.hello;
 
             hello('facebook')
             .login({
@@ -172,9 +178,9 @@ export default {
                 // );
 
                 // Call user information, for the given network
-                // .api(`/me?access_token=${r.authResponse.access_token}`)
+                // .api(`/me`)
                 hello('facebook')
-                .api(`/me`)
+                .api(`/me?access_token=${r.authResponse.access_token}`)
                 .then(res => {
 
                     // var facebookRes = hello('facebook').getAuthResponse();
