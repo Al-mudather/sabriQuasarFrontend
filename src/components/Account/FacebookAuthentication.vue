@@ -134,111 +134,105 @@ export default {
         helloFacebookAuth(network = "facebook") {
             const hello = this.hello;
 
-            this.$jquery(document).ready( () => {
-                this.$jquery.ajaxSetup({ cache: true });
-                this.$jquery.getScript('https://connect.facebook.net/en_US/sdk.js', () => {
-                    FB.init({
-                        appId: '757236575189030',
-                        version: 'v2.7',
-                        cookie     : true,                     // Enable cookies to allow the server to access the session.
-                        xfbml      : true,
-                    }); 
-                    this.$jquery('#loginbutton,#feedbutton').removeAttr('disabled');
+            // this.$jquery(document).ready( () => {
+            //     this.$jquery.ajaxSetup({ cache: true });
+            //     this.$jquery.getScript('https://connect.facebook.net/en_US/sdk.js', () => {
+            //         FB.init({
+            //             appId: '757236575189030',
+            //             version: 'v2.7',
+            //             cookie     : true,                     // Enable cookies to allow the server to access the session.
+            //             xfbml      : true,
+            //         }); 
+            //         this.$jquery('#loginbutton,#feedbutton').removeAttr('disabled');
 
-                    FB.login( (log_res) => {
-                        if (log_res.status === 'connected') {
-                            FB.getLoginStatus( (res) => {
-                                const access_token = res.authResponse.accessToken
-                                    hello('facebook')
-                                    .api(`/me?access_token=${access_token}`)
-                                    .then( (res_data) => {
-                                        const email = res_data.email
+            //         FB.login( (log_res) => {
+            //             if (log_res.status === 'connected') {
+            //                 FB.getLoginStatus( (res) => {
+            //                     const access_token = res.authResponse.accessToken
+            //                         hello('facebook')
+            //                         .api(`/me?access_token=${access_token}`)
+            //                         .then( (res_data) => {
+            //                             const email = res_data.email
 
-                                        this.loginAuthMutation(
-                                            access_token,
-                                            "facebook",
-                                            email
-                                        );
-                                    } )
-                                // FB.api('/me', (myData) => {
-                                //     console.log('lllllllllllllllllll')
-                                //     console.log(myData)
-                                //     console.log('lllllllllllllllllll')
-                                // }, {scope: 'email'});
-                            } );
-                            // Logged into your webpage and Facebook.
-                        } else {
-                            // console.log('!!!!!!!!!!!!!!!!!!')
-                            // console.log(log_res)
-                            // console.log('!!!!!!!!!!!!!!!!!!')
-                            // FB.api('/me', (response) => {
-                            //     console.log('xxxxxxxxxxxxxxxxx')
-                            //     console.log(response)
-                            //     console.log('xxxxxxxxxxxxxxxxx')
-                            // });
-                            // The person is not logged into your webpage or we are unable to tell. 
-                        }
-                    }, {scope: 'email'} );
+            //                             this.loginAuthMutation(
+            //                                 access_token,
+            //                                 "facebook",
+            //                                 email
+            //                             );
+            //                         } )
+            //                     // FB.api('/me', (myData) => {
+            //                     //     console.log('lllllllllllllllllll')
+            //                     //     console.log(myData)
+            //                     //     console.log('lllllllllllllllllll')
+            //                     // }, {scope: 'email'});
+            //                 } );
+            //                 // Logged into your webpage and Facebook.
+            //             } else {
+            //                 // console.log('!!!!!!!!!!!!!!!!!!')
+            //                 // console.log(log_res)
+            //                 // console.log('!!!!!!!!!!!!!!!!!!')
+            //                 // FB.api('/me', (response) => {
+            //                 //     console.log('xxxxxxxxxxxxxxxxx')
+            //                 //     console.log(response)
+            //                 //     console.log('xxxxxxxxxxxxxxxxx')
+            //                 // });
+            //                 // The person is not logged into your webpage or we are unable to tell. 
+            //             }
+            //         }, {scope: 'email'} );
 
-                    // FB.getLoginStatus( (res) => {
-                    //     const access_token = res.authResponse.access_token
-                    //     FB.login(function(response){
-                    //         if (response.status === 'connected') {
-                    //             console.log('xxxxxxxxxxxxxxxxx')
-                    //             console.log(response)
-                    //             console.log('xxxxxxxxxxxxxxxxx')
-                    //             // Logged into your webpage and Facebook.
-                    //         } else {
-                    //             // The person is not logged into your webpage or we are unable to tell. 
-                    //         }
-                    //     },{scope: 'email'});
-                    // } );
-                });
-            });
-
-            // const hello = this.hello;
-
-            // hello('facebook')
-            // .login({
-            //     scope: "public_profile,email",
-            //     force: true
-            // })
-            // .then(r => {
-            //     console.log("Facebook");
-            //     console.log(r);
-            //     console.log("Facebook");
-
-            //     // this.loginAuthMutation(
-            //     //     r.authResponse.access_token,
-            //     //     "facebook",
-            //     //     r.email
-            //     // );
-
-            //     // Call user information, for the given network
-            //     // .api(`/me`)
-            //     hello('facebook')
-            //     .api(`/me?access_token=${r.authResponse.access_token}`)
-            //     .then(res => {
-
-            //         // var facebookRes = hello('facebook').getAuthResponse();
-            //         // var facebook = hello.getAuthResponse('facebook')
-            //         // console.log("lllllllllllllllll");
-            //         // console.log(res);
-            //         // console.log("lllllllllllllllll");
-
-            //         // this.loginAuthMutation(
-            //         //     r.authResponse.access_token,
-            //         //     "facebook",
-            //         //     res.email
-            //         // );
-            //     }, (e) => {
-            //         console.log("eeeeeeeeeeeeeeeeeeeee");
-            //         console.log(e);
-            //         console.log("eeeeeeeeeeeeeeeeeeeee");
-            //     }
-
-            //     );
+            //         // FB.getLoginStatus( (res) => {
+            //         //     const access_token = res.authResponse.access_token
+            //         //     FB.login(function(response){
+            //         //         if (response.status === 'connected') {
+            //         //             console.log('xxxxxxxxxxxxxxxxx')
+            //         //             console.log(response)
+            //         //             console.log('xxxxxxxxxxxxxxxxx')
+            //         //             // Logged into your webpage and Facebook.
+            //         //         } else {
+            //         //             // The person is not logged into your webpage or we are unable to tell. 
+            //         //         }
+            //         //     },{scope: 'email'});
+            //         // } );
+            //     });
             // });
+
+
+            hello('facebook')
+            .login({
+                scope: "public_profile,email",
+                force: true
+            })
+            .then(r => {
+                const access_token = r.authResponse.access_token
+
+                // Call user information, for the given network
+                hello('facebook')
+                .api(`/me?access_token=${access_token}`)
+                .then(res => {
+
+                    // var facebookRes = hello('facebook').getAuthResponse();
+                    // console.log("lllllllllllllllll");
+                    // console.log(res);
+                    // console.log("lllllllllllllllll");
+                    try {
+                        this.loginAuthMutation(
+                            access_token,
+                            "facebook",
+                            res.email
+                        );
+                    } catch (error) {
+                        console.log("eeeeeeeeeeeeeeeeeeeee");
+                        console.log(error);
+                        console.log("eeeeeeeeeeeeeeeeeeeee");
+                    }
+                }, (e) => {
+                    console.log("eeeeeeeeeeeeeeeeeeeee");
+                    console.log(e);
+                    console.log("eeeeeeeeeeeeeeeeeeeee");
+                }
+
+                );
+            });
         }
     }
 };
