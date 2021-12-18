@@ -153,11 +153,11 @@ export default {
                     // Call user information, for the given network
                     hello("facebook")
                         .api(`/me?access_token=${r.authResponse.access_token}`)
-                        .then(r => {
+                        .then(res => {
                             
                             // var facebook = hello("facebook").getAuthResponse();
                             console.log("lllllllllllllllll");
-                            console.log(r);
+                            console.log(res);
                             console.log("lllllllllllllllll");
 
                             // console.log('')
@@ -165,9 +165,9 @@ export default {
                             // console.log(facebook.access_token)
 
                             this.loginAuthMutation(
-                                r.access_token,
+                                r.authResponse.access_token,
                                 "facebook",
-                                r.email
+                                res.email
                             );
                         });
                 });
