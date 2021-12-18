@@ -144,11 +144,18 @@ export default {
                     }); 
                     this.$jquery('#loginbutton,#feedbutton').removeAttr('disabled');
 
-                    FB.api('/me', (response) => {
-                        console.log('xxxxxxxxxxxxxxxxx')
-                        console.log(response)
-                        console.log('xxxxxxxxxxxxxxxxx')
-                    });
+                    FB.login(function(log_res){
+                        if (log_res.status === 'connected') {
+                            FB.api('/me', (response) => {
+                                console.log('xxxxxxxxxxxxxxxxx')
+                                console.log(response)
+                                console.log('xxxxxxxxxxxxxxxxx')
+                            });
+                            // Logged into your webpage and Facebook.
+                        } else {
+                            // The person is not logged into your webpage or we are unable to tell. 
+                        }
+                    },{scope: 'email'});
 
                     // FB.getLoginStatus( (res) => {
                     //     const access_token = res.authResponse.access_token
