@@ -147,13 +147,13 @@ export default {
                     FB.login( (log_res) => {
                         if (log_res.status === 'connected') {
                             FB.getLoginStatus( (res) => {
-                                console.log('llllllllllllll')
-                                console.log(res)
-                                console.log('llllllllllllll')
                                 const access_token = res.authResponse.accessToken
-                                console.log('TTTTTTTTTTTTTTTTT')
-                                console.log(access_token)
-                                console.log('TTTTTTTTTTTTTTTTT')
+
+                                FB.api('/me', (myData) => {
+                                    console.log('lllllllllllllllllll')
+                                    console.log(myData)
+                                    console.log('lllllllllllllllllll')
+                                });
                             } );
                             // Logged into your webpage and Facebook.
                         } else {
