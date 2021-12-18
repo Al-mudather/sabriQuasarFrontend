@@ -131,7 +131,7 @@ export default {
                 });
         },
 
-        helloFacebookAuth(network = "google") {
+        helloFacebookAuth(network = "facebook") {
             const hello = this.hello;
 
             hello("facebook")
@@ -144,13 +144,19 @@ export default {
                     console.log(r);
                     console.log("Facebook");
 
+                    // this.loginAuthMutation(
+                    //     r.authResponse.access_token,
+                    //     "facebook",
+                    //     r.email
+                    // );
+
                     // Call user information, for the given network
                     hello("facebook")
-                        .api("/me")
+                        .api("me")
                         .then(r => {
-                            // console.log("lllllllllllllllll");
-                            // console.log("r" + r);
-                            // console.log("lllllllllllllllll");
+                            console.log("lllllllllllllllll");
+                            console.log("r" + r);
+                            console.log("lllllllllllllllll");
 
                             // var facebook = hello("facebook").getAuthResponse();
 
@@ -158,11 +164,11 @@ export default {
                             // console.log(facebook)
                             // console.log(facebook.access_token)
 
-                            this.loginAuthMutation(
-                                r.access_token,
-                                "facebook",
-                                r.email
-                            );
+                            // this.loginAuthMutation(
+                            //     r.access_token,
+                            //     "facebook",
+                            //     r.email
+                            // );
                         });
                 });
         }
