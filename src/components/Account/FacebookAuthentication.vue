@@ -148,23 +148,29 @@ export default {
                         if (log_res.status === 'connected') {
                             FB.getLoginStatus( (res) => {
                                 const access_token = res.authResponse.accessToken
-
-                                FB.api('/me', (myData) => {
-                                    console.log('lllllllllllllllllll')
-                                    console.log(myData)
-                                    console.log('lllllllllllllllllll')
-                                }, {scope: 'email'});
+                                    hello('facebook')
+                                    .api(`/me?access_token=${access_token}`)
+                                    .then( (res_data) => {
+                                        console.log('lllllllllllllllllll')
+                                        console.log(res_data)
+                                        console.log('lllllllllllllllllll')
+                                    } )
+                                // FB.api('/me', (myData) => {
+                                //     console.log('lllllllllllllllllll')
+                                //     console.log(myData)
+                                //     console.log('lllllllllllllllllll')
+                                // }, {scope: 'email'});
                             } );
                             // Logged into your webpage and Facebook.
                         } else {
-                            console.log('!!!!!!!!!!!!!!!!!!')
-                            console.log(log_res)
-                            console.log('!!!!!!!!!!!!!!!!!!')
-                            FB.api('/me', (response) => {
-                                console.log('xxxxxxxxxxxxxxxxx')
-                                console.log(response)
-                                console.log('xxxxxxxxxxxxxxxxx')
-                            });
+                            // console.log('!!!!!!!!!!!!!!!!!!')
+                            // console.log(log_res)
+                            // console.log('!!!!!!!!!!!!!!!!!!')
+                            // FB.api('/me', (response) => {
+                            //     console.log('xxxxxxxxxxxxxxxxx')
+                            //     console.log(response)
+                            //     console.log('xxxxxxxxxxxxxxxxx')
+                            // });
                             // The person is not logged into your webpage or we are unable to tell. 
                         }
                     }, {scope: 'email'} );
