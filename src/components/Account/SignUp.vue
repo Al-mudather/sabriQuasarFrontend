@@ -10,7 +10,7 @@
             <!-- <div class="logBy"> -->
             <div class="row q-ma-md q-pt-xl justify-center">
                 <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
-                <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
+                <!-- <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/> -->
             </div>
             <!-- <form @submit="REGISTER_NEW_USER($event)"> -->
             <!-- <form>
@@ -114,7 +114,7 @@ import { GetMyProfileData } from "src/queries/account_management/query/GetMyProf
 import { mapActions } from "vuex";
 import AccountHeader from "src/components/utils/accountHeader";
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication';
-import FacebookAuthentication from 'src/components/Account/FacebookAuthentication';
+// import FacebookAuthentication from 'src/components/Account/FacebookAuthentication';
 
 export default {
 
@@ -134,8 +134,8 @@ export default {
 
     components: {
         AccountHeader,
-        GoogleAuthentication,
-        FacebookAuthentication
+        GoogleAuthentication
+        // FacebookAuthentication
     },
 
     beforeRouteEnter(to, from, next) {
