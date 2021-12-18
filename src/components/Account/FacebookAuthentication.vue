@@ -1,11 +1,10 @@
 <template>
     <div class="social">
         <!-- <img src="~assets/img/facebook.png" alt="" /> -->
-        <!-- <q-btn class="full-width" :label="label" icon="la la-facebook" @click="helloFacebookAuth" color="primary" />
+        <q-btn class="full-width" :label="label" icon="la la-facebook" @click="helloFacebookAuth" color="primary" />
         <q-inner-loading :showing="visible">
             <q-spinner-hourglass color="primary" size="70px" />
-        </q-inner-loading> -->
-        <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false"></div>
+        </q-inner-loading>
     </div>
 </template>
 
@@ -139,17 +138,31 @@ export default {
                 this.$jquery.getScript('https://connect.facebook.net/en_US/sdk.js', () => {
                     FB.init({
                         appId: '757236575189030',
-                        version: 'v2.7'
+                        version: 'v2.7',
+                        cookie     : true,                     // Enable cookies to allow the server to access the session.
+                        xfbml      : true,
                     }); 
                     this.$jquery('#loginbutton,#feedbutton').removeAttr('disabled');
-                    FB.getLoginStatus( (res) => {
-                        const access_token = res.authResponse.access_token
-                        FB.login(function(response){
-                            console.log('xxxxxxxxxxxxxxxxx')
-                            console.log(response)
-                            console.log('xxxxxxxxxxxxxxxxx')
-                        });
-                    } );
+
+                    FB.api('/me', (response) => {
+                        console.log('xxxxxxxxxxxxxxxxx')
+                        console.log(response)
+                        console.log('xxxxxxxxxxxxxxxxx')
+                    });
+
+                    // FB.getLoginStatus( (res) => {
+                    //     const access_token = res.authResponse.access_token
+                    //     FB.login(function(response){
+                    //         if (response.status === 'connected') {
+                    //             console.log('xxxxxxxxxxxxxxxxx')
+                    //             console.log(response)
+                    //             console.log('xxxxxxxxxxxxxxxxx')
+                    //             // Logged into your webpage and Facebook.
+                    //         } else {
+                    //             // The person is not logged into your webpage or we are unable to tell. 
+                    //         }
+                    //     },{scope: 'email'});
+                    // } );
                 });
             });
 
