@@ -14,6 +14,8 @@ import { SocialAuth } from "src/queries/account_management/mutation/CreateSocail
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { mapActions } from "vuex";
 
+import * as q_hello from 'hellojs';
+
 export default {
     name: "FacebookAuthentication",
     data () {
@@ -132,9 +134,16 @@ export default {
         },
 
         helloFacebookAuth(network = "facebook") {
+
+            q_hello.init({
+                facebook: '757236575189030'
+            });
+
+            const facebook = q_hello.use("facebook"); 
+
             const hello = this.hello;
 
-            hello("facebook")
+            facebook
                 .login({
                     scope: "public_profile,email",
                     force: true
@@ -151,21 +160,21 @@ export default {
                     // );
 
                     // Call user information, for the given network
-                    hello("facebook")
+                    facebook
                         .api(`/me?access_token=${r.authResponse.access_token}`)
                         .then(res => {
 
-                            // var facebook = hello("facebook").getAuthResponse();
-                            var facebook = hello.getAuthResponse('facebook')
+                            var facebookRes = facebook.getAuthResponse();
+                            // var facebook = hello.getAuthResponse('facebook')
                             console.log("lllllllllllllllll");
-                            console.log(facebook);
+                            console.log(facebookRes);
                             console.log("lllllllllllllllll");
 
-                            this.loginAuthMutation(
-                                r.authResponse.access_token,
-                                "facebook",
-                                res.email
-                            );
+                            // this.loginAuthMutation(
+                            //     r.authResponse.access_token,
+                            //     "facebook",
+                            //     res.email
+                            // );
                         }, (e) => {
                             console.log("eeeeeeeeeeeeeeeeeeeee");
                             console.log(e);
