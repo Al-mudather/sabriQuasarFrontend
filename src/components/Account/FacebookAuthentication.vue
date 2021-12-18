@@ -155,9 +155,9 @@ export default {
                         .api(`/me?access_token=${r.authResponse.access_token}`)
                         .then(r => {
                             
-                            var facebook = hello("facebook").getAuthResponse();
+                            // var facebook = hello("facebook").getAuthResponse();
                             console.log("lllllllllllllllll");
-                            console.log(facebook);
+                            console.log(r);
                             console.log("lllllllllllllllll");
 
                             // console.log('')
@@ -165,7 +165,7 @@ export default {
                             // console.log(facebook.access_token)
 
                             this.loginAuthMutation(
-                                facebook.access_token,
+                                r.access_token,
                                 "facebook",
                                 r.email
                             );
