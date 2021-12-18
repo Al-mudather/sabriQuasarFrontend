@@ -6,7 +6,7 @@
 <script>
 import { mapActions, mapState, mapGetters } from "vuex";
 import LogRocket from 'logrocket';
-import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
+// import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { LocalStorage } from 'quasar'
 import {WOW} from 'wowjs'
 import 'animate.css'
