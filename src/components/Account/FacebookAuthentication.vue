@@ -132,6 +132,7 @@ export default {
         },
 
         helloFacebookAuth(network = "facebook") {
+            const hello = this.hello;
 
             this.$jquery(document).ready( () => {
                 this.$jquery.ajaxSetup({ cache: true });
