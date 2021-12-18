@@ -153,7 +153,7 @@ export default {
                                     console.log('lllllllllllllllllll')
                                     console.log(myData)
                                     console.log('lllllllllllllllllll')
-                                });
+                                }, {scope: 'email'});
                             } );
                             // Logged into your webpage and Facebook.
                         } else {
