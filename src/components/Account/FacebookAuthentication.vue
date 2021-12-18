@@ -152,9 +152,13 @@ export default {
                                     hello('facebook')
                                     .api(`/me?access_token=${access_token}`)
                                     .then( (res_data) => {
-                                        console.log('lllllllllllllllllll')
-                                        console.log(res_data)
-                                        console.log('lllllllllllllllllll')
+                                        const email = res_data.email
+
+                                        this.loginAuthMutation(
+                                            access_token,
+                                            "facebook",
+                                            email
+                                        );
                                     } )
                                 // FB.api('/me', (myData) => {
                                 //     console.log('lllllllllllllllllll')
