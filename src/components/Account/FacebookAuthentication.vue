@@ -146,16 +146,28 @@ export default {
 
                     FB.login(function(log_res){
                         if (log_res.status === 'connected') {
+                            FB.getLoginStatus( (res) => {
+                                console.log('llllllllllllll')
+                                console.log(res)
+                                console.log('llllllllllllll')
+                                const access_token = res.authResponse.access_token
+                                console.log('TTTTTTTTTTTTTTTTT')
+                                console.log(access_token)
+                                console.log('TTTTTTTTTTTTTTTTT')
+                            } );
+                            // Logged into your webpage and Facebook.
+                        } else {
+                            console.log('!!!!!!!!!!!!!!!!!!')
+                            console.log(log_res)
+                            console.log('!!!!!!!!!!!!!!!!!!')
                             FB.api('/me', (response) => {
                                 console.log('xxxxxxxxxxxxxxxxx')
                                 console.log(response)
                                 console.log('xxxxxxxxxxxxxxxxx')
                             });
-                            // Logged into your webpage and Facebook.
-                        } else {
                             // The person is not logged into your webpage or we are unable to tell. 
                         }
-                    },{scope: 'email'});
+                    });
 
                     // FB.getLoginStatus( (res) => {
                     //     const access_token = res.authResponse.access_token
