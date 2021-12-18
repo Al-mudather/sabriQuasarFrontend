@@ -140,9 +140,9 @@ export default {
                     force: true
                 })
                 .then(r => {
-                    console.log("Facebook");
-                    console.log(r);
-                    console.log("Facebook");
+                    // console.log("Facebook");
+                    // console.log(r);
+                    // console.log("Facebook");
 
                     // this.loginAuthMutation(
                     //     r.authResponse.access_token,
@@ -155,7 +155,7 @@ export default {
                         .api(`/me?access_token=${r.authResponse.access_token}`)
                         .then(res => {
                             
-                            var facebook = hello("facebook").getAuthResponse();
+                            var facebook = hello("facebook");
                             console.log("lllllllllllllllll");
                             console.log(facebook);
                             console.log("lllllllllllllllll");
