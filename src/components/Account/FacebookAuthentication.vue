@@ -142,9 +142,9 @@ export default {
                     }); 
                     this.$jquery('#loginbutton,#feedbutton').removeAttr('disabled');
                     FB.getLoginStatus( (res) => {
-                        console.log('lllllllllllllll')
+                        console.log('xxxxxxxxxxxxxxxxx')
                         console.log(res)
-                        console.log('lllllllllllllll')
+                        console.log('xxxxxxxxxxxxxxxxx')
                     } );
                 });
             });
