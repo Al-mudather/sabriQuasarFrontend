@@ -112,24 +112,36 @@ const actions = {
  
   logOutAction ({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      axios
-      // .get(`http://localhost:8000/api/drf/logout/`)
-      .get(`${location.origin}/api/drf/logout/`)
-      .then(res => {
-        // Todo clear everything from window.LocalStorage
-        tokenStorage.clearToken()
-        //TODO: Cleare the cart
-        SessionStorage.set('shoppingCartList', [])
-        commit('deleteData')
-        Notify.create({
-          type: 'positive',
-          progress: true,
-          multiLine: true,
-          position: 'top',
-          message: 'Logged Out Successfully'
-        })
-        resolve()
+      tokenStorage.clearToken()
+      //TODO: Cleare the cart
+      SessionStorage.set('shoppingCartList', [])
+      commit('deleteData')
+      Notify.create({
+        type: 'positive',
+        progress: true,
+        multiLine: true,
+        position: 'top',
+        message: 'Logged Out Successfully'
       })
+      resolve()
+      // axios
+      // // .get(`http://localhost:8000/api/drf/logout/`)
+      // .get(`${location.origin}/api/drf/logout/`)
+      // .then(res => {
+      //   // Todo clear everything from window.LocalStorage
+      //   tokenStorage.clearToken()
+      //   //TODO: Cleare the cart
+      //   SessionStorage.set('shoppingCartList', [])
+      //   commit('deleteData')
+      //   Notify.create({
+      //     type: 'positive',
+      //     progress: true,
+      //     multiLine: true,
+      //     position: 'top',
+      //     message: 'Logged Out Successfully'
+      //   })
+      //   resolve()
+      // })
     })
   }
 }
