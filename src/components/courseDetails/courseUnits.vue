@@ -43,8 +43,9 @@
                     appear
                     enter-active-class="animated fadeIn"
                     leave-active-class="animated fadeOut"
-                >
+                > 
                     <q-expansion-item
+                        default-opened
                         header-class="text-white"
                         class="card"
                         v-for="unit in allCourseUnits.edges"

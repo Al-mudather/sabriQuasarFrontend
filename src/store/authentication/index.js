@@ -1,4 +1,5 @@
 import axios from 'axios'
+import $ from 'jquery'
 import { Notify, LocalStorage, SessionStorage } from 'quasar'
 import {apolloClient} from 'src/apollo/client'
 import {tokenStorage, userProfileStorage} from "src/localStorageService";
@@ -111,6 +112,7 @@ const actions = {
   },
  
   logOutAction ({ commit }, payload) {
+
     return new Promise((resolve, reject) => {
       axios
       // .get(`http://localhost:8000/api/drf/logout/`)
@@ -121,6 +123,22 @@ const actions = {
         //TODO: Cleare the cart
         SessionStorage.set('shoppingCartList', [])
         commit('deleteData')
+        //TODO: If the user logedin using facebook, log him out
+        $(document).ready( () => {
+          $.ajaxSetup({ cache: true });
+          $.getScript('https://connect.facebook.net/en_US/sdk.js', () => {
+              FB.init({
+                  appId: '757236575189030',
+                  version: 'v2.7',
+                  cookie     : true,                     // Enable cookies to allow the server to access the session.
+                  xfbml      : true,
+              }); 
+
+              FB.logout( (out) => {
+              } )
+          });
+        });
+        //TODO: Notify the user
         Notify.create({
           type: 'positive',
           progress: true,

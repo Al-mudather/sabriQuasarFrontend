@@ -2,8 +2,9 @@
 <div>
     <div class="info">
         <div class="mage">
-            <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" />
-            <img v-else src="~assets/img/padlock.png" alt="" />
+            <!-- <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" /> -->
+            <img v-if="content.isFree" src="~assets/img/padlock.png" alt="" />
+            <img v-else src="~assets/img/unlock.png" alt="" />
         </div>
         <h3 class="video" v-if="content.isFree"  @click="OPEN_FREE_VIDEO_COURSE($event ,content)">{{ formatTitle }}</h3>
         <h3 v-else >{{ formatTitle }}</h3>

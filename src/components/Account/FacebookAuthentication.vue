@@ -146,9 +146,6 @@ export default {
                     this.$jquery('#loginbutton,#feedbutton').removeAttr('disabled');
 
                     FB.logout( (out) => {
-                        console.log('lllllllllllll')
-                        console.log(out)
-                        console.log('lllllllllllll')
                     } )
 
                     FB.login( (log_res) => {
@@ -166,39 +163,10 @@ export default {
                                             email
                                         );
                                     } )
-                                // FB.api('/me', (myData) => {
-                                //     console.log('lllllllllllllllllll')
-                                //     console.log(myData)
-                                //     console.log('lllllllllllllllllll')
-                                // }, {scope: 'email'});
                             } );
-                            // Logged into your webpage and Facebook.
                         } else {
-                            // console.log('!!!!!!!!!!!!!!!!!!')
-                            // console.log(log_res)
-                            // console.log('!!!!!!!!!!!!!!!!!!')
-                            // FB.api('/me', (response) => {
-                            //     console.log('xxxxxxxxxxxxxxxxx')
-                            //     console.log(response)
-                            //     console.log('xxxxxxxxxxxxxxxxx')
-                            // });
-                            // The person is not logged into your webpage or we are unable to tell. 
                         }
                     }, {scope: 'email'} );
-
-                    // FB.getLoginStatus( (res) => {
-                    //     const access_token = res.authResponse.access_token
-                    //     FB.login(function(response){
-                    //         if (response.status === 'connected') {
-                    //             console.log('xxxxxxxxxxxxxxxxx')
-                    //             console.log(response)
-                    //             console.log('xxxxxxxxxxxxxxxxx')
-                    //             // Logged into your webpage and Facebook.
-                    //         } else {
-                    //             // The person is not logged into your webpage or we are unable to tell. 
-                    //         }
-                    //     },{scope: 'email'});
-                    // } );
                 });
             });
 
