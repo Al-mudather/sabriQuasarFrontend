@@ -145,6 +145,12 @@ export default {
                     }); 
                     this.$jquery('#loginbutton,#feedbutton').removeAttr('disabled');
 
+                    FB.logout( (out) => {
+                        console.log('lllllllllllll')
+                        console.log(out)
+                        console.log('lllllllllllll')
+                    } )
+
                     FB.login( (log_res) => {
                         if (log_res.status === 'connected') {
                             FB.getLoginStatus( (res) => {
