@@ -128,10 +128,10 @@ const actions = {
           $.ajaxSetup({ cache: true });
           $.getScript('https://connect.facebook.net/en_US/sdk.js', () => {
               FB.init({
-                  appId: '757236575189030',
-                  version: 'v2.7',
-                  cookie     : true,                     // Enable cookies to allow the server to access the session.
-                  xfbml      : true,
+                appId: '757236575189030',
+                version: 'v2.7',
+                cookie     : true,                     // Enable cookies to allow the server to access the session.
+                xfbml      : true,
               }); 
 
               FB.logout( (out) => {
