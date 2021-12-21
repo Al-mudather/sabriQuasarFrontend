@@ -184,7 +184,7 @@
 </template>
 
 <script>
-import courseCard from 'components/utils/courseCard'
+import courseCard from 'components/utils/courseCard.vue'
 import skeletonChip from 'components/skeleton/skeletonChip'
 import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality.js'
 

@@ -60,9 +60,10 @@ class videoPlayer {
         self.player = videojs('video-player', {
             html5: {
                 vhs: {
-                  cacheEncryptionKeys: true
+                    cacheEncryptionKeys: true
                 }
-              }
+            },
+            playbackRates: [0.5, 1, 1.5, 2]
         });
 
         self.player.eme();
