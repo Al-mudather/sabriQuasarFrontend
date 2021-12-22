@@ -76,43 +76,53 @@ export default {
     async DOWNLOAD_MY_CERTIFICATE (certificate) {
       // 'certificate/download/<int:certificate_id>'
       // console.log(';;;;;;;;;;;;;;;;;;;;;;;')
-      // console.log(this.token)
+      // console.log(this.user)
       // console.log(';;;;;;;;;;;;;;;;;;;;;;;')
       // const res = await axios.get(`${location.origin}api/enrollment/certificate/download/${certificatePk}`,{
       //   headers: {
       //     'Authorization': `JWT ${this.token}`
       //   }
       // })
-      
-      //TODO: Start the loading
-      this.loading = true
-      try {
-        const res = await axios(
-        {
-          method: 'GET',
-          url: `http://localhost:8000/api/enrollment/certificate/download/${certificate.node.pk}`,
-          // url: `${location.origin}/api/enrollment/certificate/download/${certificate.node.pk}`,
-          responseType: 'arraybuffer',
-          // responseType: 'blob',
-          headers: {
-            'Authorization': `JWT ${this.token}`,
-            'Content-Type': 'application/json',
+
+      if (this.user.certificateName) {
+        this.loading = true
+        try {
+          const res = await axios(
+            {
+              method: 'GET',
+              url: `http://localhost:8000/api/enrollment/certificate/download/${certificate.node.pk}`,
+              // url: `${location.origin}/api/enrollment/certificate/download/${certificate.node.pk}`,
+              responseType: 'arraybuffer',
+              // responseType: 'blob',
+              headers: {
+                'Authorization': `JWT ${this.token}`,
+                'Content-Type': 'application/json',
+              }
+            }
+          )
+  
+          if (res.data) {
+            FileDownload(res.data, `${certificate.node.enrollment.course.title}-${this.user.username}.pdf`);
+            this.loading = false
+          } else {
+            this.loading = false
           }
-
+        } catch (error) {
+          this.loading = false
         }
-      )
 
-      if (res.data) {
-        FileDownload(res.data, `${certificate.node.enrollment.course.title}-${this.user.username}.pdf`);
-        this.loading = false
       } else {
-        this.loading = false
-      }
-      } catch (error) {
-        this.loading = false
+        //TODO: Start the loading
+        this.$q.notify({
+          type: 'warning',
+          progress: true,
+          multiLine: true,
+          position: 'top',
+          message: "يجب تعيين إسم شهادة التدريب"
+        })
+        this.$router.push({ name: "user-profile" });
       }
       
-
     }
   }
 }

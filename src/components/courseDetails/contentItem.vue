@@ -15,12 +15,15 @@
         <div v-show="player" style="padding-top:56.25%;position:relative;">
           <div style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%; padding-bottom: 2rem;"  id="videoPlayer" :data-id="$_.get(content, '[pk]')"></div>
         </div>
-        <q-video
-          v-if="!player"
-          :ratio="16/9"
-          :src="videoUrl"
-        />
-
+        <div v-if="!player">
+          <div v-if="cipherVideo" v-html="cipherVideo"></div>
+          <q-video
+            v-else
+            :ratio="16/9"
+            :src="videoUrl"
+          />
+        </div>
+ 
         <q-card-section>
           <div class="row no-wrap items-center" style="margin-left: 0;">
             <div class="col text-h6 ellipsis text-center">
@@ -46,6 +49,7 @@ export default {
     return {
       card: false,
       player: null,
+      cipherVideo: null,
       videoUrl: ''
     }
   },
@@ -94,6 +98,8 @@ export default {
 
     OPEN_FREE_VIDEO_COURSE (e, content) {
       e.preventDefault();
+      //TODO: empty the cipher
+      this.cipherVideo = null
       //TODO: Unintialize the player
       this.player = null
       //TODO: Open the video card dialog
@@ -103,16 +109,22 @@ export default {
       if (video_metadata) {
         this.PREPARE_THE_SMART_NOD_VIDEO(video_metadata)
       } else {
-        const video = this.$_.get(contentData, '[video]') 
-        //TODO: If the video from the youtube git it
-        const i = video.indexOf("v");
-        const videoKey = video.slice(i + 2);
-        if ( video.indexOf('youtube') > 0) {
-          this.videoUrl =  "https://www.youtube.com/embed?=" + videoKey;
+        const cipher = this.$_.get(contentData, '[cipher_iframe]')
+         if (cipher) {
+          this.cipherVideo = cipher
         } else {
-          //TODO: if the video from the vimeo git it
-          this.videoUrl =  'https://player.vimeo.com/video/' +  String(video);
+          const video = this.$_.get(contentData, '[video]')
+          //TODO: If the video from the youtube git it
+          const i = video.indexOf("v");
+          const videoKey = video.slice(i + 2);
+          if ( video.indexOf('youtube') > 0) {
+            this.videoUrl =  "https://www.youtube.com/embed?=" + videoKey;
+          } else {
+            //TODO: if the video from the vimeo git it
+            this.videoUrl =  'https://player.vimeo.com/video/' +  String(video);
+          }
         }
+       
       }
 
     }

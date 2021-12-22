@@ -40,28 +40,6 @@
                         />
                       </div>
                     </div>
-                    <!-- <div class="col-lg-6 col-xs-12">
-                      <div class="inp">
-                        <q-input
-                            rounded
-                            outlined
-                            v-model="certificateName"
-                            hint="The certificat Name"
-                            :label="$t('الإسم رباعيا باللغه الإنجليزيه للإستخراج الشهاده')"
-                        />
-                      </div>
-                    </div>
-                    <div class="col-lg-6 col-xs-12">
-                      <div class="inp">
-                        <q-input
-                            rounded
-                            outlined
-                            v-model="certificateNameConfirm"
-                            hint="The certificat Name Confirm"
-                            :label="$t('تأكيد الإسم باللغه الإنجليزيه')"
-                        />
-                      </div>
-                    </div> -->
                     <div class="col-lg-6 col-xs-12">
                       <div class="inp">
                         <!-- <img src="~assets/img/gmail.png" alt="" /> -->
@@ -72,7 +50,7 @@
                           disabled
                         />
                       </div>
-                    </div>
+                    </div> 
                     <div class="col-lg-12 col-xs-12">
                       <div class="inp">
                         <!-- <img src="~assets/img/phone-call.png" alt="" /> -->
@@ -121,6 +99,13 @@
                   </q-inner-loading>
                 </form>
                 <!-- 
+                  Start of Updata-certificate-name 
+                -->
+                <Updata-certificate-name v-if="certificateFieldsVisible" />
+                <!-- 
+                  End of Updata-certificate-name 
+                -->
+                <!-- 
                   Start of Passowrd Rest
                 -->
                 <!-- <Password-Reset-Profile /> -->
@@ -139,6 +124,7 @@
 
 <script>
 // import PasswordResetProfile from 'src/components/Profile_managements/PasswordResetProfile.vue'
+import UpdataCertificateName from 'src/components/Profile_managements/UpdataCertificateName.vue'
 import AfilliateBord from 'src/components/MyCourses/afilliateBord.vue'
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { UpdateUserProfile } from "src/queries/account_management/mutation/UpdateUserProfile";
@@ -150,9 +136,8 @@ export default {
     return {
       lodash: this.$_,
       visible: false,
+      certificateFieldsVisible: true,
       fullName: "",
-      // certificateName: "",
-      // certificateNameConfirm: "",
       phoneNumber: "",
       whatsAppNumber: null,
       whatsAppLabel: this.$t('رقم الواتساب اذا وجد'),
@@ -167,6 +152,7 @@ export default {
   },
   components: {
     // 'Password-Reset-Profile': PasswordResetProfile
+    'Updata-certificate-name': UpdataCertificateName,
     AfilliateBord
   },
 
@@ -185,6 +171,9 @@ export default {
       this.gender = value.gender;
       this.whatsAppNumber = value.phoneNumber2;
       this.telegramNumber = value.phoneNumber3;
+      if (value.certificateName && value.certificateNameConfirm) {
+        this.certificateFieldsVisible = false
+      }
       
       if (value.gender === "MALE") {
         document.querySelector('[data-gender="female"]').classList.remove("active");
@@ -224,13 +213,13 @@ export default {
 
     setTheGenderToFemale () {
       this.gender = 'female'
-    }, 
+    },
 
     UpdateUserProfileData(e) {
-      e.preventDefault();
       //////////////////////////////
       // TODO: Update the user data
       //////////////////////////////
+      e.preventDefault();
       this.visible = true
       try {
         this.$apollo
@@ -239,8 +228,6 @@ export default {
             variables: {
               input: {
                 fullName: this.fullName,
-                certificateName: this.certificateName,
-                certificateNameConfirm: this.certificateNameConfirm,
                 phoneNumber2: this.whatsAppNumber,
                 phoneNumber3: this.telegramNumber,
                 gender: this.gender

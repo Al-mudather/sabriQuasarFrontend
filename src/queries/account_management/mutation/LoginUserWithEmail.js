@@ -18,6 +18,7 @@ mutation LoginUser($email:String!, $password: String!){
       firstName,
       lastName,
       fullName,
+      certificateName
       phoneNumber,
       phoneNumber2,
       phoneNumber3,

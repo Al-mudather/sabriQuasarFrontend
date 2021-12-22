@@ -8,6 +8,8 @@ query GetMyProfileData {
     firstName,
     lastName,
     fullName,
+    certificateName
+    certificateNameConfirm
     email,
     gender,
     phoneNumber,

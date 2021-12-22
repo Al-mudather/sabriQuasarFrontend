@@ -16,6 +16,7 @@ mutation SocialAuth($provider: String!, $accessToken: String!, $email: String!) 
         firstName,
         lastName,
         fullName,
+        certificateName
         phoneNumber,
         phoneNumber2,
         phoneNumber3,
