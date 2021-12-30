@@ -15,19 +15,24 @@ query AllCertificates($filters: JSONString) {
             enrollment {
               pk
               id
-              user {
-                id
-                pk
-                email
-                fullName
-              }
-              
               course {
                 id
                 pk
                 title
               }
-            }    
+            }
+            batch {
+              id
+              pk
+              batchName
+              courseName
+            }
+            user {
+              id
+              pk
+              email
+              fullName
+            }
             serial
             startDate
             endDate

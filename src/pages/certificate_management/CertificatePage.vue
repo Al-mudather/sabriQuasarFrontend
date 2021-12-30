@@ -12,7 +12,7 @@
                         <div class="courc">
                             <h3>شهادتـــي</h3>
                             <div class="tabl" v-for="certificate in myCertificate.edges" :key="certificate.node.pk">
-                                <h3>{{certificate.node.enrollment.course.title}}</h3>
+                                <h3>{{ $_.get(certificate, '[node][enrollment][course][title]')  || $_.get(certificate, '[node][batch][courseName]') }}</h3>
                                 <div class="butt">
                                   <q-spinner-clock
                                     color="primary"
@@ -32,9 +32,10 @@
 
 <script>
 import axios from 'axios'
-const FileDownload = require('js-file-download');
+// const FileDownload = require('js-file-download');
 import {AllCertificates} from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
 import { mapGetters } from "vuex";
+import { openURL } from 'quasar'
 
 export default {
     name: 'CertificatePage',
@@ -60,29 +61,20 @@ export default {
       variables () {
         return {
           'filters': JSON.stringify({
-            'enrollment__user__id': this.user.pk
+            // 'enrollment__user__id': this.user.pk
+            'user__id': this.user.pk
           })
         }
       },
-      result (result) {
-        if (!result.loading) {
-          this.myCertificate = result.data.allCertificates
-        }
+
+      update (data) {
+        this.myCertificate = data.allCertificates
       }
     }
   },
 
   methods: {
     async DOWNLOAD_MY_CERTIFICATE (certificate) {
-      // 'certificate/download/<int:certificate_id>'
-      // console.log(';;;;;;;;;;;;;;;;;;;;;;;')
-      // console.log(this.user)
-      // console.log(';;;;;;;;;;;;;;;;;;;;;;;')
-      // const res = await axios.get(`${location.origin}api/enrollment/certificate/download/${certificatePk}`,{
-      //   headers: {
-      //     'Authorization': `JWT ${this.token}`
-      //   }
-      // })
 
       if (this.user.certificateName) {
         this.loading = true
@@ -102,7 +94,8 @@ export default {
           )
   
           if (res.data) {
-            FileDownload(res.data, `${certificate.node.enrollment.course.title}-${this.user.username}.pdf`);
+            openURL(res.config.url)
+            // FileDownload(res.data, `${$_.get(certificate, '[node][enrollment][course][title]') || $_.get(certificate, '[node][batch][courseName]') }-${this.user.username}.pdf`);
             this.loading = false
           } else {
             this.loading = false

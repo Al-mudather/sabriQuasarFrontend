@@ -101,8 +101,8 @@ export default {
               mutation: UpdateCertificateNameQuery,
               variables: {
                 input: {
-                  certificateName: this.certificateName,
-                  certificateNameConfirm: this.certificateNameConfirm
+                  certificateName: this.certificateName.toUpperCase() , //TODO: Change the name to the upperCase
+                  certificateNameConfirm: this.certificateNameConfirm.toUpperCase() //TODO: Change the confirm name to the upperCase
                 }
               },
               refetchQueries: [{
