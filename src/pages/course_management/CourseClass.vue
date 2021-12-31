@@ -606,6 +606,10 @@ export default {
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
 
+.video-js .vjs-time-control {
+    display: block;
+}
+
 .vjs-button {
     background-color: transparent !important;
 }
