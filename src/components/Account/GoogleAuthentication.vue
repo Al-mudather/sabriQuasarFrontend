@@ -29,7 +29,7 @@ export default {
             "loginAction"
         ]),
         ...mapActions('settings', ['setCurrencyAction']),
-        ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
+        ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION', 'SET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
         GoToHomePage() {
             this.$router.push({ name: "Home" });
@@ -59,7 +59,8 @@ export default {
                 this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
                 //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
                 const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
-
+                //TODO: Empty the marketer code if exists
+                this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION('')
                 if (res) {
                     this.$router.push({ name: "my-courses" })
                 } else {

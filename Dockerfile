@@ -7,15 +7,9 @@ WORKDIR /frontend
 # Copy all files to the app directory
 COPY . .
 
-# use yarn to install package.json stuff
-RUN npm install subscriptions-transport-ws
-
 RUN npm install
 
 RUN npm install -g @quasar/cli
-
-# build with quasar
-RUN quasar build
 
 EXPOSE 8090
 

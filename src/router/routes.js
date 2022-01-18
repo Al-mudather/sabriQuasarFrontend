@@ -2,7 +2,7 @@ import { Notify, LocalStorage, SessionStorage } from 'quasar'
 
 const requireAuthentication = (to, from, next) => {
   // ...
-  const authorized = SessionStorage.getItem('userAccessToken')
+  const authorized = LocalStorage.getItem('userAccessToken')
 
   if (authorized) {
     next()

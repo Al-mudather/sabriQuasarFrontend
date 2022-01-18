@@ -30,11 +30,13 @@ export default {
     destroyed () {
         //TODO: Delete the user data
         this.logOutAction()
+        //TODO: Clear the localStorage
+        localStorage.clear()
     },
 
     created() {
-        //TODO: Clear the localStorage
-        localStorage.clear()
+        // //TODO: Clear the localStorage
+        // localStorage.clear()
 
         //TODO: logrocket
         LogRocket.init('3bybms/stc');

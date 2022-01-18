@@ -1,45 +1,45 @@
 const tokenStorage = {
   setToken(tokenObj) {
-    sessionStorage.setItem("userAccessToken", tokenObj.token);
-    sessionStorage.setItem("userRefreshToken", tokenObj.refresh);
+    localStorage.setItem("userAccessToken", tokenObj.token);
+    localStorage.setItem("userRefreshToken", tokenObj.refresh);
   },
   setAccessToken(accessToken) {
-    sessionStorage.setItem("userAccessToken", accessToken);
+    localStorage.setItem("userAccessToken", accessToken);
   },
   getAccessToken() {
-    return sessionStorage.getItem("userAccessToken");
+    return localStorage.getItem("userAccessToken");
   },
   setRefreshToken(refreshToken) {
-    sessionStorage.setItem("userRefreshToken", refreshToken);
+    localStorage.setItem("userRefreshToken", refreshToken);
   },
   getRefreshToken() {
-    return sessionStorage.getItem("userRefreshToken");
+    return localStorage.getItem("userRefreshToken");
   },
   clearToken() {
-    sessionStorage.clear();
-    sessionStorage.removeItem("Frontend_user");
-    sessionStorage.removeItem("userAccessToken");
-    sessionStorage.removeItem("userRefreshToken");
+    localStorage.clear();
+    localStorage.removeItem("Frontend_user");
+    localStorage.removeItem("userAccessToken");
+    localStorage.removeItem("userRefreshToken");
   }
 };
 
 const userProfileStorage = {
   setUser(user) {
     try {
-      sessionStorage.setItem("Frontend_user", JSON.stringify(user));
+      localStorage.setItem("Frontend_user", JSON.stringify(user));
     } catch (e) {
       // Pass Don't Set Any Thing
     }
   },
   getUser() {
     try {
-      return JSON.parse(sessionStorage.getItem("Frontend_user"));
+      return JSON.parse(localStorage.getItem("Frontend_user"));
     } catch (e) {
       return {}
     }
   },
   clearUserProfileStorage() {
-    sessionStorage.removeItem("Frontend_user");
+    localStorage.removeItem("Frontend_user");
   }
 };
 

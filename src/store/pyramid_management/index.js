@@ -29,7 +29,6 @@ const actions = {
     commit('UPDATE_REGISTERATION_CODE_MUTATION', value)
   },
 
-
   GET_MY_MARKETING_CODE_ACCOUNT_ACTION ({ commit }, value) {
     return apolloClient.query({
       query: MyPyramidAccount

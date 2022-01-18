@@ -18,17 +18,20 @@
                 ></div>
             </div>
         </div>
-        <div class="card-body" style="cursor: pointer" @click="goToCourseLecture">
+        <!-- <div class="card-body" style="cursor: pointer" @click="goToCourseLecture"> -->
+        <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-body" style="cursor: pointer; text-decoration: none;">
             <h5 class="card-title">{{course.title}}</h5>
             <a class="btn">
                 <h3>{{$t('اذهب الى الدرس')}}</h3>
                 <img src="~assets/img/send.png" alt="">
             </a>
-        </div>
+        </a>
     </div>
 </template>
-  
+   
 <script>
+import {mapGetters} from 'vuex'
+
 export default {
     name: "CourseCard",
 
@@ -40,6 +43,8 @@ export default {
     props: ['course', 'totalFinishedCourseContents'],
 
     computed: {
+        ...mapGetters("authentication", ["token"]),
+
         calculateTheTotalProgress () {
             let totalCourseContents = 0
 
@@ -58,13 +63,26 @@ export default {
             }
             // return location.origin + '/media/' + this.course.cover
             return 'https://api.stc.training' + '/media/' + this.course.cover
+        },
+
+        GO_TO_THE_COURSE_CLASS_ROOM () {
+        
+            return `http://localhost:8080/#/class/${this.course.pk}/?accesss=${this.token}`
         }
     },
 
     methods: {
         goToCourseLecture () {
-            this.$router.push({ name: 'course-class', params: { pk: this.course.pk, id: this.course.id }, query:{ tab: 'tutorial' } })
-        }
+            console.log('llllllllllllll')
+            console.log(this.$router)
+            console.log('llllllllllllll')
+            // window.go('http//:localhost:8000/api/graphql')
+            window.location.redirect("localhost:8000/api/graphql");
+            // window.location.href = "http://localhost:8080";
+            // this.$router.push({ name: 'course-class', params: { pk: this.course.pk, id: this.course.id }, query:{ tab: 'tutorial' } })
+        },
+
+        
     }
 };
 </script>
