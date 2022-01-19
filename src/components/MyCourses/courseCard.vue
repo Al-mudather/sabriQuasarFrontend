@@ -1,10 +1,12 @@
 <template>
     <div class="card">
-        <div class="card-img-top">
+        <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-img-top" style="cursor: pointer; text-decoration: none;">
+        <!-- <div class="card-img-top"> -->
             <div class="overlay"></div>
-            <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt="">
-            <img v-else src="~assets/img/imagback.png" alt="Card image cap" />
-        </div>
+                <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt="">
+                <img v-else src="~assets/img/imagback.png" alt="Card image cap" />
+        <!-- </div> -->
+            </a>
         <div class="pro">
             <span>{{calculateTheTotalProgress}}%</span>
             <div class="progress">
@@ -18,14 +20,15 @@
                 ></div>
             </div>
         </div>
-        <!-- <div class="card-body" style="cursor: pointer" @click="goToCourseLecture"> -->
-        <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-body" style="cursor: pointer; text-decoration: none;">
+        <div class="card-body" style="cursor: pointer" @click="goToCourseLecture">
+        <!-- <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-body" style="cursor: pointer; text-decoration: none;"> -->
             <h5 class="card-title">{{course.title}}</h5>
             <a class="btn">
                 <h3>{{$t('اذهب الى الدرس')}}</h3>
                 <img src="~assets/img/send.png" alt="">
             </a>
-        </a>
+        </div>
+            <!-- </a> -->
     </div>
 </template>
    
@@ -67,19 +70,14 @@ export default {
 
         GO_TO_THE_COURSE_CLASS_ROOM () {
         
-            return `http://localhost:8080/#/class/${this.course.pk}/?accesss=${this.token}`
+            // return `http://localhost:8080/#/class/${this.course.pk}/?accesss=${this.token}`
+            return `${location.origin}/classroom/${this.course.pk}/?accesss=${this.token}`
         }
     },
 
     methods: {
         goToCourseLecture () {
-            console.log('llllllllllllll')
-            console.log(this.$router)
-            console.log('llllllllllllll')
-            // window.go('http//:localhost:8000/api/graphql')
-            window.location.redirect("localhost:8000/api/graphql");
-            // window.location.href = "http://localhost:8080";
-            // this.$router.push({ name: 'course-class', params: { pk: this.course.pk, id: this.course.id }, query:{ tab: 'tutorial' } })
+            this.$router.push({ name: 'course-class', params: { pk: this.course.pk, id: this.course.id }, query:{ tab: 'tutorial' } })
         },
 
         
