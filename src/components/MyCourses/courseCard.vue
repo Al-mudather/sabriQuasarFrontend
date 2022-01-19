@@ -1,12 +1,12 @@
 <template>
     <div class="card">
-        <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-img-top" style="cursor: pointer; text-decoration: none;">
-        <!-- <div class="card-img-top"> -->
+        <!-- <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-img-top" style="cursor: pointer; text-decoration: none;"> -->
+        <div class="card-img-top">
             <div class="overlay"></div>
                 <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt="">
                 <img v-else src="~assets/img/imagback.png" alt="Card image cap" />
-        <!-- </div> -->
-            </a>
+        </div>
+            <!-- </a> -->
         <div class="pro">
             <span>{{calculateTheTotalProgress}}%</span>
             <div class="progress">
@@ -20,15 +20,15 @@
                 ></div>
             </div>
         </div>
-        <div class="card-body" style="cursor: pointer" @click="goToCourseLecture">
-        <!-- <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-body" style="cursor: pointer; text-decoration: none;"> -->
+        <!-- <div class="card-body" style="cursor: pointer" @click="goToCourseLecture"> -->
+        <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-body" style="cursor: pointer; text-decoration: none;">
             <h5 class="card-title">{{course.title}}</h5>
             <a class="btn">
                 <h3>{{$t('اذهب الى الدرس')}}</h3>
                 <img src="~assets/img/send.png" alt="">
             </a>
-        </div>
-            <!-- </a> -->
+        <!-- </div> -->
+        </a>
     </div>
 </template>
    
