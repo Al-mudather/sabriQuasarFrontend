@@ -7,8 +7,6 @@ WORKDIR /frontend
 # Copy all files to the app directory
 COPY . .
 
-RUN npm install
-
 RUN npm install -g @quasar/cli
 
 EXPOSE 8090
