@@ -96,9 +96,6 @@ export default {
                 })
 
                 if (auth_res.data.socialAuth) {
-                    console.log('llllllllllllll')
-                    console.log(auth_res.data)
-                    console.log('llllllllllllll')
                     this.loginAction(auth_res.data.socialAuth).then(() => {
                         const userData = auth_res.data.socialAuth
 
