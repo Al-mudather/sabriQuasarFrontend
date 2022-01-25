@@ -23,15 +23,17 @@ export default {
         ...mapGetters("authentication", ["user"]),
     },
     methods: {
-        ...mapActions('authentication', ['RE_LOGIN_USER']),
-        ...mapActions('authentication', ['logOutAction'])
+        ...mapActions('authentication', ['RE_LOGIN_USER', 'logOutAction', 'DESTROY_THE_USER_REFRESH_TOKEN']),
     },
 
-    destroyed () {
+    async destroyed () {
+        // TODO: Delete the user access token
+        // await this.DESTROY_THE_USER_REFRESH_TOKEN()
         //TODO: Delete the user data
         this.logOutAction()
         //TODO: Clear the localStorage
         localStorage.clear()
+        alert('You closed the STC platform')
     },
 
     created() {
@@ -135,6 +137,7 @@ export default {
                     //TODO: Go to login page
                     this.$router.push({ name: "login" });
                 }
+
                 this.$q.notify({
                     type: 'positive',
                     progress: true,
@@ -154,30 +157,11 @@ export default {
             live:false
         }
         new WOW(options)
-        // if (this.token) {
-        //     try {
-        //         const res = await this.$apollo.query({ 
-        //             query: GetMyProfileData
-        //         })
 
-        //         if (res.data.me.pk) {
-        //             //TODO: IF the data exists go to payment page
-        //             if (res.data.me.fullName && (res.data.me.phoneNumber2 || res.data.me.phoneNumber3) ) {
-        //             } else {
-        //                 this.$q.notify({
-        //                     type: 'negative',
-        //                     progress: true,
-        //                     multiLine: true,
-        //                     position: 'top',
-        //                     message: "عندما تقوم باكمال بياناتك الشخصيه, ستسهل لنا عملية الوصول اليك وحل جميع مشاكلك باسرع ما يمكن"
-        //                 })
-        //                 this.$router.push({ name: 'user-profile' })
-        //             }
-        //         }
-        //     } catch (error) {
-        //     }
-        // }
-        
+        // const res = await this.DESTROY_THE_USER_REFRESH_TOKEN()
+        // console.log('llllllllllllll')
+        // console.log(res)
+        // console.log('llllllllllllll')
     },
 };
 </script>

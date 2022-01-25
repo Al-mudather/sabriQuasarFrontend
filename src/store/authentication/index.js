@@ -4,6 +4,7 @@ import { Notify, LocalStorage, SessionStorage } from 'quasar'
 import {apolloClient} from 'src/apollo/client'
 import {tokenStorage, userProfileStorage} from "src/localStorageService";
 import {RefreshLoginUserWithEmail} from 'src/queries/account_management/mutation/RefreshUserToken'
+import {RevokeUserRefreshToken} from 'src/queries/account_management/mutation/RevokeUserRefreshToken.js'
 
 const state = {
   navbarSearch: true,
@@ -108,15 +109,23 @@ const actions = {
     } else {
       return true
     }
+  },
 
+  DESTROY_THE_USER_REFRESH_TOKEN({context}, payload) {    
+    return apolloClient.mutate({
+      mutation: RevokeUserRefreshToken, 
+      variables: {
+        refreshToken: tokenStorage.getRefreshToken(),
+      },
+    })
   },
  
   logOutAction ({ commit }, payload) {
 
     return new Promise((resolve, reject) => {
       axios
-      // .get(`http://localhost:8000/api/drf/logout/`)
-      .get(`${location.origin}/api/drf/logout/`)
+      .get(`http://localhost:8000/api/drf/logout/`)
+      // .get(`${location.origin}/api/drf/logout/`)
       .then(res => {
         // Todo clear everything from window.LocalStorage
         tokenStorage.clearToken()
