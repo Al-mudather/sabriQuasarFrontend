@@ -9,7 +9,8 @@
                 <div class="man">
                     <div class="compon">
                         <div class="mag">
-                            <img v-if="item.course.cover" :src="FORMAT_IMAGE(item.course.cover)" alt="" />
+                            <!-- <img v-if="item.course.cover" :src="FORMAT_IMAGE(item.course.cover)" alt="" /> -->
+                            <img v-if="item.course.cover" :src="FORMAT_THE_IAMGE_URL(item.course.cover)" alt="" />
                             <img v-else src="~assets/img/cart-img.png" alt="" />
                         </div>
                         <h2>{{ item.course.title }}</h2>
@@ -72,6 +73,8 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import _ from 'lodash'
+import {FORMAT_THE_IAMGE_URL} from 'src/utils/functions.js'
+
 
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateBraintreeCheckout } from 'src/queries/checkout_management/mutation/CreateBraintreeCheckout.js'
@@ -79,6 +82,7 @@ import { CreateBraintreeCheckout } from 'src/queries/checkout_management/mutatio
 export default {
   data () {
     return {
+      FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
       lodash: _
     }
   },

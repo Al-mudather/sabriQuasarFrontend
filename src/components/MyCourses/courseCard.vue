@@ -3,7 +3,8 @@
         <!-- <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-img-top" style="cursor: pointer; text-decoration: none;"> -->
         <div class="card-img-top">
             <div class="overlay"></div>
-                <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt="">
+                <!-- <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt=""> -->
+                <img v-if="course.cover" :src="FORMAT_THE_IAMGE_URL(course.cover)" alt="">
                 <img v-else src="~assets/img/imagback.png" alt="Card image cap" />
         </div>
             <!-- </a> -->
@@ -34,12 +35,14 @@
    
 <script>
 import {mapGetters} from 'vuex'
+import {FORMAT_THE_IAMGE_URL} from 'src/utils/functions.js'
 
 export default {
     name: "CourseCard",
 
     data () {
         return {
+            FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL
         }
     },
 

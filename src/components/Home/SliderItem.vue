@@ -2,7 +2,8 @@
   <div class="row">
       <div class="col-lg-4 col-sm-4 col-xs-12">
           <div class="itemImg" style="left: -0.5rem;">                                  
-              <img class="d-block w-100" :src="FORMAT_COURSE_COVER_IMAGE()" :alt="slider.slide.title">                                  
+              <!-- <img class="d-block w-100" :src="FORMAT_COURSE_COVER_IMAGE()" :alt="slider.slide.title">                                   -->
+              <img class="d-block w-100" :src="FORMAT_THE_IAMGE_URL(slider.slide.cover)" :alt="slider.slide.title">                                  
           </div>
       </div>
       <div class="col-lg-8 col-sm-8 col-xs-12">
@@ -91,11 +92,14 @@
 
 <script>
 const moment = require('moment')
+import {FORMAT_THE_IAMGE_URL} from 'src/utils/functions.js'
+
 
 export default {
   name: "SliderItem",
   data() {
     return {
+      FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
       now: 0,
       start: 0,
     };

@@ -5,7 +5,8 @@
     </div>
     <div class="vidd">
       <div class="mag">
-        <img v-if="courseData.profile" :src="CALCULATE_IMAGE_URL" alt="">
+        <!-- <img v-if="courseData.profile" :src="CALCULATE_IMAGE_URL" alt=""> -->
+        <img v-if="courseData.profile" :src="FORMAT_THE_IAMGE_URL(courseData.profile)" alt="">
         <img v-else src="~assets/img/Mask Group 5.png" alt="" />
       </div>
       <!-- <img class="playy" src="~assets/img/playy.png" alt="" /> -->
@@ -99,11 +100,13 @@
 <script>
 import { copyToClipboard } from 'quasar'
 import { mapState, mapActions } from "vuex";
+import {FORMAT_THE_IAMGE_URL} from 'src/utils/functions.js'
 
 export default {
   name: "CourseMainCard",
   data() {
     return {
+      FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
       message: this.$t('انسخ الرابط')
     };
   },

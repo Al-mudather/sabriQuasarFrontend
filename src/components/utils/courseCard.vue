@@ -4,7 +4,8 @@
       <div class="card-img-top">
           <img class="plays" src="~assets/img/play.png" alt="">
           <img src="~assets/img/moza.png" alt="Card image cap">
-          <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt="">
+          <img v-if="course.cover" :src="FORMAT_THE_IAMGE_URL(course.cover)" alt="">
+          <!-- <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt=""> -->
           <img v-else src="~assets/img/moza.png" alt="Card image cap">
       </div>
       <div class="card-body">
@@ -30,6 +31,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import {FORMAT_THE_IAMGE_URL} from 'src/utils/functions.js'
 
 export default {
   name: 'courseCard',
@@ -37,6 +39,7 @@ export default {
 
   data () {
     return {
+      FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
       openCourse: false
     }
   },
