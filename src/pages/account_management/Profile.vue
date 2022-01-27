@@ -101,7 +101,7 @@
                 <!-- 
                   Start of Updata-certificate-name 
                 -->
-                <Updata-certificate-name v-if="certificateFieldsVisible" />
+                <Updata-certificate-name :certificateNameData="certificateName"/>
                 <!-- 
                   End of Updata-certificate-name 
                 -->
@@ -136,6 +136,7 @@ export default {
     return {
       lodash: this.$_,
       visible: false,
+      certificateName: '',
       certificateFieldsVisible: true,
       fullName: "",
       phoneNumber: "",
@@ -172,7 +173,8 @@ export default {
       this.whatsAppNumber = value.phoneNumber2;
       this.telegramNumber = value.phoneNumber3;
       if (value.certificateName && value.certificateNameConfirm) {
-        this.certificateFieldsVisible = false
+        // this.certificateFieldsVisible = false
+        this.certificateName = value.certificateName
       }
       
       if (value.gender === "MALE") {
