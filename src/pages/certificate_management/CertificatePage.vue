@@ -35,7 +35,7 @@ import axios from 'axios'
 // const FileDownload = require('js-file-download');
 import {AllCertificates} from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
 import { mapGetters } from "vuex";
-import { openURL } from 'quasar'
+import { openURL, exportFile  } from 'quasar'
 
 export default {
     name: 'CertificatePage',
@@ -94,8 +94,15 @@ export default {
           )
   
           if (res.data) {
-            openURL(res.config.url)
-            // FileDownload(res.data, `${$_.get(certificate, '[node][enrollment][course][title]') || $_.get(certificate, '[node][batch][courseName]') }-${this.user.username}.pdf`);
+            // openURL(res.config.url)
+            const fileName = `${this.$_.get(certificate, '[node][enrollment][course][title]') || this.$_.get(certificate, '[node][batch][courseName]') }-${this.user.username}.pdf`
+
+            // const status = exportFile(fileName,res.data, 'utf8')
+            exportFile(fileName,res.data, {
+              encoding: 'windows-1252',
+              mimeType: 'text/csv;charset=windows-1252;'
+            })
+
             this.loading = false
           } else {
             this.loading = false
