@@ -82,8 +82,8 @@ export default {
           const res = await axios(
             {
               method: 'GET',
-              url: `http://localhost:8000/api/enrollment/certificate/download/${certificate.node.pk}`,
-              // url: `${location.origin}/api/enrollment/certificate/download/${certificate.node.pk}`,
+              // url: `http://localhost:8000/api/enrollment/certificate/download/${certificate.node.pk}`,
+              url: `${location.origin}/api/enrollment/certificate/download/${certificate.node.pk}`,
               responseType: 'arraybuffer',
               // responseType: 'blob',
               headers: {
