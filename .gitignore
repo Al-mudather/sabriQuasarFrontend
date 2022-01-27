@@ -32,3 +32,9 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+src-capacitor
+mykeys.jks
+sign_android.bat
+stctraining.apk
+stctraining.apk.idsig
