@@ -15,7 +15,6 @@
         <div class="col-lg-12 col-xs-12">
           <div class="inp">
             <q-input
-              v-if="certificateNameData"
               rounded
               outlined
               :readonly="certificateNameData ? true : false"
@@ -25,7 +24,7 @@
             />
           </div>
         </div>
-        <div v-if="!disableThefileds"  class="col-lg-12 col-xs-12">
+        <div v-if="!certificateNameData"  class="col-lg-12 col-xs-12">
           <div class="inp">
             <q-input
                 rounded
@@ -36,7 +35,7 @@
             />
           </div>
         </div>
-        <div v-if="!disableThefileds" disable="1" class="but" @click="UPDATA_THE_USER_CERTIFICATE_NAME">
+        <div v-if="!certificateNameData" disable="1" class="but" @click="UPDATA_THE_USER_CERTIFICATE_NAME">
           <h3>تعيين</h3>
           <img src="~assets/img/Group 734.png" alt="" />
         </div>
