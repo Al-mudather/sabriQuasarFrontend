@@ -83,7 +83,7 @@
                   
                   
               </div>
-              <button @click=" $router.push( { name: 'course-details', params: { pk: slider.slide.pk, id: slider.slide.id } } ) " class="details"> {{$t('التفاصيل')}} <img src="~assets/img/send.png" alt=""></button>     
+              <button @click=" $router.push( { name: 'course-details', params: { name: slider.slide.title, pk: slider.slide.pk, id: slider.slide.id } } ) " class="details"> {{$t('التفاصيل')}} <img src="~assets/img/send.png" alt=""></button>     
               <!-- <button>التفاصيل <img style="display: inline-block !important;" src="~assets/img/send.png" alt=""></button> -->
           </div>
       </div>
