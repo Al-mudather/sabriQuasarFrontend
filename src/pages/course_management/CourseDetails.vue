@@ -72,19 +72,24 @@ export default {
         { vmid: 'description', name: 'description', content: "" },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         // TWitter
+        { name: 'twitter:card', content: "summary_large_image" },
+        { name: 'twitter:domain', content: location.host },
+        { name: 'twitter:url', content: "" },
         { name: 'twitter:title', content: "" },
         { name: 'twitter:description', content: "" },
         { name: 'twitter:image', content: "" },
-        { name: 'twitter:title', content: "" },
         // Google+ / Schema.org
         { itemprop: 'name', content: "" },
         { itemprop: 'description', content: "" },
         // Facebook / Open Graph
         // SMO
-        { property: 'og:title', content: "" },
-        { p: 'og:image', c: "" },
+        { p: 'og:title', c: "" },
+        { p: 'og:site_name', c: location.host },
+        { p: 'og:type', c: "" },
         { p: 'og:url', c: "" },
-        { p: 'og:site_name', c: location.origin }
+        { p: 'og:description', c: "" },
+        { p: 'og:image', c: "" },
+        { p: 'og:alt', c: "" },
     ]
   },
 
@@ -96,20 +101,26 @@ export default {
         { vmid: 'description', name: 'description', content: this.courseData.brief },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         // TWitter
+        { name: 'twitter:card', content: "summary_large_image" },
+        { name: 'twitter:domain', content: location.origin },
+        { name: 'twitter:url', content: this.FORMAT_THE_WEB_SIT_URL(`${this.courseData.title}/${this.courseData.pk}/${this.courseData.id}`) },
         { name: 'twitter:title', content: this.courseData.title },
         { name: 'twitter:description', content: this.courseData.brief },
         { name: 'twitter:image', content: this.FORMAT_THE_IAMGE_URL(this.courseData.profile) },
-        { name: 'twitter:title', content: this.courseData.brief },
+
         // Google+ / Schema.org
         { itemprop: 'name', content: this.courseData.title },
         { itemprop: 'description', content: this.courseData.brief },
         // Facebook / Open Graph
         // { property: 'fb:app_id', content: '123456789' },
-        // SMO
-        { property: 'og:title', content: this.courseData.title },
+        // For Facebook and othe social media
+        { p: 'og:title', c: this.courseData.title },
         { p: 'og:image', c: this.FORMAT_THE_IAMGE_URL(this.courseData.profile) },
-        { p: 'og:url', c: this.FORMAT_THE_WEB_SIT_URL(`${this.courseData.pk}/${this.courseData.id}`) },
-        { p: 'og:site_name', c: location.origin }
+        { p: 'og:image:alt', c: this.courseData.title },
+        { p: 'og:image:width', c: "300" },
+        { p: 'og:image:height', c: "300" },
+        { p: 'og:url', c: this.FORMAT_THE_WEB_SIT_URL(`${this.courseData.title}/${this.courseData.pk}/${this.courseData.id}`) },
+        { p: 'og:site_name', c: location.host }
       ]
     }
   },
