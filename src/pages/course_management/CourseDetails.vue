@@ -67,7 +67,25 @@ export default {
 
   metaInfo: {
     title: "",
-    meta:[]
+    meta:[
+        {charset: 'utf-8'},
+        { vmid: 'description', name: 'description', content: "" },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        // TWitter
+        { name: 'twitter:title', content: "" },
+        { name: 'twitter:description', content: "" },
+        { name: 'twitter:image', content: "" },
+        { name: 'twitter:title', content: "" },
+        // Google+ / Schema.org
+        { itemprop: 'name', content: "" },
+        { itemprop: 'description', content: "" },
+        // Facebook / Open Graph
+        // SMO
+        { property: 'og:title', content: "" },
+        { p: 'og:image', c: "" },
+        { p: 'og:url', c: "" },
+        { p: 'og:site_name', c: location.origin }
+    ]
   },
 
   metaInfo () {
