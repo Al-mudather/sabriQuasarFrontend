@@ -26,16 +26,27 @@ const routes = [
     path: '/',
     component: () => import('layouts/HomeLayout.vue'),
     children: [
-      { path: 'home', name: 'Home', alias:'', component: () => import('pages/Home.vue') }
+      // { path: 'home', name: 'Home', alias:'', component: () => import('pages/Home.vue') }
+      { 
+        path: '', component: () => import('src/pages/homeIndex.vue'),
+        children:[
+          { path: '', name: 'Home', alias:'', component: () => import('src/pages/Home.vue'), }
+        ]
+      },
     ]
   },
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: 'course/:pk/:id', name: 'course-details', component: () => import('pages/course_management/CourseDetails.vue') },
-      { path: 'course/:code/:pk/:id', name: 'course-affilliate-details', component: () => import('pages/course_management/CourseDetails.vue') },
-      { path: 'courses', name: 'courses', component: () => import('pages/course_management/Courses.vue') }
+      { 
+        path: '' , component: () => import('src/pages/course_management/courseIndex.vue'),
+        children:[
+          { path: 'course/:name/:pk/:id', name: 'course-details', component: () => import('pages/course_management/CourseDetails.vue')},
+          { path: 'course/:name/:code/:pk/:id', name: 'course-affilliate-details', component: () => import('pages/course_management/CourseDetails.vue')},
+          { path: 'courses', name: 'courses', component: () => import('pages/course_management/Courses.vue') }
+        ]
+      }
     ]
   },
   {

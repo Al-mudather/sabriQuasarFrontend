@@ -6,7 +6,7 @@
     <div class="vidd">
       <div class="mag">
         <!-- <img v-if="courseData.profile" :src="CALCULATE_IMAGE_URL" alt=""> -->
-        <img v-if="courseData.profile" :src="FORMAT_THE_IAMGE_URL(courseData.profile)" alt="">
+        <img v-if="courseData.profile" :src="FORMAT_THE_IAMGE_URL(courseData.profile)" :alt="courseData.title">
         <img v-else src="~assets/img/Mask Group 5.png" alt="" />
       </div>
       <!-- <img class="playy" src="~assets/img/playy.png" alt="" /> -->
@@ -110,17 +110,17 @@ export default {
       message: this.$t('انسخ الرابط')
     };
   },
-  props: ["courseData", 'openCourse'],
 
   mounted() {
-    if (this.toekn) {
+    if (this.token) {
       //TODO: Get the marketer code
       this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
     }
+
   },
 
   computed: {
-    ...mapState("authentication", ["user", 'toekn']),
+    ...mapState("authentication", ["user", 'token']),
     ...mapState('settings',['currency']),
     ...mapState('pyramidManagement', ['myMarketingCode']),
 
@@ -146,7 +146,7 @@ export default {
       if ( !this.$_.isEmpty( this.$_.get(this.user, "[affiliateSet][edges]") ) ) {
         const aff =
           location.origin +
-          "/#/course/" +
+          "/#/course/" + `${this.courseData.title}` +
           this.$_.get(
             this.user,
             "[affiliateSet][edges[0]][node][affiliateLink]"

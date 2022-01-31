@@ -22,7 +22,7 @@
               <button v-else @click="AddTheCourseToTheBasket"> <img src="~assets/img/add.png" alt=""> إضافة للسلة</button>
           </div> 
         </div>
-        <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, id: course.id } } ) " class="details"> {{$t('التفاصيل')}} <img src="~assets/img/leftArraw.png" alt=""></button>                                                
+        <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, name: course.title , id: course.id } } ) " class="details"> {{$t('التفاصيل')}} <img src="~assets/img/leftArraw.png" alt=""></button>                                                
       </div>
     </div>
 </template>

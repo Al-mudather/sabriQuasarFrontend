@@ -56,7 +56,8 @@ class videoPlayer {
         if(self.player)
             self.player.dispose();
         document.querySelector(videoParentElement).innerHTML = ''
-        document.querySelector(videoParentElement).innerHTML= `<video playsinline id='video-player' style='width: 100%; height: 100%;' class="video-js  vjs-theme-fantasy" controls> </video>`
+        // document.querySelector(videoParentElement).innerHTML= `<video playsinline id='video-player' style='width: 100%; height: 100%;' class="video-js  vjs-theme-fantasy" controls> </video>`
+        document.querySelector(videoParentElement).innerHTML= `<video playsinline allow="encrypted-media" id='video-player' style='width: 100%; height: 100%;' class="video-js  vjs-theme-fantasy" controls> </video>`
         self.player = videojs('video-player', {
             html5: {
                 vhs: {

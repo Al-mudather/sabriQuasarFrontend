@@ -20,6 +20,13 @@ import { BootstrapVue } from 'bootstrap-vue'
 import VueCountdownTimer from 'vuejs-countdown-timer';
 import vueBraintree from 'vue-braintree'
 
+import VueMeta from 'vue-meta'
+import VueHead from 'vue-head'
+//TODO: For SEO
+Vue.use(VueHead)
+
+Vue.use(VueMeta)
+
 Vue.use(vueBraintree)
 
 Vue.use(BootstrapVue)

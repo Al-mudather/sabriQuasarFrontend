@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import relatedCourseCard from "src/components/utils/relatedCourseCard";
+import relatedCourseCard from "src/components/utils/relatedCourseCard.vue";
 import skeletonCard from "src/components/skeleton/skeletonCard";
 import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
 

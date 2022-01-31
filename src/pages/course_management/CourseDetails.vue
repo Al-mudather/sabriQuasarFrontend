@@ -49,16 +49,50 @@ import courseUnits from 'components/courseDetails/courseUnits.vue'
 import courseInstructors from 'components/courseDetails/courseInstructors'
 import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
+import { FORMAT_THE_IAMGE_URL, FORMAT_THE_WEB_SIT_URL } from 'src/utils/functions.js'
 import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'CourseDetails',
   data () {
     return {
-      courseID: '',
-      coursePK: '',
-      openCourse: false,
-      courseData: ''
+        FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
+        FORMAT_THE_WEB_SIT_URL: FORMAT_THE_WEB_SIT_URL,
+        courseID: '',
+        coursePK: '',
+        openCourse: false,
+        courseData: ''
+    }
+  },
+
+  metaInfo: {
+    title: "",
+    meta:[]
+  },
+
+  metaInfo () {
+    return {
+      title: this.courseData.title,
+      meta: [
+        {charset: 'utf-8'},
+        { vmid: 'description', name: 'description', content: this.courseData.brief },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        // TWitter
+        { name: 'twitter:title', content: this.courseData.title },
+        { name: 'twitter:description', content: this.courseData.brief },
+        { name: 'twitter:image', content: this.FORMAT_THE_IAMGE_URL(this.courseData.profile) },
+        { name: 'twitter:title', content: this.courseData.brief },
+        // Google+ / Schema.org
+        { itemprop: 'name', content: this.courseData.title },
+        { itemprop: 'description', content: this.courseData.brief },
+        // Facebook / Open Graph
+        // { property: 'fb:app_id', content: '123456789' },
+        // SMO
+        { property: 'og:title', content: this.courseData.title },
+        { p: 'og:image', c: this.FORMAT_THE_IAMGE_URL(this.courseData.profile) },
+        { p: 'og:url', c: this.FORMAT_THE_WEB_SIT_URL(`${this.courseData.pk}/${this.courseData.id}`) },
+        { p: 'og:site_name', c: location.origin }
+      ]
     }
   },
   components: {

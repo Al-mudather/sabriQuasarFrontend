@@ -223,7 +223,7 @@
 </template>
 
 <script>
-import courseCard from "components/utils/courseCard";
+import courseCard from "components/utils/courseCard.vue";
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
 import 'swiper/swiper-bundle.css'
 import 'swiper/swiper.min.css'
