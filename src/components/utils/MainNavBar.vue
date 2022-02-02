@@ -215,7 +215,10 @@ export default {
                             actions: searchResult
                         }).onOk(action => {
                             // TODO: Go to the course details
-                            this.$router.push({ name: 'course-details', params: { name: action.label.replace(' ', '-'), pk: action.pk, id: action.id} })
+                            console.log('lllllllllllllllll')
+                            console.log('Label: ' ,action.label.replaceAll(' ', '-'), 'pk: ', action.pk, 'id: ',  action.id )
+                            console.log('lllllllllllllllll')
+                            this.$router.push({ name: 'course-details', params: { name: action.label.replaceAll(' ', '-'), pk: action.pk, id: action.id} })
                         }).onDismiss(() => {
                             // TODO: Clear the search
                             this.search = ''
