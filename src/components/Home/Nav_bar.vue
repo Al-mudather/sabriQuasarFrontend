@@ -226,7 +226,7 @@ export default {
                             actions: searchResult
                         }).onOk(action => {
                             // TODO: Go to the course details
-                            this.$router.push({ name: 'course-details', params: { pk: action.pk, id: action.id} })
+                            this.$router.push({ name: 'course-details', params: { name: action.label.replaceAll(' ', '-'), pk: action.pk, id: action.id} })
                         }).onDismiss(() => {
                             // TODO: Clear the search
                             this.search = ''
