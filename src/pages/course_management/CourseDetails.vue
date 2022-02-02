@@ -103,7 +103,7 @@ export default {
         // TWitter
         { name: 'twitter:card', content: "summary_large_image" },
         { name: 'twitter:domain', content: location.origin },
-        { name: 'twitter:url', content: this.FORMAT_THE_WEB_SIT_URL(`${this.courseData.title}/${this.courseData.pk}/${this.courseData.id}`) },
+        { name: 'twitter:url', content: this.FORMAT_THE_WEB_SIT_URL(`#/course/${this.courseData.title}/${this.courseData.pk}/${this.courseData.id}`) },
         { name: 'twitter:title', content: this.courseData.title },
         { name: 'twitter:description', content: this.courseData.brief },
         { name: 'twitter:image', content: this.FORMAT_THE_IAMGE_URL(this.courseData.profile) },
@@ -119,7 +119,7 @@ export default {
         { p: 'og:image:alt', c: this.courseData.title },
         { p: 'og:image:width', c: "300" },
         { p: 'og:image:height', c: "300" },
-        { p: 'og:url', c: this.FORMAT_THE_WEB_SIT_URL(`${this.courseData.title}/${this.courseData.pk}/${this.courseData.id}`) },
+        { p: 'og:url', c: this.FORMAT_THE_WEB_SIT_URL(`#/course/${this.courseData.title}/${this.courseData.pk}/${this.courseData.id}`) },
         { p: 'og:site_name', c: location.host }
       ]
     }

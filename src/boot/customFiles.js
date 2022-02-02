@@ -21,10 +21,8 @@ import VueCountdownTimer from 'vuejs-countdown-timer';
 import vueBraintree from 'vue-braintree'
 
 import VueMeta from 'vue-meta'
-import VueHead from 'vue-head'
-//TODO: For SEO
-Vue.use(VueHead)
 
+//TODO: For SEO
 Vue.use(VueMeta)
 
 Vue.use(vueBraintree)
