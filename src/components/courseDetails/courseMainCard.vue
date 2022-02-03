@@ -134,6 +134,7 @@ export default {
     },
 
     PREPARE_THE_COURSE_SHARING_LINK () {
+      // return `${location.origin}/#/course/${this.courseData.title}/${this.myMarketingCode}/${this.$_.get(this.$route, "[params][pk]")}/${this.$_.get(this.$route, "[params][id]")}`
       return `${location.origin}/#/course/${this.myMarketingCode}/${this.$_.get(this.$route, "[params][pk]")}/${this.$_.get(this.$route, "[params][id]")}`
     },
 

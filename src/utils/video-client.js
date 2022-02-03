@@ -12,6 +12,7 @@ class videoPlayer {
             self.lazyLoad("src/assets/css/videojs-fantasy-theme.css")
 
             self.lazyLoad('public/video.min.js',function () {
+                self.lazyLoad('public/videojs.hls.min', function () {
                 self.lazyLoad('public/videojs-contrib-eme.js',function () {
                     self.lazyLoad('public/videojs-contrib-quality-levels.min.js',function () {
                         self.lazyLoad('public/videojs-http-source-selector.min.js',function () {
@@ -20,6 +21,7 @@ class videoPlayer {
                             })
                         })
                     })
+                })
                 })
             })
         })
@@ -84,7 +86,8 @@ class videoPlayer {
         self.player.src([{
             // src: 'https://goron.smart-node.net/'+path+'/hls/playlist.m3u8',
             src: 'https://goron.smart-node.net/'+path+'/hls/playlist.m3u8',
-            type: 'application/x-mpegURL',
+            // type: 'application/x-mpegURL',
+            type: 'application/vnd.apple.mpegurl',
             //withCredentials: true
         }]);
     }
