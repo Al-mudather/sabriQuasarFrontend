@@ -147,9 +147,9 @@ export default {
 </script>
 
 <style lang="scss">
-@import 'src/assets/css/sass/helpers/_variabels.scss';
-@import 'src/assets/css/sass/helpers/_mixins.scss';
-@import 'src/assets/css/account.scss';
+// @import 'src/assets/css/sass/helpers/_variabels.scss';
+// @import 'src/assets/css/sass/helpers/_mixins.scss';
+// @import 'src/assets/css/account.scss';
 
 /*-- Marketing --*/
 .marketing {
@@ -177,6 +177,8 @@ export default {
 
 .marketing img {
   width: 250px;
+
+
 }
 
 .marketing h3 {

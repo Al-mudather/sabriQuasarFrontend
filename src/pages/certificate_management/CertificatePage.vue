@@ -3,26 +3,21 @@
        <div class="certificate-box">
            <div class="container">
                <div class="row">
-                   <div class="col-lg-12">
-                        <!-- <div class="tittel">
-                            <a href="#">
-                                <h3>طلب شهادة جديدة</h3>
-                            </a>
-                        </div> -->
-                        <div class="courc">
-                            <h3>شهادتـــي</h3>
-                            <div class="tabl" v-for="certificate in myCertificate.edges" :key="certificate.node.pk">
-                                <h3>{{ $_.get(certificate, '[node][enrollment][course][title]')  || $_.get(certificate, '[node][batch][courseName]') }}</h3>
-                                <div class="butt">
-                                  <q-spinner-clock
-                                    color="primary"
-                                    size="2em"
-                                    v-if="loading"
-                                  />
-                                  <button v-else @click="DOWNLOAD_MY_CERTIFICATE(certificate)" class="">تحميـل <img src="img/download.png" alt=""></button>
-                                </div>
-                            </div>
+                   <div class="col-lg-12 col-sm-7 col-md-12 col-xs-6">
+                      <div class="courc">
+                        <h3>شهادتـــي</h3>
+                        <div class="tabl" v-for="certificate in myCertificate.edges" :key="certificate.node.pk">
+                          <h3>{{ $_.get(certificate, '[node][enrollment][course][title]')  || $_.get(certificate, '[node][batch][courseName]') }}</h3>
+                          <div class="butt">
+                            <q-spinner-clock
+                              color="primary"
+                              size="2em"
+                              v-if="loading"
+                            />
+                            <button v-else @click="DOWNLOAD_MY_CERTIFICATE(certificate)" class="">تحميـل <img src="img/download.png" alt=""></button>
+                          </div>
                         </div>
+                      </div>
                    </div>
                </div>
            </div>
@@ -127,7 +122,7 @@ export default {
   }
 }
 </script>
-
+ 
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
@@ -137,6 +132,10 @@ export default {
   height: 595px;
   position: relative;
   margin: 43px auto 68px auto;
+
+  @include respond(phone) { // width < 900?
+    width: 800px;
+  }
 }
 
 .certificate-box .tittel {
@@ -156,6 +155,7 @@ export default {
   background: #7b86fa;
   padding: 10px 8px;
   width: 200px;
+  width: max-content;
   text-align: center;
   border-radius: 22px;
   color: #fff;
@@ -193,6 +193,10 @@ export default {
   width: 398px;
   margin: 0;
   line-height: 1.8;
+
+  @include respond(phone) { // width < 900?
+    width: 250px;
+  }
 }
 
 .certificate-box .courc .tabl .butt {
