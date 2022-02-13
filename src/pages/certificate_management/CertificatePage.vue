@@ -195,7 +195,7 @@ export default {
   line-height: 1.8;
 
   @include respond(phone) { // width < 900?
-    width: 250px;
+    width: 230px;
   }
 }
 
