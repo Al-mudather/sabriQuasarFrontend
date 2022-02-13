@@ -134,7 +134,7 @@ export default {
   margin: 43px auto 68px auto;
 
   @include respond(phone) { // width < 900?
-    width: 800px;
+    width: 7800px;
   }
 }
 
