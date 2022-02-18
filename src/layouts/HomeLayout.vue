@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import Currency from 'components/Home/Currency'
-import NavBar from 'components/Home/Nav_bar'
+import Currency from 'components/Home/Currency.vue'
+import NavBar from 'components/Home/Nav_bar.vue'
 import Menu from 'components/Home/Menu'
 import Footer from 'src/components/utils/Footer'
 import ShoppingCart from 'components/Home/Shopping_cart'
