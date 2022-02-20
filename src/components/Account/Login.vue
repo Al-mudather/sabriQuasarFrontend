@@ -8,6 +8,9 @@
                 <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
                 <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
             </div> 
+            <div @click="GO_TO_THE_TERMS_AND_CONDETIONS_PAGE" style="cursor: pointer" class="text-center textStyle  q-mb-md">
+                {{ isEnglish ? 'By using the platform, you agree to the terms and conditions of the platform' : 'بإستخدامك للمنصه فانت توافق على شروط و احكام المنصه' }}
+            </div>
             <div class="text-center textStyle text-h4 q-mb-md">
                 OR
             </div>
@@ -116,7 +119,7 @@
 
 <script>
 import { LoginUserWithEmail } from "src/queries/account_management/mutation/LoginUserWithEmail";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 
@@ -149,6 +152,20 @@ export default {
         })
     },
 
+    mounted() {
+        if (this.isEnglish) {
+            this.facebookLabel = 'Login using Facebook'
+            this.googleLabel =  'Login using Google'
+        } else {
+            this.facebookLabel = "تسجيل الدخول عن طريق ال Facebook"
+            this.googleLabel =  "تسجيل الدخول عن طريق ال Google"
+        }
+    },
+
+    computed: {
+        ...mapState('settings', ['isEnglish'])
+    },
+
 
     methods: {
         ...mapActions('authentication', ['loginAction']),
@@ -156,6 +173,10 @@ export default {
         ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION', 'SET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
 
+        GO_TO_THE_TERMS_AND_CONDETIONS_PAGE() {
+            this.$router.push({ name: "termsAndConditions" });
+        },
+        
         goToPasswordResetPage() {
             this.$router.push({ name: 'password-reset' });
         },
@@ -235,16 +256,10 @@ export default {
                             this.errorHandler(result.data.tokenAuth.errors);
                         }
                     }).catch((error) => {
-                        console.log('lllllllllllllllll')
-                        console.log(error)
-                        console.log('lllllllllllllllll')
                         this.visible = false
                     });
                 
             } catch (error) {
-                console.log('lllllllllllllllll')
-                console.log(error)
-                console.log('lllllllllllllllll')
                 this.visible = false
             }
         },

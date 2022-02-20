@@ -12,6 +12,9 @@
                 <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
                 <!-- <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/> -->
             </div>
+            <div @click="GO_TO_THE_TERMS_AND_CONDETIONS_PAGE" style="cursor: pointer" class="text-center textStyle  q-mb-md">
+                {{ isEnglish ? 'By using the platform, you agree to the terms and conditions of the platform' : 'بإستخدامك للمنصه فانت توافق على شروط و احكام المنصه' }}
+            </div>
             <!-- <form @submit="REGISTER_NEW_USER($event)"> -->
             <!-- <form>
                 <div class="text-h6">التسجيل عن طريق facebook أو Gmail فقط</div>
@@ -111,7 +114,7 @@
 <script>
 import { RegisterNewUser } from "src/queries/account_management/mutation/RegisterNewUser";
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import AccountHeader from "src/components/utils/accountHeader";
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication';
 // import FacebookAuthentication from 'src/components/Account/FacebookAuthentication';
@@ -145,6 +148,20 @@ export default {
         })
     },
 
+    mounted() {
+        if (this.isEnglish) {
+            this.facebookLabel = 'SignUp using Facebook'
+            this.googleLabel =  'SignUp using Google' 
+        } else {
+            this.facebookLabel = "إنشاء حساب جديد بإستخدام FACEBOOK"
+            this.googleLabel =  "إنشاء حساب جديد بإستخدام Google" 
+        }
+    },
+
+    computed: {
+        ...mapState('settings', ['isEnglish'])
+    },
+
     methods: {
         ...mapActions("authentication", [
             "loginAction",
@@ -152,6 +169,10 @@ export default {
             "setRegisterationDialogAction",
             "SET_USER_DATA_ACTION"
         ]),
+
+        GO_TO_THE_TERMS_AND_CONDETIONS_PAGE() {
+            this.$router.push({ name: "termsAndConditions" });
+        },
 
         errorHandler(errorsObj) {
             console.log(errorsObj);

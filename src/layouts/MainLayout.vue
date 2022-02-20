@@ -24,7 +24,7 @@
  
 <script>
 import MainNavBar from "components/utils/MainNavBar.vue";
-import Menu from 'components/Home/Menu'
+import Menu from 'components/Home/Menu.vue'
 import Footer from "src/components/utils/Footer";
 import ShoppingCart from "components/Home/Shopping_cart";
 import { LocalStorage, Quasar } from 'quasar'

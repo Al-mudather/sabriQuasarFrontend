@@ -50,6 +50,15 @@ const routes = [
     ]
   },
   {
+    path: '/termsandConditions',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { 
+        path: '' , name: 'termsAndConditions' ,component: () => import('src/pages/TermsandConditions.vue'),
+      }
+    ]
+  },
+  {
     path: '/user',
     component: () => import('src/layouts/UserLayout'),
     children: [

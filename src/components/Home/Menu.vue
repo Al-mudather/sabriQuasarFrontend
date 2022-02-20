@@ -75,6 +75,10 @@
                     <img src="~assets/img/bordText.png" alt="">
                     <h3>{{$t('الملف الشخصي')}}</h3>
                 </a>
+                <a class="but side-nav__item" data-link="TermsAndConditions" @click="GO_TO_THE_TERMS_AND_CONDETIONS_PAGE($event)">
+                    <img src="~assets/img/bordText.png" alt="">
+                    <h3>{{ isEnglish ? 'Terms and Conditions' : 'الأحكام والشروط' }}</h3>
+                </a>
             </div>
             <div class="exit" v-if="token" @click="logTheUserOut" style="cursor: pointer; margin-top: -1.5rem">
                 <div class="mag">
@@ -239,6 +243,11 @@ export default {
             //TODO: redirect the user to the home page
             this.$router.push({ name: "Home" });
             this.logOutAction();
+        },
+
+        GO_TO_THE_TERMS_AND_CONDETIONS_PAGE(e) {
+            this.MAKE_ACTIVE(e)
+            this.$router.push({ name: "termsAndConditions" });
         },
 
         GO_TO_MY_ORDERS_PAGE(e) {

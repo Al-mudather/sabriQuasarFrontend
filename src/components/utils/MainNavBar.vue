@@ -9,13 +9,13 @@
                             <img src="~assets/img/menu.png" alt="" />
                         </div>
                         <!--logo-->
-                        <div class="logo">
+                        <div v-if="!hideFields" class="logo">
                             <img src="~assets/img/logoB.png" alt="" />
                         </div>
                     </div>
                 </div>
                 <!-- search box -->
-                <div class="col-lg-6">
+                <div v-if="!hideFields" class="col-lg-6">
                     <div class="search">
                         <form @submit="showTheSearchingResult">
                             <input
@@ -30,7 +30,7 @@
                     </div>
                 </div>
                 <!--login $ sign-->
-                <div class="col-lg-3">
+                <div v-if="!hideFields" class="col-lg-3">
                     <div class="account" v-if="!token">
                         <div class="sign">
                             <a @click="GO_TO_SIGN_UP_PAGE" style="cursor: pointer">
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <!-- Language -->
-                <div class="col-lg-1">
+                <div class="col-lg-1" :class="{ 'col-lg-10' : hideFields }">
                     <div class="lang">
                         <q-toggle v-model="_isEnglish" icon="language" unchecked-icon="clear" class="text-black" label="Eng"/>
                     </div>
@@ -74,6 +74,7 @@ export default {
     name: "NavBar",
     data() {
         return {
+            hideFields: false,
             search: ""
         };
     },
@@ -94,6 +95,19 @@ export default {
     },
 
     watch: {
+
+        '$route': {
+            handler: function (route) {
+                if ( route.name === "termsAndConditions") {
+                    this.hideFields = true
+                } else {
+                    this.hideFields = false
+                }
+            },
+            deep: true,
+            immediate: true
+        },
+
         async isEnglish (value) {
             if (value) {
                 this.$i18n.locale = 'en'
