@@ -1,10 +1,12 @@
 import axios from 'axios'
+import _ from 'lodash'
 import $ from 'jquery'
 import { Notify, LocalStorage, SessionStorage } from 'quasar'
 import {apolloClient} from 'src/apollo/client'
 import {tokenStorage, userProfileStorage} from "src/localStorageService";
 import {RefreshLoginUserWithEmail} from 'src/queries/account_management/mutation/RefreshUserToken'
 import {RevokeUserRefreshToken} from 'src/queries/account_management/mutation/RevokeUserRefreshToken.js'
+import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData.js";
 
 const state = {
   navbarSearch: true,
@@ -55,6 +57,16 @@ const actions = {
 
   SET_USER_DATA_ACTION ({ commit }, value) {
     commit('updateUser', value)
+  },
+
+  async GET_MY_PROFILE_DATA_ACTION({commit}, payload) {
+    return apolloClient.query({
+      query: GetMyProfileData
+    }).then( (res) => {
+      //TODO: Update the user profile data
+      commit('updateUser', _.get(res, '[data][me]') )
+      return res
+    })
   },
 
   loginAction ({ commit }, payload) {

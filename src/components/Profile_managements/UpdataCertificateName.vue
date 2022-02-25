@@ -50,7 +50,7 @@
 <script>
 import { UpdateCertificateNameQuery } from "src/queries/account_management/mutation/UpdateCertificateName";
 import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
-
+import { mapActions } from 'vuex'
 export default {
   name: "UpdataCertificateName",
   data() {
@@ -81,6 +81,7 @@ export default {
   },
 
   methods: {
+    ...mapActions('authentication', ['GET_MY_PROFILE_DATA_ACTION']),
 
     errorHandler(errorsObj) {
       for (const key in errorsObj) {
@@ -143,12 +144,14 @@ export default {
                   progress: true,
                   message: "Certificate Name was set successfully"
                 })
+                //TODO: Update the user profile data
+                this.GET_MY_PROFILE_DATA_ACTION()
 
                 this.$q.notify({
                   type: "warning",
                   multiLine: true,
                   progress: true,
-                  message: "يجب ان تعيد تسجيل الدخول من جديد لكي تستطيع تحميل الشهاده من صفحة شهاداتي"
+                  message: "يمكنك الذهاب إلى صفحة شهاداتي لتحميل شهادتك"
                 })
               } else if (errors) {
                 

@@ -30,7 +30,7 @@ import axios from 'axios'
 // const FileDownload = require('js-file-download');
 import {AllCertificates} from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
 import { mapGetters } from "vuex";
-import { openURL, exportFile  } from 'quasar'
+import { exportFile  } from 'quasar'
 
 export default {
     name: 'CertificatePage',
