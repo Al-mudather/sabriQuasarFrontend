@@ -67,6 +67,20 @@ const link = split(
   httpLink
 )
 
+const defaultOptions = {
+  watchQuery: {
+    fetchPolicy: 'cache-and-network',
+    errorPolicy: 'ignore',
+  },
+  query: {
+    fetchPolicy: 'network-only',
+    errorPolicy: 'all',
+  },
+  mutate: {
+    errorPolicy: 'all',
+  },
+};
+
 // Create the apollo client
 export const apolloClient = new ApolloClient({
   // link: httpLink,
@@ -76,5 +90,6 @@ export const apolloClient = new ApolloClient({
     httpLink
   ),
   cache: new InMemoryCache(),
+  defaultOptions: defaultOptions,
   connectToDevTools: true
 })
