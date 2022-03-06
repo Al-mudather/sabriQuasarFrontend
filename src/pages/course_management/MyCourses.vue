@@ -101,7 +101,8 @@ export default {
       allEnrollmentsForCurrentUser: {
         query() {
             return AllEnrollmentsForCurrentUser
-        }
+        },
+        fetchPolicy: 'network-only'
       }
     },
 
