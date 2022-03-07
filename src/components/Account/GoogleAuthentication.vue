@@ -98,9 +98,9 @@ export default {
                         }
                 })
 
-                console.log(';;;;;;;;;  auth_res   ;;;;;;;;;;;')
+                console.log(';;;;;;;;;  SocialAuth   ;;;;;;;;;;;')
                 console.log(auth_res)
-                console.log(';;;;;;;;;  auth_res   ;;;;;;;;;;;')
+                console.log(';;;;;;;;;  SocialAuth   ;;;;;;;;;;;')
 
                 if (auth_res.data.socialAuth) {
                     this.loginAction(auth_res.data.socialAuth).then(() => {
@@ -161,7 +161,10 @@ export default {
                     // console.log(r.authResponse.access_token);
                     // console.log('/////////////////');
                     try {
-                        // var google = hello("google").getAuthResponse();
+                        var google = hello("google").getAuthResponse();
+                        console.log(';;;;;;;;;  google   ;;;;;;;;;;;')
+                        console.log(google)
+                        console.log(';;;;;;;;;  google   ;;;;;;;;;;;')
                         this.loginAuthMutation(
                             r.authResponse.access_token,
                             "google-oauth2"

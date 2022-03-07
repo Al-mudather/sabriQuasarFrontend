@@ -73,6 +73,10 @@ const actions = {
     //TODO: Delete the user and the token
     tokenStorage.clearToken()
     userProfileStorage.clearUserProfileStorage()
+
+    console.log(';;;;;;;;;  loginAction   ;;;;;;;;;;;')
+    console.log(payload)
+    console.log(';;;;;;;;;  loginAction   ;;;;;;;;;;;')
     return new Promise((resolve, reject) => {
       let user = ''
       if (payload.user) {
