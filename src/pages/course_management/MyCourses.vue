@@ -9,7 +9,7 @@
                     </div>
                 </div>
             </div>
-            <div v-if="lodash.get(allEnrollmentsForCurrentUser, '[edges]').length == 0" class="notice">
+            <div v-if=" lodash.isEmpty(lodash.get(allEnrollmentsForCurrentUser, '[edges]'))" class="notice">
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-12">

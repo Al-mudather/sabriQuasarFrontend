@@ -162,9 +162,6 @@ export default {
                     // console.log('/////////////////');
                     try {
                         var google = hello("google").getAuthResponse();
-                        console.log(';;;;;;;;;  google   ;;;;;;;;;;;')
-                        console.log(google)
-                        console.log(';;;;;;;;;  google   ;;;;;;;;;;;')
                         this.loginAuthMutation(
                             google.access_token,
                             "google-oauth2"
