@@ -125,9 +125,9 @@ export default {
                         console.log('kkkkkkkkkkkkkkkk')
                         console.log(errors)
                         console.log('kkkkkkkkkkkkkkkk')
-                        console.log(errors.message)
+                        console.log(errors[0].message)
                         console.log('kkkkkkkkkkkkkkkk')
-                        if (errors.message == "PyramidAffiliate matching query does not exist.") {
+                        if (errors[0].message == "PyramidAffiliate matching query does not exist.") {
                             this.$router.push({ name: 'registeration-code' })
                         }
 
