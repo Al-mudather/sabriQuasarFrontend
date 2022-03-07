@@ -39,6 +39,7 @@ const userProfileStorage = {
     }
   },
   clearUserProfileStorage() {
+    sessionStorage.clear();
     sessionStorage.removeItem("Frontend_user");
   }
 };

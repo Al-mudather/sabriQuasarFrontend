@@ -70,6 +70,9 @@ const actions = {
   },
 
   loginAction ({ commit }, payload) {
+    //TODO: Delete the user and the token
+    tokenStorage.clearToken()
+    userProfileStorage.clearUserProfileStorage()
     return new Promise((resolve, reject) => {
       let user = ''
       if (payload.user) {
