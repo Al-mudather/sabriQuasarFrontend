@@ -102,11 +102,11 @@ export default {
         query() {
             return AllEnrollmentsForCurrentUser
         },
-        update (data) {
-            console.log('lllllllllllllllllll')
-            console.log(data)
-            console.log('lllllllllllllllllll')
-        },
+        // update (data) {
+        //     console.log('lllllllllllllllllll')
+        //     console.log(data)
+        //     console.log('lllllllllllllllllll')
+        // },
         fetchPolicy: 'network-only'
       }
     },
