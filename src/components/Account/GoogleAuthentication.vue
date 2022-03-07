@@ -83,8 +83,11 @@ export default {
         },
         // TODO: Google and Facebook Register
         async loginAuthMutation(accessToken, provider, email = "") {
-            try {
+            try { 
                 this.visible = true
+                console.log(';;;;;;;;;  provider   ;;;;;;;;;;;')
+                console.log(provider)
+                console.log(';;;;;;;;;  provider   ;;;;;;;;;;;')
 
                 const auth_res = await this.$apollo.mutate({
                         mutation: SocialAuth,
@@ -94,6 +97,10 @@ export default {
                             email: email
                         }
                 })
+
+                console.log(';;;;;;;;;  auth_res   ;;;;;;;;;;;')
+                console.log(auth_res)
+                console.log(';;;;;;;;;  auth_res   ;;;;;;;;;;;')
 
                 if (auth_res.data.socialAuth) {
                     this.loginAction(auth_res.data.socialAuth).then(() => {
