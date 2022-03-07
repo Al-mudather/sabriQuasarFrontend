@@ -166,7 +166,7 @@ export default {
                         console.log(google)
                         console.log(';;;;;;;;;  google   ;;;;;;;;;;;')
                         this.loginAuthMutation(
-                            r.authResponse.access_token,
+                            google.access_token,
                             "google-oauth2"
                         );
                         // this.loginAuthMutation(
