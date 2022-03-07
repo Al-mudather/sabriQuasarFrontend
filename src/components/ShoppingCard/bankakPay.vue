@@ -118,10 +118,14 @@ export default {
                             }
                         }
                     });
-                    const dataObj = bankakPaymentResult.data.uploadAttachmentTransaction;
-                    if (this.$_.get(dataObj,'[errors]')) {
+                    const dataObj = this.$_.get(bankakPaymentResult,'[data][uploadAttachmentTransaction]') ;
+                    const errors = this.$_.get(bankakPaymentResult,'[errors]')
+                    if (errors) {
                         this.visible = false
-                        this.errorHandler(dataObj.errors)
+                        if (errors.message == "PyramidAffiliate matching query does not exist.") {
+                            this.$router.push({ name: 'registeration-code' })
+                        }
+
                     }
         
                     if (this.$_.get(dataObj,'[success]')) {

@@ -85,10 +85,6 @@ export default {
         async loginAuthMutation(accessToken, provider, email = "") {
             try { 
                 this.visible = true
-                console.log(';;;;;;;;;  provider   ;;;;;;;;;;;')
-                console.log(provider)
-                console.log(';;;;;;;;;  provider   ;;;;;;;;;;;')
-
                 const auth_res = await this.$apollo.mutate({
                         mutation: SocialAuth,
                         variables: {
@@ -97,10 +93,6 @@ export default {
                             email: email
                         }
                 })
-
-                console.log(';;;;;;;;;  SocialAuth   ;;;;;;;;;;;')
-                console.log(auth_res)
-                console.log(';;;;;;;;;  SocialAuth   ;;;;;;;;;;;')
 
                 if (auth_res.data.socialAuth) {
                     this.loginAction(auth_res.data.socialAuth).then(() => {
