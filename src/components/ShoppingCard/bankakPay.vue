@@ -122,6 +122,11 @@ export default {
                     const errors = this.$_.get(bankakPaymentResult,'[errors]')
                     if (errors) {
                         this.visible = false
+                        console.log('kkkkkkkkkkkkkkkk')
+                        console.log(errors)
+                        console.log('kkkkkkkkkkkkkkkk')
+                        console.log(errors.message)
+                        console.log('kkkkkkkkkkkkkkkk')
                         if (errors.message == "PyramidAffiliate matching query does not exist.") {
                             this.$router.push({ name: 'registeration-code' })
                         }
