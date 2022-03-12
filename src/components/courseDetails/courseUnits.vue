@@ -52,6 +52,7 @@
                         :key="unit.node.id"
                     >
                         <template slot="header">
+                            <!-- <pre>{{unit.node}}</pre> -->
                             <contentHeader
                                 :headerText="unit.node.title"
                             />
@@ -64,7 +65,21 @@
                             data-parent="#accordion"
                         >
                             <div class="card-body">
+                                <div v-if=" $_.get(unit, '[node][isExternal]') ">
+                                    <div
+                                        v-for="content in $_.get(unit, '[node][external][courseunitcontentSet][edges]')"
+                                        :key="content.node.id"
+                                    >
+                                        <contentItem 
+                                            :content="content.node"
+                                            v-if=" ($_.get(content, '[node][modelName]') === 'ContentVideo') || 
+                                            ($_.get(content, '[node][modelName]') === 'ContentFile') || 
+                                            ($_.get(content, '[node][modelName]') === 'ContentQuiz') "
+                                        />
+                                    </div>
+                                </div>
                                 <div
+                                    v-else
                                     v-for="content in unit.node.courseunitcontentSet.edges"
                                     :key="content.node.id"
                                 >

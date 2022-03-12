@@ -3,7 +3,7 @@
         <div class="text-h4 text-center q-ma-sm" v-if="currency != 'SDG' ">{{$t('ارفق فاتورة الدفع')}}</div>
         <div v-else>
             <div class="text-h4 text-center q-ma-sm">إشعار بنكك</div>
-            <div class="text-h6 text-center text-danger" style="font-family:'cairoR'">ملاحظه: يجب كتابة الاسم رباعيا في اشعار بنكك لكي يتم اعتماد الشعار</div>
+            <div class="text-h6 text-center text-danger" style="font-family:'cairoR'">ملاحظه: في حالة إشعار بنكك, يقبل فقط الإشعار الأبيض من المعاملات السابقه في تطبيق بنكك. اي إشعار اخر سوف يتم رفضه.</div>
         </div>
         <file-upload
             imgeSize="4000000"
@@ -29,7 +29,7 @@ export default {
         return {
             visible: false,
             bankakBill: '',
-            bankakLabel:'إضغط للإرفاق إشعار بنكك',
+            bankakLabel:'إشعار بنكك الأبيض',
             othersLabel: this.$t('اضغط للإرفاق فاتورة الدفع'),
         };
     },
@@ -122,11 +122,6 @@ export default {
                     const errors = this.$_.get(bankakPaymentResult,'[errors]')
                     if (errors) {
                         this.visible = false
-                        console.log('kkkkkkkkkkkkkkkk')
-                        console.log(errors)
-                        console.log('kkkkkkkkkkkkkkkk')
-                        console.log(errors[0].message)
-                        console.log('kkkkkkkkkkkkkkkk')
                         if (errors[0].message == "PyramidAffiliate matching query does not exist.") {
                             this.$router.push({ name: 'registeration-code' })
                         }

@@ -1,5 +1,6 @@
 <template>
 <div>
+  <!-- <pre>{{content}}</pre> -->
     <div class="info">
         <div class="mage">
             <!-- <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" /> -->
@@ -61,6 +62,9 @@ export default {
       const result = JSON.parse(this.content.modelValue)
       if (this.content.modelName === 'ContentFile') {
         return result.attachment.split('/attachment/')[1]
+      }
+      if (this.content.modelName === 'ContentQuiz') {
+        return result.quiz_title
       }
       return result.title
     }

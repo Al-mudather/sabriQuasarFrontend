@@ -158,9 +158,6 @@ export default {
             })
 
         })
-        
-        for (let nav of nav_items) {
-        }
 
         // if (!this.$_.isEmpty(this.token)) {
         //     this.$jquery('#butgro').css({
