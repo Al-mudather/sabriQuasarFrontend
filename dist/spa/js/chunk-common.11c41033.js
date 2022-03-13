@@ -163,6 +163,15 @@ query GetAllCourseUnitsByCourseID($cursor: String, $limit: Int, $courseID: ID) {
                 isMandatory
                 modelName
                 modelValue
+                courseUnit {
+                  id,
+                  pk,
+                  title
+                  course {
+                    id
+                    pk
+                  }
+                }
               }
             }
           }
@@ -180,6 +189,10 @@ query GetAllCourseUnitsByCourseID($cursor: String, $limit: Int, $courseID: ID) {
                 id,
                 pk,
                 title
+                course {
+                  id
+                  pk
+                }
               }
             }
           }

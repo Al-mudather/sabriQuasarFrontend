@@ -240,6 +240,7 @@ export default {
         enrollmentId: null,
         courseID: "",
         courseData: "",
+        coursePk: null,
         totalFinishedCourseContents: 0,
         lodash: this.$_,
         progressData: {
@@ -320,7 +321,8 @@ export default {
           this.player= new videoPlayer('prod', `${location.origin}/api/course/video/auth`)
           //TODO: The play function take =>> the video key / the inrollment / the course pk
           try {
-            this.player.play(`[data-id="${this.$_.get(this.progressData, '[courseUnitContentId]')}"]`,key, this.$_.get(this.progressData, '[enrollmentId]'), this.$_.get(this.$route, '[params][pk]'), this.token)              
+            // this.player.play(`[data-id="${this.$_.get(this.progressData, '[courseUnitContentId]')}"]`,key, this.$_.get(this.progressData, '[enrollmentId]'), this.$_.get(this.$route, '[params][pk]'), this.token)              
+            this.player.play(`[data-id="${this.$_.get(this.progressData, '[courseUnitContentId]')}"]`,key, this.$_.get(this.progressData, '[enrollmentId]'), this.coursePk, this.token)              
           } catch (error) {
             this.$q.notify({
                 type: 'warning',
@@ -479,8 +481,10 @@ export default {
     currentContent(value) {
       //TODO: Set the content id
       this.progressData.courseUnitContentId = value.pk
-      //TODO: Set the unit id
+      //TODO: Set the unit id 
       this.progressData.courseUnitId = value.courseUnit.pk
+      //TODO: Course pk
+      this.coursePk = this.$_.get(value, "[courseUnit][course][pk]")
       //TODO: Empty the learning tracking id
       this.SET_START_LEARNING_TRACKING_ID_ACTION(null);
       //TODO: Temp: Start traking the learning
