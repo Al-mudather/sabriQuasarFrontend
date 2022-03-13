@@ -1,53 +1,49 @@
-<template>
-    <footer> 
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-1" style="display: none">
-                    <div class="support">
-                        <img src="~assets/img/support.png" alt="" />
-                    </div>
-                </div>
-                <div class="col-lg-11 noPadding">
-                    <div class="foo">
-                        <div class="copright">
-                            <h3>
-                                جميع الحقوق محفوظة لمنصة
-                                <span> 2021&copy; </span>
-                            </h3>
-                            <div class="logos">
-                                <img src="~assets/img/stc.training_logo.png" alt="" />
-                            </div>
-                        </div>
-                        <div class="method">
-                            <ul>
-                                <h3>طرق الدفع المعتمدة</h3>
-                                <li>
-                                    <img src="~assets/img/paypal.png" alt="" />
-                                </li>
-                                <li>
-                                    <img
-                                        src="~assets/img/discover.png"
-                                        alt=""
-                                    />
-                                </li>
-                                <li>
-                                    <img src="~assets/img/visa.png" alt="" />
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+<template> 
+    <footer>
+        <div class="container">
+        <div class="row">
+            <!--links-->
+            <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="links">
+                <a class="links__link" @click=" $router.push({ name: 'termsAndConditions' }) ">{{ isEnglish ? 'Terms and Conditions' : 'الأحكام والشروط' }}</a>
             </div>
+            </div>
+            <!--logo-->
+            <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="logo">
+                <img src="~assets/img/suppo.png" alt="">
+                <h2>جميع الحقوق محفوظة لمنصة 2021©</h2>
+            </div>
+            </div>
+        </div>
         </div>
     </footer>
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
-  name: 'Footer'
+    name: 'Footer',
+
+    computed: {
+        ...mapState("settings", ["isEnglish"]),
+    },
 }
 </script>
 <style lang="scss">
+.links {
+
+    &__link {
+        color: white !important;
+        cursor: pointer;
+        transition: all 5ms cubic-bezier(0.075, 0.82, 0.165, 1);
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+}
 /*--- Start Footer ---*/
 footer{
     padding: 10px 0;
@@ -56,7 +52,7 @@ footer{
         cursor: pointer;
         text-align: center;
         position: fixed;
-        bottom: 64px;
+        bottom: 27px;
         right: 17px;
         z-index: 5;
         img{
@@ -73,7 +69,7 @@ footer{
             padding: 10px;
             border-radius: 55px;
             position: relative;
-            top: -41px;
+            top: -41px; 
             h3{
                 font-size: 16px;
                 color: #5666B9;
