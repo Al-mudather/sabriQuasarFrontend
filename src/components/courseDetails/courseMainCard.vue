@@ -6,17 +6,17 @@
     <div class="vidd">
       <div class="mag">
         <!-- <img v-if="courseData.profile" :src="CALCULATE_IMAGE_URL" alt=""> -->
-        <img v-if="courseData.profile" :src="FORMAT_THE_IAMGE_URL(courseData.profile)" :alt="courseData.title">
+        <img v-if="courseData.profile" :src="FORMAT_THE_IAMGE_URL( $_.get(courseData, '[profile]'))" :alt="$_.get(courseData, '[title]')">
         <img v-else src="~assets/img/Mask Group 5.png" alt="" />
       </div>
       <!-- <img class="playy" src="~assets/img/playy.png" alt="" /> -->
     </div>
     <div class="content">
       <div class="uper">
-        <div v-if="courseData.enrollmentSet" class="tow ordO">
+        <div v-if="$_.get(courseData, '[enrollmentCount]')" class="tow ordO">
           <h3>
-            {{ courseData.enrollmentSet.totalCount
-            }}<span v-if="courseData.enrollmentSet.totalCount >= 1000">K</span>
+            {{ $_.get(courseData, '[enrollmentCount]')
+            }}<span v-if="$_.get(courseData, '[enrollmentCount]') >= 1000">K</span>
           </h3>
           <P>{{$t('الطلاب الملتحقين')}}</P>
         </div>
@@ -27,13 +27,13 @@
           <hr />
         </div>
 
-        <div v-if="courseData.courseHours" class="tow">
-          <h3>{{courseData.courseHours}}<span>H</span></h3>
+        <div v-if="$_.get(courseData, '[courseHours]')" class="tow">
+          <h3>{{$_.get(courseData, '[courseHours]')}}<span>H</span></h3>
           <P>{{$t('عدد الساعات')}}</P>
         </div>
-        <div v-if="courseData.courseLanguage" class="tow ordT">
+        <div v-if="$_.get(courseData, '[courseLanguage]')" class="tow ordT">
           <img src="~assets/img/languages.png" alt="" />
-          <P>{{ courseData.courseLanguage.languageName }}</P>
+          <P>{{ $_.get(courseData, '[courseLanguage][languageName]') }}</P>
         </div>
 
         <div v-else class="tow ordT">
@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <div class="share" v-if="myMarketingCode.length > 4">
+      <div class="share" v-if="$_.size(myMarketingCode) > 4">
       <!-- <div class="share"> -->
           <form @submit="COPY_THE_SHARING_LINK($event)">
             <input id="shar-link" type="text" :value="PREPARE_THE_COURSE_SHARING_LINK">

@@ -14,6 +14,7 @@ query GetCourseByID($coursePk:Int) {
     currency,
     brief,
     isPaid,
+    enrollmentCount
     courseinstructorSet {
       edges {
         node {
@@ -54,10 +55,6 @@ query GetCourseByID($coursePk:Int) {
       id,
       pk
     }, 
-    enrollmentSet{
-      edgeCount,
-      totalCount
-    },
     courseLanguage{
       id,
       pk,
