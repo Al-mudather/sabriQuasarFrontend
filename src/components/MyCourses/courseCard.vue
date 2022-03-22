@@ -73,7 +73,7 @@ export default {
 
         GO_TO_THE_COURSE_CLASS_ROOM () {
         
-            // return `http://localhost:8080/#/class/${this.course.pk}/`
+            // return `http://localhost:8082/#/class/${this.course.pk}/`
             return `${location.origin}/classroom/#/class/${this.course.pk}/`
         }
     },

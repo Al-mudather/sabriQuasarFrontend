@@ -17,7 +17,7 @@ import Header from 'src/components/Home/Header.vue'
 import Statiscs from 'components/Home/Statiscs'
 // import ViewData from 'components/Home/ViewData'
 // import Evaluation from 'components/Home/Evaluation'
-import Training from 'components/Home/Training'
+import Training from 'components/Home/Training.vue'
 // import SwiperData from 'components/Home/SwiperData'
 
 

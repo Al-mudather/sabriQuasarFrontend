@@ -74,9 +74,6 @@ const actions = {
     tokenStorage.clearToken()
     userProfileStorage.clearUserProfileStorage()
 
-    console.log(';;;;;;;;;  loginAction   ;;;;;;;;;;;')
-    console.log(payload)
-    console.log(';;;;;;;;;  loginAction   ;;;;;;;;;;;')
     return new Promise((resolve, reject) => {
       let user = ''
       if (payload.user) {

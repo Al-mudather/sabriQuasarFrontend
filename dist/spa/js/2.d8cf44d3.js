@@ -40,7 +40,6 @@ query GetAllCourseInstructors($courseID: ID) {
           qualification,
           user {
             id,
-            username,
             fullName,
             firstName,
             lastName
