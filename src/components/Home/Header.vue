@@ -1,6 +1,7 @@
 <template>
  <section class="header">
     <div v-show="$_.isEmpty(data)" class="cn text-center">
+    <!-- <div  class="cn text-center"> -->
       <div class="swiper-container">
         <div class="swiper-wrapper">
           <div class="swiper-slide full_width">

@@ -59,6 +59,15 @@ const routes = [
     ]
   },
   {
+    path: '/privacyPolicy',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { 
+        path: '' , name: 'privacyPolicy' ,component: () => import('src/pages/PrivacyPolicy.vue'),
+      }
+    ]
+  },
+  {
     path: '/user',
     component: () => import('src/layouts/UserLayout'),
     children: [

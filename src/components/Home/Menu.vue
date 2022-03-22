@@ -291,6 +291,11 @@ export default {
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
+
+.menuu .openMenu .topMenu .account {
+  display: block !important;
+}
+
 ////////////////////////////////////
 ///Sid Navigation
 .side-nav {
