@@ -192,11 +192,25 @@ export default {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
                 
-                const errors = this.$_.get(join_permission_res, '[errors]')
-                //TODO: Loop throw all the errors
-                for (let error of errors) {
-                    if (error.message.includes("PyramidAffiliate matching query does not exist.")) {
-                        this.$router.push({ name: 'registeration-code' })
+                if (errors) {
+                    //TODO: Loop throw all the errors
+                    for (let error of errors) {
+                        if (error.message.includes("PyramidAffiliate matching query does not exist.")) {
+                            this.$router.push({ name: 'registeration-code' })
+                        }
+                    }
+
+                } else {
+                    //TODO:If the user is a marketer, then git his marketing code
+                    this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+                    //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
+                    const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
+                    //TODO: Empty the marketer code if exists
+                    this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION('')
+                    if (res) {
+                        this.$router.push({ name: "my-courses" })
+                    } else {
+                        this.$router.push({ name: "Home" })
                     }
                 }
 
