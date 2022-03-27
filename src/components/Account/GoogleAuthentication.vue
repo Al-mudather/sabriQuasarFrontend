@@ -80,9 +80,6 @@ export default {
                 }
 
             } catch (e) {
-                console.log('eeeeeeeeeeee')
-                console.log(e)
-                console.log('eeeeeeeeeeee')
                 if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
                     // this.$q.notify({
                     //     type: 'positive',

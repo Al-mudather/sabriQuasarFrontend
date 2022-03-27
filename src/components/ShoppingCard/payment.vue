@@ -191,6 +191,7 @@ export default {
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+                const errors = this.$_.get(join_permission_res, '[errors]')
                 
                 if (errors) {
                     //TODO: Loop throw all the errors
