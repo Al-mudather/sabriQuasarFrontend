@@ -55,6 +55,9 @@ export default {
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
                 const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+                console.log('join_permission_res join_permission_res join_permission_res')
+                console.log( join_permission_res )
+                console.log('join_permission_res join_permission_res join_permission_res')
                 //TODO:If the user is a marketer, then git his marketing code
                 this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
                 //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
@@ -67,6 +70,9 @@ export default {
                     this.$router.push({ name: "Home" })
                 }
             } catch (e) {
+                console.log('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+                console.log( e )
+                console.log('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
                 if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
                     // this.$q.notify({
                     //     type: 'positive',

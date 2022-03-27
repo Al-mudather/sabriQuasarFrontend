@@ -98,6 +98,8 @@ import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutatio
 import bankakPayment from 'src/components/ShoppingCard/bankakPay.vue'
 // import brainTreePayment from 'src/components/ShoppingCard/brainTreePayment.vue'
 
+import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
+
 export default {
   name:  "paymentCartpage",
   data () {
@@ -117,6 +119,11 @@ export default {
     // 'paypal-payment': paypalPayment,
     'bankak-payment': bankakPayment
   },
+
+    created () {
+        //TODO: Check to see if the user has a registeration code or not
+        this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
+    },
  
   async mounted () {
     //TODO: If the user don't completed his profile data send him to the user info page
@@ -175,10 +182,38 @@ export default {
     ...mapState('settings',['currency'])
   },
 
-  methods: {
+    methods: {
       ...mapActions('shoppingCart', [
         'setShoppinCartDataListAction',
         ]),
+
+
+        async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
+            try {
+                const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+                console.log('join_permission_res join_permission_res join_permission_res')
+                console.log( join_permission_res )
+                console.log('join_permission_res join_permission_res join_permission_res')
+
+            } catch (e) {
+                console.log('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+                console.log( e )
+                console.log('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+                if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
+                    // this.$q.notify({
+                    //     type: 'positive',
+                    //     progress: true,
+                    //     multiLine: true,
+                    //     position: 'top',
+                    //     message: 'You must enter the registeration code'
+                    // })
+                    // TODO: Go to code registeration page
+                    this.$router.push({ name: 'registeration-code' })
+                }
+
+            }
+        },
+
 
         WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT () {
             const re = this.shoppingCartDataList.map(item => {
