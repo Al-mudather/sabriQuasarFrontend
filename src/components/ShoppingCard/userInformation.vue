@@ -72,8 +72,8 @@ export default {
     async created () {
         //TODO: Get my personal data
        const res = await this.$apollo.query({ 
-                query: GetMyProfileData
-            })
+            query: GetMyProfileData
+        })
 
         if (res.data.me.pk) {
             //TODO: IF the data exists go to payment page

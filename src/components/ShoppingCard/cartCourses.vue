@@ -152,7 +152,7 @@ export default {
     },
 
     getOrdersIds () {
-        return this.$_.map(this.shoppingCartDataList, "[course][pk]");
+      return this.$_.map(this.shoppingCartDataList, "[course][pk]");
     },
 
     async getOrderResult (courseIds) {

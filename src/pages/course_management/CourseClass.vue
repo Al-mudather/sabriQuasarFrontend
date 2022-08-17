@@ -418,7 +418,7 @@ export default {
         //TODO: Set the learning tracking id
         // this.SET_START_LEARNING_TRACKING_ID_ACTION(this.startLearningTrackingID)
         // TODO: Go to next lesson
-        const currentContentIndex = _.indexOf(
+        const currentContentIndex = this.$_.indexOf(
             this.contentLists,
             this.currentContent
         );
@@ -443,7 +443,7 @@ export default {
       // TODO: End the learning tracker vido
       this.END_LEARNING_UNIT_TRAKING();
       // TODO: Got to previouse lesson
-      const currentContentIndex = _.indexOf(
+      const currentContentIndex = this.$_.indexOf(
           this.contentLists,
           this.currentContent
       );
