@@ -8,7 +8,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>">
-    
+
     <meta property="og:title" content="<%= productName %>">
     <meta property="og:site_name" content="<%= productName %>">
     <meta property="og:type" content="website"/>
@@ -23,15 +23,15 @@
     <meta name="twitter:title" content="<%= productName %>">
     <meta name="twitter:description" content="<%= productDescription %>">
     <meta name="twitter:image" content="icons/STC_logo_hight_quality.jpg">
-    
+
     <link rel="canonical" href="https://stc.training" />
     <link rel="icon" type="image/png" sizes="128x128" href="icons/STC_logo_hight_quality.jpg" />
     <link rel="icon" type="image/png" sizes="96x96" href="icons/STC_logo_hight_quality.jpg" />
     <link rel="icon" type="image/png" sizes="32x32" href="icons/STC_logo_hight_quality.jpg" />
     <link rel="icon" type="image/png" sizes="16x16" href="icons/STC_logo_hight_quality.jpg" />
 
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.css" />
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <!-- <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.css" />
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" /> -->
 
     <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
     <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
@@ -42,26 +42,26 @@
     <!-- <script src="https://www.paypal.com/sdk/js?client-id=AYjObPwrWaVlArObnjJoVzxRCBxMk2iUaVKIAWnsAxIqABqxdsIWfMusdoEm4YgQ49WIYby-olv02C8_&disable-funding=credit,card,Online_betalen,sofort" data-sdk-integration-source="button-factory" data-namespace="paypal_sdk"></script> -->
 
     <!-- <script src="https://www.paypal.com/sdk/js?client-id=AYjObPwrWaVlArObnjJoVzxRCBxMk2iUaVKIAWnsAxIqABqxdsIWfMusdoEm4YgQ49WIYby-olv02C8_"></script> -->
-    <script src="https://www.paypal.com/sdk/js?client-id=AYSNAQRtb7KKE0xiWhFTU1gGp2DOWktI6vBYYKhVU50akTflNMYMwgYi9GWFsHJe7Gt1gZA8yDXiyn9X"></script>
-    <script src="https://player.vdocipher.com/playerAssets/1.6.10/vdo.js"></script>
+    <!-- <script src="https://www.paypal.com/sdk/js?client-id=AYSNAQRtb7KKE0xiWhFTU1gGp2DOWktI6vBYYKhVU50akTflNMYMwgYi9GWFsHJe7Gt1gZA8yDXiyn9X"></script> -->
+    <!-- <script src="https://player.vdocipher.com/playerAssets/1.6.10/vdo.js"></script> -->
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PRWLZK8VKV"></script>
-    <script>
+    <!-- <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
       gtag('config', 'G-PRWLZK8VKV');
-    </script>
-  
-  
+    </script> -->
+
+
     <!--
     Video player
   -->
   <link href="https://unpkg.com/video.js@7/dist/video-js.min.css" rel="stylesheet">
   <link href="https://unpkg.com/@videojs/themes@1/dist/fantasy/index.css" rel="stylesheet">
-  
+
   <script src="https://unpkg.com/video.js@7.7.6/dist/video.js" content-type="application/javascript" charset="utf-8"></script>
   <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-eme@4.0.0/dist/videojs-contrib-eme.min.js"></script>
   <!-- <script src="public/videojs-contrib-eme.js" content-type="application/javascript" charset="utf-8"></script> -->
@@ -85,11 +85,11 @@
   <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
   <script>
     window.OneSignal = window.OneSignal || [];
-    OneSignal.push(function() { 
-      OneSignal.init({ 
+    OneSignal.push(function() {
+      OneSignal.init({
         // appId: 'a7cdbe98-245c-4597-8d34-f1c17c45f81d', //TODO: Dev
         appId: '9a1c2b1f-30d6-4e19-bf23-105cd5513394', //TODO: Prod
-      }); 
+      });
       // OneSignal.showSlidedownPrompt({force: true});
     });
 
