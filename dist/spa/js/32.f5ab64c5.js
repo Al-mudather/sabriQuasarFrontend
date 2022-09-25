@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([[32],{b90d:function(e,n,o){"use strict";o.r(n);var t=function(){var e=this,n=e._self._c;return n("q-page",[n("router-view")],1)},u=[],a={name:"CourseIndex"},r=a,s=o("2877"),c=o("9989"),l=o("eebe"),p=o.n(l),i=Object(s["a"])(r,t,u,!1,null,null,null);n["default"]=i.exports;p()(i,"components",{QPage:c["a"]})}}]);
