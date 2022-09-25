@@ -3,9 +3,9 @@
   <!-- <pre>{{content}}</pre> -->
     <div class="info">
         <div class="mage">
-            <!-- <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" /> -->
-            <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" />
-            <img v-else src="~assets/img/padlock.png" alt="" />
+          <!-- <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" /> -->
+          <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" />
+          <img v-else src="~assets/img/padlock.png" alt="" />
         </div>
         <h3 class="video" v-if="content.isFree"  @click="OPEN_FREE_VIDEO_COURSE($event ,content)">{{ formatTitle }}</h3>
         <h3 v-else >{{ formatTitle }}</h3>
@@ -24,7 +24,7 @@
             :src="videoUrl"
           />
         </div>
- 
+
         <q-card-section>
           <div class="row no-wrap items-center" style="margin-left: 0;">
             <div class="col text-h6 ellipsis text-center">
@@ -32,7 +32,7 @@
             </div>
           </div>
         </q-card-section>
- 
+
         <q-card-actions align="center" style="width: 100%;">
           <q-btn label="Stop the video" @click="UNINITIALIZE_THE_VIDEO" color="primary" v-close-popup />
         </q-card-actions>
@@ -81,7 +81,7 @@ export default {
         this.player= new videoPlayer('prod', `${location.origin}/api/course/video/auth`)
         //TODO: The play function take =>> the video key / the inrollment / the course pk
         try {
-          this.player.play(`[data-id="${this.$_.get(this.content, '[pk]')}"]`,key, 7 , this.$_.get(this.$route, '[params][pk]'))              
+          this.player.play(`[data-id="${this.$_.get(this.content, '[pk]')}"]`,key, 7 , this.$_.get(this.$route, '[params][pk]'))
         } catch (error) {
           this.$q.notify({
               type: 'warning',
@@ -128,7 +128,7 @@ export default {
             this.videoUrl =  'https://player.vimeo.com/video/' +  String(video);
           }
         }
-       
+
       }
 
     }
@@ -150,7 +150,7 @@ export default {
   color: $positive !important;
   transition: all ease-in-out 0.3s;
   backface-visibility: hidden;
-  
+
   &:hover {
     transform: scale(1.05);
   }
