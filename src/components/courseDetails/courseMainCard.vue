@@ -75,13 +75,13 @@
                 fill="#fbc74b"
                 fill-rule="evenodd"
               />
-            </g> 
+            </g>
           </g>
         </svg>
         <div class="pric">
           <h3>{{FORMAT_COUSRE_PRICE(JSON.parse(courseData.currency)[currency], 3) }}<span>{{currency}}</span></h3>
-          <button v-if="openCourse" @click="GO_TO_THE_COURSE_LEARNING_CLASS">{{$t('الى الدرس')}}</button>
-          <button v-else @click="AddTheCourseToTheBasket">{{$t('أمتلك الأن')}}</button>
+          <!-- <button v-if="openCourse" @click="GO_TO_THE_COURSE_LEARNING_CLASS">{{$t('الى الدرس')}}</button> -->
+          <button @click="AddTheCourseToTheBasket">{{$t('أمتلك الأن')}}</button>
         </div>
       </div>
 
@@ -238,4 +238,3 @@ export default {
 </script>
 
 <style></style>
- 

@@ -36,68 +36,66 @@
             </div>
             <h3>{{$t('المحتويـات')}}</h3>
         </div>
-        <skeletonList v-if="lodash.get(allCourseUnits,'[edges]').length === 0" />
+        <skeletonList v-if="$_.get(allUnitsData,'[edges]').length === 0" />
         <div id="accordion">
             <q-list ref="contentList" class="rounded-borders">
                 <transition-group
                     appear
                     enter-active-class="animated fadeIn"
                     leave-active-class="animated fadeOut"
-                > 
+                >
                     <q-expansion-item
                         default-opened
                         header-class="text-white"
                         class="card"
-                        v-for="unit in allCourseUnits.edges"
-                        :key="unit.node.id"
+                        v-for="unit in $_.get(allUnitsData,'[edges]')"
+                        :key="$_.get(unit,'[node][pk]')"
                     >
-                        <template slot="header">
-                            <!-- <pre>{{unit.node}}</pre> -->
-                            <contentHeader
-                                :headerText="unit.node.title"
-                            />
-                        </template>
+                      <template slot="header">
+                        <contentHeader
+                          :headerText="$_.get(unit,'[node][title]')"
+                        />
+                      </template>
 
-                        <div
-                            id="collapseOne"
-                            class="collapse show"
-                            aria-labelledby="headingOne"
-                            data-parent="#accordion"
-                        >
-                            <div class="card-body">
-                                <div v-if=" $_.get(unit, '[node][isExternal]') ">
-                                    <div
-                                        v-for="content in $_.get(unit, '[node][external][courseunitcontentSet][edges]')"
-                                        :key="content.node.id"
-                                    >
-                                        <contentItem 
-                                            :content="content.node"
-                                            v-if=" ($_.get(content, '[node][modelName]') === 'ContentVideo') || 
-                                            ($_.get(content, '[node][modelName]') === 'ContentFile') || 
-                                            ($_.get(content, '[node][modelName]') === 'ContentQuiz') "
-                                        />
-                                    </div>
-                                </div>
-                                <div
-                                    v-else
-                                    v-for="content in unit.node.courseunitcontentSet.edges"
-                                    :key="content.node.id"
-                                >
-                                    <contentItem 
-                                        :content="content.node"
-                                        v-if=" ($_.get(content, '[node][modelName]') === 'ContentVideo') || 
-                                                    ($_.get(content, '[node][modelName]') === 'ContentFile') || 
-                                                    ($_.get(content, '[node][modelName]') === 'ContentQuiz') "
-                                    />
-                                </div>
-
+                      <div
+                        id="collapseOne"
+                        class="collapse show"
+                        aria-labelledby="headingOne"
+                        data-parent="#accordion"
+                      >
+                        <div class="card-body">
+                          <div v-if=" $_.get(unit, '[node][isExternal]') ">
+                            <div
+                              v-for="content in $_.get(unit, '[node][external][courseunitcontentSet][edges]')"
+                              :key="$_.get(content, '[node][pk]')"
+                            >
+                              <contentItem
+                                :content="content.node"
+                                v-if=" ($_.get(content, '[node][modelName]') === 'ContentVideo') ||
+                                ($_.get(content, '[node][modelName]') === 'ContentFile') ||
+                                ($_.get(content, '[node][modelName]') === 'ContentQuiz') "
+                              />
                             </div>
+                          </div>
+                          <div
+                            v-else
+                            v-for="content in $_.get(unit, '[node][courseunitcontentSet][edges]')"
+                            :key="$_.get(content, '[node][pk]')"
+                          >
+                            <contentItem
+                              :content="content.node"
+                              v-if=" ($_.get(content, '[node][modelName]') === 'ContentVideo') ||
+                                          ($_.get(content, '[node][modelName]') === 'ContentFile') ||
+                                          ($_.get(content, '[node][modelName]') === 'ContentQuiz') "
+                            />
+                          </div>
                         </div>
+                      </div>
                     </q-expansion-item>
                 </transition-group>
             </q-list>
         </div>
-        <div class="butDown" v-if="allCourseUnits.pageInfo.hasNextPage">
+        <div class="butDown" v-if="$_.get(allUnitsData, '[pageInfo][hasNextPage]')">
             <svg
                 class="right"
                 xmlns="http://www.w3.org/2000/svg"
@@ -264,14 +262,14 @@ export default {
   name: 'courseUnits',
   data () {
     return {
-        lodash: this.$_ ,
-        allCourseUnits: { pageInfo: { hasNextPage: '' } }
+      allCourseUnits: { pageInfo: { hasNextPage: '' } },
+      allUnitsData: []
     }
   },
 
   components: {
     contentHeader,
-    contentItem,
+    // contentItem,
     skeletonList
   },
 
@@ -286,6 +284,10 @@ export default {
           courseID: this.course_id,
           limit: 5
         }
+      },
+
+      update (data) {
+        this.allUnitsData = this.$_.get(data, '[allCourseUnits]')
       }
     }
   },
@@ -297,14 +299,14 @@ export default {
       await this.$apollo.queries.allCourseUnits.fetchMore({
         variables: {
           courseID: this.course_id,
-          cursor: this.allCourseUnits.pageInfo.endCursor
+          cursor: this.allUnitsData.pageInfo.endCursor
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           const newEdges = fetchMoreResult.allCourseUnits.edges
           const pageInfo = fetchMoreResult.allCourseUnits.pageInfo
 
           if (newEdges.length) {
-            this.allCourseUnits = {
+            this.allUnitsData = {
               __typename:
                                 previousResult.allCourseUnits.__typename,
               edges: [
@@ -314,7 +316,7 @@ export default {
               pageInfo
             }
 
-            return { allCourseUnits: this.allCourseUnits }
+            return { allCourseUnits: this.allUnitsData }
           }
           return previousResult
         }

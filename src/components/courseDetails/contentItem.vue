@@ -55,6 +55,11 @@ export default {
     }
   },
   props: ['content'],
+  mounted () {
+    console.log('cccccccccccccccc')
+    console.log(this.content)
+    console.log('cccccccccccccccc')
+  },
   computed: {
     ...mapGetters("authentication", ["token"]),
 
@@ -101,33 +106,40 @@ export default {
     },
 
     OPEN_FREE_VIDEO_COURSE (e, content) {
-      e.preventDefault();
-      //TODO: empty the cipher
-      this.cipherVideo = null
-      //TODO: Unintialize the player
-      this.player = null
-      //TODO: Open the video card dialog
-      this.card = true
-      const contentData = JSON.parse(content.modelValue)
-      const video_metadata = this.$_.get(contentData, '[video_metadata]')
-      if (video_metadata) {
-        this.PREPARE_THE_SMART_NOD_VIDEO(video_metadata)
-      } else {
-        const cipher = this.$_.get(contentData, '[cipher_iframe]')
-         if (cipher) {
-          this.cipherVideo = cipher
+      try {
+        e.preventDefault();
+        //TODO: empty the cipher
+        this.cipherVideo = null
+        //TODO: Unintialize the player
+        this.player = null
+        //TODO: Open the video card dialog
+        this.card = true
+        const contentData = JSON.parse(content.modelValue)
+        const video_metadata = this.$_.get(contentData, '[video_metadata]')
+        console.log('gggggggggggggggggg')
+        console.log(video_metadata)
+        console.log('gggggggggggggggggg')
+        if (video_metadata) {
+          this.PREPARE_THE_SMART_NOD_VIDEO(video_metadata)
         } else {
-          const video = this.$_.get(contentData, '[video]')
-          //TODO: If the video from the youtube git it
-          const i = video.indexOf("v");
-          const videoKey = video.slice(i + 2);
-          if ( video.indexOf('youtube') > 0) {
-            this.videoUrl =  "https://www.youtube.com/embed?=" + videoKey;
+          const cipher = this.$_.get(contentData, '[cipher_iframe]')
+           if (cipher) {
+            this.cipherVideo = cipher
           } else {
-            //TODO: if the video from the vimeo git it
-            this.videoUrl =  'https://player.vimeo.com/video/' +  String(video);
+            const video = this.$_.get(contentData, '[video]')
+            //TODO: If the video from the youtube git it
+            const i = video.indexOf("v");
+            const videoKey = video.slice(i + 2);
+            if ( video.indexOf('youtube') > 0) {
+              this.videoUrl =  "https://www.youtube.com/embed?=" + videoKey;
+            } else {
+              //TODO: if the video from the vimeo git it
+              this.videoUrl =  'https://player.vimeo.com/video/' +  String(video);
+            }
           }
+
         }
+      } catch (error) {
 
       }
 

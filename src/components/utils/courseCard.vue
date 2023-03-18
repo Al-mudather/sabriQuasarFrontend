@@ -21,12 +21,12 @@
               </svg>
               <button v-if="course.enrolled" @click="GO_TO_THE_COURSE_LEARNING_CLASS">{{$t('الى الدرس')}}</button>
               <button v-else @click="AddTheCourseToTheBasket"> <img src="~assets/img/add.png" alt=""> إضافة للسلة</button>
-          </div> 
+          </div>
         </div>
-        <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, name: course.title , id: course.id } } ) " class="details"> {{$t('التفاصيل')}} <img src="~assets/img/leftArraw.png" alt=""></button>                                           
+        <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, name: course.title , id: course.id } } ) " class="details"> {{$t('التفاصيل')}} <img src="~assets/img/leftArraw.png" alt=""></button>
       </div>
     </div>
-     
+
 </template>
 
 <script>
@@ -68,6 +68,7 @@ export default {
     ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
 
     GO_TO_THE_COURSE_LEARNING_CLASS () {
+      // `${location.origin}/classroom/#/class/${this.course.pk}/`
       this.$router.push({ name: 'course-class', params: { pk: this.course.pk, id: this.course.id }, query:{ tab: 'tutorial' } })
     },
 
@@ -107,7 +108,7 @@ export default {
     AddTheCourseToTheBasket (){
       const data = {
         user: this.user,
-        course: this.course 
+        course: this.course
       }
 
       this.setShoppingCartDataListAction(data)

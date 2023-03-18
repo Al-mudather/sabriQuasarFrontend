@@ -8,6 +8,7 @@
                         <h3>شهادتـــي</h3>
                         <div class="tabl" v-for="certificate in myCertificate.edges" :key="certificate.node.pk">
                           <h3>{{ $_.get(certificate, '[node][enrollment][course][title]')  || $_.get(certificate, '[node][batch][courseName]') }}</h3>
+                          <h3>{{ FORMAT_DATE( $_.get(certificate, '[node][created]') ) }}</h3>
                           <div class="butt">
                             <q-spinner-clock
                               color="primary"
@@ -32,6 +33,9 @@ import {AllCertificates} from 'src/queries/certificatesManagement/query/GetAllCe
 import { mapGetters } from "vuex";
 import { exportFile  } from 'quasar'
 
+const moment = require('moment')
+
+
 export default {
     name: 'CertificatePage',
     data () {
@@ -40,7 +44,7 @@ export default {
         myCertificate: []
       }
     },
- 
+
 	components: {
 	},
 
@@ -64,11 +68,20 @@ export default {
 
       update (data) {
         this.myCertificate = data.allCertificates
+        console.log('dddddddddddddddddddddd')
+        console.log( this.myCertificate )
+        console.log('dddddddddddddddddddddd')
       }
     }
   },
 
   methods: {
+
+    FORMAT_DATE (date) {
+      if (date) return moment(date).format('YYYY-MM-DD HH:mm:ss')
+      return 'Not Defined'
+    },
+
     async DOWNLOAD_MY_CERTIFICATE (certificate) {
 
       if (this.user.certificateName) {
@@ -87,7 +100,7 @@ export default {
               }
             }
           )
-  
+
           if (res.data) {
             // openURL(res.config.url)
             const fileName = `${this.$_.get(certificate, '[node][enrollment][course][title]') || this.$_.get(certificate, '[node][batch][courseName]') }-${this.user.username}.pdf`
@@ -117,19 +130,19 @@ export default {
         })
         this.$router.push({ name: "user-profile" });
       }
-      
+
     }
   }
 }
 </script>
- 
+
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
 @import "src/css/helpers/_variabels.scss";
 
 .certificate-box {
   width: 841px;
-  height: 595px;
+  min-height: 595px;
   position: relative;
   margin: 43px auto 68px auto;
 

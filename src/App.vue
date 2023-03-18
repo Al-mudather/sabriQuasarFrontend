@@ -71,7 +71,7 @@ export default {
                     if (isEnabled) {
                     } else {
                         //TODO: Show the subscribe message again until the user accept it
-                        window.OneSignal.showSlidedownPrompt({force: true}); 
+                        window.OneSignal.showSlidedownPrompt({force: true});
                     }
                 });
 
@@ -79,9 +79,9 @@ export default {
                     //TODO: If the user allowed the subscription, set his email
                     if (this.user) {
                         //TODO: Set the external user id for notification
-                        let externalUserId = this.user.email; // You will supply the external user id to the OneSignal SDK 
-                        OneSignal.push(function() { 
-                            OneSignal.setExternalUserId(externalUserId); 
+                        let externalUserId = this.user.email; // You will supply the external user id to the OneSignal SDK
+                        OneSignal.push(function() {
+                            OneSignal.setExternalUserId(externalUserId);
                         });
                     }
                 });
@@ -99,9 +99,9 @@ export default {
 
                         if (this.user.email) {
                             //TODO: Set the external user id for notification
-                            let externalUserId = this.user.email; // You will supply the external user id to the OneSignal SDK 
-                            window.OneSignal.push(function() { 
-                                window.OneSignal.setExternalUserId(externalUserId); 
+                            let externalUserId = this.user.email; // You will supply the external user id to the OneSignal SDK
+                            window.OneSignal.push(function() {
+                                window.OneSignal.setExternalUserId(externalUserId);
                             });
                         }
                     } else if (currentPermission == 'denied' || currentPermission == 'default') {
@@ -118,7 +118,7 @@ export default {
         });
 
         // console.log({router: this.$router})
-        //TODO: Empty the nav bar 
+        //TODO: Empty the nav bar
         LocalStorage.set('activeNav', '')
 
         // TODO: If There is a token, reLogin the user
@@ -167,6 +167,6 @@ export default {
 </script>
 <style>
 #q-app {
-    direction: rtl !important;
+  direction: rtl !important;
 }
 </style>

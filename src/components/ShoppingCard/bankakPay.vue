@@ -75,17 +75,17 @@ export default {
                     }
                 });
                 const dataObj = result.data.createNewOrderWithBulkOrderDetails;
-    
-    
+                console
+
                 if (this.$_.get(dataObj,'[errors]')) {
                     this.visible = false
                     this.errorHandler(dataObj.errors)
                 }
-    
+
                 if (this.$_.get(dataObj,'[success]')) {
                     return dataObj;
                 }
-                
+
             } catch (error) {
                 if ( error.message == 'GraphQL error: User already has valid enrollment in the course ...') {
                     this.$q.notify({
@@ -114,7 +114,8 @@ export default {
                         variables: {
                             input: {
                                 order: orderResult.order.pk,
-                                attachment: this.bankakBill
+                                // attachment: this.bankakBill
+                                attachment: null
                             }
                         }
                     });
@@ -127,10 +128,10 @@ export default {
                         }
 
                     }
-        
+
                     if (this.$_.get(dataObj,'[success]')) {
                         this.visible = false
-                        //TODO: 
+                        //TODO:
                         this.deleteShoppinCartDataListAction()
                         //TODO: Go to the Success page
                         this.$router.push({ name: 'cart-success' })
@@ -145,7 +146,7 @@ export default {
                     })
                     this.visible = false
                 }
-                
+
             } catch (error) {
                 this.visible = false
                 if ( error.message == 'GraphQL error: User already has valid enrollment in the course ...') {
@@ -161,7 +162,7 @@ export default {
                         message: "لديك اشتراك مسبق في احد الكورسات اللتي قمت بشرائها, الرجاء قم بشراء كورس لم تمتلكه من قبل"
                     })
                 }
-                
+
             }
 
         }
