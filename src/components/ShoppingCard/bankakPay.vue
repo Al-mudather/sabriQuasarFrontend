@@ -87,16 +87,26 @@ export default {
                 }
 
             } catch (error) {
-                if ( error.message == 'GraphQL error: User already has valid enrollment in the course ...') {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        // message: error.message,
-                        message: "لديك اشتراك مسبق في هذا الكورس"
-                    })
-                }
+              if ( error.message == 'GraphQL error: User already has valid enrollment in the course ...') {
+                this.$q.notify({
+                  type: 'warning',
+                  progress: true,
+                  multiLine: true,
+                  position: 'top',
+                  // message: error.message,
+                  message: "لديك اشتراك مسبق في هذا الكورس"
+                })
+              }
+              if ( error.message.includes('User already has valid enrollment in the course ...')) {
+                this.$q.notify({
+                  type: 'warning',
+                  progress: true,
+                  multiLine: true,
+                  position: 'top',
+                  // message: error.message,
+                  message: "لديك اشتراك مسبق في هذا الكورس"
+                })
+              }
             }
         },
 
@@ -114,8 +124,8 @@ export default {
                         variables: {
                             input: {
                                 order: orderResult.order.pk,
-                                // attachment: this.bankakBill
-                                attachment: null
+                                attachment: this.bankakBill
+                                // attachment: null
                             }
                         }
                     });
