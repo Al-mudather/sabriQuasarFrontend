@@ -1,20 +1,35 @@
 <template>
 <div>
   <!-- <pre>{{content}}</pre> -->
-    <div class="info">
-        <div class="mage">
+    <div class="info flex q-mb-sm">
+        <div class="mage q-ml-sm">
           <!-- <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" /> -->
           <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" />
           <img v-else src="~assets/img/padlock.png" alt="" />
         </div>
-        <h3 class="video" v-if="content.isFree"  @click="OPEN_FREE_VIDEO_COURSE($event ,content)">{{ formatTitle }}</h3>
-        <h3 v-else >{{ formatTitle }}</h3>
+        <h6 class="video" v-if="content.isFree"  @click="OPEN_FREE_VIDEO_COURSE($event ,content)">{{ formatTitle }}</h6>
+        <h6 v-else >{{ formatTitle }}</h6>
     </div>
 
     <q-dialog v-model="card" persistent>
       <q-card class="my-card">
-        <div v-show="player" style="padding-top:56.25%;position:relative;">
-          <div style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%; padding-bottom: 2rem;"  id="videoPlayer" :data-id="$_.get(content, '[pk]')"></div>
+        <AlhasifVideoPlayer ref="alhasifPlayer" id="videoPlayer" v-if="video_type === 'TYPE_HASIF' " :videoUuid="videoUuid" />
+        <div v-else>
+          <div v-show="player" style="padding-top:56.25%;position:relative;">
+            <div style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%; padding-bottom: 2rem;"  id="videoPlayer" :data-id="$_.get(content, '[pk]')"></div>
+          </div>
+          <div v-if="!player">
+            <div v-if="cipherVideo" v-html="cipherVideo"></div>
+            <q-video
+              v-else
+              :ratio="16/9"
+              :src="videoUrl"
+            />
+          </div>
+        </div>
+        <!-- <div v-show="player" style="padding-top:56.25%;position:relative;">
+          <AlhasifVideoPlayer ref="alhasifPlayer" id="videoPlayer" v-if="video_type === 'TYPE_HASIF' " :videoUuid="videoUuid" />
+          <div v-else style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%; padding-bottom: 2rem;"  id="videoPlayer" :data-id="$_.get(content, '[pk]')"></div>
         </div>
         <div v-if="!player">
           <div v-if="cipherVideo" v-html="cipherVideo"></div>
@@ -23,7 +38,7 @@
             :ratio="16/9"
             :src="videoUrl"
           />
-        </div>
+        </div> -->
 
         <q-card-section>
           <div class="row no-wrap items-center" style="margin-left: 0;">
@@ -43,6 +58,8 @@
 
 <script>
 import videoPlayer from 'src/utils/video-client.js'
+import AlhasifVideoPlayer from 'src/utils/AlhasifVideoPlayer.vue'
+
 import {mapGetters} from 'vuex'
 
 export default {
@@ -51,15 +68,20 @@ export default {
       card: false,
       player: null,
       cipherVideo: null,
-      videoUrl: ''
+      videoUrl: '',
+      video_type: "",
+      videoUuid: null,
     }
   },
   props: ['content'],
-  mounted () {
-    console.log('cccccccccccccccc')
-    console.log(this.content)
-    console.log('cccccccccccccccc')
+  components: {
+    AlhasifVideoPlayer
   },
+  // mounted () {
+  //   console.log('cccccccccccccccc')
+  //   console.log(this.content)
+  //   console.log('cccccccccccccccc')
+  // },
   computed: {
     ...mapGetters("authentication", ["token"]),
 
@@ -112,15 +134,25 @@ export default {
         this.cipherVideo = null
         //TODO: Unintialize the player
         this.player = null
+        //TODO: Unintialize the alhasif videoUuid
+        this.videoUuid = null
+        this.video_type = null
         //TODO: Open the video card dialog
         this.card = true
         const contentData = JSON.parse(content.modelValue)
         const video_metadata = this.$_.get(contentData, '[video_metadata]')
-        console.log('gggggggggggggggggg')
-        console.log(video_metadata)
-        console.log('gggggggggggggggggg')
+        this.video_type = this.$_.get(contentData, '[video_type]')
+
+        // console.log(this.$_.get(video_metadata,'[videoData][videoUuid]'))
+        // console.log('gggggggggggggggggg')
         if (video_metadata) {
-          this.PREPARE_THE_SMART_NOD_VIDEO(video_metadata)
+          if ( this.video_type === 'TYPE_HASIF' ) {
+            // this.$refs.alhasifPlayer.STOP_THE_VIDEO_PLAYER()
+            this.videoUuid = this.$_.get(video_metadata,'[videoData][videoUuid]')
+          } else {
+            //TODO: run the video
+            this.PREPARE_THE_SMART_NOD_VIDEO(video_metadata)
+          }
         } else {
           const cipher = this.$_.get(contentData, '[cipher_iframe]')
            if (cipher) {
