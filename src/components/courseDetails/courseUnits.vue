@@ -129,6 +129,7 @@ export default {
 
       update (data) {
         this.allUnitsData = this.$_.get(data, '[allCourseUnits]')
+
       },
       error ( e ) {
        }

@@ -11,7 +11,7 @@
       </div>
       <!-- <img class="playy" src="~assets/img/playy.png" alt="" /> -->
     </div>
-    <div class="content">
+    <div class="content" style="display: block;">
       <div class="uper">
         <div v-if="$_.get(courseData, '[enrollmentCount]')" class="tow ordO">
           <h3>
