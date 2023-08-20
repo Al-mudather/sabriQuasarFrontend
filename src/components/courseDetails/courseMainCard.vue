@@ -11,7 +11,7 @@
       </div>
       <!-- <img class="playy" src="~assets/img/playy.png" alt="" /> -->
     </div>
-    <div class="content" style="display: block;">
+    <div class="content" style="display: block; height: max-content !important; padding-bottom: 0.5rem !important;">
       <div class="uper">
         <div v-if="$_.get(courseData, '[enrollmentCount]')" class="tow ordO">
           <h3>
@@ -238,9 +238,4 @@ export default {
 </script>
 
 <style>
-.asid .content {
-  display: block !important;
-height: max-content !important;
-padding-bottom: 0.5rem !important;
-}
 </style>
