@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@lifeomic/axios-fetch": "^1.5.1",
+    "@quasar/cli": "^2.2.3",
     "@quasar/extras": "^1.9.14",
     "@vimeo/player": "^2.15.3",
     "animate.css": "^4.1.1",

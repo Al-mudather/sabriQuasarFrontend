@@ -58,5 +58,7 @@ export default {
 </script>
 
 <style>
-
+.backAccount .content {
+  display: block !important;
+}
 </style>

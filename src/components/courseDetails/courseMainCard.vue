@@ -237,4 +237,10 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.asid .content {
+  display: block !important;
+height: max-content !important;
+padding-bottom: 0.5rem !important;
+}
+</style>
