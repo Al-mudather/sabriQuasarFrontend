@@ -8,18 +8,18 @@
               <img src="~assets/img/tit.png" alt="">
               <h3>{{ isEnglish ? 'Terms and Conditions' : 'الأحكام والشروط' }}</h3>
             </div>
-            <div class="Conditions"> 
+            <div class="Conditions">
               <h3 class="condH">{{ isEnglish ? 'Important note' : 'ملاحظه مهمة' }}</h3>
               <p class="condP">
-                {{ 
+                {{
                   isEnglish
-                  ? 
+                  ?
                   `
                     Please read the following conditions carefully before using the educational platform.
                     By using the platform you are agree to all the terms and conditions and committed to be bound by them.
                     If you do not agree to any of the terms, please do not use the platform.
-                  ` 
-                  : 
+                  `
+                  :
                   'يرجى قراءة الشروط التاليه جيدا قبل إستخدامك للمنصه التعليميه. حيث إستخدامك لها يعني قبولك لهذه الشروط و موافقتك على الإلتزام بها. في حالة عدم موافقتك يرجى عدم إستخدام المنصه.'
                 }}
               </p>
@@ -28,11 +28,11 @@
             <div class="uses">
               <h3 class="condH">{{ isEnglish ? 'Terms and conditions' : 'الأحكام والشروط' }}</h3>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   1) All rights of courses and advertisements on the platform are reserved to Dr. Sabri Abu Qarun Training Center.
                   `
-                  : 
+                  :
                   `
                   1) جميع حقوق  الكورسات و الاعلانات بالمنصة محفوظة  لمركز د.صبري أبوقرون للتدريب.
                   `
@@ -40,11 +40,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   2) It is forbidden to circulate any lecture or part of a lecture by downloading from the platform and sending it to another person.
                   `
-                  : 
+                  :
                   `
                   2) يمنع تداول أي محاضرة أو جزء من محاضرة بالتحميل  من المنصه و ارسالها لشخص آخر.
                   `
@@ -52,11 +52,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   3) It is prohibited to circulate any questions or part of the exams within the platform to any other person.
                   `
-                  : 
+                  :
                   `
                   3) يمنع تداول أي اسئلة أو جزء منها من الامتحانات الموجودة داخل المنصة لأي شخص آخر .
                   `
@@ -64,11 +64,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   4) Fees are not refunded after completing the registration process and attaching payment invoice  on the platform.
                   `
-                  : 
+                  :
                   `
                   4) لا تسترد الرسوم بعد اتمام عملية التسجيل وارفاق اشعار التوريد في المنصة.
                   `
@@ -76,11 +76,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   5) In the case of attaching the payment invoice, you must be ensured that the date of the transaction is clear in addition to the name of the recipient, the amount paid and the invoice number.
                   `
-                  : 
+                  :
                   `
                   5) في حالة إرفاق فاتورة الدفع يجب التأكد من أن يكون تاريخ العمليه واضحا بإضافه إلى إسم المرسل إليه, المبلغ المدفوع و رقم الفاتوره .
                   `
@@ -88,11 +88,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   6) Do not share the account "e-mail" registered on the platform with anyone else.
                   `
-                  : 
+                  :
                   `
                   6) عدم مشاركه الحساب "الايميل" المسجل بالمنصة مع أي شخص آخر .
                   `
@@ -100,11 +100,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   7) Lectures are available for the duration of the course plus half the course period (if the duration of a course is one month as an example, the material is available for a month and a half).
                   `
-                  : 
+                  :
                   `
                   7) المحاضرات تكون متاحة طيلة فترة الكورس زائدا نصف فتره الكورس ( اذا كان الكورس مدته شهر تكون المادة متاحة شهر و نصف ) علي سبيل المثال .
                   `
@@ -112,11 +112,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   8) The course certificate is granted after attending more than 80% of the course content.
                   `
-                  : 
+                  :
                   `
                   8) تمنح شهادة الكورسات بعد حضور اكثر من 80% من محتوي الكورس .
                   `
@@ -124,11 +124,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   9) The course registration request is accepted within 72 hours from the time of submitting the application.
                   `
-                  : 
+                  :
                   `
                   9) يقبل طلب التسجيل في الكورس خلال 72 ساعه من  زمن رفع الطلب .
                   `
@@ -136,11 +136,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   10) The course content is available on the date specified for the start of the course.
                   `
-                  : 
+                  :
                   `
                   10) يتوفر محتوي الكورس في التاريخ المحدد لبداية الكورس .
                   `
@@ -148,11 +148,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   11) The participant in a particular course is not entitled to change the account after completing the registration process for any reason, and the password for his account is not available anywhere within the platform..
                   `
-                  : 
+                  :
                   `
                   11) لا يحق للمشترك في الكورس المعين تغيير البريد الالكتروني بعد اتمام عملية التسجيل لأي سبب و كلمة المرور الخاصه بالبريد الالكتروني للدخول خاصة بصاحب الحساب لا تتوفر في أي مكان  داخل المنصة.
                   `
@@ -160,23 +160,23 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
-                  12) No payment invoice is accepted, except on the approved accounts number for the education platform. The approved account numbers (195264 - 2007081).
+                  12) No payment invoice is accepted, except on the approved accounts number for the education platform. The approved account numbers (1952614 - 2571033).
                   `
-                  : 
+                  :
                   `
-                  12) لا يقبل أي اشعار توريد الا على الحسابات المعتمدة للمركز ارقام الحساب المعتمدة ( 195264 - 2007081 )
+                  12) لا يقبل أي اشعار توريد الا على الحسابات المعتمدة للمركز ارقام الحساب المعتمدة ( 1952614 - 2571033 )
                   `
                 }}
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   13) The payment invoice for the registration process of a course is not accepted,  unless the invoice contains all its details (operation number + date + amount + account number from which the amount was issued + account number to which the amount was supplied + writing the name in quadrant in the comment box inside the invoice).
                   `
-                  : 
+                  :
                   `
                   13) لايقبل اشعار توريد لاتمام عملية التسجيل للكورس إلا إذا كان الاشعار يحتوي على كل تفاصيله ( رقم العمليه + التاريخ + المبلغ + رقم الحساب الصادر منه المبلغ + رقم الحساب المورد إليه المبلغ + كتابه الاسم رباعي في خانة التعليق داخل الاشعار).
                   `
@@ -184,11 +184,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   14) The certificate is issued for the courses with the name entered by the user, and any attempt to mendment the certificate name after the certificate is issued by the platform entails additional procedures and fees.
                   `
-                  : 
+                  :
                   `
                   14)  تصدر الشهادة للدورات بالاسم المدخل من قبل الطالب وأي تعديل بعد صدور الشهادة من قبل المنصه تترتب عليه اجراءات و رسوم إضافية .
                   `
@@ -196,11 +196,11 @@
               </p>
               <br>
               <p class="condP">
-                {{ isEnglish ? 
+                {{ isEnglish ?
                   `
                   15) Violation of any of the aforementioned terms, exposes the account holder on the platform to legal accountability.
                   `
-                  : 
+                  :
                   `
                   15) مخالفة أي من البنود المذكورة تعرض صاحب الحساب في المنصه للمساءلة القانونية .
                   `
@@ -276,7 +276,7 @@ export default {
                         width: 30px;
                         margin: -9px 0 0 0;
                     }
-                    svg {  
+                    svg {
                         display: none;
                         width: 46px;
                         margin: -11px 0 0 0;
@@ -300,7 +300,7 @@ export default {
                         color: #fff;
                         text-decoration: none;
                     }
-                    svg {  
+                    svg {
                         margin: 0 0 0 0;
                     }
                 }
@@ -346,7 +346,7 @@ export default {
                         opacity: 1;
                     }
                 }
-                svg {  
+                svg {
                    opacity: 1;
                 }
             }
@@ -379,7 +379,7 @@ export default {
                         opacity: 1;
                     }
                 }
-                svg {  
+                svg {
                    opacity: 1;
                 }
             }
@@ -412,7 +412,7 @@ export default {
                         opacity: 1;
                     }
                 }
-                svg {  
+                svg {
                    opacity: 1;
                 }
             }
@@ -446,7 +446,7 @@ export default {
                         opacity: 1;
                     }
                 }
-                svg {  
+                svg {
                    opacity: 1;
                 }
             }
@@ -542,7 +542,7 @@ export default {
         overflow: hidden;
         .backg{
             position: absolute;
-            top: 0; 
+            top: 0;
             z-index: 4;
         }
         .boodW{
@@ -597,7 +597,7 @@ export default {
                     left: 0;
                     right: 0;
                     top: 39px;
-                    margin: 0 auto;     
+                    margin: 0 auto;
                 }
                 span{
                     font-size: 16px;
