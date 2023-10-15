@@ -66,7 +66,7 @@
                                                 <path id="path158" d="M2.622,1.248A18.514,18.514,0,0,0,.76,15.824l1.114-.3S.793,6.711,3.058,2.278s-.437-1.03-.437-1.03" transform="translate(34.701 34.471)" fill="#d4e4f8"/>
                                             </g>
                                             </g>
-                                        </svg> 
+                                        </svg>
                                         <button>{{$t('عرض المزيد')}} <img src="~assets/img/moree.png" alt=""></button>
                                     </div>
                                 </div>
@@ -79,7 +79,7 @@
     </section>
 </template>
 
-<script> 
+<script>
 import courseCard from 'src/components/MyCourses/courseCard.vue'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { mapActions } from "vuex"
@@ -89,6 +89,7 @@ export default {
     data () {
         return {
             lodash: this.$_,
+            courseLimit: 100,
             allEnrollmentsForCurrentUser: {}
         }
     },
@@ -102,6 +103,12 @@ export default {
         query() {
             return AllEnrollmentsForCurrentUser
         },
+        variables () {
+        return {
+          limit: this.courseLimit,
+          cursor: '',
+        }
+      },
         // update (data) {
         //     console.log('lllllllllllllllllll')
         //     console.log(data)
@@ -122,6 +129,7 @@ export default {
         async loadMoreData () {
             await this.$apollo.queries.allEnrollmentsForCurrentUser.fetchMore({
                 variables: {
+                  limit: this.courseLimit,
                     cursor: this.allEnrollmentsForCurrentUser.pageInfo.endCursor
                 },
                 updateQuery: (previousResult, { fetchMoreResult }) => {
@@ -449,7 +457,7 @@ export default {
 //                     }
 //                 }
 //                 .card-body{
-//                     padding: 8px; 
+//                     padding: 8px;
 //                     height: 200px;
 //                     h5{
 //                         font-size: 17px;
@@ -815,7 +823,7 @@ export default {
                     }
                 }
                 .card-body{
-                    padding: 8px; 
+                    padding: 8px;
                     h5{
                         font-size: 17px;
                         font-family: 'cairoR';
