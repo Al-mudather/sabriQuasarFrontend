@@ -159,7 +159,7 @@ export default {
               progress: true,
               multiLine: true,
               position: "top",
-              message: JSON.stringify(error.message),
+              message: JSON.stringify(errors),
             });
             if (
               errors[0].message ==
@@ -188,7 +188,7 @@ export default {
         }
       } catch (error) {
         this.$q.notify({
-          type: "warning",
+          type: "negative",
           progress: true,
           multiLine: true,
           position: "top",
