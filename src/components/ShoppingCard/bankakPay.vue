@@ -159,7 +159,7 @@ export default {
               progress: true,
               multiLine: true,
               position: "top",
-              message: JSON.stringify(errors),
+              message: errors,
             });
             if (
               errors[0].message ==

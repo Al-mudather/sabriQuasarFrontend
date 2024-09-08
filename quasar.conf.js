@@ -6,9 +6,9 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
-const DotEnv = require('dotenv')
-const webpack = require('webpack')
-const envparser = require('./src/boot/envparser.js')
+const DotEnv = require("dotenv");
+const webpack = require("webpack");
+const envparser = require("./src/boot/envparser.js");
 
 module.exports = function (/* ctx */) {
   return {
@@ -20,38 +20,37 @@ module.exports = function (/* ctx */) {
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
     boot: [
-      'lodash',
-      'i18n',
-      'axios',
-      'apollo',
-      'hello',
-      'socail_auth',
-      'customFiles',
-      'main'
+      "lodash",
+      "i18n",
+      "axios",
+      "apollo",
+      "vueCookies",
+      "hello",
+      "socail_auth",
+      "customFiles",
+      "main",
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
-    css: [
-      'app.scss'
-    ],
+    css: ["app.scss"],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
-      'ionicons-v4',
-      'mdi-v5',
-      'fontawesome-v5',
-      'eva-icons',
-      'themify',
-      'line-awesome',
-      'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
+      "ionicons-v4",
+      "mdi-v5",
+      "fontawesome-v5",
+      "eva-icons",
+      "themify",
+      "line-awesome",
+      "roboto-font-latin-ext", // this or either 'roboto-font', NEVER both!
 
-      'roboto-font', // optional, you are not bound to it
-      'material-icons' // optional, you are not bound to it
+      "roboto-font", // optional, you are not bound to it
+      "material-icons", // optional, you are not bound to it
     ],
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
+      vueRouterMode: "hash", // available values: 'hash', 'history'
       env: envparser(),
       // transpile: false,
 
@@ -71,33 +70,33 @@ module.exports = function (/* ctx */) {
       // extractCSS: false,
 
       // https://quasar.dev/quasar-cli/handling-webpack
-      extendWebpack (cfg) {
+      extendWebpack(cfg) {
         cfg.module.rules.push({
-          enforce: 'pre',
+          enforce: "pre",
           test: /\.(js|vue)$/,
-          loader: 'eslint-loader',
-          exclude: /node_modules/
-        })
-      }
+          loader: "eslint-loader",
+          exclude: /node_modules/,
+        });
+      },
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
       https: false,
       port: 8080,
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
     },
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
-      iconSet: 'material-icons', // Quasar icon set
-      lang: 'en-us', // Quasar language pack
+      iconSet: "material-icons", // Quasar icon set
+      lang: "en-us", // Quasar language pack
       config: {},
 
       // Possible values for "importStrategy":
       // * 'auto' - (DEFAULT) Auto-import needed Quasar components & directives
       // * 'all'  - Manually specify what to import
-      importStrategy: 'auto',
+      importStrategy: "auto",
 
       // For special cases outside of where "auto" importStrategy can have an impact
       // (like functional components as one of the examples),
@@ -108,63 +107,64 @@ module.exports = function (/* ctx */) {
 
       // Quasar plugins
       plugins: [
-        'Notify',
-        'Loading',
-        'BottomSheet',
-        'LocalStorage',
-        'SessionStorage'
-      ]
+        "Notify",
+        "Loading",
+        "BottomSheet",
+        "LocalStorage",
+        "SessionStorage",
+      ],
     },
 
-    animations: 'all', // --- includes all animations
+    animations: "all", // --- includes all animations
     // https://quasar.dev/options/animations
     // animations: [],
 
     // https://quasar.dev/quasar-cli/developing-ssr/configuring-ssr
     ssr: {
-      pwa: false
+      pwa: false,
     },
 
     // https://quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
+      workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: 'Medical trainng center',
-        short_name: 'Medical Training Center',
-        description: 'The First Medical Training Platform in Sudan, Africa and the Middle East',
-        display: 'standalone',
-        orientation: 'portrait',
-        background_color: '#ffffff',
-        theme_color: '#027be3',
+        name: "Medical trainng center",
+        short_name: "Medical Training Center",
+        description:
+          "The First Medical Training Platform in Sudan, Africa and the Middle East",
+        display: "standalone",
+        orientation: "portrait",
+        background_color: "#ffffff",
+        theme_color: "#027be3",
         icons: [
           {
-            src: 'statics/icons/logoB.png',
-            sizes: '128x128',
-            type: 'image/png'
+            src: "statics/icons/logoB.png",
+            sizes: "128x128",
+            type: "image/png",
           },
           {
-            src: 'statics/icons/logoB.png',
-            sizes: '192x192',
-            type: 'image/png'
+            src: "statics/icons/logoB.png",
+            sizes: "192x192",
+            type: "image/png",
           },
           {
-            src: 'statics/icons/logoB.png',
-            sizes: '256x256',
-            type: 'image/png'
+            src: "statics/icons/logoB.png",
+            sizes: "256x256",
+            type: "image/png",
           },
           {
-            src: 'statics/icons/logoB.png',
-            sizes: '384x384',
-            type: 'image/png'
+            src: "statics/icons/logoB.png",
+            sizes: "384x384",
+            type: "image/png",
           },
           {
-            src: 'statics/icons/logoB.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
-      }
+            src: "statics/icons/logoB.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
+      },
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-cordova-apps/configuring-cordova
@@ -174,22 +174,20 @@ module.exports = function (/* ctx */) {
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-capacitor-apps/configuring-capacitor
     capacitor: {
-      hideSplashscreen: true
+      hideSplashscreen: true,
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-electron-apps/configuring-electron
     electron: {
-      bundler: 'packager', // 'packager' or 'builder'
+      bundler: "packager", // 'packager' or 'builder'
 
       packager: {
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
-
         // OS X / Mac App Store
         // appBundleId: '',
         // appCategoryType: '',
         // osxSign: '',
         // protocol: 'myapp://path',
-
         // Windows only
         // win32metadata: { ... }
       },
@@ -197,16 +195,16 @@ module.exports = function (/* ctx */) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'sabri_quasar_frontend'
+        appId: "sabri_quasar_frontend",
       },
 
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
       nodeIntegration: true,
 
-      extendWebpack (/* cfg */) {
+      extendWebpack(/* cfg */) {
         // do something with Electron main process Webpack cfg
         // chainWebpack also available besides this extendWebpack
-      }
-    }
-  }
-}
+      },
+    },
+  };
+};
