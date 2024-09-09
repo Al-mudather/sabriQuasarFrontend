@@ -92,6 +92,7 @@ export default {
     return {
       search: "",
       visible: false,
+      isDraft: false,
       courses: [],
     };
   },
@@ -222,6 +223,7 @@ export default {
             query: GetAllCourses,
             variables: {
               title_Icontains: this.search,
+              isDraft: this.isDraft,
             },
           })
           .then((res) => {
