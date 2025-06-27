@@ -1,6 +1,7 @@
 <template>
   <section class="web">
     <Header />
+    <!-- <MudassirChat /> -->
     <Statiscs />
     <!-- <ViewData /> -->
     <!-- <Evaluation /> -->
@@ -11,24 +12,22 @@
 </template>
 
 <script>
-
 // import Header from 'src/components/Home/Header22.vue'
-import Header from 'src/components/Home/Header.vue'
-import Statiscs from 'components/Home/Statiscs'
+import Header from "src/components/Home/Header.vue";
+import Statiscs from "components/Home/Statiscs";
+// import MudassirChat from "components/chat/chatBot.vue";
 // import ViewData from 'components/Home/ViewData'
 // import Evaluation from 'components/Home/Evaluation'
-import Training from 'components/Home/Training.vue'
+import Training from "components/Home/Training.vue";
 // import SwiperData from 'components/Home/SwiperData'
 
-
-import Account from 'pages/account_management/Account'
-import { mapState, mapActions } from 'vuex'
+import Account from "pages/account_management/Account";
+import { mapState, mapActions } from "vuex";
 
 export default {
-  name: 'Home',
-  data () {
-    return {
-    }
+  name: "Home",
+  data() {
+    return {};
   },
   components: {
     Account,
@@ -36,22 +35,21 @@ export default {
     Statiscs,
     // ViewData,
     // Evaluation,
-    Training
+    Training,
+    // MudassirChat,
     // SwiperData
   },
   computed: {
-    ...mapState('authentication', ['loginDialog'])
+    ...mapState("authentication", ["loginDialog"]),
   },
   methods: {
-    ...mapActions('settings', ['setActiveNavAction'])
+    ...mapActions("settings", ["setActiveNavAction"]),
   },
-  mounted () {
-
+  mounted() {
     //TODO: Save the active link so when render it will be make active again
-    this.setActiveNavAction('HOME')
-
-  }
-}
+    this.setActiveNavAction("HOME");
+  },
+};
 </script>
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";

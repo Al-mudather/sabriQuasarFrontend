@@ -106,7 +106,7 @@
 </template>
 
 <script>
-import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
+import { CheckTheUserPermissionToUsePlatforme } from "src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery";
 import { CheckoutSubscription } from "src/queries/notification_management/subscription/CheckoutSubscription";
 import { LocalStorage } from "quasar";
 
@@ -116,24 +116,24 @@ export default {
   name: "ShoppingCartPage",
   data() {
     return {
-      prevRoute: null
+      prevRoute: null,
     };
   },
 
   apollo: {
     $subscribe: {
       checkoutSubscription: {
-        query: CheckoutSubscription
-      }
-    }
+        query: CheckoutSubscription,
+      },
+    },
   },
 
   mounted() {
     //TODO: Check if the user has the activation code
-    this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
+    this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE();
     // TODO: import the shooping cart animation
     this.$el.querySelector(".lii.active").nextSibling.classList.add("show");
-    this.$root.$on("activateShoppingProgress", cart_name => {
+    this.$root.$on("activateShoppingProgress", (cart_name) => {
       if (cart_name) {
         const name = `[data-cart="${cart_name}"]`;
         this.$el.querySelector(name).classList.add("active");
@@ -153,125 +153,129 @@ export default {
   },
 
   computed: {
-    ...mapState("shoppingCart", ["shoppingCartDataList"])
-  }, 
+    ...mapState("shoppingCart", ["shoppingCartDataList"]),
+  },
 
   beforeDestroy() {
     this.$root.$off("activateShoppingProgress");
   },
 
   beforeRouteEnter(to, from, next) {
-    next(vm => {
-      vm.prevRoute = from.fullPath
-    })
+    next((vm) => {
+      vm.prevRoute = from.fullPath;
+    });
   },
 
   methods: {
     ...mapActions("shoppingCart", ["setShoppinCartDialogAction"]),
 
-    async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
-        try {
-          const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
-        } catch (e) {
-            //TODO: IF there is an error, then the user did not join the platform with a registeration code
-            if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-                this.$q.notify({
-                    type: 'positive',
-                    progress: true,
-                    multiLine: true,
-                    position: 'top',
-                    message: 'You must inter the registeration code'
-                })
-                // TODO: Go to registeration code page
-                this.$router.push({ name: 'registeration-code' })
-            }
-
+    async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE() {
+      try {
+        const join_permission_res = await this.$apollo.query({
+          query: CheckTheUserPermissionToUsePlatforme,
+        });
+      } catch (e) {
+        //TODO: IF there is an error, then the user did not join the platform with a registeration code
+        if (
+          e.message ==
+          "GraphQL error: PyramidAffiliate matching query does not exist."
+        ) {
+          this.$q.notify({
+            type: "positive",
+            progress: true,
+            multiLine: true,
+            position: "top",
+            message: "You must inter the registeration code",
+          });
+          // TODO: Go to registeration code page
+          this.$router.push({ name: "registeration-code" });
         }
+      }
     },
 
     changeTheShoppingCarLinksToEnglish() {
       this.$jquery(".tabb svg").css({
-        transform: "rotateY(180deg)"
+        transform: "rotateY(180deg)",
       });
 
       // TODO: Change the shopping cart arrows
       this.$jquery("[data-cart=arrowOfCartCourses]").css({
-        transform: "rotateY(180deg) translate(-50%, -7%)"
+        transform: "rotateY(180deg) translate(-50%, -7%)",
       });
 
       this.$jquery("[data-cart=arrowOfLoginCart]").css({
-        transform: "rotateY(180deg) translate(-120%, -5%)"
+        transform: "rotateY(180deg) translate(-120%, -5%)",
       });
 
       this.$jquery("[data-cart=arrowOfPaymentData]").css({
-        transform: "rotateY(180deg) translate(-125%, -30%)"
+        transform: "rotateY(180deg) translate(-125%, -30%)",
       });
 
       // TODO: Change the divs
       this.$jquery("[data-cart=loginCart]").css({
-        transform: "translateX(15%)"
+        transform: "translateX(15%)",
       });
 
       this.$jquery("[data-cart=paymentData]").css({
-        transform: "translateX(30%)"
+        transform: "translateX(30%)",
       });
 
       this.$jquery("[data-cart=paymentData]").css({
-        transform: "translateX(30%)"
+        transform: "translateX(30%)",
       });
 
       this.$jquery("[data-cart=successMessage]").css({
-        transform: "translate(25%, -1%)"
+        transform: "translate(25%, -1%)",
       });
     },
 
     changeTheShoppingCarLinksToArabic() {
       // TODO: Change the shopping cart elements style when arabic
       this.$jquery(".tabb svg").css({
-        transform: "rotateY(360deg)"
+        transform: "rotateY(360deg)",
       });
 
       // TODO: Change the shopping cart arrows
       this.$jquery("[data-cart=arrowOfCartCourses]").css({
-        transform: "rotateY(360deg) translate(-3px, -2px)"
+        transform: "rotateY(360deg) translate(-3px, -2px)",
       });
 
       this.$jquery("[data-cart=arrowOfLoginCart]").css({
-        transform: "rotateY(360deg) translate(-9px, -1px)"
+        transform: "rotateY(360deg) translate(-9px, -1px)",
       });
 
       this.$jquery("[data-cart=arrowOfPaymentData]").css({
-        transform: "rotateY(360deg) translate(-7px, -7px)"
+        transform: "rotateY(360deg) translate(-7px, -7px)",
       });
 
       // TODO: Change the divs
       this.$jquery("[data-cart=loginCart]").css({
-        transform: "translateX(-15%)"
+        transform: "translateX(-15%)",
       });
 
       this.$jquery("[data-cart=paymentData]").css({
-        transform: "translateX(-30%)"
+        transform: "translateX(-30%)",
       });
 
       this.$jquery("[data-cart=paymentData]").css({
-        transform: "translateX(-30%)"
+        transform: "translateX(-30%)",
       });
 
       this.$jquery("[data-cart=successMessage]").css({
-        transform: "translate(-25%, 1%)"
+        transform: "translate(-25%, 1%)",
       });
     },
 
     closeShoppingCart() {
       // TODO: if you are in the payment page, go to the page before the shopping page
-      this.$router.push({ name: 'Home' })
+      this.$router.push({ name: "Home" });
       // if ( this.$route.fullPath === '/cart/payment') {
       //   this.$router.go(-4)
       // } else {
       //   this.$router.push( this.prevRoute || { name: 'Home' })
       // }
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss">
@@ -302,7 +306,7 @@ export default {
     cursor: pointer;
 
     &:hover > svg > path {
-      fill: $red-5;   
+      fill: $red-5;
     }
 
     svg {
@@ -310,7 +314,7 @@ export default {
       top: 0;
       left: 0;
       right: 0;
-      
+
       & > path {
         transition: all ease-in-out 0.3s;
       }
@@ -388,7 +392,7 @@ export default {
     max-width: 666px !important;
     border-radius: 45px !important;
     height: auto !important;
-    padding: 33px !important;
+    padding: 15px !important;
     .titell {
       h3 {
         font-size: 18px !important;
