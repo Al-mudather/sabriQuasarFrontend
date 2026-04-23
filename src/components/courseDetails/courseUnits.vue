@@ -1,99 +1,80 @@
 <template>
-    <div class="all">
-      <div class="hedd">
-            <div class="point">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="67.452"
-                    height="54.53"
-                    viewBox="0 0 67.452 54.53"
-                >
-                    <g
-                        id="Group_633"
-                        data-name="Group 633"
-                        transform="translate(-798.943 -217.261)"
-                    >
-                        <circle
-                            id="Ellipse_15"
-                            data-name="Ellipse 15"
-                            cx="14.5"
-                            cy="14.5"
-                            r="14.5"
-                            transform="translate(809 233)"
-                            fill="#5666b9"
-                        />
-                        <path
-                            id="Path_598"
-                            data-name="Path 598"
-                            d="M19.826-38.194a1.169,1.169,0,0,0-.072.62,1.519,1.519,0,0,0,.116.316,2.864,2.864,0,0,0,.9.994c1.416,1.044,2.627,1.9,2.937,3.215.234.994,0,2.31-1.2,4.227a13.254,13.254,0,0,0-1.6,3.9,16.244,16.244,0,0,0-.473,4.231.668.668,0,0,1-.623.709A.668.668,0,0,1,19.1-20.6a17.509,17.509,0,0,1,.424-4.641,14.709,14.709,0,0,1,1.709-4.363c.856-1.418,1.138-2.346.955-3.071a2.3,2.3,0,0,0-.852-1.154c-.438-.369-.968-.717-1.521-1.11a3.75,3.75,0,0,1-1.757-2.706,2.274,2.274,0,0,1,.6-1.794,1.467,1.467,0,0,1,1.1-.45L22.627-40A18.548,18.548,0,0,0,34.41-46.131,18.432,18.432,0,0,0,39.093-58.5,18.439,18.439,0,0,0,33.7-71.548a18.488,18.488,0,0,0-13.05-5.493A18.56,18.56,0,0,0,7.451-71.7,18.7,18.7,0,0,0,1.836-58.5a.668.668,0,0,1-.667.667A.668.668,0,0,1,.5-58.5,20.14,20.14,0,0,1,6.3-72.844a20.277,20.277,0,0,1,14.346-6.07,20.343,20.343,0,0,1,14.493,5.923A20.393,20.393,0,0,1,41.163-58.5a20.376,20.376,0,0,1-5.306,13.67,20.334,20.334,0,0,1-13.046,6.571Z"
-                            transform="matrix(-0.259, -0.966, 0.966, -0.259, 885.823, 251.85)"
-                            fill="#e5e5e6"
-                            fill-rule="evenodd"
-                        />
-                    </g>
-                </svg>
-                <img src="~assets/img/questio.png" alt="" />
-            </div>
-            <h3>{{$t('المحتويـات')}}</h3>
-        </div>
-        <div id="accordion">
-          <q-list ref="contentList"
-            class="rounded-borders q-mb-sm"
-            bordered
-            padding
-            v-for="unit in $_.get(allUnitsData,'[edges]')"
-            :key="$_.get(unit,'[node][pk]')"
-            >
-            <q-item-label header>{{$_.get(unit,'[node][title]')}}</q-item-label>
+  <section class="course-units">
+    <header class="course-units__head">
+      <h2>{{ $t('المحتويـات') }}</h2>
+      <ds-badge v-if="totalUnits > 0" variant="brand">
+        {{ totalUnits }} {{ $t('وحدات') }}
+      </ds-badge>
+    </header>
 
-            <div
-                        id="collapseOne"
-                        class="collapse show"
-                        aria-labelledby="headingOne"
-                        data-parent="#accordion"
-                      >
-                        <div class="card-body">
-                          <div v-if=" $_.get(unit, '[node][isExternal]') ">
-                            <div
-                              v-for="content in $_.get(unit, '[node][external][courseunitcontentSet][edges]')"
-                              :key="$_.get(content, '[node][pk]')"
-                            >
-                              <contentItem
-                                :content="content.node"
-                                v-if=" ($_.get(content, '[node][modelName]') === 'ContentVideo') ||
-                                ($_.get(content, '[node][modelName]') === 'ContentFile') ||
-                                ($_.get(content, '[node][modelName]') === 'ContentQuiz') "
-                              />
-                            </div>
-                          </div>
-                          <div
-                            v-else
-                            v-for="content in $_.get(unit, '[node][courseunitcontentSet][edges]')"
-                            :key="$_.get(content, '[node][pk]')"
-                          >
-                            <contentItem
-                              :content="content.node"
-                              v-if=" ($_.get(content, '[node][modelName]') === 'ContentVideo') ||
-                                          ($_.get(content, '[node][modelName]') === 'ContentFile') ||
-                                          ($_.get(content, '[node][modelName]') === 'ContentQuiz') "
-                            />
-                          </div>
-                        </div>
-                      </div>
-          </q-list>
-        </div>
+    <div v-if="units.length === 0 && !loading" class="course-units__empty">
+      <ds-empty-state
+        :title="$t('لا توجد محتويات حتى الآن')"
+        size="sm"
+      />
     </div>
+
+    <div v-else-if="loading" class="course-units__skeleton">
+      <ds-skeleton v-for="n in 3" :key="'u-' + n" shape="rect" height="3.5rem" />
+    </div>
+
+    <ul v-else class="course-units__list">
+      <li v-for="(unit, idx) in units" :key="$_.get(unit, '[node][pk]')" class="unit">
+        <details :open="idx === 0">
+          <summary class="unit__head">
+            <span class="unit__index">{{ idx + 1 }}</span>
+            <span class="unit__title">{{ $_.get(unit, '[node][title]') }}</span>
+            <svg
+              class="unit__chevron"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </summary>
+
+          <div class="unit__body">
+            <template v-if="$_.get(unit, '[node][isExternal]')">
+              <div
+                v-for="content in $_.get(unit, '[node][external][courseunitcontentSet][edges]')"
+                :key="$_.get(content, '[node][pk]')"
+              >
+                <content-item
+                  v-if="isRenderableContent(content)"
+                  :content="content.node"
+                />
+              </div>
+            </template>
+            <template v-else>
+              <div
+                v-for="content in $_.get(unit, '[node][courseunitcontentSet][edges]')"
+                :key="$_.get(content, '[node][pk]')"
+              >
+                <content-item
+                  v-if="isRenderableContent(content)"
+                  :content="content.node"
+                />
+              </div>
+            </template>
+          </div>
+        </details>
+      </li>
+    </ul>
+  </section>
 </template>
 
 <script>
-import contentHeader from 'components/utils/contentHeader.vue'
 import contentItem from 'components/courseDetails/contentItem.vue'
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
-import skeletonList from 'src/components/skeleton/skeletonList'
-import expandableItem from 'src/components/utils/expandable_item.vue'
+
+const RENDERABLE = ['ContentVideo', 'ContentFile', 'ContentQuiz']
 
 export default {
   name: 'courseUnits',
+  components: { contentItem },
+  props: ['course_id'],
+
   data () {
     return {
       allCourseUnits: { pageInfo: { hasNextPage: '' } },
@@ -101,82 +82,133 @@ export default {
     }
   },
 
-  components: {
-    // contentHeader,
-    contentItem,
-    // skeletonList,
-    // expandableItem
+  computed: {
+    units () { return this.$_.get(this.allUnitsData, 'edges', []) || [] },
+    totalUnits () { return this.$_.get(this.allUnitsData, 'totalCount', this.units.length) },
+    loading () { return this.$apollo.queries.allCourseUnits.loading && this.units.length === 0 }
   },
-
-  // mounted () {
-  //   print('..........................')
-  //   print(this.allUnitsData)
-  //   print('..........................')
-  // },
 
   apollo: {
     allCourseUnits: {
-      query () {
-        return GetAllCourseUnitsByCourseID
-      },
-
-      variables () {
-        return {
-          courseID: this.course_id,
-          limit: 5
-        }
-      },
-
-      update (data) {
-        this.allUnitsData = this.$_.get(data, '[allCourseUnits]')
-
-      },
-      error ( e ) {
-       }
+      query () { return GetAllCourseUnitsByCourseID },
+      variables () { return { courseID: this.course_id, limit: 5 } },
+      update (data) { this.allUnitsData = this.$_.get(data, '[allCourseUnits]') }
     }
   },
 
-  props: ['course_id'],
-
   methods: {
-    async loadMoreData () {
-      await this.$apollo.queries.allCourseUnits.fetchMore({
-        variables: {
-          courseID: this.course_id,
-          cursor: this.allUnitsData.pageInfo.endCursor
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          const newEdges = fetchMoreResult.allCourseUnits.edges
-          const pageInfo = fetchMoreResult.allCourseUnits.pageInfo
-
-          if (newEdges.length) {
-            this.allUnitsData = {
-              __typename:
-                                previousResult.allCourseUnits.__typename,
-              edges: [
-                ...previousResult.allCourseUnits.edges,
-                ...newEdges
-              ],
-              pageInfo
-            }
-
-            return { allCourseUnits: this.allUnitsData }
-          }
-          return previousResult
-        }
-      })
+    isRenderableContent (content) {
+      return RENDERABLE.includes(this.$_.get(content, '[node][modelName]'))
     }
   }
 }
 </script>
 
-<style lang="scss">
-.q-card__section--vert {
-    padding: 0 !important;
+<style lang="scss" scoped>
+.course-units {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-space-5);
+  box-shadow: var(--ds-shadow-xs);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-3);
+    margin-block-end: var(--ds-space-4);
+
+    h2 {
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-xl);
+      font-weight: var(--ds-weight-bold);
+      color: var(--ds-text);
+      margin: 0;
+    }
+  }
+
+  &__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+  }
 }
-.q-item__section--side {
-    display: none;
-    visibility: hidden;
-    width: 0;
+
+.unit {
+  details {
+    background: var(--ds-surface-muted);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-md);
+    overflow: hidden;
+    transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+
+    &[open] { background: var(--ds-surface); }
+    &[open] .unit__chevron { transform: rotate(180deg); }
+  }
+
+  summary {
+    list-style: none;
+    cursor: pointer;
+    padding: var(--ds-space-3) var(--ds-space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-3);
+    user-select: none;
+
+    &::-webkit-details-marker { display: none; }
+
+    &:hover { background: var(--ds-surface-muted); }
+    &:focus-visible {
+      outline: 2px solid transparent;
+      box-shadow: var(--ds-shadow-focus);
+    }
+  }
+
+  &__index {
+    flex-shrink: 0;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ds-brand-600);
+    color: var(--ds-text-onBrand);
+    border-radius: 50%;
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-weight-bold);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__title {
+    flex: 1;
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-md);
+    font-weight: var(--ds-weight-medium);
+    color: var(--ds-text);
+    min-inline-size: 0;
+  }
+
+  &__chevron {
+    inline-size: 1rem;
+    block-size: 1rem;
+    color: var(--ds-text-muted);
+    flex-shrink: 0;
+    transition: transform var(--ds-duration-fast) var(--ds-ease-out);
+  }
+
+  &__body {
+    padding: 0 var(--ds-space-4) var(--ds-space-3);
+    border-block-start: 1px solid var(--ds-border);
+  }
 }
 </style>
