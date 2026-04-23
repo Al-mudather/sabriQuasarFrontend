@@ -23,10 +23,17 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'TermsAndConditions',
+
+  setup () {
+    const settings = useSettingsStore()
+    const { isEnglish } = storeToRefs(settings)
+    return { isEnglish }
+  },
 
   data () {
     return {
@@ -69,9 +76,6 @@ export default {
     }
   },
 
-  computed: {
-    ...mapState('settings', ['isEnglish'])
-  }
 }
 </script>
 

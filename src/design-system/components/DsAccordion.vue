@@ -28,19 +28,19 @@ export default {
       },
     };
   },
-  model: { prop: 'value', event: 'input' },
+  emits: ['update:modelValue', 'change'],
   props: {
     multi: { type: Boolean, default: false },
-    value: { type: Array, default: null },
+    modelValue: { type: Array, default: null },
   },
   data() {
     return {
-      internalOpened: this.value ? [...this.value] : [],
+      internalOpened: this.modelValue ? [...this.modelValue] : [],
       refs: [],
     };
   },
   watch: {
-    value(val) {
+    modelValue(val) {
       if (val) this.internalOpened = [...val];
     },
   },
@@ -58,7 +58,7 @@ export default {
         next = [name];
       }
       this.internalOpened = next;
-      this.$emit('input', next);
+      this.$emit('update:modelValue', next);
       this.$emit('change', next);
     },
     registerRef(name, el) {

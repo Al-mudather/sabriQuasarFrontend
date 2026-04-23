@@ -6,16 +6,16 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import { MyPyramidAffiliates } from 'src/queries/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe.js'
 
 export default {
   name: 'WhoJoindThePlatformThrowMe',
-  data () { return { count: 0 } },
-  apollo: {
-    myPyramidAffiliates: {
-      query: MyPyramidAffiliates,
-      result (res) { if (!res.loading) this.count = res.data.myPyramidAffiliates }
-    }
+  setup () {
+    const { result } = useQuery(MyPyramidAffiliates, null, { errorPolicy: 'all' })
+    const count = computed(() => result.value?.myPyramidAffiliates || 0)
+    return { count }
   }
 }
 </script>

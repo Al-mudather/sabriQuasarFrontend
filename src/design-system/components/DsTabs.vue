@@ -27,7 +27,7 @@
         @keydown="onKeydown($event, idx)"
       >
         <span v-if="tab.icon" class="ds-tabs__icon">
-          <i :class="tab.icon" aria-hidden="true" />
+          <i :class="tab.icon" aria-hidden="true"></i>
         </span>
         <span class="ds-tabs__label">{{ tab.label }}</span>
       </button>
@@ -61,9 +61,9 @@ export default {
       },
     };
   },
-  model: { prop: 'value', event: 'input' },
+  emits: ['update:modelValue', 'change'],
   props: {
-    value: { type: [String, Number], default: null },
+    modelValue: { type: [String, Number], default: null },
     align: {
       type: String,
       default: 'start',
@@ -84,7 +84,7 @@ export default {
   },
   computed: {
     currentValue() {
-      if (this.value != null) return this.value;
+      if (this.modelValue != null) return this.modelValue;
       const first = this.tabs.find((t) => !t.disabled);
       return first ? first.name : null;
     },
@@ -111,7 +111,7 @@ export default {
     this.$nextTick(this.updateIndicator);
     window.addEventListener('resize', this.updateIndicator);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('resize', this.updateIndicator);
   },
   updated() {
@@ -132,7 +132,7 @@ export default {
     },
     select(tab) {
       if (tab.disabled) return;
-      this.$emit('input', tab.name);
+      this.$emit('update:modelValue', tab.name);
       this.$emit('change', tab.name);
     },
     updateIndicator() {

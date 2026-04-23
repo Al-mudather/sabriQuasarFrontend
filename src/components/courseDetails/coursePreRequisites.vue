@@ -21,17 +21,22 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import { GetAllPreRequisitesByCourse } from 'src/queries/course_management/query/GetAllPreRequisitesByCourse'
 
 export default {
   name: 'CoursePreRequisites',
   props: ['course_id'],
 
-  data () {
-    return {
-      data: '',
-      loading: true
-    }
+  setup (props) {
+    const { result, loading } = useQuery(
+      GetAllPreRequisitesByCourse,
+      () => ({ courseID: props.course_id }),
+      { errorPolicy: 'all' }
+    )
+    const data = computed(() => result.value || '')
+    return { data, loading }
   },
 
   computed: {
@@ -39,17 +44,6 @@ export default {
       return this.$_.get(this.data, '[allPrerequisiteByCourse][edges]', []) || []
     },
     hasContent () { return this.prerequisites.length > 0 }
-  },
-
-  apollo: {
-    allPreRequisitesByCourse: {
-      query () { return GetAllPreRequisitesByCourse },
-      variables () { return { courseID: this.course_id } },
-      result (data) {
-        this.data = data.data
-        this.loading = data.loading
-      }
-    }
   }
 }
 </script>

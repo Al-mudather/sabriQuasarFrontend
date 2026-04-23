@@ -81,7 +81,11 @@
 
 <script>
 import { LoginUserWithEmail } from 'src/queries/account_management/mutation/LoginUserWithEmail'
-import { mapActions, mapState } from 'vuex'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { apolloClient } from 'src/apollo/client'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue'
@@ -91,6 +95,14 @@ import DsInput from 'src/design-system/components/DsInput.vue'
 export default {
   name: 'Login',
   components: { GoogleAuthentication, FacebookAuthentication, DsInput },
+
+  setup () {
+    const auth = useAuthStore()
+    const settings = useSettingsStore()
+    const pyramid = usePyramidStore()
+    const { isEnglish } = storeToRefs(settings)
+    return { auth, settings, pyramid, isEnglish }
+  },
 
   data () {
     return {
@@ -106,8 +118,6 @@ export default {
     }
   },
 
-  computed: { ...mapState('settings', ['isEnglish']) },
-
   beforeRouteEnter (to, from, next) {
     next(vm => { vm.prevRoute = from.fullPath })
   },
@@ -120,13 +130,6 @@ export default {
   },
 
   methods: {
-    ...mapActions('authentication', ['loginAction']),
-    ...mapActions('settings', ['setCurrencyAction']),
-    ...mapActions('pyramidManagement', [
-      'GET_MY_MARKETING_CODE_ACCOUNT_ACTION',
-      'SET_MY_MARKETING_CODE_ACCOUNT_ACTION'
-    ]),
-
     GO_TO_THE_TERMS_AND_CONDETIONS_PAGE () { this.$router.push({ name: 'terms-and-conditions' }) },
     goToPasswordResetPage ()                { this.$router.push({ name: 'password-reset' }) },
     goToSignUpPage ()                       { this.$router.push({ name: 'signUp' }) },
@@ -164,7 +167,7 @@ export default {
       this.resetErrors()
       this.visible = true
       try {
-        const result = await this.$apollo.mutate({
+        const result = await apolloClient.mutate({
           mutation: LoginUserWithEmail,
           variables: { email: this.email, password: this.password }
         })
@@ -172,7 +175,7 @@ export default {
           if (result.data.tokenAuth.user.verified) {
             try {
               const userCur = result.data.tokenAuth.user.userCurrency
-              if (userCur) this.setCurrencyAction(userCur === 'SDG' ? 'SDG' : 'USD')
+              if (userCur) this.settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')
               // eslint-disable-next-line no-undef
               if (typeof OneSignal !== 'undefined') {
                 const externalUserId = result.data.tokenAuth.user.email
@@ -181,7 +184,7 @@ export default {
               }
             } catch (e) { /* OneSignal optional */ }
 
-            await this.loginAction(result.data.tokenAuth)
+            await this.auth.login(result.data.tokenAuth)
             if (this.redirectAfterLogin()) return
             this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
           } else {
@@ -197,17 +200,17 @@ export default {
 
     async IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE () {
       try {
-        const res = await this.$apollo.query({ query: AllEnrollmentsForCurrentUser })
+        const res = await apolloClient.query({ query: AllEnrollmentsForCurrentUser })
         return res.data.allEnrollmentsForCurrentUser.edges.length > 0
       } catch (e) { return false }
     },
 
     async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
       try {
-        await this.$apollo.query({ query: CheckTheUserPermissionToUsePlatforme })
-        this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+        await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
+        this.pyramid.fetchMyMarketingCode()
         const hasCourses = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
-        this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION('')
+        this.pyramid.setMyMarketingCode('')
         this.$router.push({ name: hasCourses ? 'my-courses' : 'Home' })
       } catch (e) {
         if (e.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {

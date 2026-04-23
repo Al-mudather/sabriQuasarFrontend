@@ -94,7 +94,10 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
+import { useQuery, useMutation } from '@vue/apollo-composable'
+import { computed } from 'vue'
+import _ from 'lodash'
 import { MyAttachmentTransactions } from 'src/queries/attachment_transactions_management/query/TheUserAttachmentTransactionsQuery'
 import { ReUploadAttachmentTransaction } from 'src/queries/attachment_transactions_management/mutation/ReUploadAttachmentTransaction'
 import TransactionCard from 'src/components/shared/TransactionCard.vue'
@@ -104,11 +107,30 @@ export default {
   name: 'MyOrders',
   components: { TransactionCard, FileUpload },
 
+  setup () {
+    const settings = useSettingsStore()
+
+    const txQuery = useQuery(MyAttachmentTransactions)
+    const myTransactionsOrders = computed(
+      () => txQuery.result.value?.myAttachmentTransactions || null
+    )
+    const loading = txQuery.loading
+
+    const reupload = useMutation(ReUploadAttachmentTransaction, {
+      refetchQueries: [{ query: MyAttachmentTransactions }]
+    })
+
+    return {
+      settings,
+      myTransactionsOrders,
+      loading,
+      _reupload: reupload
+    }
+  },
+
   data () {
     return {
-      loading: true,
       activeFilter: 'all',
-      myTransactionsOrders: [],
       billOpen: false,
       activeOrder: null,
       reuploadLoading: false,
@@ -118,7 +140,7 @@ export default {
 
   computed: {
     orders () {
-      return (this.$_.get(this.myTransactionsOrders, 'edges', []) || []).map(e => e.node)
+      return (_.get(this.myTransactionsOrders, 'edges', []) || []).map(e => e.node)
     },
     statusCounts () {
       const c = { all: this.orders.length, completed: 0, processing: 0, rejected: 0, pending: 0 }
@@ -143,21 +165,9 @@ export default {
     }
   },
 
-  apollo: {
-    myAttachmentTransactions: {
-      query () { return MyAttachmentTransactions },
-      result (result) {
-        this.loading = result.loading
-        if (!result.loading) this.myTransactionsOrders = result.data.myAttachmentTransactions
-      }
-    }
-  },
-
-  mounted () { this.setActiveNavAction('BORD') },
+  mounted () { this.settings.setActiveNav('BORD') },
 
   methods: {
-    ...mapActions('settings', ['setActiveNavAction']),
-
     mapStatus (o) {
       if (!o) return 'pending'
       if (o.doneVerification) return 'completed'
@@ -245,10 +255,9 @@ export default {
       if (!this.activeOrder) return
       this.reuploadLoading = true
       try {
-        const res = await this.$apollo.mutate({
-          mutation: ReUploadAttachmentTransaction,
-          variables: { id: this.activeOrder.pk, input: { attachment: this.bankakBill } },
-          refetchQueries: [{ query: MyAttachmentTransactions }]
+        const res = await this._reupload.mutate({
+          id: this.activeOrder.pk,
+          input: { attachment: this.bankakBill }
         })
         const { success, errors } = res.data.reUploadAttachmentTransaction
         if (success) {

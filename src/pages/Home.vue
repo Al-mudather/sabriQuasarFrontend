@@ -40,7 +40,9 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { computed, onMounted } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
+import { useSettingsStore } from 'src/stores/settings'
 
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
 import { GetAllCoursesCountStatiscs } from 'src/queries/course_management/query/GetAllCoursesStatiscs'
@@ -66,53 +68,52 @@ export default {
     FinalCta,
     DsSkeleton
   },
-  data () {
-    return {
-      allCourseSpecialities: null,
-      allCoursesCount: null
-    }
-  },
-  apollo: {
-    allCourseSpecialities: {
-      query: GetSpecialities,
-      update: data => data.allCourseSpecialities,
-      error (err) {
-        // eslint-disable-next-line no-console
-        console.warn('[Home] specialities query failed', err)
-      }
-    },
-    allCoursesCount: {
-      query: GetAllCoursesCountStatiscs,
-      update: data => data.allCoursesCount,
-      error (err) {
-        // eslint-disable-next-line no-console
-        console.warn('[Home] count query failed', err)
-      }
-    }
-  },
-  computed: {
-    specialities () {
-      return (this.allCourseSpecialities && this.allCourseSpecialities.edges) || []
-    },
-    specialitiesLoading () {
-      return this.$apollo && this.$apollo.queries.allCourseSpecialities
-        ? this.$apollo.queries.allCourseSpecialities.loading
-        : false
-    },
-    coursesCount () {
-      const n = Number(this.allCoursesCount)
+
+  setup () {
+    const settings = useSettingsStore()
+
+    const specialitiesQuery = useQuery(GetSpecialities, null, {
+      errorPolicy: 'all'
+    })
+    specialitiesQuery.onError((err) => {
+      // eslint-disable-next-line no-console
+      console.warn('[Home] specialities query failed', err)
+    })
+
+    const countQuery = useQuery(GetAllCoursesCountStatiscs, null, {
+      errorPolicy: 'all'
+    })
+    countQuery.onError((err) => {
+      // eslint-disable-next-line no-console
+      console.warn('[Home] count query failed', err)
+    })
+
+    const allCourseSpecialities = computed(
+      () => specialitiesQuery.result.value?.allCourseSpecialities || null
+    )
+    const allCoursesCount = computed(
+      () => countQuery.result.value?.allCoursesCount ?? null
+    )
+
+    const specialities = computed(
+      () => allCourseSpecialities.value?.edges || []
+    )
+    const specialitiesLoading = specialitiesQuery.loading
+
+    const coursesCount = computed(() => {
+      const n = Number(allCoursesCount.value)
       return Number.isFinite(n) && n > 0 ? n : null
-    },
-    learnersCount () {
-      // Placeholder until a real learner-count endpoint exists.
-      return null
+    })
+    const learnersCount = computed(() => null)
+
+    onMounted(() => { settings.setActiveNav('HOME') })
+
+    return {
+      specialities,
+      specialitiesLoading,
+      coursesCount,
+      learnersCount
     }
-  },
-  methods: {
-    ...mapActions('settings', ['setActiveNavAction'])
-  },
-  mounted () {
-    this.setActiveNavAction('HOME')
   }
 }
 </script>

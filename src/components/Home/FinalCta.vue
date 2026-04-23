@@ -39,7 +39,7 @@ export default {
   mounted () {
     this._drift = contourDrift(this.$el.querySelector('.final-cta__contour'))
   },
-  beforeDestroy () {
+  beforeUnmount () {
     if (this._drift && this._drift.kill) this._drift.kill()
   }
 }

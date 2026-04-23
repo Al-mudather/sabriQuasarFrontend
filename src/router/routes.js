@@ -116,8 +116,9 @@ const routes = [
     ? [{ path: '/design-system', name: 'design-system', component: () => import('src/pages/DesignSystem.vue') }]
     : []),
 
-  // 404 fallback — must stay last.
-  { path: '*', name: 'not-found', component: () => import('pages/Error404.vue') }
+  // 404 fallback — must stay last. Vue Router 4 requires the named
+  // param pattern `:pathMatch(.*)*` instead of the old `*` wildcard.
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('pages/Error404.vue') }
 ]
 
 export default routes

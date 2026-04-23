@@ -4,7 +4,12 @@
       v-if="allSlidersData && allSlidersData.length"
       ref="promoSwiper"
       class="promo__swiper"
-      :options="swiperOptions"
+      :modules="swiperModules"
+      :slides-per-view="1"
+      :space-between="16"
+      :loop="false"
+      :pagination="{ clickable: true }"
+      :autoplay="{ delay: 8000, disableOnInteraction: false }"
     >
       <swiper-slide
         v-for="slide in allSlidersData"
@@ -13,7 +18,6 @@
       >
         <SliderItem :slider="slide.node" />
       </swiper-slide>
-      <div slot="pagination" class="swiper-pagination promo__pagination"></div>
     </swiper>
 
     <DsSkeleton v-else height="280px" rounded />
@@ -21,9 +25,10 @@
 </template>
 
 <script>
-import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
-import 'swiper/swiper-bundle.css'
-import 'swiper/swiper.min.css'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Pagination, Autoplay } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/pagination'
 
 import SliderItem from 'src/components/Home/SliderItem.vue'
 
@@ -33,19 +38,7 @@ export default {
     return {
       autoplay: false,
       slide: 0,
-      swiperOptions: {
-        loop: false,
-        slidesPerView: 1,
-        spaceBetween: 16,
-        pagination: {
-          el: '.promo__pagination',
-          clickable: true
-        },
-        autoplay: {
-          delay: 8000,
-          disableOnInteraction: false
-        }
-      }
+      swiperModules: [Pagination, Autoplay]
     }
   },
 

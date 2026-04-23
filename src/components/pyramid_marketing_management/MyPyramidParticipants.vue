@@ -19,36 +19,33 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useQuery } from '@vue/apollo-composable'
 import { MyPyramidMarketers } from 'src/queries/pyramid_marketing_management/query/MyPyramidMarketers'
 import { copyToClipboard } from 'quasar'
-import { mapState, mapActions } from 'vuex'
+import { usePyramidStore } from 'src/stores/pyramid'
 
 export default {
   name: 'MyPyramidParticipants',
 
+  setup () {
+    const pyramid = usePyramidStore()
+    const { myMarketingCode } = storeToRefs(pyramid)
+    const { result } = useQuery(MyPyramidMarketers, null, { errorPolicy: 'all' })
+    const myPyramidMarketersCount = computed(() => result.value?.myPyramidMarketers || 0)
+    return { pyramid, myMarketingCode, myPyramidMarketersCount }
+  },
+
   data () {
     return {
-      message: this.$t('انسخ الرابط'),
-      myPyramidMarketersCount: 0.0
+      message: this.$t('انسخ الرابط')
     }
   },
 
-  computed: { ...mapState('pyramidManagement', ['myMarketingCode']) },
-
-  apollo: {
-    myPyramidMarketers: {
-      query () { return MyPyramidMarketers },
-      result (result) {
-        if (!result.loading) this.myPyramidMarketersCount = result.data.myPyramidMarketers
-      }
-    }
-  },
-
-  mounted () { this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION() },
+  mounted () { this.pyramid.fetchMyMarketingCode() },
 
   methods: {
-    ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
-
     async CopyTheLinkHandler () {
       const copyText = document.getElementById('shar-link')
       copyText.focus()

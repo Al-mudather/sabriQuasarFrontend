@@ -17,7 +17,7 @@
       <h2>Colors</h2>
       <div class="ds-swatches">
         <div v-for="s in swatches" :key="s.label" class="ds-swatch">
-          <div class="ds-swatch__chip" :style="{ background: s.value }" />
+          <div class="ds-swatch__chip" :style="{ background: s.value }"></div>
           <div class="ds-swatch__meta">
             <strong>{{ s.label }}</strong>
             <code>{{ s.token }}</code>
@@ -167,7 +167,7 @@ export default {
       handler (v) { document.documentElement.setAttribute('dir', v ? 'rtl' : 'ltr') }
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     // Don't leave dir flipped when navigating away
     document.documentElement.setAttribute('dir', 'rtl')
   }

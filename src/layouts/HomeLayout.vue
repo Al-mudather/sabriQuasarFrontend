@@ -18,24 +18,29 @@
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
 import { Quasar } from 'quasar'
-import { mapActions, mapState } from 'vuex'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'HomeLayout',
   components: { AppHeader, AppFooter },
 
-  computed: {
-    ...mapState('authentication', ['token']),
-    ...mapState('settings', ['isEnglish'])
+  setup () {
+    const auth = useAuthStore()
+    const settings = useSettingsStore()
+    const { token } = storeToRefs(auth)
+    const { isEnglish } = storeToRefs(settings)
+    return { token, isEnglish, settings }
   },
 
   async mounted () {
-    this.setIsEnglishAction(this.isEnglish)
+    this.settings.setIsEnglish(this.isEnglish)
     this.$i18n.locale = this.isEnglish ? 'en' : 'ar'
 
     if (this.isEnglish) {
       try {
-        const lang = await import(/* webpackInclude: /(de|en-us)\.js$/ */ 'quasar/lang/en-us')
+        const lang = await import('quasar/lang/en-us')
         Quasar.lang.set({ ...lang.default, rtl: true })
       } catch (err) { /* lang pack missing; no-op */ }
     } else {
@@ -43,11 +48,6 @@ export default {
         Quasar.lang.set({ isoName: 'ar', nativeName: 'العربية' })
       } catch (err) { /* no-op */ }
     }
-  },
-
-  methods: {
-    ...mapActions('authentication', ['logOutAction']),
-    ...mapActions('settings', ['setIsEnglishAction'])
   }
 }
 </script>

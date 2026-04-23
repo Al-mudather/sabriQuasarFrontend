@@ -125,7 +125,11 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
+import { storeToRefs } from 'pinia'
+import { useQuery, useMutation } from '@vue/apollo-composable'
+import { computed } from 'vue'
+import _ from 'lodash'
 import StatCard from 'src/components/shared/StatCard.vue'
 import TransactionCard from 'src/components/shared/TransactionCard.vue'
 import { MyPyramidBalance }     from 'src/queries/pyramid_marketing_management/query/MyPyramidBalanceQuery'
@@ -139,16 +143,44 @@ export default {
   name: 'MyMarketingPage',
   components: { StatCard, TransactionCard },
 
+  setup () {
+    const settings = useSettingsStore()
+    const { currency } = storeToRefs(settings)
+
+    const balanceQuery  = useQuery(MyPyramidBalance)
+    const affiliatesQuery = useQuery(MyPyramidAffiliates)
+    const accountQuery  = useQuery(MyPyramidAccount)
+    const rewardQuery   = useQuery(MyPyramidLedgerReward)
+    const withdrawsQuery = useQuery(MyPyramidWithdraws)
+
+    const myPyramidBalance = computed(() => balanceQuery.result.value?.myPyramidBalance || null)
+    const myPyramidAffiliates = computed(() => affiliatesQuery.result.value?.myPyramidAffiliates || 0)
+    const myPyramidAccount = computed(() => accountQuery.result.value?.myPyramidAccount || null)
+    const myPyramidLedgerReward = computed(() => rewardQuery.result.value?.myPyramidLedgerReward || null)
+    const myPyramidWithdraws = computed(() => withdrawsQuery.result.value?.myPyramidWithdraws || null)
+    const loadingWithdraws = withdrawsQuery.loading
+
+    const withdrawMutation = useMutation(WithdrawPyramidBalance, {
+      refetchQueries: [
+        { query: MyPyramidBalance },
+        { query: MyPyramidWithdraws }
+      ]
+    })
+
+    return {
+      currency,
+      myPyramidBalance,
+      myPyramidAffiliates,
+      myPyramidAccount,
+      myPyramidLedgerReward,
+      myPyramidWithdraws,
+      loadingWithdraws,
+      _withdraw: withdrawMutation
+    }
+  },
+
   data () {
     return {
-      myPyramidBalance: null,
-      myPyramidWithdraws: null,
-      myPyramidAffiliates: 0,
-      myPyramidAccount: null,
-      myPyramidLedgerReward: null,
-
-      loadingWithdraws: true,
-
       // UI
       copied: false,
       withdrawOpen: false,
@@ -157,25 +189,9 @@ export default {
     }
   },
 
-  apollo: {
-    myPyramidBalance:     { query: MyPyramidBalance },
-    myPyramidAffiliates:  {
-      query: MyPyramidAffiliates,
-      update: data => data.myPyramidAffiliates || 0
-    },
-    myPyramidAccount:     { query: MyPyramidAccount },
-    myPyramidLedgerReward: { query: MyPyramidLedgerReward },
-    myPyramidWithdraws: {
-      query: MyPyramidWithdraws,
-      result (res) { this.loadingWithdraws = res.loading }
-    }
-  },
-
   computed: {
-    ...mapState('settings', ['currency']),
-
     referralCode () {
-      return this.$_.get(this.myPyramidAccount, 'pyramidCode') || ''
+      return _.get(this.myPyramidAccount, 'pyramidCode') || ''
     },
 
     shareUrl () {
@@ -191,7 +207,7 @@ export default {
     },
 
     activeBalance () {
-      const v = Number(this.$_.get(this.myPyramidBalance, 'balance', 0))
+      const v = Number(_.get(this.myPyramidBalance, 'balance', 0))
       return Number.isFinite(v) ? v : 0
     },
 
@@ -225,7 +241,7 @@ export default {
     },
 
     withdraws () {
-      return (this.$_.get(this.myPyramidWithdraws, 'edges', []) || []).map(e => e.node)
+      return (_.get(this.myPyramidWithdraws, 'edges', []) || []).map(e => e.node)
     },
 
     pendingPayouts () {
@@ -332,14 +348,7 @@ export default {
       }
       this.withdrawLoading = true
       try {
-        const res = await this.$apollo.mutate({
-          mutation: WithdrawPyramidBalance,
-          variables: { amount: amt, input: {} },
-          refetchQueries: [
-            { query: MyPyramidBalance },
-            { query: MyPyramidWithdraws }
-          ]
-        })
+        const res = await this._withdraw.mutate({ amount: amt, input: {} })
         const { success, errors } = res.data.makePyramidWithdraw
         if (success) {
           this.$q.notify({

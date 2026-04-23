@@ -12,10 +12,19 @@
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { SocialAuth } from "src/queries/account_management/mutation/CreateSocailAuth";
-import { mapActions } from "vuex";
+import { useAuthStore } from "src/stores/auth";
+import { useSettingsStore } from "src/stores/settings";
+import { usePyramidStore } from "src/stores/pyramid";
+import { apolloClient } from "src/apollo/client";
 
 export default {
     name: "GoogleAuthentication",
+    setup () {
+        const auth = useAuthStore();
+        const settings = useSettingsStore();
+        const pyramid = usePyramidStore();
+        return { auth, settings, pyramid };
+    },
     data () {
         return {
             visible: false
@@ -25,11 +34,6 @@ export default {
     props:['prevRoute', 'label'],
 
     methods: {
-        ...mapActions("authentication", [
-            "loginAction"
-        ]),
-        ...mapActions('settings', ['setCurrencyAction']),
-        ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION', 'SET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
         GoToHomePage() {
             this.$router.push({ name: "Home" });
@@ -37,7 +41,7 @@ export default {
 
         async IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE () {
             try {
-                const res = await this.$apollo.query({
+                const res = await apolloClient.query({
                     query: AllEnrollmentsForCurrentUser,
                 })
 
@@ -54,7 +58,7 @@ export default {
  
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
-                const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+                const join_permission_res = await apolloClient.query({query: CheckTheUserPermissionToUsePlatforme})
                 const errors = this.$_.get(join_permission_res, '[errors]')
 
                 if (errors) {
@@ -67,11 +71,11 @@ export default {
 
                 } else {
                     //TODO:If the user is a marketer, then git his marketing code
-                    this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+                    this.pyramid.fetchMyMarketingCode()
                     //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
                     const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
                     //TODO: Empty the marketer code if exists
-                    this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION('')
+                    this.pyramid.setMyMarketingCode('')
                     if (res) {
                         this.$router.push({ name: "my-courses" })
                     } else {
@@ -98,7 +102,7 @@ export default {
         async loginAuthMutation(accessToken, provider, email = "") {
             try { 
                 this.visible = true
-                const auth_res = await this.$apollo.mutate({
+                const auth_res = await apolloClient.mutate({
                         mutation: SocialAuth,
                         variables: {
                             provider: provider,
@@ -108,14 +112,14 @@ export default {
                 })
 
                 if (auth_res.data.socialAuth) {
-                    this.loginAction(auth_res.data.socialAuth).then(() => {
+                    Promise.resolve(this.auth.login(auth_res.data.socialAuth)).then(() => {
                         const userData = auth_res.data.socialAuth
 
                         //TODO: Set the user currency
                         try {
                             const userCur = userData.social.user.userCurrency
                             if (userCur) {
-                                userCur == 'SDG' ? this.setCurrencyAction('SDG') : this.setCurrencyAction('USD')
+                                userCur == 'SDG' ? this.settings.setCurrency('SDG') : this.settings.setCurrency('USD')
                             }
 
                             //TODO: Set the external user id for notification

@@ -163,7 +163,7 @@
                 <ul class="course-details__enrol-meta">
                   <li v-if="courseData && courseData.courseLanguage">
                     <span>{{ $t('اللغة') }}</span>
-                    <strong>{{ $_.get(courseData, '[courseLanguage][languageName]') }}</strong>
+                    <strong>{{ courseData && courseData.courseLanguage && courseData.courseLanguage.languageName }}</strong>
                   </li>
                   <li v-if="courseData && courseData.courseHours">
                     <span>{{ $t('المدة') }}</span>
@@ -224,7 +224,15 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { useCartStore } from 'src/stores/cart'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { storeToRefs } from 'pinia'
+import { apolloClient } from 'src/apollo/client'
+import { useHead } from '@unhead/vue'
+import { computed } from 'vue'
+import _ from 'lodash'
 import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
 import { FORMAT_THE_IAMGE_URL, FORMAT_THE_WEB_SIT_URL } from 'src/utils/functions.js'
 
@@ -238,12 +246,12 @@ import DsTab from 'src/design-system/components/DsTab.vue'
 
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
 
-import aboutTheCourse from 'components/courseDetails/aboutTheCourse'
+import aboutTheCourse from 'components/courseDetails/aboutTheCourse.vue'
 import whatIwillLearn from 'components/courseDetails/whatIwillLearn.vue'
-import coursePreRequisites from 'components/courseDetails/coursePreRequisites'
+import coursePreRequisites from 'components/courseDetails/coursePreRequisites.vue'
 import courseUnits from 'components/courseDetails/courseUnits.vue'
-import courseInstructors from 'components/courseDetails/courseInstructors'
-import relatedCoureses from 'src/components/courseDetails/relatedCoureses'
+import courseInstructors from 'components/courseDetails/courseInstructors.vue'
+import relatedCoureses from 'src/components/courseDetails/relatedCoureses.vue'
 
 import { contourDrift } from 'src/design-system/motion'
 
@@ -267,6 +275,16 @@ export default {
     relatedCoureses
   },
 
+  setup () {
+    const auth = useAuthStore()
+    const settings = useSettingsStore()
+    const cart = useCartStore()
+    const pyramid = usePyramidStore()
+    const { token, user } = storeToRefs(auth)
+    const { currency, isEnglish } = storeToRefs(settings)
+    return { auth, settings, cart, pyramid, token, user, currency, isEnglish }
+  },
+
   data () {
     return {
       FORMAT_THE_IAMGE_URL,
@@ -280,35 +298,33 @@ export default {
     }
   },
 
-  metaInfo () {
-    const c = this.courseData || {}
-    const title = c.title || ''
-    const brief = (c.brief || '').replace(/<[^>]*>/g, '').slice(0, 160)
-    const image = c.profile ? this.FORMAT_THE_IAMGE_URL(c.profile) : ''
-    const url = (c.pk && c.id)
-      ? this.FORMAT_THE_WEB_SIT_URL(`#/course/${c.title}/${c.pk}/${c.id}`)
-      : ''
-    return {
-      title,
-      meta: [
-        { charset: 'utf-8' },
-        { vmid: 'description', name: 'description', content: brief },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:title', content: title },
-        { name: 'twitter:description', content: brief },
-        { name: 'twitter:image', content: image },
-        { p: 'og:title', c: title },
-        { p: 'og:image', c: image },
-        { p: 'og:url', c: url }
-      ]
-    }
+  created () {
+    // Bind <head> to the reactive courseData — migrates `metaInfo` → `useHead`.
+    useHead({
+      title: computed(() => (this.courseData && this.courseData.title) || ''),
+      meta: computed(() => {
+        const c = this.courseData || {}
+        const title = c.title || ''
+        const brief = (c.brief || '').replace(/<[^>]*>/g, '').slice(0, 160)
+        const image = c.profile ? FORMAT_THE_IAMGE_URL(c.profile) : ''
+        const url = (c.pk && c.id)
+          ? FORMAT_THE_WEB_SIT_URL(`#/course/${c.title}/${c.pk}/${c.id}`)
+          : ''
+        return [
+          { name: 'description', content: brief },
+          { name: 'twitter:card', content: 'summary_large_image' },
+          { name: 'twitter:title', content: title },
+          { name: 'twitter:description', content: brief },
+          { name: 'twitter:image', content: image },
+          { property: 'og:title', content: title },
+          { property: 'og:image', content: image },
+          { property: 'og:url', content: url }
+        ]
+      })
+    })
   },
 
   computed: {
-    ...mapState('authentication', ['token', 'user']),
-    ...mapState('settings', ['currency', 'isEnglish']),
-
     selectedCurrency () {
       return (this.currency || 'SAR').toUpperCase()
     },
@@ -334,26 +350,24 @@ export default {
     },
 
     lessonTotal () {
-      const edges = this.$_.get(this.courseData, '[courseunitSet][edges]', []) || []
+      const edges = _.get(this.courseData, '[courseunitSet][edges]', []) || []
       return edges.reduce((sum, edge) => {
-        return sum + (this.$_.get(edge, '[node][courseunitcontentSet][totalCount]', 0) || 0)
+        return sum + (_.get(edge, '[node][courseunitcontentSet][totalCount]', 0) || 0)
       }, 0)
     },
 
     specialityLabel () {
-      // The GetCourseByID query only returns id/pk for speciality, no label.
-      // When a label is added to the API we'll surface it here.
-      return this.$_.get(this.courseData, '[courseSpeciality][name]', '')
+      return _.get(this.courseData, '[courseSpeciality][name]', '')
     },
 
     leadInstructor () {
-      const edges = this.$_.get(this.courseData, '[courseinstructorSet][edges]', []) || []
+      const edges = _.get(this.courseData, '[courseinstructorSet][edges]', []) || []
       if (!edges.length) return null
-      const instructor = this.$_.get(edges, '[0][node][instructor]')
+      const instructor = _.get(edges, '[0][node][instructor]')
       if (!instructor) return null
-      const firstName = this.$_.get(instructor, '[user][firstName]', '') || ''
-      const lastName = this.$_.get(instructor, '[user][lastName]', '') || ''
-      const username = this.$_.get(instructor, '[user][username]', '') || ''
+      const firstName = _.get(instructor, '[user][firstName]', '') || ''
+      const lastName = _.get(instructor, '[user][lastName]', '') || ''
+      const username = _.get(instructor, '[user][username]', '') || ''
       const name = (`${firstName} ${lastName}`).trim() || username.split('@')[0]
       return {
         name,
@@ -363,17 +377,14 @@ export default {
     },
 
     truncatedBrief () {
-      const raw = this.$_.get(this.courseData, '[brief]', '')
+      const raw = _.get(this.courseData, '[brief]', '')
       if (!raw) return ''
-      // strip tags for hero summary — detailed HTML lives in the overview tab
       const text = String(raw).replace(/<[^>]*>/g, '').trim()
       return text.length > 260 ? text.slice(0, 260) + '…' : text
     },
 
     isEnrolled () {
-      // No dedicated enrolment state in Vuex yet. If the API later surfaces
-      // `isEnrolled` on the course node, wire it here.
-      return !!this.$_.get(this.courseData, '[isEnrolled]', false)
+      return !!_.get(this.courseData, '[isEnrolled]', false)
     }
   },
 
@@ -394,26 +405,23 @@ export default {
     })
   },
 
-  beforeDestroy () {
+  beforeUnmount () {
     this.motionHandles.forEach(h => h && h.kill && h.kill())
     this.motionHandles = []
   },
 
   methods: {
-    ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
-    ...mapActions('pyramidManagement', ['SET_REGISTERATION_CODE_ACTION']),
-
     async loadCourse (params) {
       if (!params || !params.pk) return
       this.courseID = params.id
       this.coursePK = params.pk
-      const marketerCode = this.$_.get(params, '[code]')
-      if (marketerCode) this.SET_REGISTERATION_CODE_ACTION(marketerCode)
+      const marketerCode = _.get(params, '[code]')
+      if (marketerCode) this.pyramid.setRegisterationCode(marketerCode)
       this.errorLoading = false
       this.courseData = null
 
       try {
-        const res = await this.$apollo.query({
+        const res = await apolloClient.query({
           query: GetCourseByID,
           variables: { coursePk: parseInt(params.pk, 10) }
         })
@@ -436,7 +444,7 @@ export default {
 
     addToCart () {
       if (!this.courseData) return
-      this.setShoppingCartDataListAction({ user: this.user, course: this.courseData })
+      this.cart.addCourseToCart({ user: this.user, course: this.courseData })
       this.$q && this.$q.notify && this.$q.notify({
         type: 'positive',
         position: 'top',
@@ -448,12 +456,12 @@ export default {
 
     enrolNow () {
       if (!this.courseData) return
-      this.setShoppingCartDataListAction({ user: this.user, course: this.courseData })
+      this.cart.addCourseToCart({ user: this.user, course: this.courseData })
       this.$router.push({ name: 'cart' })
     },
 
     continueToClassroom () {
-      const pk = this.coursePK || this.$_.get(this.courseData, '[pk]')
+      const pk = this.coursePK || _.get(this.courseData, '[pk]')
       if (!pk) return
       window.location.href = `${location.origin}/classroom/#/class/${pk}/`
     }

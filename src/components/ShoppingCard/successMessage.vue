@@ -58,14 +58,14 @@
       <DsButton
         variant="accent"
         size="lg"
-        @click.native="$router.push({ name: 'my-courses' })"
+        @click="$router.push({ name: 'my-courses' })"
       >
         {{ $t('ابدأ التعلم الآن') }}
       </DsButton>
       <DsButton
         variant="secondary"
         size="lg"
-        @click.native="$router.push({ name: 'courses' })"
+        @click="$router.push({ name: 'courses' })"
       >
         {{ $t('عودة إلى الدورات') }}
       </DsButton>
@@ -74,39 +74,43 @@
 </template>
 
 <script>
+import { computed, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useQuery } from '@vue/apollo-composable'
 import { GetMyNotifications } from 'src/queries/notification_management/query/MyNotifications'
-import { mapState, mapActions } from 'vuex'
+import { useCartStore } from 'src/stores/cart'
+import { useAuthStore } from 'src/stores/auth'
 
 export default {
   name: 'successCartpage',
 
-  apollo: {
-    myNotifications: {
-      query () { return GetMyNotifications },
-      variables () {
-        return {
-          orderBy: ['-id'],
-          type: 'CHECKOUT_DONE',
-          extraData: `<Order ${this.checkoutOrderID}>`
+  setup () {
+    const cart = useCartStore()
+    const auth = useAuthStore()
+    const { checkoutOrderID } = storeToRefs(cart)
+    const { user } = storeToRefs(auth)
+
+    const { result, onResult } = useQuery(
+      GetMyNotifications,
+      () => ({
+        orderBy: ['-id'],
+        type: 'CHECKOUT_DONE',
+        extraData: `<Order ${checkoutOrderID.value}>`
+      }),
+      { errorPolicy: 'all' }
+    )
+
+    onResult((r) => {
+      try {
+        if (r.data?.myNotifications?.edges?.[0]?.node?.title === 'CHECKOUT_SUCCESS') {
+          cart.deleteCart()
         }
-      },
-      result (result) {
-        try {
-          if (result.data.myNotifications.edges[0].node.title === 'CHECKOUT_SUCCESS') {
-            this.deleteShoppinCartDataListAction()
-          }
-        } catch (_) { /* silent */ }
-      }
-    }
-  },
+      } catch (_) { /* silent */ }
+    })
 
-  computed: {
-    ...mapState('shoppingCart', ['checkoutOrderID']),
-    ...mapState('authentication', ['user'])
-  },
+    const myNotifications = computed(() => result.value?.myNotifications || null)
 
-  methods: {
-    ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction'])
+    return { cart, auth, checkoutOrderID, user, myNotifications }
   }
 }
 </script>

@@ -28,15 +28,18 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
 
 export default {
   name: 'Currency',
+  setup () {
+    const settings = useSettingsStore()
+    return { settings }
+  },
   data () { return { showCurrency: false } },
   methods: {
-    ...mapActions('settings', ['setCurrencyAction']),
     currencySelectionHandler (currency) {
-      this.setCurrencyAction(currency)
+      this.settings.setCurrency(currency)
       this.showCurrency = false
       this.$q.notify({
         type: 'positive',

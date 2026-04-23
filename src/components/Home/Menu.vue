@@ -128,42 +128,38 @@
 </template>
 
 <script>
+import { computed } from "vue";
+import { storeToRefs } from "pinia";
+import { useQuery } from "@vue/apollo-composable";
+import { useAuthStore } from "src/stores/auth";
+import { useSettingsStore } from "src/stores/settings";
+import { useCartStore } from "src/stores/cart";
+import { usePyramidStore } from "src/stores/pyramid";
 import { MyPyramidAccount } from "src/queries/pyramid_marketing_management/query/MyPyramidAccount";
-
-import { mapActions, mapGetters, mapState } from "vuex";
 import { LocalStorage } from "quasar";
 
 export default {
   name: "Menu",
 
-  data() {
-    return {
-      myPyramidAccount: "",
-    };
-  },
-
-  apollo: {
-    myPyramidAccount: {
-      query() {
-        return MyPyramidAccount;
-      },
-      result(result) {
-        if (!result.loading) {
-          this.myPyramidAccount = result.data.myPyramidAccount;
-        }
-      },
-    },
+  setup () {
+    const auth = useAuthStore();
+    const settings = useSettingsStore();
+    const cart = useCartStore();
+    const pyramid = usePyramidStore();
+    const { token, user } = storeToRefs(auth);
+    const { isEnglish } = storeToRefs(settings);
+    const { result: pyramidResult } = useQuery(MyPyramidAccount, null, { errorPolicy: 'all' });
+    const myPyramidAccount = computed(() => pyramidResult.value?.myPyramidAccount || "");
+    return { auth, settings, cart, pyramid, token, user, isEnglish, myPyramidAccount };
   },
 
   computed: {
-    ...mapGetters("authentication", ["token", "user"]),
-    ...mapState("settings", ["isEnglish"]),
     _isEnglish: {
       get() {
         return this.isEnglish;
       },
       set(newVlaue) {
-        return this.setIsEnglishAction(newVlaue);
+        return this.settings.setIsEnglish(newVlaue);
       },
     },
   },
@@ -198,39 +194,28 @@ export default {
     token(value) {},
 
     async _isEnglish(value) {
-      this.setIsEnglishAction(value);
+      this.settings.setIsEnglish(value);
     },
   },
 
   methods: {
-    ...mapActions("authentication", ["logOutAction"]),
-    ...mapActions("settings", [
-      "setIsEnglishAction",
-      "setOpenMenuAction",
-      "setActiveNavAction",
-    ]),
-    ...mapActions("shoppingCart", ["deleteShoppinCartDataListAction"]),
-    ...mapActions("pyramidManagement", [
-      "SET_MY_MARKETING_CODE_ACCOUNT_ACTION",
-    ]),
-
     MAKE_ACTIVE(e) {
       let active_nav = this.$jquery(e.target).parent().closest("a");
       if (active_nav.length == 0) {
         active_nav = this.$jquery(e.target).closest("a");
       }
-      this.setActiveNavAction(active_nav.attr("data-link"));
+      this.settings.setActiveNav(active_nav.attr("data-link"));
     },
 
     changeMenuState() {
-      this.setOpenMenuAction(false);
+      this.settings.setOpenMenu(false);
     },
 
     logTheUserOut() {
-      this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION("");
-      this.deleteShoppinCartDataListAction();
+      this.pyramid.setMyMarketingCode("");
+      this.cart.deleteCart();
       this.$router.push({ name: "Home" });
-      this.logOutAction();
+      this.auth.logOut();
     },
 
     GO_TO_MY_ORDERS_PAGE(e) {

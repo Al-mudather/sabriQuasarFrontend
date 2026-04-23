@@ -20,9 +20,9 @@
     :style="cardStyle"
     aria-hidden="true"
   >
-    <span class="ds-skeleton ds-skeleton--rect ds-skeleton-card__media" />
-    <span class="ds-skeleton ds-skeleton--line" style="width:85%" />
-    <span class="ds-skeleton ds-skeleton--line" style="width:60%" />
+    <span class="ds-skeleton ds-skeleton--rect ds-skeleton-card__media"></span>
+    <span class="ds-skeleton ds-skeleton--line" style="width:85%"></span>
+    <span class="ds-skeleton ds-skeleton--line" style="width:60%"></span>
   </div>
 
   <div

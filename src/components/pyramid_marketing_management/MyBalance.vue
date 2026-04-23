@@ -36,9 +36,12 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import { MyPyramidWithdraws } from 'src/queries/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
 import { MyPyramidBalance } from 'src/queries/pyramid_marketing_management/query/MyPyramidBalanceQuery'
 import { WithdrawPyramidBalance } from 'src/queries/pyramid_marketing_management/mutation/MakePyramidWithdraw'
+import { apolloClient } from 'src/apollo/client'
 
 const priceLookup = [
   { value: 1, symbol: '' }, { value: 1e3, symbol: 'k' },
@@ -48,16 +51,13 @@ const priceLookup = [
 export default {
   name: 'MyBalance',
 
-  data () { return { withdraw: false, myBalance: 0.0, amount: null } },
-
-  apollo: {
-    myPyramidBalance: {
-      query () { return MyPyramidBalance },
-      result (result) {
-        if (!result.loading) this.myBalance = result.data.myPyramidBalance.balance
-      }
-    }
+  setup () {
+    const { result } = useQuery(MyPyramidBalance, null, { errorPolicy: 'all' })
+    const myBalance = computed(() => result.value?.myPyramidBalance?.balance || 0.0)
+    return { myBalance }
   },
+
+  data () { return { withdraw: false, amount: null } },
 
   methods: {
     FORMAT_COUSRE_PRICE (num, digits = 3) {
@@ -99,7 +99,7 @@ export default {
         })
         return
       }
-      const res = await this.$apollo.mutate({
+      const res = await apolloClient.mutate({
         mutation: WithdrawPyramidBalance,
         variables: { amount: this.amount, input: {} },
         refetchQueries: [

@@ -137,41 +137,42 @@
 import axios from 'axios'
 import moment from 'moment'
 import { exportFile } from 'quasar'
-import { mapGetters } from 'vuex'
+import { useAuthStore } from 'src/stores/auth'
+import { storeToRefs } from 'pinia'
+import { useQuery } from '@vue/apollo-composable'
+import { computed } from 'vue'
 import { AllCertificates } from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
 
 export default {
   name: 'CertificatePage',
 
+  setup () {
+    const auth = useAuthStore()
+    const { user, token } = storeToRefs(auth)
+
+    const certQuery = useQuery(
+      AllCertificates,
+      () => ({ filters: JSON.stringify({ user__id: user.value && user.value.pk }) })
+    )
+    const myCertificate = computed(() => certQuery.result.value?.allCertificates || null)
+    const queryLoading = certQuery.loading
+
+    return { user, token, myCertificate, _queryLoading: queryLoading }
+  },
+
   data () {
     return {
-      myCertificate: {},
       downloadingPk: null
     }
   },
 
   computed: {
-    ...mapGetters('authentication', ['user', 'token']),
-
     certificates () {
       return (this.myCertificate && this.myCertificate.edges) || []
     },
 
     isLoading () {
-      return this.$apollo.queries.allCertificates.loading &&
-        this.certificates.length === 0
-    }
-  },
-
-  apollo: {
-    allCertificates: {
-      query () { return AllCertificates },
-      variables () {
-        return {
-          filters: JSON.stringify({ user__id: this.user && this.user.pk })
-        }
-      },
-      update (data) { this.myCertificate = data.allCertificates }
+      return this._queryLoading && this.certificates.length === 0
     }
   },
 

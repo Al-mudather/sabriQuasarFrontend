@@ -31,10 +31,16 @@ import { PaypalPublishableKey } from 'src/queries/checkout_management/query/Payp
 import { CreatePaypalCheckout } from 'src/queries/checkout_management/mutation/CreatePaypalCheckout'
 import { CapturePaypalCheckout } from 'src/queries/checkout_management/mutation/CapturePaypalCheckout'
 
-
-import { mapState } from "vuex";
+import { storeToRefs } from "pinia";
+import { useCartStore } from "src/stores/cart";
+import { apolloClient } from "src/apollo/client";
 
 export default {
+    setup () {
+        const cart = useCartStore();
+        const { shoppingCartDataList } = storeToRefs(cart);
+        return { cart, shoppingCartDataList };
+    },
 
     data () {
         return {
@@ -42,10 +48,6 @@ export default {
             errorMessages: [],
             btnVisible: true
         };
-    },
-
-    computed: {
-        ...mapState("shoppingCart", ["shoppingCartDataList"])
     },
 
     methods: {
@@ -97,7 +99,7 @@ export default {
                     // Call your server to finalize the transaction
                     onApprove: async (data, actions) => {
 
-                        const paypalResult = await this.$apollo.mutate({
+                        const paypalResult = await apolloClient.mutate({
                             mutation: CapturePaypalCheckout,
                             variables: {
                                 orderId: data.orderID
@@ -150,7 +152,7 @@ export default {
         },
 
         async getPaypalKeyFromTheBackend () {
-            const paypalKeyResult = await this.$apollo.query({
+            const paypalKeyResult = await apolloClient.query({
                 query: PaypalPublishableKey
             });
 
@@ -160,7 +162,7 @@ export default {
         },
 
         async getOrderResult (courseIds) {
-            const result = await this.$apollo.mutate({
+            const result = await apolloClient.mutate({
                 mutation: CreateNewOrderWithBulkOrderDetails,
                 variables: {
                     courseIds: courseIds
@@ -182,7 +184,7 @@ export default {
 
         async getpaypalPaymentUrlFromTheBackend (orderResult) {
             // TODO: Get the paypal url
-            const paypalPaymentresult = await this.$apollo.mutate({
+            const paypalPaymentresult = await apolloClient.mutate({
                 mutation: CreatePaypalCheckout,
                 variables: {
                     orderId: orderResult.order.pk

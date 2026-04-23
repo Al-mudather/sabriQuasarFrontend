@@ -33,42 +33,45 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useQuery } from '@vue/apollo-composable'
+import { useAuthStore } from 'src/stores/auth'
+import { apolloClient } from 'src/apollo/client'
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
-import { mapState, mapActions } from 'vuex'
 import { JoinPyramidProgram } from 'src/queries/pyramid_marketing_management/mutation/JoinPyramidProgram'
 import { MyPyramidAccount } from 'src/queries/pyramid_marketing_management/query/MyPyramidAccount'
 
 export default {
   name: 'afilliateBord',
 
+  setup () {
+    const auth = useAuthStore()
+    const { user } = storeToRefs(auth)
+    const { result, onResult } = useQuery(MyPyramidAccount, null, { errorPolicy: 'all' })
+    const myPyramidAccount = computed(() => result.value?.myPyramidAccount || null)
+    return { auth, user, myPyramidAccount, onPyramidResult: onResult }
+  },
+
   data () {
     return { myPyramidAccountID: null, amIAMarketer: false, visible: false }
   },
 
-  computed: { ...mapState('authentication', ['user']) },
-
-  apollo: {
-    myPyramidAccount: {
-      query () { return MyPyramidAccount },
-      result (result) {
-        this.visible = true
-        if (!result.loading) {
-          this.visible = false
-          this.myPyramidAccountID = result.data.myPyramidAccount.pyramidId
-        }
+  mounted () {
+    this.onPyramidResult((r) => {
+      this.visible = false
+      if (r.data?.myPyramidAccount) {
+        this.myPyramidAccountID = r.data.myPyramidAccount.pyramidId
       }
-    }
+    })
   },
 
   methods: {
-    ...mapActions('authentication', ['SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION']),
-
     async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
       try {
-        await this.$apollo.query({
-          query: CheckTheUserPermissionToUsePlatforme,
-          refetchQueries: [{ query: MyPyramidAccount }]
+        await apolloClient.query({
+          query: CheckTheUserPermissionToUsePlatforme
         })
       } catch (e) {
         if (e.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
@@ -90,7 +93,7 @@ export default {
       this.visible = true
       this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
       try {
-        const res = await this.$apollo.mutate({ mutation: JoinPyramidProgram, variables: { input: {} } })
+        const res = await apolloClient.mutate({ mutation: JoinPyramidProgram, variables: { input: {} } })
         if (res.data.joinPyramidProgram.success) {
           this.$q.notify({
             type: 'positive',
@@ -100,8 +103,8 @@ export default {
             message: 'You are now a marketer'
           })
           this.amIAMarketer = true
-          const profile = await this.$apollo.query({ query: GetMyProfileData })
-          this.SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION(profile.data.me)
+          const profile = await apolloClient.query({ query: GetMyProfileData })
+          this.auth.setUserAfterJoinPyramid(profile.data.me)
         }
       } catch (e) { /* apolloProvider surfaces error */ }
       finally { this.visible = false }

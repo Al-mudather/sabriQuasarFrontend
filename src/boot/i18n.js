@@ -10,7 +10,7 @@ const i18n = createI18n({
   allowComposition: true,
   globalInjection: true,
   locale: 'ar',
-  fallbackLocale: 'ar',
+  fallbackLocale: 'en',
   messages
 })
 

@@ -13,7 +13,7 @@
 
         <div class="testimonial-spread__attribution">
           <span class="testimonial-spread__avatar" aria-hidden="true">
-            <span class="testimonial-spread__avatar-inner" />
+            <span class="testimonial-spread__avatar-inner"></span>
           </span>
           <span class="testimonial-spread__meta">
             <span class="testimonial-spread__name">د. هدى الفهد</span>

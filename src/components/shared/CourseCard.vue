@@ -71,8 +71,8 @@
         </div>
 
         <!-- Featured overlay gradient + overlaid body -->
-        <template v-if="variant === 'featured'">
-          <div class="course-card__featured-gradient" aria-hidden="true" />
+        <div v-if="variant === 'featured'" class="course-card__featured-wrap">
+          <div class="course-card__featured-gradient" aria-hidden="true"></div>
           <div class="course-card__featured-body">
             <span class="course-card__kicker">
               {{ $t ? $t('الدورة الأكثر طلباً') : 'الدورة الأكثر طلباً' }}
@@ -94,7 +94,7 @@
               </span>
             </div>
           </div>
-        </template>
+        </div>
 
         <!-- Public: instructor avatar overlay -->
         <div
@@ -176,7 +176,7 @@
       </div>
 
       <!-- Hairline -->
-      <div class="course-card__hairline" aria-hidden="true" />
+      <div class="course-card__hairline" aria-hidden="true"></div>
 
       <!-- Metadata row -->
       <ul class="course-card__meta">
@@ -214,7 +214,7 @@
           size="sm"
           full-width
           class="course-card__cta"
-          @click.native.stop="onCta"
+          @click.stop="onCta"
         >
           {{ $t ? $t('متابعة الدورة') : 'متابعة الدورة' }}
         </ds-button>
@@ -236,7 +236,7 @@
             size="lg"
             full-width
             class="course-card__cta"
-            @click.native.stop="onCta"
+            @click.stop="onCta"
           >
             {{ $t ? $t('سجل في الدورة') : 'سجل في الدورة' }}
           </ds-button>
@@ -263,7 +263,7 @@
             variant="primary"
             size="sm"
             class="course-card__cta"
-            @click.native.stop="onCta"
+            @click.stop="onCta"
           >
             {{ $t ? $t('سجل الآن') : 'سجل الآن' }}
           </ds-button>
@@ -883,7 +883,6 @@ export default {
   &__cta {
     white-space: nowrap;
   }
-}
 
   /* ---------- Placeholder cover (no API image) ---------- */
   &__cover--placeholder {
@@ -932,6 +931,7 @@ export default {
   &--enrolled &__desc {
     font-size: var(--ds-text-sm) !important;
   }
+}
 
 /* Reduced motion: disable hover scale on cover */
 @media (prefers-reduced-motion: reduce) {
@@ -939,3 +939,4 @@ export default {
   .course-card:hover .course-card__cover { transform: none; }
   .course-card__ring-fill { transition: none; }
 }
+</style>

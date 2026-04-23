@@ -15,8 +15,11 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import { MyPyramidLedgerReward } from 'src/queries/pyramid_marketing_management/query/MyPyramidLedgerRewardQuery'
 import { ClaimPyramidLedgerBalance } from 'src/queries/pyramid_marketing_management/mutation/ClaimPyramidLedgerBalance'
+import { apolloClient } from 'src/apollo/client'
 
 const priceLookup = [
   { value: 1, symbol: '' }, { value: 1e3, symbol: 'k' },
@@ -26,16 +29,13 @@ const priceLookup = [
 export default {
   name: 'MyPyramidRewards',
 
-  data () { return { visible: false, myRewards: 0.0 } },
-
-  apollo: {
-    myPyramidLedgerReward: {
-      query () { return MyPyramidLedgerReward },
-      result (result) {
-        if (!result.loading) this.myRewards = result.data.myPyramidLedgerReward
-      }
-    }
+  setup () {
+    const { result } = useQuery(MyPyramidLedgerReward, null, { errorPolicy: 'all' })
+    const myRewards = computed(() => result.value?.myPyramidLedgerReward || 0.0)
+    return { myRewards }
   },
+
+  data () { return { visible: false } },
 
   methods: {
     errorHandler (errorsObj) {
@@ -61,7 +61,7 @@ export default {
     async COLLECT_MY_REWARDS () {
       this.visible = true
       try {
-        const res = await this.$apollo.mutate({
+        const res = await apolloClient.mutate({
           mutation: ClaimPyramidLedgerBalance,
           variables: { input: {} },
           refetchQueries: [{ query: MyPyramidLedgerReward }]

@@ -242,13 +242,36 @@
 <script>
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
 import { UpdateUserProfile } from 'src/queries/account_management/mutation/UpdateUserProfile'
-import { mapActions, mapState } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
+import { storeToRefs } from 'pinia'
+import { useQuery, useMutation } from '@vue/apollo-composable'
+import { computed } from 'vue'
 import DsInput from 'src/design-system/components/DsInput.vue'
 
 export default {
   name: 'Profile',
 
   components: { DsInput },
+
+  setup () {
+    const settings = useSettingsStore()
+    const { isEnglish, currency } = storeToRefs(settings)
+
+    const profileQuery = useQuery(GetMyProfileData)
+    const me = computed(() => profileQuery.result.value?.me || null)
+
+    const updateProfile = useMutation(UpdateUserProfile, {
+      refetchQueries: [{ query: GetMyProfileData }]
+    })
+
+    return {
+      settings,
+      isEnglish,
+      currency,
+      me,
+      _updateProfile: updateProfile
+    }
+  },
 
   data () {
     return {
@@ -273,7 +296,6 @@ export default {
   },
 
   computed: {
-    ...mapState('settings', ['isEnglish', 'currency']),
     genders () {
       return [
         { value: 'male',   label: this.$t('ذكر') },
@@ -292,10 +314,6 @@ export default {
     }
   },
 
-  apollo: {
-    me: { query () { return GetMyProfileData } }
-  },
-
   watch: {
     me (value) {
       if (!value) return
@@ -311,12 +329,10 @@ export default {
   },
 
   mounted () {
-    this.setActiveNavAction('PROFILE')
+    this.settings.setActiveNav('PROFILE')
   },
 
   methods: {
-    ...mapActions('settings', ['setActiveNavAction', 'setCurrencyAction', 'setIsEnglishAction']),
-
     startEditInfo () {
       this.snapshot = {
         fullName: this.fullName,
@@ -338,7 +354,7 @@ export default {
     },
 
     setLang (flag) {
-      this.setIsEnglishAction(flag)
+      this.settings.setIsEnglish(flag)
       this.$q.notify && this.$q.notify({
         type: 'positive',
         position: 'top',
@@ -348,7 +364,7 @@ export default {
     },
 
     setCurrency (val) {
-      this.setCurrencyAction(val)
+      this.settings.setCurrency(val)
       this.$q.notify && this.$q.notify({
         type: 'positive',
         position: 'top',
@@ -397,17 +413,13 @@ export default {
     async UpdateUserProfileData () {
       this.saving = true
       try {
-        const result = await this.$apollo.mutate({
-          mutation: UpdateUserProfile,
-          variables: {
-            input: {
-              fullName: this.fullName,
-              phoneNumber2: this.whatsAppNumber,
-              phoneNumber3: this.telegramNumber,
-              gender: this.gender
-            }
-          },
-          refetchQueries: [{ query: GetMyProfileData }]
+        const result = await this._updateProfile.mutate({
+          input: {
+            fullName: this.fullName,
+            phoneNumber2: this.whatsAppNumber,
+            phoneNumber3: this.telegramNumber,
+            gender: this.gender
+          }
         })
         if (result.data.updateUserProfile.success) {
           this.$q.notify({

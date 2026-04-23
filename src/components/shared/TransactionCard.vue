@@ -17,7 +17,7 @@
             :class="{ 'tx-card__badge--breath': resolvedStatus === 'processing' }"
             :aria-label="meta.labelAr"
           >
-            <span slot="icon" class="tx-card__badge-icon" v-html="meta.iconSvg" />
+            <span slot="icon" class="tx-card__badge-icon" v-html="meta.iconSvg"></span>
             {{ meta.labelAr }}
           </ds-badge>
           <h3
@@ -79,7 +79,7 @@
           class="tx-card__attachment-link"
         >
           <ds-tag variant="indigo" size="sm">
-            <span slot="icon" class="tx-card__attach-icon" v-html="paperclipSvg" />
+            <span slot="icon" class="tx-card__attach-icon" v-html="paperclipSvg"></span>
             عرض المرفق
           </ds-tag>
         </a>

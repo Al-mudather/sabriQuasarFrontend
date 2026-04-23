@@ -78,12 +78,26 @@
 </template>
 
 <script>
-import { mapGetters, mapState, mapActions } from "vuex";
+import { storeToRefs } from "pinia";
+import { useAuthStore } from "src/stores/auth";
+import { useSettingsStore } from "src/stores/settings";
+import { useCartStore } from "src/stores/cart";
+import { usePyramidStore } from "src/stores/pyramid";
+import { apolloClient } from "src/apollo/client";
 import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
 import { Quasar } from "quasar";
 
 export default {
   name: "NavBar",
+  setup () {
+    const auth = useAuthStore();
+    const settings = useSettingsStore();
+    const cart = useCartStore();
+    const pyramid = usePyramidStore();
+    const { token } = storeToRefs(auth);
+    const { isEnglish } = storeToRefs(settings);
+    return { auth, settings, cart, pyramid, token, isEnglish };
+  },
   data() {
     return {
       search: "",
@@ -94,14 +108,12 @@ export default {
   },
   props: {},
   computed: {
-    ...mapGetters("authentication", ["token"]),
-    ...mapState("settings", ["isEnglish"]),
     _isEnglish: {
       get() {
         return this.isEnglish;
       },
       set(newVlaue) {
-        return this.setIsEnglishAction(newVlaue);
+        return this.settings.setIsEnglish(newVlaue);
       },
     },
   },
@@ -110,7 +122,7 @@ export default {
     async isEnglish(value) {
       if (value) {
         this.$i18n.locale = "en";
-        this.setIsEnglishAction(value);
+        this.settings.setIsEnglish(value);
         const langIso = "en-us";
 
         try {
@@ -143,7 +155,7 @@ export default {
         }
       } else {
         this.$i18n.locale = "ar";
-        this.setIsEnglishAction(value);
+        this.settings.setIsEnglish(value);
 
         try {
           Quasar.lang.set({
@@ -169,25 +181,17 @@ export default {
   },
 
   methods: {
-    ...mapActions("authentication", ["logOutAction"]),
-    ...mapActions("settings", ["setIsEnglishAction", "setOpenMenuAction"]),
-    ...mapActions("shoppingCart", ["deleteShoppinCartDataListAction"]),
-    ...mapActions("pyramidManagement", [
-      "SET_MY_MARKETING_CODE_ACCOUNT_ACTION",
-    ]),
-
     changeMenuState() {
-      this.setOpenMenuAction(true);
+      this.settings.setOpenMenu(true);
     },
 
     LOG_USER_OUT() {
-      this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION("");
+      this.pyramid.setMyMarketingCode("");
       try {
         this.removeCookie();
       } catch (error) {}
-      this.deleteShoppinCartDataListAction();
-      this.logOutAction();
-      this.$apollo.provider.defaultClient.resetStore();
+      this.cart.deleteCart();
+      this.auth.logOut();
       this.$router.push({ name: "Home" });
     },
 
@@ -200,7 +204,7 @@ export default {
       event.preventDefault();
 
       if (!this.$_.isEmpty(this.search)) {
-        this.$apollo
+        apolloClient
           .query({
             query: GetAllCourses,
             variables: {

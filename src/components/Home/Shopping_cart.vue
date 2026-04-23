@@ -26,15 +26,17 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex'
+import { storeToRefs } from 'pinia'
+import { useCartStore } from 'src/stores/cart'
 
 export default {
   name: 'ShoppingCart',
-
-  computed: { ...mapState('shoppingCart', ['shoppingCartDataList']) },
-
+  setup () {
+    const cart = useCartStore()
+    const { shoppingCartDataList } = storeToRefs(cart)
+    return { cart, shoppingCartDataList }
+  },
   methods: {
-    ...mapActions('shoppingCart', ['setShoppinCartDialogAction']),
     OpenShoppingCartSection () { this.$router.push({ name: 'cart' }) }
   }
 }

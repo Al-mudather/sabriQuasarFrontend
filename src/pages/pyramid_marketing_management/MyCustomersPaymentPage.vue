@@ -9,32 +9,27 @@
 
     <section class="customers-payment-page__body">
       <div v-if="transactions.length > 0" class="customers-payment-page__grid">
-        <template v-for="tx in transactions">
+        <template v-for="tx in transactions" :key="tx.node.pk">
           <Transaction-completed
             v-if="tx.node.doneVerification"
-            :key="tx.node.pk"
             :customerTrans="tx.node"
           />
           <Transaction-under-processing
             v-else-if="tx.node.marketerEndorse && !tx.node.pyramidManagerEndorse"
-            :key="tx.node.pk"
             :customerTrans="tx.node"
           />
           <Transaction-rejected
             v-else-if="tx.node.pyramidRetryPlease"
-            :key="tx.node.pk"
             :label="rejectedByTheManager"
             :customerTrans="tx.node"
           />
           <Transaction-rejected
             v-else-if="tx.node.retryPlease || tx.node.pyramidRetryPlease"
-            :key="tx.node.pk"
             :label="rejectedByTheMe"
             :customerTrans="tx.node"
           />
           <Transaction-hanged
             v-else
-            :key="tx.node.pk"
             :customerTrans="tx.node"
           />
         </template>
@@ -55,6 +50,9 @@
 
 <script>
 import { AllMarketerAttachmentTransaction } from 'src/queries/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
+import { useQuery } from '@vue/apollo-composable'
+import { computed } from 'vue'
+import _ from 'lodash'
 import Transaction_completed from 'src/components/attachment_transactions_management/Transaction_completed.vue'
 import Transaction_under_processing from 'src/components/attachment_transactions_management/Transaction_under_processing.vue'
 import Transaction_rejected from 'src/components/attachment_transactions_management/Transaction_rejected.vue'
@@ -70,27 +68,23 @@ export default {
     'Transaction-hanged': Transaction_hanged
   },
 
+  setup () {
+    const q = useQuery(AllMarketerAttachmentTransaction)
+    const customersTransactionsList = computed(
+      () => q.result.value?.allMarketerAttachmentTransaction || null
+    )
+    return { customersTransactionsList }
+  },
+
   data () {
     return {
       rejectedByTheManager: this.$t('الطلب مرفوض من الإداره'),
-      rejectedByTheMe: this.$t('الطلب مرفوض بواسطتي'),
-      customersTransactionsList: []
+      rejectedByTheMe: this.$t('الطلب مرفوض بواسطتي')
     }
   },
 
   computed: {
-    transactions () { return this.$_.get(this.customersTransactionsList, 'edges', []) || [] }
-  },
-
-  apollo: {
-    allMarketerAttachmentTransaction: {
-      query () { return AllMarketerAttachmentTransaction },
-      result (result) {
-        if (!result.loading) {
-          this.customersTransactionsList = result.data.allMarketerAttachmentTransaction
-        }
-      }
-    }
+    transactions () { return _.get(this.customersTransactionsList, 'edges', []) || [] }
   }
 }
 </script>

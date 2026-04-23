@@ -64,9 +64,15 @@
 import videoPlayer from 'src/utils/video-client.js'
 import AlhasifVideoPlayer from 'src/utils/AlhasifVideoPlayer.vue'
 
-import {mapGetters} from 'vuex'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
 
 export default {
+  setup () {
+    const auth = useAuthStore()
+    const { token } = storeToRefs(auth)
+    return { auth, token }
+  },
   data () {
     return {
       card: false,
@@ -81,14 +87,7 @@ export default {
   components: {
     AlhasifVideoPlayer
   },
-  // mounted () {
-  //   console.log('cccccccccccccccc')
-  //   console.log(this.content)
-  //   console.log('cccccccccccccccc')
-  // },
   computed: {
-    ...mapGetters("authentication", ["token"]),
-
     formatTitle () {
       const result = JSON.parse(this.content.modelValue)
       if (this.content.modelName === 'ContentFile') {

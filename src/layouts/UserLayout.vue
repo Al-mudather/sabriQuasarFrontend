@@ -82,9 +82,12 @@
 <script>
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
-import DsModal from 'src/design-system/components/DsModal'
+import DsModal from 'src/design-system/components/DsModal.vue'
 import { LocalStorage, Quasar } from 'quasar'
-import { mapState, mapActions } from 'vuex'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { storeToRefs } from 'pinia'
+import { h } from 'vue'
 
 // Inline sidebar renderer — kept local to UserLayout so the layout
 // stays self-contained without bleeding into src/components.
@@ -97,9 +100,10 @@ const SidebarContent = {
     navLinks:   { type: Array,  required: true },
     isActive:   { type: Function, required: true }
   },
-  render (h) {
+  emits: ['navigate', 'logout'],
+  render () {
     const avatarNode = this.userAvatar
-      ? h('img', { class: 'user-sidebar__avatar-img', attrs: { src: this.userAvatar, alt: this.userName } })
+      ? h('img', { class: 'user-sidebar__avatar-img', src: this.userAvatar, alt: this.userName })
       : h('span', { class: 'user-sidebar__avatar-initial' }, (this.userName || 'u').slice(0, 1))
 
     return h('div', { class: 'user-sidebar' }, [
@@ -111,32 +115,35 @@ const SidebarContent = {
           h('span', { class: 'user-sidebar__role' }, this.userRole)
         ])
       ]),
-      h('hr', { class: 'user-sidebar__divider', attrs: { 'aria-hidden': 'true' } }),
+      h('hr', { class: 'user-sidebar__divider', 'aria-hidden': 'true' }),
 
       // Nav
-      h('nav', { class: 'user-sidebar__nav', attrs: { 'aria-label': 'تنقل الحساب' } },
+      h('nav', { class: 'user-sidebar__nav', 'aria-label': 'تنقل الحساب' },
         this.navLinks.map(link => h('router-link', {
           key: link.to,
-          class: { 'user-sidebar__link': true, 'is-active': this.isActive(link.to) },
-          attrs: { to: link.to, 'aria-current': this.isActive(link.to) ? 'page' : null },
-          nativeOn: { click: () => this.$emit('navigate') }
-        }, [
-          h('span', { class: 'user-sidebar__link-icon', attrs: { 'aria-hidden': 'true' }, domProps: { innerHTML: link.icon } }),
+          to: link.to,
+          class: ['user-sidebar__link', { 'is-active': this.isActive(link.to) }],
+          'aria-current': this.isActive(link.to) ? 'page' : null,
+          onClick: () => this.$emit('navigate')
+        }, () => [
+          h('span', { class: 'user-sidebar__link-icon', 'aria-hidden': 'true', innerHTML: link.icon }),
           h('span', { class: 'user-sidebar__link-label' }, link.label)
         ]))
       ),
 
-      h('hr', { class: 'user-sidebar__divider', attrs: { 'aria-hidden': 'true' } }),
+      h('hr', { class: 'user-sidebar__divider', 'aria-hidden': 'true' }),
 
       // Logout
       h('button', {
         class: 'user-sidebar__logout',
-        attrs: { type: 'button' },
-        on: { click: () => this.$emit('logout') }
+        type: 'button',
+        onClick: () => this.$emit('logout')
       }, [
-        h('span', { class: 'user-sidebar__link-icon', attrs: { 'aria-hidden': 'true' }, domProps: {
+        h('span', {
+          class: 'user-sidebar__link-icon',
+          'aria-hidden': 'true',
           innerHTML: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/></svg>'
-        }}),
+        }),
         h('span', 'تسجيل الخروج')
       ])
     ])
@@ -157,6 +164,14 @@ export default {
   name: 'UserLayout',
   components: { AppHeader, AppFooter, DsModal, SidebarContent },
 
+  setup () {
+    const auth = useAuthStore()
+    const settings = useSettingsStore()
+    const { token, user } = storeToRefs(auth)
+    const { isEnglish } = storeToRefs(settings)
+    return { token, user, isEnglish, auth, settings }
+  },
+
   data () {
     return {
       drawerOpen: false,
@@ -172,22 +187,19 @@ export default {
   },
 
   computed: {
-    ...mapState('settings', ['isEnglish']),
-    ...mapState('authentication', ['token']),
-
     userDisplayName () {
-      const u = (this.$store.state.user && this.$store.state.user.userData) || {}
+      const u = this.user || {}
       return u.fullName || u.name || u.username || ''
     },
     userRoleLabel () {
-      const u = (this.$store.state.user && this.$store.state.user.userData) || {}
+      const u = this.user || {}
       const role = u.role || u.userType
       if (role === 'trainer' || role === 'TRAINER') return 'مدرب'
       if (role === 'admin'   || role === 'ADMIN')   return 'مشرف'
       return 'متعلم'
     },
     userAvatar () {
-      const u = (this.$store.state.user && this.$store.state.user.userData) || {}
+      const u = this.user || {}
       return u.avatar || u.photo || ''
     }
   },
@@ -201,9 +213,6 @@ export default {
   },
 
   methods: {
-    ...mapActions('settings', ['setIsEnglishAction']),
-    ...mapActions('authentication', ['logOutAction']),
-
     isActive (to) {
       if (!this.$route) return false
       return this.$route.path === to || this.$route.path.startsWith(to + '/')
@@ -216,18 +225,18 @@ export default {
 
     async logOut () {
       try {
-        await this.logOutAction()
+        await this.auth.logOut()
       } catch (e) { /* graceful */ }
       this.$router.push({ name: 'Home' }).catch(() => {})
     },
 
     async applyLocale (isEnglish) {
       this.$i18n.locale = isEnglish ? 'en' : 'ar'
-      this.setIsEnglishAction(isEnglish)
+      this.settings.setIsEnglish(isEnglish)
 
       try {
         if (isEnglish) {
-          const lang = await import(/* webpackInclude: /(de|en-us)\.js$/ */ 'quasar/lang/en-us')
+          const lang = await import('quasar/lang/en-us')
           Quasar.lang.set({ ...lang.default, rtl: true })
         } else {
           Quasar.lang.set({ isoName: 'ar', nativeName: 'العربية' })

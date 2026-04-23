@@ -12,10 +12,19 @@
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { SocialAuth } from "src/queries/account_management/mutation/CreateSocailAuth";
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
-import { mapActions } from "vuex";
+import { useAuthStore } from "src/stores/auth";
+import { useSettingsStore } from "src/stores/settings";
+import { usePyramidStore } from "src/stores/pyramid";
+import { apolloClient } from "src/apollo/client";
 
 export default {
     name: "FacebookAuthentication",
+    setup () {
+        const auth = useAuthStore();
+        const settings = useSettingsStore();
+        const pyramid = usePyramidStore();
+        return { auth, settings, pyramid };
+    },
     data () {
         return {
             visible: false
@@ -25,11 +34,6 @@ export default {
     props:['prevRoute', 'label'],
 
     methods: {
-        ...mapActions("authentication", [
-            "loginAction"
-        ]),
-        ...mapActions('settings', ['setCurrencyAction']),
-        ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION', 'SET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
 
         GoToHomePage() {
             this.$router.push({ name: "Home" });
@@ -37,7 +41,7 @@ export default {
 
         async IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE () {
             try {
-                const res = await this.$apollo.query({
+                const res = await apolloClient.query({
                     query: AllEnrollmentsForCurrentUser,
                 })
 
@@ -54,13 +58,13 @@ export default {
 
         async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
             try {
-                const join_permission_res = await this.$apollo.query({query: CheckTheUserPermissionToUsePlatforme})
+                const join_permission_res = await apolloClient.query({query: CheckTheUserPermissionToUsePlatforme})
                 //TODO:If the user is a marketer, then git his marketing code
-                this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+                this.pyramid.fetchMyMarketingCode()
                 //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
                 const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
                 //TODO: delete the marketer code
-                this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION('')
+                this.pyramid.setMyMarketingCode('')
                 if (res) {
                     this.$router.push({ name: "my-courses" })
                 } else {
@@ -84,7 +88,7 @@ export default {
         // TODO: Google and Facebook Register
         loginAuthMutation(accessToken, provider, email = "") {
             this.visible = true
-            this.$apollo
+            apolloClient
                 .mutate({
                     mutation: SocialAuth,
                     variables: {
@@ -97,12 +101,12 @@ export default {
                     this.visible = false
                     const userData = result.data.socialAuth
                     if (userData) {
-                        this.loginAction(userData).then(() => {
-                            
+                        Promise.resolve(this.auth.login(userData)).then(() => {
+
                             try {
                                 const userCur = userData.social.user.userCurrency
                                 if (userCur) {
-                                    userCur == 'SDG' ? this.setCurrencyAction('SDG') : this.setCurrencyAction('USD')
+                                    userCur == 'SDG' ? this.settings.setCurrency('SDG') : this.settings.setCurrency('USD')
                                 }
 
                                 //TODO: Set the external user id for notification

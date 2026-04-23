@@ -5,8 +5,8 @@
     </div>
 
     <div class="instructor-marquee__viewport">
-      <div class="instructor-marquee__fade instructor-marquee__fade--start" aria-hidden="true" />
-      <div class="instructor-marquee__fade instructor-marquee__fade--end" aria-hidden="true" />
+      <div class="instructor-marquee__fade instructor-marquee__fade--start" aria-hidden="true"></div>
+      <div class="instructor-marquee__fade instructor-marquee__fade--end" aria-hidden="true"></div>
 
       <div class="instructor-marquee__track">
         <div
@@ -28,22 +28,16 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import { GetAllCourseInstructors } from 'src/queries/course_management/query/GetAllCourseInstructors'
 
 export default {
   name: 'InstructorMarquee',
-  data () {
-    return { allCourseInstructors: null }
-  },
-  apollo: {
-    allCourseInstructors: {
-      query: GetAllCourseInstructors,
-      update: data => data.allCourseInstructors,
-      error (err) {
-        // eslint-disable-next-line no-console
-        console.warn('[InstructorMarquee] query failed', err)
-      }
-    }
+  setup () {
+    const { result } = useQuery(GetAllCourseInstructors, null, { errorPolicy: 'all' })
+    const allCourseInstructors = computed(() => result.value?.allCourseInstructors || null)
+    return { allCourseInstructors }
   },
   computed: {
     people () {

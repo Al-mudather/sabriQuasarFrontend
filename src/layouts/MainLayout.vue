@@ -18,14 +18,17 @@
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
 import { LocalStorage, Quasar } from 'quasar'
-import { mapState, mapActions } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'MainLayout',
   components: { AppHeader, AppFooter },
 
-  computed: {
-    ...mapState('settings', ['isEnglish'])
+  setup () {
+    const settings = useSettingsStore()
+    const { isEnglish } = storeToRefs(settings)
+    return { isEnglish, settings }
   },
 
   mounted () {
@@ -37,11 +40,9 @@ export default {
   },
 
   methods: {
-    ...mapActions('settings', ['setIsEnglishAction']),
-
     async applyLocale (isEnglish) {
       this.$i18n.locale = isEnglish ? 'en' : 'ar'
-      this.setIsEnglishAction(isEnglish)
+      this.settings.setIsEnglish(isEnglish)
 
       try {
         if (isEnglish) {

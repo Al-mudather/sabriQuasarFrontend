@@ -3,7 +3,7 @@
     <header class="cd-section__head">
       <h2>{{ $t('عن الكورس') }}</h2>
     </header>
-    <div v-if="courseData && courseData.brief" class="cd-section__prose" v-html="courseData.brief" />
+    <div v-if="courseData && courseData.brief" class="cd-section__prose" v-html="courseData.brief"></div>
     <div v-else class="cd-section__skeleton">
       <ds-skeleton shape="line" width="100%" />
       <ds-skeleton shape="line" width="92%" />

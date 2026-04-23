@@ -16,6 +16,11 @@ import { tokenStorage } from 'src/localStorageService'
 import { API_URI, WS_HOST } from '../utils/hostConfig'
 
 // ---------- Auth middleware -------------------------------------------------
+// Token is fetched from tokenStorage (the canonical source) at request time,
+// not at module load. The Pinia `auth` store mirrors the same storage keys,
+// so `useAuthStore().token` and `tokenStorage.getAccessToken()` always agree.
+// We prefer the storage read here to avoid coupling the Apollo module to
+// Pinia's setup lifecycle (Apollo is constructed before Pinia boots).
 const authMiddleware = new ApolloLink((operation, forward) => {
   const token = tokenStorage.getAccessToken()
   const jwt = token ? 'JWT ' + token : null
@@ -27,6 +32,20 @@ const authMiddleware = new ApolloLink((operation, forward) => {
   }))
   return forward(operation)
 })
+
+// ---------- JSONString scalar read policy ----------------------------------
+// Backend sends `JSONString` scalars as a JSON-encoded string. Previously
+// every call site ran `JSON.parse(node.currency)[selectedCurrency]`. A single
+// `read` policy on each type that declares a JSONString field parses once at
+// read time, so consumers can treat it as a plain object (`node.currency[cur]`).
+// Codegen already types these fields as `Record<string, number>` so the
+// editor types and the runtime shape now match.
+const parseJsonStringRead = (existing) => {
+  if (existing == null) return existing
+  if (typeof existing === 'object') return existing
+  try { return JSON.parse(existing) } catch { return {} }
+}
+const jsonStringFieldPolicy = { read: parseJsonStringRead }
 
 // ---------- HTTP (upload) link ---------------------------------------------
 const uploadLink = createUploadLink({
@@ -77,9 +96,31 @@ const defaultOptions = {
   }
 }
 
+// Per `src/graphql/generated.ts`, these nodes carry `JSONString` outputs:
+//   - CourseNode.currency             (price-per-currency map)
+//   - CourseUnitContentNode.modelValue
+//   - HostedSession[Sdk]Output.session
+//   - VideoConferenceMeetingNode.{meetingData,videoMetadata}
+//   - MakeOrderNode.session
+//   - PaymentCredentials.{paypalPublishableKey, stripePublishableKey}
+//   - ActivityLogNode.metadata
+//   - FormSubmissionNode.{createData, responseData}
+//   - FormStructureNode.createData
+// We register the parse-on-read policy for the field that drives the main
+// UI pattern (currency). Other types stay string-valued for now — add them
+// here when a consumer starts parsing them. Keeping the policy surface
+// minimal avoids silently swallowing shapes the backend might change.
+const cache = new InMemoryCache({
+  typePolicies: {
+    CourseNode: {
+      fields: { currency: jsonStringFieldPolicy }
+    }
+  }
+})
+
 export const apolloClient = new ApolloClient({
   link: ApolloLink.from([authMiddleware, transportLink]),
-  cache: new InMemoryCache(),
+  cache,
   defaultOptions,
   connectToDevTools: true
 })

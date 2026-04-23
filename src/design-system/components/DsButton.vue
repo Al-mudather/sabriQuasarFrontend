@@ -20,7 +20,7 @@
     :aria-busy="loading ? 'true' : null"
     @click="onClick"
   >
-    <span v-if="loading" class="ds-btn__spinner" aria-hidden="true" />
+    <span v-if="loading" class="ds-btn__spinner" aria-hidden="true"></span>
     <span
       v-if="$slots.leading && !loading"
       class="ds-btn__icon ds-btn__icon--leading"
@@ -84,7 +84,7 @@ export default {
   mounted() {
     this.setupMagnetic();
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.teardownMagnetic();
   },
   methods: {

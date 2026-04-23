@@ -6,11 +6,13 @@
           ref="mySwiper"
           class="nav nav-tabs"
           :space-between="1"
-          :options="swiperOptions"
+          :slides-per-view="'auto'"
+          :grab-cursor="true"
+          :centered-slides="true"
         >
           <swiper-slide
             class="nav-item"
-            v-for="spec in allCourseSpecialities.edges"
+            v-for="spec in (allCourseSpecialities && allCourseSpecialities.edges) || []"
             :key="spec.node.id"
           >
             <a
@@ -23,7 +25,6 @@
               <span>{{ spec.node.speciality }}</span>
             </a>
           </swiper-slide>
-          <div class="swiper-pagination" slot="pagination"></div>
         </swiper>
       </div>
     </div>
@@ -70,17 +71,26 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import courseCard from 'components/utils/courseCard.vue'
-import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
-import 'swiper/swiper-bundle.css'
-import 'swiper/swiper.min.css'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import 'swiper/css'
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
 import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality.js'
-import { mapActions } from 'vuex'
+import { apolloClient } from 'src/apollo/client'
+import { useSettingsStore } from 'src/stores/settings'
 
 export default {
   name: 'Training',
   components: { courseCard, Swiper, SwiperSlide },
+
+  setup () {
+    const settings = useSettingsStore()
+    const { result } = useQuery(GetSpecialities, null, { errorPolicy: 'all' })
+    const allCourseSpecialities = computed(() => result.value?.allCourseSpecialities || { edges: [] })
+    return { settings, allCourseSpecialities }
+  },
 
   data () {
     return {
@@ -88,31 +98,21 @@ export default {
       edgeCount: 0,
       totalCount: 0,
       isDraft: false,
-      allCourseSpecialities: '',
       courses: [],
       swiperOptions: {
         effect: 'coverflow',
         grabCursor: true,
         centeredSlides: true,
         slidesPerView: 'auto',
-        coverflowEffect: { rotate: 500, stretch: 0, depth: 100, modifier: 1, slideShadows: false },
-        pagination: { el: '.swiper-pagination' }
+        coverflowEffect: { rotate: 500, stretch: 0, depth: 100, modifier: 1, slideShadows: false }
       }
     }
   },
 
-  apollo: {
-    allCourseSpecialities: {
-      query () { return GetSpecialities }
-    }
-  },
-
-  computed: {
-    swiper () { return this.$refs.mySwiper.$swiper }
-  },
-
   mounted () {
-    this.swiper.slideTo(4, 1000, false)
+    if (this.$refs.mySwiper?.swiper) {
+      this.$refs.mySwiper.swiper.slideTo(4, 1000, false)
+    }
   },
 
   updated () {
@@ -130,15 +130,13 @@ export default {
   },
 
   methods: {
-    ...mapActions('settings', ['setActiveNavAction']),
-
     gotTocoursesPage () {
-      this.setActiveNavAction('COURSES')
+      this.settings.setActiveNav('COURSES')
       this.$router.push({ name: 'courses' })
     },
 
     async changeCourseData (specialityId) {
-      const res = await this.$apollo.query({
+      const res = await apolloClient.query({
         query: GetAllCoursesInSpeciality,
         variables: { specialityId, first: 4, isDraft: this.isDraft, orderBy: ['id'] }
       })

@@ -6,10 +6,9 @@
     :aria-label="groupAriaLabel"
   >
     <div class="rating-stars__track" @mouseleave="onTrackLeave">
-      <template v-for="n in 5">
+      <template v-for="n in 5" :key="n">
         <button
           v-if="interactive"
-          :key="`btn-${n}`"
           type="button"
           class="rating-stars__star rating-stars__star--btn"
           :aria-label="`قيم بـ ${n} من 5`"
@@ -35,7 +34,6 @@
 
         <span
           v-else
-          :key="`span-${n}`"
           class="rating-stars__star"
         >
           <span class="rating-stars__star-inner">
@@ -64,9 +62,9 @@ const STAR_PATH = 'M12 2.5l2.95 5.98 6.6.96-4.77 4.65 1.12 6.57L12 17.77l-5.9 3.
 
 export default {
   name: 'RatingStars',
-  model: { prop: 'value', event: 'input' },
+  emits: ['update:modelValue', 'change'],
   props: {
-    value:       { type: Number, default: 0 },
+    modelValue:  { type: Number, default: 0 },
     count:       { type: Number, default: null },
     size: {
       type: String,
@@ -92,7 +90,7 @@ export default {
   computed: {
     starPath () { return STAR_PATH },
     displayValue () {
-      const raw = this.hoverValue != null ? this.hoverValue : this.value
+      const raw = this.hoverValue != null ? this.hoverValue : this.modelValue
       const clamped = Math.max(0, Math.min(5, raw || 0))
       if (this.precision === 'full') return Math.round(clamped)
       return Math.round(clamped * 2) / 2
@@ -129,13 +127,13 @@ export default {
     },
     onSelect (n) {
       if (!this.interactive) return
-      this.$emit('input', n)
+      this.$emit('update:modelValue', n)
       this.$emit('change', n)
     },
     onKey (delta) {
       if (!this.interactive) return
-      const next = Math.max(0, Math.min(5, Math.round((this.value || 0) + delta)))
-      this.$emit('input', next)
+      const next = Math.max(0, Math.min(5, Math.round((this.modelValue || 0) + delta)))
+      this.$emit('update:modelValue', next)
       this.$emit('change', next)
     }
   }

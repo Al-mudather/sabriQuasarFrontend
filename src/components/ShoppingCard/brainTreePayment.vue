@@ -24,12 +24,16 @@
 
 <script>
 import { CaptureBraintreeCheckout } from 'src/queries/checkout_management/mutation/CaptureBraintreeCheckout.js'
-
-
-
-import { mapState, mapActions } from "vuex";
+import { storeToRefs } from "pinia";
+import { useCartStore } from "src/stores/cart";
+import { apolloClient } from "src/apollo/client";
 
 export default {
+    setup () {
+        const cart = useCartStore();
+        const { shoppingCartDataList, braintreeClientToken, orderData } = storeToRefs(cart);
+        return { cart, shoppingCartDataList, braintreeClientToken, orderData };
+    },
 
     data () {
         return {
@@ -38,14 +42,7 @@ export default {
         };
     },
 
-    computed: {
-        ...mapState("shoppingCart", ["shoppingCartDataList", "braintreeClientToken", "orderData"])
-    },
-
     methods: {
-        ...mapActions('shoppingCart', [
-            "SET_ORDER_DATA_Action"
-        ]),
         errorHandler(errorsObj) {
             for (const key in errorsObj) {
                 for (const val of errorsObj[key]) {
@@ -62,7 +59,7 @@ export default {
         
 
         async START_THE_PAYMENT_AFTER_GETING_THE_CLIENT_TOKEN (payload) {
-            const braintreePaymentresult = await this.$apollo.mutate({
+            const braintreePaymentresult = await apolloClient.mutate({
                 mutation: CaptureBraintreeCheckout,
                 variables: {
                     orderId: this.orderData.order.pk,
@@ -75,7 +72,7 @@ export default {
 
             if (success) {
                 //TODO: Delete the order
-                this.SET_ORDER_DATA_Action(null)
+                this.cart.setOrderData(null)
                 //TODO: Go to the Success page
                 this.$router.push({ name: 'cart-success' })
             }

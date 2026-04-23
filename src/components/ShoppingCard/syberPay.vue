@@ -11,16 +11,21 @@
 <script>
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateSyberpayCheckout } from 'src/queries/checkout_management/mutation/CreateSyberpayCheckout';
-import { mapState } from "vuex";
+import { storeToRefs } from "pinia";
+import { useCartStore } from "src/stores/cart";
+import { apolloClient } from "src/apollo/client";
+import { openURL } from "quasar";
 
 export default {
+    setup () {
+        const cart = useCartStore();
+        const { shoppingCartDataList } = storeToRefs(cart);
+        return { cart, shoppingCartDataList };
+    },
     data() {
         return {
             visible: false
         };
-    },
-    computed: {
-        ...mapState("shoppingCart", ["shoppingCartDataList"])
     },
     methods: {
         async buyTheCoursesUsingSyberPay() {
@@ -48,7 +53,7 @@ export default {
         },
 
         async getOrderResult(courseIds) {
-            const result = await this.$apollo.mutate({
+            const result = await apolloClient.mutate({
                 mutation: CreateNewOrderWithBulkOrderDetails,
                 variables: {
                     courseIds: courseIds
@@ -68,7 +73,7 @@ export default {
         },
 
         async getSyberPayPaymentUrlFromTheBackend(orderResult) {
-            const syberpayPaymentresult = await this.$apollo.mutate({
+            const syberpayPaymentresult = await apolloClient.mutate({
                 mutation: CreateSyberpayCheckout,
                 variables: {
                     orderId: orderResult.order.pk,

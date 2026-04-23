@@ -75,7 +75,11 @@
 
 <script>
 import { copyToClipboard } from 'quasar'
-import { mapState, mapActions } from 'vuex'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { useCartStore } from 'src/stores/cart'
+import { usePyramidStore } from 'src/stores/pyramid'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 
 const priceLookup = [
@@ -96,6 +100,17 @@ export default {
   name: 'CourseMainCard',
   props: ['courseData'],
 
+  setup () {
+    const auth = useAuthStore()
+    const settings = useSettingsStore()
+    const cart = useCartStore()
+    const pyramid = usePyramidStore()
+    const { user, token } = storeToRefs(auth)
+    const { currency } = storeToRefs(settings)
+    const { myMarketingCode } = storeToRefs(pyramid)
+    return { auth, settings, cart, pyramid, user, token, currency, myMarketingCode }
+  },
+
   data () {
     return {
       FORMAT_THE_IAMGE_URL,
@@ -104,14 +119,10 @@ export default {
   },
 
   mounted () {
-    if (this.token) this.GET_MY_MARKETING_CODE_ACCOUNT_ACTION()
+    if (this.token) this.pyramid.fetchMyMarketingCode()
   },
 
   computed: {
-    ...mapState('authentication', ['user', 'token']),
-    ...mapState('settings', ['currency']),
-    ...mapState('pyramidManagement', ['myMarketingCode']),
-
     enrollmentCount () {
       const n = this.$_.get(this.courseData, '[enrollmentCount]', 0)
       return n >= 1000 ? Math.round(n / 1000) : n
@@ -138,9 +149,6 @@ export default {
   },
 
   methods: {
-    ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
-    ...mapActions('pyramidManagement', ['GET_MY_MARKETING_CODE_ACCOUNT_ACTION']),
-
     hasField (key) {
       return !!this.$_.get(this.courseData, `[${key}]`)
     },
@@ -163,7 +171,7 @@ export default {
     },
 
     AddTheCourseToTheBasket () {
-      this.setShoppingCartDataListAction({ user: this.user, course: this.courseData })
+      this.cart.addCourseToCart({ user: this.user, course: this.courseData })
       this.$router.push({ name: 'cart' })
     }
   }

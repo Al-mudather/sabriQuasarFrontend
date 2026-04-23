@@ -19,11 +19,16 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { storeToRefs } from 'pinia'
+import { useSettingsStore } from 'src/stores/settings'
 
 export default {
   name: 'Footer',
-  computed: { ...mapState('settings', ['isEnglish']) }
+  setup () {
+    const settings = useSettingsStore()
+    const { isEnglish } = storeToRefs(settings)
+    return { isEnglish }
+  }
 }
 </script>
 

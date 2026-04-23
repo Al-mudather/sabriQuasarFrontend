@@ -29,7 +29,7 @@
 
       <div class="notif__meta">
         <span v-if="relativeTime" class="notif__time">{{ relativeTime }}</span>
-        <span v-if="!notification.read" class="notif__dot" aria-label="غير مقروء" />
+        <span v-if="!notification.read" class="notif__dot" aria-label="غير مقروء"></span>
         <DsButton
           v-if="notification.actionLabel"
           variant="ghost"

@@ -19,19 +19,25 @@
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateStripeCheckout } from "src/queries/checkout_management/mutation/CreateStripeCheckout";
 import { StripePublishableKey } from "src/queries/checkout_management/query/StripePublishableKey";
-import { mapState, mapActions } from "vuex";
+import { storeToRefs } from "pinia";
+import { useCartStore } from "src/stores/cart";
+import { useSettingsStore } from "src/stores/settings";
+import { apolloClient } from "src/apollo/client";
 
 export default {
+  setup () {
+    const cart = useCartStore();
+    const settings = useSettingsStore();
+    const { shoppingCartDataList } = storeToRefs(cart);
+    const { currency } = storeToRefs(settings);
+    return { cart, settings, shoppingCartDataList, currency };
+  },
   data() {
     return {
       errorMessages: [],
       alert: false,
       visible: false,
     };
-  },
-  computed: {
-    ...mapState("shoppingCart", ["shoppingCartDataList"]),
-    ...mapState("settings", ["currency"]),
   },
   watch: {
     errorMessages(value) {
@@ -41,7 +47,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions("shoppingCart", ["setSaveCheckoutOrderIDAction"]),
     errorHandler(errorsObj) {
       // console.log(errorsObj);
       for (const key in errorsObj) {
@@ -72,7 +77,7 @@ export default {
         // TODO: Make the order
         const orderResult = await this.getOrderResult(courseIds);
         // TODO: Save the order result to the store for the success checkout
-        this.setSaveCheckoutOrderIDAction(orderResult.order.pk);
+        this.cart.setSaveCheckoutOrderID(orderResult.order.pk);
         // TODO: Get the stripe key from the backend
         const stripKey = await this.getStripeKeyFromTheBackend();
         // TODO: Intialize the stripe objct with strip key to make the payment
@@ -120,7 +125,7 @@ export default {
     },
 
     async getOrderResult(courseIds) {
-      const result = await this.$apollo.mutate({
+      const result = await apolloClient.mutate({
         mutation: CreateNewOrderWithBulkOrderDetails,
         variables: {
           courseIds: courseIds,
@@ -139,7 +144,7 @@ export default {
     },
 
     async getStripeKeyFromTheBackend() {
-      const stripeKeyResult = await this.$apollo.query({
+      const stripeKeyResult = await apolloClient.query({
         query: StripePublishableKey,
       });
 
@@ -149,7 +154,7 @@ export default {
     },
 
     async getStripPaymentUrlFromTheBackend(orderResult) {
-      const stripPaymentresult = await this.$apollo.mutate({
+      const stripPaymentresult = await apolloClient.mutate({
         mutation: CreateStripeCheckout,
         variables: {
           orderId: orderResult.order.pk,

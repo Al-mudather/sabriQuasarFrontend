@@ -108,13 +108,23 @@
 <script>
 import { RegisterNewUser } from 'src/queries/account_management/mutation/RegisterNewUser'
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
-import { mapActions, mapState } from 'vuex'
-import GoogleAuthentication from 'src/components/Account/GoogleAuthentication'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { apolloClient } from 'src/apollo/client'
+import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue'
 import DsInput from 'src/design-system/components/DsInput.vue'
 
 export default {
   name: 'SignUp',
   components: { GoogleAuthentication, DsInput },
+
+  setup () {
+    const auth = useAuthStore()
+    const settings = useSettingsStore()
+    const { isEnglish } = storeToRefs(settings)
+    return { auth, settings, isEnglish }
+  },
 
   data () {
     return {
@@ -135,8 +145,6 @@ export default {
     }
   },
 
-  computed: { ...mapState('settings', ['isEnglish']) },
-
   beforeRouteEnter (to, from, next) {
     next(vm => { vm.prevRoute = from.fullPath })
   },
@@ -146,13 +154,6 @@ export default {
   },
 
   methods: {
-    ...mapActions('authentication', [
-      'loginAction',
-      'setSignUpDialogAction',
-      'setRegisterationDialogAction',
-      'SET_USER_DATA_ACTION'
-    ]),
-
     goTerms ()   { this.$router.push({ name: 'terms-and-conditions' }) },
     goPrivacy () { this.$router.push('/privacyPolicy').catch(() => this.$router.push({ name: 'terms-and-conditions' })) },
     goLogin ()   { this.$router.push({ name: 'login' }) },
@@ -190,7 +191,7 @@ export default {
       if (!this.validate()) return
       this.visible = true
       try {
-        const signUp_res = await this.$apollo.mutate({
+        const signUp_res = await apolloClient.mutate({
           mutation: RegisterNewUser,
           variables: {
             email: this.email,
@@ -204,10 +205,10 @@ export default {
             token: signUp_res.data.register.token,
             refresh: signUp_res.data.register.refreshToken
           }
-          await this.loginAction(tokenAuth)
+          await this.auth.login(tokenAuth)
           try {
-            const profile = await this.$apollo.query({ query: GetMyProfileData })
-            this.SET_USER_DATA_ACTION(profile.data.me)
+            const profile = await apolloClient.query({ query: GetMyProfileData })
+            this.auth.setUser(profile.data.me)
           } catch (e) { /* non-blocking */ }
           this.$router.push({ name: 'registeration-code' })
         } else if (signUp_res.data.register.errors) {

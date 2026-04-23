@@ -31,7 +31,7 @@
         :id="inputId"
         ref="input"
         class="ds-textarea__control"
-        :value="value"
+        :value="modelValue"
         :placeholder="placeholder"
         :disabled="disabled"
         :required="required"
@@ -71,7 +71,7 @@
       >
         <slot name="helper" />
       </p>
-      <span v-else class="ds-textarea__helper-spacer" />
+      <span v-else class="ds-textarea__helper-spacer"></span>
 
       <span
         v-if="maxlength"
@@ -91,12 +91,9 @@ let _uid = 0;
 export default {
   name: 'DsTextarea',
   inheritAttrs: false,
-  model: {
-    prop: 'value',
-    event: 'input'
-  },
+  emits: ['update:modelValue', 'focus', 'blur'],
   props: {
-    value:       { type: [String, Number], default: '' },
+    modelValue:  { type: [String, Number], default: '' },
     label:       { type: String, default: '' },
     placeholder: { type: String, default: '' },
     disabled:    { type: Boolean, default: false },
@@ -136,7 +133,7 @@ export default {
   },
   methods: {
     onInput(e) {
-      this.$emit('input', e.target.value);
+      this.$emit('update:modelValue', e.target.value);
     },
     onFocus(e) {
       this.focused = true;

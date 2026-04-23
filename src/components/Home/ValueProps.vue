@@ -21,7 +21,7 @@
             'value-props__card--high': i === 2
           }"
         >
-          <span class="value-props__icon" aria-hidden="true" v-html="v.icon" />
+          <span class="value-props__icon" aria-hidden="true" v-html="v.icon"></span>
           <h3 class="value-props__title">{{ v.title }}</h3>
           <p class="value-props__body">{{ v.body }}</p>
         </ds-card>

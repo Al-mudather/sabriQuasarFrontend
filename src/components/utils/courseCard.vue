@@ -27,7 +27,7 @@
           v-if="course.enrolled"
           variant="accent"
           full-width
-          @click.native.stop="goToClassroom"
+          @click.stop="goToClassroom"
         >
           {{ $t('الى الدرس') }}
         </ds-button>
@@ -35,7 +35,7 @@
           v-else
           variant="primary"
           full-width
-          @click.native.stop="addToCart"
+          @click.stop="addToCart"
         >
           {{ $t('إضافة للسلة') }}
         </ds-button>
@@ -43,7 +43,7 @@
           variant="ghost"
           size="sm"
           full-width
-          @click.native.stop="goToDetails"
+          @click.stop="goToDetails"
         >
           {{ $t('التفاصيل') }}
         </ds-button>
@@ -53,7 +53,10 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { useCartStore } from 'src/stores/cart'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 
 const formatPrice = (num, digits = 3) => {
@@ -73,14 +76,20 @@ export default {
   name: 'courseCard',
   props: ['name', 'instructor', 'unit', 'price', 'course'],
 
+  setup () {
+    const auth = useAuthStore()
+    const settings = useSettingsStore()
+    const cart = useCartStore()
+    const { user } = storeToRefs(auth)
+    const { isEnglish, currency } = storeToRefs(settings)
+    return { auth, settings, cart, user, isEnglish, currency }
+  },
+
   data () {
     return { FORMAT_THE_IAMGE_URL }
   },
 
   computed: {
-    ...mapState('authentication', ['user']),
-    ...mapState('settings', ['isEnglish', 'currency']),
-
     displayTitle () { return this.name || this.course.title },
 
     formattedPrice () {
@@ -95,8 +104,6 @@ export default {
   },
 
   methods: {
-    ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
-
     goToDetails () {
       this.$router.push({
         name: 'course-details',
@@ -109,7 +116,7 @@ export default {
     },
 
     addToCart () {
-      this.setShoppingCartDataListAction({ user: this.user, course: this.course })
+      this.cart.addCourseToCart({ user: this.user, course: this.course })
       this.$router.push({ name: 'cart' })
     }
   }

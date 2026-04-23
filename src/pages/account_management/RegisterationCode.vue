@@ -14,7 +14,7 @@
         <input
           v-for="(d, i) in digits"
           :key="i"
-          :ref="`d${i}`"
+          :ref="el => { if (el) otpRefs[i] = el }"
           class="otp__box"
           inputmode="numeric"
           pattern="[0-9]*"
@@ -53,10 +53,19 @@
 
 <script>
 import { JoinPlatform } from 'src/queries/pyramid_marketing_management/mutation/JoinPlatform'
-import { mapState, mapActions } from 'vuex'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { storeToRefs } from 'pinia'
+import { useMutation } from '@vue/apollo-composable'
 
 export default {
   name: 'RegisterationCode',
+
+  setup () {
+    const pyramid = usePyramidStore()
+    const { registerationCode } = storeToRefs(pyramid)
+    const joinPlatform = useMutation(JoinPlatform)
+    return { pyramid, registerationCode, _joinPlatform: joinPlatform }
+  },
 
   data () {
     return {
@@ -64,18 +73,18 @@ export default {
       visible: false,
       cooldown: 60,
       timer: null,
-      apiError: ''
+      apiError: '',
+      otpRefs: []
     }
   },
 
   computed: {
-    ...mapState('pyramidManagement', ['registerationCode']),
     r_code () { return this.digits.join('') },
     isComplete () { return this.digits.every(d => d !== '') }
   },
 
-  beforeDestroy () {
-    this.SET_REGISTERATION_CODE_ACTION('')
+  beforeUnmount () {
+    this.pyramid.setRegisterationCode('')
     if (this.timer) clearInterval(this.timer)
   },
 
@@ -91,17 +100,15 @@ export default {
   },
 
   methods: {
-    ...mapActions('pyramidManagement', ['SET_REGISTERATION_CODE_ACTION']),
-
     focusBox (i) {
-      const el = this.$refs[`d${i}`]
-      if (el && el[0]) el[0].focus()
+      const el = this.otpRefs[i]
+      if (el) el.focus()
     },
 
     onInput (e, i) {
       const v = e.target.value.replace(/\D/g, '')
       const char = v.slice(-1) || ''
-      this.$set(this.digits, i, char)
+      this.digits[i] = char
       if (char && i < 5) this.focusBox(i + 1)
     },
 
@@ -121,7 +128,7 @@ export default {
       const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6)
       if (!text) return
       e.preventDefault()
-      for (let i = 0; i < 6; i++) this.$set(this.digits, i, text[i] || '')
+      for (let i = 0; i < 6; i++) this.digits[i] = text[i] || ''
       this.focusBox(Math.min(text.length, 5))
     },
 
@@ -153,10 +160,7 @@ export default {
       this.apiError = ''
       this.visible = true
       try {
-        const res = await this.$apollo.mutate({
-          mutation: JoinPlatform,
-          variables: { marketingCode: this.r_code, input: {} }
-        })
+        const res = await this._joinPlatform.mutate({ marketingCode: this.r_code, input: {} })
         if (res.data.joinPlatform.success) {
           this.$q.notify({
             type: 'positive',
@@ -165,7 +169,7 @@ export default {
             position: 'top',
             message: this.$t('مرحباً بك')
           })
-          this.SET_REGISTERATION_CODE_ACTION('')
+          this.pyramid.setRegisterationCode('')
           this.$router.push({ name: 'Home' })
         }
       } catch (e) {

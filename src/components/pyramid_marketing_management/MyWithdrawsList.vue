@@ -36,6 +36,8 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import { MyPyramidWithdraws } from 'src/queries/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
 import moment from 'moment'
 
@@ -47,19 +49,14 @@ const priceLookup = [
 export default {
   name: 'MyWithdrawsList',
 
-  data () { return { withdrawLists: [] } },
+  setup () {
+    const { result } = useQuery(MyPyramidWithdraws, null, { errorPolicy: 'all' })
+    const withdrawLists = computed(() => result.value?.myPyramidWithdraws || [])
+    return { withdrawLists }
+  },
 
   computed: {
     withdrawEdges () { return this.$_.get(this.withdrawLists, 'edges', []) || [] }
-  },
-
-  apollo: {
-    myPyramidWithdraws: {
-      query () { return MyPyramidWithdraws },
-      result (result) {
-        if (!result.loading) this.withdrawLists = result.data.myPyramidWithdraws
-      }
-    }
   },
 
   methods: {

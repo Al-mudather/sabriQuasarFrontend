@@ -29,7 +29,7 @@
         :href="classroomUrl"
         :variant="isCompleted ? 'secondary' : 'accent'"
         full-width
-        @click.native.stop
+        @click.stop
       >
         {{ ctaLabel }}
       </ds-button>

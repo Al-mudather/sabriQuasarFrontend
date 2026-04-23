@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import courseCard from 'components/utils/courseCard'
+import courseCard from 'components/utils/courseCard.vue'
 export default {
   name: 'Evaluation',
   components: {

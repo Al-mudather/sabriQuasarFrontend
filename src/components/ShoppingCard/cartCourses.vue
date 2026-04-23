@@ -12,7 +12,7 @@
         <DsButton
           variant="accent"
           size="lg"
-          @click.native="$router.push({ name: 'courses' })"
+          @click="$router.push({ name: 'courses' })"
         >
           {{ $t('تصفح الدورات') }}
         </DsButton>
@@ -144,7 +144,7 @@
                 variant="ghost"
                 size="md"
                 :disabled="!promoCode || promoApplied"
-                @click.native="applyPromo"
+                @click="applyPromo"
               >
                 {{ promoApplied ? $t('تمت الإضافة') : $t('تطبيق') }}
               </DsButton>
@@ -163,7 +163,7 @@
             size="lg"
             full-width
             class="cart-courses__cta"
-            @click.native="goToAuthenticationCartPage"
+            @click="goToAuthenticationCartPage"
           >
             {{ $t('متابعة الشراء') }}
           </DsButton>
@@ -179,8 +179,11 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { storeToRefs } from 'pinia'
 import _ from 'lodash'
+import { useCartStore } from 'src/stores/cart'
+import { useSettingsStore } from 'src/stores/settings'
+import { apolloClient } from 'src/apollo/client'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 
 import { CreateNewOrderWithBulkOrderDetails } from 'src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
@@ -194,6 +197,14 @@ export default {
 
   components: { DsInput, PriceDisplay },
 
+  setup () {
+    const cart = useCartStore()
+    const settings = useSettingsStore()
+    const { shoppingCartDataList } = storeToRefs(cart)
+    const { isEnglish, currency } = storeToRefs(settings)
+    return { cart, settings, shoppingCartDataList, isEnglish, currency }
+  },
+
   data () {
     return {
       FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
@@ -205,9 +216,6 @@ export default {
   },
 
   computed: {
-    ...mapState('shoppingCart', ['shoppingCartDataList']),
-    ...mapState('settings', ['isEnglish', 'currency']),
-
     hasItems () {
       return this.shoppingCartDataList && this.shoppingCartDataList.length > 0
     },
@@ -232,7 +240,7 @@ export default {
       immediate: true,
       handler (v) {
         // Persist total fees for downstream steps (unchanged behaviour).
-        this.setTotalPaymentFeesAction(v)
+        this.cart.setTotalPaymentFees(v)
       }
     }
   },
@@ -242,14 +250,6 @@ export default {
   },
 
   methods: {
-    ...mapActions('shoppingCart', [
-      'deleteShoppinCartDataListAction',
-      'setShoppinCartDataListAction',
-      'setTotalPaymentFeesAction',
-      'SET_BRAINTREE_CLIENT_TOKEN_Action',
-      'SET_ORDER_DATA_Action'
-    ]),
-
     itemAmount (item) {
       try {
         const map = JSON.parse(item.course.currency)
@@ -285,7 +285,7 @@ export default {
     },
 
     async getBraintreePaymentUrlFromTheBackend (orderResult) {
-      const braintreePaymentresult = await this.$apollo.mutate({
+      const braintreePaymentresult = await apolloClient.mutate({
         mutation: CreateBraintreeCheckout,
         variables: {
           orderId: orderResult.order.pk
@@ -302,8 +302,8 @@ export default {
         const courseIds = this.getOrdersIds()
         const orderResult = await this.getOrderResult(courseIds)
         const braintreeClientToken = await this.getBraintreePaymentUrlFromTheBackend(orderResult)
-        this.SET_BRAINTREE_CLIENT_TOKEN_Action(braintreeClientToken)
-        this.SET_ORDER_DATA_Action(orderResult)
+        this.cart.setBraintreeClientToken(braintreeClientToken)
+        this.cart.setOrderData(orderResult)
       } catch (error) {
         // silent
       }
@@ -314,7 +314,7 @@ export default {
     },
 
     async getOrderResult (courseIds) {
-      const result = await this.$apollo.mutate({
+      const result = await apolloClient.mutate({
         mutation: CreateNewOrderWithBulkOrderDetails,
         variables: { courseIds: courseIds }
       })
@@ -339,7 +339,6 @@ export default {
 
     goToAuthenticationCartPage () {
       if (this.shoppingCartDataList.length > 0) {
-        this.$root.$emit('activateShoppingProgress', 'loginCart')
         this.$router.push({ name: 'login-cart' })
       } else {
         this.$q.notify({
@@ -355,11 +354,11 @@ export default {
     removeCourseFromCart (item) {
       const data = this.shoppingCartDataList
       this.lodash.remove(data, element => element.course.id === item.course.id)
-      this.setShoppinCartDataListAction(data)
+      this.cart.setCartList(data)
     },
 
     deleteTheShoppCart () {
-      this.deleteShoppinCartDataListAction()
+      this.cart.deleteCart()
     }
   }
 }

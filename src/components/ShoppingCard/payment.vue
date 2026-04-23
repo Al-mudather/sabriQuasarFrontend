@@ -3,7 +3,7 @@
     <!-- Sub-view: Bankak (bank transfer attach) -->
     <div v-if="showBankakPayment" class="cart-payment__subview">
       <header class="cart-payment__subview-head">
-        <DsButton variant="ghost" size="md" @click.native="goBackToOptions">
+        <DsButton variant="ghost" size="md" @click="goBackToOptions">
           ← {{ $t('رجوع') }}
         </DsButton>
         <div>
@@ -23,7 +23,7 @@
     <!-- Sub-view: Stripe card -->
     <div v-else-if="showStripePayment" class="cart-payment__subview">
       <header class="cart-payment__subview-head">
-        <DsButton variant="ghost" size="md" @click.native="goBackToOptions">
+        <DsButton variant="ghost" size="md" @click="goBackToOptions">
           ← {{ $t('رجوع') }}
         </DsButton>
         <div>
@@ -62,7 +62,7 @@
           full-width
           :loading="stripeLoading"
           :disabled="stripeLoading"
-          @click.native="initiateStripePayment"
+          @click="initiateStripePayment"
         >
           {{ $t('ادفع الآن') }}
         </DsButton>
@@ -99,7 +99,7 @@
               @click="selectedMethod = m.id"
             >
               <span class="cart-payment__method-indicator" aria-hidden="true">
-                <span class="cart-payment__method-dot" />
+                <span class="cart-payment__method-dot"></span>
               </span>
               <span class="cart-payment__method-icon" aria-hidden="true">
                 <q-icon :name="m.icon" size="1.5rem" />
@@ -119,7 +119,7 @@
           <DsButton
             variant="ghost"
             size="md"
-            @click.native="$router.push({ name: 'user-info' })"
+            @click="$router.push({ name: 'user-info' })"
           >
             ← {{ $t('عودة') }}
           </DsButton>
@@ -127,7 +127,7 @@
             variant="accent"
             size="lg"
             :disabled="!selectedMethod"
-            @click.native="confirmMethod"
+            @click="confirmMethod"
           >
             {{ $t('تأكيد الدفع') }}
           </DsButton>
@@ -192,9 +192,12 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { storeToRefs } from 'pinia'
 import _ from 'lodash'
 
+import { useCartStore } from 'src/stores/cart'
+import { useSettingsStore } from 'src/stores/settings'
+import { apolloClient } from 'src/apollo/client'
 import { CreateNewOrderWithBulkOrderDetails } from 'src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
 import { CreateStripeCheckout } from 'src/queries/checkout_management/mutation/CreateStripeCheckout'
 import { StripePublishableKey } from 'src/queries/checkout_management/query/StripePublishableKey'
@@ -212,6 +215,14 @@ export default {
     PriceDisplay
   },
 
+  setup () {
+    const cart = useCartStore()
+    const settings = useSettingsStore()
+    const { shoppingCartDataList, totalPaymentFees } = storeToRefs(cart)
+    const { currency } = storeToRefs(settings)
+    return { cart, settings, shoppingCartDataList, totalPaymentFees, currency }
+  },
+
   data () {
     return {
       showBankakPayment: false,
@@ -223,9 +234,6 @@ export default {
   },
 
   computed: {
-    ...mapState('shoppingCart', ['shoppingCartDataList', 'totalPaymentFees']),
-    ...mapState('settings', ['currency']),
-
     availableMethods () {
       // Only expose methods that are actually wired up today: bankak + stripe.
       return [
@@ -251,7 +259,7 @@ export default {
     this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
 
     try {
-      const res = await this.$apollo.query({ query: GetMyProfileData })
+      const res = await apolloClient.query({ query: GetMyProfileData })
       if (res.data.me && res.data.me.pk) {
         const me = res.data.me
         if (!(me.fullName && (me.phoneNumber2 || me.phoneNumber3))) {
@@ -280,15 +288,9 @@ export default {
       })
       this.$router.push({ name: 'Home' })
     }
-    this.$root.$emit('activateShoppingProgress', 'paymentData')
   },
 
   methods: {
-    ...mapActions('shoppingCart', [
-      'setShoppinCartDataListAction',
-      'setSaveCheckoutOrderIDAction'
-    ]),
-
     itemAmount (item) {
       try {
         const map = JSON.parse(item.course.currency)
@@ -332,7 +334,7 @@ export default {
         const courseIds = this.getOrdersIds()
         const orderResult = await this.getOrderResult(courseIds)
 
-        this.setSaveCheckoutOrderIDAction(orderResult.order.pk)
+        this.cart.setSaveCheckoutOrderID(orderResult.order.pk)
 
         const stripeKey = await this.getStripeKeyFromTheBackend()
         const stripe = this.$Stripe(stripeKey)
@@ -362,7 +364,7 @@ export default {
     },
 
     async getOrderResult (courseIds) {
-      const result = await this.$apollo.mutate({
+      const result = await apolloClient.mutate({
         mutation: CreateNewOrderWithBulkOrderDetails,
         variables: { courseIds: courseIds }
       })
@@ -375,12 +377,12 @@ export default {
     },
 
     async getStripeKeyFromTheBackend () {
-      const stripeKeyResult = await this.$apollo.query({ query: StripePublishableKey })
+      const stripeKeyResult = await apolloClient.query({ query: StripePublishableKey })
       return JSON.parse(this.$_.get(stripeKeyResult, '[data][stripePublishableKey]')).publisableKey
     },
 
     async getStripPaymentUrlFromTheBackend (orderResult) {
-      const stripPaymentResult = await this.$apollo.mutate({
+      const stripPaymentResult = await apolloClient.mutate({
         mutation: CreateStripeCheckout,
         variables: {
           orderId: orderResult.order.pk,
@@ -413,7 +415,7 @@ export default {
 
     async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
       try {
-        const join_permission_res = await this.$apollo.query({
+        const join_permission_res = await apolloClient.query({
           query: CheckTheUserPermissionToUsePlatforme
         })
         const errors = this.$_.get(join_permission_res, '[errors]')
@@ -446,7 +448,7 @@ export default {
     removeCourseFromCart (item) {
       const data = this.shoppingCartDataList
       this.lodash.remove(data, element => element.course.id === item.course.id)
-      this.setShoppinCartDataListAction(data)
+      this.cart.setCartList(data)
     }
   }
 }

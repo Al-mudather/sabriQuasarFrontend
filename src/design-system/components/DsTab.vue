@@ -35,7 +35,7 @@ export default {
   created() {
     this.registerSelf();
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.dsTabs) this.dsTabs.unregister(this.name);
   },
   methods: {

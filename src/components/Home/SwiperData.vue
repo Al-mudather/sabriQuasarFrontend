@@ -18,9 +18,10 @@
                                 :slides-per-view="3"
                                 :space-between="50"
                                 ref="mySwiper"
-                                :options="swiperOptions"
+                                :grab-cursor="true"
+                                :centered-slides="true"
                                 @swiper="onSwiper"
-                                @slideChange="onSlideChange"
+                                @slide-change="onSlideChange"
                             >
                                 <swiper-slide v-for="i in 3" :key="i">
                                     <review-card
@@ -38,11 +39,10 @@
 </template>
 
 <script>
-import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
-import 'swiper/swiper-bundle.css'
-import 'swiper/swiper.min.css'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import 'swiper/css'
 
-import reviewCard from 'components/utils/reviewCard'
+import reviewCard from 'components/utils/reviewCard.vue'
 export default {
   name: 'SwiperData',
   data () {

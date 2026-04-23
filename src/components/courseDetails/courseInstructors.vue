@@ -35,26 +35,26 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import { GetAllCourseInstructors } from 'src/queries/course_management/query/GetAllCourseInstructors'
 
 export default {
   name: 'CourseInstructors',
   props: ['course_id'],
 
-  data () {
-    return { allCourseInstructors: { edges: [] } }
+  setup (props) {
+    const { result, loading } = useQuery(
+      GetAllCourseInstructors,
+      () => ({ courseID: props.course_id }),
+      { errorPolicy: 'all' }
+    )
+    const allCourseInstructors = computed(() => result.value?.allCourseInstructors || { edges: [] })
+    return { allCourseInstructors, loading }
   },
 
   computed: {
-    instructors () { return this.$_.get(this.allCourseInstructors, 'edges', []) },
-    loading () { return this.$apollo.queries.allCourseInstructors.loading }
-  },
-
-  apollo: {
-    allCourseInstructors: {
-      query () { return GetAllCourseInstructors },
-      variables () { return { courseID: this.course_id } }
-    }
+    instructors () { return this.$_.get(this.allCourseInstructors, 'edges', []) }
   },
 
   methods: {

@@ -32,7 +32,7 @@
         ref="input"
         class="ds-input__control"
         :type="type"
-        :value="value"
+        :value="modelValue"
         :placeholder="placeholder"
         :disabled="disabled"
         :required="required"
@@ -78,12 +78,9 @@ let _uid = 0;
 export default {
   name: 'DsInput',
   inheritAttrs: false,
-  model: {
-    prop: 'value',
-    event: 'input'
-  },
+  emits: ['update:modelValue', 'focus', 'blur'],
   props: {
-    value:       { type: [String, Number], default: '' },
+    modelValue:  { type: [String, Number], default: '' },
     type:        {
       type: String,
       default: 'text',
@@ -120,7 +117,7 @@ export default {
   },
   methods: {
     onInput(e) {
-      this.$emit('input', e.target.value);
+      this.$emit('update:modelValue', e.target.value);
     },
     onFocus(e) {
       this.focused = true;

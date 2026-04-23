@@ -7,8 +7,8 @@
       </div>
 
       <div class="stats-wedges__row">
-        <template v-for="(s, i) in stats">
-          <div :key="`wedge-${i}`" class="stats-wedges__cell">
+        <template v-for="(s, i) in stats" :key="`wedge-${i}`">
+          <div class="stats-wedges__cell">
             <stat-card
               :value="s.value"
               :label="s.label"
@@ -21,7 +21,6 @@
           </div>
           <span
             v-if="i < stats.length - 1"
-            :key="`hair-${i}`"
             class="stats-wedges__hair"
             aria-hidden="true"
           />
@@ -32,6 +31,8 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import StatCard from 'src/components/shared/StatCard.vue'
 import { GetTotalUsersStatistics } from 'src/queries/account_management/query/GetTotalUsers'
 import { GetAllInstructorsStatiscs } from 'src/queries/account_management/query/GetAllInstructorsStatiscs'
@@ -41,36 +42,18 @@ import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses
 export default {
   name: 'StatsWedges',
   components: { StatCard },
-  data () {
-    return {
-      totalUsers: 0,
-      allInstructorCount: 0,
-      allCoursesHours: 0,
-      coursesTotal: 0
-    }
-  },
-  apollo: {
-    totalUsers: {
-      query: GetTotalUsersStatistics,
-      update: data => Number(data.totalUsers) || 0,
-      error () {}
-    },
-    allInstructorCount: {
-      query: GetAllInstructorsStatiscs,
-      update: data => Number(data.allInstructorCount) || 0,
-      error () {}
-    },
-    allCoursesHours: {
-      query: GetAllCoursesHoursStatistics,
-      update: data => Number(data.allCoursesHours) || 0,
-      error () {}
-    },
-    coursesTotal: {
-      query: GetAllCourses,
-      variables: { first: 1, isDraft: false },
-      update: data => (data.allCourses && Number(data.allCourses.totalCount)) || 0,
-      error () {}
-    }
+  setup () {
+    const { result: totalUsersResult } = useQuery(GetTotalUsersStatistics, null, { errorPolicy: 'all' })
+    const { result: instructorsResult } = useQuery(GetAllInstructorsStatiscs, null, { errorPolicy: 'all' })
+    const { result: hoursResult } = useQuery(GetAllCoursesHoursStatistics, null, { errorPolicy: 'all' })
+    const { result: coursesResult } = useQuery(GetAllCourses, { first: 1, isDraft: false }, { errorPolicy: 'all' })
+
+    const totalUsers = computed(() => Number(totalUsersResult.value?.totalUsers) || 0)
+    const allInstructorCount = computed(() => Number(instructorsResult.value?.allInstructorCount) || 0)
+    const allCoursesHours = computed(() => Number(hoursResult.value?.allCoursesHours) || 0)
+    const coursesTotal = computed(() => Number(coursesResult.value?.allCourses?.totalCount) || 0)
+
+    return { totalUsers, allInstructorCount, allCoursesHours, coursesTotal }
   },
   computed: {
     stats () {

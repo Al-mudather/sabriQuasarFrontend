@@ -17,7 +17,7 @@
     >
       <span v-if="$slots.icon || icon" class="ds-accordion-item__icon">
         <slot name="icon">
-          <i v-if="icon" :class="icon" aria-hidden="true" />
+          <i v-if="icon" :class="icon" aria-hidden="true"></i>
         </slot>
       </span>
       <span class="ds-accordion-item__titles">
@@ -109,7 +109,7 @@ export default {
       : null;
     if (this._ro && this.$refs.inner) this._ro.observe(this.$refs.inner);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.dsAccordion) this.dsAccordion.unregisterRef(this.name);
     if (this._ro) this._ro.disconnect();
   },

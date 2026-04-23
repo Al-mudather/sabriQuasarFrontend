@@ -10,16 +10,21 @@
 
 <script>
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
-import { mapState } from "vuex";
+import { storeToRefs } from "pinia";
+import { useCartStore } from "src/stores/cart";
+import { apolloClient } from "src/apollo/client";
+import { openURL } from "quasar";
 
 export default {
+    setup () {
+        const cart = useCartStore();
+        const { shoppingCartDataList } = storeToRefs(cart);
+        return { cart, shoppingCartDataList };
+    },
     data() {
         return {
             visible: false
         };
-    },
-    computed: {
-        ...mapState("shoppingCart", ["shoppingCartDataList"])
     },
     methods: {
         async buyTheCoursesUsingSmartNode() {
@@ -58,7 +63,7 @@ export default {
         },
 
         async getOrderResult(courseIds) {
-            const result = await this.$apollo.mutate({
+            const result = await apolloClient.mutate({
                 mutation: CreateNewOrderWithBulkOrderDetails,
                 variables: {
                     courseIds: courseIds
@@ -78,7 +83,7 @@ export default {
         },
 
         async makeSmartNodePayment(orderResult) {
-            const smartNoderesult = await this.$apollo.mutate({
+            const smartNoderesult = await apolloClient.mutate({
                 mutation: CreateSmartNodeCheckout,
                 variables: {
                     card: '',

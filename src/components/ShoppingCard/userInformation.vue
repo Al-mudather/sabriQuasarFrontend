@@ -95,7 +95,7 @@
           <DsButton
             variant="ghost"
             size="md"
-            @click.native="$router.push({ name: 'cart' })"
+            @click="$router.push({ name: 'cart' })"
           >
             ← {{ $t('عودة إلى السلة') }}
           </DsButton>
@@ -106,7 +106,7 @@
             size="lg"
             :loading="submitting"
             :disabled="submitting"
-            @click.native="UPDATE_THE_USER_PROFILE"
+            @click="UPDATE_THE_USER_PROFILE"
           >
             {{ $t('التالي — الدفع') }}
           </DsButton>
@@ -119,6 +119,7 @@
 <script>
 import { UpdateUserProfile } from 'src/queries/account_management/mutation/UpdateUserProfile'
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
+import { apolloClient } from 'src/apollo/client'
 
 import DsInput from 'src/design-system/components/DsInput.vue'
 import DsTextarea from 'src/design-system/components/DsTextarea.vue'
@@ -166,7 +167,7 @@ export default {
 
   async created () {
     try {
-      const res = await this.$apollo.query({ query: GetMyProfileData })
+      const res = await apolloClient.query({ query: GetMyProfileData })
       if (res.data.me && res.data.me.pk) {
         const me = res.data.me
         if (me.fullName && (me.phoneNumber2 || me.phoneNumber3)) {
@@ -214,7 +215,7 @@ export default {
           ? `${this.countryCode}${this.whatsAppNumber.replace(/\D/g, '')}`
           : null
 
-        const res = await this.$apollo.mutate({
+        const res = await apolloClient.mutate({
           mutation: UpdateUserProfile,
           variables: {
             input: {

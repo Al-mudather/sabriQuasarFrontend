@@ -70,7 +70,12 @@ import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { CheckoutSubscription } from 'src/queries/notification_management/subscription/CheckoutSubscription'
-import { mapActions, mapState } from 'vuex'
+import { useCartStore } from 'src/stores/cart'
+import { storeToRefs } from 'pinia'
+import { useSubscription } from '@vue/apollo-composable'
+import { apolloClient } from 'src/apollo/client'
+import { onBeforeRouteUpdate, onBeforeRouteLeave } from 'vue-router'
+import { ref } from 'vue'
 
 // Route-name → zero-indexed step. Order: cart, login, userInfo, payment, success.
 const STEP_BY_ROUTE = {
@@ -89,17 +94,24 @@ export default {
 
   components: { AppHeader, AppFooter },
 
-  data () { return { prevRoute: null } },
+  setup () {
+    const cart = useCartStore()
+    const { shoppingCartDataList } = storeToRefs(cart)
+    const prevRoute = ref(null)
 
-  apollo: {
-    $subscribe: {
-      checkoutSubscription: { query: CheckoutSubscription }
-    }
+    // Passive subscription — fires for cache updates, no direct use of result here.
+    useSubscription(CheckoutSubscription)
+
+    // Track previous route for back-navigation UX — Vue Router 4 replacement
+    // for the old beforeRouteEnter `next(vm => ...)` callback. We capture the
+    // "from" path on route changes into/through this layout.
+    onBeforeRouteUpdate((to, from) => { prevRoute.value = from.fullPath })
+    onBeforeRouteLeave((to, from) => { prevRoute.value = from.fullPath })
+
+    return { cart, shoppingCartDataList, prevRoute }
   },
 
   computed: {
-    ...mapState('shoppingCart', ['shoppingCartDataList']),
-
     steps () {
       return [
         { key: 'cart',     label: 'السلة' },
@@ -128,21 +140,14 @@ export default {
 
   mounted () {
     this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
-    this.$root.$on('activateShoppingProgress', () => { /* no-op */ })
-  },
-
-  beforeDestroy () { this.$root.$off('activateShoppingProgress') },
-
-  beforeRouteEnter (to, from, next) {
-    next(vm => { vm.prevRoute = from.fullPath })
+    // Vue 3 removed $root event bus. The 'activateShoppingProgress' handler
+    // was a no-op; all cart-progress state now flows through Pinia + route.
   },
 
   methods: {
-    ...mapActions('shoppingCart', ['setShoppinCartDialogAction']),
-
     async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
       try {
-        await this.$apollo.query({ query: CheckTheUserPermissionToUsePlatforme })
+        await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
       } catch (e) {
         if (e.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
           this.$q.notify({

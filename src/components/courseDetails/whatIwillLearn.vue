@@ -34,17 +34,22 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import { GetAllWhatYouWillLearnByCourseID } from 'src/queries/course_management/query/GetAllWhatYouWillLearnByCourseID'
 
 export default {
   name: 'WhatIwillLearn',
   props: ['course_id'],
 
-  data () {
-    return {
-      loading: true,
-      allWhatYouWillLearn: { pageInfo: { hasNextPage: '' } }
-    }
+  setup (props) {
+    const { result, loading, fetchMore } = useQuery(
+      GetAllWhatYouWillLearnByCourseID,
+      () => ({ courseID: props.course_id, limit: 5 }),
+      { errorPolicy: 'all' }
+    )
+    const allWhatYouWillLearn = computed(() => result.value?.allWhatYouWillLearn || { pageInfo: { hasNextPage: '' } })
+    return { allWhatYouWillLearn, loading, fetchMore }
   },
 
   computed: {
@@ -52,17 +57,9 @@ export default {
     hasNextPage () { return this.$_.get(this.allWhatYouWillLearn, '[pageInfo][hasNextPage]', false) }
   },
 
-  apollo: {
-    allWhatYouWillLearn: {
-      query () { return GetAllWhatYouWillLearnByCourseID },
-      variables () { return { courseID: this.course_id, limit: 5 } },
-      result (data) { this.loading = data.loading }
-    }
-  },
-
   methods: {
     async loadMoreData () {
-      await this.$apollo.queries.allWhatYouWillLearn.fetchMore({
+      await this.fetchMore({
         variables: {
           courseID: this.course_id,
           cursor: this.allWhatYouWillLearn.pageInfo.endCursor
@@ -71,12 +68,13 @@ export default {
           const newEdges = fetchMoreResult.allWhatYouWillLearn.edges
           const pageInfo = fetchMoreResult.allWhatYouWillLearn.pageInfo
           if (newEdges.length) {
-            this.allWhatYouWillLearn = {
-              __typename: previousResult.allWhatYouWillLearn.__typename,
-              edges: [...previousResult.allWhatYouWillLearn.edges, ...newEdges],
-              pageInfo
+            return {
+              allWhatYouWillLearn: {
+                __typename: previousResult.allWhatYouWillLearn.__typename,
+                edges: [...previousResult.allWhatYouWillLearn.edges, ...newEdges],
+                pageInfo
+              }
             }
-            return { allWhatYouWillLearn: this.allWhatYouWillLearn }
           }
           return previousResult
         }

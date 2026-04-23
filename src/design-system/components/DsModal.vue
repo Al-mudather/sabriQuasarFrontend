@@ -1,12 +1,12 @@
 <template>
   <q-dialog
-    :value="value"
+    :model-value="modelValue"
     :persistent="persistent"
     :seamless="false"
     :content-class="contentClass"
     transition-show="ds-modal-in"
     transition-hide="ds-modal-out"
-    @input="onInput"
+    @update:model-value="onInput"
     @show="$emit('show')"
     @hide="$emit('hide')"
   >
@@ -46,12 +46,9 @@
 <script>
 export default {
   name: "DsModal",
-  model: {
-    prop: "value",
-    event: "input",
-  },
+  emits: ["update:modelValue", "show", "hide"],
   props: {
-    value: { type: Boolean, default: false },
+    modelValue: { type: Boolean, default: false },
     persistent: { type: Boolean, default: false },
     size: {
       type: String,
@@ -68,10 +65,10 @@ export default {
   },
   methods: {
     onInput(val) {
-      this.$emit("input", val);
+      this.$emit("update:modelValue", val);
     },
     close() {
-      this.$emit("input", false);
+      this.$emit("update:modelValue", false);
     },
   },
 };

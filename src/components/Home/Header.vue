@@ -11,26 +11,18 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import SwiperHeader from 'src/components/Home/SwiperHeader.vue'
 import PromotionSection from 'src/components/Home/PromotionSection.vue'
 import { AllHomePageSliders } from 'src/queries/marketing_management/query/AllHomePageSliders.js'
 
 export default {
   name: 'Header',
-  data () {
-    return {
-      data: ''
-    }
-  },
-  apollo: {
-    allHomePageSliders: {
-      query: AllHomePageSliders,
-      result (res) {
-        if (!res.loading) {
-          this.data = res.data.allHomePageSliders.edges
-        }
-      }
-    }
+  setup () {
+    const { result } = useQuery(AllHomePageSliders, null, { errorPolicy: 'all' })
+    const data = computed(() => result.value?.allHomePageSliders?.edges || '')
+    return { data }
   },
   components: {
     SwiperHeader,

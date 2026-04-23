@@ -65,6 +65,8 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import contentItem from 'components/courseDetails/contentItem.vue'
 import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
 
@@ -75,25 +77,20 @@ export default {
   components: { contentItem },
   props: ['course_id'],
 
-  data () {
-    return {
-      allCourseUnits: { pageInfo: { hasNextPage: '' } },
-      allUnitsData: []
-    }
+  setup (props) {
+    const { result, loading: qLoading } = useQuery(
+      GetAllCourseUnitsByCourseID,
+      () => ({ courseID: props.course_id, limit: 5 }),
+      { errorPolicy: 'all' }
+    )
+    const allUnitsData = computed(() => result.value?.allCourseUnits || [])
+    return { allUnitsData, qLoading }
   },
 
   computed: {
     units () { return this.$_.get(this.allUnitsData, 'edges', []) || [] },
     totalUnits () { return this.$_.get(this.allUnitsData, 'totalCount', this.units.length) },
-    loading () { return this.$apollo.queries.allCourseUnits.loading && this.units.length === 0 }
-  },
-
-  apollo: {
-    allCourseUnits: {
-      query () { return GetAllCourseUnitsByCourseID },
-      variables () { return { courseID: this.course_id, limit: 5 } },
-      update (data) { this.allUnitsData = this.$_.get(data, '[allCourseUnits]') }
-    }
+    loading () { return this.qLoading && this.units.length === 0 }
   },
 
   methods: {

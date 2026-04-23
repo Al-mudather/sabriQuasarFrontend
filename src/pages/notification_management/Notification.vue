@@ -76,7 +76,10 @@
 <script>
 import AppNotification from 'src/components/shared/Notification.vue'
 import { GetAllMyNotifications } from 'src/queries/notification_management/query/GetAllMyNotifications'
-import { mapActions } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
+import { useQuery } from '@vue/apollo-composable'
+import { computed, ref } from 'vue'
+import _ from 'lodash'
 
 const TYPE_BUCKET = {
   CHECKOUT_DONE: 'transactions',
@@ -108,32 +111,38 @@ export default {
   name: 'Notification',
   components: { AppNotification },
 
-  data () {
+  setup () {
+    const settings = useSettingsStore()
+    const notifQuery = useQuery(
+      GetAllMyNotifications,
+      { orderBy: ['-id'], limit: 15 }
+    )
+
+    const myNotifications = computed(() => notifQuery.result.value?.myNotifications || null)
+    const loading = notifQuery.loading
+
+    const readLocal = ref({})
+
     return {
-      myNotifications: '',
-      loading: false,
-      notificationData: [],
-      readLocal: {},        // pk -> true (optimistic local read state)
-      activeFilter: 'all'
+      settings,
+      _notifQuery: notifQuery,
+      myNotifications,
+      loading,
+      readLocal
     }
   },
 
-  apollo: {
-    myNotifications: {
-      query: GetAllMyNotifications,
-      variables: { orderBy: ['-id'], limit: 15 },
-      result (res) {
-        this.loading = res.loading
-        if (!res.loading) this.notificationData = res.data.myNotifications
-      }
+  data () {
+    return {
+      activeFilter: 'all'
     }
   },
 
   computed: {
     notifications () {
-      return (this.$_.get(this.notificationData, 'edges', []) || []).map(e => e.node)
+      return (_.get(this.myNotifications, 'edges', []) || []).map(e => e.node)
     },
-    hasMore () { return this.$_.get(this.myNotifications, '[pageInfo][hasNextPage]', false) },
+    hasMore () { return _.get(this.myNotifications, '[pageInfo][hasNextPage]', false) },
     unreadCount () {
       return this.notifications.filter(n => !this.readLocal[n.pk]).length
     },
@@ -164,11 +173,9 @@ export default {
     }
   },
 
-  mounted () { this.setActiveNavAction('NOTIFICATION') },
+  mounted () { this.settings.setActiveNav('NOTIFICATION') },
 
   methods: {
-    ...mapActions('settings', ['setActiveNavAction']),
-
     mapNotification (n) {
       return {
         pk: n.pk,
@@ -193,7 +200,7 @@ export default {
     },
 
     onRead (n) {
-      if (n && n.pk != null) this.$set(this.readLocal, n.pk, true)
+      if (n && n.pk != null) this.readLocal[n.pk] = true
     },
 
     onNotificationClick (evt) {
@@ -212,7 +219,7 @@ export default {
     },
 
     markAllRead () {
-      for (const n of this.notifications) this.$set(this.readLocal, n.pk, true)
+      for (const n of this.notifications) this.readLocal[n.pk] = true
       this.$q.notify({
         type: 'positive',
         position: 'top',
@@ -222,18 +229,19 @@ export default {
     },
 
     async LOAD_MORE_DATA () {
-      await this.$apollo.queries.myNotifications.fetchMore({
+      await this._notifQuery.fetchMore({
         variables: { cursor: this.myNotifications.pageInfo.endCursor },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           const newEdges = fetchMoreResult.myNotifications.edges
           const pageInfo = fetchMoreResult.myNotifications.pageInfo
           if (newEdges.length) {
-            this.myNotifications = {
-              __typename: previousResult.myNotifications.__typename,
-              edges: [...previousResult.myNotifications.edges, ...newEdges],
-              pageInfo
+            return {
+              myNotifications: {
+                __typename: previousResult.myNotifications.__typename,
+                edges: [...previousResult.myNotifications.edges, ...newEdges],
+                pageInfo
+              }
             }
-            return { myNotifications: this.myNotifications }
           }
           return previousResult
         }

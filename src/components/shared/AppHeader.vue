@@ -77,9 +77,9 @@
         aria-label="فتح القائمة"
         @click="drawerOpen = true"
       >
-        <span class="app-header__hamburger-bar" />
-        <span class="app-header__hamburger-bar" />
-        <span class="app-header__hamburger-bar" />
+        <span class="app-header__hamburger-bar"></span>
+        <span class="app-header__hamburger-bar"></span>
+        <span class="app-header__hamburger-bar"></span>
       </button>
     </div>
 
@@ -104,7 +104,7 @@
           class="app-header__drawer-link"
           :class="{ 'is-active': isActive(link.to) }"
           :aria-current="isActive(link.to) ? 'page' : null"
-          @click.native="drawerOpen = false"
+          @click="drawerOpen = false"
         >
           {{ link.label }}
         </router-link>
@@ -114,7 +114,7 @@
           <router-link
             to="/account/login"
             class="app-header__login"
-            @click.native="drawerOpen = false"
+            @click="drawerOpen = false"
           >
             تسجيل الدخول
           </router-link>
@@ -134,8 +134,8 @@
 </template>
 
 <script>
-import DsButton from 'src/design-system/components/DsButton';
-import DsModal from 'src/design-system/components/DsModal';
+import DsButton from 'src/design-system/components/DsButton.vue';
+import DsModal from 'src/design-system/components/DsModal.vue';
 import { LOGO, BRAND } from 'src/design-system/brand';
 
 export default {
@@ -171,7 +171,7 @@ export default {
       window.addEventListener('scroll', this.onScroll, { passive: true });
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (typeof window !== 'undefined') {
       window.removeEventListener('scroll', this.onScroll);
     }

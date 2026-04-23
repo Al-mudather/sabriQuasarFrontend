@@ -6,15 +6,15 @@
 //   - vueBraintree:        Track C wires braintree-web-drop-in directly.
 //   - vueVimeoPlayer:      Track C uses @vimeo/player directly.
 //
-// What survives: the hover-min stylesheet import plus the $jquery / $_ globals
-// that legacy components may still read off `this`.
+// Track C audit: the previously-registered `$jquery` / `$_` globals had zero
+// call sites in `src/**` (verified via grep for `this.$jquery` and `this.$_`).
+// `$_` is still registered in `boot/lodash.js` for any future consumer; this
+// file no longer touches globals and only keeps the surviving hover-min
+// stylesheet import.
 
 import { boot } from 'quasar/wrappers'
 import '../assets/css/hover-min.css'
-import jQuery from 'jquery'
-import _ from 'lodash'
 
-export default boot(({ app }) => {
-  app.config.globalProperties.$jquery = jQuery
-  app.config.globalProperties.$_ = _
+export default boot(() => {
+  // CSS side-effect only.
 })

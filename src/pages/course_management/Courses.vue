@@ -44,45 +44,41 @@
           <!-- Speciality group -->
           <section class="filter-panel__group">
             <h3 class="filter-panel__group-title">{{ $t('التخصص') }}</h3>
-            <ApolloQuery :query="GetSpecialities" :variables="{ courseNumber: 20 }">
-              <template v-slot="{ result: { loading, data } }">
-                <div v-if="loading" class="filter-panel__skeletons">
-                  <ds-skeleton v-for="i in 5" :key="i" shape="line" width="80%" />
-                </div>
-                <ul v-else class="filter-panel__list">
-                  <li class="filter-panel__item">
-                    <label class="check">
-                      <input
-                        type="radio"
-                        name="speciality"
-                        :value="null"
-                        :checked="activeSpecialityID === null"
-                        @change="setSpeciality(null)"
-                      />
-                      <span class="check__mark" aria-hidden="true"></span>
-                      <span class="check__label">{{ $t('كل التخصصات') }}</span>
-                    </label>
-                  </li>
-                  <li
-                    v-for="spec in $_.get(data, 'allCourseSpecialities.edges', [])"
-                    :key="spec.node.id"
-                    class="filter-panel__item"
-                  >
-                    <label class="check">
-                      <input
-                        type="radio"
-                        name="speciality"
-                        :value="spec.node.pk"
-                        :checked="activeSpecialityID === spec.node.pk"
-                        @change="setSpeciality(spec.node.pk)"
-                      />
-                      <span class="check__mark" aria-hidden="true"></span>
-                      <span class="check__label">{{ spec.node.speciality }}</span>
-                    </label>
-                  </li>
-                </ul>
-              </template>
-            </ApolloQuery>
+            <div v-if="specialitiesLoading" class="filter-panel__skeletons">
+              <ds-skeleton v-for="i in 5" :key="i" shape="line" width="80%" />
+            </div>
+            <ul v-else class="filter-panel__list">
+              <li class="filter-panel__item">
+                <label class="check">
+                  <input
+                    type="radio"
+                    name="speciality"
+                    :value="null"
+                    :checked="activeSpecialityID === null"
+                    @change="setSpeciality(null)"
+                  />
+                  <span class="check__mark" aria-hidden="true"></span>
+                  <span class="check__label">{{ $t('كل التخصصات') }}</span>
+                </label>
+              </li>
+              <li
+                v-for="spec in specialitiesEdges"
+                :key="spec.node.id"
+                class="filter-panel__item"
+              >
+                <label class="check">
+                  <input
+                    type="radio"
+                    name="speciality"
+                    :value="spec.node.pk"
+                    :checked="activeSpecialityID === spec.node.pk"
+                    @change="setSpeciality(spec.node.pk)"
+                  />
+                  <span class="check__mark" aria-hidden="true"></span>
+                  <span class="check__label">{{ spec.node.speciality }}</span>
+                </label>
+              </li>
+            </ul>
           </section>
 
           <!-- Price group -->
@@ -165,70 +161,58 @@
         </div>
 
         <!-- =========== Results =========== -->
-        <ApolloQuery
-          :query="GetAllCourses"
-          :variables="queryVariables"
-          :fetch-policy="'cache-and-network'"
-          @result="onQueryResult"
-        >
-          <template v-slot="{ result: { loading, data }, query }">
-            <!-- Loading skeletons -->
-            <div v-if="loading && !data" class="catalog__grid">
-              <ds-card
-                v-for="i in 6"
-                :key="`sk-${i}`"
-                class="catalog__skeleton"
-              >
-                <template #media>
-                  <ds-skeleton shape="rect" height="180px" radius="0" />
-                </template>
-                <ds-skeleton shape="line" width="85%" />
-                <ds-skeleton shape="line" width="55%" />
-                <template #footer>
-                  <ds-skeleton shape="pill" width="100%" />
-                </template>
-              </ds-card>
-            </div>
+        <div v-if="coursesLoading && !coursesData" class="catalog__grid">
+          <ds-card
+            v-for="i in 6"
+            :key="`sk-${i}`"
+            class="catalog__skeleton"
+          >
+            <template #media>
+              <ds-skeleton shape="rect" height="180px" radius="0" />
+            </template>
+            <ds-skeleton shape="line" width="85%" />
+            <ds-skeleton shape="line" width="55%" />
+            <template #footer>
+              <ds-skeleton shape="pill" width="100%" />
+            </template>
+          </ds-card>
+        </div>
 
-            <!-- Empty -->
-            <ds-empty-state
-              v-else-if="!loading && $_.get(data, 'allCourses.edgeCount', 0) <= 0"
-              variant="search"
-              size="md"
-              :title="$t('لا توجد دورات تطابق البحث')"
-              :body="$t('جرّب إزالة بعض الفلاتر أو تعديل كلمات البحث')"
+        <ds-empty-state
+          v-else-if="!coursesLoading && coursesEdgeCount <= 0"
+          variant="search"
+          size="md"
+          :title="$t('لا توجد دورات تطابق البحث')"
+          :body="$t('جرّب إزالة بعض الفلاتر أو تعديل كلمات البحث')"
+        />
+
+        <div v-else>
+          <div ref="grid" class="catalog__grid">
+            <course-card
+              v-for="course in coursesEdges"
+              :key="course.node.id"
+              class="catalog__grid-item"
+              :course="course.node"
+              :name="course.node.title"
+              instructor="مركز دكتور صبري ابو قرون"
+              :price="course.node.courseFee"
+              unit="SDG"
             />
+          </div>
 
-            <!-- Grid -->
-            <div v-else>
-              <div ref="grid" class="catalog__grid">
-                <course-card
-                  v-for="course in $_.get(data, 'allCourses.edges', [])"
-                  :key="course.node.id"
-                  class="catalog__grid-item"
-                  :course="course.node"
-                  :name="course.node.title"
-                  instructor="مركز دكتور صبري ابو قرون"
-                  :price="course.node.courseFee"
-                  unit="SDG"
-                />
-              </div>
-
-              <div
-                v-if="$_.get(data, 'allCourses.pageInfo.hasNextPage', false)"
-                class="catalog__load-more"
-              >
-                <ds-button
-                  variant="secondary"
-                  :loading="loading"
-                  @click="loadMore(query, data)"
-                >
-                  {{ $t('تحميل المزيد') }}
-                </ds-button>
-              </div>
-            </div>
-          </template>
-        </ApolloQuery>
+          <div
+            v-if="coursesHasNext"
+            class="catalog__load-more"
+          >
+            <ds-button
+              variant="secondary"
+              :loading="coursesLoading"
+              @click="loadMore()"
+            >
+              {{ $t('تحميل المزيد') }}
+            </ds-button>
+          </div>
+        </div>
       </section>
     </div>
   </main>
@@ -238,7 +222,12 @@
 import courseCard from 'components/utils/courseCard.vue'
 import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses.js'
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites.js'
-import { mapActions } from 'vuex'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { useQuery } from '@vue/apollo-composable'
+import { apolloClient } from 'src/apollo/client'
+import { computed, ref, reactive } from 'vue'
+import _ from 'lodash'
 import { cascade } from 'src/design-system/motion.js'
 import DsBreadcrumb from 'src/design-system/components/DsBreadcrumb.vue'
 import DsBreadcrumbItem from 'src/design-system/components/DsBreadcrumbItem.vue'
@@ -257,10 +246,58 @@ export default {
     DsTag
   },
 
+  setup () {
+    const auth = useAuthStore()
+    const settings = useSettingsStore()
+
+    // Specialities filter list
+    const specQuery = useQuery(GetSpecialities, { courseNumber: 20 })
+    const specialitiesLoading = specQuery.loading
+    const specialitiesEdges = computed(
+      () => _.get(specQuery.result.value, 'allCourseSpecialities.edges', []) || []
+    )
+
+    // Reactive query variables — shared ref so useQuery updates on filter change.
+    const queryVars = reactive({ first: 12, orderBy: ['-createdAt'], isDraft: false })
+    const coursesQuery = useQuery(GetAllCourses, () => queryVars, {
+      fetchPolicy: 'cache-and-network'
+    })
+    const coursesData = computed(() => coursesQuery.result.value || null)
+    const coursesLoading = coursesQuery.loading
+    const coursesEdges = computed(
+      () => _.get(coursesData.value, 'allCourses.edges', []) || []
+    )
+    const coursesEdgeCount = computed(
+      () => _.get(coursesData.value, 'allCourses.edgeCount', 0) || 0
+    )
+    const coursesHasNext = computed(
+      () => _.get(coursesData.value, 'allCourses.pageInfo.hasNextPage', false) || false
+    )
+
+    const totalCount = ref(null)
+    coursesQuery.onResult((res) => {
+      const tc = res.data && res.data.allCourses && res.data.allCourses.totalCount
+      if (Number.isFinite(Number(tc))) totalCount.value = Number(tc)
+    })
+
+    return {
+      auth,
+      settings,
+      _coursesQuery: coursesQuery,
+      queryVars,
+      specialitiesLoading,
+      specialitiesEdges,
+      coursesData,
+      coursesLoading,
+      coursesEdges,
+      coursesEdgeCount,
+      coursesHasNext,
+      totalCount
+    }
+  },
+
   data () {
     return {
-      GetAllCourses,
-      GetSpecialities,
       // raw input — debounced into `search`
       searchInput: '',
       search: '',
@@ -269,7 +306,6 @@ export default {
       activeSpecialityLabel: '',
       activePriceFilter: 'all',
       sortValue: 'newest',
-      totalCount: null,
       isDraft: false,
       didInitialCascade: false
     }
@@ -309,6 +345,17 @@ export default {
       if (this.activePriceFilter === 'free') vars.isPaid = false
       if (this.activePriceFilter === 'paid') vars.isPaid = true
       return vars
+    },
+
+    effectiveVars () {
+      // Syncs computed filters into the reactive object feeding useQuery.
+      const v = this.queryVariables
+      // Clear keys that are no longer set so useQuery sees removed filters.
+      Object.keys(this.queryVars).forEach(k => {
+        if (!(k in v)) delete this.queryVars[k]
+      })
+      Object.assign(this.queryVars, v)
+      return v
     },
 
     hasActiveFilters () {
@@ -353,24 +400,32 @@ export default {
       this.searchTimer = setTimeout(() => {
         this.search = val
       }, 300)
+    },
+    queryVariables: {
+      deep: true,
+      handler (v) {
+        Object.keys(this.queryVars).forEach(k => {
+          if (!(k in v)) delete this.queryVars[k]
+        })
+        Object.assign(this.queryVars, v)
+      }
     }
   },
 
   mounted () {
-    this.setActiveNavAction('COURSES')
-    this.setNavbarSearchAction(false)
+    this.settings.setActiveNav('COURSES')
+    this.auth.setNavbarSearch(false)
     this.hydrateFromRoute()
+    // Prime queryVars on mount.
+    Object.assign(this.queryVars, this.queryVariables)
   },
 
-  destroyed () {
-    this.setNavbarSearchAction(true)
+  unmounted () {
+    this.auth.setNavbarSearch(true)
     if (this.searchTimer) clearTimeout(this.searchTimer)
   },
 
   methods: {
-    ...mapActions('authentication', ['setNavbarSearchAction']),
-    ...mapActions('settings', ['setActiveNavAction']),
-
     formatNum (n) {
       const v = Number(n)
       if (!Number.isFinite(v)) return ''
@@ -399,7 +454,7 @@ export default {
 
     async resolveSpecialityLabel (pk) {
       try {
-        const { data } = await this.$apollo.query({
+        const { data } = await apolloClient.query({
           query: GetSpecialities,
           variables: { courseNumber: 50 }
         })
@@ -430,24 +485,10 @@ export default {
       this.activePriceFilter = 'all'
     },
 
-    onQueryResult ({ data }) {
-      const tc = data && data.allCourses && data.allCourses.totalCount
-      if (Number.isFinite(Number(tc))) this.totalCount = Number(tc)
-      // Initial cascade once data arrives
-      this.$nextTick(() => {
-        if (this.didInitialCascade) return
-        const grid = this.$refs.grid
-        if (!grid) return
-        const items = grid.querySelectorAll('.catalog__grid-item')
-        if (!items.length) return
-        cascade(items, { stagger: 0.06, y: 14, duration: 0.5 })
-        this.didInitialCascade = true
-      })
-    },
-
-    async loadMore (query, data) {
+    async loadMore () {
+      const data = this.coursesData
       if (!data || !data.allCourses || !data.allCourses.pageInfo.hasNextPage) return
-      await query.fetchMore({
+      await this._coursesQuery.fetchMore({
         variables: {
           ...this.queryVariables,
           cursor: data.allCourses.pageInfo.endCursor

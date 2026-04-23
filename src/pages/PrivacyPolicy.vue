@@ -1532,12 +1532,15 @@ have about working with the API.
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'PrivacyPolicy',
-  computed: {
-    ...mapState('settings', ['isEnglish'])
+  setup () {
+    const settings = useSettingsStore()
+    const { isEnglish } = storeToRefs(settings)
+    return { isEnglish }
   }
 }
 </script>

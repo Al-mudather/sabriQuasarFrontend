@@ -3,7 +3,7 @@
     <div class="category-section__container">
       <header class="category-section__header">
         <div class="category-section__title-block">
-          <span class="category-section__icon" aria-hidden="true" v-html="iconSvg" />
+          <span class="category-section__icon" aria-hidden="true" v-html="iconSvg"></span>
           <h2 class="category-section__title">{{ speciality.speciality }}</h2>
           <span class="category-section__count">{{ countLabel }}</span>
         </div>
@@ -82,12 +82,13 @@
 // When Track B flips to Vue 3 + Vite, this can be promoted to `import type`.
 /** @typedef {import('src/graphql').AllCoursesInSpecialityQuery} AllCoursesInSpecialityQuery */
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
 import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality'
 import CourseCard from 'src/components/shared/CourseCard.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
-import { mapState } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { cascade } from 'src/design-system/motion'
 
@@ -131,6 +132,8 @@ export default {
   //   }
   // },
   setup (props) {
+    const settings = useSettingsStore()
+    const { currency, isEnglish } = storeToRefs(settings)
     const { result, loading } = useQuery(
       GetAllCoursesInSpeciality,
       () => ({ specialityId: props.speciality.pk, first: 8, isDraft: false }),
@@ -138,10 +141,9 @@ export default {
     )
     const coursesInSpeciality = computed(() => result.value?.allCoursesInSpeciality || null)
     const isLoading = computed(() => loading.value && !coursesInSpeciality.value)
-    return { coursesInSpeciality, isLoading }
+    return { coursesInSpeciality, isLoading, currency, isEnglish }
   },
   computed: {
-    ...mapState('settings', ['currency', 'isEnglish']),
     courses () {
       const edges = (this.coursesInSpeciality && this.coursesInSpeciality.edges) || []
       return edges.map(e => e.node).filter(Boolean)

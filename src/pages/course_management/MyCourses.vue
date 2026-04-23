@@ -151,7 +151,9 @@ import DsTabs from 'src/design-system/components/DsTabs.vue'
 import DsTab from 'src/design-system/components/DsTab.vue'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
-import { mapActions } from 'vuex'
+import { useSettingsStore } from 'src/stores/settings'
+import { useQuery } from '@vue/apollo-composable'
+import { computed } from 'vue'
 
 /**
  * Progress derivation
@@ -179,19 +181,26 @@ export default {
 
   components: { CourseCard, StatCard, DsTabs, DsTab },
 
-  data () {
+  setup () {
+    const settings = useSettingsStore()
+    const enrollQuery = useQuery(
+      AllEnrollmentsForCurrentUser,
+      { limit: 100, cursor: '' },
+      { fetchPolicy: 'network-only' }
+    )
+    const allEnrollmentsForCurrentUser = computed(
+      () => enrollQuery.result.value?.allEnrollmentsForCurrentUser || null
+    )
     return {
-      courseLimit: 100,
-      allEnrollmentsForCurrentUser: {},
-      activeTab: 'in-progress'
+      settings,
+      allEnrollmentsForCurrentUser,
+      _enrollLoading: enrollQuery.loading
     }
   },
 
-  apollo: {
-    allEnrollmentsForCurrentUser: {
-      query () { return AllEnrollmentsForCurrentUser },
-      variables () { return { limit: this.courseLimit, cursor: '' } },
-      fetchPolicy: 'network-only'
+  data () {
+    return {
+      activeTab: 'in-progress'
     }
   },
 
@@ -201,8 +210,7 @@ export default {
     },
 
     isLoading () {
-      return this.$apollo.queries.allEnrollmentsForCurrentUser.loading &&
-        this.enrollments.length === 0
+      return this._enrollLoading && this.enrollments.length === 0
     },
 
     /**
@@ -257,11 +265,10 @@ export default {
   },
 
   mounted () {
-    this.setActiveNavAction && this.setActiveNavAction('BORD')
+    this.settings.setActiveNav('BORD')
   },
 
   methods: {
-    ...mapActions('settings', ['setActiveNavAction']),
     goToCoursesPage () {
       this.$router.push({ name: 'courses' })
     },

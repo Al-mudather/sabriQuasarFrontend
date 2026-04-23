@@ -40,11 +40,17 @@
 <script>
 import { UpdateCertificateNameQuery } from 'src/queries/account_management/mutation/UpdateCertificateName'
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
-import { mapActions } from 'vuex'
+import { useAuthStore } from 'src/stores/auth'
+import { apolloClient } from 'src/apollo/client'
 
 export default {
   name: 'UpdataCertificateName',
   props: ['certificateNameData'],
+
+  setup () {
+    const auth = useAuthStore()
+    return { auth }
+  },
 
   data () {
     return {
@@ -66,8 +72,6 @@ export default {
   },
 
   methods: {
-    ...mapActions('authentication', ['GET_MY_PROFILE_DATA_ACTION']),
-
     errorHandler (errorsObj) {
       for (const key in errorsObj) {
         for (const val of errorsObj[key]) this.errorMessages.push(val.message)
@@ -91,7 +95,7 @@ export default {
       }
       this.visible = true
       try {
-        const result = await this.$apollo.mutate({
+        const result = await apolloClient.mutate({
           mutation: UpdateCertificateNameQuery,
           variables: {
             input: {
@@ -111,7 +115,7 @@ export default {
             progress: true,
             message: 'Certificate Name was set successfully'
           })
-          this.GET_MY_PROFILE_DATA_ACTION()
+          this.auth.getMyProfileData()
           this.$q.notify({
             type: 'warning',
             multiLine: true,

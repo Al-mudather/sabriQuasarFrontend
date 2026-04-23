@@ -9,7 +9,7 @@
     </svg>
 
     <!-- Logo watermark silhouette (cream-transparent gradient stand-in) -->
-    <div class="hero-indigo__watermark" aria-hidden="true" />
+    <div class="hero-indigo__watermark" aria-hidden="true"></div>
 
     <div class="hero-indigo__container">
       <div class="hero-indigo__grid">
@@ -30,7 +30,7 @@
                 </svg>
               </span>
               <span class="hero-indigo__inline-photo" aria-hidden="true">
-                <span class="hero-indigo__inline-photo-inner" />
+                <span class="hero-indigo__inline-photo-inner"></span>
               </span>
               <span class="hero-indigo__word">أقوى</span>
             </span>
@@ -70,7 +70,7 @@
         <div class="hero-indigo__portrait-wrap">
           <div ref="portrait" class="hero-indigo__portrait">
             <img :src="portraitSrc" alt="" />
-            <div class="hero-indigo__portrait-overlay" aria-hidden="true" />
+            <div class="hero-indigo__portrait-overlay" aria-hidden="true"></div>
             <div class="hero-indigo__badge">
               <span class="hero-indigo__badge-num">20+</span>
               <span class="hero-indigo__badge-label">سنة خبرة</span>
@@ -120,7 +120,7 @@ export default {
       }
     }, 200)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     if (this._breath && this._breath.kill) this._breath.kill()
     if (this._drift && this._drift.kill) this._drift.kill()
     if (this._cascade && this._cascade.kill) this._cascade.kill()

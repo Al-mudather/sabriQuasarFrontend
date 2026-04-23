@@ -31,10 +31,18 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { storeToRefs } from "pinia";
+import { useAuthStore } from "src/stores/auth";
+import { useSettingsStore } from "src/stores/settings";
 
 export default {
   name: "CoursesNavBar",
+  setup () {
+    const auth = useAuthStore();
+    const settings = useSettingsStore();
+    const { user, token } = storeToRefs(auth);
+    return { auth, settings, user, token };
+  },
   data() {
     return {
       lodash: this.$_,
@@ -42,15 +50,9 @@ export default {
     };
   },
 
-  computed: {
-    ...mapState("authentication", ["user", "token"]),
-  },
-
   methods: {
-    ...mapActions("settings", ["setIsEnglishAction", "setOpenMenuAction"]),
-
     changeMenuState() {
-      this.setOpenMenuAction(true);
+      this.settings.setOpenMenu(true);
     },
   },
 };

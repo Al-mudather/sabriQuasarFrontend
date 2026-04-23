@@ -35,9 +35,19 @@
 import FileUpload from "src/components/utils/FileUploader.vue";
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { UploadAttachmentTransaction } from "src/queries/checkout_management/mutation/UploadAttachmentTransaction";
-import { mapState, mapActions } from "vuex";
+import { storeToRefs } from "pinia";
+import { useCartStore } from "src/stores/cart";
+import { useSettingsStore } from "src/stores/settings";
+import { apolloClient } from "src/apollo/client";
 
 export default {
+  setup () {
+    const cart = useCartStore();
+    const settings = useSettingsStore();
+    const { shoppingCartDataList } = storeToRefs(cart);
+    const { currency } = storeToRefs(settings);
+    return { cart, settings, shoppingCartDataList, currency };
+  },
   data() {
     return {
       visible: false,
@@ -47,14 +57,8 @@ export default {
     };
   },
   components: { FileUpload },
-  computed: {
-    ...mapState("shoppingCart", ["shoppingCartDataList"]),
-    ...mapState("settings", ["currency"]),
-  },
 
   methods: {
-    ...mapActions("shoppingCart", ["deleteShoppinCartDataListAction"]),
-
     paymentImageHandler(val) {
       this.bankakBill = val;
     },
@@ -79,7 +83,7 @@ export default {
 
     async getOrderResult(courseIds) {
       try {
-        const result = await this.$apollo.mutate({
+        const result = await apolloClient.mutate({
           mutation: CreateNewOrderWithBulkOrderDetails,
           variables: {
             courseIds: courseIds,
@@ -136,7 +140,7 @@ export default {
           // TODO: Make the order
           const orderResult = await this.getOrderResult(courseIds);
           // TODO: Make payment using bankak
-          const bankakPaymentResult = await this.$apollo.mutate({
+          const bankakPaymentResult = await apolloClient.mutate({
             mutation: UploadAttachmentTransaction,
             variables: {
               input: {
@@ -171,7 +175,7 @@ export default {
           if (this.$_.get(dataObj, "[success]")) {
             this.visible = false;
             //TODO:
-            this.deleteShoppinCartDataListAction();
+            this.cart.deleteCart();
             //TODO: Go to the Success page
             this.$router.push({ name: "cart-success" });
           }

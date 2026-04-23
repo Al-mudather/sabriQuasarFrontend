@@ -18,7 +18,7 @@
             variant="accent"
             size="lg"
             full-width
-            @click.native="GoToLoginPage"
+            @click="GoToLoginPage"
           >
             {{ $t('لديّ حساب — تسجيل الدخول') }}
           </DsButton>
@@ -27,7 +27,7 @@
             variant="secondary"
             size="lg"
             full-width
-            @click.native="GoToSignUpPage"
+            @click="GoToSignUpPage"
           >
             {{ $t('إنشاء حساب جديد') }}
           </DsButton>
@@ -58,7 +58,7 @@
           variant="accent"
           size="lg"
           full-width
-          @click.native="GoToPaymentCartPage"
+          @click="GoToPaymentCartPage"
         >
           {{ $t('متابعة') }}
         </DsButton>
@@ -68,10 +68,17 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
 
 export default {
   name: 'loginCartpage',
+
+  setup () {
+    const auth = useAuthStore()
+    const { user, token } = storeToRefs(auth)
+    return { auth, user, token }
+  },
 
   data () {
     return {
@@ -79,12 +86,7 @@ export default {
     }
   },
 
-  computed: {
-    ...mapState('authentication', ['user', 'token'])
-  },
-
   mounted () {
-    this.$root.$emit('activateShoppingProgress', 'loginCart')
     if (this.token) {
       this.$router.push({ name: 'user-info' })
     }
