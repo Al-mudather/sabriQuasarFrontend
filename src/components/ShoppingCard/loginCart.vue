@@ -1,53 +1,69 @@
 <template>
-  <section class="login-cart">
-    <template v-if="!token">
-      <DsCard class="login-cart__card">
-        <div class="login-cart__content">
-          <q-icon name="lock_outline" size="2.5rem" class="login-cart__icon" />
-          <h2 class="login-cart__title">{{ $t('سجل دخولك لمتابعة الشراء') }}</h2>
-          <p class="login-cart__desc">
-            {{ $t('تحتاج إلى تسجيل الدخول أو إنشاء حساب قبل إتمام عملية الشراء') }}
-          </p>
-
-          <div class="login-cart__actions">
-            <DsButton
-              variant="primary"
-              size="lg"
-              full-width
-              @click.native="GoToLoginPage"
-            >
-              {{ $t('دخول') }}
-            </DsButton>
-            <DsButton
-              variant="secondary"
-              size="lg"
-              full-width
-              @click.native="GoToSignUpPage"
-            >
-              {{ $t('إنشـاء حســاب') }}
-            </DsButton>
-          </div>
+  <section class="login-cart" aria-label="تسجيل الدخول للمتابعة">
+    <DsCard v-if="!token" class="login-cart__card" padding="lg">
+      <div class="login-cart__content">
+        <div class="login-cart__crest" aria-hidden="true">
+          <q-icon name="lock_outline" size="1.75rem" />
         </div>
-      </DsCard>
-    </template>
 
-    <template v-else>
-      <DsCard class="login-cart__card">
-        <div class="login-cart__content">
-          <q-icon name="check_circle_outline" size="2.5rem" class="login-cart__icon login-cart__icon--success" />
-          <h2 class="login-cart__title">{{ $t('أنت مسجل الدخول') }}</h2>
-          <p class="login-cart__desc">{{ $t('يمكنك الآن متابعة عملية الشراء') }}</p>
+        <h2 class="login-cart__title">
+          {{ $t('أكمل خطوة واحدة قبل المتابعة') }}
+        </h2>
+        <p class="login-cart__desc">
+          {{ $t('سجل دخولك أو أنشئ حساباً جديداً لحفظ دوراتك ومتابعة طلبك بأمان.') }}
+        </p>
+
+        <div class="login-cart__actions">
           <DsButton
-            variant="primary"
+            variant="accent"
             size="lg"
             full-width
-            @click.native="GoToPaymentCartPage"
+            @click.native="GoToLoginPage"
           >
-            {{ $t('متابعة') }}
+            {{ $t('لديّ حساب — تسجيل الدخول') }}
+          </DsButton>
+
+          <DsButton
+            variant="secondary"
+            size="lg"
+            full-width
+            @click.native="GoToSignUpPage"
+          >
+            {{ $t('إنشاء حساب جديد') }}
           </DsButton>
         </div>
-      </DsCard>
-    </template>
+
+        <p class="login-cart__meta">
+          {{ $t('بالمتابعة فإنك توافق على') }}
+          <router-link :to="{ name: 'terms-and-conditions' }" class="login-cart__link">
+            {{ $t('الشروط والأحكام') }}
+          </router-link>
+          {{ $t('و') }}
+          <router-link :to="{ name: 'privacy-policy' }" class="login-cart__link">
+            {{ $t('سياسة الخصوصية') }}
+          </router-link>
+          .
+        </p>
+      </div>
+    </DsCard>
+
+    <DsCard v-else class="login-cart__card" padding="lg">
+      <div class="login-cart__content">
+        <div class="login-cart__crest login-cart__crest--ok" aria-hidden="true">
+          <q-icon name="check" size="1.75rem" />
+        </div>
+        <h2 class="login-cart__title">{{ $t('أنت مسجل الدخول') }}</h2>
+        <p class="login-cart__desc">{{ $t('يمكنك الآن متابعة عملية الشراء.') }}</p>
+        <DsButton
+          variant="accent"
+          size="lg"
+          full-width
+          @click.native="GoToPaymentCartPage"
+        >
+          {{ $t('متابعة') }}
+        </DsButton>
+      </div>
+    </DsCard>
   </section>
 </template>
 
@@ -59,7 +75,6 @@ export default {
 
   data () {
     return {
-      checked: false,
       lodash: this.$_
     }
   },
@@ -79,20 +94,20 @@ export default {
     GoToLoginPage () {
       this.$router.push({
         name: 'login',
-        query: { redirect: '/cart' }
+        query: { redirect: '/cart/userInfo' }
       })
     },
 
     GoToSignUpPage () {
       this.$router.push({
         name: 'signUp',
-        query: { redirect: '/cart' }
+        query: { redirect: '/cart/userInfo' }
       })
     },
 
     GoToPaymentCartPage () {
       if (!this.$_.isEmpty(this.user)) {
-        this.$router.push({ name: 'payment' })
+        this.$router.push({ name: 'user-info' })
       } else {
         this.$q.notify({
           type: 'warning',
@@ -114,7 +129,7 @@ export default {
 
   &__card {
     width: 100%;
-    max-width: 28rem;
+    max-width: 30rem;
   }
 
   &__content {
@@ -122,20 +137,32 @@ export default {
     flex-direction: column;
     align-items: center;
     gap: var(--ds-space-4);
-    padding: var(--ds-space-4) var(--ds-space-2);
     text-align: center;
   }
 
-  &__icon {
-    color: var(--ds-brand-600);
+  &__crest {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ds-cream, #f6f1ea);
+    color: var(--ds-indigo, #322873);
+    border: 1px solid var(--ds-indigo, #322873);
 
-    &--success { color: var(--ds-success); }
+    &--ok {
+      background: var(--ds-indigo, #322873);
+      color: var(--ds-cream, #f6f1ea);
+      border-color: var(--ds-indigo, #322873);
+    }
   }
 
   &__title {
     margin: 0;
     font-family: var(--ds-font-heading);
     font-size: var(--ds-text-xl);
+    line-height: 1.3;
     color: var(--ds-text);
   }
 
@@ -143,7 +170,7 @@ export default {
     margin: 0;
     font-size: var(--ds-text-sm);
     color: var(--ds-text-muted);
-    line-height: 1.6;
+    line-height: 1.7;
   }
 
   &__actions {
@@ -152,6 +179,21 @@ export default {
     gap: var(--ds-space-3);
     width: 100%;
     margin-block-start: var(--ds-space-2);
+  }
+
+  &__meta {
+    margin: 0;
+    font-size: var(--ds-text-xs);
+    color: var(--ds-text-muted);
+    line-height: 1.6;
+  }
+
+  &__link {
+    color: var(--ds-indigo, #322873);
+    text-decoration: none;
+    font-weight: var(--ds-weight-medium);
+
+    &:hover { text-decoration: underline; }
   }
 }
 </style>

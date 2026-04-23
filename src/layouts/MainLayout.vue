@@ -1,14 +1,6 @@
 <template>
-  <q-layout>
-    <MainNavBar />
-    <transition
-      appear
-      enter-active-class="animated fadeIn"
-      leave-active-class="animated fadeOut"
-    >
-      <Menu v-if="openMenu" />
-    </transition>
-    <ShoppingCart />
+  <q-layout view="hHh lpR fFf" :dir="$q.lang.rtl ? 'rtl' : 'rtl'">
+    <AppHeader variant="cream" :sticky="true" />
     <q-page-container>
       <transition
         appear
@@ -18,24 +10,22 @@
         <router-view />
       </transition>
     </q-page-container>
-    <Footer />
+    <AppFooter />
   </q-layout>
 </template>
 
 <script>
-import MainNavBar from 'components/utils/MainNavBar.vue'
-import Menu from 'components/Home/Menu.vue'
-import Footer from 'src/components/utils/Footer'
-import ShoppingCart from 'components/Home/Shopping_cart'
+import AppHeader from 'src/components/shared/AppHeader.vue'
+import AppFooter from 'src/components/shared/AppFooter.vue'
 import { LocalStorage, Quasar } from 'quasar'
 import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'MainLayout',
-  components: { MainNavBar, Menu, Footer, ShoppingCart },
+  components: { AppHeader, AppFooter },
 
   computed: {
-    ...mapState('settings', ['openMenu', 'isEnglish'])
+    ...mapState('settings', ['isEnglish'])
   },
 
   mounted () {

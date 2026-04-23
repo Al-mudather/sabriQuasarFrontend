@@ -4,94 +4,147 @@
 // properties (runtime overridable, theme-switching friendly) and
 // SCSS variables (compile-time, for media queries / math).
 //
-// Brand direction: navy + gold, Arabic-first, medical-professional.
-// Anti-templates: gradient blobs, neon purples, over-rounded UIs.
+// Brand direction: Royal Indigo (#322873 — the STC logo indigo)
+// + cream paper + terracotta accent. Arabic-first, RTL primary.
+// Editorial warmth, not corporate clinical.
+//
+// BANNED (never restore): pure #000/#FFF, SaaS blue (#1976D2,
+// #0066CC, #2563EB), emerald green (#0E6B55 and siblings),
+// neon or outer-glow shadows, mesh gradients.
 // =============================================================
 
 :root {
   // -----------------------------------------------------------
-  // Color — brand
+  // Brand — Royal Indigo (from the STC logo)
+  // 600 is the locked primary (#322873). 700 is the hover/deep.
   // -----------------------------------------------------------
-  --ds-brand-50:  #eaf1fb;
-  --ds-brand-100: #c9daf0;
-  --ds-brand-200: #9fbde0;
-  --ds-brand-300: #6d99cf;
-  --ds-brand-400: #3f78bd;
-  --ds-brand-500: #1c5ca5;   // hover-lighter
-  --ds-brand-600: #104982;   // primary — existing $mainColor
-  --ds-brand-700: #0c3a6a;
-  --ds-brand-800: #0a2c52;
-  --ds-brand-900: #061e39;
+  --ds-brand-50:  #ece9f5;
+  --ds-brand-100: #d1cae8;
+  --ds-brand-200: #ada3d6;
+  --ds-brand-300: #897dc3;
+  --ds-brand-400: #6957b0;
+  --ds-brand-500: #4d3e9f;   // Indigo Lifted — hover on indigo surfaces
+  --ds-brand-600: #322873;   // Royal Indigo — PRIMARY (locked to STC logo)
+  --ds-brand-700: #1f1847;   // Indigo Deep — pressed / dark text-on-indigo
+  --ds-brand-800: #16103a;
+  --ds-brand-900: #0d0a27;
 
-  // Accent — gold (CTAs, highlights)
-  --ds-accent-50:  #fff6dc;
-  --ds-accent-100: #ffe7a4;
-  --ds-accent-200: #fdd66d;
-  --ds-accent-300: #fcc74c;   // existing $yalloColor
-  --ds-accent-400: #f1b42a;
-  --ds-accent-500: #d69b18;
-  --ds-accent-600: #a8780f;
-
-  // Neutrals (warm-cool gray)
-  --ds-neutral-0:    #ffffff;
-  --ds-neutral-50:   #f7f8fa;
-  --ds-neutral-100:  #eef0f4;
-  --ds-neutral-200:  #dde1e9;
-  --ds-neutral-300:  #c2c8d4;
-  --ds-neutral-400:  #9ba3b2;
-  --ds-neutral-500:  #7b7b7b;   // existing $textColor
-  --ds-neutral-600:  #5b6271;
-  --ds-neutral-700:  #3f4656;
-  --ds-neutral-800:  #262b38;
-  --ds-neutral-900:  #13161e;
-
-  // Semantic
-  --ds-success: #1f9d55;
-  --ds-success-bg: #e4f6ec;
-  --ds-warning: #c28418;
-  --ds-warning-bg: #fef3dc;
-  --ds-danger:  #c23138;
-  --ds-danger-bg: #fbe5e7;
-  --ds-info:    var(--ds-brand-500);
-  --ds-info-bg: var(--ds-brand-50);
-
-  // Surface tokens (derived — swap for dark mode later)
-  --ds-surface:        var(--ds-neutral-0);
-  --ds-surface-muted:  var(--ds-neutral-50);
-  --ds-surface-sunken: var(--ds-neutral-100);
-  --ds-text:           var(--ds-neutral-800);
-  --ds-text-muted:     var(--ds-neutral-500);
-  --ds-text-onBrand:   var(--ds-neutral-0);
-  --ds-border:         var(--ds-neutral-200);
-  --ds-border-strong:  var(--ds-neutral-300);
+  // Convenience aliases that match the DESIGN.md naming
+  --ds-indigo:       #322873;
+  --ds-indigo-deep:  #1f1847;
+  --ds-indigo-lifted:#4d3e9f;
 
   // -----------------------------------------------------------
-  // Typography
+  // Accent — Terracotta (one instance per viewport)
+  // 300 is the signature accent value (#c1623c).
   // -----------------------------------------------------------
-  --ds-font-body:    'cairoR', 'Cairo', 'Segoe UI', 'Tahoma', sans-serif;
-  --ds-font-heading: 'cairoB', 'Cairo', 'Segoe UI', 'Tahoma', sans-serif;
+  --ds-accent-50:  #fbeee7;
+  --ds-accent-100: #f5d5c3;
+  --ds-accent-200: #dfa082;
+  --ds-accent-300: #c1623c;   // Terracotta — signature accent
+  --ds-accent-400: #a8522f;
+  --ds-accent-500: #8c4326;
+  --ds-accent-600: #6f351e;
+  --ds-accent-700: #542716;
+  --ds-accent-800: #3a1b0f;
+  --ds-accent-900: #210f08;
+
+  --ds-terracotta: #c1623c;
+
+  // -----------------------------------------------------------
+  // Neutrals — warm-cool gray, anchored to Ink Charcoal.
+  // Never pure black; all neutrals carry a brown warmth.
+  // -----------------------------------------------------------
+  --ds-neutral-0:    #fbf7f0;   // Ivory Surface (near-white with cream warmth)
+  --ds-neutral-50:   #f6f1ea;   // Cream Canvas
+  --ds-neutral-100:  #efe8dc;   // Surface Sunken
+  --ds-neutral-200:  #e2d9c9;
+  --ds-neutral-300:  #c9bfae;
+  --ds-neutral-400:  #a89a87;
+  --ds-neutral-500:  #8a7a6a;   // Warm Taupe — muted text, dividers
+  --ds-neutral-600:  #6b5d50;
+  --ds-neutral-700:  #4d4238;
+  --ds-neutral-800:  #2e2722;
+  --ds-neutral-900:  #1b1410;   // Ink Charcoal — primary text
+
+  // Named tokens from DESIGN.md for ergonomic consumption
+  --ds-cream:          #f6f1ea;
+  --ds-ivory:          #fbf7f0;
+  --ds-surface-cream:  #f6f1ea;
+  --ds-surface-ivory:  #fbf7f0;
+  --ds-surface-sunken-color: #efe8dc;
+  --ds-ink:            #1b1410;
+  --ds-taupe:          #8a7a6a;
+
+  // -----------------------------------------------------------
+  // Semantic — muted, warm-leaning. Never emerald, never SaaS.
+  // -----------------------------------------------------------
+  --ds-success:    #5a8e3a;
+  --ds-success-bg: #e8efde;
+  --ds-warning:    #b8862a;
+  --ds-warning-bg: #f5ead1;
+  --ds-danger:     #9e3524;
+  --ds-danger-bg:  #f2dad4;
+  --ds-info:       var(--ds-brand-600);
+  --ds-info-bg:    var(--ds-brand-50);
+
+  // -----------------------------------------------------------
+  // Surface tokens (derived)
+  // -----------------------------------------------------------
+  --ds-surface:          var(--ds-cream);          // page background
+  --ds-surface-muted:    var(--ds-ivory);          // deprecated alias — use surface-elevated
+  --ds-surface-elevated: var(--ds-ivory);          // cards, raised panels
+  --ds-surface-sunken:   var(--ds-surface-sunken-color);
+  --ds-surface-indigo:   var(--ds-brand-600);      // indigo hero / footer
+
+  --ds-text:            var(--ds-ink);
+  --ds-text-muted:      var(--ds-taupe);
+  --ds-text-onBrand:    var(--ds-ivory);
+  --ds-text-on-primary: var(--ds-ivory);
+  --ds-text-on-indigo:  var(--ds-ivory);
+
+  --ds-border:          rgba(27, 20, 16, 0.08);
+  --ds-border-strong:   rgba(27, 20, 16, 0.16);
+  --ds-border-on-indigo:rgba(251, 247, 240, 0.16);
+
+  // -----------------------------------------------------------
+  // Typography — Arabic-first.
+  // Display: Tajawal 700. Headings: IBM Plex Sans Arabic 600.
+  // Body: Cairo 400–500. Numeric: IBM Plex Mono.
+  // -----------------------------------------------------------
+  --ds-font-display: 'Tajawal', 'Cairo', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --ds-font-heading: 'IBM Plex Sans Arabic', 'Cairo', system-ui, sans-serif;
+  --ds-font-body:    'Cairo', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --ds-font-mono:    'IBM Plex Mono', 'Courier New', monospace;
 
   // Fluid type scale: clamp(min, preferred, max). 16px base.
-  --ds-text-2xs: clamp(0.70rem, 0.68rem + 0.1vw, 0.75rem);    // 11-12
-  --ds-text-xs:  clamp(0.78rem, 0.76rem + 0.1vw, 0.82rem);    // 12.5-13
-  --ds-text-sm:  clamp(0.88rem, 0.85rem + 0.15vw, 0.94rem);   // 14-15
-  --ds-text-md:  clamp(1.00rem, 0.96rem + 0.2vw,  1.08rem);   // 16-17
-  --ds-text-lg:  clamp(1.12rem, 1.07rem + 0.25vw, 1.22rem);   // 18-19.5
-  --ds-text-xl:  clamp(1.28rem, 1.20rem + 0.4vw,  1.44rem);   // 20.5-23
-  --ds-text-2xl: clamp(1.50rem, 1.38rem + 0.6vw,  1.75rem);   // 24-28
-  --ds-text-3xl: clamp(1.85rem, 1.65rem + 1vw,   2.25rem);    // 29-36
-  --ds-text-4xl: clamp(2.30rem, 2.00rem + 1.5vw, 2.90rem);    // 36-46
+  --ds-text-2xs: clamp(0.70rem, 0.68rem + 0.1vw, 0.75rem);
+  --ds-text-xs:  clamp(0.78rem, 0.76rem + 0.1vw, 0.82rem);
+  --ds-text-sm:  clamp(0.88rem, 0.85rem + 0.15vw, 0.94rem);
+  --ds-text-md:  clamp(1.00rem, 0.96rem + 0.2vw,  1.08rem);
+  --ds-text-lg:  clamp(1.12rem, 1.07rem + 0.25vw, 1.22rem);
+  --ds-text-xl:  clamp(1.28rem, 1.20rem + 0.4vw,  1.44rem);
+  --ds-text-2xl: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);   // H2 per DESIGN.md
+  --ds-text-3xl: clamp(1.75rem, 1.5rem + 1.2vw, 2.5rem);     // H1 per DESIGN.md
+  --ds-text-4xl: clamp(2.25rem, 1.8rem + 2.2vw, 3.5rem);     // Display per DESIGN.md
 
-  --ds-leading-tight:  1.25;
-  --ds-leading-normal: 1.55;
-  --ds-leading-arabic: 1.85;   // Arabic text needs more breathing room
+  --ds-leading-tight:  1.2;
+  --ds-leading-normal: 1.6;     // Latin body
+  --ds-leading-arabic: 1.85;    // Arabic body — never go below
 
-  --ds-weight-regular: 400;
-  --ds-weight-medium:  500;
-  --ds-weight-bold:    700;
+  --ds-tracking-display: -0.01em;
+
+  --ds-weight-regular:  400;
+  --ds-weight-medium:   500;
+  --ds-weight-semibold: 600;
+  --ds-weight-bold:     700;
+
+  // Max line-length tokens for prose blocks
+  --ds-measure-latin:  65ch;
+  --ds-measure-arabic: 50ch;
 
   // -----------------------------------------------------------
-  // Spacing — 4px base
+  // Spacing — 4px base, linear 0..24
   // -----------------------------------------------------------
   --ds-space-0:  0;
   --ds-space-1:  0.25rem;    // 4
@@ -100,47 +153,66 @@
   --ds-space-4:  1rem;       // 16
   --ds-space-5:  1.25rem;    // 20
   --ds-space-6:  1.5rem;     // 24
+  --ds-space-7:  1.75rem;    // 28
   --ds-space-8:  2rem;       // 32
   --ds-space-10: 2.5rem;     // 40
   --ds-space-12: 3rem;       // 48
+  --ds-space-14: 3.5rem;     // 56
   --ds-space-16: 4rem;       // 64
   --ds-space-20: 5rem;       // 80
   --ds-space-24: 6rem;       // 96
 
+  // Section rhythm — clamp for responsive vertical breathing
+  --ds-section-y: clamp(3rem, 8vw, 6rem);
+
   // -----------------------------------------------------------
-  // Radius
+  // Radius — nothing over 2xl (24px). No pill on cards.
   // -----------------------------------------------------------
   --ds-radius-xs:  4px;
   --ds-radius-sm:  6px;
-  --ds-radius-md:  10px;
-  --ds-radius-lg:  14px;
-  --ds-radius-xl:  20px;
-  --ds-radius-2xl: 28px;
-  --ds-radius-pill: 999px;
+  --ds-radius-md:  10px;    // buttons, small cards
+  --ds-radius-lg:  14px;    // cards
+  --ds-radius-xl:  18px;
+  --ds-radius-2xl: 24px;    // MAX — hero portraits
+  --ds-radius-pill: 999px;  // chips / tags only
 
   // -----------------------------------------------------------
-  // Shadow — subtle, layered (never "drop-shadow with bad blur")
+  // Shadow — warm-tinted, layered. Based on rgba(27,20,16,X).
+  // Never pure black, never neon glow.
   // -----------------------------------------------------------
-  --ds-shadow-xs: 0 1px 2px rgba(13, 22, 43, 0.04);
-  --ds-shadow-sm: 0 1px 3px rgba(13, 22, 43, 0.06), 0 1px 2px rgba(13, 22, 43, 0.04);
-  --ds-shadow-md: 0 4px 10px rgba(13, 22, 43, 0.06), 0 2px 4px rgba(13, 22, 43, 0.04);
-  --ds-shadow-lg: 0 12px 24px rgba(13, 22, 43, 0.08), 0 4px 8px rgba(13, 22, 43, 0.04);
-  --ds-shadow-focus: 0 0 0 3px rgba(16, 73, 130, 0.25);
+  --ds-shadow-xs: 0 1px 2px rgba(27, 20, 16, 0.04);
+  --ds-shadow-sm: 0 1px 3px rgba(27, 20, 16, 0.06), 0 1px 2px rgba(27, 20, 16, 0.04);
+  --ds-shadow-md: 0 1px 3px rgba(27, 20, 16, 0.06), 0 4px 12px rgba(27, 20, 16, 0.04);
+  --ds-shadow-lg: 0 2px 6px rgba(27, 20, 16, 0.08), 0 12px 28px rgba(27, 20, 16, 0.06);
+  --ds-shadow-xl: 0 4px 10px rgba(27, 20, 16, 0.10), 0 24px 48px rgba(27, 20, 16, 0.08);
+  --ds-shadow-focus: 0 0 0 3px rgba(50, 40, 115, 0.25);
 
   // -----------------------------------------------------------
-  // Motion
+  // Motion — the six named motions' primitives.
+  // Animate only transform + opacity. Never top/left/width/height.
   // -----------------------------------------------------------
   --ds-duration-instant: 80ms;
   --ds-duration-fast:    160ms;
   --ds-duration-base:    240ms;
   --ds-duration-slow:    400ms;
+  --ds-duration-story:   1200ms;   // counter-up, cream-wipe
+  --ds-duration-breath:  8000ms;   // slow-breath loop
+  --ds-duration-drift:   24000ms;  // contour-drift loop
 
   --ds-ease-out:    cubic-bezier(0.22, 0.61, 0.36, 1);
   --ds-ease-in:     cubic-bezier(0.42, 0, 1, 1);
   --ds-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ds-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);  // rough CSS spring
+
+  // Spring parameters for JS consumers (magnetic, drag)
+  --ds-spring-stiffness: 140;
+  --ds-spring-damping:   22;
+
+  // Cascade stagger for list reveals
+  --ds-cascade-stagger:  80ms;
 
   // -----------------------------------------------------------
-  // Z-index
+  // Z-index — only these six levels exist.
   // -----------------------------------------------------------
   --ds-z-base:     1;
   --ds-z-raised:   10;
@@ -151,24 +223,24 @@
 }
 
 // =============================================================
-// SCSS bridge — lets SCSS consumers use the same tokens in
-// media queries, functions, and math where CSS vars can't reach.
+// SCSS bridge — compile-time tokens for media queries / math
+// where CSS custom properties can't reach. Names preserved.
 // =============================================================
 
-// Breakpoints (mobile-first)
 $ds-bp-sm: 600px;
 $ds-bp-md: 900px;
 $ds-bp-lg: 1200px;
 $ds-bp-xl: 1536px;
 
-// Container max-widths
 $ds-container-sm: 560px;
 $ds-container-md: 840px;
 $ds-container-lg: 1120px;
-$ds-container-xl: 1320px;
+$ds-container-xl: 1200px;   // DESIGN.md-locked max content width
 
 // =============================================================
-// Reduced motion — respect OS preference globally
+// Reduced motion — respect OS preference globally.
+// Cascade opacity survives (per DESIGN.md); all translate/scale
+// loops collapse to instant.
 // =============================================================
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -176,5 +248,8 @@ $ds-container-xl: 1320px;
     --ds-duration-fast:    0ms;
     --ds-duration-base:    0ms;
     --ds-duration-slow:    0ms;
+    --ds-duration-story:   0ms;
+    --ds-duration-breath:  0ms;
+    --ds-duration-drift:   0ms;
   }
 }

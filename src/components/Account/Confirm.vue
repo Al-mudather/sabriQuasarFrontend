@@ -1,57 +1,65 @@
 <template>
-  <main class="confirm-page">
-    <div class="confirm-page__card">
-      <ds-empty-state :title="$t('تم إرسال رابط التفعيل')" size="md">
-        <template #illustration>
-          <img src="~assets/img/success.png" alt="" />
-        </template>
-        <template #description>
-          <span>{{ $t('تم إرسال رابط تفعيل حسابك علي بريدك الالكتروني') }}</span>
-          <br />
-          <span>{{ $t('اذا لم تقم باستلام الرابط يرجى اعادة ارسال ايميلك مره اخرى') }}</span>
-        </template>
-        <template #actions>
-          <ds-button variant="primary" @click="prompt = true">
-            {{ $t('إعادة الإرسال') }}
-          </ds-button>
-          <ds-button variant="ghost" @click="GoToHomePage">
-            {{ $t('العودة إلى الرئيسية') }}
-          </ds-button>
-        </template>
-      </ds-empty-state>
+  <div class="auth-card">
+    <div class="auth-card__icon" aria-hidden="true">
+      <svg viewBox="0 0 48 48" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="12" width="36" height="26" rx="3" />
+        <path d="M6 14l18 14 18-14" />
+      </svg>
     </div>
 
-    <q-dialog v-model="prompt" persistent>
-      <q-card class="confirm-page__dialog">
-        <h3>{{ $t('بريدك الإلكتروني') }}</h3>
-        <q-input
-          rounded outlined
-          type="email"
-          v-model="email"
-          :label="$t('الإيميل')"
-          autofocus
-          @keyup.enter="RESEND_USER_EMAIL"
-        />
-        <div class="confirm-page__dialog-actions">
-          <ds-button variant="ghost" @click="prompt = false">
-            {{ $t('إلغاء') }}
-          </ds-button>
-          <ds-button variant="primary" :loading="loader" @click="RESEND_USER_EMAIL">
-            {{ $t('إرسال') }}
-          </ds-button>
-        </div>
-      </q-card>
-    </q-dialog>
-  </main>
+    <header class="auth-card__head">
+      <h1 class="auth-card__title">{{ $t('تم إرسال رابط التفعيل') }}</h1>
+      <p class="auth-card__subtitle">
+        {{ $t('أرسلنا لك رابط تفعيل على بريدك الإلكتروني. افتح الرابط لإكمال التحقق من الحساب.') }}
+      </p>
+      <p class="auth-card__hint">
+        {{ $t('لم يصلك الرابط؟ أعد الإرسال من هنا.') }}
+      </p>
+    </header>
+
+    <div v-if="showResend" class="auth-card__form">
+      <ds-input
+        v-model="email"
+        type="email"
+        :label="$t('البريد الإلكتروني')"
+        autocomplete="email"
+        autofocus
+        @keydown.enter="RESEND_USER_EMAIL"
+      />
+      <ds-button
+        variant="accent"
+        size="lg"
+        full-width
+        :loading="loader"
+        @click="RESEND_USER_EMAIL"
+      >
+        {{ $t('إرسال') }}
+      </ds-button>
+      <ds-button variant="ghost" size="lg" full-width @click="showResend = false">
+        {{ $t('إلغاء') }}
+      </ds-button>
+    </div>
+
+    <div v-else class="auth-card__actions">
+      <ds-button variant="accent" size="lg" full-width @click="showResend = true">
+        {{ $t('إعادة الإرسال') }}
+      </ds-button>
+      <ds-button variant="ghost" size="lg" full-width @click="GoToHomePage">
+        {{ $t('العودة إلى الرئيسية') }}
+      </ds-button>
+    </div>
+  </div>
 </template>
 
 <script>
 import { ResendActivationEmail } from 'src/queries/account_management/mutation/ResendActivationEmail'
+import DsInput from 'src/design-system/components/DsInput.vue'
 
 export default {
   name: 'Confirm',
+  components: { DsInput },
 
-  data () { return { prompt: false, loader: false, email: '' } },
+  data () { return { showResend: false, loader: false, email: '' } },
 
   methods: {
     GoToHomePage () { this.$router.push({ name: 'Home' }) },
@@ -95,7 +103,7 @@ export default {
             position: 'top',
             message: this.$t('تم إرسال البريد بنجاح')
           })
-          this.prompt = false
+          this.showResend = false
         } else if (result.data.resendActivationEmail.errors) {
           this.errorHandler(result.data.resendActivationEmail.errors)
         }
@@ -110,45 +118,50 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.confirm-page {
-  min-block-size: 70vh;
+.auth-card {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--ds-space-8) var(--ds-space-4);
+  flex-direction: column;
+  gap: var(--ds-space-5);
 
-  &__card {
-    inline-size: 100%;
-    max-inline-size: 480px;
-    background: var(--ds-surface);
-    border: 1px solid var(--ds-border);
-    border-radius: var(--ds-radius-lg);
-    padding: var(--ds-space-6);
-    box-shadow: var(--ds-shadow-md);
+  &__icon {
+    inline-size: 56px;
+    block-size: 56px;
+    border-radius: 50%;
+    background: var(--ds-brand-50);
+    color: var(--ds-brand-600);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  &__dialog {
-    inline-size: 100%;
-    max-inline-size: 360px;
-    padding: var(--ds-space-6);
+  &__head { text-align: start; }
+
+  &__title {
+    font-family: var(--ds-font-heading);
+    font-weight: var(--ds-weight-bold);
+    font-size: var(--ds-text-xl);
+    color: var(--ds-text);
+    margin: 0 0 var(--ds-space-2);
+  }
+
+  &__subtitle {
+    font-size: var(--ds-text-md);
+    color: var(--ds-text-muted);
+    margin: 0 0 var(--ds-space-2);
+    line-height: var(--ds-leading-arabic);
+  }
+
+  &__hint {
+    font-size: var(--ds-text-sm);
+    color: var(--ds-text-muted);
+    margin: 0;
+  }
+
+  &__form,
+  &__actions {
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-4);
-
-    h3 {
-      text-align: center;
-      font-family: var(--ds-font-heading);
-      font-size: var(--ds-text-lg);
-      font-weight: var(--ds-weight-bold);
-      color: var(--ds-text);
-      margin: 0;
-    }
-  }
-
-  &__dialog-actions {
-    display: flex;
     gap: var(--ds-space-3);
-    justify-content: flex-end;
   }
 }
 </style>

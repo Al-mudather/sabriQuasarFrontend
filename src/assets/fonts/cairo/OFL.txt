@@ -1,0 +1,8 @@
+Copyright 2010 The Cairo Project Authors (https://github.com/Gue3bara/Cairo),
+with Reserved Font Name "Cairo".
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+https://openfontlicense.org
+
+See https://openfontlicense.org for the full license text.

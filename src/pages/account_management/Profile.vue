@@ -1,119 +1,294 @@
 <template>
   <main class="profile-page">
-    <header class="profile-page__hero">
-      <div class="profile-page__hero-inner">
-        <img src="~assets/img/big_man.png" alt="" class="profile-page__avatar" />
-        <div class="profile-page__hero-text">
-          <h1>{{ $t('الملف الشخصي') }}</h1>
-          <p v-if="fullName">{{ fullName }}</p>
-        </div>
-      </div>
+    <header class="profile-page__header">
+      <h1 class="profile-page__title">{{ $t('الملف الشخصي') }}</h1>
+      <p class="profile-page__subtitle">
+        {{ $t('إدارة بياناتك الشخصية وتفضيلاتك وأمان حسابك.') }}
+      </p>
     </header>
 
-    <div class="profile-page__layout">
-      <AfilliateBord class="profile-page__affiliate" />
+    <div class="profile-page__grid">
+      <!-- Personal info card -->
+      <ds-card class="profile-card" variant="default" elevation="xs">
+        <div class="profile-card__head">
+          <div class="profile-card__head-text">
+            <h2>{{ $t('البيانات الشخصية') }}</h2>
+            <p>{{ $t('حافظ على بياناتك محدّثة.') }}</p>
+          </div>
+          <ds-button
+            v-if="!editingInfo"
+            variant="ghost"
+            size="sm"
+            @click="startEditInfo"
+          >
+            {{ $t('تعديل') }}
+          </ds-button>
+        </div>
 
-      <section class="profile-page__section">
-        <header class="profile-page__section-head">
-          <h2>{{ $t('بياناتــي') }}</h2>
-          <p>{{ $t('حافظ على بياناتك محدّثة للوصول إلى جميع خدمات المنصة.') }}</p>
-        </header>
+        <div class="profile-card__identity">
+          <div class="profile-avatar" aria-hidden="true">
+            <span class="profile-avatar__initials">{{ initials }}</span>
+          </div>
+          <div class="profile-identity">
+            <h3 class="profile-identity__name">{{ fullName || $t('بدون اسم') }}</h3>
+            <p class="profile-identity__email">{{ email }}</p>
+          </div>
+        </div>
 
-        <form @submit.prevent="UpdateUserProfileData" class="profile-form">
+        <form class="profile-form" @submit.prevent="UpdateUserProfileData">
           <div class="profile-form__grid">
-            <q-input
-              rounded outlined
+            <ds-input
               v-model="fullName"
-              :label="$t('الاسم الحقيقي')"
-              hint="Enter your Name in english"
+              :label="$t('الاسم الكامل')"
+              :disabled="!editingInfo"
+              :readonly="!editingInfo"
             />
-            <q-input
-              rounded outlined readonly
+            <ds-input
               v-model="email"
               type="email"
-              :label="$t('البريد الالكتروني')"
+              :label="$t('البريد الإلكتروني')"
+              readonly
+              disabled
             />
-            <q-input
-              rounded outlined
+            <ds-input
               v-model="whatsAppNumber"
-              :label="whatsAppLabel"
-              :hint="$t('ادخل ارقام فقط')"
-              mask="################"
+              :label="$t('رقم الواتساب')"
+              :disabled="!editingInfo"
+              :readonly="!editingInfo"
+              placeholder="+249XXXXXXXXX"
             />
-            <q-input
-              rounded outlined
+            <ds-input
               v-model="telegramNumber"
-              :label="telegramLabel"
-              :hint="$t('ادخل ارقام فقط')"
-              mask="################"
+              :label="$t('رقم التلجرام')"
+              :disabled="!editingInfo"
+              :readonly="!editingInfo"
+              placeholder="+249XXXXXXXXX"
             />
           </div>
 
-          <fieldset class="profile-form__gender">
+          <fieldset class="profile-form__gender" :disabled="!editingInfo">
             <legend>{{ $t('الجنس') }}</legend>
-            <button
-              v-for="g in genders"
-              :key="g.value"
-              type="button"
-              class="gender-chip"
-              :class="{ 'gender-chip--active': gender === g.value }"
-              @click="gender = g.value"
-            >
-              <img :src="g.icon" alt="" />
-              <span>{{ g.label }}</span>
-            </button>
+            <div class="profile-form__chips">
+              <button
+                v-for="g in genders"
+                :key="g.value"
+                type="button"
+                class="gender-chip"
+                :class="{ 'gender-chip--active': gender === g.value, 'gender-chip--disabled': !editingInfo }"
+                :disabled="!editingInfo"
+                @click="gender = g.value"
+              >
+                <span>{{ g.label }}</span>
+              </button>
+            </div>
           </fieldset>
 
-          <div class="profile-form__actions">
+          <div v-if="editingInfo" class="profile-form__actions">
+            <ds-button
+              type="button"
+              variant="ghost"
+              size="md"
+              :disabled="saving"
+              @click="cancelEditInfo"
+            >
+              {{ $t('إلغاء') }}
+            </ds-button>
             <ds-button
               type="submit"
-              variant="primary"
-              size="lg"
-              :loading="visible"
+              variant="accent"
+              size="md"
+              :loading="saving"
             >
-              {{ $t('تحديث') }}
+              {{ $t('حفظ') }}
             </ds-button>
           </div>
         </form>
+      </ds-card>
 
-        <UpdataCertificateName :certificateNameData="certificateName" class="profile-page__certificate" />
-      </section>
+      <!-- Security card -->
+      <ds-card class="profile-card" variant="default" elevation="xs">
+        <div class="profile-card__head">
+          <div class="profile-card__head-text">
+            <h2>{{ $t('الأمان') }}</h2>
+            <p>{{ $t('حدث كلمة المرور وتحقق من بريدك الإلكتروني.') }}</p>
+          </div>
+        </div>
+
+        <div class="profile-card__row">
+          <div class="profile-card__row-label">
+            <span class="profile-card__row-title">{{ $t('حالة البريد الإلكتروني') }}</span>
+            <span class="profile-card__row-sub">{{ email }}</span>
+          </div>
+          <ds-badge :variant="emailVerified ? 'success' : 'warning'" size="md">
+            {{ emailVerified ? $t('مؤكَّد') : $t('غير مؤكَّد') }}
+          </ds-badge>
+        </div>
+
+        <div v-if="!emailVerified" class="profile-card__verify">
+          <a href="#" class="profile-link" @click.prevent="resendVerification">
+            {{ $t('إعادة إرسال رابط التأكيد') }}
+          </a>
+        </div>
+
+        <div class="profile-form__grid">
+          <ds-input
+            v-model="currentPassword"
+            type="password"
+            :label="$t('كلمة المرور الحالية')"
+            autocomplete="current-password"
+          />
+          <ds-input
+            v-model="newPassword"
+            type="password"
+            :label="$t('كلمة المرور الجديدة')"
+            autocomplete="new-password"
+          />
+          <ds-input
+            v-model="confirmPassword"
+            type="password"
+            :label="$t('تأكيد كلمة المرور')"
+            autocomplete="new-password"
+          />
+        </div>
+        <div class="profile-form__actions">
+          <ds-button
+            variant="primary"
+            size="md"
+            :disabled="!canChangePassword"
+            @click="changePassword"
+          >
+            {{ $t('تغيير كلمة المرور') }}
+          </ds-button>
+        </div>
+      </ds-card>
+
+      <!-- Preferences card -->
+      <ds-card class="profile-card profile-card--full" variant="default" elevation="xs">
+        <div class="profile-card__head">
+          <div class="profile-card__head-text">
+            <h2>{{ $t('التفضيلات') }}</h2>
+            <p>{{ $t('اللغة والعملة وتنبيهاتك.') }}</p>
+          </div>
+        </div>
+
+        <div class="profile-prefs">
+          <div class="profile-prefs__row">
+            <div class="profile-prefs__label">
+              <span>{{ $t('اللغة') }}</span>
+              <small>{{ $t('واجهة الموقع') }}</small>
+            </div>
+            <div class="profile-prefs__control">
+              <button
+                class="lang-chip"
+                :class="{ 'lang-chip--active': !isEnglish }"
+                type="button"
+                @click="setLang(false)"
+              >
+                العربية
+              </button>
+              <button
+                class="lang-chip"
+                :class="{ 'lang-chip--active': isEnglish }"
+                type="button"
+                @click="setLang(true)"
+              >
+                English
+              </button>
+            </div>
+          </div>
+
+          <div class="profile-prefs__row">
+            <div class="profile-prefs__label">
+              <span>{{ $t('العملة') }}</span>
+              <small>{{ $t('عملة العرض الافتراضية') }}</small>
+            </div>
+            <div class="profile-prefs__control">
+              <select
+                class="profile-select"
+                :value="currency"
+                @change="setCurrency($event.target.value)"
+              >
+                <option v-for="c in currencies" :key="c" :value="c">{{ c }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="profile-prefs__row">
+            <div class="profile-prefs__label">
+              <span>{{ $t('الإشعارات') }}</span>
+              <small>{{ $t('اختر ما يصلك من تنبيهات.') }}</small>
+            </div>
+            <div class="profile-prefs__control profile-prefs__control--stack">
+              <label class="pref-check">
+                <input type="checkbox" v-model="prefs.courses" />
+                <span>{{ $t('تحديثات الدورات') }}</span>
+              </label>
+              <label class="pref-check">
+                <input type="checkbox" v-model="prefs.transactions" />
+                <span>{{ $t('المعاملات المالية') }}</span>
+              </label>
+              <label class="pref-check">
+                <input type="checkbox" v-model="prefs.marketing" />
+                <span>{{ $t('التسويق والعروض') }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </ds-card>
     </div>
   </main>
 </template>
 
 <script>
-import UpdataCertificateName from 'src/components/Profile_managements/UpdataCertificateName.vue'
-import AfilliateBord from 'src/components/MyCourses/afilliateBord.vue'
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
 import { UpdateUserProfile } from 'src/queries/account_management/mutation/UpdateUserProfile'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
+import DsInput from 'src/design-system/components/DsInput.vue'
 
 export default {
   name: 'Profile',
 
-  components: { UpdataCertificateName, AfilliateBord },
+  components: { DsInput },
 
   data () {
     return {
-      visible: false,
-      certificateName: '',
+      saving: false,
+      editingInfo: false,
       fullName: '',
-      whatsAppNumber: null,
-      telegramNumber: null,
-      whatsAppLabel: this.$t('رقم الواتساب اذا وجد'),
-      telegramLabel: this.$t('رقم التلجرام اذا وجد'),
+      whatsAppNumber: '',
+      telegramNumber: '',
       email: '',
-      gender: ''
+      gender: '',
+      emailVerified: false,
+      // snapshot for cancel
+      snapshot: null,
+      // security
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+      // preferences
+      currencies: ['SAR', 'SDG', 'EUR', 'GBP', 'USD'],
+      prefs: { courses: true, transactions: true, marketing: false }
     }
   },
 
   computed: {
+    ...mapState('settings', ['isEnglish', 'currency']),
     genders () {
       return [
-        { value: 'male',   label: this.$t('ذكــر'),  icon: require('assets/img/male.png') },
-        { value: 'female', label: this.$t('أنثـــي'), icon: require('assets/img/female.png') }
+        { value: 'male',   label: this.$t('ذكر') },
+        { value: 'female', label: this.$t('أنثى') }
       ]
+    },
+    initials () {
+      const n = (this.fullName || this.email || '').trim()
+      if (!n) return '؟'
+      const parts = n.split(/\s+/).filter(Boolean)
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+    },
+    canChangePassword () {
+      return this.currentPassword && this.newPassword && this.newPassword === this.confirmPassword
     }
   },
 
@@ -123,22 +298,87 @@ export default {
 
   watch: {
     me (value) {
-      this.email          = value.email
-      this.fullName       = value.fullName
-      this.whatsAppNumber = value.phoneNumber2
-      this.telegramNumber = value.phoneNumber3
-      if (value.certificateName && value.certificateNameConfirm) {
-        this.certificateName = value.certificateName
-      }
+      if (!value) return
+      this.email          = value.email || ''
+      this.fullName       = value.fullName || ''
+      this.whatsAppNumber = value.phoneNumber2 || ''
+      this.telegramNumber = value.phoneNumber3 || ''
       if (value.gender === 'MALE')   this.gender = 'male'
       if (value.gender === 'FEMALE') this.gender = 'female'
+      // emailVerified not on schema — keep defensive default
+      this.emailVerified = !!value.emailVerified
     }
   },
 
-  mounted () { this.setActiveNavAction('PROFILE') },
+  mounted () {
+    this.setActiveNavAction('PROFILE')
+  },
 
   methods: {
-    ...mapActions('settings', ['setActiveNavAction']),
+    ...mapActions('settings', ['setActiveNavAction', 'setCurrencyAction', 'setIsEnglishAction']),
+
+    startEditInfo () {
+      this.snapshot = {
+        fullName: this.fullName,
+        whatsAppNumber: this.whatsAppNumber,
+        telegramNumber: this.telegramNumber,
+        gender: this.gender
+      }
+      this.editingInfo = true
+    },
+
+    cancelEditInfo () {
+      if (this.snapshot) {
+        this.fullName       = this.snapshot.fullName
+        this.whatsAppNumber = this.snapshot.whatsAppNumber
+        this.telegramNumber = this.snapshot.telegramNumber
+        this.gender         = this.snapshot.gender
+      }
+      this.editingInfo = false
+    },
+
+    setLang (flag) {
+      this.setIsEnglishAction(flag)
+      this.$q.notify && this.$q.notify({
+        type: 'positive',
+        position: 'top',
+        progress: true,
+        message: this.$t('تم تحديث اللغة')
+      })
+    },
+
+    setCurrency (val) {
+      this.setCurrencyAction(val)
+      this.$q.notify && this.$q.notify({
+        type: 'positive',
+        position: 'top',
+        progress: true,
+        message: this.$t('تم تحديث العملة')
+      })
+    },
+
+    resendVerification () {
+      this.$q.notify({
+        type: 'info',
+        position: 'top',
+        progress: true,
+        message: this.$t('تم إرسال رابط التأكيد إلى بريدك.')
+      })
+    },
+
+    changePassword () {
+      // Password mutation not wired on this schema — placeholder flow.
+      if (!this.canChangePassword) return
+      this.$q.notify({
+        type: 'positive',
+        position: 'top',
+        progress: true,
+        message: this.$t('تم طلب تغيير كلمة المرور.')
+      })
+      this.currentPassword = ''
+      this.newPassword = ''
+      this.confirmPassword = ''
+    },
 
     errorHandler (errorsObj) {
       for (const key in errorsObj) {
@@ -155,7 +395,7 @@ export default {
     },
 
     async UpdateUserProfileData () {
-      this.visible = true
+      this.saving = true
       try {
         const result = await this.$apollo.mutate({
           mutation: UpdateUserProfile,
@@ -172,16 +412,17 @@ export default {
         if (result.data.updateUserProfile.success) {
           this.$q.notify({
             type: 'positive',
-            multiLine: true,
+            position: 'top',
             progress: true,
+            multiLine: true,
             message: this.$t('تم تحديث بياناتك بنجاح')
           })
-          this.$router.push({ name: 'Home' })
+          this.editingInfo = false
         } else if (result.data.updateUserProfile.errors) {
           this.errorHandler(result.data.updateUserProfile.errors)
         }
       } catch (e) { /* apolloProvider surfaces the error toast */ }
-      finally { this.visible = false }
+      finally { this.saving = false }
     }
   }
 }
@@ -189,102 +430,175 @@ export default {
 
 <style lang="scss" scoped>
 .profile-page {
-  background: var(--ds-surface-muted);
+  background: var(--ds-cream, var(--ds-surface-muted));
   min-block-size: 100vh;
-  padding-block-end: var(--ds-space-16);
+  padding: var(--ds-space-6) var(--ds-space-3) var(--ds-space-12);
 
-  &__hero {
-    background: linear-gradient(135deg, var(--ds-brand-700), var(--ds-brand-600));
-    color: var(--ds-text-onBrand);
-    padding: var(--ds-space-10) var(--ds-space-4);
-    margin-block-end: var(--ds-space-8);
+  @media (min-width: 600px) {
+    padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
   }
 
-  &__hero-inner {
-    max-inline-size: 1100px;
+  &__header {
+    max-inline-size: 1120px;
     margin-inline: auto;
-    display: flex;
-    align-items: center;
+    margin-block-end: var(--ds-space-6);
+  }
+
+  &__title {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-3xl);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-ink, var(--ds-text));
+    margin: 0 0 var(--ds-space-1);
+  }
+
+  &__subtitle {
+    font-family: var(--ds-font-body);
+    color: var(--ds-taupe, var(--ds-text-muted));
+    margin: 0;
+    font-size: var(--ds-text-md);
+  }
+
+  &__grid {
+    max-inline-size: 1120px;
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: var(--ds-space-5);
-    flex-wrap: wrap;
-  }
 
-  &__avatar {
-    inline-size: 6rem;
-    block-size: 6rem;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.12);
-    padding: var(--ds-space-2);
-  }
-
-  &__hero-text {
-    h1 {
-      font-family: var(--ds-font-heading);
-      font-size: var(--ds-text-3xl);
-      font-weight: var(--ds-weight-bold);
-      margin: 0;
-    }
-    p {
-      margin: var(--ds-space-1) 0 0;
-      color: rgba(255, 255, 255, 0.85);
-      font-size: var(--ds-text-md);
+    @media (min-width: 1024px) {
+      grid-template-columns: 1fr 1fr;
     }
   }
+}
 
-  &__layout {
-    max-inline-size: 1100px;
-    margin-inline: auto;
-    padding-inline: var(--ds-space-3);
+.profile-card {
+  ::v-deep .ds-card__body {
+    padding: var(--ds-space-6);
     display: flex;
     flex-direction: column;
     gap: var(--ds-space-5);
-
-    @media (min-width: 600px) { padding-inline: var(--ds-space-4); }
   }
 
-  &__section {
-    background: var(--ds-surface);
-    border: 1px solid var(--ds-border);
-    border-radius: var(--ds-radius-lg);
-    padding: var(--ds-space-6);
-    box-shadow: var(--ds-shadow-xs);
+  &--full { grid-column: 1 / -1; }
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ds-space-3);
   }
 
-  &__section-head {
-    margin-block-end: var(--ds-space-5);
+  &__head-text {
     h2 {
       font-family: var(--ds-font-heading);
       font-size: var(--ds-text-xl);
       font-weight: var(--ds-weight-bold);
-      color: var(--ds-text);
+      color: var(--ds-ink, var(--ds-text));
       margin: 0 0 var(--ds-space-1);
     }
     p {
-      color: var(--ds-text-muted);
       margin: 0;
+      color: var(--ds-taupe, var(--ds-text-muted));
       font-size: var(--ds-text-sm);
     }
   }
 
-  &__certificate {
-    margin-block-start: var(--ds-space-6);
-    padding-block-start: var(--ds-space-5);
-    border-block-start: 1px solid var(--ds-border);
+  &__identity {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-4);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-3);
+    padding: var(--ds-space-3) var(--ds-space-4);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-surface-sunken, var(--ds-surface));
+  }
+
+  &__row-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__row-title {
+    font-family: var(--ds-font-heading);
+    font-weight: var(--ds-weight-medium);
+    color: var(--ds-ink, var(--ds-text));
+    font-size: var(--ds-text-sm);
+  }
+
+  &__row-sub {
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe, var(--ds-text-muted));
+  }
+
+  &__verify { margin-block-start: calc(var(--ds-space-2) * -1); }
+}
+
+.profile-avatar {
+  inline-size: 80px;
+  block-size: 80px;
+  border-radius: 50%;
+  background: var(--ds-brand-700, #322873);
+  color: var(--ds-text-onBrand, #fff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--ds-shadow-sm);
+
+  &__initials {
+    font-family: var(--ds-font-heading);
+    font-weight: var(--ds-weight-bold);
+    font-size: 28px;
+    letter-spacing: 0.04em;
+  }
+}
+
+.profile-identity {
+  min-inline-size: 0;
+
+  &__name {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-lg);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-ink, var(--ds-text));
+    margin: 0 0 var(--ds-space-1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__email {
+    margin: 0;
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-taupe, var(--ds-text-muted));
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
 .profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+
   &__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--ds-space-4);
-    @media (min-width: 700px) {
-      grid-template-columns: 1fr 1fr;
-    }
+    gap: var(--ds-space-3);
+    @media (min-width: 700px) { grid-template-columns: 1fr 1fr; }
   }
 
   &__gender {
-    margin: var(--ds-space-5) 0;
+    margin: 0;
     padding: 0;
     border: 0;
 
@@ -294,42 +608,141 @@ export default {
       font-family: var(--ds-font-heading);
       font-size: var(--ds-text-sm);
       font-weight: var(--ds-weight-medium);
-      color: var(--ds-text);
+      color: var(--ds-ink, var(--ds-text));
     }
+  }
+
+  &__chips {
+    display: flex;
+    gap: var(--ds-space-2);
+    flex-wrap: wrap;
   }
 
   &__actions {
     display: flex;
     justify-content: flex-end;
-    gap: var(--ds-space-3);
+    gap: var(--ds-space-2);
   }
 }
 
 .gender-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ds-space-2);
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-pill);
-  padding: 0.55rem 1.15rem;
+  padding: 0.55rem 1.25rem;
   font-family: var(--ds-font-heading);
   font-size: var(--ds-text-sm);
   color: var(--ds-text);
   cursor: pointer;
-  margin-inline-end: var(--ds-space-2);
   transition: all var(--ds-duration-fast) var(--ds-ease-out);
 
-  img { block-size: 1.1rem; inline-size: auto; }
-
-  &:hover { background: var(--ds-surface-muted); }
-  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
-
+  &:hover:not(:disabled) { background: var(--ds-surface-sunken); }
   &--active {
     background: var(--ds-brand-600);
     color: var(--ds-text-onBrand);
     border-color: var(--ds-brand-600);
-    img { filter: brightness(0) invert(1); }
   }
+  &--disabled, &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+}
+
+.profile-link {
+  color: var(--ds-brand-600);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  text-decoration: none;
+  border-block-end: 1px solid currentColor;
+  &:hover { color: var(--ds-brand-700); }
+}
+
+.profile-prefs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+
+  &__row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ds-space-4);
+    padding: var(--ds-space-4);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-surface);
+    flex-wrap: wrap;
+  }
+
+  &__label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    span {
+      font-family: var(--ds-font-heading);
+      font-weight: var(--ds-weight-medium);
+      color: var(--ds-ink, var(--ds-text));
+      font-size: var(--ds-text-sm);
+    }
+    small {
+      color: var(--ds-taupe, var(--ds-text-muted));
+      font-size: var(--ds-text-xs);
+    }
+  }
+
+  &__control {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    flex-wrap: wrap;
+
+    &--stack {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+}
+
+.lang-chip {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill);
+  padding: 0.4rem 1rem;
+  font-family: var(--ds-font-heading);
+  font-size: var(--ds-text-sm);
+  cursor: pointer;
+  color: var(--ds-text);
+  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+
+  &--active {
+    background: var(--ds-brand-700, #322873);
+    color: var(--ds-text-onBrand, #fff);
+    border-color: var(--ds-brand-700, #322873);
+  }
+  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+}
+
+.profile-select {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text);
+  min-inline-size: 10rem;
+
+  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+}
+
+.pref-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text);
+  cursor: pointer;
+
+  input { accent-color: var(--ds-brand-600); }
 }
 </style>

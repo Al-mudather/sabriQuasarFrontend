@@ -1,126 +1,189 @@
 <template>
   <main class="my-courses">
-    <!-- Page header + progress summary -->
+    <!-- Page header -->
     <header class="my-courses__header">
-      <div class="my-courses__head-row">
-        <h1 class="my-courses__title">
-          <img src="~assets/img/tit.png" alt="" aria-hidden="true" />
-          <span>{{ $t('كورساتـي') }}</span>
-        </h1>
-      </div>
-
-      <dl v-if="!isLoading && total > 0" class="my-courses__stats">
-        <div class="stat">
-          <dt>{{ $t('قيد التقدم') }}</dt>
-          <dd>{{ inProgressCount }}</dd>
-        </div>
-        <div class="stat">
-          <dt>{{ $t('مكتمل') }}</dt>
-          <dd>{{ completedCount }}</dd>
-        </div>
-        <div class="stat">
-          <dt>{{ $t('الإجمالي') }}</dt>
-          <dd>{{ total }}</dd>
-        </div>
-      </dl>
+      <h1 class="my-courses__title">{{ $t('دوراتي') }}</h1>
+      <p v-if="!isLoading" class="my-courses__subtitle">
+        {{ subheadingText }}
+      </p>
     </header>
 
-    <!-- Filter chips -->
-    <nav v-if="!isLoading && total > 0" class="my-courses__filters" aria-label="Filter courses">
-      <button
-        v-for="f in filterOptions"
-        :key="f.id"
-        type="button"
-        class="chip"
-        :class="{ 'chip--active': activeFilter === f.id }"
-        @click="activeFilter = f.id"
-      >
-        {{ f.label }}
-        <span class="chip__count">{{ f.count }}</span>
-      </button>
-    </nav>
-
-    <!-- States -->
-    <section class="my-courses__body">
-      <!-- Loading: skeleton grid -->
-      <div v-if="isLoading" class="my-courses__grid">
-        <course-card-skeleton v-for="n in 8" :key="'sk-' + n" />
+    <!-- Stats strip (hidden while loading or empty) -->
+    <section
+      v-if="!isLoading && total > 0"
+      class="my-courses__stats"
+      aria-label="Learning statistics"
+    >
+      <div class="stat-tile">
+        <stat-card
+          :value="total"
+          :label="$t('إجمالي الدورات')"
+          size="sm"
+          variant="indigo"
+        />
       </div>
-
-      <!-- Empty state: no enrollments -->
-      <ds-empty-state
-        v-else-if="total === 0"
-        :title="$t('لا توجد كورسات بعد')"
-        size="lg"
-      >
-        <template #illustration>
-          <img src="~assets/img/notCores.png" alt="" />
-        </template>
-        <template #description>
-          {{ $t('ليس لديك أي اشتراك في الوقت الحالي. ابدأ رحلتك التعليمية بتصفح الكورسات المتاحة.') }}
-        </template>
-        <template #actions>
-          <ds-button variant="primary" @click="GO_TO_COURSES_PAGE">
-            {{ $t('تصفح الكورسات') }}
-          </ds-button>
-        </template>
-      </ds-empty-state>
-
-      <!-- Empty state: filter matched nothing -->
-      <ds-empty-state
-        v-else-if="filteredEnrollments.length === 0"
-        :title="$t('لا توجد نتائج')"
-        :description="$t('جرّب تغيير الفلتر للعثور على كورسات أخرى.')"
-        size="md"
-      >
-        <template #actions>
-          <ds-button variant="secondary" @click="activeFilter = 'all'">
-            {{ $t('عرض الكل') }}
-          </ds-button>
-        </template>
-      </ds-empty-state>
-
-      <!-- Data: course grid -->
-      <div v-else class="my-courses__grid">
-        <course-card
-          v-for="enrollment in filteredEnrollments"
-          :key="enrollment.node.id"
-          :course="enrollment.node.course"
-          :total-finished-course-contents="enrollment.node.learningprogressSet.totalCount"
+      <div class="stat-tile">
+        <stat-card
+          :value="completedCount"
+          :label="$t('دورات مكتملة')"
+          :max="total || 1"
+          size="sm"
+          variant="terracotta"
+        />
+      </div>
+      <div v-if="hoursWatched > 0" class="stat-tile">
+        <stat-card
+          :value="hoursWatched"
+          :label="$t('ساعات مشاهدة')"
+          size="sm"
+          variant="indigo"
         />
       </div>
     </section>
+
+    <!-- Tabs -->
+    <ds-tabs
+      v-if="!isLoading && total > 0"
+      v-model="activeTab"
+      align="start"
+      size="md"
+      class="my-courses__tabs"
+    >
+      <ds-tab
+        name="in-progress"
+        :label="`${$t('قيد التعلم')} (${inProgressCount})`"
+      >
+        <div v-if="inProgressList.length" class="my-courses__grid">
+          <course-card
+            v-for="item in inProgressList"
+            :key="item.key"
+            variant="enrolled"
+            :course="item.course"
+            class="my-courses__card"
+            @cta-click="goToClassroom(item.course)"
+          />
+        </div>
+        <ds-empty-state
+          v-else
+          variant="search"
+          :title="$t('لا توجد دورات هنا بعد')"
+          :body="$t('ابدأ رحلتك التعليمية الآن')"
+          :cta-label="$t('تصفح الدورات')"
+          @cta-click="goToCoursesPage"
+        />
+      </ds-tab>
+
+      <ds-tab
+        name="completed"
+        :label="`${$t('مكتملة')} (${completedCount})`"
+      >
+        <div v-if="completedList.length" class="my-courses__grid">
+          <course-card
+            v-for="item in completedList"
+            :key="item.key"
+            variant="enrolled"
+            :course="item.course"
+            class="my-courses__card"
+            @cta-click="goToClassroom(item.course)"
+          />
+        </div>
+        <ds-empty-state
+          v-else
+          variant="search"
+          :title="$t('لا توجد دورات هنا بعد')"
+          :body="$t('ابدأ رحلتك التعليمية الآن')"
+          :cta-label="$t('تصفح الدورات')"
+          @cta-click="goToCoursesPage"
+        />
+      </ds-tab>
+
+      <ds-tab
+        name="all"
+        :label="`${$t('جميع الدورات')} (${total})`"
+      >
+        <div v-if="allList.length" class="my-courses__grid">
+          <course-card
+            v-for="item in allList"
+            :key="item.key"
+            variant="enrolled"
+            :course="item.course"
+            class="my-courses__card"
+            @cta-click="goToClassroom(item.course)"
+          />
+        </div>
+        <ds-empty-state
+          v-else
+          variant="search"
+          :title="$t('لا توجد دورات هنا بعد')"
+          :body="$t('ابدأ رحلتك التعليمية الآن')"
+          :cta-label="$t('تصفح الدورات')"
+          @cta-click="goToCoursesPage"
+        />
+      </ds-tab>
+    </ds-tabs>
+
+    <!-- Loading skeletons -->
+    <section v-if="isLoading" class="my-courses__grid" aria-busy="true">
+      <ds-skeleton
+        v-for="n in 6"
+        :key="'sk-' + n"
+        type="card"
+      />
+    </section>
+
+    <!-- Global empty state: no enrollments at all -->
+    <ds-empty-state
+      v-if="!isLoading && total === 0"
+      variant="search"
+      :title="$t('لا توجد دورات هنا بعد')"
+      :body="$t('ابدأ رحلتك التعليمية الآن')"
+      :cta-label="$t('تصفح الدورات')"
+      size="lg"
+      @cta-click="goToCoursesPage"
+    />
   </main>
 </template>
 
 <script>
-import courseCard from 'src/components/MyCourses/courseCard.vue'
-import CourseCardSkeleton from 'src/components/MyCourses/CourseCardSkeleton.vue'
+import CourseCard from 'src/components/shared/CourseCard.vue'
+import StatCard from 'src/components/shared/StatCard.vue'
+import DsTabs from 'src/design-system/components/DsTabs.vue'
+import DsTab from 'src/design-system/components/DsTab.vue'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
+import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { mapActions } from 'vuex'
 
-const progressOf = (enrollment) => {
-  const course = enrollment.node.course
-  const done = enrollment.node.learningprogressSet.totalCount
-  const total = course.courseunitSet.edges.reduce(
-    (acc, u) => acc + u.node.courseunitcontentSet.totalCount,
+/**
+ * Progress derivation
+ * ------------------------------------------------------------------
+ * The backend does not expose a precomputed `progress` field on an
+ * enrollment. It exposes:
+ *   enrollment.learningprogressSet.totalCount            (lessons done)
+ *   course.courseunitSet.edges[].node.courseunitcontentSet.totalCount (lessons total)
+ * We compute progress percent client-side from those two numbers.
+ */
+function computeProgress (enrollmentNode) {
+  const course = enrollmentNode && enrollmentNode.course
+  if (!course || !course.courseunitSet) return 0
+  const done = (enrollmentNode.learningprogressSet && enrollmentNode.learningprogressSet.totalCount) || 0
+  const total = (course.courseunitSet.edges || []).reduce(
+    (acc, u) => acc + ((u.node && u.node.courseunitcontentSet && u.node.courseunitcontentSet.totalCount) || 0),
     0
   )
   if (total <= 0) return 0
-  return Math.round((done / total) * 100)
+  return Math.max(0, Math.min(100, Math.round((done / total) * 100)))
 }
 
 export default {
   name: 'MyCourses',
 
-  components: { courseCard, CourseCardSkeleton },
+  components: { CourseCard, StatCard, DsTabs, DsTab },
 
   data () {
     return {
-      lodash: this.$_,
       courseLimit: 100,
-      activeFilter: 'all',
-      allEnrollmentsForCurrentUser: {}
+      allEnrollmentsForCurrentUser: {},
+      activeTab: 'in-progress'
     }
   },
 
@@ -134,7 +197,7 @@ export default {
 
   computed: {
     enrollments () {
-      return this.lodash.get(this.allEnrollmentsForCurrentUser, 'edges', []) || []
+      return (this.allEnrollmentsForCurrentUser && this.allEnrollmentsForCurrentUser.edges) || []
     },
 
     isLoading () {
@@ -142,51 +205,71 @@ export default {
         this.enrollments.length === 0
     },
 
-    total () { return this.enrollments.length },
-
-    inProgressCount () {
-      return this.enrollments.filter(e => {
-        const p = progressOf(e); return p > 0 && p < 100
-      }).length
-    },
-
-    completedCount () {
-      return this.enrollments.filter(e => progressOf(e) >= 100).length
-    },
-
-    notStartedCount () {
-      return this.enrollments.filter(e => progressOf(e) === 0).length
-    },
-
-    filterOptions () {
-      return [
-        { id: 'all',         label: this.$t('الكل'),         count: this.total },
-        { id: 'in-progress', label: this.$t('قيد التقدم'),   count: this.inProgressCount },
-        { id: 'completed',   label: this.$t('مكتمل'),        count: this.completedCount },
-        { id: 'not-started', label: this.$t('لم يبدأ بعد'),  count: this.notStartedCount }
-      ]
-    },
-
-    filteredEnrollments () {
-      const f = this.activeFilter
-      if (f === 'all') return this.enrollments
-      return this.enrollments.filter(e => {
-        const p = progressOf(e)
-        if (f === 'completed')   return p >= 100
-        if (f === 'in-progress') return p > 0 && p < 100
-        if (f === 'not-started') return p === 0
-        return true
+    /**
+     * Normalised view-model for the CourseCard shared component.
+     * Shared card expects: { id, pk, name, coverImage, category, progress }
+     */
+    items () {
+      return this.enrollments.map((edge) => {
+        const node = edge.node || {}
+        const c = node.course || {}
+        return {
+          key: node.id || c.id || c.pk,
+          pk: c.pk,
+          enrollmentPk: node.pk,
+          progress: computeProgress(node),
+          course: {
+            id: c.id,
+            pk: c.pk,
+            name: c.title,
+            coverImage: c.cover ? FORMAT_THE_IAMGE_URL(c.cover) : null,
+            category: null,
+            progress: computeProgress(node)
+          }
+        }
       })
+    },
+
+    total () { return this.items.length },
+
+    inProgressList () {
+      return this.items.filter(i => i.progress > 0 && i.progress < 100)
+    },
+
+    completedList () {
+      return this.items.filter(i => i.progress >= 100)
+    },
+
+    allList () { return this.items },
+
+    inProgressCount () { return this.inProgressList.length },
+    completedCount () { return this.completedList.length },
+
+    // Only surfaced if we can derive an honest value. We do not fake.
+    hoursWatched () { return 0 },
+
+    subheadingText () {
+      if (this.total === 0) return this.$t('ابدأ رحلتك التعليمية الآن')
+      return this.$t('تتابع الآن {n} دورات', { n: this.total })
+        // graceful fallback for plain $t without interpolation
+        .replace('{n}', this.total)
     }
   },
 
   mounted () {
-    this.setActiveNavAction('BORD')
+    this.setActiveNavAction && this.setActiveNavAction('BORD')
   },
 
   methods: {
     ...mapActions('settings', ['setActiveNavAction']),
-    GO_TO_COURSES_PAGE () { this.$router.push({ name: 'courses' }) }
+    goToCoursesPage () {
+      this.$router.push({ name: 'courses' })
+    },
+    goToClassroom ({ pk } = {}) {
+      const id = pk || ''
+      if (!id) return
+      window.location.href = `${location.origin}/classroom/#/class/${id}/`
+    }
   }
 }
 </script>
@@ -205,154 +288,81 @@ export default {
     margin-block-end: var(--ds-space-6);
   }
 
-  &__head-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ds-space-4);
-    flex-wrap: wrap;
+  &__title {
+    font-family: var(--ds-font-heading, 'Tajawal', system-ui, sans-serif);
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 44px);
+    color: var(--ds-ink, var(--ds-text));
+    margin: 0 0 var(--ds-space-2);
+    line-height: 1.2;
   }
 
-  &__title {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ds-space-2);
-    font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-2xl);
-    font-weight: var(--ds-weight-bold);
-    color: var(--ds-text);
+  &__subtitle {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-md);
+    color: var(--ds-taupe, var(--ds-text-muted));
     margin: 0;
-
-    @media (min-width: 600px) {
-      gap: var(--ds-space-3);
-      font-size: var(--ds-text-3xl);
-    }
-
-    img { block-size: 1.5rem; inline-size: auto; @media (min-width: 600px) { block-size: 2rem; } }
+    line-height: var(--ds-leading-arabic, 1.7);
   }
 
   &__stats {
     display: grid;
-    // 3-across always — no orphan rows. Shrinks with the viewport.
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--ds-space-2);
-    margin: var(--ds-space-6) 0 0;
-    padding: 0;
-
-    @media (min-width: 600px) {
-      gap: var(--ds-space-3);
-    }
-
-    .stat {
-      background: var(--ds-surface);
-      border: 1px solid var(--ds-border);
-      border-radius: var(--ds-radius-lg);
-      padding: var(--ds-space-3);
-      display: flex;
-      flex-direction: column;
-      gap: var(--ds-space-1);
-      box-shadow: var(--ds-shadow-xs);
-      min-inline-size: 0;
-
-      @media (min-width: 600px) {
-        padding: var(--ds-space-4);
-      }
-
-      dt {
-        font-size: var(--ds-text-xs);
-        color: var(--ds-text-muted);
-        font-family: var(--ds-font-body);
-        @media (min-width: 600px) { font-size: var(--ds-text-sm); }
-      }
-      dd {
-        font-family: var(--ds-font-heading);
-        font-size: var(--ds-text-2xl);
-        font-weight: var(--ds-weight-bold);
-        color: var(--ds-brand-700);
-        margin: 0;
-        font-variant-numeric: tabular-nums;
-        @media (min-width: 600px) { font-size: var(--ds-text-3xl); }
-      }
-    }
-  }
-
-  &__filters {
-    display: flex;
-    flex-flow: row wrap;
-    gap: var(--ds-space-2);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--ds-space-4);
     margin-block-end: var(--ds-space-6);
-    padding-block: var(--ds-space-2);
-    // Let chips scroll horizontally on very narrow screens rather
-    // than break into a vertical list.
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-
-    @media (min-width: 480px) {
-      overflow-x: visible;
-      border-block-end: 1px solid var(--ds-border);
-    }
+    justify-items: center;
   }
 
-  &__body {
-    min-block-size: 20rem;
+  .stat-tile {
+    background: var(--ds-surface, #fff);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    padding: var(--ds-space-3);
+    box-shadow: var(--ds-shadow-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+  }
+
+  &__tabs {
+    margin-block-end: var(--ds-space-4);
   }
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: 1fr;
     gap: var(--ds-space-5);
     align-items: stretch;
-  }
-}
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ds-space-2);
-  flex: 0 0 auto;
-  inline-size: auto;
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  color: var(--ds-text);
-  border-radius: var(--ds-radius-pill);
-  padding: 0.5rem 1rem;
-  white-space: nowrap;
-  font-family: var(--ds-font-heading);
-  font-size: var(--ds-text-sm);
-  font-weight: var(--ds-weight-medium);
-  cursor: pointer;
-  transition:
-    background-color var(--ds-duration-fast) var(--ds-ease-out),
-    color            var(--ds-duration-fast) var(--ds-ease-out),
-    border-color     var(--ds-duration-fast) var(--ds-ease-out);
-
-  &:hover { background: var(--ds-surface-muted); }
-  &:focus-visible {
-    outline: 2px solid transparent;
-    box-shadow: var(--ds-shadow-focus);
-  }
-
-  &--active {
-    background: var(--ds-brand-600);
-    color: var(--ds-text-onBrand);
-    border-color: var(--ds-brand-600);
-    &:hover { background: var(--ds-brand-700); }
-    .chip__count {
-      background: rgba(255, 255, 255, 0.2);
-      color: var(--ds-text-onBrand);
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    @media (min-width: 992px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
-  &__count {
-    background: var(--ds-neutral-100);
-    color: var(--ds-text-muted);
-    font-size: var(--ds-text-2xs);
-    padding: 0.15rem 0.5rem;
-    border-radius: var(--ds-radius-pill);
-    font-variant-numeric: tabular-nums;
+  &__card {
+    animation: my-courses-rise 420ms var(--ds-ease-out, ease-out) both;
+  }
+
+  // Gentle cascade — first paint only. No repeat on tab switch via
+  // using animation-fill-mode only; browser re-triggers per-element
+  // on initial v-for, subsequent renders just re-use existing DOM.
+  @for $i from 1 through 12 {
+    &__card:nth-child(#{$i}) {
+      animation-delay: #{($i - 1) * 40}ms;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &__card { animation: none; }
   }
 }
-</style>
 
+@keyframes my-courses-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+</style>

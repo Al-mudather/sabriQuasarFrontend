@@ -1,9 +1,12 @@
-//web colors
-$mainColor:#104982;
-$secondColor:#0c7ad8;
-$textColor:#7B7B7B;
-$yalloColor:#FCC74C;
-$activeTabe   : #FCD462;
+// Compatibility shim — maps legacy SCSS variable names to the new
+// indigo-anchored STC token system in src/design-system/tokens.scss.
+// The 4 Vue files that still @import this file will render in the new
+// palette automatically until Phase 4 refactors them.
+// When all legacy @import references are removed, delete this file.
 
-//buttons
-$mainButtonSize:18px;
+@import 'src/design-system/tokens.scss';
+
+$mainColor:   #322873;  // Royal Indigo (brand primary, from STC logo)
+$secondColor: #8A7A6A;  // Warm Taupe (muted / secondary)
+$textColor:   #1B1410;  // Ink Charcoal
+$yalloColor:  #C1623C;  // Terracotta (was the gold accent; now signature warm accent)

@@ -1,62 +1,150 @@
 <template>
-  <section class="web">
-    <Header />
-    <!-- <MudassirChat /> -->
-    <Statiscs />
-    <!-- <ViewData /> -->
-    <!-- <Evaluation /> -->
-    <Training />
-    <!-- <SwiperData /> -->
-    <Account />
-  </section>
+  <main class="stc-home">
+    <HeroIndigo
+      :learners-count="learnersCount"
+      :courses-count="coursesCount"
+    />
+
+    <StatsWedges :courses-count="coursesCount" />
+
+    <ValueProps />
+
+    <template v-if="specialitiesLoading && !specialities.length">
+      <div
+        v-for="n in 3"
+        :key="`cat-sk-${n}`"
+        class="stc-home__cat-skeleton"
+        aria-hidden="true"
+      >
+        <div class="stc-home__cat-skeleton-inner">
+          <ds-skeleton type="text" :rows="1" />
+          <div class="stc-home__cat-skeleton-rail">
+            <ds-skeleton v-for="m in 3" :key="m" type="card" />
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <CategorySection
+      v-for="edge in specialities"
+      :key="edge.node.id"
+      :speciality="edge.node"
+    />
+
+    <InstructorMarquee />
+
+    <TestimonialSpread />
+
+    <FinalCta />
+  </main>
 </template>
 
 <script>
-// import Header from 'src/components/Home/Header22.vue'
-import Header from "src/components/Home/Header.vue";
-import Statiscs from "components/Home/Statiscs";
-// import MudassirChat from "components/chat/chatBot.vue";
-// import ViewData from 'components/Home/ViewData'
-// import Evaluation from 'components/Home/Evaluation'
-import Training from "components/Home/Training.vue";
-// import SwiperData from 'components/Home/SwiperData'
+import { mapActions } from 'vuex'
 
-import Account from "pages/account_management/Account";
-import { mapState, mapActions } from "vuex";
+import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
+import { GetAllCoursesCountStatiscs } from 'src/queries/course_management/query/GetAllCoursesStatiscs'
+
+import HeroIndigo from 'src/components/Home/HeroIndigo.vue'
+import StatsWedges from 'src/components/Home/StatsWedges.vue'
+import ValueProps from 'src/components/Home/ValueProps.vue'
+import CategorySection from 'src/components/Home/CategorySection.vue'
+import InstructorMarquee from 'src/components/Home/InstructorMarquee.vue'
+import TestimonialSpread from 'src/components/Home/TestimonialSpread.vue'
+import FinalCta from 'src/components/Home/FinalCta.vue'
+import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 
 export default {
-  name: "Home",
-  data() {
-    return {};
-  },
+  name: 'Home',
   components: {
-    Account,
-    Header,
-    Statiscs,
-    // ViewData,
-    // Evaluation,
-    Training,
-    // MudassirChat,
-    // SwiperData
+    HeroIndigo,
+    StatsWedges,
+    ValueProps,
+    CategorySection,
+    InstructorMarquee,
+    TestimonialSpread,
+    FinalCta,
+    DsSkeleton
+  },
+  data () {
+    return {
+      allCourseSpecialities: null,
+      allCoursesCount: null
+    }
+  },
+  apollo: {
+    allCourseSpecialities: {
+      query: GetSpecialities,
+      update: data => data.allCourseSpecialities,
+      error (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[Home] specialities query failed', err)
+      }
+    },
+    allCoursesCount: {
+      query: GetAllCoursesCountStatiscs,
+      update: data => data.allCoursesCount,
+      error (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[Home] count query failed', err)
+      }
+    }
   },
   computed: {
-    ...mapState("authentication", ["loginDialog"]),
+    specialities () {
+      return (this.allCourseSpecialities && this.allCourseSpecialities.edges) || []
+    },
+    specialitiesLoading () {
+      return this.$apollo && this.$apollo.queries.allCourseSpecialities
+        ? this.$apollo.queries.allCourseSpecialities.loading
+        : false
+    },
+    coursesCount () {
+      const n = Number(this.allCoursesCount)
+      return Number.isFinite(n) && n > 0 ? n : null
+    },
+    learnersCount () {
+      // Placeholder until a real learner-count endpoint exists.
+      return null
+    }
   },
   methods: {
-    ...mapActions("settings", ["setActiveNavAction"]),
+    ...mapActions('settings', ['setActiveNavAction'])
   },
-  mounted() {
-    //TODO: Save the active link so when render it will be make active again
-    this.setActiveNavAction("HOME");
-  },
-};
+  mounted () {
+    this.setActiveNavAction('HOME')
+  }
+}
 </script>
-<style lang="scss">
-@import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variables.scss";
-// @import 'src/assets/css/homepage.scss';
 
-.cart > img {
-  transform: translate(-50%, -40%) !important;
+<style lang="scss" scoped>
+.stc-home {
+  background: var(--ds-cream);
+  color: var(--ds-ink);
+  min-block-size: 100vh;
+}
+
+.stc-home__cat-skeleton {
+  background: var(--ds-cream);
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.stc-home__cat-skeleton-inner {
+  max-inline-size: 1200px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stc-home__cat-skeleton-rail {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .stc-home__cat-skeleton-rail { grid-template-columns: 1fr; }
 }
 </style>

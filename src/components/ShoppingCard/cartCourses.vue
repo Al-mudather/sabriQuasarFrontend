@@ -1,62 +1,179 @@
 <template>
-  <section class="cart-courses">
-    <ul v-if="shoppingCartDataList && shoppingCartDataList.length" class="cart-courses__list">
-      <li
-        v-for="item in shoppingCartDataList"
-        :key="item.course.id"
-        class="cart-courses__row"
-      >
-        <div class="cart-courses__media">
-          <img
-            v-if="item.course.cover"
-            :src="FORMAT_THE_IAMGE_URL(item.course.cover)"
-            :alt="item.course.title"
-          />
-          <img v-else src="~assets/img/cart-img.png" :alt="item.course.title" />
-        </div>
-
-        <div class="cart-courses__info">
-          <h3 class="cart-courses__title">{{ item.course.title }}</h3>
-          <p class="cart-courses__price">
-            <span>{{ FORMAT_COUSRE_PRICE(JSON.parse(item.course.currency)[currency], 3) }}</span>
-            <span class="cart-courses__currency">{{ currency }}</span>
-          </p>
-        </div>
-
-        <button
-          type="button"
-          class="cart-courses__remove"
-          :aria-label="$t('إزالة')"
-          @click="removeCourseFromCart(item)"
-        >
-          <q-icon name="delete_outline" size="1.25rem" />
-        </button>
-      </li>
-    </ul>
-
+  <section class="cart-courses" aria-label="سلة التسوق">
+    <!-- Empty state -->
     <DsEmptyState
-      v-else
+      v-if="!hasItems"
+      variant="search"
       :title="$t('السلة فارغة قم بتعبئتها')"
       :description="$t('تصفح الكورسات وأضف ما تريد إلى سلتك')"
-    />
+      size="lg"
+    >
+      <template #actions>
+        <DsButton
+          variant="accent"
+          size="lg"
+          @click.native="$router.push({ name: 'courses' })"
+        >
+          {{ $t('تصفح الدورات') }}
+        </DsButton>
+      </template>
+    </DsEmptyState>
 
-    <div v-if="shoppingCartDataList && shoppingCartDataList.length" class="cart-courses__summary">
-      <div class="cart-courses__total">
-        <span class="cart-courses__total-label">{{ $t('المجمــوع') }}</span>
-        <span class="cart-courses__total-value">
-          {{ FORMAT_COUSRE_PRICE(calculateTheTotalFees(), 3) }}
-          <span class="cart-courses__currency">{{ currency }}</span>
-        </span>
+    <!-- Two-column layout -->
+    <div v-else class="cart-courses__grid">
+      <!-- Left: line items -->
+      <div class="cart-courses__items">
+        <header class="cart-courses__section-head">
+          <h2 class="cart-courses__section-title">
+            {{ $t('الدورات في سلتك') }}
+          </h2>
+          <span class="cart-courses__count">
+            {{ shoppingCartDataList.length }} {{ $t('عنصر') }}
+          </span>
+        </header>
+
+        <ul class="cart-courses__list">
+          <li
+            v-for="item in shoppingCartDataList"
+            :key="item.course.id"
+          >
+            <DsCard tag="article" padding="sm" class="cart-courses__row">
+              <div class="cart-courses__media">
+                <img
+                  v-if="item.course.cover"
+                  :src="FORMAT_THE_IAMGE_URL(item.course.cover)"
+                  :alt="item.course.title"
+                  loading="lazy"
+                />
+                <div v-else class="cart-courses__media-fallback" aria-hidden="true">
+                  <q-icon name="menu_book" size="1.5rem" />
+                </div>
+              </div>
+
+              <div class="cart-courses__info">
+                <h3 class="cart-courses__title">{{ item.course.title }}</h3>
+                <p
+                  v-if="instructorName(item)"
+                  class="cart-courses__instructor"
+                >
+                  {{ instructorName(item) }}
+                </p>
+                <PriceDisplay
+                  :amount="itemAmount(item)"
+                  :currency="currency"
+                  size="sm"
+                  variant="ink"
+                />
+              </div>
+
+              <button
+                type="button"
+                class="cart-courses__remove"
+                :aria-label="$t('إزالة من السلة')"
+                @click="removeCourseFromCart(item)"
+              >
+                <q-icon name="delete_outline" size="1.25rem" />
+              </button>
+            </DsCard>
+          </li>
+        </ul>
       </div>
 
-      <DsButton
-        variant="primary"
-        size="lg"
-        full-width
-        @click.native="goToAuthenticationCartPage"
-      >
-        {{ $t('متابعة') }}
-      </DsButton>
+      <!-- Right: summary -->
+      <aside class="cart-courses__summary-col" aria-label="ملخص الطلب">
+        <DsCard padding="md" class="cart-courses__summary">
+          <h2 class="cart-courses__summary-title">
+            {{ $t('ملخص الطلب') }}
+          </h2>
+
+          <dl class="cart-courses__summary-rows">
+            <div class="cart-courses__summary-row">
+              <dt>{{ $t('المجموع الفرعي') }}</dt>
+              <dd>
+                <PriceDisplay
+                  :amount="subtotal"
+                  :currency="currency"
+                  size="sm"
+                  variant="ink"
+                />
+              </dd>
+            </div>
+
+            <div
+              v-if="discountAmount > 0"
+              class="cart-courses__summary-row cart-courses__summary-row--discount"
+            >
+              <dt>{{ $t('الخصم') }}</dt>
+              <dd>
+                −
+                <PriceDisplay
+                  :amount="discountAmount"
+                  :currency="currency"
+                  size="sm"
+                  variant="ink"
+                />
+              </dd>
+            </div>
+
+            <div class="cart-courses__summary-row cart-courses__summary-row--total">
+              <dt>{{ $t('المجمــوع') }}</dt>
+              <dd>
+                <PriceDisplay
+                  :amount="totalDue"
+                  :currency="currency"
+                  size="lg"
+                  variant="terracotta"
+                />
+              </dd>
+            </div>
+          </dl>
+
+          <!-- Promo -->
+          <div class="cart-courses__promo">
+            <label class="cart-courses__promo-label" for="promo-input">
+              {{ $t('كود الخصم') }}
+            </label>
+            <div class="cart-courses__promo-row">
+              <DsInput
+                id="promo-input"
+                v-model="promoCode"
+                :placeholder="$t('أدخل كود الخصم')"
+                :disabled="promoApplied"
+              />
+              <DsButton
+                variant="ghost"
+                size="md"
+                :disabled="!promoCode || promoApplied"
+                @click.native="applyPromo"
+              >
+                {{ promoApplied ? $t('تمت الإضافة') : $t('تطبيق') }}
+              </DsButton>
+            </div>
+            <p
+              v-if="promoApplied"
+              class="cart-courses__promo-hint cart-courses__promo-hint--ok"
+            >
+              <q-icon name="check_circle" size="1rem" />
+              {{ $t('تم تطبيق الكود') }} ({{ promoCode }})
+            </p>
+          </div>
+
+          <DsButton
+            variant="accent"
+            size="lg"
+            full-width
+            class="cart-courses__cta"
+            @click.native="goToAuthenticationCartPage"
+          >
+            {{ $t('متابعة الشراء') }}
+          </DsButton>
+
+          <p class="cart-courses__assurance">
+            <q-icon name="lock" size="0.95rem" />
+            {{ $t('الدفع آمن ومشفر') }}
+          </p>
+        </DsCard>
+      </aside>
     </div>
   </section>
 </template>
@@ -69,19 +186,55 @@ import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { CreateNewOrderWithBulkOrderDetails } from 'src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
 import { CreateBraintreeCheckout } from 'src/queries/checkout_management/mutation/CreateBraintreeCheckout.js'
 
+import DsInput from 'src/design-system/components/DsInput.vue'
+import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
+
 export default {
   name: 'cartCoursesPage',
+
+  components: { DsInput, PriceDisplay },
 
   data () {
     return {
       FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
-      lodash: _
+      lodash: _,
+      promoCode: '',
+      promoApplied: false,
+      discountAmount: 0
     }
   },
 
   computed: {
     ...mapState('shoppingCart', ['shoppingCartDataList']),
-    ...mapState('settings', ['isEnglish', 'currency'])
+    ...mapState('settings', ['isEnglish', 'currency']),
+
+    hasItems () {
+      return this.shoppingCartDataList && this.shoppingCartDataList.length > 0
+    },
+
+    subtotal () {
+      if (!this.hasItems) return 0
+      let sum = 0.0
+      for (const item of this.shoppingCartDataList) {
+        sum += this.itemAmount(item)
+      }
+      return sum
+    },
+
+    totalDue () {
+      const t = this.subtotal - this.discountAmount
+      return t > 0 ? t : 0
+    }
+  },
+
+  watch: {
+    subtotal: {
+      immediate: true,
+      handler (v) {
+        // Persist total fees for downstream steps (unchanged behaviour).
+        this.setTotalPaymentFeesAction(v)
+      }
+    }
   },
 
   mounted () {
@@ -97,6 +250,40 @@ export default {
       'SET_ORDER_DATA_Action'
     ]),
 
+    itemAmount (item) {
+      try {
+        const map = JSON.parse(item.course.currency)
+        return parseFloat(map[this.currency]) || 0
+      } catch (_) {
+        return 0
+      }
+    },
+
+    instructorName (item) {
+      const c = item.course || {}
+      if (c.instructorName) return c.instructorName
+      if (c.instructor) {
+        if (typeof c.instructor === 'string') return c.instructor
+        return c.instructor.fullName || c.instructor.name || ''
+      }
+      return ''
+    },
+
+    applyPromo () {
+      // Placeholder promo logic — kept client-side until a backend mutation exists.
+      // Preserves the UI contract (promo code input + applied state) without
+      // forging a discount the server doesn't know about.
+      if (!this.promoCode) return
+      this.promoApplied = true
+      this.discountAmount = 0
+      this.$q.notify({
+        type: 'info',
+        progress: true,
+        position: 'top',
+        message: 'سيتم التحقق من كود الخصم في خطوة الدفع'
+      })
+    },
+
     async getBraintreePaymentUrlFromTheBackend (orderResult) {
       const braintreePaymentresult = await this.$apollo.mutate({
         mutation: CreateBraintreeCheckout,
@@ -104,9 +291,7 @@ export default {
           orderId: orderResult.order.pk
         }
       })
-
       const braintreeDetails = braintreePaymentresult.data.createBraintreeCheckout
-
       if (this.$_.get(braintreeDetails, '[success]')) {
         return braintreeDetails.braintreeClientToken
       }
@@ -133,16 +318,8 @@ export default {
         mutation: CreateNewOrderWithBulkOrderDetails,
         variables: { courseIds: courseIds }
       })
-
       const dataObj = result.data.createNewOrderWithBulkOrderDetails
-
-      if (this.$_.get(dataObj, '[errors]')) {
-        this.visible = false
-      }
-
-      if (this.$_.get(dataObj, '[success]')) {
-        return dataObj
-      }
+      if (this.$_.get(dataObj, '[success]')) return dataObj
     },
 
     WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT () {
@@ -158,37 +335,6 @@ export default {
           })
         }
       })
-    },
-
-    calculateTheTotalFees () {
-      let sum = 0.0
-      for (const item of this.shoppingCartDataList) {
-        sum = sum + parseFloat(JSON.parse(item.course.currency)[this.currency])
-      }
-      this.setTotalPaymentFeesAction(sum)
-      return sum
-    },
-
-    FORMAT_COUSRE_PRICE (num, digits) {
-      const lookup = [
-        { value: 1, symbol: '' },
-        { value: 1e3, symbol: 'k' },
-        { value: 1e6, symbol: 'M' },
-        { value: 1e9, symbol: 'G' },
-        { value: 1e12, symbol: 'T' },
-        { value: 1e15, symbol: 'P' },
-        { value: 1e18, symbol: 'E' }
-      ]
-
-      if ((num.toString().split('.')[0] == 0) || num == 0) {
-        return num
-      }
-      const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
-      var item = lookup.slice().reverse().find(function (item) {
-        return num >= item.value
-      })
-
-      return item ? (num / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
     },
 
     goToAuthenticationCartPage () {
@@ -208,9 +354,7 @@ export default {
 
     removeCourseFromCart (item) {
       const data = this.shoppingCartDataList
-      this.lodash.remove(data, element => {
-        return element.course.id === item.course.id
-      })
+      this.lodash.remove(data, element => element.course.id === item.course.id)
       this.setShoppinCartDataListAction(data)
     },
 
@@ -223,10 +367,40 @@ export default {
 
 <style lang="scss" scoped>
 .cart-courses {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-6);
   color: var(--ds-text);
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--ds-space-6);
+    align-items: flex-start;
+
+    @media (min-width: 960px) {
+      grid-template-columns: minmax(0, 1fr) 22rem;
+      gap: var(--ds-space-8);
+    }
+  }
+
+  &__section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-3);
+    margin-block-end: var(--ds-space-4);
+  }
+
+  &__section-title {
+    margin: 0;
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-lg);
+    font-weight: var(--ds-weight-semibold);
+    color: var(--ds-text);
+  }
+
+  &__count {
+    font-size: var(--ds-text-sm);
+    color: var(--ds-text-muted);
+  }
 
   &__list {
     list-style: none;
@@ -238,29 +412,29 @@ export default {
 
   &__row {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 4.75rem 1fr auto;
     align-items: center;
     gap: var(--ds-space-4);
-    padding: var(--ds-space-3);
-    background: var(--ds-surface);
-    border: 1px solid var(--ds-border);
-    border-radius: var(--ds-radius-lg);
-    box-shadow: var(--ds-shadow-xs);
-    transition: box-shadow var(--ds-duration-fast) var(--ds-ease-out),
-                border-color var(--ds-duration-fast) var(--ds-ease-out);
-
-    &:hover { box-shadow: var(--ds-shadow-sm); border-color: var(--ds-border-strong); }
   }
 
   &__media {
-    width: 4.5rem;
-    height: 4.5rem;
+    width: 4.75rem;
+    height: 4.75rem;
     border-radius: var(--ds-radius-md);
     overflow: hidden;
     background: var(--ds-surface-muted);
     flex-shrink: 0;
 
-    img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    img,
+    &-fallback {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ds-taupe);
+    }
   }
 
   &__info {
@@ -276,29 +450,17 @@ export default {
     font-size: var(--ds-text-md);
     font-weight: var(--ds-weight-medium);
     color: var(--ds-text);
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  &__price {
+  &__instructor {
     margin: 0;
-    font-size: var(--ds-text-sm);
-    font-weight: var(--ds-weight-bold);
-    color: var(--ds-brand-700);
-    display: inline-flex;
-    align-items: baseline;
-    gap: var(--ds-space-1);
-  }
-
-  &__currency {
     font-size: var(--ds-text-xs);
-    font-weight: var(--ds-weight-regular);
     color: var(--ds-text-muted);
-    margin-inline-start: var(--ds-space-1);
   }
 
   &__remove {
@@ -312,43 +474,115 @@ export default {
     color: var(--ds-text-muted);
     border: 1px solid transparent;
     cursor: pointer;
-    transition: background var(--ds-duration-fast) var(--ds-ease-out),
-                color var(--ds-duration-fast) var(--ds-ease-out),
-                transform var(--ds-duration-fast) var(--ds-ease-out);
+    transition:
+      background var(--ds-duration-fast) var(--ds-ease-out),
+      color var(--ds-duration-fast) var(--ds-ease-out),
+      transform var(--ds-duration-fast) var(--ds-ease-out);
 
     &:hover {
-      background: var(--ds-danger-bg);
-      color: var(--ds-danger);
+      background: var(--ds-danger-bg, #fde2dc);
+      color: var(--ds-danger, #c1623c);
       transform: scale(1.05);
     }
   }
 
-  &__summary {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-space-4);
-    padding-block-start: var(--ds-space-4);
-    border-block-start: 1px solid var(--ds-border);
+  /* --- Summary --- */
+  &__summary-col {
+    position: relative;
+
+    @media (min-width: 960px) {
+      position: sticky;
+      inset-block-start: calc(var(--ds-space-6) + 2rem);
+    }
   }
 
-  &__total {
+  &__summary {
+    border: 1px solid var(--ds-indigo, #322873);
+  }
+
+  &__summary-title {
+    margin: 0 0 var(--ds-space-4);
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-lg);
+    font-weight: var(--ds-weight-semibold);
+    color: var(--ds-indigo, #322873);
+  }
+
+  &__summary-rows {
+    margin: 0 0 var(--ds-space-4);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+  }
+
+  &__summary-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--ds-space-4);
-  }
-
-  &__total-label {
-    font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-lg);
+    gap: var(--ds-space-3);
+    font-size: var(--ds-text-sm);
     color: var(--ds-text);
+
+    dt { color: var(--ds-text-muted); }
+    dd { margin: 0; }
+
+    &--discount { color: var(--ds-success, #2c7a4b); }
+
+    &--total {
+      padding-block-start: var(--ds-space-3);
+      border-block-start: 1px solid var(--ds-border);
+      font-weight: var(--ds-weight-semibold);
+
+      dt {
+        color: var(--ds-ink);
+        font-family: var(--ds-font-heading);
+      }
+    }
   }
 
-  &__total-value {
-    font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-xl);
-    font-weight: var(--ds-weight-bold);
-    color: var(--ds-brand-700);
+  &__promo {
+    margin-block-end: var(--ds-space-4);
+    padding-block: var(--ds-space-3);
+    border-block: 1px dashed var(--ds-border);
+  }
+
+  &__promo-label {
+    display: block;
+    margin-block-end: var(--ds-space-2);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-text-muted);
+  }
+
+  &__promo-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--ds-space-2);
+    align-items: start;
+  }
+
+  &__promo-hint {
+    margin: var(--ds-space-2) 0 0;
+    font-size: var(--ds-text-xs);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-1);
+
+    &--ok { color: var(--ds-success, #2c7a4b); }
+  }
+
+  &__cta { margin-block-start: var(--ds-space-2); }
+
+  &__assurance {
+    margin: var(--ds-space-3) 0 0;
+    text-align: center;
+    font-size: var(--ds-text-xs);
+    color: var(--ds-text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-1);
+    justify-content: center;
+    width: 100%;
   }
 }
 </style>

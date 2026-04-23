@@ -1,5 +1,169 @@
-// Global app styles. Kept intentionally thin — real styling
-// lives in the design system (src/design-system/*) and is
-// consumed via CSS custom properties.
+// =============================================================
+// Global app styles.
+// Thin by design — all values live in the design system
+// (src/design-system/tokens.scss + mixins.scss).
+// =============================================================
 
 @import "../design-system/tokens.scss";
+@import "../design-system/mixins.scss";
+
+// -------------------------------------------------------------
+// Font-face declarations.
+// Agent 1C places the actual woff2 files at
+// src/assets/fonts/<family>/<weight>.woff2. `font-display: swap`
+// so the UI is never blank while fonts load.
+// -------------------------------------------------------------
+
+@font-face {
+  font-family: 'Tajawal';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('~src/assets/fonts/tajawal/Tajawal-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Tajawal';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('~src/assets/fonts/tajawal/Tajawal-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Tajawal';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('~src/assets/fonts/tajawal/Tajawal-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('~src/assets/fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('~src/assets/fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url('~src/assets/fonts/ibm-plex-sans-arabic/IBMPlexSansArabic-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cairo';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('~src/assets/fonts/cairo/Cairo-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cairo';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('~src/assets/fonts/cairo/Cairo-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cairo';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url('~src/assets/fonts/cairo/Cairo-SemiBold.woff2') format('woff2');
+}
+
+// -------------------------------------------------------------
+// Reset — minimal, predictable.
+// -------------------------------------------------------------
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--ds-font-body);
+  font-weight: var(--ds-weight-regular);
+  background-color: var(--ds-surface);
+  color: var(--ds-text);
+  line-height: var(--ds-leading-arabic);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+}
+
+// Locale-specific leading overrides. Arabic gets 1.85, Latin 1.6.
+html[dir="rtl"] body { line-height: var(--ds-leading-arabic); }
+html[dir="ltr"] body { line-height: var(--ds-leading-normal); }
+
+h1, h2, h3, h4, h5, h6, p, figure, blockquote {
+  margin: 0;
+}
+
+img, svg, video, canvas {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+// -------------------------------------------------------------
+// Selection — indigo bed, cream text. The brand in microform.
+// -------------------------------------------------------------
+::selection {
+  background-color: var(--ds-brand-600);
+  color: var(--ds-ivory);
+}
+
+// -------------------------------------------------------------
+// Focus-visible — universal baseline. Components may layer
+// their own focus affordance via @include ds-focus-ring on top.
+// -------------------------------------------------------------
+:focus-visible {
+  outline: 3px solid var(--ds-brand-600);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// -------------------------------------------------------------
+// Reduced-motion global safety net. Individual animations
+// already opt out via their mixins; this is the belt-and-braces.
+// -------------------------------------------------------------
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

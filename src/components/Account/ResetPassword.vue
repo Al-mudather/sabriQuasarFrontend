@@ -1,64 +1,98 @@
 <template>
-  <AccountHeader :dialogName="$t('إستعادة كلمة المرور')">
-    <section class="auth-form">
-      <p class="auth-form__lead">
-        {{ $t('أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.') }}
-      </p>
+  <div class="auth-card">
+    <template v-if="!sent">
+      <header class="auth-card__head">
+        <h1 class="auth-card__title">{{ $t('استعادة كلمة المرور') }}</h1>
+        <p class="auth-card__subtitle">
+          {{ $t('أدخل بريدك الإلكتروني وسنرسل إليك رابطاً لإعادة تعيين كلمة المرور.') }}
+        </p>
+      </header>
 
-      <ul v-if="errorMessages.length > 0" class="auth-form__errors" role="alert">
-        <li v-for="(m, i) in errorMessages" :key="i">{{ m }}</li>
-      </ul>
+      <div v-if="apiError" class="auth-card__banner" role="alert">{{ apiError }}</div>
 
-      <form @submit.prevent="sendEmailConfirmationToTheUser" class="auth-form__fields">
-        <q-input
-          rounded outlined
+      <form @submit.prevent="sendEmailConfirmationToTheUser" class="auth-card__form" novalidate>
+        <ds-input
           v-model="email"
           type="email"
-          :label="$t('الإيميل')"
+          :label="$t('البريد الإلكتروني')"
+          :error="fieldError"
           autocomplete="email"
+          required
         />
+
         <ds-button
           type="submit"
-          variant="primary"
+          native-type="submit"
+          variant="accent"
           size="lg"
           full-width
           :loading="visible"
         >
-          {{ $t('إرسال الرابط') }}
+          {{ $t('إرسال رابط الاستعادة') }}
+        </ds-button>
+
+        <ds-button
+          type="button"
+          native-type="button"
+          variant="ghost"
+          size="lg"
+          full-width
+          @click="goLogin"
+        >
+          {{ $t('العودة إلى تسجيل الدخول') }}
         </ds-button>
       </form>
-    </section>
-  </AccountHeader>
+    </template>
+
+    <template v-else>
+      <div class="auth-card__success">
+        <div class="auth-card__success-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="24" cy="24" r="20" />
+            <path d="M14 24l7 7 14-14" />
+          </svg>
+        </div>
+        <h1 class="auth-card__title">{{ $t('تم إرسال الرابط إلى بريدك') }}</h1>
+        <p class="auth-card__subtitle">
+          {{ $t('تحقق من صندوق الوارد — الرابط صالح لمدة قصيرة. إن لم تجده، راجع مجلد الرسائل غير المرغوبة.') }}
+        </p>
+        <ds-button variant="ghost" size="lg" full-width @click="goLogin">
+          {{ $t('العودة إلى تسجيل الدخول') }}
+        </ds-button>
+      </div>
+    </template>
+  </div>
 </template>
 
 <script>
 import { UserPasswordResetEmail } from 'src/queries/account_management/mutation/UserPasswordResetEmail'
-import AccountHeader from 'src/components/utils/accountHeader'
+import DsInput from 'src/design-system/components/DsInput.vue'
 
 export default {
   name: 'ResetPassword',
-  components: { AccountHeader },
+  components: { DsInput },
 
   data () {
-    return { email: '', visible: false, errorMessages: [] }
+    return { email: '', visible: false, sent: false, apiError: '', fieldError: '' }
   },
 
   methods: {
+    goLogin () { this.$router.push({ name: 'login' }) },
+
     errorHandler (errorsObj) {
+      const generic = []
       for (const key in errorsObj) {
         for (const val of errorsObj[key]) {
-          this.$q.notify({
-            type: 'warning',
-            position: 'top',
-            progress: true,
-            multiLine: true,
-            message: val.message
-          })
+          if (key === 'email') this.fieldError = val.message
+          else generic.push(val.message)
         }
       }
+      if (generic.length) this.apiError = generic.join(' — ')
     },
 
     async sendEmailConfirmationToTheUser () {
+      this.apiError = ''
+      this.fieldError = ''
       this.visible = true
       try {
         const res = await this.$apollo.mutate({
@@ -66,20 +100,13 @@ export default {
           variables: { email: this.email }
         })
         if (res.data.sendPasswordResetEmail.success) {
-          this.$router.push({ name: 'password-confirm' })
+          this.sent = true
+        } else if (res.data.sendPasswordResetEmail.errors) {
+          this.errorHandler(res.data.sendPasswordResetEmail.errors)
         }
-        if (res.data.sendPasswordResetEmail.errors) this.errorHandler(res.data.sendPasswordResetEmail.errors)
         if (res.errors) this.errorHandler(res.errors)
       } catch (error) {
-        if (error.message === 'GraphQL error: [Errno 11001] getaddrinfo failed') {
-          this.$q.notify({
-            type: 'warning',
-            position: 'top',
-            progress: true,
-            multiLine: true,
-            message: this.$t('تعذر إرسال البريد الإلكتروني، حاول مجددًا')
-          })
-        }
+        this.apiError = this.$t('تعذر إرسال البريد الإلكتروني، حاول مجدداً')
       } finally {
         this.visible = false
       }
@@ -89,34 +116,60 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.auth-form {
+.auth-card {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-4);
+  gap: var(--ds-space-5);
 
-  &__lead {
-    font-size: var(--ds-text-md);
+  &__head { text-align: start; }
+
+  &__title {
+    font-family: var(--ds-font-heading);
+    font-weight: var(--ds-weight-bold);
+    font-size: var(--ds-text-2xl);
     color: var(--ds-text);
-    text-align: center;
+    margin: 0 0 var(--ds-space-2);
+  }
+
+  &__subtitle {
+    font-size: var(--ds-text-md);
+    color: var(--ds-text-muted);
+    margin: 0;
     line-height: var(--ds-leading-arabic);
-    margin: 0;
   }
 
-  &__errors {
-    list-style: none;
-    margin: 0;
+  &__banner {
     padding: var(--ds-space-3) var(--ds-space-4);
-    background: var(--ds-danger-bg);
-    color: var(--ds-danger);
-    border-radius: var(--ds-radius-md);
+    background: var(--ds-accent-50);
+    color: var(--ds-accent-500);
+    border-inline-start: 3px solid var(--ds-accent-300);
+    border-radius: var(--ds-radius-sm);
     font-size: var(--ds-text-sm);
-    li + li { margin-block-start: var(--ds-space-1); }
   }
 
-  &__fields {
+  &__form {
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-3);
+    gap: var(--ds-space-4);
+  }
+
+  &__success {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-4);
+    align-items: flex-start;
+    text-align: start;
+  }
+
+  &__success-icon {
+    inline-size: 64px;
+    block-size: 64px;
+    border-radius: 50%;
+    background: var(--ds-brand-50);
+    color: var(--ds-brand-600);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>

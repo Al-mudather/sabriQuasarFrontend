@@ -6,10 +6,7 @@
 <script>
 import { mapActions, mapState, mapGetters } from "vuex";
 import LogRocket from "logrocket";
-// import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
 import { LocalStorage } from "quasar";
-import { WOW } from "wowjs";
-import "animate.css";
 
 export default {
   name: "App",
@@ -169,16 +166,7 @@ export default {
     }
   },
   async mounted() {
-    let options = {
-      //Default is true
-      live: false,
-    };
-    new WOW(options);
-
-    // const res = await this.DESTROY_THE_USER_REFRESH_TOKEN()
-    // console.log('llllllllllllll')
-    // console.log(res)
-    // console.log('llllllllllllll')
+    // GSAP-driven motion replaces legacy WOW; orchestration lives in src/design-system/motion.js
   },
 };
 </script>

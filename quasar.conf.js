@@ -92,7 +92,21 @@ module.exports = function (/* ctx */) {
     framework: {
       iconSet: "material-icons", // Quasar icon set
       lang: "en-us", // Quasar language pack
-      config: {},
+      config: {
+        // Brand tokens mirror src/design-system/tokens.scss.
+        // Royal Indigo is the locked primary (STC logo color).
+        // Terracotta is the signature accent, used sparingly.
+        brand: {
+          primary:   "#322873", // Royal Indigo
+          secondary: "#C1623C", // Terracotta
+          accent:    "#C1623C", // Terracotta (single-source accent)
+          dark:      "#1B1410", // Ink Charcoal
+          positive:  "#5A8E3A", // Success (muted, warm)
+          negative:  "#9E3524", // Danger Rust
+          info:      "#322873", // Info = primary indigo
+          warning:   "#B8862A", // Warning Amber
+        },
+      },
 
       // Possible values for "importStrategy":
       // * 'auto' - (DEFAULT) Auto-import needed Quasar components & directives
@@ -116,9 +130,9 @@ module.exports = function (/* ctx */) {
       ],
     },
 
-    animations: "all", // --- includes all animations
-    // https://quasar.dev/options/animations
-    // animations: [],
+    // Motion is orchestrated via GSAP + ScrollTrigger (see design-system/motion).
+    // Quasar's bundled Animate.css suite is not used.
+    animations: [],
 
     // https://quasar.dev/quasar-cli/developing-ssr/configuring-ssr
     ssr: {

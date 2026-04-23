@@ -1,0 +1,426 @@
+<template>
+  <section class="hero-indigo" aria-label="STC hero">
+    <!-- Topographic contour overlay -->
+    <svg class="hero-indigo__contour" viewBox="0 0 1600 800" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0,180 C400,120 800,260 1600,160" />
+      <path d="M0,380 C500,320 1000,460 1600,360" />
+      <path d="M0,580 C400,520 900,660 1600,560" />
+      <path d="M0,720 C500,680 1100,760 1600,700" />
+    </svg>
+
+    <!-- Logo watermark silhouette (cream-transparent gradient stand-in) -->
+    <div class="hero-indigo__watermark" aria-hidden="true" />
+
+    <div class="hero-indigo__container">
+      <div class="hero-indigo__grid">
+        <!-- RIGHT (logical-start, 55%) -->
+        <div class="hero-indigo__copy">
+          <span class="hero-indigo__kicker">
+            <span class="hero-indigo__kicker-dash" aria-hidden="true">—</span>
+            مركز د. صبري للتدريب الطبي والتطوير الذاتي
+          </span>
+
+          <h1 class="hero-indigo__headline">
+            <span ref="line1" class="hero-indigo__line">ابدأ رحلتك نحو</span>
+            <span ref="line2" class="hero-indigo__line hero-indigo__line--inline">
+              <span class="hero-indigo__word hero-indigo__word--underline">
+                نسخة
+                <svg class="hero-indigo__brush" viewBox="0 0 120 18" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M2,11 C22,4 48,16 78,8 C98,3 112,10 118,6" />
+                </svg>
+              </span>
+              <span class="hero-indigo__inline-photo" aria-hidden="true">
+                <span class="hero-indigo__inline-photo-inner" />
+              </span>
+              <span class="hero-indigo__word">أقوى</span>
+            </span>
+            <span ref="line3" class="hero-indigo__line">من نفسك</span>
+          </h1>
+
+          <p class="hero-indigo__deck">
+            برامج تدريبية معتمدة في التطوير الذاتي والمهارات الطبية،
+            يقودها خبراء متمرسون بخبرة تمتد لعقود.
+          </p>
+
+          <div class="hero-indigo__actions">
+            <ds-button variant="accent" size="lg" pill to="/courses">
+              ابدأ مجاناً
+            </ds-button>
+            <a class="hero-indigo__video" href="#intro-video">
+              <span class="hero-indigo__play" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M10 8 L16 12 L10 16 Z" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+              شاهد الفيديو التعريفي
+            </a>
+          </div>
+
+          <ul ref="trust" class="hero-indigo__trust">
+            <li><bdi>{{ learnersLabel }}</bdi> متعلم</li>
+            <li aria-hidden="true" class="hero-indigo__trust-dot">·</li>
+            <li><bdi>{{ coursesLabel }}</bdi> دورة معتمدة</li>
+            <li aria-hidden="true" class="hero-indigo__trust-dot">·</li>
+            <li>20+ سنة خبرة</li>
+          </ul>
+        </div>
+
+        <!-- LEFT (logical-end, 45%) — offset portrait -->
+        <div class="hero-indigo__portrait-wrap">
+          <div ref="portrait" class="hero-indigo__portrait">
+            <img :src="portraitSrc" alt="" />
+            <div class="hero-indigo__portrait-overlay" aria-hidden="true" />
+            <div class="hero-indigo__badge">
+              <span class="hero-indigo__badge-num">20+</span>
+              <span class="hero-indigo__badge-label">سنة خبرة</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script>
+import DsButton from 'src/design-system/components/DsButton.vue'
+import { LOGO } from 'src/design-system/brand'
+import { slowBreath, cascade, contourDrift } from 'src/design-system/motion'
+
+export default {
+  name: 'HeroIndigo',
+  components: { DsButton },
+  props: {
+    learnersCount: { type: Number, default: null },
+    coursesCount:  { type: Number, default: null }
+  },
+  computed: {
+    portraitSrc () { return LOGO.full },
+    learnersLabel () {
+      return Number.isFinite(this.learnersCount) && this.learnersCount > 0
+        ? new Intl.NumberFormat('ar-EG').format(this.learnersCount)
+        : '[metric]'
+    },
+    coursesLabel () {
+      return Number.isFinite(this.coursesCount) && this.coursesCount > 0
+        ? new Intl.NumberFormat('ar-EG').format(this.coursesCount)
+        : '[metric]'
+    }
+  },
+  mounted () {
+    this._breath = slowBreath(this.$refs.portrait)
+    this._drift = contourDrift(this.$el.querySelector('.hero-indigo__contour'))
+    const lines = [this.$refs.line1, this.$refs.line2, this.$refs.line3].filter(Boolean)
+    this._cascade = cascade(lines, { stagger: 0.08, y: 18, duration: 0.7 })
+    // Trust row cascade — delayed
+    this._trustTimer = setTimeout(() => {
+      if (this.$refs.trust) {
+        const items = this.$refs.trust.querySelectorAll('li')
+        this._trustCascade = cascade(items, { stagger: 0.06, y: 10, duration: 0.5 })
+      }
+    }, 200)
+  },
+  beforeDestroy () {
+    if (this._breath && this._breath.kill) this._breath.kill()
+    if (this._drift && this._drift.kill) this._drift.kill()
+    if (this._cascade && this._cascade.kill) this._cascade.kill()
+    if (this._trustCascade && this._trustCascade.kill) this._trustCascade.kill()
+    if (this._trustTimer) clearTimeout(this._trustTimer)
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+@import 'src/design-system/tokens.scss';
+
+.hero-indigo {
+  position: relative;
+  isolation: isolate;
+  background: var(--ds-brand-600);
+  color: var(--ds-ivory);
+  overflow: hidden;
+  padding-block: clamp(4rem, 10vw, 7.5rem);
+}
+
+.hero-indigo__contour {
+  position: absolute;
+  inset: 0;
+  inline-size: 110%;
+  block-size: 100%;
+  fill: none;
+  stroke: var(--ds-cream);
+  stroke-width: 1.2;
+  opacity: 0.10;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-indigo__watermark {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -120px;
+  inline-size: 500px;
+  background:
+    radial-gradient(
+      circle at 30% 50%,
+      rgba(251, 247, 240, 0.12) 0%,
+      rgba(251, 247, 240, 0.04) 40%,
+      transparent 70%
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-indigo__container {
+  position: relative;
+  z-index: 1;
+  max-inline-size: 1200px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+.hero-indigo__grid {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+
+  @media (max-width: $ds-bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Copy column ---------- */
+
+.hero-indigo__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--ds-font-body);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ds-accent-300);
+  line-height: 1.6;
+  margin-block-end: var(--ds-space-6);
+}
+
+.hero-indigo__kicker-dash {
+  color: var(--ds-accent-300);
+  font-weight: 600;
+}
+
+.hero-indigo__headline {
+  font-family: var(--ds-font-display);
+  font-weight: 700;
+  font-size: clamp(2.5rem, 4vw + 1rem, 4.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ds-ivory);
+  margin: 0 0 var(--ds-space-6);
+}
+
+.hero-indigo__line {
+  display: block;
+  opacity: 1;
+}
+
+.hero-indigo__line--inline {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  flex-wrap: wrap;
+}
+
+.hero-indigo__word {
+  position: relative;
+  display: inline-block;
+}
+
+.hero-indigo__word--underline {
+  /* brush stroke sits under the text */
+}
+
+.hero-indigo__brush {
+  position: absolute;
+  inset-inline-start: -8%;
+  inset-block-end: -0.18em;
+  inline-size: 140%;
+  block-size: 0.32em;
+  fill: none;
+  stroke: var(--ds-accent-300);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.hero-indigo__inline-photo {
+  display: inline-flex;
+  inline-size: 48px;
+  block-size: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  align-self: center;
+  box-shadow: 0 0 0 2px var(--ds-ivory), 0 2px 8px rgba(0, 0, 0, 0.25);
+  background: var(--ds-brand-500);
+}
+
+.hero-indigo__inline-photo-inner {
+  inline-size: 100%;
+  block-size: 100%;
+  background:
+    radial-gradient(circle at 35% 35%, var(--ds-accent-200) 0%, var(--ds-accent-400) 60%, var(--ds-brand-700) 100%);
+  display: block;
+}
+
+.hero-indigo__deck {
+  font-family: var(--ds-font-body);
+  font-weight: 400;
+  font-size: clamp(1rem, 0.9rem + 0.3vw, 1.15rem);
+  line-height: 1.85;
+  color: rgba(251, 247, 240, 0.82);
+  max-inline-size: 48ch;
+  margin: 0 0 var(--ds-space-8);
+}
+
+.hero-indigo__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-6);
+  flex-wrap: wrap;
+  margin-block-end: var(--ds-space-8);
+}
+
+.hero-indigo__video {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-family: var(--ds-font-body);
+  font-weight: 500;
+  color: var(--ds-ivory);
+  text-decoration: none;
+  padding-block: 0.6rem;
+  padding-inline: 1.1rem;
+  border: 1px solid rgba(251, 247, 240, 0.35);
+  border-radius: 999px;
+  transition: background-color var(--ds-duration-base) var(--ds-ease-out),
+              border-color var(--ds-duration-base) var(--ds-ease-out);
+
+  &:hover {
+    background-color: rgba(251, 247, 240, 0.08);
+    border-color: rgba(251, 247, 240, 0.6);
+  }
+}
+
+.hero-indigo__play {
+  display: inline-flex;
+  color: var(--ds-ivory);
+}
+
+.hero-indigo__trust {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-xs);
+  font-weight: 500;
+  color: rgba(251, 247, 240, 0.7);
+
+  li {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.hero-indigo__trust-dot {
+  color: rgba(251, 247, 240, 0.45);
+  padding-inline: 0.1rem;
+}
+
+/* ---------- Portrait column ---------- */
+
+.hero-indigo__portrait-wrap {
+  position: relative;
+  min-block-size: 100%;
+
+  @media (max-width: $ds-bp-md) {
+    margin-block-start: var(--ds-space-8);
+  }
+}
+
+.hero-indigo__portrait {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  inline-size: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ds-brand-700);
+  box-shadow: 0 18px 48px rgba(13, 10, 39, 0.35);
+  transform-origin: center;
+  /* Offset bottom — portrait extends 60px past the section's edge */
+  margin-block-end: -60px;
+
+  @media (max-width: $ds-bp-md) {
+    margin-block-end: 0;
+    max-inline-size: 420px;
+    margin-inline: auto;
+  }
+
+  img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.92) contrast(1.05);
+  }
+}
+
+.hero-indigo__portrait-overlay {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 45%;
+  background: linear-gradient(
+    to top,
+    rgba(27, 20, 16, 0.45) 0%,
+    rgba(27, 20, 16, 0.15) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.hero-indigo__badge {
+  position: absolute;
+  inset-block-start: 16px;
+  inset-inline-start: 16px;
+  inline-size: 64px;
+  block-size: 64px;
+  border-radius: 50%;
+  background: var(--ds-accent-300);
+  color: var(--ds-ivory);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(110, 52, 30, 0.35);
+  font-family: var(--ds-font-body);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.hero-indigo__badge-num {
+  font-family: var(--ds-font-mono);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.hero-indigo__badge-label {
+  font-size: 9px;
+  margin-block-start: 2px;
+  opacity: 0.95;
+}
+</style>

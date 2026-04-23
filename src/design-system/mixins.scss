@@ -1,4 +1,5 @@
 @use "sass:map";
+@import "./tokens.scss";
 
 // =============================================================
 // RTL-safe mixins. Use these instead of hand-rolled
@@ -13,31 +14,53 @@
 }
 
 // =============================================================
-// Focus ring — use on any interactive element.
+// Focus ring — 3px Royal Indigo ring + border darken.
 // Transparent outline preserves layout; box-shadow paints ring.
 // =============================================================
 @mixin ds-focus-ring {
   outline: 2px solid transparent;
   outline-offset: 2px;
-  box-shadow: var(--ds-shadow-focus);
+  box-shadow: 0 0 0 3px rgba(50, 40, 115, 0.25);
+  border-color: var(--ds-brand-600);
+}
+
+// =============================================================
+// Elevation recipes — 4 levels using warm-ink shadows.
+// Never pure black; uses rgba(27,20,16,X) tinted to ink.
+// =============================================================
+@mixin ds-elevation($level: 1) {
+  @if      $level == 0 { box-shadow: none; }
+  @else if $level == 1 { box-shadow: var(--ds-shadow-sm); }
+  @else if $level == 2 { box-shadow: var(--ds-shadow-md); }
+  @else if $level == 3 { box-shadow: var(--ds-shadow-lg); }
+  @else if $level == 4 { box-shadow: var(--ds-shadow-xl); }
 }
 
 // =============================================================
 // Breakpoints — mobile-first only.
 // =============================================================
 @mixin ds-above($bp) {
-  @if $bp == sm      { @media (min-width: 600px)  { @content; } }
-  @else if $bp == md { @media (min-width: 900px)  { @content; } }
-  @else if $bp == lg { @media (min-width: 1200px) { @content; } }
-  @else if $bp == xl { @media (min-width: 1536px) { @content; } }
+  @if $bp == sm      { @media (min-width: #{$ds-bp-sm}) { @content; } }
+  @else if $bp == md { @media (min-width: #{$ds-bp-md}) { @content; } }
+  @else if $bp == lg { @media (min-width: #{$ds-bp-lg}) { @content; } }
+  @else if $bp == xl { @media (min-width: #{$ds-bp-xl}) { @content; } }
 }
 
 // =============================================================
 // Typography helpers
 // =============================================================
+@mixin ds-display {
+  font-family: var(--ds-font-display);
+  font-weight: var(--ds-weight-bold);
+  line-height: var(--ds-leading-tight);
+  letter-spacing: var(--ds-tracking-display);
+  font-size: var(--ds-text-4xl);
+  color: var(--ds-text);
+}
+
 @mixin ds-heading($size: xl) {
   font-family: var(--ds-font-heading);
-  font-weight: var(--ds-weight-bold);
+  font-weight: var(--ds-weight-semibold);
   line-height: var(--ds-leading-tight);
   color: var(--ds-text);
   @if     $size == 4xl { font-size: var(--ds-text-4xl); }
@@ -59,6 +82,15 @@
   @else                { font-size: var(--ds-text-md); }
 }
 
+@mixin ds-mono($size: sm) {
+  font-family: var(--ds-font-mono);
+  font-weight: var(--ds-weight-medium);
+  @if     $size == lg { font-size: var(--ds-text-lg); }
+  @else if $size == md { font-size: var(--ds-text-md); }
+  @else if $size == xs { font-size: var(--ds-text-xs); }
+  @else                { font-size: var(--ds-text-sm); }
+}
+
 // =============================================================
 // Truncation
 // =============================================================
@@ -73,4 +105,99 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+// =============================================================
+// Container — max-width 1200px centered, fluid inline padding.
+// =============================================================
+@mixin ds-container {
+  width: 100%;
+  max-width: #{$ds-container-xl};
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+// =============================================================
+// The six named motions — CSS fallbacks.
+// GSAP handles the production-grade choreography; these mixins
+// give us parity for non-JS contexts and reduced-motion.
+// =============================================================
+
+// slow-breath: 1 → 1.03 scale loop, never more than 3%.
+@keyframes ds-slow-breath {
+  0%   { transform: scale(1); }
+  100% { transform: scale(1.03); }
+}
+@mixin ds-breath {
+  animation: ds-slow-breath var(--ds-duration-breath) var(--ds-ease-in-out) infinite alternate;
+  will-change: transform;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+// contour-drift: 0 → 5% translateX loop, seamless.
+@keyframes ds-contour-drift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(5%); }
+}
+@mixin ds-contour-drift {
+  animation: ds-contour-drift var(--ds-duration-drift) linear infinite;
+  will-change: transform;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+// cascade: opacity 0→1 + translateY(16px→0), 600ms ease-out.
+// Reduced-motion keeps opacity, drops the translate (per DESIGN.md).
+@keyframes ds-cascade-in {
+  0%   { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes ds-cascade-in-reduced {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+@mixin ds-cascade-item($delay: 0ms) {
+  opacity: 0;
+  animation: ds-cascade-in 600ms var(--ds-ease-out) $delay forwards;
+  will-change: transform, opacity;
+  @media (prefers-reduced-motion: reduce) {
+    animation-name: ds-cascade-in-reduced;
+    animation-duration: 240ms;
+  }
+}
+
+// =============================================================
+// Hero indigo — full-bleed indigo ground with topographic
+// contour overlay at 10% cream. Decorative background only.
+// Consumers put content inside a ds-container child.
+// =============================================================
+@mixin ds-hero-indigo {
+  position: relative;
+  background-color: var(--ds-brand-600);
+  color: var(--ds-text-on-indigo);
+  overflow: hidden;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    // Stacked radial washes evoke the topographic contour motif at
+    // 10% cream opacity — replaced by an SVG layer in production.
+    background-image:
+      radial-gradient(ellipse 120% 60% at 20% 30%, rgba(246, 241, 234, 0.10), transparent 60%),
+      radial-gradient(ellipse 100% 50% at 80% 70%, rgba(246, 241, 234, 0.08), transparent 65%),
+      radial-gradient(ellipse 80%  40% at 50% 50%, rgba(246, 241, 234, 0.06), transparent 70%);
+    opacity: 1;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
 }

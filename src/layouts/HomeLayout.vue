@@ -1,15 +1,6 @@
 <template>
-  <q-layout>
-    <Currency />
-    <NavBar />
-    <transition
-      appear
-      enter-active-class="animated fadeIn"
-      leave-active-class="animated fadeOut"
-    >
-      <Menu v-if="openMenu" />
-    </transition>
-    <ShoppingCart />
+  <q-layout view="hHh lpR fFf" :dir="$q.lang.rtl ? 'rtl' : 'rtl'">
+    <AppHeader variant="transparent" :sticky="true" />
     <q-page-container>
       <transition
         appear
@@ -19,26 +10,23 @@
         <router-view />
       </transition>
     </q-page-container>
-    <Footer />
+    <AppFooter />
   </q-layout>
 </template>
 
 <script>
-import Currency from 'components/Home/Currency.vue'
-import NavBar from 'components/Home/Nav_bar.vue'
-import Menu from 'components/Home/Menu'
-import Footer from 'src/components/utils/Footer'
-import ShoppingCart from 'components/Home/Shopping_cart'
+import AppHeader from 'src/components/shared/AppHeader.vue'
+import AppFooter from 'src/components/shared/AppFooter.vue'
 import { Quasar } from 'quasar'
 import { mapActions, mapState } from 'vuex'
 
 export default {
   name: 'HomeLayout',
-  components: { Currency, NavBar, Menu, Footer, ShoppingCart },
+  components: { AppHeader, AppFooter },
 
   computed: {
     ...mapState('authentication', ['token']),
-    ...mapState('settings', ['openMenu', 'isEnglish'])
+    ...mapState('settings', ['isEnglish'])
   },
 
   async mounted () {
@@ -59,7 +47,7 @@ export default {
 
   methods: {
     ...mapActions('authentication', ['logOutAction']),
-    ...mapActions('settings', ['setIsEnglishAction', 'setOpenMenuAction'])
+    ...mapActions('settings', ['setIsEnglishAction'])
   }
 }
 </script>

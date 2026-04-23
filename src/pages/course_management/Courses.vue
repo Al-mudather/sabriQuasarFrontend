@@ -1,502 +1,800 @@
 <template>
-  <main class="courses-page">
-    <header class="courses-page__head">
-      <h1 class="courses-page__title">
-        <img src="~assets/img/tit.png" alt="" aria-hidden="true" />
-        <span>{{ $t('الـــدورات') }}</span>
-      </h1>
+  <main class="catalog">
+    <!-- =========== Page header (cream) =========== -->
+    <header class="catalog__head">
+      <div class="catalog__head-inner">
+        <ds-breadcrumb class="catalog__crumbs">
+          <ds-breadcrumb-item :to="{ name: 'home' }">
+            {{ $t('الرئيسية') }}
+          </ds-breadcrumb-item>
+          <ds-breadcrumb-item>
+            {{ $t('الدورات') }}
+          </ds-breadcrumb-item>
+        </ds-breadcrumb>
 
-      <form class="courses-page__search" @submit.prevent="GetAllCoursesByTitle">
-        <svg viewBox="0 0 24 24" class="courses-page__search-icon" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
-          <path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <input
-          v-model="search"
-          type="search"
-          :placeholder="$t('ما الذي تبحث عنة في التخصص المختار ادناه؟')"
-          @keydown.enter.prevent="GetAllCoursesByTitle"
-        />
-      </form>
+        <h1 class="catalog__title">{{ $t('جميع الدورات') }}</h1>
 
-      <div class="courses-page__filters">
-        <button
-          v-for="f in filters"
-          :key="f.id"
-          type="button"
-          class="chip"
-          :class="{ 'chip--active': activePriceFilter === f.id }"
-          @click="applyPriceFilter(f.id)"
-        >{{ f.label }}</button>
-
-        <div class="courses-page__sorters">
-          <button
-            type="button"
-            class="sort-btn"
-            :class="{ 'sort-btn--active': activeOrder === 'ACE' }"
-            :aria-label="$t('ترتيب تصاعدي')"
-            @click="GetAllCoursesByOrderingDecendinOrAcending('ACE')"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M7 14l5-5 5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <button
-            type="button"
-            class="sort-btn"
-            :class="{ 'sort-btn--active': activeOrder === 'DEC' }"
-            :aria-label="$t('ترتيب تنازلي')"
-            @click="GetAllCoursesByOrderingDecendinOrAcending('DEC')"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
+        <p class="catalog__subtitle">
+          <template v-if="totalCount !== null">
+            {{ formatNum(totalCount) }} {{ $t('دورة متاحة') }}
+          </template>
+          <template v-else>
+            {{ $t('استكشف مكتبة الدورات التدريبية') }}
+          </template>
+        </p>
       </div>
     </header>
 
-    <section class="courses-page__tabs">
-      <div ref="cat" @click="changeTab" class="swiper-container">
-        <swiper
-          ref="mySwiper"
-          class="courses-page__tab-list"
-          :space-between="1"
-          :options="swiperOptions"
-        >
-          <div v-if="$_.isEmpty(allCourseSpecialities.edges)" class="courses-page__tab-skeletons">
-            <ds-skeleton v-for="i in 6" :key="i" shape="pill" width="7rem" />
-          </div>
-          <swiper-slide
-            v-else
-            class="nav-item"
-            v-for="spec in allCourseSpecialities.edges"
-            :key="spec.node.id"
-          >
-            <a
-              :data-pk="spec.node.pk"
-              class="nav-link"
-              role="tab"
-              @click="changeCourseData(spec.node.pk)"
+    <div class="catalog__shell">
+      <!-- =========== Sidebar (inline-end in RTL) =========== -->
+      <aside class="catalog__sidebar" aria-label="filters">
+        <div class="filter-panel">
+          <div class="filter-panel__head">
+            <h2 class="filter-panel__heading">{{ $t('الفلاتر') }}</h2>
+            <button
+              v-if="hasActiveFilters"
+              type="button"
+              class="filter-panel__clear"
+              @click="clearAllFilters"
             >
-              <img src="~assets/img/brain.png" alt="" aria-hidden="true" />
-              <span>{{ spec.node.speciality }}</span>
-            </a>
-          </swiper-slide>
-        </swiper>
-      </div>
-    </section>
-
-    <section class="courses-page__body">
-      <ApolloQuery
-        :query="GetAllCoursesInSpeciality"
-        :variables="{
-          specialityId: activeSpecialityID,
-          first: 8,
-          ...filter,
-          ...searchFilter,
-          ...orderingFilter,
-          isDraft: isDraft
-        }"
-        :skip="!activeSpecialityID"
-      >
-        <template v-slot="{ result: { loading, data }, query }">
-          <div v-if="loading" class="courses-page__grid">
-            <ds-card v-for="i in 8" :key="i" class="courses-page__card-skeleton">
-              <template #media>
-                <ds-skeleton shape="rect" height="100%" radius="0" />
-              </template>
-              <ds-skeleton shape="line" width="85%" />
-              <ds-skeleton shape="line" width="55%" />
-              <template #footer>
-                <ds-skeleton shape="pill" width="100%" />
-              </template>
-            </ds-card>
+              {{ $t('مسح الفلاتر') }}
+            </button>
           </div>
 
-          <ds-empty-state
-            v-else-if="$_.get(data, '[allCoursesInSpeciality][edgeCount]', 0) <= 0"
-            :title="$t('لا توجد نتائج للبحث')"
-            :description="$t('حاول الكتابة بشكل مختلف')"
-            size="md"
+          <!-- Speciality group -->
+          <section class="filter-panel__group">
+            <h3 class="filter-panel__group-title">{{ $t('التخصص') }}</h3>
+            <ApolloQuery :query="GetSpecialities" :variables="{ courseNumber: 20 }">
+              <template v-slot="{ result: { loading, data } }">
+                <div v-if="loading" class="filter-panel__skeletons">
+                  <ds-skeleton v-for="i in 5" :key="i" shape="line" width="80%" />
+                </div>
+                <ul v-else class="filter-panel__list">
+                  <li class="filter-panel__item">
+                    <label class="check">
+                      <input
+                        type="radio"
+                        name="speciality"
+                        :value="null"
+                        :checked="activeSpecialityID === null"
+                        @change="setSpeciality(null)"
+                      />
+                      <span class="check__mark" aria-hidden="true"></span>
+                      <span class="check__label">{{ $t('كل التخصصات') }}</span>
+                    </label>
+                  </li>
+                  <li
+                    v-for="spec in $_.get(data, 'allCourseSpecialities.edges', [])"
+                    :key="spec.node.id"
+                    class="filter-panel__item"
+                  >
+                    <label class="check">
+                      <input
+                        type="radio"
+                        name="speciality"
+                        :value="spec.node.pk"
+                        :checked="activeSpecialityID === spec.node.pk"
+                        @change="setSpeciality(spec.node.pk)"
+                      />
+                      <span class="check__mark" aria-hidden="true"></span>
+                      <span class="check__label">{{ spec.node.speciality }}</span>
+                    </label>
+                  </li>
+                </ul>
+              </template>
+            </ApolloQuery>
+          </section>
+
+          <!-- Price group -->
+          <section class="filter-panel__group">
+            <h3 class="filter-panel__group-title">{{ $t('السعر') }}</h3>
+            <ul class="filter-panel__list">
+              <li
+                v-for="f in priceFilters"
+                :key="f.id"
+                class="filter-panel__item"
+              >
+                <label class="check">
+                  <input
+                    type="radio"
+                    name="price"
+                    :value="f.id"
+                    :checked="activePriceFilter === f.id"
+                    @change="applyPriceFilter(f.id)"
+                  />
+                  <span class="check__mark" aria-hidden="true"></span>
+                  <span class="check__label">{{ f.label }}</span>
+                </label>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </aside>
+
+      <!-- =========== Main content =========== -->
+      <section class="catalog__main">
+        <!-- Toolbar: search + sort -->
+        <div class="catalog__toolbar">
+          <div class="catalog__search">
+            <svg
+              viewBox="0 0 24 24"
+              class="catalog__search-icon"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input
+              v-model="searchInput"
+              type="search"
+              class="catalog__search-input"
+              :placeholder="$t('ابحث عن دورة...')"
+              :aria-label="$t('البحث في الدورات')"
+            />
+          </div>
+
+          <div class="catalog__sort">
+            <label for="sort-select" class="catalog__sort-label">
+              {{ $t('ترتيب:') }}
+            </label>
+            <select
+              id="sort-select"
+              v-model="sortValue"
+              class="catalog__sort-select"
+            >
+              <option value="newest">{{ $t('الأحدث') }}</option>
+              <option value="popular">{{ $t('الأكثر طلباً') }}</option>
+              <option value="price_asc">{{ $t('السعر: من الأقل') }}</option>
+              <option value="price_desc">{{ $t('السعر: من الأعلى') }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Active filter chips -->
+        <div v-if="activeChips.length" class="catalog__chips">
+          <ds-tag
+            v-for="chip in activeChips"
+            :key="chip.key"
+            variant="indigo"
+            size="sm"
+            closable
+            @close="chip.onClear"
           >
-            <template #illustration>
-              <img src="~assets/img/search(1).png" alt="" />
-            </template>
-          </ds-empty-state>
+            {{ chip.label }}
+          </ds-tag>
+        </div>
 
-          <div v-else>
-            <div class="courses-page__grid">
-              <course-card
-                v-for="course in $_.get(data, '[allCoursesInSpeciality][edges]', [])"
-                :key="course.node.id"
-                :course="course.node"
-                :name="course.node.title"
-                instructor="مركز دكتور صبري ابو قرون"
-                :price="course.node.courseFee"
-                unit="SDG"
-              />
+        <!-- =========== Results =========== -->
+        <ApolloQuery
+          :query="GetAllCourses"
+          :variables="queryVariables"
+          :fetch-policy="'cache-and-network'"
+          @result="onQueryResult"
+        >
+          <template v-slot="{ result: { loading, data }, query }">
+            <!-- Loading skeletons -->
+            <div v-if="loading && !data" class="catalog__grid">
+              <ds-card
+                v-for="i in 6"
+                :key="`sk-${i}`"
+                class="catalog__skeleton"
+              >
+                <template #media>
+                  <ds-skeleton shape="rect" height="180px" radius="0" />
+                </template>
+                <ds-skeleton shape="line" width="85%" />
+                <ds-skeleton shape="line" width="55%" />
+                <template #footer>
+                  <ds-skeleton shape="pill" width="100%" />
+                </template>
+              </ds-card>
             </div>
 
-            <div v-if="data.allCoursesInSpeciality.pageInfo.hasNextPage" class="courses-page__load-more">
-              <ds-button variant="secondary" @click="loadMoreData(query, data)">
-                {{ $t('عرض المزيد') }}
-              </ds-button>
+            <!-- Empty -->
+            <ds-empty-state
+              v-else-if="!loading && $_.get(data, 'allCourses.edgeCount', 0) <= 0"
+              variant="search"
+              size="md"
+              :title="$t('لا توجد دورات تطابق البحث')"
+              :body="$t('جرّب إزالة بعض الفلاتر أو تعديل كلمات البحث')"
+            />
+
+            <!-- Grid -->
+            <div v-else>
+              <div ref="grid" class="catalog__grid">
+                <course-card
+                  v-for="course in $_.get(data, 'allCourses.edges', [])"
+                  :key="course.node.id"
+                  class="catalog__grid-item"
+                  :course="course.node"
+                  :name="course.node.title"
+                  instructor="مركز دكتور صبري ابو قرون"
+                  :price="course.node.courseFee"
+                  unit="SDG"
+                />
+              </div>
+
+              <div
+                v-if="$_.get(data, 'allCourses.pageInfo.hasNextPage', false)"
+                class="catalog__load-more"
+              >
+                <ds-button
+                  variant="secondary"
+                  :loading="loading"
+                  @click="loadMore(query, data)"
+                >
+                  {{ $t('تحميل المزيد') }}
+                </ds-button>
+              </div>
             </div>
-          </div>
-        </template>
-      </ApolloQuery>
-    </section>
+          </template>
+        </ApolloQuery>
+      </section>
+    </div>
   </main>
 </template>
 
 <script>
 import courseCard from 'components/utils/courseCard.vue'
-import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality.js'
-import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
+import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses.js'
+import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites.js'
 import { mapActions } from 'vuex'
-import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
-import 'swiper/swiper-bundle.css'
-import 'swiper/swiper.min.css'
+import { cascade } from 'src/design-system/motion.js'
+import DsBreadcrumb from 'src/design-system/components/DsBreadcrumb.vue'
+import DsBreadcrumbItem from 'src/design-system/components/DsBreadcrumbItem.vue'
+import DsInput from 'src/design-system/components/DsInput.vue'
+import DsTag from 'src/design-system/components/DsTag.vue'
 
 export default {
   name: 'Courses',
-  components: { courseCard, Swiper, SwiperSlide },
+
+  components: {
+    courseCard,
+    DsBreadcrumb,
+    DsBreadcrumbItem,
+    // eslint-disable-next-line vue/no-unused-components
+    DsInput,
+    DsTag
+  },
 
   data () {
     return {
-      GetAllCoursesInSpeciality,
-      counter: 0,
-      isDraft: false,
+      GetAllCourses,
+      GetSpecialities,
+      // raw input — debounced into `search`
+      searchInput: '',
       search: '',
+      searchTimer: null,
       activeSpecialityID: null,
+      activeSpecialityLabel: '',
       activePriceFilter: 'all',
-      activeOrder: null,
-      allCourseSpecialities: '',
-      filter: {},
-      searchFilter: {},
-      orderingFilter: {},
-      swiperOptions: {
-        effect: 'coverflow',
-        grabCursor: true,
-        centeredSlides: true,
-        slidesPerView: 'auto',
-        coverflowEffect: { rotate: 500, stretch: 0, depth: 100, modifier: 1, slideShadows: false }
-      }
+      sortValue: 'newest',
+      totalCount: null,
+      isDraft: false,
+      didInitialCascade: false
     }
   },
 
   computed: {
-    swiper () { return this.$refs.mySwiper.$swiper },
-
-    filters () {
+    priceFilters () {
       return [
         { id: 'all',  label: this.$t('الكل') },
         { id: 'free', label: this.$t('مجاناً') },
-        { id: 'paid', label: this.$t('مدفوعه') }
+        { id: 'paid', label: this.$t('مدفوعة') }
       ]
-    }
-  },
+    },
 
-  apollo: {
-    allCourseSpecialities: {
-      query () { return GetSpecialities },
-      variables () { return { courseNumber: 20 } }
+    orderBy () {
+      switch (this.sortValue) {
+        case 'price_asc':  return ['courseFee']
+        case 'price_desc': return ['-courseFee']
+        case 'popular':    return ['-enrolled']
+        case 'newest':
+        default:           return ['-createdAt']
+      }
+    },
+
+    queryVariables () {
+      const vars = {
+        first: 12,
+        orderBy: this.orderBy,
+        isDraft: this.isDraft
+      }
+      if (this.search && this.search.trim()) {
+        vars.title_Icontains = this.search.trim()
+      }
+      if (this.activeSpecialityID) {
+        vars.courseSpeciality = this.activeSpecialityID
+      }
+      if (this.activePriceFilter === 'free') vars.isPaid = false
+      if (this.activePriceFilter === 'paid') vars.isPaid = true
+      return vars
+    },
+
+    hasActiveFilters () {
+      return (
+        !!this.activeSpecialityID ||
+        this.activePriceFilter !== 'all' ||
+        !!(this.search && this.search.trim())
+      )
+    },
+
+    activeChips () {
+      const chips = []
+      if (this.search && this.search.trim()) {
+        chips.push({
+          key: 'search',
+          label: `${this.$t('بحث')}: "${this.search.trim()}"`,
+          onClear: () => { this.searchInput = ''; this.search = '' }
+        })
+      }
+      if (this.activeSpecialityID) {
+        chips.push({
+          key: `spec-${this.activeSpecialityID}`,
+          label: this.activeSpecialityLabel || this.$t('تخصص محدد'),
+          onClear: () => this.setSpeciality(null)
+        })
+      }
+      if (this.activePriceFilter !== 'all') {
+        const f = this.priceFilters.find(x => x.id === this.activePriceFilter)
+        chips.push({
+          key: `price-${this.activePriceFilter}`,
+          label: f ? f.label : '',
+          onClear: () => this.applyPriceFilter('all')
+        })
+      }
+      return chips
     }
   },
 
   watch: {
-    '$route.params': {
-      immediate: true,
-      deep: true,
-      handler (params) {
-        this.search = params.search || ''
-        this.GetAllCoursesByTitle()
-      }
-    },
-    search (val) { if (this.$_.isEmpty(val)) this.GetAllCoursesByTitle() }
+    searchInput (val) {
+      if (this.searchTimer) clearTimeout(this.searchTimer)
+      this.searchTimer = setTimeout(() => {
+        this.search = val
+      }, 300)
+    }
   },
 
   mounted () {
     this.setActiveNavAction('COURSES')
-    this.swiper.slideTo(3, 1000, false)
     this.setNavbarSearchAction(false)
+    this.hydrateFromRoute()
   },
 
-  destroyed () { this.setNavbarSearchAction(true) },
-
-  updated () {
-    if (this.counter !== 0 || !this.$refs.cat) return
-    const l1 = this.$refs.cat.firstChild
-    const l2 = l1 && l1.firstChild
-    const l3 = l2 && l2.firstChild
-    const firstTab = l3 && l3.firstChild
-    if (!firstTab) return
-    firstTab.classList.add('active')
-    const specialityID = JSON.parse(firstTab.dataset.pk)
-    this.changeCourseData(specialityID)
-    this.activeSpecialityID = specialityID
-    this.counter += 10
+  destroyed () {
+    this.setNavbarSearchAction(true)
+    if (this.searchTimer) clearTimeout(this.searchTimer)
   },
 
   methods: {
     ...mapActions('authentication', ['setNavbarSearchAction']),
     ...mapActions('settings', ['setActiveNavAction']),
 
-    GetAllCoursesByOrderingDecendinOrAcending (type) {
-      this.activeOrder = type
-      this.orderingFilter = { orderBy: [type === 'DEC' ? '-title' : 'title'] }
-      this.changeCourseData(this.activeSpecialityID)
+    formatNum (n) {
+      const v = Number(n)
+      if (!Number.isFinite(v)) return ''
+      try {
+        return new Intl.NumberFormat('ar-EG').format(v)
+      } catch (_) {
+        return String(v)
+      }
     },
 
-    GetAllCoursesByTitle () {
-      this.searchFilter = { title_Icontains: this.search }
-      this.changeCourseData(this.activeSpecialityID)
+    hydrateFromRoute () {
+      const q = this.$route.query || {}
+      const specRaw = q.speciality
+      if (specRaw !== undefined && specRaw !== null && specRaw !== '') {
+        const pk = Number(specRaw)
+        if (Number.isFinite(pk)) {
+          this.activeSpecialityID = pk
+          this.resolveSpecialityLabel(pk)
+        }
+      }
+      if (q.q && typeof q.q === 'string') {
+        this.searchInput = q.q
+        this.search = q.q
+      }
+    },
+
+    async resolveSpecialityLabel (pk) {
+      try {
+        const { data } = await this.$apollo.query({
+          query: GetSpecialities,
+          variables: { courseNumber: 50 }
+        })
+        const edges = (data && data.allCourseSpecialities && data.allCourseSpecialities.edges) || []
+        const match = edges.find(e => e.node.pk === pk)
+        if (match) this.activeSpecialityLabel = match.node.speciality
+      } catch (_) { /* ignore */ }
+    },
+
+    setSpeciality (pk) {
+      this.activeSpecialityID = pk
+      if (pk) {
+        this.resolveSpecialityLabel(pk)
+      } else {
+        this.activeSpecialityLabel = ''
+      }
     },
 
     applyPriceFilter (id) {
       this.activePriceFilter = id
-      if (id === 'free') this.filter = { isPaid: false }
-      else if (id === 'paid') this.filter = { isPaid: true }
-      else this.filter = {}
-      this.changeCourseData(this.activeSpecialityID)
     },
 
-    async changeCourseData (specialityID) {
-      this.activeSpecialityID = specialityID
+    clearAllFilters () {
+      this.searchInput = ''
+      this.search = ''
+      this.activeSpecialityID = null
+      this.activeSpecialityLabel = ''
+      this.activePriceFilter = 'all'
     },
 
-    async loadMoreData (query, data) {
-      await query.fetchMore({
-        variables: {
-          specialityId: this.activeSpecialityID,
-          cursor: data.allCoursesInSpeciality.pageInfo.endCursor,
-          isDraft: this.isDraft
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          const newEdges = fetchMoreResult.allCoursesInSpeciality.edges
-          const pageInfo = fetchMoreResult.allCoursesInSpeciality.pageInfo
-          if (newEdges.length) {
-            return {
-              allCoursesInSpeciality: {
-                __typename: previousResult.allCoursesInSpeciality.__typename,
-                edges: [...previousResult.allCoursesInSpeciality.edges, ...newEdges],
-                pageInfo
-              }
-            }
-          }
-          return previousResult
-        }
+    onQueryResult ({ data }) {
+      const tc = data && data.allCourses && data.allCourses.totalCount
+      if (Number.isFinite(Number(tc))) this.totalCount = Number(tc)
+      // Initial cascade once data arrives
+      this.$nextTick(() => {
+        if (this.didInitialCascade) return
+        const grid = this.$refs.grid
+        if (!grid) return
+        const items = grid.querySelectorAll('.catalog__grid-item')
+        if (!items.length) return
+        cascade(items, { stagger: 0.06, y: 14, duration: 0.5 })
+        this.didInitialCascade = true
       })
     },
 
-    changeTab (e) {
-      e.preventDefault()
-      const clickedLiParent = e.target.closest('.nav-item')
-      if (!clickedLiParent) return
-      const ulParent = clickedLiParent.parentElement
-      for (const liParent of ulParent.childNodes) {
-        if (liParent.firstChild) liParent.firstChild.classList.remove('active')
-      }
-      clickedLiParent.firstChild.classList.add('active')
+    async loadMore (query, data) {
+      if (!data || !data.allCourses || !data.allCourses.pageInfo.hasNextPage) return
+      await query.fetchMore({
+        variables: {
+          ...this.queryVariables,
+          cursor: data.allCourses.pageInfo.endCursor
+        },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return prev
+          const newEdges = fetchMoreResult.allCourses.edges
+          return {
+            allCourses: {
+              __typename: prev.allCourses.__typename,
+              totalCount: fetchMoreResult.allCourses.totalCount,
+              edgeCount: fetchMoreResult.allCourses.edgeCount,
+              edges: [...prev.allCourses.edges, ...newEdges],
+              pageInfo: fetchMoreResult.allCourses.pageInfo
+            }
+          }
+        }
+      })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.courses-page {
-  max-inline-size: 1200px;
+.catalog {
+  min-block-size: 100vh;
+  background: var(--ds-bg, var(--ds-surface-muted));
+}
+
+/* ---------- Cream header ---------- */
+.catalog__head {
+  background: var(--ds-cream, #F6F1EA);
+  border-block-end: 1px solid var(--ds-border);
+}
+
+.catalog__head-inner {
+  max-inline-size: 1240px;
   margin-inline: auto;
-  padding: var(--ds-space-6) var(--ds-space-3) var(--ds-space-16);
+  padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-10);
 
-  @media (min-width: 600px) {
-    padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
-  }
-
-  &__head {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-space-4);
-    margin-block-end: var(--ds-space-6);
-  }
-
-  &__title {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ds-space-2);
-    font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-3xl);
-    font-weight: var(--ds-weight-bold);
-    color: var(--ds-text);
-    margin: 0;
-    img { block-size: 1.75rem; inline-size: auto; }
-  }
-
-  &__search {
-    position: relative;
-    max-inline-size: 560px;
-
-    input {
-      inline-size: 100%;
-      padding: 0.85rem var(--ds-space-3) 0.85rem calc(var(--ds-space-10) + 0.5rem);
-      background: var(--ds-surface);
-      border: 1px solid var(--ds-border);
-      border-radius: var(--ds-radius-pill);
-      font-family: var(--ds-font-body);
-      font-size: var(--ds-text-md);
-      color: var(--ds-text);
-      outline: 0;
-      transition:
-        border-color var(--ds-duration-fast) var(--ds-ease-out),
-        box-shadow var(--ds-duration-fast) var(--ds-ease-out);
-
-      &:focus {
-        border-color: var(--ds-brand-600);
-        box-shadow: var(--ds-shadow-focus);
-      }
-
-      &::placeholder { color: var(--ds-text-muted); }
-    }
-  }
-
-  &__search-icon {
-    position: absolute;
-    inset-inline-start: var(--ds-space-3);
-    inset-block-start: 50%;
-    transform: translateY(-50%);
-    inline-size: 1.25rem;
-    block-size: 1.25rem;
-    color: var(--ds-text-muted);
-    pointer-events: none;
-  }
-
-  &__filters {
-    display: flex;
-    gap: var(--ds-space-2);
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  &__sorters {
-    margin-inline-start: auto;
-    display: flex;
-    gap: var(--ds-space-1);
-  }
-
-  &__tabs {
-    margin-block-end: var(--ds-space-6);
-  }
-
-  &__tab-list {
-    padding-block: var(--ds-space-2);
-  }
-
-  &__tab-skeletons {
-    display: flex;
-    gap: var(--ds-space-2);
-  }
-
-  &__body {
-    min-block-size: 30rem;
-  }
-
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: var(--ds-space-5);
-    align-items: stretch;
-  }
-
-  &__card-skeleton { height: 100%; }
-
-  &__load-more {
-    display: flex;
-    justify-content: center;
-    margin-block-start: var(--ds-space-8);
+  @media (min-width: 768px) {
+    padding: var(--ds-space-12) var(--ds-space-6) var(--ds-space-12);
   }
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  flex: 0 0 auto;
-  background: var(--ds-surface);
+.catalog__crumbs {
+  margin-block-end: var(--ds-space-3);
+}
+
+.catalog__title {
+  font-family: var(--ds-font-heading, 'Tajawal', sans-serif);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw + 1rem, 3.5rem); /* 44-56px */
+  line-height: 1.15;
+  color: var(--ds-ink, var(--ds-text));
+  margin: 0 0 var(--ds-space-2);
+  letter-spacing: -0.01em;
+}
+
+.catalog__subtitle {
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-md);
+  color: var(--ds-taupe, var(--ds-text-muted));
+  margin: 0;
+}
+
+/* ---------- Shell (grid with sidebar) ---------- */
+.catalog__shell {
+  max-inline-size: 1240px;
+  margin-inline: auto;
+  padding: var(--ds-space-6) var(--ds-space-4) var(--ds-space-16);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-6);
+
+  @media (min-width: 960px) {
+    grid-template-columns: 1fr 280px; /* main then sidebar (sidebar inline-end via order in RTL) */
+    padding: var(--ds-space-8) var(--ds-space-6) var(--ds-space-16);
+    gap: var(--ds-space-8);
+  }
+}
+
+.catalog__sidebar {
+  @media (min-width: 960px) {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    position: sticky;
+    inset-block-start: var(--ds-space-6);
+    align-self: start;
+  }
+}
+
+.catalog__main {
+  grid-column: 1 / 2;
+  min-inline-size: 0;
+}
+
+/* ---------- Filter panel ---------- */
+.filter-panel {
+  background: var(--ds-surface-elevated, #ffffff);
   border: 1px solid var(--ds-border);
-  color: var(--ds-text);
-  border-radius: var(--ds-radius-pill);
-  padding: 0.5rem 1rem;
-  white-space: nowrap;
+  border-radius: var(--ds-radius-lg, 14px);
+  padding: var(--ds-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+}
+
+.filter-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+}
+
+.filter-panel__heading {
   font-family: var(--ds-font-heading);
+  font-weight: 700;
+  font-size: var(--ds-text-lg);
+  color: var(--ds-ink, var(--ds-text));
+  margin: 0;
+}
+
+.filter-panel__clear {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--ds-font-body);
   font-size: var(--ds-text-sm);
-  font-weight: var(--ds-weight-medium);
+  color: var(--ds-brand-700, var(--ds-brand-600));
   cursor: pointer;
-  transition:
-    background-color var(--ds-duration-fast) var(--ds-ease-out),
-    color var(--ds-duration-fast) var(--ds-ease-out),
-    border-color var(--ds-duration-fast) var(--ds-ease-out);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 
-  &:hover { background: var(--ds-surface-muted); }
-  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+  &:hover { color: var(--ds-accent-600, var(--ds-accent-300)); }
+  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); border-radius: 4px; }
+}
 
-  &--active {
-    background: var(--ds-brand-600);
-    color: var(--ds-text-onBrand);
-    border-color: var(--ds-brand-600);
-    &:hover { background: var(--ds-brand-700); }
+.filter-panel__group {
+  border-block-start: 1px solid var(--ds-border);
+  padding-block-start: var(--ds-space-4);
+
+  &:first-of-type {
+    border-block-start: 0;
+    padding-block-start: 0;
   }
 }
 
-.sort-btn {
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-md);
-  color: var(--ds-text);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color var(--ds-duration-fast) var(--ds-ease-out),
-              color var(--ds-duration-fast) var(--ds-ease-out);
-
-  svg { inline-size: 1.1rem; block-size: 1.1rem; }
-
-  &:hover { background: var(--ds-surface-muted); }
-  &--active { background: var(--ds-brand-600); color: var(--ds-text-onBrand); border-color: var(--ds-brand-600); }
-  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+.filter-panel__group-title {
+  font-family: var(--ds-font-heading);
+  font-weight: 600;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink, var(--ds-text));
+  margin: 0 0 var(--ds-space-3);
+  letter-spacing: 0.02em;
 }
 
-::v-deep .courses-page__tab-list .nav-link {
+.filter-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  max-block-size: 280px;
+  overflow-y: auto;
+}
+
+.filter-panel__skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+}
+
+/* ---------- Custom check/radio ---------- */
+.check {
   display: inline-flex;
   align-items: center;
   gap: var(--ds-space-2);
-  padding: 0.5rem 1rem;
-  border-radius: var(--ds-radius-pill);
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  color: var(--ds-text);
-  font-family: var(--ds-font-heading);
-  font-size: var(--ds-text-sm);
-  font-weight: var(--ds-weight-medium);
-  text-decoration: none;
-  white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color var(--ds-duration-fast) var(--ds-ease-out),
-    color var(--ds-duration-fast) var(--ds-ease-out),
-    border-color var(--ds-duration-fast) var(--ds-ease-out);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text);
+  user-select: none;
 
-  img { block-size: 1em; inline-size: auto; }
-
-  &:hover { background: var(--ds-surface-muted); }
-
-  &.active {
-    background: var(--ds-brand-600);
-    color: var(--ds-text-onBrand);
-    border-color: var(--ds-brand-600);
-    img { filter: brightness(0) invert(1); }
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
   }
+
+  &__mark {
+    inline-size: 18px;
+    block-size: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ds-border);
+    background: var(--ds-surface);
+    flex: 0 0 auto;
+    position: relative;
+    transition:
+      border-color var(--ds-duration-fast) var(--ds-ease-out),
+      background-color var(--ds-duration-fast) var(--ds-ease-out);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background: var(--ds-brand-600);
+      transform: scale(0);
+      transition: transform var(--ds-duration-fast) var(--ds-ease-out);
+    }
+  }
+
+  input:checked + &__mark {
+    border-color: var(--ds-brand-600);
+    &::after { transform: scale(1); }
+  }
+
+  input:focus-visible + &__mark {
+    box-shadow: var(--ds-shadow-focus);
+  }
+
+  &__label {
+    line-height: 1.4;
+  }
+
+  &:hover &__label { color: var(--ds-brand-700, var(--ds-brand-600)); }
+}
+
+/* ---------- Toolbar ---------- */
+.catalog__toolbar {
+  display: flex;
+  gap: var(--ds-space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-block-end: var(--ds-space-4);
+}
+
+.catalog__search {
+  position: relative;
+  flex: 1 1 280px;
+  min-inline-size: 0;
+}
+
+.catalog__search-input {
+  inline-size: 100%;
+  padding: 0.75rem var(--ds-space-3) 0.75rem calc(var(--ds-space-10));
+  background: var(--ds-surface-elevated, #ffffff);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill, 9999px);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-md);
+  color: var(--ds-text);
+  outline: 0;
+  transition:
+    border-color var(--ds-duration-fast) var(--ds-ease-out),
+    box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+
+  &:focus {
+    border-color: var(--ds-brand-600);
+    box-shadow: var(--ds-shadow-focus);
+  }
+
+  &::placeholder { color: var(--ds-text-muted); }
+}
+
+.catalog__search-icon {
+  position: absolute;
+  inset-inline-start: var(--ds-space-3);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  color: var(--ds-text-muted);
+  pointer-events: none;
+}
+
+.catalog__sort {
+  order: -1; /* inline-start in RTL */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin-inline-end: auto;
+
+  @media (max-width: 640px) {
+    order: 0;
+    margin-inline-end: 0;
+    inline-size: 100%;
+  }
+}
+
+.catalog__sort-label {
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-muted);
+  white-space: nowrap;
+}
+
+.catalog__sort-select {
+  padding: 0.6rem var(--ds-space-3);
+  background: var(--ds-surface-elevated, #ffffff);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md, 8px);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text);
+  cursor: pointer;
+  min-inline-size: 160px;
+  outline: 0;
+
+  &:focus { border-color: var(--ds-brand-600); box-shadow: var(--ds-shadow-focus); }
+}
+
+/* ---------- Active chips ---------- */
+.catalog__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin-block-end: var(--ds-space-4);
+}
+
+/* ---------- Grid ---------- */
+.catalog__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ds-space-6);
+  align-items: stretch;
+
+  @media (min-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.catalog__grid-item {
+  min-inline-size: 0;
+}
+
+.catalog__skeleton { block-size: 100%; }
+
+.catalog__load-more {
+  display: flex;
+  justify-content: center;
+  margin-block-start: var(--ds-space-8);
 }
 </style>

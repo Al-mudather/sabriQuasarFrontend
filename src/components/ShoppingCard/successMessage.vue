@@ -1,37 +1,73 @@
 <template>
-  <section class="cart-success">
-    <div class="cart-success__art">
-      <q-icon name="check_circle" size="4rem" class="cart-success__icon" />
+  <section class="cart-success" aria-label="تم استلام الطلب">
+    <div class="cart-success__crest" aria-hidden="true">
+      <svg
+        viewBox="0 0 64 64"
+        width="40"
+        height="40"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M18 33.5 L28 43.5 L47 22" />
+      </svg>
     </div>
 
-    <h2 class="cart-success__greeting">
-      {{ $t('شكرا لك') }}
-      <span v-if="user && !$_.isEmpty(user.fullName)">{{ user.fullName }}</span>
-      <span v-else-if="user && !$_.isEmpty(user.firstName) && !$_.isEmpty(user.lastName)">
+    <h1 class="cart-success__title">
+      {{ $t('تم استلام طلبك') }}
+    </h1>
+
+    <p class="cart-success__greeting">
+      {{ $t('شكراً لك') }}
+      <span v-if="user && user.fullName">{{ user.fullName }}</span>
+      <span v-else-if="user && user.firstName && user.lastName">
         {{ user.firstName }} {{ user.lastName }}
       </span>
-      <span v-else-if="user && user.username">{{ user.username.split('@')[0] }}</span>
-    </h2>
+      <span v-else-if="user && user.username">
+        {{ user.username.split('@')[0] }}
+      </span>
+      — {{ $t('نسعد بانضمامك إلينا.') }}
+    </p>
 
-    <p class="cart-success__title">{{ $t('تهانينا لك') }}</p>
+    <p
+      v-if="checkoutOrderID"
+      class="cart-success__order"
+    >
+      {{ $t('رقم الطلب') }}:
+      <span class="cart-success__order-number">#{{ checkoutOrderID }}</span>
+    </p>
 
-    <div class="cart-success__links">
-      <p class="cart-success__line" @click="GO_TO_MY_ORDERS_page">
-        {{ $t('يمكنك متابعة حالة طلباتك في حالة الدفع عن طريق الأشعار من') }}
-        <span class="cart-success__link">{{ $t('صفحة طلباتي') }}</span>
+    <div class="cart-success__body">
+      <p>
+        {{ $t('إذا دفعت بإرفاق إشعار بنكي، يمكنك متابعة حالة طلبك من') }}
+        <router-link :to="{ name: 'my-orders' }" class="cart-success__link">
+          {{ $t('صفحة طلباتي') }}
+        </router-link>.
       </p>
-      <p class="cart-success__line" @click="GO_TO_MY_COURSES_page">
-        {{ $t('او الذهاب الى لوحتك التعليميه في حالة الدفع المباشر لتبدأ التعلم فورا') }}
-        <span class="cart-success__link">{{ $t('لوحتك التعليمية') }}</span>
+      <p>
+        {{ $t('إذا كان الدفع مباشراً، ستجد دوراتك جاهزة في') }}
+        <router-link :to="{ name: 'my-courses' }" class="cart-success__link">
+          {{ $t('لوحتك التعليمية') }}
+        </router-link>.
       </p>
     </div>
 
     <div class="cart-success__actions">
-      <DsButton variant="primary" size="lg" @click.native="GO_TO_MY_COURSES_page">
-        {{ $t('لوحتك التعليمية') }}
+      <DsButton
+        variant="accent"
+        size="lg"
+        @click.native="$router.push({ name: 'my-courses' })"
+      >
+        {{ $t('ابدأ التعلم الآن') }}
       </DsButton>
-      <DsButton variant="secondary" size="lg" @click.native="GO_TO_MY_ORDERS_page">
-        {{ $t('صفحة طلباتي') }}
+      <DsButton
+        variant="secondary"
+        size="lg"
+        @click.native="$router.push({ name: 'courses' })"
+      >
+        {{ $t('عودة إلى الدورات') }}
       </DsButton>
     </div>
   </section>
@@ -46,10 +82,7 @@ export default {
 
   apollo: {
     myNotifications: {
-      query () {
-        return GetMyNotifications
-      },
-
+      query () { return GetMyNotifications },
       variables () {
         return {
           orderBy: ['-id'],
@@ -57,15 +90,12 @@ export default {
           extraData: `<Order ${this.checkoutOrderID}>`
         }
       },
-
       result (result) {
         try {
           if (result.data.myNotifications.edges[0].node.title === 'CHECKOUT_SUCCESS') {
             this.deleteShoppinCartDataListAction()
           }
-        } catch {
-          // silent
-        }
+        } catch (_) { /* silent */ }
       }
     }
   },
@@ -76,15 +106,7 @@ export default {
   },
 
   methods: {
-    ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction']),
-
-    GO_TO_MY_COURSES_page () {
-      this.$router.push({ name: 'my-courses' })
-    },
-
-    GO_TO_MY_ORDERS_page () {
-      this.$router.push({ name: 'my-orders' })
-    }
+    ...mapActions('shoppingCart', ['deleteShoppinCartDataListAction'])
   }
 }
 </script>
@@ -99,29 +121,17 @@ export default {
   text-align: center;
   color: var(--ds-text);
 
-  &__art {
+  &__crest {
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 50%;
+    background: var(--ds-indigo, #322873);
+    color: var(--ds-cream, #f6f1ea);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 6rem;
-    height: 6rem;
-    border-radius: 50%;
-    background: var(--ds-success-bg);
     margin-block-end: var(--ds-space-2);
-  }
-
-  &__icon { color: var(--ds-success); }
-
-  &__greeting {
-    margin: 0;
-    font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-xl);
-    color: var(--ds-text);
-
-    span {
-      color: var(--ds-brand-700);
-      margin-inline-start: var(--ds-space-2);
-    }
+    box-shadow: 0 12px 32px rgba(50, 40, 115, 0.18);
   }
 
   &__title {
@@ -129,26 +139,54 @@ export default {
     font-family: var(--ds-font-heading);
     font-size: var(--ds-text-2xl);
     font-weight: var(--ds-weight-bold);
-    color: var(--ds-success);
+    color: var(--ds-ink, #1b1410);
   }
 
-  &__links {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-space-2);
-    max-width: 36rem;
+  &__greeting {
+    margin: 0;
+    font-size: var(--ds-text-md);
+    color: var(--ds-text);
+    line-height: 1.7;
+
+    span {
+      color: var(--ds-indigo, #322873);
+      font-weight: var(--ds-weight-semibold);
+      margin-inline: 0.25ch;
+    }
   }
 
-  &__line {
+  &__order {
     margin: 0;
     font-size: var(--ds-text-sm);
     color: var(--ds-text-muted);
-    line-height: 1.6;
-    cursor: pointer;
+  }
+
+  &__order-number {
+    color: var(--ds-indigo, #322873);
+    font-family: var(--ds-font-heading);
+    font-weight: var(--ds-weight-bold);
+    margin-inline-start: 0.5ch;
+    letter-spacing: 0.02em;
+  }
+
+  &__body {
+    max-width: 34rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+
+    p {
+      margin: 0;
+      font-size: var(--ds-text-sm);
+      color: var(--ds-text-muted);
+      line-height: 1.8;
+    }
   }
 
   &__link {
-    color: var(--ds-brand-600);
+    color: var(--ds-indigo, #322873);
+    text-decoration: none;
     font-weight: var(--ds-weight-medium);
 
     &:hover { text-decoration: underline; }
