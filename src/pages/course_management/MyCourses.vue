@@ -195,7 +195,11 @@ export default {
 .my-courses {
   max-inline-size: 1200px;
   margin-inline: auto;
-  padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
+  padding: var(--ds-space-5) var(--ds-space-3) var(--ds-space-12);
+
+  @media (min-width: 600px) {
+    padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
+  }
 
   &__header {
     margin-block-end: var(--ds-space-6);
@@ -212,55 +216,83 @@ export default {
   &__title {
     display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-3);
+    gap: var(--ds-space-2);
     font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-3xl);
+    font-size: var(--ds-text-2xl);
     font-weight: var(--ds-weight-bold);
     color: var(--ds-text);
     margin: 0;
-    img { block-size: 2rem; inline-size: auto; }
+
+    @media (min-width: 600px) {
+      gap: var(--ds-space-3);
+      font-size: var(--ds-text-3xl);
+    }
+
+    img { block-size: 1.5rem; inline-size: auto; @media (min-width: 600px) { block-size: 2rem; } }
   }
 
   &__stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: var(--ds-space-3);
+    // 3-across always — no orphan rows. Shrinks with the viewport.
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-space-2);
     margin: var(--ds-space-6) 0 0;
     padding: 0;
+
+    @media (min-width: 600px) {
+      gap: var(--ds-space-3);
+    }
 
     .stat {
       background: var(--ds-surface);
       border: 1px solid var(--ds-border);
       border-radius: var(--ds-radius-lg);
-      padding: var(--ds-space-4);
+      padding: var(--ds-space-3);
       display: flex;
       flex-direction: column;
       gap: var(--ds-space-1);
       box-shadow: var(--ds-shadow-xs);
+      min-inline-size: 0;
+
+      @media (min-width: 600px) {
+        padding: var(--ds-space-4);
+      }
 
       dt {
-        font-size: var(--ds-text-sm);
+        font-size: var(--ds-text-xs);
         color: var(--ds-text-muted);
         font-family: var(--ds-font-body);
+        @media (min-width: 600px) { font-size: var(--ds-text-sm); }
       }
       dd {
         font-family: var(--ds-font-heading);
-        font-size: var(--ds-text-3xl);
+        font-size: var(--ds-text-2xl);
         font-weight: var(--ds-weight-bold);
         color: var(--ds-brand-700);
         margin: 0;
         font-variant-numeric: tabular-nums;
+        @media (min-width: 600px) { font-size: var(--ds-text-3xl); }
       }
     }
   }
 
   &__filters {
     display: flex;
+    flex-flow: row wrap;
     gap: var(--ds-space-2);
-    flex-wrap: wrap;
     margin-block-end: var(--ds-space-6);
     padding-block: var(--ds-space-2);
-    border-block-end: 1px solid var(--ds-border);
+    // Let chips scroll horizontally on very narrow screens rather
+    // than break into a vertical list.
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+
+    @media (min-width: 480px) {
+      overflow-x: visible;
+      border-block-end: 1px solid var(--ds-border);
+    }
   }
 
   &__body {
@@ -279,11 +311,14 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: var(--ds-space-2);
+  flex: 0 0 auto;
+  inline-size: auto;
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   color: var(--ds-text);
   border-radius: var(--ds-radius-pill);
   padding: 0.5rem 1rem;
+  white-space: nowrap;
   font-family: var(--ds-font-heading);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-medium);
@@ -320,3 +355,4 @@ export default {
   }
 }
 </style>
+
