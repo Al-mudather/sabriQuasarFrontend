@@ -1,27 +1,14 @@
-// import something here
-import Vue from 'vue'
-import VueAxios from 'vue-axios'
-import VueAuthenticate from 'vue-authenticate'
-import axios from 'axios'
+// Track B stub: `vue-authenticate` is removed (unmaintained, Vue 2 only).
+//
+// The legacy wiring only registered a single Google provider pointing at
+// localhost — it was dev-only config that wasn't useful in production.
+//
+// Track C will replace this with a ~50 LOC OAuth authorization-code flow
+// helper inside the login page, preserving the backend callback contract
+// at `/rest-auth/google/`.
 
-// "async" is optional;
-// more info on params: https://quasar.dev/quasar-cli/boot-files
+import { boot } from 'quasar/wrappers'
 
-Vue.use(VueAxios, axios)
-
-Vue.use(VueAuthenticate, {
-  baseUrl: 'http://localhost:8000', // Your API domain
-
-  providers: {
-    google: {
-      url: '/rest-auth/google/',
-      clientId: '812696144817-l1pdrq5sjmd71f5gnv6scsahsfaa5eve.apps.googleusercontent.com',
-      redirectUri: 'http://localhost:8080', // Your client app URL
-      scope: ['email']
-    }
-  }
+export default boot(() => {
+  // noop — see note above
 })
-
-// export default async (/* { app, router, Vue ... } */) => {
-//   // something to do
-// }

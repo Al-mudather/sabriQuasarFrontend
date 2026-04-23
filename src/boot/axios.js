@@ -1,6 +1,11 @@
-import Vue from 'vue'
+import { boot } from 'quasar/wrappers'
 import axios from 'axios'
 
-Vue.prototype.$axios = axios
+export default boot(({ app }) => {
+  app.config.globalProperties.$axios = axios
+  if (typeof window !== 'undefined') {
+    app.config.globalProperties.$Stripe = window.Stripe
+  }
+})
 
-Vue.prototype.$Stripe = window.Stripe
+export { axios }

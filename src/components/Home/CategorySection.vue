@@ -81,6 +81,8 @@
 // <script lang="ts"> (the project's Vue 2 loader doesn't run TS in .vue files).
 // When Track B flips to Vue 3 + Vite, this can be promoted to `import type`.
 /** @typedef {import('src/graphql').AllCoursesInSpecialityQuery} AllCoursesInSpecialityQuery */
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality'
 import CourseCard from 'src/components/shared/CourseCard.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
@@ -116,36 +118,30 @@ export default {
   props: {
     speciality: { type: Object, required: true }
   },
-  data () {
-    return {
-      coursesInSpeciality: null
-    }
-  },
-  apollo: {
-    coursesInSpeciality: {
-      query: GetAllCoursesInSpeciality,
-      variables () {
-        return {
-          specialityId: this.speciality.pk,
-          first: 8,
-          isDraft: false
-        }
-      },
-      update: data => data.allCoursesInSpeciality,
-      error (err) {
-        // Silent-fail; empty state handles UX.
-        // eslint-disable-next-line no-console
-        console.warn('[CategorySection] query failed', err)
-      }
-    }
+  // --- Track B acceptance: Apollo via @vue/apollo-composable ---------------
+  // The old Options-API `apollo:{…}` block is kept commented out below for
+  // Track C's reference while it migrates the other 25 apollo:{…} sites.
+  //
+  // apollo: {
+  //   coursesInSpeciality: {
+  //     query: GetAllCoursesInSpeciality,
+  //     variables () { return { specialityId: this.speciality.pk, first: 8, isDraft: false } },
+  //     update: data => data.allCoursesInSpeciality,
+  //     error (err) { console.warn('[CategorySection] query failed', err) }
+  //   }
+  // },
+  setup (props) {
+    const { result, loading } = useQuery(
+      GetAllCoursesInSpeciality,
+      () => ({ specialityId: props.speciality.pk, first: 8, isDraft: false }),
+      { fetchPolicy: 'cache-and-network', errorPolicy: 'all' }
+    )
+    const coursesInSpeciality = computed(() => result.value?.allCoursesInSpeciality || null)
+    const isLoading = computed(() => loading.value && !coursesInSpeciality.value)
+    return { coursesInSpeciality, isLoading }
   },
   computed: {
     ...mapState('settings', ['currency', 'isEnglish']),
-    isLoading () {
-      return this.$apollo && this.$apollo.queries.coursesInSpeciality
-        ? this.$apollo.queries.coursesInSpeciality.loading && !this.coursesInSpeciality
-        : false
-    },
     courses () {
       const edges = (this.coursesInSpeciality && this.coursesInSpeciality.edges) || []
       return edges.map(e => e.node).filter(Boolean)
@@ -175,7 +171,7 @@ export default {
     }, { threshold: 0.2 })
     this._io.observe(this.$el)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     if (this._io) { this._io.disconnect(); this._io = null }
     if (this._cascade && this._cascade.kill) this._cascade.kill()
   },

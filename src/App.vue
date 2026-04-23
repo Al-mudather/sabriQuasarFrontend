@@ -26,7 +26,7 @@ export default {
     ]),
   },
 
-  async destroyed() {
+  async unmounted() {
     // TODO: Delete the user access token
     // await this.DESTROY_THE_USER_REFRESH_TOKEN()
     //TODO: Delete the user data

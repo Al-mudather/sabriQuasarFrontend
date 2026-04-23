@@ -1,99 +1,87 @@
-import {ApolloClient} from 'apollo-client'
-import {InMemoryCache} from "apollo-cache-inmemory/lib/index";
-// import fetch from "node-fetch";
-// import {createHttpLink} from "apollo-link-http/lib/index";
-import {ApolloLink, concat, split} from 'apollo-link';
-import {tokenStorage} from 'src/localStorageService'
-import {createUploadLink} from 'apollo-upload-client'
-import axios from 'axios'
-import {API_URI, WS_HOST} from '../utils/hostConfig'
-import {WebSocketLink} from 'apollo-link-ws'
-import {getMainDefinition} from 'apollo-utilities'
+// Apollo Client 3 + @vue/apollo-composable + graphql-ws wiring.
+//
+// Preserves the behavior of the legacy Apollo Client 2 setup:
+//  - HTTP link with file-upload support (apollo-upload-client v18).
+//  - WebSocket link for GraphQL subscriptions (graphql-ws).
+//  - JWT auth middleware that injects the user's access token on every op.
+//  - fetchPolicy defaults tuned for UX (cache-and-network on watch, network-only on query).
 
-const {buildAxiosFetch} = require("@lifeomic/axios-fetch");
+import { ApolloClient, ApolloLink, InMemoryCache, split } from '@apollo/client/core'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { createClient as createWsClient } from 'graphql-ws'
+import { getMainDefinition } from '@apollo/client/utilities'
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs'
 
-// const httpLink = createHttpLink({uri: 'http://localhost:8000/graphql/', fetch: fetch})
+import { tokenStorage } from 'src/localStorageService'
+import { API_URI, WS_HOST } from '../utils/hostConfig'
 
+// ---------- Auth middleware -------------------------------------------------
 const authMiddleware = new ApolloLink((operation, forward) => {
-
-  // add the authorization to the headers
-  // operation.getContext().hasUpload
-  let jwt = "JWT " + tokenStorage.getAccessToken() || null
-  // console.log(jwt)
-  operation.setContext({
+  const token = tokenStorage.getAccessToken()
+  const jwt = token ? 'JWT ' + token : null
+  operation.setContext(({ headers = {} }) => ({
     headers: {
+      ...headers,
       authorization: jwt
     }
-  })
-  // console.log(operation)
+  }))
   return forward(operation)
 })
 
-let wsProtocol = 'ws'
-if (window.location.protocol === 'https:') {
-  wsProtocol = 'wss'
-}
-
-// Create the subscription websocket link
-const wsLink = new WebSocketLink({
-  uri: `${wsProtocol}://${WS_HOST}/ws/graphql/`,
-  options: {
-    reconnect: true,
-    connectionParams: {
-      Authorization: tokenStorage.getAccessToken() || null,
-    },
-  },
-})
-
-const httpLink = createUploadLink({
-  // uri: "http://127.0.0.1:8000" + '/api/graphql/',
+// ---------- HTTP (upload) link ---------------------------------------------
+const uploadLink = createUploadLink({
   uri: API_URI + '/api/graphql/',
-  fetch: buildAxiosFetch(axios, (config, input, init) => ({
-    ...config,
-    onUploadProgress: init.onUploadProgress,
-  }))
+  // Native fetch is sufficient here; the old axios-fetch wrapper existed for
+  // upload progress, which can be restored in Track C when the upload UI is
+  // reviewed. Leaving native fetch keeps the client simple and avoids the
+  // deprecated @lifeomic/axios-fetch dependency on the hot path.
+  fetch: (...args) => fetch(...args)
 })
 
-// using the ability to split links, you can send data to each link
-// depending on what kind of operation is being sent
-const link = split(
-  // split based on operation type
-  ({query}) => {
-    const definition = getMainDefinition(query)
-    return definition.kind === 'OperationDefinition' &&
-      definition.operation === 'subscription'
-  },
-  wsLink,
-  httpLink
+// ---------- WebSocket link --------------------------------------------------
+const wsProtocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'wss' : 'ws'
+const wsLink = new GraphQLWsLink(
+  createWsClient({
+    url: `${wsProtocol}://${WS_HOST}/ws/graphql/`,
+    connectionParams: () => {
+      const token = tokenStorage.getAccessToken()
+      return token ? { Authorization: 'JWT ' + token } : {}
+    },
+    lazy: true,
+    retryAttempts: 5
+  })
 )
 
+// ---------- Split: subscriptions -> ws, everything else -> http ------------
+const transportLink = split(
+  ({ query }) => {
+    const def = getMainDefinition(query)
+    return def.kind === 'OperationDefinition' && def.operation === 'subscription'
+  },
+  wsLink,
+  uploadLink
+)
+
+// ---------- Client ---------------------------------------------------------
 const defaultOptions = {
-  // errorPolicy 'all' returns both data and errors so the Vue-Apollo
-  // errorHandler fires and we can surface the failure to the user.
-  // 'ignore' (the previous setting) silently swallowed watchQuery
-  // errors which made empty screens look like empty data.
   watchQuery: {
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
+    errorPolicy: 'all'
   },
   query: {
     fetchPolicy: 'network-only',
-    errorPolicy: 'all',
+    errorPolicy: 'all'
   },
   mutate: {
-    errorPolicy: 'all',
-  },
-};
+    errorPolicy: 'all'
+  }
+}
 
-// Create the apollo client
 export const apolloClient = new ApolloClient({
-  // link: httpLink,
-  link: concat(
-    authMiddleware,
-    link,
-    httpLink
-  ),
+  link: ApolloLink.from([authMiddleware, transportLink]),
   cache: new InMemoryCache(),
-  defaultOptions: defaultOptions,
+  defaultOptions,
   connectToDevTools: true
 })
+
+export default apolloClient

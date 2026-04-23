@@ -1,18 +1,9 @@
 /* eslint-env node */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs-extra');
-let extend = undefined;
-
-/**
- * The .babelrc file has been created to assist Jest for transpiling.
- * You should keep your application's babel rules in this file.
- */
-
-if (fs.existsSync('./.babelrc')) {
-  extend = './.babelrc';
-}
-
+// Babel is only used by Jest now (Vite handles app transforms via esbuild).
+// Keep it minimal.
 module.exports = {
-  presets: ['@quasar/babel-preset-app', '@babel/preset-typescript'],
-  extends: extend,
-};
+  presets: [
+    ['@babel/preset-env', { targets: { node: 'current' } }],
+    '@babel/preset-typescript'
+  ]
+}

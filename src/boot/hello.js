@@ -1,11 +1,14 @@
-import Vue from 'vue'
+// HelloJS + vue-hellojs have been removed (unmaintained, ES5 globals).
+//
+// This file is now a stub. Track C will replace the OAuth popup UX with a
+// direct Google Identity Services + Facebook Login SDK wiring in the login
+// page component, keeping the existing backend callback contracts.
+//
+// We intentionally keep the boot entry so quasar.config.js boot[] order and
+// any downstream references don't break mid-migration.
 
-const HelloJs = require('hellojs/dist/hello.all.min.js')
-const VueHello = require('vue-hellojs')
+import { boot } from 'quasar/wrappers'
 
-HelloJs.init({
-  google: '812696144817-l1pdrq5sjmd71f5gnv6scsahsfaa5eve.apps.googleusercontent.com',
-  // facebook: FACEBOOK_APP_CLIENT_ID
-  facebook: '757236575189030'
+export default boot(() => {
+  // noop — see note above
 })
-Vue.use(VueHello, HelloJs)

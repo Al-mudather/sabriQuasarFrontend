@@ -1,25 +1,20 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { store } from 'quasar/wrappers'
+import { createStore } from 'vuex'
 
 import settings from './settings'
 import pyramidManagement from './pyramid_management'
 import authentication from './authentication'
 import shoppingCart from './shoppingCart'
 
-
-Vue.use(Vuex)
-
 /*
- * If not building with SSR mode, you can
- * directly export the Store instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Store instance.
+ * Vuex 4 root. Kept alongside the new Pinia root (src/stores/index.js) for
+ * the Track B -> Track C migration window so the 152 legacy mapper sites
+ * (mapState / mapGetters / mapActions) continue to work while they're
+ * ported module-by-module.
  */
 
-export default function (/* { ssrContext } */) {
-  const Store = new Vuex.Store({
+export default store(function (/* { ssrContext } */) {
+  const Store = createStore({
     modules: {
       settings,
       pyramidManagement,
@@ -27,10 +22,8 @@ export default function (/* { ssrContext } */) {
       shoppingCart
     },
 
-    // enable strict mode (adds overhead!)
-    // for dev mode only
-    strict: process.env.DEBUGGING
+    strict: !!process.env.DEBUGGING
   })
 
   return Store
-}
+})

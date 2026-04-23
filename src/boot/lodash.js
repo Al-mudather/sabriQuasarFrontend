@@ -1,5 +1,6 @@
-import Vue from 'vue'
-import _ from 'lodash';
+import { boot } from 'quasar/wrappers'
+import _ from 'lodash'
 
-
-Vue.prototype.$_ = _
+export default boot(({ app }) => {
+  app.config.globalProperties.$_ = _
+})

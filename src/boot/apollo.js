@@ -1,10 +1,15 @@
-import VueApollo from 'vue-apollo'
+// Vue 3 + @vue/apollo-composable wiring.
+//
+// - Provides the ApolloClient instance on the app so both `useQuery` (setup)
+//   and the legacy imperative `apolloClient.mutate(...)` pattern keep working.
+// - Error notifications are de-duplicated so a network outage doesn't flood
+//   the UI with identical toasts.
+
+import { boot } from 'quasar/wrappers'
 import { Notify } from 'quasar'
+import { DefaultApolloClient } from '@vue/apollo-composable'
 import { apolloClient } from '../apollo/client'
 
-// Dedupe noisy error toasts — show at most one user-facing notice per
-// 3 seconds per message, so a burst of failed queries during a network
-// outage doesn't flood the screen.
 const recentlyShown = new Map()
 const NOTIFY_COOLDOWN_MS = 3000
 
@@ -23,28 +28,24 @@ function notifyOnce (message) {
   })
 }
 
-export const apolloProvider = new VueApollo({
-  defaultClient: apolloClient,
-  defaultOptions: {
-    $query: {
-      fetchPolicy: 'cache-and-network'
-    }
-  },
-  errorHandler ({ graphQLErrors, networkError }) {
-    if (graphQLErrors && graphQLErrors.length) {
-      graphQLErrors.forEach(({ message, locations, path }) => {
-        console.error(`[GraphQL error]: ${message}`, { locations, path })
-      })
-      notifyOnce(graphQLErrors[0].message || 'حدث خطأ أثناء تحميل البيانات.')
-    }
-    if (networkError) {
-      console.error('[Network error]:', networkError)
+// Apollo 3 no longer takes an `errorHandler` option on the client itself;
+// hook into unhandled promise rejections so a thrown GraphQL error still
+// surfaces a toast exactly like the old Vue-Apollo errorHandler did.
+if (typeof window !== 'undefined') {
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event && event.reason
+    if (reason && reason.graphQLErrors && reason.graphQLErrors.length) {
+      notifyOnce(reason.graphQLErrors[0].message || 'حدث خطأ أثناء تحميل البيانات.')
+    } else if (reason && reason.networkError) {
       notifyOnce('تعذر الاتصال بالخادم. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.')
     }
-  }
+  })
+}
+
+export default boot(({ app }) => {
+  app.provide(DefaultApolloClient, apolloClient)
+  // Keep a runtime handle for components that imperatively use the client.
+  app.config.globalProperties.$apolloClient = apolloClient
 })
 
-export default ({ app, Vue }) => {
-  Vue.use(VueApollo)
-  app.apolloProvider = apolloProvider
-}
+export { apolloClient }

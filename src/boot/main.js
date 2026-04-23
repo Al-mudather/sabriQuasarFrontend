@@ -1,18 +1,12 @@
-// colaps
-var cardHeader = document.querySelectorAll('.dowUp a')
-var num = cardHeader.length
+// Repurposed during Track B: the original file was a dangling DOM listener
+// that assumed elements existed at boot time. It now installs @unhead/vue
+// (the vue-meta replacement) so <Head> blocks and title management keep
+// working in the Options API.
 
-for (var i = 0; i < num; i++) {
-  cardHeader[i].addEventListener('click', function () {
-    var
-      typeimg = this.parentNode.children[0].children[0].children[0].alt,
-      imgEl = this.parentNode.children[0].children[0].children[0]
-    if (typeimg === 'mins') {
-      imgEl.alt = 'plus'
-      imgEl.src = '~assets/img/pluus.png'
-    } if (typeimg === 'plus') {
-      imgEl.alt = 'mins'
-      imgEl.src = '~assets/img/mins.png'
-    }
-  })
-}
+import { boot } from 'quasar/wrappers'
+import { createHead } from '@unhead/vue'
+
+export default boot(({ app }) => {
+  const head = createHead()
+  app.use(head)
+})
