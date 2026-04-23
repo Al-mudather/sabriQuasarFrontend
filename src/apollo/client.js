@@ -68,9 +68,13 @@ const link = split(
 )
 
 const defaultOptions = {
+  // errorPolicy 'all' returns both data and errors so the Vue-Apollo
+  // errorHandler fires and we can surface the failure to the user.
+  // 'ignore' (the previous setting) silently swallowed watchQuery
+  // errors which made empty screens look like empty data.
   watchQuery: {
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'ignore',
+    errorPolicy: 'all',
   },
   query: {
     fetchPolicy: 'network-only',

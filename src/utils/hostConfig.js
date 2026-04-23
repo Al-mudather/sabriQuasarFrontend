@@ -1,29 +1,12 @@
-let baseURL = "https://stc.training"
-let host = "https://stc.training";
-let ws_host = "stc.training";
-// let ws_host = "127.0.0.1:8000"
-let port = "80";
+// Host configuration. Reads from build-time env (.env, .env.development,
+// .env.production, etc.) via Quasar's build.env + DefinePlugin. Defaults
+// here keep the app working if the env file is missing.
 
+const baseURL = process.env.API_URI || 'https://stc.training'
+const wsHost  = process.env.WS_HOST || 'stc.training'
+const port    = process.env.APP_PORT || '80'
 
-// if (process.env.NODE_ENV === 'development' && process.env.MODE!=='capacitor') {
-
-//   port = '8000'
-
-//   // baseURL = https://${host}:${port}
-//   // baseURL = "http://192.168.43.86:8000"
-//   baseURL = "http://localhost:8000"
-//   // baseURL = "http://127.0.0.1:8000"
-
-//   // ws_host = "http://192.168.43.86:8000"
-//   ws_host = "127.0.0.1:8000"
-//   // ws_host = "localhost:8000"
-
-// }
-
-export const HOST = host;
-
-export const WS_HOST = ws_host;
-
-export const PORT = port;
-
-export const API_URI = baseURL;
+export const HOST    = baseURL
+export const WS_HOST = wsHost
+export const PORT    = port
+export const API_URI = baseURL
