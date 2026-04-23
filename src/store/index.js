@@ -6,8 +6,7 @@ import settings from './settings'
 import pyramidManagement from './pyramid_management'
 import authentication from './authentication'
 import shoppingCart from './shoppingCart'
-import courseManagement from './courseManagement'
-import learningProgress from './learningProgress'
+
 
 Vue.use(Vuex)
 
@@ -26,9 +25,7 @@ export default function (/* { ssrContext } */) {
       settings,
       pyramidManagement,
       authentication,
-      shoppingCart,
-      courseManagement,
-      learningProgress
+      shoppingCart
     },
 
     // enable strict mode (adds overhead!)

@@ -57,11 +57,7 @@ export default {
 
     goToTheNotificationSource () {
         if ( (this.lodash.get(this.notification, '[type]') === 'QUESTION_ASK') || (this.lodash.get(this.notification, '[type]') === 'QUESTION_ANS') ) {
-            this.$router.push({ 
-                name: 'course-class',
-                params: { pk:  this.courseID, id: this.lodash.get(this.notification, '[type]')},
-                query:{ tab: 'question' }
-            })
+            window.location.href = `${location.origin}/classroom/#/class/${this.courseID}/`
         } else if ( (this.lodash.get(this.notification, '[type]') === 'CHECKOUT_DONE') ) {
             this.$router.push({ 
                 name: 'my-courses'

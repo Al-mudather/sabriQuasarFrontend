@@ -80,7 +80,7 @@
         </svg>
         <div class="pric">
           <h3>{{FORMAT_COUSRE_PRICE(JSON.parse(courseData.currency)[currency], 3) }}<span>{{currency}}</span></h3>
-          <!-- <button v-if="openCourse" @click="GO_TO_THE_COURSE_LEARNING_CLASS">{{$t('الى الدرس')}}</button> -->
+
           <button @click="AddTheCourseToTheBasket">{{$t('أمتلك الأن')}}</button>
         </div>
       </div>
@@ -195,9 +195,7 @@ export default {
         })
     },
 
-    GO_TO_THE_COURSE_LEARNING_CLASS () {
-      this.$router.push({ name: 'course-class', params: { pk: this.$route.params.pk, id: this.$route.params.id }, query:{ tab: 'tutorial' } })
-    },
+
 
     FORMAT_COUSRE_PRICE(num, digits) {
       const lookup = [

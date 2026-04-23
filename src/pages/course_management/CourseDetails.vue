@@ -10,7 +10,7 @@
                     </div>
                 </div>
                 <div class="col-lg-4">
-                    <courseMainCard :courseData="courseData" :openCourse="openCourse" /> 
+                    <courseMainCard :courseData="courseData" /> 
                 </div>
                 <div class="col-lg-8">
                     <div class="detailes">
@@ -48,7 +48,6 @@ import coursePreRequisites from 'components/courseDetails/coursePreRequisites'
 import courseUnits from 'components/courseDetails/courseUnits.vue'
 import courseInstructors from 'components/courseDetails/courseInstructors'
 import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
-import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { FORMAT_THE_IAMGE_URL, FORMAT_THE_WEB_SIT_URL } from 'src/utils/functions.js'
 import { mapState, mapActions } from 'vuex'
 
@@ -60,7 +59,6 @@ export default {
         FORMAT_THE_WEB_SIT_URL: FORMAT_THE_WEB_SIT_URL,
         courseID: '',
         coursePK: '',
-        openCourse: false,
         courseData: ''
     }
   },
@@ -153,11 +151,7 @@ export default {
         const marketerCode = this.$_.get(params, "[code]")
         //TODO: Set the registerstion code to the stoare
         this.SET_REGISTERATION_CODE_ACTION(marketerCode)
-        //TODO: Don't open the course yet
-        this.openCourse = false
-        // TODO: IS THE USER HAS VALED INROLLMENT IN THIS COURSE
-        this.IS_THE_USER_HAS_VALED_INROLLMENT_IN_THIS_COURSE(params.pk)
-        // TODO: GET THE COURSE BY PK
+
         const res = await this.$apollo.query({
           query: GetCourseByID,
           variables: {
@@ -174,23 +168,7 @@ export default {
   methods: { 
     ...mapActions("pyramidManagement", ["SET_REGISTERATION_CODE_ACTION"]),
 
-    async IS_THE_USER_HAS_VALED_INROLLMENT_IN_THIS_COURSE (coursePK) {
-        //TODO: IF the user is loged in
-        if (this.token) {
-            try {
-                const res = await this.$apollo.query({
-                    query: AllEnrollmentsForCurrentUser,
-                })
-    
-                res.data.allEnrollmentsForCurrentUser.edges.map(enroll => {
-                    if (enroll.node.course.pk == coursePK) {
-                        this.openCourse = true
-                    }
-                })
-            } catch (error) {
-            }
-        }
-    },
+
     
     changeTheLayoutStyle(value) {
         if (value) {

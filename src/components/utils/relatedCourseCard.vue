@@ -67,7 +67,7 @@ export default {
     ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
 
     GO_TO_THE_COURSE_LEARNING_CLASS () {
-      this.$router.push({ name: 'course-class', params: { pk: this.course.pk, id: this.course.id }, query:{ tab: 'tutorial' } })
+      window.location.href = `${location.origin}/classroom/#/class/${this.course.pk}/`
     },
 
     FORMAT_COUSRE_PRICE(num, digits) {

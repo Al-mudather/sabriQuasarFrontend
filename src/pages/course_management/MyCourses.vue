@@ -9,7 +9,24 @@
                     </div>
                 </div>
             </div>
-            <div v-if=" lodash.isEmpty(lodash.get(allEnrollmentsForCurrentUser, '[edges]'))" class="notice">
+            <div v-if="isLoading" class="cards">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="group">
+                                <div class="row justify-center">
+                                    <div class="col-12 row justify-center">
+                                        <div v-for="n in 8" :key="'sk-' + n" class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                            <course-card-skeleton />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-else-if="lodash.isEmpty(lodash.get(allEnrollmentsForCurrentUser, '[edges]'))" class="notice">
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-12">
@@ -81,6 +98,7 @@
 
 <script>
 import courseCard from 'src/components/MyCourses/courseCard.vue'
+import CourseCardSkeleton from 'src/components/MyCourses/CourseCardSkeleton.vue'
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { mapActions } from "vuex"
 
@@ -95,8 +113,16 @@ export default {
     },
 
 	components: {
-		courseCard
+		courseCard,
+		CourseCardSkeleton
 	},
+
+    computed: {
+        isLoading () {
+            return this.$apollo.queries.allEnrollmentsForCurrentUser.loading &&
+                this.lodash.isEmpty(this.lodash.get(this.allEnrollmentsForCurrentUser, '[edges]'))
+        }
+    },
 
     apollo: {
       allEnrollmentsForCurrentUser: {
@@ -773,13 +799,24 @@ export default {
     .cards{
         margin: 20px 0 20px 0;
         display: block;
+        .col-lg-3, .col-md-6, .col-sm-6, .col-xs-12 {
+            display: flex;
+        }
         .group{
             .card{
                 border: 0;
                 padding: 13px;
                 border-radius: 23px;
                 margin: 0 0 25px 0;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                height: calc(100% - 25px);
                 @include prefixer(box-shadow, 2px 6px 30px #e8e8e8, webkit moz o);
+                .card-img-top img{
+                    aspect-ratio: 16 / 10;
+                    object-fit: cover;
+                }
                 .pro{
                     position: relative;
                     span{
@@ -824,22 +861,27 @@ export default {
                 }
                 .card-body{
                     padding: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
                     h5{
                         font-size: 17px;
                         font-family: 'cairoR';
                         color: #707070;
                         line-height: 1.7;
-                        margin: 11px 0 34px 0;
+                        margin: 11px 0 20px 0;
                         overflow: hidden;
                         -webkit-line-clamp: 2;
                         display: -webkit-box;
                         -webkit-box-orient: vertical;
+                        min-height: calc(1.7em * 2);
                     }
                     .btn{
                         width: 100%;
                         height: 44px;
                         border-radius: 50px;
                         background-color:#7b86fa;
+                        margin-top: auto;
                         h3{
                             color: #fff;
                             font-size: 14px;

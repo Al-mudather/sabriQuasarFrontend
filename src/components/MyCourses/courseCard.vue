@@ -21,7 +21,7 @@
                 ></div>
             </div>
         </div>
-        <!-- <div class="card-body" style="cursor: pointer" @click="goToCourseLecture"> -->
+
         <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-body" style="cursor: pointer; text-decoration: none;">
             <h5 class="card-title">{{course.title}}</h5>
             <a class="btn">
@@ -79,11 +79,6 @@ export default {
     },
 
     methods: {
-        goToCourseLecture () {
-            this.$router.push({ name: 'course-class', params: { pk: this.course.pk, id: this.course.id }, query:{ tab: 'tutorial' } })
-        },
-
-        
     }
 };
 </script>
