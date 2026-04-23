@@ -1,0 +1,31 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "community-admin",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/almudatheryahya/Desktop/Projects/2.community/community-admin",
+      "port": 3020,
+      "autoPort": false
+    },
+    {
+      "name": "community-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3010
+    },
+    {
+      "name": "community-be",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:dev"],
+      "port": 5001
+    },
+    {
+      "name": "dashboard-community",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3002
+    }
+  ]
+}

@@ -1,73 +1,113 @@
 <template>
-    <transition
-        appear
-        enter-active-class="animated fadeIn"
-        leave-active-class="animated fadeOut"
-    >
-        <div class="notf" @click="goToTheNotificationSource" style="cursor: pointer">
-        <div class="row">            
-            <div class="col-lg-2">
-                <div class="user">
-                    <img src="~assets/img/man.png" alt="" />
-                </div>
-            </div>
-            <div class="col-lg-10 noPadding">
-                <div class="content">
-                <h3 v-if="notification.type === 'QUESTION_ASK' ">
-                    {{$t('السؤال :')}} 
-                    <span>{{notification.title}}</span>
-                </h3>
-                <h3 v-else-if="notification.type === 'QUESTION_ANS' ">
-                    {{$t('جواب السؤال :')}} 
-                    <span>{{notification.title}}</span>
-                    {{$t('هو :')}} 
-                    <span>{{notification.description}}</span>
-                </h3>
-                <h3 v-else-if="notification.type === 'CHECKOUT_DONE' ">
-                    {{notification.description}} 
-                    <span>{{$t('تمت عملية الدفع بنجاح يمكنك الان التعلم من خلال لوحتك التعليميه')}}</span>
-                </h3>
-                </div>
-            </div>
-        </div>
-        </div>
-    </transition>
+  <article class="notif-card" @click="goToTheNotificationSource" role="button" tabindex="0" @keydown.enter="goToTheNotificationSource">
+    <img src="~assets/img/man.png" alt="" class="notif-card__avatar" />
+    <div class="notif-card__body">
+      <p v-if="notification.type === 'QUESTION_ASK'">
+        <span class="notif-card__label">{{ $t('السؤال :') }}</span>
+        <strong>{{ notification.title }}</strong>
+      </p>
+      <p v-else-if="notification.type === 'QUESTION_ANS'">
+        <span class="notif-card__label">{{ $t('جواب السؤال :') }}</span>
+        <strong>{{ notification.title }}</strong>
+        <br />
+        {{ $t('هو :') }} <span>{{ notification.description }}</span>
+      </p>
+      <p v-else-if="notification.type === 'CHECKOUT_DONE'">
+        {{ notification.description }}
+        <br />
+        <span class="notif-card__muted">{{ $t('تمت عملية الدفع بنجاح يمكنك الان التعلم من خلال لوحتك التعليميه') }}</span>
+      </p>
+    </div>
+  </article>
 </template>
 
 <script>
-
 export default {
-  name: "notificationCard",
-  data () {
-    return {
-        lodash: this.$_,
-        courseID: ''
+  name: 'NotificationCard',
+  props: ['notification'],
+
+  data () { return { courseID: '' } },
+
+  mounted () {
+    const type = this.$_.get(this.notification, '[type]')
+    if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
+      const extraData = this.$_.get(this.notification, '[extraData]', '')
+      try {
+        this.courseID = parseInt(extraData.split('::')[0].split(' ')[1].replace('>', ''))
+      } catch (e) { /* malformed payload; ignore */ }
     }
   },
-  props: ['notification'],
-  mounted () {
-    if ( (this.lodash.get(this.notification, '[type]') === 'QUESTION_ASK') || (this.lodash.get(this.notification, '[type]') === 'QUESTION_ANS') ) {
-        const courseID =  parseInt( this.lodash.get(this.notification, '[extraData]').split('::')[0].split(' ')[1].replace('>', '') )
-        this.courseID = courseID 
-    }
-
-  }, 
 
   methods: {
-
     goToTheNotificationSource () {
-        if ( (this.lodash.get(this.notification, '[type]') === 'QUESTION_ASK') || (this.lodash.get(this.notification, '[type]') === 'QUESTION_ANS') ) {
-            window.location.href = `${location.origin}/classroom/#/class/${this.courseID}/`
-        } else if ( (this.lodash.get(this.notification, '[type]') === 'CHECKOUT_DONE') ) {
-            this.$router.push({ 
-                name: 'my-courses'
-            })
-        }
+      const type = this.$_.get(this.notification, '[type]')
+      if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
+        window.location.href = `${location.origin}/classroom/#/class/${this.courseID}/`
+      } else if (type === 'CHECKOUT_DONE') {
+        this.$router.push({ name: 'my-courses' })
+      }
     }
-    
   }
-  
 }
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+.notif-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-space-4);
+  cursor: pointer;
+  box-shadow: var(--ds-shadow-xs);
+  transition:
+    transform var(--ds-duration-fast) var(--ds-ease-out),
+    box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--ds-shadow-sm);
+  }
+  &:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--ds-shadow-focus);
+  }
+
+  &__avatar {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--ds-surface-muted);
+  }
+
+  &__body {
+    flex: 1;
+    min-inline-size: 0;
+
+    p {
+      margin: 0;
+      font-size: var(--ds-text-sm);
+      line-height: var(--ds-leading-arabic);
+      color: var(--ds-text);
+
+      strong {
+        color: var(--ds-brand-700);
+        font-weight: var(--ds-weight-bold);
+      }
+    }
+  }
+
+  &__label {
+    color: var(--ds-text-muted);
+    font-size: var(--ds-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-inline-end: var(--ds-space-1);
+  }
+
+  &__muted { color: var(--ds-text-muted); font-size: var(--ds-text-xs); }
+}
+</style>

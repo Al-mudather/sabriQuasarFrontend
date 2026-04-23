@@ -1,13 +1,16 @@
 <template>
-  <div class="profit">
-    <div class="taxt">
-      <h4>{{$t('الأرباح المستحقة')}}</h4>
-      <h3> <span>{{ FORMAT_COUSRE_PRICE(myRewards, 3) }}</span>SDG </h3>
-      <button @click="COLLECT_MY_REWARDS"><img src="~assets/img/money.png" alt=""> {{$t('تحصيل ارباحي')}} </button>
+  <div class="rewards-card">
+    <h3 class="rewards-card__title">{{ $t('الأرباح المستحقة') }}</h3>
+    <div class="rewards-card__amount">
+      <span class="rewards-card__value">{{ FORMAT_COUSRE_PRICE(myRewards, 3) }}</span>
+      <span class="rewards-card__currency">SDG</span>
     </div>
-    <q-inner-loading :showing="visible">
-      <q-spinner-hourglass color="primary" size="70px" />
-    </q-inner-loading>
+    <ds-button variant="accent" :loading="visible" @click="COLLECT_MY_REWARDS">
+      <template #leading>
+        <img src="~assets/img/money.png" alt="" aria-hidden="true" style="block-size: 1rem; inline-size: auto;" />
+      </template>
+      {{ $t('تحصيل ارباحي') }}
+    </ds-button>
   </div>
 </template>
 
@@ -15,82 +18,56 @@
 import { MyPyramidLedgerReward } from 'src/queries/pyramid_marketing_management/query/MyPyramidLedgerRewardQuery'
 import { ClaimPyramidLedgerBalance } from 'src/queries/pyramid_marketing_management/mutation/ClaimPyramidLedgerBalance'
 
+const priceLookup = [
+  { value: 1, symbol: '' }, { value: 1e3, symbol: 'k' },
+  { value: 1e6, symbol: 'M' }, { value: 1e9, symbol: 'B' }
+]
+
 export default {
-  name: "MyPyramidRewards",
-  data() {
-    return {
-      visible: false,
-      myRewards: 0.0
-    };
-  },
+  name: 'MyPyramidRewards',
+
+  data () { return { visible: false, myRewards: 0.0 } },
+
   apollo: {
     myPyramidLedgerReward: {
-      query () {
-        return MyPyramidLedgerReward
-      },
+      query () { return MyPyramidLedgerReward },
       result (result) {
-        if (!result.loading) {
-          this.myRewards = result.data.myPyramidLedgerReward 
-        }
+        if (!result.loading) this.myRewards = result.data.myPyramidLedgerReward
       }
     }
   },
+
   methods: {
-    errorHandler(errorsObj) {
-        for (const key in errorsObj) {
-            for (const val of errorsObj[key]) {
-                this.$q.notify({
-                    type: 'warning',
-                    progress: true,
-                    multiLine: true,
-                    position: 'top',
-                    message: val.message
-                })
-            }
+    errorHandler (errorsObj) {
+      for (const key in errorsObj) {
+        for (const val of errorsObj[key]) {
+          this.$q.notify({
+            type: 'warning', progress: true, multiLine: true, position: 'top', message: val.message
+          })
         }
-    },
-
-    FORMAT_COUSRE_PRICE(num, digits) {
-      try {
-        const lookup = [
-          { value: 1, symbol: "" },
-          { value: 1e3, symbol: "k" },
-          { value: 1e6, symbol: "M" },
-          { value: 1e9, symbol: "G" },
-          { value: 1e12, symbol: "T" },
-          { value: 1e15, symbol: "P" },
-          { value: 1e18, symbol: "E" }
-        ];
-
-        if ( (num.toString().split('.')[0] == 0) || num == 0 ) {
-          return num
-        }
-        const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
-        var item = lookup.slice().reverse().find(function(item) {
-          return num >= item.value;
-        });
-
-        return item ? (num / item.value).toFixed(digits).replace(rx, "$1") + item.symbol : "0";
-      } catch (error) {
-        return num
       }
     },
 
-    async COLLECT_MY_REWARDS () {
+    FORMAT_COUSRE_PRICE (num, digits = 3) {
       try {
-        this.visible = true
-        const rewards_res = await this.$apollo.mutate({
+        const n = Number(num)
+        if (!Number.isFinite(n) || n === 0) return String(num)
+        const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
+        const item = priceLookup.slice().reverse().find(it => n >= it.value)
+        return item ? (n / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
+      } catch (e) { return num }
+    },
+
+    async COLLECT_MY_REWARDS () {
+      this.visible = true
+      try {
+        const res = await this.$apollo.mutate({
           mutation: ClaimPyramidLedgerBalance,
-          variables: {
-            input: {}
-          },
+          variables: { input: {} },
           refetchQueries: [{ query: MyPyramidLedgerReward }]
         })
-        const errors = rewards_res.data.claimPyramidLedgerBalance.errors
-        const success = rewards_res.data.claimPyramidLedgerBalance.success
-  
+        const { success, errors } = res.data.claimPyramidLedgerBalance
         if (success) {
-          this.visible = false
           this.$q.notify({
             type: 'positive',
             position: 'top',
@@ -98,18 +75,52 @@ export default {
             multiLine: true,
             message: this.$t('تم تحصيل الارباح')
           })
-        } else if (errors) {
-          this.visible = false
-          this.errorHandler(errors)
-        }
-        
-      } catch (error) {
-        this.visible = false
-      }
+        } else if (errors) this.errorHandler(errors)
+      } catch (e) { /* apolloProvider surfaces */ }
+      finally { this.visible = false }
     }
   }
-};
+}
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.rewards-card {
+  background: linear-gradient(135deg, var(--ds-accent-300), var(--ds-accent-500));
+  color: var(--ds-brand-800);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  box-shadow: var(--ds-shadow-md);
+  min-block-size: 180px;
+
+  &__title {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-weight-medium);
+    color: var(--ds-brand-900);
+    margin: 0;
+  }
+
+  &__amount {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+  }
+
+  &__value {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-3xl);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-brand-800);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  &__currency {
+    font-size: var(--ds-text-sm);
+    color: var(--ds-brand-700);
+  }
+}
 </style>
