@@ -1,86 +1,132 @@
 <template>
-    <div class="card">
-        <!-- <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-img-top" style="cursor: pointer; text-decoration: none;"> -->
-        <div class="card-img-top">
-            <div class="overlay"></div>
-                <!-- <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt=""> -->
-                <img v-if="course.cover" :src="FORMAT_THE_IAMGE_URL(course.cover)" alt="">
-                <img v-else src="~assets/img/imagback.png" alt="Card image cap" />
-        </div>
-            <!-- </a> -->
-        <div class="pro">
-            <span>{{calculateTheTotalProgress}}%</span>
-            <div class="progress">
-                <div
-                    class="progress-bar"
-                    role="progressbar"
-                    :style="{ width: calculateTheTotalProgress + '%' }"
-                    aria-valuenow="25"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                ></div>
-            </div>
-        </div>
+  <ds-card interactive class="course-card" @click="openClassroom">
+    <template #media>
+      <div class="course-card__media">
+        <img
+          v-if="course.cover"
+          :src="FORMAT_THE_IAMGE_URL(course.cover)"
+          :alt="course.title"
+        />
+        <img v-else src="~assets/img/imagback.png" :alt="course.title" />
+        <ds-badge v-if="statusBadge" :variant="statusBadge.variant" class="course-card__badge">
+          {{ statusBadge.label }}
+        </ds-badge>
+      </div>
+    </template>
 
-        <a :href="GO_TO_THE_COURSE_CLASS_ROOM" class="card-body" style="cursor: pointer; text-decoration: none;">
-            <h5 class="card-title">{{course.title}}</h5>
-            <a class="btn">
-                <h3>{{$t('اذهب الى الدرس')}}</h3>
-                <img src="~assets/img/send.png" alt="">
-            </a>
-        <!-- </div> -->
-        </a>
-    </div>
+    <h3 class="course-card__title">{{ course.title }}</h3>
+
+    <ds-progress-bar
+      :value="progressPercent"
+      :variant="isCompleted ? 'success' : 'brand'"
+      show-label
+      size="sm"
+    />
+
+    <template #footer>
+      <ds-button
+        tag="a"
+        :href="classroomUrl"
+        :variant="isCompleted ? 'secondary' : 'accent'"
+        full-width
+        @click.native.stop
+      >
+        {{ ctaLabel }}
+      </ds-button>
+    </template>
+  </ds-card>
 </template>
-   
+
 <script>
-import {mapGetters} from 'vuex'
-import {FORMAT_THE_IAMGE_URL} from 'src/utils/functions.js'
+import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 
 export default {
-    name: "CourseCard",
+  name: 'CourseCard',
 
-    data () {
-        return {
-            FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL
-        }
+  props: {
+    course: { type: Object, required: true },
+    totalFinishedCourseContents: { type: Number, default: 0 }
+  },
+
+  data () {
+    return { FORMAT_THE_IAMGE_URL }
+  },
+
+  computed: {
+    progressPercent () {
+      const total = this.course.courseunitSet.edges.reduce(
+        (acc, unit) => acc + unit.node.courseunitcontentSet.totalCount,
+        0
+      )
+      if (total <= 0) return 0
+      return Math.round((this.totalFinishedCourseContents / total) * 100)
     },
 
-    props: ['course', 'totalFinishedCourseContents'],
+    isCompleted () { return this.progressPercent >= 100 },
+    isNotStarted () { return this.progressPercent === 0 },
+    isInProgress () { return !this.isCompleted && !this.isNotStarted },
 
-    computed: {
-        ...mapGetters("authentication", ["token"]),
-
-        calculateTheTotalProgress () {
-            let totalCourseContents = 0
-
-            this.course.courseunitSet.edges.map(unit => {
-                totalCourseContents += unit.node.courseunitcontentSet.totalCount
-            })
-            if (totalCourseContents > 0) {
-                return parseInt( (this.totalFinishedCourseContents / totalCourseContents ) * 100 )
-            }
-            return 0
-        },
-
-        CALCULATE_IMAGE_URL () {
-            if (process.env.NODE_ENV == 'development') {
-                return 'http://localhost:8000/media/' + this.course.cover
-            }
-            // return location.origin + '/media/' + this.course.cover
-            return 'https://api.stc.training' + '/media/' + this.course.cover
-        },
-
-        GO_TO_THE_COURSE_CLASS_ROOM () {
-        
-            // return `http://localhost:8082/#/class/${this.course.pk}/`
-            return `${location.origin}/classroom/#/class/${this.course.pk}/`
-        }
+    statusBadge () {
+      if (this.isCompleted)  return { label: this.$t('مكتمل'),     variant: 'success' }
+      if (this.isInProgress) return { label: this.$t('قيد التقدم'), variant: 'brand' }
+      return null
     },
 
-    methods: {
+    ctaLabel () {
+      if (this.isCompleted)  return this.$t('مراجعة الكورس')
+      if (this.isInProgress) return this.$t('متابعة التعلم')
+      return this.$t('اذهب الى الدرس')
+    },
+
+    classroomUrl () {
+      return `${location.origin}/classroom/#/class/${this.course.pk}/`
     }
-};
+  },
+
+  methods: {
+    openClassroom () { window.location.href = this.classroomUrl }
+  }
+}
 </script>
-<style lang="scss">
+
+<style lang="scss" scoped>
+.course-card {
+  block-size: calc(100% - var(--ds-space-6));
+  margin-block-end: var(--ds-space-6);
+
+  &__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    img {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform var(--ds-duration-slow) var(--ds-ease-out);
+    }
+  }
+
+  &:hover &__media img { transform: scale(1.04); }
+
+  &__badge {
+    position: absolute;
+    inset-block-start: var(--ds-space-3);
+    inset-inline-start: var(--ds-space-3);
+  }
+
+  &__title {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-md);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-text);
+    line-height: var(--ds-leading-tight);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-block-size: calc(var(--ds-text-md) * var(--ds-leading-tight) * 2);
+  }
+}
 </style>
