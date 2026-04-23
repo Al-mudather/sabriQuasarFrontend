@@ -1,606 +1,335 @@
 <template>
-  <div>
-    <!--=============== START profile ===============-->
-    <section class="profile">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="title">
-              <img src="~assets/img/tit.png" alt="" />
-              <h3>{{$t('الملف الشخصي')}}</h3>
-            </div>
-          </div>
+  <main class="profile-page">
+    <header class="profile-page__hero">
+      <div class="profile-page__hero-inner">
+        <img src="~assets/img/big_man.png" alt="" class="profile-page__avatar" />
+        <div class="profile-page__hero-text">
+          <h1>{{ $t('الملف الشخصي') }}</h1>
+          <p v-if="fullName">{{ fullName }}</p>
         </div>
       </div>
-      <div class="container">
-        <div class="details">
-          <div class="row">
-            <AfilliateBord />
-            <div class="col-lg-3">
-              <div class="user">
-                <img src="~assets/img/big_man.png" alt="" />
-              </div>
-            </div>
-            <div class="col-lg-7">
-              <div class="all">
-                <div class="title">
-                  <img src="~assets/img/tit.png" alt="" />
-                  <h3>{{$t('بياناتــي')}}</h3>
-                </div> 
-                <form>
-                  <div class="row">
-                    <div class="col-lg-6 col-xs-12">
-                      <div class="inp">
-                        <q-input
-                            rounded
-                            outlined
-                            v-model="fullName"
-                            hint="Enter your Name in english"
-                            :label="$t('الاسم الحقيقي')"
-                        />
-                      </div>
-                    </div>
-                    <div class="col-lg-6 col-xs-12">
-                      <div class="inp">
-                        <!-- <img src="~assets/img/gmail.png" alt="" /> -->
-                        <input
-                          v-model="email"
-                          type="email"
-                          :placeholder="$t('البريد الالكتروني')"
-                          disabled
-                        />
-                      </div>
-                    </div> 
-                    <div class="col-lg-12 col-xs-12">
-                      <div class="inp">
-                        <!-- <img src="~assets/img/phone-call.png" alt="" /> -->
-                        <q-input
-                            rounded
-                            outlined
-                            :label="whatsAppLabel"
-                            :hint="$t('ادخل ارقام فقط')"
-                            mask="################"
-                            v-model="whatsAppNumber"
-                        />
-                      </div>
-                      <div class="inp">
-                        <!-- <img src="~assets/img/phone-call.png" alt="" /> -->
-                         <q-input
-                            rounded 
-                            outlined 
-                            v-model="telegramNumber" 
-                            :hint="$t('ادخل ارقام فقط')"
-                            :label="telegramLabel"
-                            mask="################"
-                        />
-                      </div>
-                    </div>
-                    <div class="type">
-                      <div class="male" data-gender="male" @click="setTheGenderToMale">
-                        <img src="~assets/img/male.png" alt="" />
-                        <h3>{{$t('ذكــر')}}</h3>
-                      </div>
-                      <div class="male" data-gender="female" @click="setTheGenderToFemale">
-                        <img src="~assets/img/female.png" alt="" />
-                        <h3>{{$t('أنثـــي')}}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    disable="1"
-                    class="but"
-                    @click="UpdateUserProfileData"
-                  >
-                    <h3>{{$t('تحديث')}}</h3>
-                    <img src="~assets/img/Group 734.png" alt="" />
-                  </div>
-                  <q-inner-loading :showing="visible">
-                      <q-spinner-hourglass color="primary" size="70px" />
-                  </q-inner-loading>
-                </form>
-                <!-- 
-                  Start of Updata-certificate-name 
-                -->
-                <Updata-certificate-name :certificateNameData="certificateName"/>
-                <!-- 
-                  End of Updata-certificate-name 
-                -->
-                <!-- 
-                  Start of Passowrd Rest
-                -->
-                <!-- <Password-Reset-Profile /> -->
-                <!-- 
-                  End of Passowrd Rest
-                -->
-              </div>
-            </div>
+    </header>
+
+    <div class="profile-page__layout">
+      <AfilliateBord class="profile-page__affiliate" />
+
+      <section class="profile-page__section">
+        <header class="profile-page__section-head">
+          <h2>{{ $t('بياناتــي') }}</h2>
+          <p>{{ $t('حافظ على بياناتك محدّثة للوصول إلى جميع خدمات المنصة.') }}</p>
+        </header>
+
+        <form @submit.prevent="UpdateUserProfileData" class="profile-form">
+          <div class="profile-form__grid">
+            <q-input
+              rounded outlined
+              v-model="fullName"
+              :label="$t('الاسم الحقيقي')"
+              hint="Enter your Name in english"
+            />
+            <q-input
+              rounded outlined readonly
+              v-model="email"
+              type="email"
+              :label="$t('البريد الالكتروني')"
+            />
+            <q-input
+              rounded outlined
+              v-model="whatsAppNumber"
+              :label="whatsAppLabel"
+              :hint="$t('ادخل ارقام فقط')"
+              mask="################"
+            />
+            <q-input
+              rounded outlined
+              v-model="telegramNumber"
+              :label="telegramLabel"
+              :hint="$t('ادخل ارقام فقط')"
+              mask="################"
+            />
           </div>
-        </div>
-      </div>
-    </section>
-    <!--=============== End profile ===============-->
-  </div>
+
+          <fieldset class="profile-form__gender">
+            <legend>{{ $t('الجنس') }}</legend>
+            <button
+              v-for="g in genders"
+              :key="g.value"
+              type="button"
+              class="gender-chip"
+              :class="{ 'gender-chip--active': gender === g.value }"
+              @click="gender = g.value"
+            >
+              <img :src="g.icon" alt="" />
+              <span>{{ g.label }}</span>
+            </button>
+          </fieldset>
+
+          <div class="profile-form__actions">
+            <ds-button
+              type="submit"
+              variant="primary"
+              size="lg"
+              :loading="visible"
+            >
+              {{ $t('تحديث') }}
+            </ds-button>
+          </div>
+        </form>
+
+        <UpdataCertificateName :certificateNameData="certificateName" class="profile-page__certificate" />
+      </section>
+    </div>
+  </main>
 </template>
 
 <script>
-// import PasswordResetProfile from 'src/components/Profile_managements/PasswordResetProfile.vue'
 import UpdataCertificateName from 'src/components/Profile_managements/UpdataCertificateName.vue'
 import AfilliateBord from 'src/components/MyCourses/afilliateBord.vue'
-import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
-import { UpdateUserProfile } from "src/queries/account_management/mutation/UpdateUserProfile";
+import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
+import { UpdateUserProfile } from 'src/queries/account_management/mutation/UpdateUserProfile'
 import { mapActions } from 'vuex'
 
 export default {
-  name: "Home",
-  data() {
+  name: 'Profile',
+
+  components: { UpdataCertificateName, AfilliateBord },
+
+  data () {
     return {
-      lodash: this.$_,
       visible: false,
       certificateName: '',
-      certificateFieldsVisible: true,
-      fullName: "",
-      phoneNumber: "",
+      fullName: '',
       whatsAppNumber: null,
+      telegramNumber: null,
       whatsAppLabel: this.$t('رقم الواتساب اذا وجد'),
       telegramLabel: this.$t('رقم التلجرام اذا وجد'),
-      telegramNumber: null,
-      email: "",
-      gender: '',
-      myAffiliateLink: "",
-      errorMessages: [],
-      genderOptions: ['male', 'female', 'not_set']
+      email: '',
+      gender: ''
     }
   },
-  components: {
-    // 'Password-Reset-Profile': PasswordResetProfile
-    'Updata-certificate-name': UpdataCertificateName,
-    AfilliateBord
+
+  computed: {
+    genders () {
+      return [
+        { value: 'male',   label: this.$t('ذكــر'),  icon: require('assets/img/male.png') },
+        { value: 'female', label: this.$t('أنثـــي'), icon: require('assets/img/female.png') }
+      ]
+    }
   },
 
   apollo: {
-    me: {
-      query() {
-        return GetMyProfileData;
-      }
-    }
+    me: { query () { return GetMyProfileData } }
   },
- 
+
   watch: {
-    me(value) {
-      this.email = value.email;
-      this.fullName = value.fullName;
-      this.gender = value.gender;
-      this.whatsAppNumber = value.phoneNumber2;
-      this.telegramNumber = value.phoneNumber3;
+    me (value) {
+      this.email          = value.email
+      this.fullName       = value.fullName
+      this.whatsAppNumber = value.phoneNumber2
+      this.telegramNumber = value.phoneNumber3
       if (value.certificateName && value.certificateNameConfirm) {
-        // this.certificateFieldsVisible = false
         this.certificateName = value.certificateName
       }
-      
-      if (value.gender === "MALE") {
-        document.querySelector('[data-gender="female"]').classList.remove("active");
-        document.querySelector('[data-gender="male"]').classList.add("active");
-        this.gender = 'male'
-      } else if (value.gender === "FEMALE") {
-        document.querySelector('[data-gender="male"]').classList.remove("active");
-        document.querySelector('[data-gender="female"]').classList.add("active");
-        this.gender = 'female'
-      } else {
-
-      }
+      if (value.gender === 'MALE')   this.gender = 'male'
+      if (value.gender === 'FEMALE') this.gender = 'female'
     }
   },
+
+  mounted () { this.setActiveNavAction('PROFILE') },
 
   methods: {
     ...mapActions('settings', ['setActiveNavAction']),
 
-    errorHandler(errorsObj) {
+    errorHandler (errorsObj) {
       for (const key in errorsObj) {
         for (const val of errorsObj[key]) {
-           this.$q.notify({
-              type: 'warning',
-              progress: true,
-              multiLine: true,
-              position: 'top',
-              message: val.message
+          this.$q.notify({
+            type: 'warning',
+            progress: true,
+            multiLine: true,
+            position: 'top',
+            message: val.message
           })
         }
       }
     },
 
-    setTheGenderToMale () {
-      this.gender = 'male'
-    },
-
-    setTheGenderToFemale () {
-      this.gender = 'female'
-    },
-
-    UpdateUserProfileData(e) {
-      //////////////////////////////
-      // TODO: Update the user data
-      //////////////////////////////
-      e.preventDefault();
+    async UpdateUserProfileData () {
       this.visible = true
       try {
-        this.$apollo
-          .mutate({ 
-            mutation: UpdateUserProfile,
-            variables: {
-              input: {
-                fullName: this.fullName,
-                phoneNumber2: this.whatsAppNumber,
-                phoneNumber3: this.telegramNumber,
-                gender: this.gender
-              }
-            },
-            refetchQueries: [{
-              query: GetMyProfileData,
-            }]
+        const result = await this.$apollo.mutate({
+          mutation: UpdateUserProfile,
+          variables: {
+            input: {
+              fullName: this.fullName,
+              phoneNumber2: this.whatsAppNumber,
+              phoneNumber3: this.telegramNumber,
+              gender: this.gender
+            }
+          },
+          refetchQueries: [{ query: GetMyProfileData }]
+        })
+        if (result.data.updateUserProfile.success) {
+          this.$q.notify({
+            type: 'positive',
+            multiLine: true,
+            progress: true,
+            message: this.$t('تم تحديث بياناتك بنجاح')
           })
-          .then(result => {
-            if (result.data.updateUserProfile.success) {
-              this.$q.notify({
-                type: "positive",
-                multiLine: true,
-                progress: true,
-                message: this.$t('تم تحديث بياناتك بنجاح')
-              })
-              this.$router.push({ name: 'Home' })
-            } else if (result.data.updateUserProfile.errors) {
-              this.errorHandler(result.data.updateUserProfile.errors);
-            }
-            this.visible = false
-          })
-          .catch(e => {
-            this.visible = false
-          });
-
-      } catch {
-        this.visible = false
-      }
-    }
-  },
-
-  mounted() {
-    //TODO: Save the active link so when render it will be make active again
-    this.setActiveNavAction('PROFILE')
-
-    const userTypes = this.$el.querySelectorAll(".type .male");
-
-    let getSiblings = function(e) {
-      // for collecting siblings
-      let siblings = [];
-      // if no parent, return no sibling
-      if (!e.parentNode) {
-        return siblings;
-      }
-      // first child of the parent node
-      let sibling = e.parentNode.firstChild;
-      // collecting siblings
-      while (sibling) {
-        if (sibling.nodeType === 1 && sibling !== e) {
-          siblings.push(sibling);
+          this.$router.push({ name: 'Home' })
+        } else if (result.data.updateUserProfile.errors) {
+          this.errorHandler(result.data.updateUserProfile.errors)
         }
-        sibling = sibling.nextSibling;
-      }
-      return siblings;
-    };
-
-    userTypes.forEach(type => {
-      type.addEventListener("click", function() {
-        let siblings = getSiblings(this);
-
-        siblings.map(e => {
-          e.classList.remove("active");
-        });
-
-        this.classList.add("active");
-      });
-    });
-  }
-};
-</script>
-<style lang="scss">
-@import "src/assets/css/sass/helpers/_variables.scss";
-@import "src/assets/css/sass/helpers/_mixins.scss";
-
-/*--============= Start profile style =============--*/
-.profile {
-  padding: 10px;
-  margin: 20px 0 45px 0;
-  position: relative;
-  .title {
-    display: inline-block;
-    width: 100%;
-    padding: 12px;
-    background: #fff;
-    margin: 18px 0 16px 0;
-    img {
-      display: inline-block;
-      margin: -9px 0 0 0;
-    }
-    h3 {
-      color: $textColor;
-      font-size: 22px;
-      font-family: "cairoB";
-      line-height: 1.7;
-      margin: 0 11px 0 0;
-      display: inline-block;
-    }
-  }
-  .details {
-    margin: 30px 0 30px 0;
-    .bord{
-        display: block;
-        padding: 15px;
-        background-color: #7B86FA;
-        border-radius: 14px;
-        height: auto;
-        margin: 0 0 25px 0;
-        position: relative;
-        overflow: hidden;
-        .money{
-            width: auto;
-            position: absolute;
-            left: 0;
-            right: -29px;
-            bottom: -46px;
-        }
-        .all{
-            display: none;
-            position: relative;
-            .price{
-                position: relative;
-                display: inline-block;
-                top: 0;
-                width: 100%;
-                img{
-                    position:absolute;
-                    top: 0;
-                }
-                .hrcooo{
-                    right: -16px;
-                }
-                .hrColor{
-                    left: 0;
-                }
-                h2{
-                    color: #fff;
-                    font-family: 'cairoR';
-                    font-size: 17px;
-                }
-                h3{
-                    color: #FFF067;
-                    font-size: 31px;
-                    font-family: 'cairoR';
-                }
-                span{
-                    display: inline-block;
-                    font-size: 13px;
-                    font-family: 'cairoR';
-                    color: #fff;
-                    margin: 0 0 0 6px;
-                }
-                .box{
-                    text-align: center;
-                    width: 78px;
-                    background-color: #fff;
-                    border-radius: 11px;
-                    margin: 12px auto;
-                    height: 64px;
-                    h3{
-                        font-size: 28px;
-                        color: #7B86F8;
-                        font-family: 'cairoB';
-                        margin: 2px 0 3px 0;
-                        text-align: center;
-                    }
-                    span{
-                        display: block;
-                        color: $textColor;
-                        margin: 0;
-                    }
-                }
-            }
-            .right{
-                h2{
-                    text-align: center;
-                }
-            }
-            .linke{
-                text-decoration: none;
-                margin: 0 20px 0 0;
-                position: absolute;
-                width: 86px;
-                cursor: pointer;
-                h3{
-                    font-size: 12px;
-                    display: inline-block;
-                    color: #ffff;
-                    font-family: 'cairoR';
-                    .mage{
-                        width: auto;
-                        display: inline-block;
-                        margin: 0;
-                        position: unset;
-                    }
-                }
-            }
-            .share{
-                text-align: center;
-                margin: 0 0 7px 0;
-                padding: 10px;
-                form{
-                    position: relative;
-                    text-align: center;
-                    width: 78%;
-                    margin: 0 auto;
-                    top: 17px;
-                    //maxMobile
-                    @media(max-width:767px){
-                        width: 100%;
-                    }
-                    input{
-                        background-color: #8d96ff;
-                        border: none;
-                        width: 100%;
-                        height: 37px;
-                        outline: 0;
-                        padding: 0px 29px 0 0;
-                        overflow: hidden;
-                        border-radius: 100px;
-                        font-family: 'cairoR';
-                        color: #fff;
-                    }
-                    button{
-                        width: 41px;
-                        height: 33px;
-                        background-color: #fcc74c;
-                        position: absolute;
-                        left: 5px;
-                        top: 2px;
-                        font-size: 16px;
-                        outline: 0;
-                        img{
-                            width: 20px;
-                        }
-                    }
-                }
-            }
-        }
-        /*button*/
-        .avvil{
-            position: relative;
-            display: block;
-            text-align: center;
-            h3{
-                font-family: 'cairoR';
-                font-size: 16px;
-                line-height: 1.5;
-                color: #fcfcfc;
-                display: inline-block;
-                margin: 5px 0 20px 0;
-            }
-            button{
-                width: 170px;
-                height: 47px;
-                margin: 0 0 5px 0;
-                background-color:#fcc74c;
-                color: #fff;
-                text-align: center;
-                display: inline-block;
-                outline: 0;
-                transition: all .3s ease-in-out;
-                &:hover{
-                    background-color: #fcfcfc;
-                    color: #fcc74c;
-                    border: 1px solid #fcc74c;
-                    transform: scale(0.9);
-                }
-            }
-        }
-    }
-    .load{
-        img{
-            width: 100%;
-            height: 147px;
-            //maxMobile
-            @media(max-width:767px){
-                height: 207px;
-            }
-        }
-    }
-    .user {
-      //maxMobile
-      @media (max-width: 767px) {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      //minSmall
-      @media (min-width: 768px) {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      img {
-        width: 129px;
-        height: 129px;
-        border-radius: 50%;
-      }
-    }
-    .all {
-      background: #fff;
-      padding: 14px;
-      border-radius: 28px;
-      .password {
-        margin: 30px 0 0 0;
-      }
-      .title {
-        background-color: unset;
-        h3 {
-          font-size: 18px;
-        }
-      }
-      form {
-        .inp {
-          position: relative;
-          margin-bottom: 15px;
-          img {
-            position: absolute;
-            top: 22px;
-            right: 12px;
-          }
-        }
-        .type {
-          margin: 15px auto 15px auto;
-          .active {
-            border: 1px solid #fcc74c;
-          }
-          .male {
-            cursor: pointer;
-            background-color: #fff;
-            padding: 12px;
-            display: inline-block;
-            width: 91px;
-            height: 94px;
-            text-align: center;
-            border-radius: 10px;
-            margin: 0 0 0 20px;
-            box-shadow: 0px 3px 20px #eae8e878;
-            h3 {
-              font-size: 13px;
-              color: $textColor;
-              font-family: "cairoR";
-              text-align: center;
-              margin: 8px 0 5px 0;
-            }
-          }
-        }
-        .but {
-          margin: 30px auto 24px auto;
-          background: #fcd462;
-          padding: 5px;
-          width: 130px;
-          border-radius: 50px;
-          text-align: center;
-          cursor: pointer;
-          h3 {
-            display: inline-block;
-            color: $textColor;
-            font-size: 16px;
-            font-family: "cairoR";
-            margin: 0;
-          }
-          img {
-            display: inline-block;
-            position: relative;
-            left: 0;
-            right: 21px;
-          }
-        }
-      }
+      } catch (e) { /* apolloProvider surfaces the error toast */ }
+      finally { this.visible = false }
     }
   }
 }
-/*--============= End profile style =============--*/
+</script>
+
+<style lang="scss" scoped>
+.profile-page {
+  background: var(--ds-surface-muted);
+  min-block-size: 100vh;
+  padding-block-end: var(--ds-space-16);
+
+  &__hero {
+    background: linear-gradient(135deg, var(--ds-brand-700), var(--ds-brand-600));
+    color: var(--ds-text-onBrand);
+    padding: var(--ds-space-10) var(--ds-space-4);
+    margin-block-end: var(--ds-space-8);
+  }
+
+  &__hero-inner {
+    max-inline-size: 1100px;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-5);
+    flex-wrap: wrap;
+  }
+
+  &__avatar {
+    inline-size: 6rem;
+    block-size: 6rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    padding: var(--ds-space-2);
+  }
+
+  &__hero-text {
+    h1 {
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-3xl);
+      font-weight: var(--ds-weight-bold);
+      margin: 0;
+    }
+    p {
+      margin: var(--ds-space-1) 0 0;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: var(--ds-text-md);
+    }
+  }
+
+  &__layout {
+    max-inline-size: 1100px;
+    margin-inline: auto;
+    padding-inline: var(--ds-space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-5);
+
+    @media (min-width: 600px) { padding-inline: var(--ds-space-4); }
+  }
+
+  &__section {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    padding: var(--ds-space-6);
+    box-shadow: var(--ds-shadow-xs);
+  }
+
+  &__section-head {
+    margin-block-end: var(--ds-space-5);
+    h2 {
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-xl);
+      font-weight: var(--ds-weight-bold);
+      color: var(--ds-text);
+      margin: 0 0 var(--ds-space-1);
+    }
+    p {
+      color: var(--ds-text-muted);
+      margin: 0;
+      font-size: var(--ds-text-sm);
+    }
+  }
+
+  &__certificate {
+    margin-block-start: var(--ds-space-6);
+    padding-block-start: var(--ds-space-5);
+    border-block-start: 1px solid var(--ds-border);
+  }
+}
+
+.profile-form {
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--ds-space-4);
+    @media (min-width: 700px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  &__gender {
+    margin: var(--ds-space-5) 0;
+    padding: 0;
+    border: 0;
+
+    legend {
+      padding: 0;
+      margin-block-end: var(--ds-space-2);
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-sm);
+      font-weight: var(--ds-weight-medium);
+      color: var(--ds-text);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--ds-space-3);
+  }
+}
+
+.gender-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill);
+  padding: 0.55rem 1.15rem;
+  font-family: var(--ds-font-heading);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text);
+  cursor: pointer;
+  margin-inline-end: var(--ds-space-2);
+  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+
+  img { block-size: 1.1rem; inline-size: auto; }
+
+  &:hover { background: var(--ds-surface-muted); }
+  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+
+  &--active {
+    background: var(--ds-brand-600);
+    color: var(--ds-text-onBrand);
+    border-color: var(--ds-brand-600);
+    img { filter: brightness(0) invert(1); }
+  }
+}
 </style>

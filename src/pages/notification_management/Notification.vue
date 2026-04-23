@@ -1,43 +1,55 @@
 <template>
-  <section class="Notific" style="min-height: 44vh">
-    <div class="container-fluid">
-      <div class="row justify-center">
-        <div class="col-lg-12">
-          <div class="title">
-            <img src="~assets/img/tit.png" alt="" />
-            <h3>{{$t('الإشعارات')}}</h3>
-          </div>
-        </div>
-        <div v-if="$_.get(GET_NOTIFICATION_DATA, 'totalCount') == 0" class="empty">
-            <img src="~assets/img/no_notification.png" alt="">
-            <h3> عذرا لا تـوجد إشــعارات فــي الوقــت الحـالــي </h3>
-        </div>
-        <div v-if="$_.isEmpty(GET_NOTIFICATION_DATA, 'edges')" style="width: 55%">
-          <q-skeleton class="q-mt-sm" v-for="i in 7" :key="i" height="100px" />
-        </div>
-        <div v-else class="notifi">
-          <Notification-Card
-            v-for="notification in GET_NOTIFICATION_DATA.edges"
-            :key="notification.node.pk"
-            :notification="notification.node"
-          />
-          <div class="butDown text-center" v-if='$_.get(myNotifications,"[pageInfo][hasNextPage]")'>
-            <button @click="LOAD_MORE_DATA">{{$t('عرض المزيد')}}<img class="q-mr-sm" src="~assets/img/moree.png" alt=""></button>
-          </div>
+  <main class="notifications-page">
+    <header class="notifications-page__head">
+      <h1>
+        <img src="~assets/img/tit.png" alt="" aria-hidden="true" />
+        <span>{{ $t('الإشعارات') }}</span>
+      </h1>
+    </header>
+
+    <section class="notifications-page__body">
+      <div v-if="loading && notifications.length === 0" class="notifications-page__skeletons">
+        <ds-skeleton v-for="i in 5" :key="i" shape="rect" height="5rem" />
+      </div>
+
+      <ds-empty-state
+        v-else-if="notifications.length === 0"
+        :title="$t('لا توجد إشعارات بعد')"
+        size="md"
+      >
+        <template #illustration>
+          <img src="~assets/img/no_notification.png" alt="" />
+        </template>
+        <template #description>
+          {{ $t('ستصلك هنا أي تنبيهات عن كورساتك ومدفوعاتك وشهاداتك.') }}
+        </template>
+      </ds-empty-state>
+
+      <div v-else class="notifications-page__list">
+        <NotificationCard
+          v-for="n in notifications"
+          :key="n.node.pk"
+          :notification="n.node"
+        />
+        <div v-if="hasMore" class="notifications-page__more">
+          <ds-button variant="secondary" @click="LOAD_MORE_DATA">
+            {{ $t('عرض المزيد') }}
+          </ds-button>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 </template>
 
 <script>
 import NotificationCard from 'src/components/notification_management/NotificationCard.vue'
 import { GetAllMyNotifications } from 'src/queries/notification_management/query/GetAllMyNotifications'
-// import { DoneReadingNotification } from 'src/queries/notification_management/mutation/DoneReadingNotification'
 import { mapActions } from 'vuex'
 
 export default {
-  name: "Notification",
+  name: 'Notification',
+  components: { NotificationCard },
+
   data () {
     return {
       myNotifications: '',
@@ -45,170 +57,93 @@ export default {
       notificationData: []
     }
   },
+
   apollo: {
     myNotifications: {
       query: GetAllMyNotifications,
-      variables: {
-        orderBy: ['-id'],
-        limit: 2
-      },
+      variables: { orderBy: ['-id'], limit: 2 },
       result (res) {
-        this.loading = res.loading 
-        if (!res.loading) {
-          this.notificationData = res.data.myNotifications
-        }
+        this.loading = res.loading
+        if (!res.loading) this.notificationData = res.data.myNotifications
       }
     }
   },
-  components: {
-    NotificationCard
-  },
- 
-  mounted () {
-    //TODO: Save the active link so when render it will be make active again
-    this.setActiveNavAction('NOTIFICATION')
-    // TODO: Get the notification from the [ UserNavBar ] component
-    // this.$root.$on('NotificationData', this.GET_NOTIFICATION_DATA)
-    // TODO: Get the notification 
-    // this.$apollo.query({
-    //   query: GetAllMyNotifications,
-    //   variables: {
-    //     orderBy: ['-id'],
-    //     limit: 2
-    //   }
-    // }).then( res => {
-      
-    // } )
-  },
 
   computed: {
-    GET_NOTIFICATION_DATA () {
-      return this.notificationData
-    }
+    notifications () { return this.$_.get(this.notificationData, 'edges', []) || [] },
+    hasMore () { return this.$_.get(this.myNotifications, '[pageInfo][hasNextPage]', false) }
   },
+
+  mounted () { this.setActiveNavAction('NOTIFICATION') },
 
   methods: {
     ...mapActions('settings', ['setActiveNavAction']),
+
     async LOAD_MORE_DATA () {
       await this.$apollo.queries.myNotifications.fetchMore({
-        variables: {
-          cursor: this.myNotifications.pageInfo.endCursor
-        },
+        variables: { cursor: this.myNotifications.pageInfo.endCursor },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           const newEdges = fetchMoreResult.myNotifications.edges
           const pageInfo = fetchMoreResult.myNotifications.pageInfo
-
           if (newEdges.length) {
             this.myNotifications = {
-              __typename:
-                                previousResult.myNotifications.__typename,
-              edges: [
-                ...previousResult.myNotifications.edges,
-                ...newEdges
-              ],
+              __typename: previousResult.myNotifications.__typename,
+              edges: [...previousResult.myNotifications.edges, ...newEdges],
               pageInfo
             }
-
             return { myNotifications: this.myNotifications }
           }
           return previousResult
         }
       })
-    },
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.notifications-page {
+  max-inline-size: 720px;
+  margin-inline: auto;
+  padding: var(--ds-space-6) var(--ds-space-3) var(--ds-space-12);
+
+  @media (min-width: 600px) {
+    padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
   }
 
-};
-</script>
-<style lang="scss">
-@import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variables.scss";
-/*--============= Start Notification page =============--*/
-.Notific{
-    padding: 10px;
-    margin: 20px 0 45px 0;
-    position: relative;
-    .title{
-        display: inline-block;
-        width: 100%;
-        padding: 12px;
-        background: #fff;
-        margin: 18px 0 16px 0;
-        img{
-            display: inline-block;
-            margin: -9px 0 0 0;
-        }
-        h3{
-            color: $textColor;
-            font-size: 22px;
-            font-family: 'cairoB';
-            line-height: 1.7;
-            margin: 0 11px 0 0;
-            display: inline-block;
-        }
+  &__head {
+    margin-block-end: var(--ds-space-6);
+    h1 {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ds-space-2);
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-3xl);
+      font-weight: var(--ds-weight-bold);
+      color: var(--ds-text);
+      margin: 0;
+      img { block-size: 1.75rem; inline-size: auto; }
     }
-    .notifi{
-        margin: 10px auto;
-        max-width: 600px;
-        .notf{
-            background-color: #fff;
-            padding: 18px;
-            border-radius: 15px;
-            margin: 20px 0 20px 0;
-            box-shadow: 0px 3px 20px #eae8e878;
-            .user{
-            //maxMobile
-            @media(max-width:767px){
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            //minSmall
-            @media(min-width:768px){
-                text-align: center;
-                margin-bottom: 20px;
-            }
-                img{
-                    border-radius: 50px;
-                    width: 50px;
-                    height: 50px;
-                    display: inline-block;
-                }
-            }
-            .content{
-                h3{
-                    font-size: 18px;
-                    display: inline-block;
-                    font-family: 'cairoR';
-                    color: $textColor;
-                    width: 398px;
-                    margin: 0;
-                    line-height: 1.8;
-                    //maxMobile
-                    @media(max-width:767px){
-                        text-align: center;
-                        width: 100%;
-                        font-size: 17px;
-                        padding: 5px;
-                    }
-                    span{
-                        color: #C9C9C9;
-                    }
-                }
-            }
-        }
-    }
-    .empty{
-        display: block;
-        text-align: center;
-        img{
-            width:auto;
-        }
-        h3{
-            font-size: 19px;
-            font-family: 'cairoR';
-            color: $textColor;
-            margin: 35px 0 0 0;
-        }
-    }
+  }
+
+  &__body { min-block-size: 16rem; }
+
+  &__skeletons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-3);
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-3);
+  }
+
+  &__more {
+    margin-block-start: var(--ds-space-4);
+    display: flex;
+    justify-content: center;
+  }
 }
-/*--============= End Notification page =============--*/
 </style>

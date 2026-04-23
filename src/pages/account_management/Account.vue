@@ -1,23 +1,18 @@
 <template>
-  <section class="web">
-    <router-view></router-view>
-  </section>
+  <main class="account-shell">
+    <router-view />
+  </main>
 </template>
 
 <script>
-
 export default {
-  name: 'Home',
-  data () {
-    return {
-    }
-  },
-  components: {
-  }
+  name: 'Account'
 }
 </script>
-<style lang="scss">
-@import 'src/assets/css/sass/helpers/_variables.scss';
-@import 'src/assets/css/sass/helpers/_mixins.scss';
-@import 'src/assets/css/account.scss';
+
+<style lang="scss" scoped>
+.account-shell {
+  min-block-size: 100vh;
+  background: var(--ds-surface-muted);
+}
 </style>

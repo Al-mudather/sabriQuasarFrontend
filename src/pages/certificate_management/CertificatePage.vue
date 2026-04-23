@@ -1,339 +1,179 @@
 <template>
-    <section class="web">
-       <div class="certificate-box">
-           <div class="container">
-               <div class="row">
-                   <div class="col-lg-12 col-sm-7 col-md-12 col-xs-6">
-                      <div class="courc">
-                        <h3>شهادتـــي</h3>
-                        <div class="tabl" v-for="certificate in myCertificate.edges" :key="certificate.node.pk">
-                          <h3>{{ $_.get(certificate, '[node][enrollment][course][title]')  || $_.get(certificate, '[node][batch][courseName]') }}</h3>
-                          <h3>{{ FORMAT_DATE( $_.get(certificate, '[node][created]') ) }}</h3>
-                          <div class="butt">
-                            <q-spinner-clock
-                              color="primary"
-                              size="2em"
-                              v-if="loading"
-                            />
-                            <button v-else @click="DOWNLOAD_MY_CERTIFICATE(certificate)" class="">تحميـل <img src="img/download.png" alt=""></button>
-                          </div>
-                        </div>
-                      </div>
-                   </div>
-               </div>
-           </div>
-        </div>
+  <main class="certs-page">
+    <header class="certs-page__head">
+      <h1>
+        <img src="~assets/img/tit.png" alt="" aria-hidden="true" />
+        <span>{{ $t('شهادتـــي') }}</span>
+      </h1>
+    </header>
+
+    <section class="certs-page__body">
+      <ds-empty-state
+        v-if="certificates.length === 0"
+        :title="$t('لا توجد شهادات بعد')"
+        :description="$t('ستظهر هنا شهاداتك فور إكمال أي كورس.')"
+        size="md"
+      />
+
+      <div v-else class="certs-page__list">
+        <article
+          v-for="cert in certificates"
+          :key="cert.node.pk"
+          class="cert-card"
+        >
+          <div class="cert-card__meta">
+            <h3>{{ courseNameOf(cert) }}</h3>
+            <time>{{ FORMAT_DATE($_.get(cert, '[node][created]')) }}</time>
+          </div>
+          <ds-button
+            variant="accent"
+            :loading="loading"
+            @click="DOWNLOAD_MY_CERTIFICATE(cert)"
+          >
+            {{ $t('تحميل') }}
+          </ds-button>
+        </article>
+      </div>
     </section>
+  </main>
 </template>
 
 <script>
 import axios from 'axios'
-// const FileDownload = require('js-file-download');
-import {AllCertificates} from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
-import { mapGetters } from "vuex";
-import { exportFile  } from 'quasar'
-
-const moment = require('moment')
-
+import { AllCertificates } from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
+import { mapGetters } from 'vuex'
+import { exportFile } from 'quasar'
+import moment from 'moment'
 
 export default {
-    name: 'CertificatePage',
-    data () {
-      return {
-        loading: false,
-        myCertificate: []
-      }
-    },
+  name: 'CertificatePage',
 
-	components: {
-	},
+  data () { return { loading: false, myCertificate: [] } },
 
   computed: {
-    ...mapGetters("authentication", ["user", "token"]),
+    ...mapGetters('authentication', ['user', 'token']),
+    certificates () { return this.$_.get(this.myCertificate, 'edges', []) || [] }
   },
 
   apollo: {
     allCertificates: {
-      query () {
-        return AllCertificates
-      },
+      query () { return AllCertificates },
       variables () {
         return {
-          'filters': JSON.stringify({
-            // 'enrollment__user__id': this.user.pk
-            'user__id': this.user.pk
-          })
+          filters: JSON.stringify({ user__id: this.user.pk })
         }
       },
-
-      update (data) {
-        this.myCertificate = data.allCertificates
-      }
+      update (data) { this.myCertificate = data.allCertificates }
     }
   },
 
   methods: {
+    courseNameOf (cert) {
+      return this.$_.get(cert, '[node][enrollment][course][title]') ||
+             this.$_.get(cert, '[node][batch][courseName]')
+    },
 
     FORMAT_DATE (date) {
-      if (date) return moment(date).format('YYYY-MM-DD HH:mm:ss')
-      return 'Not Defined'
+      return date ? moment(date).format('YYYY-MM-DD HH:mm') : 'Not Defined'
     },
 
     async DOWNLOAD_MY_CERTIFICATE (certificate) {
-
-      if (this.user.certificateName) {
-        this.loading = true
-        try {
-          const res = await axios(
-            {
-              method: 'GET',
-              // url: `http://localhost:8000/api/enrollment/certificate/download/${certificate.node.pk}`,
-              url: `${location.origin}/api/enrollment/certificate/download/${certificate.node.pk}`,
-              responseType: 'arraybuffer',
-              // responseType: 'blob',
-              headers: {
-                'Authorization': `JWT ${this.token}`,
-                'Content-Type': 'application/json',
-              }
-            }
-          )
-
-          if (res.data) {
-            // openURL(res.config.url)
-            const fileName = `${this.$_.get(certificate, '[node][enrollment][course][title]') || this.$_.get(certificate, '[node][batch][courseName]') }-${this.user.username}.pdf`
-
-            // const status = exportFile(fileName,res.data, 'utf8')
-            exportFile(fileName,res.data, {
-              encoding: 'windows-1252',
-              mimeType: 'text/csv;charset=windows-1252;'
-            })
-
-            this.loading = false
-          } else {
-            this.loading = false
-          }
-        } catch (error) {
-          this.loading = false
-        }
-
-      } else {
-        //TODO: Start the loading
+      if (!this.user.certificateName) {
         this.$q.notify({
           type: 'warning',
           progress: true,
           multiLine: true,
           position: 'top',
-          message: "يجب تعيين إسم شهادة التدريب"
+          message: 'يجب تعيين إسم شهادة التدريب'
         })
-        this.$router.push({ name: "user-profile" });
+        this.$router.push({ name: 'user-profile' })
+        return
       }
 
+      this.loading = true
+      try {
+        const res = await axios({
+          method: 'GET',
+          url: `${location.origin}/api/enrollment/certificate/download/${certificate.node.pk}`,
+          responseType: 'arraybuffer',
+          headers: {
+            'Authorization': `JWT ${this.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        if (res.data) {
+          const fileName = `${this.courseNameOf(certificate)}-${this.user.username}.pdf`
+          exportFile(fileName, res.data, {
+            encoding: 'windows-1252',
+            mimeType: 'text/csv;charset=windows-1252;'
+          })
+        }
+      } catch (e) { /* apolloProvider surfaces errors */ }
+      finally { this.loading = false }
     }
   }
 }
 </script>
 
-<style lang="scss">
-@import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variables.scss";
+<style lang="scss" scoped>
+.certs-page {
+  max-inline-size: 880px;
+  margin-inline: auto;
+  padding: var(--ds-space-6) var(--ds-space-3) var(--ds-space-12);
 
-.certificate-box {
-  width: 841px;
-  min-height: 595px;
-  position: relative;
-  margin: 43px auto 68px auto;
+  @media (min-width: 600px) {
+    padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
+  }
 
-  @include respond(phone) { // width < 900?
-    width: 780px;
+  &__head {
+    margin-block-end: var(--ds-space-6);
+    h1 {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ds-space-2);
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-3xl);
+      font-weight: var(--ds-weight-bold);
+      color: var(--ds-text);
+      margin: 0;
+      img { block-size: 1.75rem; inline-size: auto; }
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-3);
   }
 }
 
-.certificate-box .tittel {
-  position: absolute;
-  top: -23px;
-  left: 0;
-  z-index: 2;
-}
+.cert-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  box-shadow: var(--ds-shadow-xs);
+  flex-wrap: wrap;
 
-.certificate-box .tittel a {
-  text-decoration: none;
-}
-
-.certificate-box .tittel a h3 {
-  font-family: 'cairoR';
-  font-size: 18px;
-  background: #7b86fa;
-  padding: 10px 8px;
-  width: 200px;
-  width: max-content;
-  text-align: center;
-  border-radius: 22px;
-  color: #fff;
-}
-
-.certificate-box .courc {
-  position: relative;
-  padding: 42px 10px 20px 10px;
-  border: 1px solid #cccccc3d;
-  border-radius: 8px;
-}
-
-.certificate-box .courc h3 {
-  margin: -13px 0 26px 0;
-  font-size: 18px;
-  font-family: 'cairoB';
-  color: #7b7b7b;
-}
-
-.certificate-box .courc .tabl {
-  background-color: #fff;
-  padding: 10px;
-  border-radius: 15px;
-  margin: 20px 0 20px 0;
-  -webkit-box-shadow: 0px 3px 20px #eae8e878;
-          box-shadow: 0px 3px 20px #eae8e878;
-  margin: 5px 0 20px 0;
-}
-
-.certificate-box .courc .tabl h3 {
-  font-size: 18px;
-  display: inline-block;
-  font-family: 'cairoR';
-  color: #7B7B7B;
-  width: 398px;
-  margin: 0;
-  line-height: 1.8;
-
-  @include respond(phone) { // width < 900?
-    width: 230px;
+  &__meta {
+    flex: 1;
+    min-inline-size: 0;
+    h3 {
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-md);
+      font-weight: var(--ds-weight-bold);
+      color: var(--ds-text);
+      margin: 0 0 var(--ds-space-1);
+    }
+    time {
+      font-size: var(--ds-text-xs);
+      color: var(--ds-text-muted);
+      font-variant-numeric: tabular-nums;
+    }
   }
 }
-
-.certificate-box .courc .tabl .butt {
-  display: block;
-  float: left;
-}
-
-.certificate-box .courc .tabl .butt button {
-  position: relative;
-  display: inline-block;
-  color: #fff;
-  background-color: #FCC74C;
-  font-size: 14px;
-  font-family: 'cairoR';
-  height: 34px;
-  width: 85px;
-  top: 0;
-  right: 0;
-  left: 0;
-}
-
-.certificate-box .courc .tabl .butt button img {
-  margin-right: 5px;
-}
-
-.certificate-box .courc .tabl .butt .blue {
-  background-color: #7B86FA;
-}
-
-.certificate-box button {
-  color: #fff;
-  background-color: #7B86FA;
-  font-size: 16px;
-  font-family: 'cairoR';
-  height: 47px;
-  width: 187px;
-  position: absolute;
-  bottom: -48px;
-  margin: 0 auto;
-  text-align: center;
-  right: 0;
-  left: 0;
-}
-
-/*--- start popup form ---*/
-.popCurr {
-  display: block;
-  position: fixed;
-  width: 100%;
-  height: 100vh;
-  background: #fcd462ab;
-  top: 0;
-  right: 0;
-  text-align: center;
-  z-index: 999;
-}
-
-.popCurr .clos {
-  position: relative;
-  margin: 0 auto;
-  height: 52px;
-  width: 38px;
-  cursor: pointer;
-}
-
-.popCurr .clos svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-
-.popCurr .clos img {
-  position: absolute;
-  width: auto;
-  top: 24px;
-  right: 11px;
-}
-
-.popCurr .cn {
-  max-width: 400px;
-  margin: 68px auto 50px auto;
-  padding: 23px 20px 23px 20px;
-  opacity: 1;
-  background-color: #fff;
-  border-radius: 20px;
-}
-
-.popCurr .cn form {
-  margin: 10px 0 10px 0;
-}
-
-.popCurr .cn form .inp {
-  position: relative;
-  margin: 0 0 15px 0;
-}
-
-.popCurr .cn form .inp img {
-  position: absolute;
-  top: 22px;
-  right: 12px;
-}
-
-.popCurr .cn form .form-select {
-  width: 100%;
-  height: 52px;
-  border: 1px solid #E1E1E1;
-  border-radius: 100px;
-  color: #767676;
-  padding: 7px;
-}
-
-.popCurr .cn form button {
-  width: 139px;
-  height: 42px;
-  background-color: #7B86FA;
-  color: #fff;
-  margin: 17px 0 0 0;
-  font-size: 16px;
-  -webkit-transition: all ease-in .3s;
-  transition: all ease-in .3s;
-  outline: 0;
-}
-
-.popCurr .cn form button:hover {
-  background-color: #FCC74C;
-  color: #7B7B7B;
-}
-
 </style>
