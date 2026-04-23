@@ -1,80 +1,76 @@
 <template>
-  <section class="top">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-2">
-          <!--menu & logo -->
-          <div class="minlog" @click="changeMenuState" style="cursor: pointer">
-            <div class="menu">
-              <img src="~assets/img/menu.png" alt="" />
-            </div>
-            <!--logo-->
-            <div class="logo">
-              <img src="~assets/img/logo.png" alt="" />
-            </div>
+  <section class="top home-nav">
+    <div class="home-nav__inner">
+      <!-- Menu & logo -->
+      <div class="home-nav__brand" @click="changeMenuState">
+        <button
+          type="button"
+          class="home-nav__menu-btn"
+          :aria-label="$t('القائمة')"
+        >
+          <q-icon name="menu" size="26px" />
+        </button>
+        <div class="home-nav__logo">
+          <img src="~assets/img/logo.png" alt="" />
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="home-nav__search">
+        <form class="home-nav__search-form" @submit="showTheSearchingResult">
+          <q-icon name="search" size="18px" class="home-nav__search-icon" />
+          <input
+            v-model="search"
+            type="text"
+            class="home-nav__search-input"
+            :placeholder="$t('ما الذي تبحث عنه؟')"
+          />
+          <button
+            type="submit"
+            class="home-nav__search-submit"
+            :aria-label="$t('بحث')"
+          >
+            <q-icon name="search" size="18px" />
+          </button>
+        </form>
+      </div>
+
+      <!-- Auth actions -->
+      <div class="home-nav__auth">
+        <div class="account m_btn" v-if="!token">
+          <div class="sign m_btn">
+            <ds-button variant="accent" size="md" @click="GO_TO_SIGN_UP_PAGE">
+              <template #leading><q-icon name="person_add" size="18px" /></template>
+              {{ $t("تسجيل حساب") }}
+            </ds-button>
+          </div>
+          <div class="login m_btn">
+            <ds-button variant="secondary" size="md" @click="GO_TO_LOG_IN_PAGE">
+              <template #leading><q-icon name="login" size="18px" /></template>
+              {{ $t("دخول") }}
+            </ds-button>
           </div>
         </div>
-        <!-- search box -->
-        <div class="col-lg-6">
-          <div class="search">
-            <form @submit="showTheSearchingResult">
-              <input
-                v-model="search"
-                type="text"
-                v-bind:placeholder="$t('ما الذي تبحث عنه؟')"
-              />
-              <button>
-                <img src="~assets/img/search.png" />
-              </button>
-            </form>
+        <div class="account m_btn" v-else>
+          <div class="sign logOutBtn mag">
+            <ds-button variant="secondary" size="md" @click="LOG_USER_OUT">
+              <template #leading><q-icon name="logout" size="18px" /></template>
+              {{ $t("خروج") }}
+            </ds-button>
           </div>
         </div>
-        <!--login $ sign-->
-        <div class="col-lg-3">
-          <div class="account" v-if="!token">
-            <div class="sign m_btn">
-              <a @click="GO_TO_SIGN_UP_PAGE" style="cursor: pointer">
-                <img src="~assets/img/sign.png" alt="" />
-                <h3 class="q-pr-sm">{{ $t("تسجيل حساب") }}</h3>
-              </a>
-            </div>
-            <div class="login m_btn">
-              <a @click="GO_TO_LOG_IN_PAGE" style="cursor: pointer">
-                <img src="~assets/img/login.png" alt="" />
-                <h3 class="q-pr-sm">{{ $t("دخول") }}</h3>
-              </a>
-            </div>
-          </div>
-          <div class="account m_btn" v-else>
-            <div
-              @click="LOG_USER_OUT"
-              style="cursor: pointer"
-              class="sign logOutBtn mag"
-            >
-              <div class="mag">
-                <img src="~assets/img/enter.png" alt="" />
-              </div>
-              <h3 class="q-pr-sm">{{ $t("خروج") }}</h3>
-            </div>
-          </div>
-        </div>
-        <!-- Language -->
-        <div class="col-lg-1">
-          <div class="lang">
-            <q-toggle
-              v-model="_isEnglish"
-              icon="language"
-              unchecked-icon="clear"
-              class="text-white"
-              label="Eng"
-            />
-            <!-- <img src="~assets/img/doown.png" alt="" />
-                        <q-toggle v-model="englishLang"/>
-                        <h3 class="q-pq-sm">Ar</h3>
-                        <div class="contry">
-                            <img src="~assets/img/ar.png" alt="" />
-                        </div> -->
-          </div>
+      </div>
+
+      <!-- Language -->
+      <div class="home-nav__lang">
+        <div class="lang">
+          <q-toggle
+            v-model="_isEnglish"
+            icon="language"
+            unchecked-icon="clear"
+            class="text-white"
+            label="Eng"
+          />
         </div>
       </div>
     </div>
@@ -128,19 +124,16 @@ export default {
             });
           });
 
-          // TODO: Change the style of the backet when English
+          // Adjust cart styling in outer layouts when switching locales
           this.$jquery(".backgroun").css({
             transform: "rotate(180deg)",
           });
-          // TODO: Change the style of the backet when English
           this.$jquery(".shoppgCart > .cart svg").css({
             transform: "translate(-20%, -30%)",
           });
-
           this.$jquery(".shoppgCart > .cart h3").css({
             transform: "translate(35%, -100%)",
           });
-
           this.$jquery(".shoppgCart > .cart > .notifc").css({
             transform: "translate(-5%,-43%)",
           });
@@ -149,31 +142,24 @@ export default {
           // let's not break the app, so catching
         }
       } else {
-        const langIso = "ar";
         this.$i18n.locale = "ar";
-        // TODO: Save the language
         this.setIsEnglishAction(value);
 
         try {
           Quasar.lang.set({
             isoName: "ar",
             nativeName: "العربية",
-            // rtl: true,
           });
 
           this.$jquery(".backgroun").css({
             transform: "rotate(360deg)",
           });
-
-          // TODO: Change the style of the backet when English
           this.$jquery(".shoppgCart > .cart svg").css({
             transform: "translate(0%, 0%)",
           });
-
           this.$jquery(".shoppgCart > .cart h3").css({
             transform: "translate(0%, 0%)",
           });
-
           this.$jquery(".shoppgCart > .cart > .notifc").css({
             transform: "translate(0%,0%)",
           });
@@ -195,22 +181,18 @@ export default {
     },
 
     LOG_USER_OUT() {
-      //TODO: Delete the marketer code
       this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION("");
-      //todo: Remove all the cookies of the tap
       try {
         this.removeCookie();
       } catch (error) {}
-      //TODO: Empty the shopping cart
       this.deleteShoppinCartDataListAction();
-      //TODO: redirect the user to the home page
       this.logOutAction();
       this.$apollo.provider.defaultClient.resetStore();
       this.$router.push({ name: "Home" });
     },
+
     removeCookie() {
       const token = "csrftoken";
-      // var cookies = this.$cookies.get(token);
       this.$cookies.remove(token);
     },
 
@@ -245,7 +227,6 @@ export default {
                   actions: searchResult,
                 })
                 .onOk((action) => {
-                  // TODO: Go to the course details
                   this.$router.push({
                     name: "course-details",
                     params: {
@@ -256,7 +237,6 @@ export default {
                   });
                 })
                 .onDismiss(() => {
-                  // TODO: Clear the search
                   this.search = "";
                 });
             } else {
@@ -296,115 +276,151 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-.m_btn {
-  transition: all 0.5s;
-  backface-visibility: hidden;
 
-  &:hover {
-    backface-visibility: hidden;
-    transform: scale(1.07);
+<style lang="scss" scoped>
+.top.home-nav {
+  background: linear-gradient(
+    135deg,
+    var(--ds-brand-700) 0%,
+    var(--ds-brand-600) 100%
+  );
+  padding-block: var(--ds-space-3);
+  padding-inline: var(--ds-space-4);
+  color: var(--ds-text-onBrand);
+}
+
+.home-nav__inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--ds-space-4);
+  max-width: 1400px;
+  margin-inline: auto;
+
+  @media (max-width: 900px) {
+    grid-template-columns: auto 1fr auto;
+    .home-nav__search {
+      grid-column: 1 / -1;
+      order: 3;
+    }
   }
 }
 
-.s_btn {
-  &,
-  &:link,
-  &:visited {
-    // text-transform: uppercase;
-    // text-decoration: none;
-    // padding: 0.5rem 0.1rem;
-    // display: inline-block;
-    // border-radius: 10rem;
+.home-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  cursor: pointer;
+}
 
-    transition: all 0.2s;
-    position: relative;
-    // font-size: $default-font-size;
+.home-nav__menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ds-text-onBrand);
+  border-radius: var(--ds-radius-pill);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 
-    // Change for button element
-    border: none;
-    cursor: pointer;
+  &:hover,
+  &:focus-visible {
+    background-color: rgba(255, 255, 255, 0.18);
   }
 
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 1rem 2rem rgba($color-black, 0.2);
-
-    &::after {
-      transform: scaleX(1.4) scaleY(1.6);
-      opacity: 0;
-    }
-  }
-
-  &:active,
-  &:focus {
+  &:focus-visible {
     outline: none;
-    transform: translateY(-1px);
-    box-shadow: 0 0.5rem 1rem rgba($color-black, 0.2);
-  }
-
-  &--white {
-    background-color: $color-white;
-    color: $color-gray-dark;
-
-    &::after {
-      background-color: $color-white;
-    }
-  }
-
-  &--green {
-    background-color: $color-primary;
-    color: $color-white;
-
-    &::after {
-      background-color: $color-primary;
-    }
-  }
-
-  &::after {
-    content: "";
-    display: inline-block;
-    width: 100%;
-    height: 100%;
-    border-radius: 10rem;
-
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    transition: all 0.4s;
-  }
-
-  &--animated {
-    animation: moveInBottom 0.5s ease-out 0.75s;
-    animation-fill-mode: backwards;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
   }
 }
 
-.logOutBtn {
-  height: 41px;
-  width: 137px;
-  color: #fff;
-  background-color: #1c508d;
-  border-radius: 50px;
-  padding: 8px 16px;
-  text-align: center;
-  margin: 0 auto 26px auto;
-  overflow: hidden;
-  .mag {
-    background: #e57e6d;
-    padding: 4px;
-    border-radius: 50%;
-    display: inline-block;
-    width: 32px;
-    height: 32px;
-    line-height: 1.2;
-    margin: -3px 0 0 0;
+.home-nav__logo img {
+  display: block;
+  max-height: 44px;
+  width: auto;
+}
+
+.home-nav__search {
+  min-width: 0;
+}
+
+.home-nav__search-form {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  background-color: var(--ds-surface);
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-pill);
+  padding-inline: var(--ds-space-4);
+  padding-block: var(--ds-space-2);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: var(--ds-accent-300);
+    box-shadow: 0 0 0 3px rgba(252, 199, 76, 0.35);
   }
-  h3 {
-    display: inline-block;
-    font-size: 16px;
-    font-family: "cairoR";
+}
+
+.home-nav__search-icon {
+  color: var(--ds-text-muted);
+  flex-shrink: 0;
+}
+
+.home-nav__search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--ds-text);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+
+  &::placeholder {
+    color: var(--ds-text-muted);
   }
+}
+
+.home-nav__search-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--ds-accent-300);
+  color: var(--ds-brand-800);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ds-radius-pill);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: var(--ds-accent-400);
+  }
+}
+
+.home-nav__auth .account {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.home-nav__lang {
+  display: inline-flex;
+  align-items: center;
+}
+
+.m_btn {
+  transition: transform 0.2s ease;
+  &:hover {
+    transform: scale(1.03);
+  }
+}
+
+.lang {
+  color: var(--ds-text-onBrand);
 }
 </style>

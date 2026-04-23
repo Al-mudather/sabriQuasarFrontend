@@ -1,74 +1,80 @@
 <template>
-  <section class="top">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-2">
-          <!--menu & logo -->
-          <div class="minlog" @click="changeMenuState" style="cursor: pointer">
-            <div class="menu">
-              <img src="~assets/img/menu.png" alt="" />
-            </div>
-            <!--logo-->
-            <div v-if="!hideFields" class="logo">
-              <img src="~assets/img/logoB.png" alt="" />
-            </div>
+  <section class="top main-nav">
+    <div class="main-nav__inner" :class="{ 'main-nav__inner--compact': hideFields }">
+      <!-- Menu & logo -->
+      <div class="main-nav__brand">
+        <button
+          type="button"
+          class="main-nav__menu-btn"
+          @click="changeMenuState"
+          :aria-label="$t('القائمة')"
+        >
+          <q-icon name="menu" size="24px" />
+        </button>
+        <div v-if="!hideFields" class="main-nav__logo">
+          <img src="~assets/img/logoB.png" alt="" />
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div v-if="!hideFields" class="main-nav__search">
+        <form class="main-nav__search-form" @submit="showTheSearchingResult">
+          <q-icon
+            name="search"
+            size="18px"
+            class="main-nav__search-icon"
+          />
+          <input
+            v-model="search"
+            type="text"
+            class="main-nav__search-input"
+            :placeholder="$t('ما الذي تبحث عنه؟')"
+          />
+          <button type="submit" class="main-nav__search-submit" :aria-label="$t('بحث')">
+            <q-icon name="search" size="18px" />
+          </button>
+        </form>
+      </div>
+
+      <!-- Auth actions -->
+      <div v-if="!hideFields" class="main-nav__auth">
+        <div class="account" v-if="!token">
+          <div class="sign">
+            <ds-button variant="primary" size="md" @click="GO_TO_SIGN_UP_PAGE">
+              <template #leading><q-icon name="person_add" size="18px" /></template>
+              {{ $t("تسجيل حساب") }}
+            </ds-button>
+          </div>
+          <div class="login">
+            <ds-button variant="secondary" size="md" @click="GO_TO_LOG_IN_PAGE">
+              <template #leading><q-icon name="login" size="18px" /></template>
+              {{ $t("دخول") }}
+            </ds-button>
           </div>
         </div>
-        <!-- search box -->
-        <div v-if="!hideFields" class="col-lg-6">
-          <div class="search">
-            <form @submit="showTheSearchingResult">
-              <input
-                v-model="search"
-                type="text"
-                v-bind:placeholder="$t('ما الذي تبحث عنه؟')"
-              />
-              <button>
-                <img src="~assets/img/search.png" />
-              </button>
-            </form>
-          </div>
+        <div class="account" v-else>
+          <ds-button
+            variant="secondary"
+            size="md"
+            class="logOutBtn"
+            @click="LOG_USER_OUT"
+          >
+            <template #leading><q-icon name="logout" size="18px" /></template>
+            {{ $t("خروج") }}
+          </ds-button>
         </div>
-        <!--login $ sign-->
-        <div v-if="!hideFields" class="col-lg-3">
-          <div class="account" v-if="!token">
-            <div class="sign">
-              <a @click="GO_TO_SIGN_UP_PAGE" style="cursor: pointer">
-                <img src="~assets/img/sign.png" alt="" />
-                <h3 class="q-pr-sm">{{ $t("تسجيل حساب") }}</h3>
-              </a>
-            </div>
-            <div class="login">
-              <a @click="GO_TO_LOG_IN_PAGE" style="cursor: pointer">
-                <img src="~assets/img/login.png" alt="" />
-                <h3 class="q-pr-sm">{{ $t("دخول") }}</h3>
-              </a>
-            </div>
-          </div>
-          <div class="account" v-else>
-            <div
-              @click="LOG_USER_OUT"
-              style="cursor: pointer"
-              class="sign logOutBtn mag"
-            >
-              <div class="mag">
-                <img src="~assets/img/enter.png" alt="" />
-              </div>
-              <h3 class="q-pr-sm">{{ $t("خروج") }}</h3>
-            </div>
-          </div>
-        </div>
-        <!-- Language -->
-        <div class="col-lg-1" :class="{ 'col-lg-10': hideFields }">
-          <div class="lang">
-            <q-toggle
-              v-model="_isEnglish"
-              icon="language"
-              unchecked-icon="clear"
-              class="text-black"
-              label="Eng"
-            />
-          </div>
+      </div>
+
+      <!-- Language -->
+      <div class="main-nav__lang">
+        <div class="lang">
+          <q-toggle
+            v-model="_isEnglish"
+            icon="language"
+            unchecked-icon="clear"
+            class="text-black"
+            label="Eng"
+          />
         </div>
       </div>
     </div>
@@ -134,19 +140,16 @@ export default {
             });
           });
 
-          // TODO: Change the style of the backet when English
+          // Adjust other layouts' cart styling when switching to English
           this.$jquery(".backgroun").css({
             transform: "rotate(180deg)",
           });
-          // TODO: Change the style of the backet when English
           this.$jquery(".shoppgCart > .cart svg").css({
             transform: "translate(-20%, -30%)",
           });
-
           this.$jquery(".shoppgCart > .cart h3").css({
             transform: "translate(35%, -100%)",
           });
-
           this.$jquery(".shoppgCart > .cart > .notifc").css({
             transform: "translate(-5%,-43%)",
           });
@@ -156,25 +159,20 @@ export default {
         }
       } else {
         this.$i18n.locale = "ar";
-        // TODO: Save the language
         this.setIsEnglishAction(value);
 
         try {
           Quasar.lang.set({
             isoName: "ar",
             nativeName: "العربية",
-            // rtl: true,
           });
 
           this.$jquery(".backgroun").css({
             transform: "rotate(360deg)",
           });
-
-          // TODO: Change the style of the backet when English
           this.$jquery(".shoppgCart > .cart svg").css({
             transform: "translate(0%, 0%)",
           });
-
           this.$jquery(".shoppgCart > .cart h3").css({
             transform: "translate(0%, 0%)",
           });
@@ -196,15 +194,11 @@ export default {
     },
 
     LOG_USER_OUT() {
-      //TODO: Delete the marketer code
       this.SET_MY_MARKETING_CODE_ACCOUNT_ACTION("");
-      //TODO: Empty the shopping cart
       this.deleteShoppinCartDataListAction();
-      //todo: Remove all the cookies of the tap
       try {
         this.removeCookie();
       } catch (error) {}
-      //TODO: redirect the user to the home page
       this.logOutAction();
       this.$apollo.provider.defaultClient.resetStore();
       this.$router.push({ name: "Home" });
@@ -212,7 +206,6 @@ export default {
 
     removeCookie() {
       const token = "csrftoken";
-      // var cookies = this.$cookies.get(token);
       this.$cookies.remove(token);
     },
 
@@ -246,7 +239,6 @@ export default {
                   actions: searchResult,
                 })
                 .onOk((action) => {
-                  // TODO: Go to the course details
                   this.$router.push({
                     name: "course-details",
                     params: {
@@ -257,7 +249,6 @@ export default {
                   });
                 })
                 .onDismiss(() => {
-                  // TODO: Clear the search
                   this.search = "";
                 });
             } else {
@@ -317,65 +308,146 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
-@import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variables.scss";
-.logOutBtn {
-  height: 41px;
-  width: 137px;
-  color: #fff;
-  background-color: #1c508d;
-  border-radius: 50px;
-  padding: 8px 16px;
-  text-align: center;
-  margin: 0 auto 26px auto;
-  overflow: hidden;
-  .mag {
-    background: #e57e6d;
-    padding: 4px;
-    border-radius: 50%;
-    display: inline-block;
-    width: 32px;
-    height: 32px;
-    line-height: 1.2;
-    margin: -3px 0 0 0;
+.top.main-nav {
+  background-color: var(--ds-surface);
+  border-block-end: 1px solid var(--ds-border);
+  padding-block: var(--ds-space-3);
+  padding-inline: var(--ds-space-4);
+}
+
+.main-nav__inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--ds-space-4);
+  max-width: 1400px;
+  margin-inline: auto;
+
+  @media (max-width: 900px) {
+    grid-template-columns: auto 1fr auto;
+    .main-nav__search {
+      grid-column: 1 / -1;
+      order: 3;
+    }
   }
-  h3 {
-    display: inline-block;
-    font-size: 16px;
-    font-family: "cairoR";
+
+  &--compact {
+    grid-template-columns: auto 1fr;
   }
 }
-.top {
-  background-color: #fcfcfc;
-  .search {
-    display: block;
-    //maxMobile
-    @media (max-width: 767px) {
-      display: none;
-    }
-    //minSmall
-    @media (min-width: 768px) {
-      display: none;
-    }
-    //minLarg
-    @media (min-width: 1200px) {
-      display: block;
-    }
-    form {
-      input {
-        background-color: #fafafa;
-        color: #7b7b7b;
-      }
-    }
+
+.main-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+}
+
+.main-nav__menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  color: var(--ds-brand-700);
+  border-radius: var(--ds-radius-pill);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--ds-surface-muted);
   }
-  .lang {
-    // background-color: #fff;
-    // border: 2px solid #eceaea;
-    padding: 3px 1px 0 0;
-    h3 {
-      color: #474747;
-    }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--ds-shadow-focus);
+  }
+}
+
+.main-nav__logo img {
+  display: block;
+  max-height: 42px;
+  width: auto;
+}
+
+.main-nav__search {
+  min-width: 0;
+}
+
+.main-nav__search-form {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  background-color: var(--ds-surface-muted);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill);
+  padding-inline: var(--ds-space-4);
+  padding-block: var(--ds-space-2);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: var(--ds-brand-500);
+    box-shadow: var(--ds-shadow-focus);
+  }
+}
+
+.main-nav__search-icon {
+  color: var(--ds-text-muted);
+  flex-shrink: 0;
+}
+
+.main-nav__search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--ds-text);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+
+  &::placeholder {
+    color: var(--ds-text-muted);
+  }
+}
+
+.main-nav__search-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--ds-brand-600);
+  color: var(--ds-text-onBrand);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ds-radius-pill);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: var(--ds-brand-700);
+  }
+}
+
+.main-nav__auth .account {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.main-nav__lang {
+  display: inline-flex;
+  align-items: center;
+}
+
+.lang {
+  padding-block-start: 3px;
+  h3 {
+    color: var(--ds-text);
   }
 }
 </style>

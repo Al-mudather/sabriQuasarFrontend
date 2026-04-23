@@ -7893,3 +7893,73 @@
 2026-04-22 23:51:53 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
 2026-04-22 23:51:53 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/2.community/community-admin/src/components/uploads/UploadTrayRow.tsx
 2026-04-22 23:51:53 | INFO | Skipping non-Python file
+2026-04-23 16:39:29 | INFO | ==================================================
+2026-04-23 16:39:29 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:39:29 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:39:29 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/utils/UserNavBar.vue
+2026-04-23 16:39:29 | INFO | Skipping non-Python file
+2026-04-23 16:40:16 | INFO | ==================================================
+2026-04-23 16:40:16 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:40:16 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:40:16 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/utils/MainNavBar.vue
+2026-04-23 16:40:16 | INFO | Skipping non-Python file
+2026-04-23 16:40:40 | INFO | ==================================================
+2026-04-23 16:40:40 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:40:40 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:40:40 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/utils/MainNavBar.vue
+2026-04-23 16:40:40 | INFO | Skipping non-Python file
+2026-04-23 16:40:45 | INFO | ==================================================
+2026-04-23 16:40:45 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:40:45 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:40:45 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/Home/SwiperHeader.vue
+2026-04-23 16:40:45 | INFO | Skipping non-Python file
+2026-04-23 16:41:10 | INFO | ==================================================
+2026-04-23 16:41:10 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:41:10 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:41:10 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/Home/SliderItem.vue
+2026-04-23 16:41:10 | INFO | Skipping non-Python file
+2026-04-23 16:41:23 | INFO | ==================================================
+2026-04-23 16:41:23 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:41:23 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:41:23 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/Home/PromotionSection.vue
+2026-04-23 16:41:23 | INFO | Skipping non-Python file
+2026-04-23 16:41:25 | INFO | ==================================================
+2026-04-23 16:41:25 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:41:25 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:41:25 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/Home/Nav_bar.vue
+2026-04-23 16:41:25 | INFO | Skipping non-Python file
+2026-04-23 16:41:32 | INFO | ==================================================
+2026-04-23 16:41:32 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:41:32 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:41:32 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/Home/Header.vue
+2026-04-23 16:41:32 | INFO | Skipping non-Python file
+2026-04-23 16:41:48 | INFO | ==================================================
+2026-04-23 16:41:48 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:41:48 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:41:48 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/ShoppingCard/cartCourses.vue
+2026-04-23 16:41:48 | INFO | Skipping non-Python file
+2026-04-23 16:42:05 | INFO | ==================================================
+2026-04-23 16:42:05 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:42:05 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:42:05 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/ShoppingCard/loginCart.vue
+2026-04-23 16:42:05 | INFO | Skipping non-Python file
+2026-04-23 16:42:20 | INFO | ==================================================
+2026-04-23 16:42:20 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:42:20 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:42:20 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/Home/Menu.vue
+2026-04-23 16:42:20 | INFO | Skipping non-Python file
+2026-04-23 16:42:30 | INFO | ==================================================
+2026-04-23 16:42:30 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:42:30 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:42:30 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/ShoppingCard/userInformation.vue
+2026-04-23 16:42:30 | INFO | Skipping non-Python file
+2026-04-23 16:42:51 | INFO | ==================================================
+2026-04-23 16:42:51 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:42:51 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:42:51 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/ShoppingCard/successMessage.vue
+2026-04-23 16:42:51 | INFO | Skipping non-Python file
+2026-04-23 16:43:36 | INFO | ==================================================
+2026-04-23 16:43:36 | INFO | RUFF VALIDATOR POSTTOOLUSE HOOK TRIGGERED
+2026-04-23 16:43:36 | INFO | hook_input keys: ['session_id', 'transcript_path', 'cwd', 'permission_mode', 'agent_id', 'agent_type', 'hook_event_name', 'tool_name', 'tool_input', 'tool_response', 'tool_use_id']
+2026-04-23 16:43:36 | INFO | file_path: /Users/almudatheryahya/Desktop/Projects/6.dr_sabri/sabriQuasarFrontend/src/components/Home/SliderItem.vue
+2026-04-23 16:43:36 | INFO | Skipping non-Python file

@@ -1,30 +1,30 @@
 <template>
-  <section class="navv">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="menu" @click="changeMenuState" style="cursor: pointer">
-            <img src="~assets/img/menu.png" alt="" />
-          </div>
-          <div class="user" v-if="lodash.get(user, '[firstName]')">
-            <img src="~assets/img/man.png" alt="" />
-            <h3>
-              {{ lodash.get(user, "[firstName]") }}
-              {{ lodash.get(user, "[lastName]") }}
-            </h3>
-          </div>
-          <div class="user" v-else-if="lodash.get(user, '[username]')">
-            <img src="~assets/img/man.png" alt="" />
-            <h3>{{ lodash.get(user, "[username]") }}</h3>
-          </div>
-          <div class="user heading" v-else>
-            {{ lodash.get(user, "[email]") }}
-          </div>
-          <!-- <div class="notification" @click="$router.push({ name: 'notification' })">
-                        <span>+{{lodash.get(myNotifications,'[totalCount]')}}</span>
-                        <img src="~assets/img/notif.png" alt="" />
-                    </div> -->
-        </div>
+  <section class="navv user-nav">
+    <div class="user-nav__inner">
+      <button
+        type="button"
+        class="user-nav__menu-btn"
+        @click="changeMenuState"
+        :aria-label="$t('القائمة')"
+      >
+        <q-icon name="menu" size="24px" />
+      </button>
+
+      <div class="user-nav__user" v-if="lodash.get(user, '[firstName]')">
+        <q-icon name="person" size="22px" class="user-nav__user-icon" />
+        <h3 class="user-nav__user-name">
+          {{ lodash.get(user, "[firstName]") }}
+          {{ lodash.get(user, "[lastName]") }}
+        </h3>
+      </div>
+      <div class="user-nav__user" v-else-if="lodash.get(user, '[username]')">
+        <q-icon name="person" size="22px" class="user-nav__user-icon" />
+        <h3 class="user-nav__user-name">
+          {{ lodash.get(user, "[username]") }}
+        </h3>
+      </div>
+      <div class="user-nav__user heading" v-else>
+        {{ lodash.get(user, "[email]") }}
       </div>
     </div>
   </section>
@@ -32,8 +32,6 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
-// import { NotificationCreatedSubscription } from 'src/queries/notification_management/subscription/NotificationCreatedSubscription'
-// import { GetAllMyNotificationsCount } from 'src/queries/notification_management/query/GetAllMyNotificationsCount'
 
 export default {
   name: "CoursesNavBar",
@@ -44,48 +42,6 @@ export default {
     };
   },
 
-  // apollo: {
-
-  //   myNotifications: {
-  //     query: GetAllMyNotificationsCount,
-  //     skip () {
-  //       return !this.token
-  //     }
-  //   },
-
-  //   $subscribe: {
-
-  //     notificationCreated: {
-
-  //       query: NotificationCreatedSubscription,
-
-  //       result({data}) {
-  //         if (this.$_.get(this.myNotifications, '[edges]')) {
-  //           this.myNotifications.edges.unshift({
-  //             node: data.notificationCreated.notification
-  //           })
-  //           this.myNotifications.totalCount++
-  //         } else {
-  //           this.myNotifications = {
-  //             totalCount: 1,
-  //             edges: {
-  //               node: data.notificationCreated.notification
-  //             }
-  //           }
-  //         }
-  //       },
-
-  //     },
-
-  //   },
-
-  // },
-
-  // watch: {
-  //   myNotifications (value) {
-  //     this.$root.$emit('NotificationData', value)
-  //   }
-  // },
   computed: {
     ...mapState("authentication", ["user", "token"]),
   },
@@ -99,14 +55,67 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-@import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variables.scss";
-@import "src/css/layout/_navbar.scss";
+
+<style lang="scss" scoped>
+.user-nav {
+  background-color: var(--ds-surface);
+  border-block-end: 1px solid var(--ds-border);
+  padding-block: var(--ds-space-3);
+  padding-inline: var(--ds-space-4);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-4);
+    max-width: 1400px;
+    margin-inline: auto;
+  }
+
+  &__menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: transparent;
+    color: var(--ds-brand-700);
+    border-radius: var(--ds-radius-pill);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--ds-surface-muted);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--ds-shadow-focus);
+    }
+  }
+
+  &__user {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+  }
+
+  &__user-icon {
+    color: var(--ds-brand-600);
+  }
+
+  &__user-name {
+    margin: 0;
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-md);
+    color: var(--ds-text);
+  }
+}
 
 .heading {
-  font-size: 29px;
-  font-family: "cairoR";
-  color: #7b7b7b;
+  font-size: var(--ds-text-xl);
+  font-family: var(--ds-font-body);
+  color: var(--ds-text-muted);
 }
 </style>
