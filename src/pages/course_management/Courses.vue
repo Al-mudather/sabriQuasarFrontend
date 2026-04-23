@@ -1,1067 +1,502 @@
 <template>
-  <div>
-    <section class="cources">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="title">
-              <img src="~assets/img/tit.png" alt="" />
-              <h3>{{ $t("الـــدورات") }}</h3>
-            </div>
-          </div>
-          <!-- strat Fltter-->
-          <div class="col-lg-12 col-md-6 col-xs-12">
-            <div class="search">
-              <form @submit="GetAllCoursesByTitle($event)">
-                <q-input
-                  v-model="search"
-                  borderless
-                  @keydown.enter.prevent="GetAllCoursesByTitle($event)"
-                  type="text"
-                  :placeholder="$t('ما الذي تبحث عنة في التخصص المختار ادناه؟')"
-                >
-                </q-input>
-                <button style="left: 10%" type="submit">
-                  <img src="~assets/img/search.png" />
-                </button>
-              </form>
-            </div>
-          </div>
-          <div class="col-lg-12 col-md-6 col-xs-12">
-            <div class="flbut">
-              <div class="but">
-                <img
-                  @click="GetAllCoursesByOrderingDecendinOrAcending('DEC')"
-                  class="but-filter"
-                  src="~assets/img/sortD.png"
-                  alt=""
-                />
-                <img
-                  @click="GetAllCoursesByOrderingDecendinOrAcending('ACE')"
-                  class="but-filter"
-                  src="~assets/img/sortU.png"
-                  alt=""
-                />
-              </div>
-              <!--dropdown-->
-              <div class="dropdow">
-                <button class="open active">
-                  <img src="~assets/img/fltter.png" alt="" />{{ $t("فلتر") }}
-                </button>
-                <button class="end">
-                  <img src="~assets/img/end.png" alt="" />{{ $t("إخفـاء") }}
-                </button>
-                <div class="listt">
-                  <img class="arrow" src="~assets/img/arrow.png" alt="" />
-                  <h3>
-                    <img class="tih" src="~assets/img/poii.png" alt="" />
-                    الدورات
-                  </h3>
-                  <ul @click="ChangeFilter">
-                    <li @click="GetAllCoursesWithoutFilter" class="active">
-                      {{ $t("الكل") }}
-                    </li>
-                    <li @click="GetAllFreeCourses">{{ $t("مجاناً") }}</li>
-                    <li @click="GetAllPayidCourses">{{ $t("مدفوعه") }}</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
+  <main class="courses-page">
+    <header class="courses-page__head">
+      <h1 class="courses-page__title">
+        <img src="~assets/img/tit.png" alt="" aria-hidden="true" />
+        <span>{{ $t('الـــدورات') }}</span>
+      </h1>
+
+      <form class="courses-page__search" @submit.prevent="GetAllCoursesByTitle">
+        <svg viewBox="0 0 24 24" class="courses-page__search-icon" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input
+          v-model="search"
+          type="search"
+          :placeholder="$t('ما الذي تبحث عنة في التخصص المختار ادناه؟')"
+          @keydown.enter.prevent="GetAllCoursesByTitle"
+        />
+      </form>
+
+      <div class="courses-page__filters">
+        <button
+          v-for="f in filters"
+          :key="f.id"
+          type="button"
+          class="chip"
+          :class="{ 'chip--active': activePriceFilter === f.id }"
+          @click="applyPriceFilter(f.id)"
+        >{{ f.label }}</button>
+
+        <div class="courses-page__sorters">
+          <button
+            type="button"
+            class="sort-btn"
+            :class="{ 'sort-btn--active': activeOrder === 'ACE' }"
+            :aria-label="$t('ترتيب تصاعدي')"
+            @click="GetAllCoursesByOrderingDecendinOrAcending('ACE')"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 14l5-5 5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="sort-btn"
+            :class="{ 'sort-btn--active': activeOrder === 'DEC' }"
+            :aria-label="$t('ترتيب تنازلي')"
+            @click="GetAllCoursesByOrderingDecendinOrAcending('DEC')"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
+      </div>
+    </header>
+
+    <section class="courses-page__tabs">
+      <div ref="cat" @click="changeTab" class="swiper-container">
+        <swiper
+          ref="mySwiper"
+          class="courses-page__tab-list"
+          :space-between="1"
+          :options="swiperOptions"
+        >
+          <div v-if="$_.isEmpty(allCourseSpecialities.edges)" class="courses-page__tab-skeletons">
+            <ds-skeleton v-for="i in 6" :key="i" shape="pill" width="7rem" />
+          </div>
+          <swiper-slide
+            v-else
+            class="nav-item"
+            v-for="spec in allCourseSpecialities.edges"
+            :key="spec.node.id"
+          >
+            <a
+              :data-pk="spec.node.pk"
+              class="nav-link"
+              role="tab"
+              @click="changeCourseData(spec.node.pk)"
+            >
+              <img src="~assets/img/brain.png" alt="" aria-hidden="true" />
+              <span>{{ spec.node.speciality }}</span>
+            </a>
+          </swiper-slide>
+        </swiper>
       </div>
     </section>
 
-    <section class="tabCourc">
-      <div class="container">
-        <div class="row">
-          <div ref="col" class="col-lg-12">
-            <div ref="cat" @click="changeTab" class="swiper-container q-mt-xl">
-              <swiper
-                ref="mySwiper"
-                class="nav nav-tabs"
-                :space-between="1"
-                :options="swiperOptions"
-              >
-                <div
-                  class="row"
-                  v-if="lodash.isEmpty(allCourseSpecialities.edges)"
-                >
-                  <skeletonChip
-                    v-for="(chip, index) in 11"
-                    :key="index"
-                    class="col"
-                  />
-                </div>
-                <swiper-slide
-                  v-else
-                  class="nav-item q-pr-sm"
-                  v-for="spec in allCourseSpecialities.edges"
-                  :key="spec.node.id"
-                >
-                  <a
-                    style="outline: 0"
-                    :data-pk="spec.node.pk"
-                    @click="changeCourseData(spec.node.pk)"
-                    class="nav-link"
-                    data-toggle="tab"
-                    role="tab"
-                  >
-                    <img src="~assets/img/brain.png" alt="" />{{
-                      spec.node.speciality
-                    }}
-                  </a>
-                </swiper-slide>
-              </swiper>
+    <section class="courses-page__body">
+      <ApolloQuery
+        :query="GetAllCoursesInSpeciality"
+        :variables="{
+          specialityId: activeSpecialityID,
+          first: 8,
+          ...filter,
+          ...searchFilter,
+          ...orderingFilter,
+          isDraft: isDraft
+        }"
+        :skip="!activeSpecialityID"
+      >
+        <template v-slot="{ result: { loading, data }, query }">
+          <div v-if="loading" class="courses-page__grid">
+            <ds-card v-for="i in 8" :key="i" class="courses-page__card-skeleton">
+              <template #media>
+                <ds-skeleton shape="rect" height="100%" radius="0" />
+              </template>
+              <ds-skeleton shape="line" width="85%" />
+              <ds-skeleton shape="line" width="55%" />
+              <template #footer>
+                <ds-skeleton shape="pill" width="100%" />
+              </template>
+            </ds-card>
+          </div>
+
+          <ds-empty-state
+            v-else-if="$_.get(data, '[allCoursesInSpeciality][edgeCount]', 0) <= 0"
+            :title="$t('لا توجد نتائج للبحث')"
+            :description="$t('حاول الكتابة بشكل مختلف')"
+            size="md"
+          >
+            <template #illustration>
+              <img src="~assets/img/search(1).png" alt="" />
+            </template>
+          </ds-empty-state>
+
+          <div v-else>
+            <div class="courses-page__grid">
+              <course-card
+                v-for="course in $_.get(data, '[allCoursesInSpeciality][edges]', [])"
+                :key="course.node.id"
+                :course="course.node"
+                :name="course.node.title"
+                instructor="مركز دكتور صبري ابو قرون"
+                :price="course.node.courseFee"
+                unit="SDG"
+              />
             </div>
 
-            <!-- start rate -->
-            <div class="rate">
-              <div class="container-fluid">
-                <div
-                  class="cn fadeIn"
-                  id="home"
-                  role="tabpanel"
-                  aria-labelledby="home-tab"
-                >
-                  <!-- <div class="row justify-center" v-if="!lodash.isEmpty(courses.edges)"> -->
-                  <ApolloQuery
-                    :query="GetAllCoursesInSpeciality"
-                    :variables="{
-                      specialityId: activeSpecialityID,
-                      first: 8,
-                      ...filter,
-                      ...searchFilter,
-                      ...orderingFilter,
-                      isDraft: isDraft,
-                    }"
-                    :skip="!activeSpecialityID"
-                  >
-                    <template v-slot="{ result: { loading, data }, query }">
-                      <!-- Loading -->
-                      <div
-                        v-if="loading"
-                        class="loading apollo row justify-center"
-                      >
-                        <q-card
-                          class="col-lg-4 col-md-4 col-sm-12 col-xs-12"
-                          v-for="i in 12"
-                          :key="i"
-                          flat
-                          style="max-width: 300px"
-                        >
-                          <q-skeleton height="150px" square />
-
-                          <q-card-section>
-                            <q-skeleton type="text" class="text-subtitle1" />
-                            <q-skeleton
-                              type="text"
-                              width="50%"
-                              class="text-subtitle1"
-                            />
-                            <q-skeleton type="text" class="text-caption" />
-                          </q-card-section>
-                        </q-card>
-                      </div>
-
-                      <!-- <div v-else-if="data.allCoursesInSpeciality.edgeCount <= 0" class="no-result apollo"> -->
-                      <div
-                        v-else-if="
-                          $_.get(data, '[allCoursesInSpeciality][edgeCount]') <=
-                          0
-                        "
-                        class="no-result apollo"
-                      >
-                        <div class="row justify-center">
-                          <transition
-                            appear
-                            enter-active-class="animated fadeIn"
-                            leave-active-class="animated fadeOut"
-                          >
-                            <div
-                              class="col col-lg-3 col-md-6 col-sm-6 col-xs-12 notResult"
-                            >
-                              <img src="~assets/img/search(1).png" alt="" />
-                              <p>
-                                {{ $t("لا توجد نتائج للبحث") }}
-                                <br />
-                                {{ $t("حاول الكتابة بشكل مختلف") }}
-                              </p>
-                            </div>
-                          </transition>
-                        </div>
-                      </div>
-                      <!-- Result -->
-                      <div v-else-if="data" class="result apollo">
-                        <div class="row justify-center">
-                          <!-- data.allCoursesInSpeciality.edges -->
-                          <div
-                            v-for="course in $_.get(
-                              data,
-                              '[allCoursesInSpeciality][edges]'
-                            )"
-                            :key="course.node.id"
-                            class="col-lg-3 col-md-6 col-sm-6 col-xs-12"
-                          >
-                            <transition
-                              appear
-                              enter-active-class="animated fadeIn"
-                              leave-active-class="animated fadeOut"
-                            >
-                              <course-card
-                                :course="course.node"
-                                :name="course.node.title"
-                                instructor="مركز دكتور صبري ابو قرون"
-                                :price="course.node.courseFee"
-                                unit="SDG"
-                              />
-                            </transition>
-                          </div>
-                        </div>
-
-                        <div
-                          class="butDown text-center q-mt-md"
-                          v-if="
-                            data.allCoursesInSpeciality.pageInfo.hasNextPage
-                          "
-                        >
-                          <button @click="loadMoreData(query, data)">
-                            {{ $t("عرض المزيد")
-                            }}<img
-                              class="q-mr-sm"
-                              src="~assets/img/moree.png"
-                              alt=""
-                            />
-                          </button>
-                        </div>
-                        <!-- {{ data }} -->
-                      </div>
-                    </template>
-                  </ApolloQuery>
-                </div>
-              </div>
+            <div v-if="data.allCoursesInSpeciality.pageInfo.hasNextPage" class="courses-page__load-more">
+              <ds-button variant="secondary" @click="loadMoreData(query, data)">
+                {{ $t('عرض المزيد') }}
+              </ds-button>
             </div>
           </div>
-        </div>
-      </div>
+        </template>
+      </ApolloQuery>
     </section>
-  </div>
+  </main>
 </template>
 
 <script>
-import courseCard from "components/utils/courseCard.vue";
-import skeletonChip from "components/skeleton/skeletonChip";
-import { GetAllCoursesInSpeciality } from "src/queries/course_management/query/GetAllCoursesInSpeciality.js";
-
-import { GetSpecialities } from "src/queries/course_management/query/GetAllSpeciallites";
-import { mapActions } from "vuex";
-import { Swiper, SwiperSlide } from "vue-awesome-swiper";
-import "swiper/swiper-bundle.css";
-import "swiper/swiper.min.css";
+import courseCard from 'components/utils/courseCard.vue'
+import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality.js'
+import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
+import { mapActions } from 'vuex'
+import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
+import 'swiper/swiper-bundle.css'
+import 'swiper/swiper.min.css'
 
 export default {
-  name: "Courses",
-  data() {
+  name: 'Courses',
+  components: { courseCard, Swiper, SwiperSlide },
+
+  data () {
     return {
-      GetAllCoursesInSpeciality: GetAllCoursesInSpeciality,
+      GetAllCoursesInSpeciality,
       counter: 0,
-      totalCount: 0,
-      edgeCount: 0,
-      lodash: this.$_,
       isDraft: false,
-      search: "",
-      tab: "main",
-      openFilter: true,
+      search: '',
       activeSpecialityID: null,
-      allCourseSpecialities: "",
+      activePriceFilter: 'all',
+      activeOrder: null,
+      allCourseSpecialities: '',
       filter: {},
       searchFilter: {},
       orderingFilter: {},
       swiperOptions: {
-        effect: "coverflow",
+        effect: 'coverflow',
         grabCursor: true,
         centeredSlides: true,
-        slidesPerView: "auto",
-        coverflowEffect: {
-          rotate: 500,
-          stretch: 0,
-          depth: 100,
-          modifier: 1,
-          slideShadows: false,
-        },
-      },
-    };
-  },
-  components: {
-    courseCard,
-    skeletonChip,
-    Swiper,
-    SwiperSlide,
-  },
-
-  computed: {},
-
-  apollo: {
-    allCourseSpecialities: {
-      query() {
-        return GetSpecialities;
-      },
-      variables() {
-        return {
-          courseNumber: 20,
-        };
-      },
-    },
-  },
-
-  watch: {
-    "$route.params": {
-      handler: function (params) {
-        // TODO: save the searching data
-        this.search = params.search;
-        // TODO: Make the searching
-        this.GetAllCoursesByTitle();
-      },
-      deep: true,
-      immediate: true,
-    },
-
-    search(val) {
-      if (this.$_.isEmpty(val)) {
-        this.GetAllCoursesByTitle();
+        slidesPerView: 'auto',
+        coverflowEffect: { rotate: 500, stretch: 0, depth: 100, modifier: 1, slideShadows: false }
       }
-    },
-  },
-
-  computed: {
-    swiper() {
-      return this.$refs.mySwiper.$swiper;
-    },
-  },
-
-  mounted() {
-    //TODO: Save the active link so when render it will be make active again
-    this.setActiveNavAction("COURSES");
-    // TODO: Adjest the swiper
-    this.swiper.slideTo(3, 1000, false);
-    // TODO: Disable the navebar
-    this.setNavbarSearchAction(false);
-
-    this.TRANSITION_THE_FILTER();
-  },
-
-  destroyed() {
-    // TODO: Enable the navebar
-    this.setNavbarSearchAction(true);
-  },
-
-  updated() {
-    this.TRANSITION_THE_FILTER();
-    if (this.counter === 0) {
-      // TODO: When the page is loadded, select the first category with it's
-      // data courses to be viewd
-      const targetedAncer =
-        this.$refs.cat.firstChild.firstChild.firstChild.firstChild;
-      // TODO: make the first category active
-      targetedAncer.classList.add("active");
-      const specialityID = JSON.parse(targetedAncer.dataset.pk);
-      this.changeCourseData(specialityID);
-      this.activeSpecialityID = specialityID;
-      // this.courses = data
-      this.counter += 10;
     }
   },
 
+  computed: {
+    swiper () { return this.$refs.mySwiper.$swiper },
+
+    filters () {
+      return [
+        { id: 'all',  label: this.$t('الكل') },
+        { id: 'free', label: this.$t('مجاناً') },
+        { id: 'paid', label: this.$t('مدفوعه') }
+      ]
+    }
+  },
+
+  apollo: {
+    allCourseSpecialities: {
+      query () { return GetSpecialities },
+      variables () { return { courseNumber: 20 } }
+    }
+  },
+
+  watch: {
+    '$route.params': {
+      immediate: true,
+      deep: true,
+      handler (params) {
+        this.search = params.search || ''
+        this.GetAllCoursesByTitle()
+      }
+    },
+    search (val) { if (this.$_.isEmpty(val)) this.GetAllCoursesByTitle() }
+  },
+
+  mounted () {
+    this.setActiveNavAction('COURSES')
+    this.swiper.slideTo(3, 1000, false)
+    this.setNavbarSearchAction(false)
+  },
+
+  destroyed () { this.setNavbarSearchAction(true) },
+
+  updated () {
+    if (this.counter !== 0 || !this.$refs.cat) return
+    const l1 = this.$refs.cat.firstChild
+    const l2 = l1 && l1.firstChild
+    const l3 = l2 && l2.firstChild
+    const firstTab = l3 && l3.firstChild
+    if (!firstTab) return
+    firstTab.classList.add('active')
+    const specialityID = JSON.parse(firstTab.dataset.pk)
+    this.changeCourseData(specialityID)
+    this.activeSpecialityID = specialityID
+    this.counter += 10
+  },
+
   methods: {
-    ...mapActions("authentication", ["setNavbarSearchAction"]),
-    ...mapActions("settings", ["setActiveNavAction"]),
+    ...mapActions('authentication', ['setNavbarSearchAction']),
+    ...mapActions('settings', ['setActiveNavAction']),
 
-    TRANSITION_THE_FILTER() {
-      // Drowp Down js
-      var butFilter = document.querySelector(".dropdow .open"),
-        butClose = document.querySelector(".dropdow .end"),
-        control = document.querySelector(".listt");
-      butFilter.addEventListener("click", function () {
-        butFilter.style.opacity = "0";
-        setTimeout(function () {
-          butFilter.style.display = "none";
-          butClose.style.display = "block";
-          setTimeout(function () {
-            butClose.style.opacity = "1";
-          }, 50);
-        }, 50);
-        control.style.display = "block";
-        setTimeout(function () {
-          control.style.opacity = "1";
-          control.style.transform = "translateY(0)";
-          control.style.transition = "all 0.2s ease-in-out";
-        }, 50);
-      });
-
-      // close
-      butClose.addEventListener("click", function () {
-        control.style.opacity = "0";
-        control.style.transform = "translateY(45px)";
-        control.style.transition = "all 0.3s ease-in-out";
-        setTimeout(function () {
-          control.style.display = "none";
-        }, 100);
-        setTimeout(function () {
-          butClose.style.display = "none";
-          butFilter.style.display = "block";
-          setTimeout(function () {
-            butFilter.style.opacity = "1";
-          }, 50);
-        }, 50);
-      });
+    GetAllCoursesByOrderingDecendinOrAcending (type) {
+      this.activeOrder = type
+      this.orderingFilter = { orderBy: [type === 'DEC' ? '-title' : 'title'] }
+      this.changeCourseData(this.activeSpecialityID)
     },
 
-    // TODO: Get All courses by Title from search
-    GetAllCoursesByOrderingDecendinOrAcending(type) {
-      if (type === "DEC") {
-        this.orderingFilter = { orderBy: ["-title"] };
-        this.changeCourseData(this.activeSpecialityID);
-      } else {
-        this.orderingFilter = { orderBy: ["title"] };
-        this.changeCourseData(this.activeSpecialityID);
-      }
-    },
-    // TODO: Get All courses by Title from search
-    GetAllCoursesByTitle(e) {
-      try {
-        e.preventDefault();
-      } catch (error) {}
-      this.searchFilter = { title_Icontains: this.search };
-      this.changeCourseData(this.activeSpecialityID);
-      // TODO: Remove the search filter
-    },
-    // TODO: Get Only the free courses
-    GetAllFreeCourses() {
-      this.filter = { isPaid: false };
-      this.changeCourseData(this.activeSpecialityID);
-    },
-    // TODO: Get only the payeed courses
-    GetAllPayidCourses() {
-      this.filter = { isPaid: true };
-      this.changeCourseData(this.activeSpecialityID);
-    },
-    // TODO: Get all courses without filter
-    GetAllCoursesWithoutFilter() {
-      this.filter = {};
-      this.changeCourseData(this.activeSpecialityID);
-    },
-    // TODO: Change the filter activation class
-    ChangeFilter(e) {
-      const ulParent = e.target.parentElement;
-      for (const child of ulParent.childNodes) {
-        child.classList.remove("active");
-      }
-      e.target.classList.add("active");
-    },
-    next() {
-      this.$refs.flickity.next();
+    GetAllCoursesByTitle () {
+      this.searchFilter = { title_Icontains: this.search }
+      this.changeCourseData(this.activeSpecialityID)
     },
 
-    previous() {
-      this.$refs.flickity.previous();
-    },
-    // TODO: Get the related courses data when the selected speciality become active
-    async changeCourseData(specialityID) {
-      this.activeSpecialityID = specialityID;
+    applyPriceFilter (id) {
+      this.activePriceFilter = id
+      if (id === 'free') this.filter = { isPaid: false }
+      else if (id === 'paid') this.filter = { isPaid: true }
+      else this.filter = {}
+      this.changeCourseData(this.activeSpecialityID)
     },
 
-    async loadMoreData(query, data) {
+    async changeCourseData (specialityID) {
+      this.activeSpecialityID = specialityID
+    },
+
+    async loadMoreData (query, data) {
       await query.fetchMore({
         variables: {
           specialityId: this.activeSpecialityID,
           cursor: data.allCoursesInSpeciality.pageInfo.endCursor,
-          isDraft: this.isDraft,
+          isDraft: this.isDraft
         },
         updateQuery: (previousResult, { fetchMoreResult }) => {
-          const newEdges = fetchMoreResult.allCoursesInSpeciality.edges;
-          const pageInfo = fetchMoreResult.allCoursesInSpeciality.pageInfo;
-
+          const newEdges = fetchMoreResult.allCoursesInSpeciality.edges
+          const pageInfo = fetchMoreResult.allCoursesInSpeciality.pageInfo
           if (newEdges.length) {
-            data = {
-              __typename: previousResult.allCoursesInSpeciality.__typename,
-              edges: [
-                ...previousResult.allCoursesInSpeciality.edges,
-                ...newEdges,
-              ],
-              pageInfo,
-            };
-
-            return { allCoursesInSpeciality: data };
+            return {
+              allCoursesInSpeciality: {
+                __typename: previousResult.allCoursesInSpeciality.__typename,
+                edges: [...previousResult.allCoursesInSpeciality.edges, ...newEdges],
+                pageInfo
+              }
+            }
           }
-          return previousResult;
-        },
-      });
+          return previousResult
+        }
+      })
     },
 
-    // TODO: Change the speciality when it been clicked
-    changeTab(e) {
-      e.preventDefault();
-      // TODO: Get the cliked li parent for the a child
-      const clickedLiParent = e.target.parentElement;
-      // TODO: Get the parent ul element
-      const ulParent = clickedLiParent.parentElement;
-      if (clickedLiParent.classList.contains("nav-item")) {
-        // TODO: Remove the class active from all the li elements
-        for (const liParent of ulParent.childNodes) {
-          liParent.firstChild.classList.remove("active");
-        }
-        // TODO: Add the class active to only the cliked item
-        clickedLiParent.firstChild.classList.add("active");
+    changeTab (e) {
+      e.preventDefault()
+      const clickedLiParent = e.target.closest('.nav-item')
+      if (!clickedLiParent) return
+      const ulParent = clickedLiParent.parentElement
+      for (const liParent of ulParent.childNodes) {
+        if (liParent.firstChild) liParent.firstChild.classList.remove('active')
       }
-    },
-  },
-};
+      clickedLiParent.firstChild.classList.add('active')
+    }
+  }
+}
 </script>
-<style lang="scss">
-@import "src/assets/css/sass/helpers/_variables.scss";
-@import "src/assets/css/sass/helpers/_mixins.scss";
-@import "src/assets/css/account.scss";
 
-.swiper-slide {
-  width: max-content !important;
-}
+<style lang="scss" scoped>
+.courses-page {
+  max-inline-size: 1200px;
+  margin-inline: auto;
+  padding: var(--ds-space-6) var(--ds-space-3) var(--ds-space-16);
 
-.q-field__before > i {
-  transform: translateX(1rem);
-}
+  @media (min-width: 600px) {
+    padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
+  }
 
-/*--- START cources ---*/
-.cources {
-  padding: 50px 0;
-  margin: 25px 0 0 0;
-  .title {
-    margin: 0 0 55px 0;
-    img {
-      display: inline-block;
-      margin: -9px 0 0 0;
-    }
-    h3 {
-      color: $textColor;
-      font-size: 22px;
-      font-family: "cairoB";
-      line-height: 1.7;
-      margin: 0 11px 0 0;
-      display: inline-block;
+  &__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-4);
+    margin-block-end: var(--ds-space-6);
+  }
+
+  &__title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-3xl);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-text);
+    margin: 0;
+    img { block-size: 1.75rem; inline-size: auto; }
+  }
+
+  &__search {
+    position: relative;
+    max-inline-size: 560px;
+
+    input {
+      inline-size: 100%;
+      padding: 0.85rem var(--ds-space-3) 0.85rem calc(var(--ds-space-10) + 0.5rem);
+      background: var(--ds-surface);
+      border: 1px solid var(--ds-border);
+      border-radius: var(--ds-radius-pill);
+      font-family: var(--ds-font-body);
+      font-size: var(--ds-text-md);
+      color: var(--ds-text);
+      outline: 0;
+      transition:
+        border-color var(--ds-duration-fast) var(--ds-ease-out),
+        box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+
+      &:focus {
+        border-color: var(--ds-brand-600);
+        box-shadow: var(--ds-shadow-focus);
+      }
+
+      &::placeholder { color: var(--ds-text-muted); }
     }
   }
-  .flbut {
-    width: 30%;
-    margin: -42px 0 0 0;
-    //maxMobile
-    @media (max-width: 767px) {
-      width: 100%;
-      text-align: center;
-    }
-    //maxSmall
-    @media (max-width: 991px) {
-      width: 100%;
-      text-align: center;
-      margin: -2px 0 0 0;
-    }
-    .but {
-      display: inline-block;
-      overflow: hidden;
-      position: relative;
-      top: 9px;
-      height: 2rem;
 
-      &-filter {
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        &:hover {
-          transform: scale(1.1);
-        }
-      }
-
-      img {
-        display: inline-block;
-        margin: 0 0 0 22px;
-      }
-    }
-    .dropdow {
-      display: inline-block;
-      position: relative;
-      z-index: 1;
-      button {
-        outline: 0;
-        width: 117px;
-        height: 49px;
-        background-color: #f8f8f8;
-        img {
-          margin-left: 16px;
-        }
-        &.active {
-          background-color: $yalloColor;
-        }
-      }
-      .end {
-        display: none;
-        opacity: 0;
-      }
-      .listt {
-        opacity: 0;
-        transform: translateY(45px);
-        display: none;
-        transition: all 0.3s ease-in-out;
-        position: absolute;
-        background-color: #7b86fa;
-        padding: 10px;
-        border-radius: 13px;
-        margin: 20px 0 0 0;
-        width: 218px;
-        .arrow {
-          position: absolute;
-          top: -11px;
-          left: 112px;
-        }
-        h3 {
-          font-size: 14px;
-          color: #fff;
-          font-family: "cairoR";
-          margin: 6px 0 14px 0;
-          .tih {
-            display: inline-block;
-            position: relative;
-            top: -1px;
-          }
-        }
-        ul {
-          list-style: none;
-          margin: 0;
-          li {
-            display: inline-block;
-            cursor: pointer;
-            background-color: #8993fb;
-            color: #fff;
-            padding: 3px 12px;
-            height: 30px;
-            text-align: center;
-            font-size: 14px;
-            border-radius: 12px;
-            &.active {
-              background-color: #fff;
-              color: #bbbbbb;
-            }
-          }
-        }
-      }
-    }
+  &__search-icon {
+    position: absolute;
+    inset-inline-start: var(--ds-space-3);
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    color: var(--ds-text-muted);
+    pointer-events: none;
   }
-  .search {
-    padding: 0 18% 0 0;
-    width: 74%;
-    margin: -9px auto;
-    //maxMobile
-    @media (max-width: 767px) {
-      width: 100%;
-      margin-bottom: 50px;
-      padding: 0;
-    }
-    //maxSmall
-    @media (max-width: 991px) {
-      width: 100%;
-      padding: 0;
-    }
-    form {
-      position: relative;
-      text-align: center;
-      input {
-        width: 100%;
-        height: 54px;
-        padding: 15px;
-        font-size: 17px;
-        font-family: "cairoR";
-        border-radius: 50px;
-        border: 0;
-        background-color: #fff;
-        color: #7b7b7b;
-        outline: 0;
-        transition: all ease-in-out 0.3s;
 
-        &:focus {
-          border-bottom: 3px solid #fcc74c;
-        }
+  &__filters {
+    display: flex;
+    gap: var(--ds-space-2);
+    flex-wrap: wrap;
+    align-items: center;
+  }
 
-        @include prefixer(
-          box-shadow,
-          2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14),
-          webkit moz o ms
-        );
-      }
-      input::placeholder {
-        color: #bbbbbb !important;
-        font-size: 14px;
-        font-family: "cairoR";
-      }
+  &__sorters {
+    margin-inline-start: auto;
+    display: flex;
+    gap: var(--ds-space-1);
+  }
 
-      button {
-        width: 47px;
-        height: 40px;
-        background-color: #f8f8f8;
-        position: absolute;
-        left: 8px;
-        top: 5px;
-        font-size: 16px;
-        outline: 0;
-        img {
-          margin-left: 0px;
-        }
-      }
-    }
+  &__tabs {
+    margin-block-end: var(--ds-space-6);
+  }
+
+  &__tab-list {
+    padding-block: var(--ds-space-2);
+  }
+
+  &__tab-skeletons {
+    display: flex;
+    gap: var(--ds-space-2);
+  }
+
+  &__body {
+    min-block-size: 30rem;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--ds-space-5);
+    align-items: stretch;
+  }
+
+  &__card-skeleton { height: 100%; }
+
+  &__load-more {
+    display: flex;
+    justify-content: center;
+    margin-block-start: var(--ds-space-8);
   }
 }
 
-/*--- Start Training ---*/
-.tabCourc {
-  padding: 20px 0;
-  margin-top: 0;
-  .nav-tabs {
-    margin: 0 0 59px 0;
-    padding: 15px;
-    border: 0;
-    background-color: #fafafa;
-    border-radius: 50px;
-    .nav-item {
-      //maxMobile
-      @media (max-width: 767px) {
-        margin: 0 9px 10px 0;
-      }
-      .nav-link {
-        //maxMobile
-        @media (max-width: 767px) {
-          width: 100%;
-        }
-        img {
-          margin: -3px -3px 0 2px;
-        }
-        font-size: 18px;
-        font-family: "cairoR";
-        width: 100%;
-        height: 44px;
-        margin-left: 10px;
-        border-radius: 50px;
-        color: $textColor;
-        border: 1px solid #f6f6f6;
-        padding: 7px 10px 0 0;
-        background-color: #fff;
-        @include prefixer(
-          box-shadow,
-          2px 9px 18.79px 2.21px rgba(147, 147, 147, 0.14),
-          webkit moz o ms
-        );
-        &.active {
-          background-color: #2d77d8;
-          color: #fff;
-        }
-      }
-    }
-  }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  color: var(--ds-text);
+  border-radius: var(--ds-radius-pill);
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+  font-family: var(--ds-font-heading);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-out),
+    color var(--ds-duration-fast) var(--ds-ease-out),
+    border-color var(--ds-duration-fast) var(--ds-ease-out);
 
-  .rate {
-    margin-top: 30px;
+  &:hover { background: var(--ds-surface-muted); }
+  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
 
-    .cn {
-      padding: 0 0 0 0;
-      position: relative;
-      @media (min-width: 320px) and (max-width: 700px) {
-        right: 0;
-      }
-
-      .card {
-        position: relative;
-        border: 0;
-        box-shadow: 3px 7px 15px #eceaea;
-        border-radius: 37px;
-        background: #e3edfa;
-        width: 100%;
-        padding: 10px;
-        height: 441px;
-        .pattern {
-          position: absolute;
-          top: 0;
-          width: 100%;
-          left: 0;
-          right: 0;
-          height: 100%;
-        }
-        .card-img-top {
-          position: relative;
-          padding: 14px;
-          height: 294px;
-          width: 100%;
-          overflow: hidden;
-          border-radius: 30px;
-          .plays {
-            position: absolute;
-            width: auto;
-            top: 45%;
-            left: 0;
-            right: 44%;
-            height: unset;
-            z-index: 5;
-          }
-          img {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            border-width: 0;
-            left: 0;
-            right: 0;
-            top: 0;
-          }
-        }
-        .card-body {
-          position: relative;
-          padding: unset;
-          border-radius: 29px;
-          background: #f78a78;
-          margin: -37px auto 2px auto;
-          width: 100%;
-          top: -6px;
-          height: 164px;
-          .card-title {
-            margin-bottom: 7px;
-            color: #fff;
-            font-size: 17px;
-            font-family: cairoR;
-            line-height: 1.8;
-            background-color: #fc9685;
-            padding: 8px;
-            border-top-left-radius: 26px;
-            border-top-right-radius: 26px;
-            height: 72px;
-            overflow: hidden;
-            -webkit-line-clamp: 2;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-          }
-          .detai {
-            position: relative;
-            // width: 89px;
-            .added {
-              display: inline-block;
-              position: absolute;
-              left: 0;
-              right: -7px;
-              width: 148px;
-              top: 40px;
-              svg {
-                path {
-                  fill: #fff067;
-                }
-              }
-              button {
-                color: #fff;
-                font-size: 14px;
-                font-family: cairoR;
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: 16px;
-                text-align: center;
-                width: 129px;
-                background-color: unset;
-                box-shadow: none;
-                height: unset;
-                outline: 0;
-                color: #7b7b7b;
-              }
-            }
-            h3 {
-              display: inline-block;
-              color: #fff067;
-              font-size: 31px;
-              font-family: cairoR;
-              margin-right: 8px;
-            }
-            span {
-              display: inline-block;
-              font-size: 13px;
-              font-family: cairoR;
-              color: #fff;
-            }
-          }
-          .details {
-            display: inline-block;
-            background-color: unset;
-            height: unset;
-            box-shadow: unset;
-            color: #fff;
-            font-size: 14px;
-            font-family: cairoR;
-            outline: 0;
-            float: left;
-            margin: 4px 0 0 -38px;
-          }
-        }
-      }
-      .parent {
-        @media (min-width: 320px) and (max-width: 700px) {
-          margin-bottom: 0;
-        }
-        //maxMobile
-        @media (max-width: 767px) {
-          margin-bottom: -53px;
-        }
-        .imag {
-          position: relative;
-          border-radius: 50px;
-          overflow: hidden;
-          margin: 0 auto 0 auto;
-          height: 294px;
-          width: 82%;
-          //maxMobile
-          @media (max-width: 767px) {
-            height: 274px;
-          }
-          //minMedium
-          @media (min-width: 922px) {
-            height: auto;
-          }
-          .overlay {
-            @include overlay;
-            background-color: rgba(#fbfbff, 0.6);
-          }
-
-          img {
-            width: 100%;
-          }
-
-          .magtxt {
-            h4 {
-              position: absolute;
-              top: 25px;
-              left: 0;
-              color: #7b7b7b;
-              font-size: 17px;
-              font-family: "cairoR";
-              width: 100%;
-              padding: 0 8% 0 13%;
-            }
-
-            img {
-              position: absolute;
-              width: 26px;
-              top: 45%;
-              left: 44%;
-            }
-          }
-        }
-
-        .pric {
-          background-color: #7b86fa;
-          padding: 20px;
-          border-radius: 107px 107px 27px 27px;
-          height: 117px;
-          width: 176px;
-          margin: -59px auto;
-          position: relative;
-          z-index: 2;
-
-          .detai {
-            text-align: center;
-
-            span {
-              display: inline-block;
-              font-size: 13px;
-              font-family: "cairoR";
-              color: #fff;
-              margin: 0 0 0 6px;
-            }
-
-            h3 {
-              display: inline-block;
-              color: #fff067;
-              font-size: 31px;
-              font-family: "cairoR";
-            }
-          }
-
-          button {
-            width: 85px;
-            height: 33px;
-            background-color: #fff067;
-            color: $textColor;
-            font-size: 14px;
-            outline: 0;
-            margin: 8px 0 0 0;
-            @include prefixer(box-shadow, 8px 3px 7px #9e9e9e36, webkit moz ms);
-          }
-
-          .cart {
-            position: relative;
-            cursor: pointer;
-            right: 12px;
-            margin: 0 0 0 0;
-
-            .sala {
-              position: absolute;
-              left: 4px;
-              top: -31px;
-              width: auto;
-            }
-
-            img {
-              width: auto;
-              position: absolute;
-              left: 19px;
-              top: -21px;
-            }
-          }
-        }
-        .name {
-          border-radius: 50px;
-          background-color: #5666b9;
-          width: 100%;
-          padding-top: 178px;
-          height: 222px;
-          position: relative;
-          top: -108px;
-          z-index: -1;
-          @include prefixer(box-shadow, 8px 12px 8px #eceaea, webkit moz ms);
-
-          .user {
-            margin-right: 23px;
-
-            img {
-              display: inline-block;
-              width: 25px;
-            }
-
-            h3 {
-              display: inline-block;
-              font-size: 12px;
-              color: #fff;
-            }
-          }
-        }
-        .color {
-          background-color: #0c79d6;
-        }
-      }
-    }
-  }
-  .notResult {
-    padding: 10px;
-    margin: 0 auto 40px auto;
-    text-align: center;
-    img {
-      width: auto;
-    }
-    p {
-      font-size: 18px;
-      color: $textColor;
-      font-family: "cairoR";
-      margin: 30px 0 20px 0;
-      line-height: 1.8;
-    }
+  &--active {
+    background: var(--ds-brand-600);
+    color: var(--ds-text-onBrand);
+    border-color: var(--ds-brand-600);
+    &:hover { background: var(--ds-brand-700); }
   }
 }
 
-/*--- End Training ---*/
+.sort-btn {
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--ds-duration-fast) var(--ds-ease-out),
+              color var(--ds-duration-fast) var(--ds-ease-out);
+
+  svg { inline-size: 1.1rem; block-size: 1.1rem; }
+
+  &:hover { background: var(--ds-surface-muted); }
+  &--active { background: var(--ds-brand-600); color: var(--ds-text-onBrand); border-color: var(--ds-brand-600); }
+  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+}
+
+::v-deep .courses-page__tab-list .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: 0.5rem 1rem;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  color: var(--ds-text);
+  font-family: var(--ds-font-heading);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-out),
+    color var(--ds-duration-fast) var(--ds-ease-out),
+    border-color var(--ds-duration-fast) var(--ds-ease-out);
+
+  img { block-size: 1em; inline-size: auto; }
+
+  &:hover { background: var(--ds-surface-muted); }
+
+  &.active {
+    background: var(--ds-brand-600);
+    color: var(--ds-text-onBrand);
+    border-color: var(--ds-brand-600);
+    img { filter: brightness(0) invert(1); }
+  }
+}
 </style>
