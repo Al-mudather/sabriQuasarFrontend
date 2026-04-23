@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="row justify-center">
         <div class="col-lg-12">
-          <div class="titel">
+          <div class="title">
             <img src="~assets/img/tit.png" alt="" />
             <h3>{{$t('الإشعارات')}}</h3>
           </div>
@@ -127,7 +127,7 @@ export default {
     padding: 10px;
     margin: 20px 0 45px 0;
     position: relative;
-    .titel{
+    .title{
         display: inline-block;
         width: 100%;
         padding: 12px;

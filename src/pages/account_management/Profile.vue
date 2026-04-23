@@ -5,7 +5,7 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-lg-12">
-            <div class="titel">
+            <div class="title">
               <img src="~assets/img/tit.png" alt="" />
               <h3>{{$t('الملف الشخصي')}}</h3>
             </div>
@@ -23,7 +23,7 @@
             </div>
             <div class="col-lg-7">
               <div class="all">
-                <div class="titel">
+                <div class="title">
                   <img src="~assets/img/tit.png" alt="" />
                   <h3>{{$t('بياناتــي')}}</h3>
                 </div> 
@@ -310,7 +310,7 @@ export default {
   padding: 10px;
   margin: 20px 0 45px 0;
   position: relative;
-  .titel {
+  .title {
     display: inline-block;
     width: 100%;
     padding: 12px;
@@ -535,7 +535,7 @@ export default {
       .password {
         margin: 30px 0 0 0;
       }
-      .titel {
+      .title {
         background-color: unset;
         h3 {
           font-size: 18px;

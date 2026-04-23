@@ -1,6 +1,6 @@
 <template>
   <div class="password">
-    <div class="titel">
+    <div class="title">
       <img src="~assets/img/tit.png" alt="" />
       <h3 v-if="certificateNameData">{{$t('اسم إستخراج شهادة التدريب')}}</h3>
       <h3 v-else>{{$t('تعيين اسم إستخراج شهادة التدريب')}}</h3>

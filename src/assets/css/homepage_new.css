@@ -2252,19 +2252,19 @@ body {
   margin-top: 30px;
 }
 
-.opinions .titel {
+.opinions .title {
   margin: 0 auto 100px;
   width: 250px;
   position: relative;
 }
 
-.opinions .titel span {
+.opinions .title span {
   font-size: 29px;
   font-family: 'cairoR';
   color: #7B7B7B;
 }
 
-.opinions .titel h2 {
+.opinions .title h2 {
   font-size: 39px;
   font-family: 'airR';
   color: #7B7B7B;

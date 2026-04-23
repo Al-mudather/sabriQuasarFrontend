@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="titel">
+                    <div class="title">
                         <img src="~assets/img/tit.png" alt="">
                         <h3>{{$t('كورساتـي')}}</h3>
                     </div>
@@ -30,7 +30,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="imageees">
+                            <div class="images">
                                 <img src="~assets/img/notCores.png" alt="">
                                 <h3>ليس لديك أي اشتراك في الوقت الحالي الرجاء الدخول الي صفحة <a @click="GO_TO_COURSES_PAGE" style="cursor: pointer">الكورسات</a> للاشتراك </h3>
                             </div>
@@ -202,7 +202,7 @@ export default {
 //     padding: 10px;
 //     margin: 20px 0 45px 0;
 //     position: relative;
-//     .titel{
+//     .title{
 //         display: inline-block;
 //         width: 100%;
 //         padding: 12px;
@@ -544,7 +544,7 @@ export default {
 //         display: block;
 //         margin: 20px 0 20px 0;
 //         text-align: center;
-//         .imageees{
+//         .images{
 //             img{
 //                 width: auto;
 //             }
@@ -567,7 +567,7 @@ export default {
     padding: 10px;
     margin: 20px 0 45px 0;
     position: relative;
-    .titel{
+    .title{
         display: inline-block;
         width: 100%;
         padding: 12px;
@@ -928,7 +928,7 @@ export default {
         display: none;
         margin: 20px 0 20px 0;
         text-align: center;
-        .imageees{
+        .images{
             img{
                 width: auto;
             }

@@ -3,7 +3,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <div  class="titel">
+                    <div  class="title">
                         <img src="~assets/img/tit.png" alt="">
                         <h3 v-if="courseData.title">{{courseData.title}}</h3>
                         <q-skeleton v-else type="text" />
@@ -26,7 +26,7 @@
                     </div>
                 </div>
                 <div class="col-lg-12">
-                    <div class="titel mix">
+                    <div class="title mix">
                         <img src="~assets/img/tit.png" alt="">
                         <h3>{{$t('دورات ذات صلة')}}</h3>
                     </div>
@@ -193,7 +193,7 @@ export default {
 .courceDetails{
     padding: 50px 0;
     margin: 25px 0 50px 0;
-    .titel{
+    .title{
         margin: 0 0 39px 0;
         //maxMobile
         @media(max-width:767px){

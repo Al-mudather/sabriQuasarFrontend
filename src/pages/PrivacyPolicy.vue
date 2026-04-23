@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-lg-12">
           <div class="privacy">
-            <div class="titel">
+            <div class="title">
               <img src="~assets/img/tit.png" alt="">
               <h3>{{ isEnglish ? 'Privacy Policy' : 'سياسة الخصوصيه' }}</h3>
             </div>
@@ -1561,7 +1561,7 @@ export default {
 }
 
 .profile {
-    .titel {
+    .title {
         img {
             opacity: 1;
         }

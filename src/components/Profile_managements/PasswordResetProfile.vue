@@ -1,6 +1,6 @@
 <template>
   <div class="password">
-    <div class="titel">
+    <div class="title">
       <img src="~assets/img/tit.png" alt="" />
       <h3>{{$t('تعيين كلمة مرور جديدة')}}</h3>
     </div>

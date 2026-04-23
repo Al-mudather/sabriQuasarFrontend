@@ -3,7 +3,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="titel">
+                    <div class="title">
                         <span>{{$t('بعضا من')}}</span>
                         <h2>{{$t('آراء الطــلاب')}}</h2>
                     </div>
@@ -86,7 +86,7 @@ export default {
     padding: 30px 0;
     margin-top: 30px;
 
-    .titel {
+    .title {
         margin: 0 auto 100px;
         width: 250px;
         position: relative;

@@ -4,7 +4,7 @@
       <div class="container">
         <div class="row">
           <div class="col-lg-12">
-            <div class="titel">
+            <div class="title">
               <img src="~assets/img/tit.png" alt="" />
               <h3>{{ $t("الـــدورات") }}</h3>
             </div>
@@ -534,7 +534,7 @@ export default {
 .cources {
   padding: 50px 0;
   margin: 25px 0 0 0;
-  .titel {
+  .title {
     margin: 0 0 55px 0;
     img {
       display: inline-block;
