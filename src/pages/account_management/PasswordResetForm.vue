@@ -52,6 +52,15 @@
 </template>
 
 <script>
+/**
+ * Auth feature types handled by this page.
+ *
+ * Note: `ResetUserPassword` maps to the `UserPasswordReset` operation in the
+ * schema (see TODO in src/features/auth/types.ts).
+ *
+ * @typedef {import('src/features/auth/types').PasswordResetResult} PasswordResetResult
+ * @typedef {import('src/features/auth/types').PasswordResetVariables} PasswordResetVariables
+ */
 import { ResetUserPassword } from 'src/queries/account_management/mutation/ResetUserPassword'
 import DsInput from 'src/design-system/components/DsInput.vue'
 
@@ -123,13 +132,14 @@ export default {
       }
       this.visible = true
       try {
+        /** @type {{ data: PasswordResetResult }} */
         const res = await this.$apollo.mutate({
           mutation: ResetUserPassword,
-          variables: {
+          variables: /** @type {PasswordResetVariables} */ ({
             token: this.token,
             newPassword1: this.newPassword1,
             newPassword2: this.newPassword2
-          }
+          })
         })
         if (res.data.passwordReset.success) {
           const toast = this.$toast

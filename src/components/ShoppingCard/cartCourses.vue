@@ -179,6 +179,16 @@
 </template>
 
 <script>
+/**
+ * Cart/checkout feature types for the cart-listing page. Fires the
+ * CreateBraintreeCheckout mutation via apolloClient.mutate directly.
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/features/cart/types').CartItem} CartItem
+ * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/features/cart/types').CreateBraintreeCheckoutResult} CreateBraintreeCheckoutResult
+ * @typedef {import('src/features/cart/types').CreateBraintreeCheckoutVars} CreateBraintreeCheckoutVars
+ */
 import { storeToRefs } from 'pinia'
 import _ from 'lodash'
 import { useCartStore } from 'src/stores/cart'

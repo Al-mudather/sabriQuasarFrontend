@@ -145,6 +145,8 @@
 </template>
 
 <script>
+/** @typedef {import('src/features/courses/types').Course} Course */
+
 import CourseCard from 'src/components/shared/CourseCard.vue'
 import StatCard from 'src/components/shared/StatCard.vue'
 import DsTabs from 'src/design-system/components/DsTabs.vue'
@@ -183,6 +185,9 @@ export default {
 
   setup () {
     const settings = useSettingsStore()
+    // TODO: AllEnrollmentsForCurrentUser belongs to the enrollment feature and
+    // has no matching Result/Vars alias in src/features/courses/types.ts.
+    // Wire up typed generics once the enrollments feature types land.
     const enrollQuery = useQuery(
       AllEnrollmentsForCurrentUser,
       { limit: 100, cursor: '' },

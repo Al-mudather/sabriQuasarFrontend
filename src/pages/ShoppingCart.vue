@@ -66,6 +66,17 @@
 </template>
 
 <script>
+/**
+ * Cart layout shell. Binds `shoppingCartDataList` from the Pinia cart store
+ * (typed as CartEntry[] in src/features/cart/types.ts) and hosts the nested
+ * cart-step router views. The `useSubscription(CheckoutSubscription)` call
+ * below has no matching Result/Vars alias in the cart feature module — the
+ * subscription lives outside the per-provider Stripe/Paypal/Braintree/
+ * SmartNode surface.
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ */
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'

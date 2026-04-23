@@ -52,6 +52,12 @@
 </template>
 
 <script>
+/**
+ * Auth feature types handled by this component.
+ *
+ * @typedef {import('src/features/auth/types').ResendActivationEmailResult} ResendActivationEmailResult
+ * @typedef {import('src/features/auth/types').ResendActivationEmailVariables} ResendActivationEmailVariables
+ */
 import { ResendActivationEmail } from 'src/queries/account_management/mutation/ResendActivationEmail'
 import DsInput from 'src/design-system/components/DsInput.vue'
 
@@ -91,9 +97,10 @@ export default {
       }
       this.loader = true
       try {
+        /** @type {{ data: ResendActivationEmailResult }} */
         const result = await this.$apollo.mutate({
           mutation: ResendActivationEmail,
-          variables: { email: this.email }
+          variables: /** @type {ResendActivationEmailVariables} */ ({ email: this.email })
         })
         if (result.data.resendActivationEmail.success) {
           this.$q.notify({

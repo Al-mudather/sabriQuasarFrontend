@@ -81,6 +81,10 @@ import { useQuery } from '@vue/apollo-composable'
 import { computed, ref } from 'vue'
 import _ from 'lodash'
 
+/** @typedef {import('src/features/notifications/types').Notification} Notification */
+/** @typedef {import('src/features/notifications/types').MyNotificationsResult} MyNotificationsResult */
+/** @typedef {import('src/features/notifications/types').MyNotificationsVars} MyNotificationsVars */
+
 const TYPE_BUCKET = {
   CHECKOUT_DONE: 'transactions',
   PAYMENT: 'transactions',
@@ -113,6 +117,7 @@ export default {
 
   setup () {
     const settings = useSettingsStore()
+    /** @type {ReturnType<typeof useQuery<MyNotificationsResult, MyNotificationsVars>>} */
     const notifQuery = useQuery(
       GetAllMyNotifications,
       { orderBy: ['-id'], limit: 15 }

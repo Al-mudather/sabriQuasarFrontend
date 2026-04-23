@@ -45,6 +45,12 @@
 </template>
 
 <script>
+/**
+ * Auth feature types handled by this page.
+ *
+ * @typedef {import('src/features/auth/types').VerifyAccountResult} VerifyAccountResult
+ * @typedef {import('src/features/auth/types').VerifyAccountVariables} VerifyAccountVariables
+ */
 import { VerifyUserAccount } from 'src/queries/account_management/mutation/VerifyUserAccount'
 
 export default {
@@ -59,9 +65,10 @@ export default {
     async verify (token) {
       this.state = 'loading'
       try {
+        /** @type {{ data: VerifyAccountResult }} */
         const res = await this.$apollo.mutate({
           mutation: VerifyUserAccount,
-          variables: { token }
+          variables: /** @type {VerifyAccountVariables} */ ({ token })
         })
         const ok = (res && res.data && (res.data.success || (res.data.verifyAccount && res.data.verifyAccount.success)))
         if (ok) {

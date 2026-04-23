@@ -16,6 +16,18 @@
 </template>
 
 <script>
+/**
+ * Cart/checkout feature types for the Stripe pay-button component. Calls
+ * the CreateStripeCheckout mutation + StripePublishableKey query via
+ * apolloClient.* (untyped runtime); aliases below document the expected shapes.
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/features/cart/types').CreateStripeCheckoutResult} CreateStripeCheckoutResult
+ * @typedef {import('src/features/cart/types').CreateStripeCheckoutVars} CreateStripeCheckoutVars
+ * @typedef {import('src/features/cart/types').StripePublishableKeyResult} StripePublishableKeyResult
+ * @typedef {import('src/features/cart/types').StripePublishableKeyVars} StripePublishableKeyVars
+ */
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { CreateStripeCheckout } from "src/queries/checkout_management/mutation/CreateStripeCheckout";
 import { StripePublishableKey } from "src/queries/checkout_management/query/StripePublishableKey";

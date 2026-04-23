@@ -106,6 +106,16 @@
 </template>
 
 <script>
+/**
+ * Auth feature types handled by this component.
+ *
+ * @typedef {import('src/features/auth/types').RegisterMutationResult} RegisterMutationResult
+ * @typedef {import('src/features/auth/types').RegisterVariables} RegisterVariables
+ * @typedef {import('src/features/auth/types').RegisterResult} RegisterResult
+ * @typedef {import('src/features/auth/types').GetMyProfileResult} GetMyProfileResult
+ * @typedef {import('src/features/auth/types').GetMyProfileVariables} GetMyProfileVariables
+ * @typedef {import('src/features/auth/types').AuthUser} AuthUser
+ */
 import { RegisterNewUser } from 'src/queries/account_management/mutation/RegisterNewUser'
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
 import { storeToRefs } from 'pinia'
@@ -191,14 +201,15 @@ export default {
       if (!this.validate()) return
       this.visible = true
       try {
+        /** @type {{ data: RegisterMutationResult }} */
         const signUp_res = await apolloClient.mutate({
           mutation: RegisterNewUser,
-          variables: {
+          variables: /** @type {RegisterVariables} */ ({
             email: this.email,
             fullName: this.fullName,
             password1: this.password1,
             password2: this.password2
-          }
+          })
         })
         if (signUp_res.data.register.success) {
           const tokenAuth = {
@@ -207,6 +218,7 @@ export default {
           }
           await this.auth.login(tokenAuth)
           try {
+            /** @type {{ data: GetMyProfileResult }} */
             const profile = await apolloClient.query({ query: GetMyProfileData })
             this.auth.setUser(profile.data.me)
           } catch (e) { /* non-blocking */ }

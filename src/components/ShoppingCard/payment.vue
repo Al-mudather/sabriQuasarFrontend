@@ -192,6 +192,19 @@
 </template>
 
 <script>
+/**
+ * Cart/checkout feature types. This component reaches the Stripe checkout
+ * mutation + publishable-key query directly via apolloClient.*; the aliases
+ * below document the expected shapes even though the calls are untyped at
+ * runtime (no useMutation/useQuery composable here).
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/features/cart/types').CreateStripeCheckoutResult} CreateStripeCheckoutResult
+ * @typedef {import('src/features/cart/types').CreateStripeCheckoutVars} CreateStripeCheckoutVars
+ * @typedef {import('src/features/cart/types').StripePublishableKeyResult} StripePublishableKeyResult
+ * @typedef {import('src/features/cart/types').StripePublishableKeyVars} StripePublishableKeyVars
+ */
 import { storeToRefs } from 'pinia'
 import _ from 'lodash'
 

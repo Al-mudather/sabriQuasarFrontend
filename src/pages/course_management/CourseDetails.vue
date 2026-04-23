@@ -224,6 +224,10 @@
 </template>
 
 <script>
+/** @typedef {import('src/features/courses/types').CourseDetail} CourseDetail */
+/** @typedef {import('src/features/courses/types').CoursePricing} CoursePricing */
+/** @typedef {import('src/features/courses/types').CurrencyCode} CurrencyCode */
+
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
@@ -331,11 +335,12 @@ export default {
 
     parsedPrices () {
       if (!this.courseData || !this.courseData.currency) return null
-      try {
-        return JSON.parse(this.courseData.currency)
-      } catch (e) {
-        return null
-      }
+      // Apollo's CourseNode.currency typePolicy in src/apollo/client.js parses
+      // the JSONString scalar at cache-read time, so `courseData.currency`
+      // is already an object here — no defensive JSON.parse needed.
+      /** @type {CoursePricing} */
+      const pricing = this.courseData.currency
+      return pricing
     },
 
     currentPrice () {

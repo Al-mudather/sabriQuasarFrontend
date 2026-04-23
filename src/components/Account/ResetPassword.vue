@@ -65,6 +65,12 @@
 </template>
 
 <script>
+/**
+ * Auth feature types handled by this component.
+ *
+ * @typedef {import('src/features/auth/types').PasswordResetEmailResult} PasswordResetEmailResult
+ * @typedef {import('src/features/auth/types').PasswordResetEmailVariables} PasswordResetEmailVariables
+ */
 import { UserPasswordResetEmail } from 'src/queries/account_management/mutation/UserPasswordResetEmail'
 import DsInput from 'src/design-system/components/DsInput.vue'
 
@@ -95,9 +101,10 @@ export default {
       this.fieldError = ''
       this.visible = true
       try {
+        /** @type {{ data: PasswordResetEmailResult, errors?: unknown }} */
         const res = await this.$apollo.mutate({
           mutation: UserPasswordResetEmail,
-          variables: { email: this.email }
+          variables: /** @type {PasswordResetEmailVariables} */ ({ email: this.email })
         })
         if (res.data.sendPasswordResetEmail.success) {
           this.sent = true

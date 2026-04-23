@@ -103,6 +103,12 @@ import { ReUploadAttachmentTransaction } from 'src/queries/attachment_transactio
 import TransactionCard from 'src/components/shared/TransactionCard.vue'
 import FileUpload from 'src/components/utils/FileUploader.vue'
 
+/** @typedef {import('src/features/attachments/types').UserAttachmentTransaction} UserAttachmentTransaction */
+/** @typedef {import('src/features/attachments/types').TheUserAttachmentTransactionsResult} TheUserAttachmentTransactionsResult */
+/** @typedef {import('src/features/attachments/types').TheUserAttachmentTransactionsVars} TheUserAttachmentTransactionsVars */
+/** @typedef {import('src/features/attachments/types').ReUploadAttachmentResult} ReUploadAttachmentResult */
+/** @typedef {import('src/features/attachments/types').ReUploadAttachmentVars} ReUploadAttachmentVars */
+
 export default {
   name: 'MyOrders',
   components: { TransactionCard, FileUpload },
@@ -110,12 +116,14 @@ export default {
   setup () {
     const settings = useSettingsStore()
 
+    /** @type {ReturnType<typeof useQuery<TheUserAttachmentTransactionsResult, TheUserAttachmentTransactionsVars>>} */
     const txQuery = useQuery(MyAttachmentTransactions)
     const myTransactionsOrders = computed(
       () => txQuery.result.value?.myAttachmentTransactions || null
     )
     const loading = txQuery.loading
 
+    /** @type {ReturnType<typeof useMutation<ReUploadAttachmentResult, ReUploadAttachmentVars>>} */
     const reupload = useMutation(ReUploadAttachmentTransaction, {
       refetchQueries: [{ query: MyAttachmentTransactions }]
     })

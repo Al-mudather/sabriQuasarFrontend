@@ -78,6 +78,14 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
 import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality.js'
+/**
+ * @typedef {import('src/features/courses/types').GetAllSpecialitiesResult} GetAllSpecialitiesResult
+ * @typedef {import('src/features/courses/types').GetAllSpecialitiesVars} GetAllSpecialitiesVars
+ * @typedef {import('src/features/courses/types').AllCoursesInSpecialityResult} AllCoursesInSpecialityResult
+ * @typedef {import('src/features/courses/types').AllCoursesInSpecialityVars} AllCoursesInSpecialityVars
+ * @typedef {import('src/features/courses/types').Speciality} Speciality
+ * @typedef {import('src/features/courses/types').CourseInSpeciality} CourseInSpeciality
+ */
 import { apolloClient } from 'src/apollo/client'
 import { useSettingsStore } from 'src/stores/settings'
 

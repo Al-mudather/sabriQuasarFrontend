@@ -32,6 +32,14 @@
 </template>
 
 <script>
+/**
+ * Cart/checkout feature types for the Bankak (bank transfer) upload flow.
+ * The provider is outside the Stripe/Braintree/SmartNode/Paypal/Syberpay set,
+ * so only the generic cart aliases are referenced here.
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ */
 import FileUpload from "src/components/utils/FileUploader.vue";
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { UploadAttachmentTransaction } from "src/queries/checkout_management/mutation/UploadAttachmentTransaction";

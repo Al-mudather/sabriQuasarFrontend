@@ -143,6 +143,10 @@ import { useQuery } from '@vue/apollo-composable'
 import { computed } from 'vue'
 import { AllCertificates } from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
 
+/** @typedef {import('src/features/certificates/types').Certificate} Certificate */
+/** @typedef {import('src/features/certificates/types').AllCertificatesResult} AllCertificatesResult */
+/** @typedef {import('src/features/certificates/types').AllCertificatesVars} AllCertificatesVars */
+
 export default {
   name: 'CertificatePage',
 
@@ -150,6 +154,7 @@ export default {
     const auth = useAuthStore()
     const { user, token } = storeToRefs(auth)
 
+    /** @type {ReturnType<typeof useQuery<AllCertificatesResult, AllCertificatesVars>>} */
     const certQuery = useQuery(
       AllCertificates,
       () => ({ filters: JSON.stringify({ user__id: user.value && user.value.pk }) })

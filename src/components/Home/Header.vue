@@ -16,6 +16,11 @@ import { useQuery } from '@vue/apollo-composable'
 import SwiperHeader from 'src/components/Home/SwiperHeader.vue'
 import PromotionSection from 'src/components/Home/PromotionSection.vue'
 import { AllHomePageSliders } from 'src/queries/marketing_management/query/AllHomePageSliders.js'
+/**
+ * @typedef {import('src/features/marketing-content/types').AllHomePageSlidersResult} AllHomePageSlidersResult
+ * @typedef {import('src/features/marketing-content/types').AllHomePageSlidersVars} AllHomePageSlidersVars
+ * @typedef {import('src/features/marketing-content/types').HomePageSlider} HomePageSlider
+ */
 
 export default {
   name: 'Header',

@@ -26,6 +26,19 @@
 </template>
 
 <script>
+/**
+ * Cart/checkout feature types for the Paypal component. Note: a
+ * CreatePaypalCheckout aliased Result/Vars pair is not yet exported from
+ * src/features/cart/types.ts (see TODO there); only the capture step is
+ * typed below.
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/features/cart/types').CapturePaypalCheckoutResult} CapturePaypalCheckoutResult
+ * @typedef {import('src/features/cart/types').CapturePaypalCheckoutVars} CapturePaypalCheckoutVars
+ * @typedef {import('src/features/cart/types').PaypalPublishableKeyResult} PaypalPublishableKeyResult
+ * @typedef {import('src/features/cart/types').PaypalPublishableKeyVars} PaypalPublishableKeyVars
+ */
 import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
 import { PaypalPublishableKey } from 'src/queries/checkout_management/query/PaypalPublishableKey'
 import { CreatePaypalCheckout } from 'src/queries/checkout_management/mutation/CreatePaypalCheckout'

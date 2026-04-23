@@ -219,6 +219,13 @@
 </template>
 
 <script>
+/** @typedef {import('src/features/courses/types').Course} Course */
+/** @typedef {import('src/features/courses/types').Speciality} Speciality */
+/** @typedef {import('src/features/courses/types').GetAllCoursesResult} GetAllCoursesResult */
+/** @typedef {import('src/features/courses/types').GetAllCoursesVars} GetAllCoursesVars */
+/** @typedef {import('src/features/courses/types').GetAllSpecialitiesResult} GetAllSpecialitiesResult */
+/** @typedef {import('src/features/courses/types').GetAllSpecialitiesVars} GetAllSpecialitiesVars */
+
 import courseCard from 'components/utils/courseCard.vue'
 import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses.js'
 import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites.js'
@@ -251,6 +258,7 @@ export default {
     const settings = useSettingsStore()
 
     // Specialities filter list
+    /** @type {import('@vue/apollo-composable').UseQueryReturn<GetAllSpecialitiesResult, GetAllSpecialitiesVars>} */
     const specQuery = useQuery(GetSpecialities, { courseNumber: 20 })
     const specialitiesLoading = specQuery.loading
     const specialitiesEdges = computed(
@@ -259,6 +267,7 @@ export default {
 
     // Reactive query variables — shared ref so useQuery updates on filter change.
     const queryVars = reactive({ first: 12, orderBy: ['-createdAt'], isDraft: false })
+    /** @type {import('@vue/apollo-composable').UseQueryReturn<GetAllCoursesResult, GetAllCoursesVars>} */
     const coursesQuery = useQuery(GetAllCourses, () => queryVars, {
       fetchPolicy: 'cache-and-network'
     })

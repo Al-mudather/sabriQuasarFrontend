@@ -80,7 +80,12 @@
 // Track A codegen: JSDoc typedef keeps IDE type awareness without requiring
 // <script lang="ts"> (the project's Vue 2 loader doesn't run TS in .vue files).
 // When Track B flips to Vue 3 + Vite, this can be promoted to `import type`.
-/** @typedef {import('src/graphql').AllCoursesInSpecialityQuery} AllCoursesInSpecialityQuery */
+/**
+ * @typedef {import('src/features/courses/types').AllCoursesInSpecialityResult} AllCoursesInSpecialityResult
+ * @typedef {import('src/features/courses/types').AllCoursesInSpecialityVars} AllCoursesInSpecialityVars
+ * @typedef {import('src/features/courses/types').CourseInSpeciality} CourseInSpeciality
+ * @typedef {import('src/features/courses/types').CoursePricing} CoursePricing
+ */
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
@@ -178,13 +183,19 @@ export default {
     if (this._cascade && this._cascade.kill) this._cascade.kill()
   },
   methods: {
+    /** @param {CourseInSpeciality} node */
     normalize (node) {
       // Map GraphQL course node -> CourseCard's expected shape.
-      // node.currency is a JSON string blob like {"SAR":50,"SDG":500000,"EUR":50,"GBP":50}
+      // node.currency is already parsed to an object at the network boundary
+      // by Apollo's typePolicy (see src/features/courses/types.ts). Fall back
+      // to JSON.parse for any legacy/cache-miss case where it's still a string.
       const selectedCur = this.currency || 'SAR'
       let current = 0
       try {
-        const prices = JSON.parse(node.currency)
+        /** @type {CoursePricing} */
+        const prices = typeof node.currency === 'string'
+          ? JSON.parse(node.currency)
+          : (node.currency || {})
         current = Number(prices[selectedCur]) || 0
       } catch (_) {
         current = 0

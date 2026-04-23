@@ -11,13 +11,31 @@
 import { defineStore } from 'pinia'
 import { Notify, SessionStorage } from 'quasar'
 
+/**
+ * Feature-level type aliases for the cart store. Pulled from the type-only
+ * module at src/features/cart/types.ts so the Pinia state is annotated with
+ * the same shapes the checkout components import.
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ */
+
 export const useCartStore = defineStore('shoppingCart', {
   state: () => ({
+    /** @type {boolean} */
     shoppinCartDialog: false,
+    /** @type {string | null} */
     braintreeClientToken: null,
+    /**
+     * Order payload returned by CreateNewOrderWithBulkOrderDetails. Kept
+     * permissive (unknown) because the shape is not aliased in features/cart/types.
+     * @type {unknown}
+     */
     orderData: null,
+    /** @type {number} */
     totalPaymentFees: SessionStorage.getItem('totalPaymentFees') || 0.0,
+    /** @type {string | number | null} */
     checkoutOrderID: SessionStorage.getItem('orderID') || null,
+    /** @type {CartEntry[]} */
     shoppingCartDataList: SessionStorage.getItem('shoppingCartList') || []
   }),
 

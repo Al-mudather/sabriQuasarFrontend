@@ -23,11 +23,30 @@ import { RefreshLoginUserWithEmail } from 'src/queries/account_management/mutati
 import { RevokeUserRefreshToken } from 'src/queries/account_management/mutation/RevokeUserRefreshToken.js'
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData.js'
 
+/**
+ * Shared auth feature types — see `src/features/auth/types.ts`.
+ *
+ * @typedef {import('src/features/auth/types').AuthSessionUser} AuthSessionUser
+ * @typedef {import('src/features/auth/types').LoginResult} LoginResult
+ * @typedef {import('src/features/auth/types').SocialAuthResult} SocialAuthResult
+ * @typedef {import('src/features/auth/types').RegisterResult} RegisterResult
+ * @typedef {import('src/features/auth/types').RefreshTokenMutationResult} RefreshTokenMutationResult
+ * @typedef {import('src/features/auth/types').RefreshTokenVariables} RefreshTokenVariables
+ * @typedef {import('src/features/auth/types').RevokeRefreshTokenMutationResult} RevokeRefreshTokenMutationResult
+ * @typedef {import('src/features/auth/types').RevokeRefreshTokenVariables} RevokeRefreshTokenVariables
+ * @typedef {import('src/features/auth/types').GetMyProfileResult} GetMyProfileResult
+ * @typedef {import('src/features/auth/types').GetMyProfileVariables} GetMyProfileVariables
+ */
+
 export const useAuthStore = defineStore('authentication', {
   state: () => ({
+    /** @type {boolean} */
     navbarSearch: true,
+    /** @type {AuthSessionUser | Record<string, never> | null} */
     user: userProfileStorage.getUser() || {},
+    /** @type {string | null} */
     token: tokenStorage.getAccessToken() || null,
+    /** @type {string | null} */
     refreshToken: tokenStorage.getRefreshToken() || null
   }),
 
@@ -42,12 +61,16 @@ export const useAuthStore = defineStore('authentication', {
 
   actions: {
     // ---- Direct state writers (formerly Vuex mutations) ---------------------
+    /** @param {AuthSessionUser} user */
     updateUser (user) {
       userProfileStorage.setUser(user)
       this.user = user
     },
+    /** @param {string | null} token */
     updateToken (token) { this.token = token },
+    /** @param {string | null} refreshToken */
     updateRefreshToken (refreshToken) { this.refreshToken = refreshToken },
+    /** @param {boolean} value */
     updateNavebarSearcgDialog (value) { this.navbarSearch = value },
     deleteData () {
       this.user = null
@@ -78,6 +101,9 @@ export const useAuthStore = defineStore('authentication', {
       return res
     },
 
+    /**
+     * @param {LoginResult | SocialAuthResult | { token: string, refresh?: string, refreshToken?: string, user?: AuthSessionUser, social?: { user: AuthSessionUser } }} payload
+     */
     loginAction (payload) {
       // Clear any stale token before writing the new one so the auth link
       // doesn't race a half-logged-in state on the next Apollo op.

@@ -9,6 +9,14 @@
 </template>
 
 <script>
+/**
+ * Auth feature types handled by this component.
+ *
+ * @typedef {import('src/features/auth/types').SocialAuthMutationResult} SocialAuthMutationResult
+ * @typedef {import('src/features/auth/types').SocialAuthVariables} SocialAuthVariables
+ * @typedef {import('src/features/auth/types').SocialAuthResult} SocialAuthResult
+ * @typedef {import('src/features/auth/types').SocialAuthProfile} SocialAuthProfile
+ */
 import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { SocialAuth } from "src/queries/account_management/mutation/CreateSocailAuth";
 import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
@@ -89,16 +97,17 @@ export default {
         loginAuthMutation(accessToken, provider, email = "") {
             this.visible = true
             apolloClient
-                .mutate({
+                .mutate(/** @type {{ mutation: unknown, variables: SocialAuthVariables }} */ ({
                     mutation: SocialAuth,
                     variables: {
                         provider: provider,
                         accessToken: accessToken,
                         email: email
                     }
-                })
+                }))
                 .then(result => {
                     this.visible = false
+                    /** @type {SocialAuthResult} */
                     const userData = result.data.socialAuth
                     if (userData) {
                         Promise.resolve(this.auth.login(userData)).then(() => {

@@ -117,6 +117,15 @@
 </template>
 
 <script>
+/**
+ * Cart-checkout billing-info step. This component gates progression to
+ * the payment step and does not itself invoke any per-provider checkout
+ * mutation — only account_management.UpdateUserProfile + GetMyProfileData.
+ * The cart feature aliases are referenced for consistency with siblings.
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ */
 import { UpdateUserProfile } from 'src/queries/account_management/mutation/UpdateUserProfile'
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
 import { apolloClient } from 'src/apollo/client'

@@ -280,6 +280,43 @@
 // Phase 4 note: real API images only; inline SVG placeholder is used when
 // course.coverImage is absent. No external stock photo services.
 
+/** @typedef {import('src/features/courses/types').Course} Course */
+/** @typedef {import('src/features/courses/types').CourseDetail} CourseDetail */
+/** @typedef {import('src/features/courses/types').CoursePricing} CoursePricing */
+
+/**
+ * The CourseCard accepts a normalised view-model shape rather than the raw
+ * GraphQL Course node, because it is consumed by Home / Courses listing /
+ * Cart / MyCourses with slightly different source shapes. Callers flatten
+ * the domain `Course` (see src/features/courses/types.ts) into this shape.
+ *
+ * @typedef {Object} CourseCardPrice
+ * @property {number} [current]
+ * @property {number} [original]
+ * @property {string} [currency]
+ *
+ * @typedef {Object} CourseCardInstructor
+ * @property {string} [name]
+ * @property {string} [avatar]
+ *
+ * @typedef {Object} CourseCardProps
+ * @property {string} [id]
+ * @property {number|string} [pk]
+ * @property {string} [name]
+ * @property {string} [coverImage]
+ * @property {string} [category]
+ * @property {string} [description]
+ * @property {string} [duration]
+ * @property {number} [lessonCount]
+ * @property {string} [level]
+ * @property {number} [rating]
+ * @property {number} [ratingCount]
+ * @property {number} [studentCount]
+ * @property {number} [progress]
+ * @property {CourseCardInstructor} [instructor]
+ * @property {CourseCardPrice} [price]
+ */
+
 import DsCard from 'src/design-system/components/DsCard.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsBadge from 'src/design-system/components/DsBadge.vue'

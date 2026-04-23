@@ -240,6 +240,17 @@
 </template>
 
 <script>
+/**
+ * Auth feature types handled by this page.
+ *
+ * @typedef {import('src/features/auth/types').GetMyProfileResult} GetMyProfileResult
+ * @typedef {import('src/features/auth/types').GetMyProfileVariables} GetMyProfileVariables
+ * @typedef {import('src/features/auth/types').AuthUser} AuthUser
+ * @typedef {import('src/features/auth/types').UpdateProfileMutationResult} UpdateProfileMutationResult
+ * @typedef {import('src/features/auth/types').UpdateProfileVariables} UpdateProfileVariables
+ * @typedef {import('src/features/auth/types').UpdateProfileResult} UpdateProfileResult
+ * @typedef {import('src/features/auth/types').UserGender} UserGender
+ */
 import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
 import { UpdateUserProfile } from 'src/queries/account_management/mutation/UpdateUserProfile'
 import { useSettingsStore } from 'src/stores/settings'
@@ -257,12 +268,16 @@ export default {
     const settings = useSettingsStore()
     const { isEnglish, currency } = storeToRefs(settings)
 
-    const profileQuery = useQuery(GetMyProfileData)
+    const profileQuery = /** @type {import('@vue/apollo-composable').UseQueryReturn<GetMyProfileResult, GetMyProfileVariables>} */ (
+      useQuery(GetMyProfileData)
+    )
     const me = computed(() => profileQuery.result.value?.me || null)
 
-    const updateProfile = useMutation(UpdateUserProfile, {
-      refetchQueries: [{ query: GetMyProfileData }]
-    })
+    const updateProfile = /** @type {import('@vue/apollo-composable').UseMutationReturn<UpdateProfileMutationResult, UpdateProfileVariables>} */ (
+      useMutation(UpdateUserProfile, {
+        refetchQueries: [{ query: GetMyProfileData }]
+      })
+    )
 
     return {
       settings,

@@ -80,6 +80,14 @@
 </template>
 
 <script>
+/**
+ * Auth feature types handled by this component.
+ *
+ * @typedef {import('src/features/auth/types').LoginMutationResult} LoginMutationResult
+ * @typedef {import('src/features/auth/types').LoginVariables} LoginVariables
+ * @typedef {import('src/features/auth/types').LoginResult} LoginResult
+ * @typedef {import('src/features/auth/types').LoginSessionUser} LoginSessionUser
+ */
 import { LoginUserWithEmail } from 'src/queries/account_management/mutation/LoginUserWithEmail'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
@@ -167,9 +175,10 @@ export default {
       this.resetErrors()
       this.visible = true
       try {
+        /** @type {{ data: LoginMutationResult }} */
         const result = await apolloClient.mutate({
           mutation: LoginUserWithEmail,
-          variables: { email: this.email, password: this.password }
+          variables: /** @type {LoginVariables} */ ({ email: this.email, password: this.password })
         })
         if (result.data.tokenAuth.success) {
           if (result.data.tokenAuth.user.verified) {

@@ -139,6 +139,42 @@ import { MyPyramidAccount }     from 'src/queries/pyramid_marketing_management/q
 import { MyPyramidLedgerReward } from 'src/queries/pyramid_marketing_management/query/MyPyramidLedgerRewardQuery'
 import { WithdrawPyramidBalance } from 'src/queries/pyramid_marketing_management/mutation/MakePyramidWithdraw'
 
+/** @typedef {import('src/features/pyramid/types').PyramidAccount} PyramidAccount */
+/** @typedef {import('src/features/pyramid/types').PyramidBalance} PyramidBalance */
+/** @typedef {import('src/features/pyramid/types').PyramidWithdraw} PyramidWithdraw */
+/** @typedef {import('src/features/pyramid/types').PyramidLedgerRewardValue} PyramidLedgerRewardValue */
+/** @typedef {import('src/features/pyramid/types').PyramidLedgerPayload} PyramidLedgerPayload */
+/** @typedef {import('src/features/pyramid/types').MyPyramidBalanceResult} MyPyramidBalanceResult */
+/** @typedef {import('src/features/pyramid/types').MyPyramidBalanceVars} MyPyramidBalanceVars */
+/** @typedef {import('src/features/pyramid/types').MyPyramidWithdrawsResult} MyPyramidWithdrawsResult */
+/** @typedef {import('src/features/pyramid/types').MyPyramidWithdrawsVars} MyPyramidWithdrawsVars */
+/** @typedef {import('src/features/pyramid/types').MyPyramidAccountResult} MyPyramidAccountResult */
+/** @typedef {import('src/features/pyramid/types').MyPyramidAccountVars} MyPyramidAccountVars */
+/** @typedef {import('src/features/pyramid/types').MyPyramidLedgerRewardResult} MyPyramidLedgerRewardResult */
+/** @typedef {import('src/features/pyramid/types').MyPyramidLedgerRewardVars} MyPyramidLedgerRewardVars */
+/** @typedef {import('src/features/pyramid/types').MyPyramidMarketersResult} MyPyramidMarketersResult */
+/** @typedef {import('src/features/pyramid/types').MyPyramidMarketersVars} MyPyramidMarketersVars */
+/** @typedef {import('src/features/pyramid/types').MakePyramidWithdrawResult} MakePyramidWithdrawResult */
+/** @typedef {import('src/features/pyramid/types').MakePyramidWithdrawVars} MakePyramidWithdrawVars */
+
+/**
+ * Narrow the ledger-reward scalar safely. Backend may return number, a
+ * JSON-encoded string keyed by currency, or (after a cache round-trip) a
+ * pre-parsed object. Returns null for unparseable strings rather than
+ * leaking a parse exception.
+ *
+ * @param {PyramidLedgerRewardValue} raw
+ * @returns {PyramidLedgerPayload | number | null}
+ */
+function parseLedger (raw) {
+  if (raw == null) return null
+  if (typeof raw === 'number') return raw
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw) } catch { return null }
+  }
+  return raw // already an object (cache-read parsed)
+}
+
 export default {
   name: 'MyMarketingPage',
   components: { StatCard, TransactionCard },
@@ -147,19 +183,29 @@ export default {
     const settings = useSettingsStore()
     const { currency } = storeToRefs(settings)
 
-    const balanceQuery  = useQuery(MyPyramidBalance)
+    /** @type {ReturnType<typeof useQuery<MyPyramidBalanceResult, MyPyramidBalanceVars>>} */
+    const balanceQuery    = useQuery(MyPyramidBalance)
+    /** @type {ReturnType<typeof useQuery<MyPyramidMarketersResult, MyPyramidMarketersVars>>} */
     const affiliatesQuery = useQuery(MyPyramidAffiliates)
-    const accountQuery  = useQuery(MyPyramidAccount)
-    const rewardQuery   = useQuery(MyPyramidLedgerReward)
-    const withdrawsQuery = useQuery(MyPyramidWithdraws)
+    /** @type {ReturnType<typeof useQuery<MyPyramidAccountResult, MyPyramidAccountVars>>} */
+    const accountQuery    = useQuery(MyPyramidAccount)
+    /** @type {ReturnType<typeof useQuery<MyPyramidLedgerRewardResult, MyPyramidLedgerRewardVars>>} */
+    const rewardQuery     = useQuery(MyPyramidLedgerReward)
+    /** @type {ReturnType<typeof useQuery<MyPyramidWithdrawsResult, MyPyramidWithdrawsVars>>} */
+    const withdrawsQuery  = useQuery(MyPyramidWithdraws)
 
+    /** @type {import('vue').ComputedRef<PyramidBalance | null>} */
     const myPyramidBalance = computed(() => balanceQuery.result.value?.myPyramidBalance || null)
+    /** @type {import('vue').ComputedRef<number>} */
     const myPyramidAffiliates = computed(() => affiliatesQuery.result.value?.myPyramidAffiliates || 0)
+    /** @type {import('vue').ComputedRef<PyramidAccount | null>} */
     const myPyramidAccount = computed(() => accountQuery.result.value?.myPyramidAccount || null)
+    /** @type {import('vue').ComputedRef<PyramidLedgerRewardValue>} */
     const myPyramidLedgerReward = computed(() => rewardQuery.result.value?.myPyramidLedgerReward || null)
     const myPyramidWithdraws = computed(() => withdrawsQuery.result.value?.myPyramidWithdraws || null)
     const loadingWithdraws = withdrawsQuery.loading
 
+    /** @type {ReturnType<typeof useMutation<MakePyramidWithdrawResult, MakePyramidWithdrawVars>>} */
     const withdrawMutation = useMutation(WithdrawPyramidBalance, {
       refetchQueries: [
         { query: MyPyramidBalance },
@@ -213,29 +259,20 @@ export default {
 
     // Earnings may arrive as a JSON string keyed by currency, or a flat number.
     totalEarnings () {
+      /** @type {PyramidLedgerRewardValue} */
       const raw = this.myPyramidLedgerReward
-      if (raw == null) return 0
-      // Flat number
-      const n = Number(raw)
-      if (Number.isFinite(n) && typeof raw !== 'string') return n
-      // JSON string per-currency
-      if (typeof raw === 'string') {
-        try {
-          const parsed = JSON.parse(raw)
-          if (parsed && typeof parsed === 'object') {
-            const byCurrency = parsed[this.currency]
-            if (byCurrency != null) return Number(byCurrency) || 0
-          } else if (Number.isFinite(Number(parsed))) {
-            return Number(parsed)
-          }
-        } catch (e) {
-          const num = Number(raw)
-          if (Number.isFinite(num)) return num
+      const parsed = parseLedger(raw)
+      if (parsed == null) return 0
+      if (typeof parsed === 'number') return Number.isFinite(parsed) ? parsed : 0
+      if (typeof parsed === 'object') {
+        const byCurrency = parsed[this.currency]
+        if (byCurrency != null) {
+          const n = Number(byCurrency)
+          return Number.isFinite(n) ? n : 0
         }
-      }
-      if (raw && typeof raw === 'object') {
-        const byCurrency = raw[this.currency]
-        if (byCurrency != null) return Number(byCurrency) || 0
+        if (typeof parsed.amount === 'number' && Number.isFinite(parsed.amount)) {
+          return parsed.amount
+        }
       }
       return 0
     },
@@ -250,6 +287,7 @@ export default {
   },
 
   methods: {
+    /** @param {PyramidWithdraw} w */
     mapWithdraw (w) {
       return {
         id: w.pk,

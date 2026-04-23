@@ -9,6 +9,14 @@
 </template>
 
 <script>
+/**
+ * Cart/checkout feature types for the SmartNode component.
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/features/cart/types').CreateSmartNodeCheckoutResult} CreateSmartNodeCheckoutResult
+ * @typedef {import('src/features/cart/types').CreateSmartNodeCheckoutVars} CreateSmartNodeCheckoutVars
+ */
 import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
 import { storeToRefs } from "pinia";
 import { useCartStore } from "src/stores/cart";

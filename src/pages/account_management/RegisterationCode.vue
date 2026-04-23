@@ -52,6 +52,11 @@
 </template>
 
 <script>
+/**
+ * This page lives under account_management but its sole mutation
+ * (`JoinPlatform`) belongs to the pyramid feature, not auth. No auth
+ * feature types are handled here — kept as a marker for the scope audit.
+ */
 import { JoinPlatform } from 'src/queries/pyramid_marketing_management/mutation/JoinPlatform'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { storeToRefs } from 'pinia'

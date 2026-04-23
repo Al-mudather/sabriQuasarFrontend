@@ -23,6 +23,14 @@
 </template>
 
 <script>
+/**
+ * Cart/checkout feature types for the Braintree capture component.
+ *
+ * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/features/cart/types').CaptureBraintreeCheckoutResult} CaptureBraintreeCheckoutResult
+ * @typedef {import('src/features/cart/types').CaptureBraintreeCheckoutVars} CaptureBraintreeCheckoutVars
+ */
 import { CaptureBraintreeCheckout } from 'src/queries/checkout_management/mutation/CaptureBraintreeCheckout.js'
 import { storeToRefs } from "pinia";
 import { useCartStore } from "src/stores/cart";
