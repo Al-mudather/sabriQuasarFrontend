@@ -1,34 +1,30 @@
 <template>
-  <section class="currency">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="switch">
-                    <div class="point">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="50.46" height="49.977" viewBox="0 0 50.46 49.977">
-                            <g id="Group_675" data-name="Group 675" transform="translate(0 0)">
-                              <circle id="Ellipse_17" data-name="Ellipse 17" cx="14.5" cy="14.5" r="14.5" transform="translate(11.403 11.186)" fill="#5666b9"/>
-                              <path id="Path_953" data-name="Path 953" d="M19.326.623A1.169,1.169,0,0,1,19.254,0c.025-.1-.385,2.334,2.872,2.425,0,0,8.82,2.8,11.783,6.132A18.587,18.587,0,0,1,6.951,34.125a18.7,18.7,0,0,1-5.615-13.2.667.667,0,1,0-1.334,0A20.265,20.265,0,0,0,20.147,41.344,20.38,20.38,0,0,0,22.31.688Z" transform="matrix(0.259, -0.966, 0.966, 0.259, 0, 39.276)" fill="#e5e5e6" fill-rule="evenodd"/>
-                            </g>
-                          </svg>                                   
-                        <img src="~assets/img/exchange.png" alt="">                                         
-                    </div>
-                    <div class="dropdown hvr-shadow-radial" @click=" showCurrency = !showCurrency ">
-                        <h3>{{$t('حدد عملة الشراء')}} </h3>
-                        <div class="listt" v-if="showCurrency">
-                            <img class="arrow" src="~assets/img/arrow.png" alt="">
-                            <ul>
-                                <li @click="currencySelectionHandler('SDG')"><img src="~assets/img/sudan.png" data-currency="SDG"  alt="">{{$t('الجنيه السوداني')}}</li>
-                                <li @click="currencySelectionHandler('USD')"><img src="~assets/img/united-states .png" data-currency="USD"  alt="">{{$t('الدولار الامريكي')}}</li>
-                                <!-- <li @click="currencySelectionHandler('SAR')"><img src="~assets/img/saudi-arabia.png" data-currency="SAR"  alt="">{{$t('الريال السعودي')}}</li> -->
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-  </section>
+  <div class="currency-picker">
+    <button
+      type="button"
+      class="currency-picker__trigger"
+      :aria-expanded="showCurrency"
+      @click="showCurrency = !showCurrency"
+    >
+      <img src="~assets/img/exchange.png" alt="" aria-hidden="true" />
+      <span>{{ $t('حدد عملة الشراء') }}</span>
+    </button>
+
+    <ul v-if="showCurrency" class="currency-picker__list">
+      <li>
+        <button type="button" @click="currencySelectionHandler('SDG')">
+          <img src="~assets/img/sudan.png" alt="" />
+          <span>{{ $t('الجنيه السوداني') }}</span>
+        </button>
+      </li>
+      <li>
+        <button type="button" @click="currencySelectionHandler('USD')">
+          <img src="~assets/img/united-states .png" alt="" />
+          <span>{{ $t('الدولار الامريكي') }}</span>
+        </button>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
@@ -36,31 +32,82 @@ import { mapActions } from 'vuex'
 
 export default {
   name: 'Currency',
-  data () {
-    return {
-      showCurrency: false,
-      options: [
-        'USD', 'SDG', 'EUR', 'GBP', 'SAR'
-      ]
-    }
-  },
+  data () { return { showCurrency: false } },
   methods: {
     ...mapActions('settings', ['setCurrencyAction']),
-
     currencySelectionHandler (currency) {
-      // const name = `[data-cart="${currency}"]`
       this.setCurrencyAction(currency)
+      this.showCurrency = false
       this.$q.notify({
         type: 'positive',
         progress: true,
         multiLine: true,
         position: 'top',
         message: this.$t('تم تغيير العمله الى:') + currency
-    })
+      })
     }
   }
 }
 </script>
-<style lang="scss">
 
+<style lang="scss" scoped>
+.currency-picker {
+  position: relative;
+  display: inline-block;
+
+  &__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-pill);
+    padding: var(--ds-space-2) var(--ds-space-3);
+    cursor: pointer;
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-text);
+    transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+
+    img { block-size: 1.1rem; inline-size: auto; }
+    &:hover { background: var(--ds-surface-muted); }
+    &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+  }
+
+  &__list {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: calc(100% + var(--ds-space-1));
+    list-style: none;
+    margin: 0;
+    padding: var(--ds-space-1);
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-md);
+    box-shadow: var(--ds-shadow-md);
+    min-inline-size: 200px;
+    z-index: var(--ds-z-raised);
+
+    li { margin: 0; }
+    button {
+      inline-size: 100%;
+      display: flex;
+      align-items: center;
+      gap: var(--ds-space-2);
+      padding: var(--ds-space-2) var(--ds-space-3);
+      background: transparent;
+      border: 0;
+      border-radius: var(--ds-radius-sm);
+      color: var(--ds-text);
+      font-family: var(--ds-font-body);
+      font-size: var(--ds-text-sm);
+      cursor: pointer;
+      text-align: start;
+      transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+
+      img { block-size: 1rem; inline-size: auto; }
+      &:hover { background: var(--ds-surface-muted); }
+    }
+  }
+}
 </style>
