@@ -1,28 +1,12 @@
 <template>
-  <section class="statiscs">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="chart">
-                        <div class="row justify-center">
-                            <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
-                                <Statistcs-data :name="$t('طالب')" :query="GetTotalUsersStatistics"><span>K</span></Statistcs-data>
-                            </div>
-                            <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
-                                <Statistcs-data :name="$t('دكتور متخصص')" :query="GetAllInstructorsStatiscs"></Statistcs-data>
-                            </div>
-                            <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
-                                <Statistcs-data :name="$t('دوره تدريبيه')" :query="GetAllCoursesCountStatiscs"></Statistcs-data>
-                            </div>
-                            <div class="col-lg-3 col-md-5 col-sm-6 col-xs-11">
-                                <Statistcs-data :name="$t('ساعه تدريبيه')"  :query="GetAllCoursesHoursStatistics"><span>K</span></Statistcs-data>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+  <section class="home-stats">
+    <div class="home-stats__inner">
+      <statistcs-data :name="$t('طالب')" :query="GetTotalUsersStatistics"><span>K</span></statistcs-data>
+      <statistcs-data :name="$t('دكتور متخصص')" :query="GetAllInstructorsStatiscs" />
+      <statistcs-data :name="$t('دوره تدريبيه')" :query="GetAllCoursesCountStatiscs" />
+      <statistcs-data :name="$t('ساعه تدريبيه')" :query="GetAllCoursesHoursStatistics"><span>K</span></statistcs-data>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -31,25 +15,31 @@ import { GetAllCoursesCountStatiscs } from 'src/queries/course_management/query/
 import { GetAllCoursesHoursStatistics } from 'src/queries/course_management/query/GetAllCoursesHours'
 import { GetAllInstructorsStatiscs } from 'src/queries/account_management/query/GetAllInstructorsStatiscs'
 import { GetTotalUsersStatistics } from 'src/queries/account_management/query/GetTotalUsers'
+
 export default {
   name: 'Statiscs',
+  components: { 'statistcs-data': StatistcsData },
   data () {
     return {
-      GetAllCoursesCountStatiscs: GetAllCoursesCountStatiscs,
-      GetAllInstructorsStatiscs: GetAllInstructorsStatiscs,
-      GetAllCoursesHoursStatistics: GetAllCoursesHoursStatistics,
-      GetTotalUsersStatistics: GetTotalUsersStatistics
+      GetAllCoursesCountStatiscs,
+      GetAllInstructorsStatiscs,
+      GetAllCoursesHoursStatistics,
+      GetTotalUsersStatistics
     }
-  },
-  components: {
-    'Statistcs-data': StatistcsData
-  },
-  props: {
   }
 }
 </script>
-<style lang="scss">
-.container {
-    padding-right: 0 !important;
+
+<style lang="scss" scoped>
+.home-stats {
+  padding: var(--ds-space-10) var(--ds-space-4);
+
+  &__inner {
+    max-inline-size: 1120px;
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--ds-space-4);
+  }
 }
 </style>

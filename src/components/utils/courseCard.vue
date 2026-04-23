@@ -1,124 +1,182 @@
 <template>
-    <div class="card q-mb-lg">
-      <img class="pattern" src="~assets/img/patternn.png" alt="">
-      <div class="card-img-top">
-          <img class="plays" src="~assets/img/play.png" alt="">
-          <img src="~assets/img/moza.png" alt="Card image cap">
-          <img v-if="course.cover" :src="FORMAT_THE_IAMGE_URL(course.cover)" alt="">
-          <!-- <img v-if="course.cover" :src="CALCULATE_IMAGE_URL" alt=""> -->
-          <img v-else src="~assets/img/moza.png" alt="Card image cap">
+  <ds-card interactive class="public-course-card" @click="goToDetails">
+    <template #media>
+      <div class="public-course-card__media">
+        <img
+          v-if="course.cover"
+          :src="FORMAT_THE_IAMGE_URL(course.cover)"
+          :alt="displayTitle"
+        />
+        <img v-else src="~assets/img/moza.png" :alt="displayTitle" />
+        <ds-badge v-if="course.enrolled" variant="success" class="public-course-card__badge">
+          {{ $t('مشترك') }}
+        </ds-badge>
       </div>
-      <div class="card-body">
-        <h5 class="card-title"> {{name}}</h5>
-        <div class="detai">
-          <h3><span>{{currency}}</span>{{FORMAT_COUSRE_PRICE(parseFloat(JSON.parse(course.currency)[currency]), 3)}}</h3>
-          <div class="added">
-              <svg xmlns="http://www.w3.org/2000/svg" width="148.279" height="45.39" viewBox="0 0 148.279 45.39">
-                  <g id="Group_65702" data-name="Group 65702" transform="translate(-1165.277 -153.588)">
-                    <path id="Path_158448" data-name="Path 158448" d="M788.9,564.961l-6.771-3.433v6.011h7.347v-1.617A1.093,1.093,0,0,0,788.9,564.961Z" transform="translate(524.077 -407.94)" fill="#4a5999"/>
-                    <path id="Path_158449" data-name="Path 158449" d="M641.2,606.918H752.779c20.945,0,36.7-15.751,36.7-35.18v-4.957H674.83a25.69,25.69,0,0,0-23.791,16Z" transform="translate(524.077 -407.94)" fill="#667bd1"/>
-                  </g>
-              </svg>
-              <button v-if="course.enrolled" @click="GO_TO_THE_COURSE_LEARNING_CLASS">{{$t('الى الدرس')}}</button>
-              <button v-else @click="AddTheCourseToTheBasket"> <img src="~assets/img/add.png" alt=""> إضافة للسلة</button>
-          </div>
-        </div>
-        <button @click=" $router.push( { name: 'course-details', params: { pk: course.pk, name: course.title , id: course.id } } ) " class="details"> {{$t('التفاصيل')}} <img src="~assets/img/leftArraw.png" alt=""></button>
-      </div>
+    </template>
+
+    <h3 class="public-course-card__title">{{ displayTitle }}</h3>
+
+    <div class="public-course-card__price">
+      <span class="currency">{{ currency }}</span>
+      <span class="amount">{{ formattedPrice }}</span>
     </div>
 
+    <template #footer>
+      <div class="public-course-card__actions">
+        <ds-button
+          v-if="course.enrolled"
+          variant="accent"
+          full-width
+          @click.native.stop="goToClassroom"
+        >
+          {{ $t('الى الدرس') }}
+        </ds-button>
+        <ds-button
+          v-else
+          variant="primary"
+          full-width
+          @click.native.stop="addToCart"
+        >
+          {{ $t('إضافة للسلة') }}
+        </ds-button>
+        <ds-button
+          variant="ghost"
+          size="sm"
+          full-width
+          @click.native.stop="goToDetails"
+        >
+          {{ $t('التفاصيل') }}
+        </ds-button>
+      </div>
+    </template>
+  </ds-card>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import {FORMAT_THE_IAMGE_URL} from 'src/utils/functions.js'
+import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+
+const formatPrice = (num, digits = 3) => {
+  const lookup = [
+    { value: 1, symbol: '' },
+    { value: 1e3, symbol: 'k' },
+    { value: 1e6, symbol: 'M' },
+    { value: 1e9, symbol: 'B' }
+  ]
+  if (!Number.isFinite(num) || num === 0) return String(num)
+  const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
+  const item = lookup.slice().reverse().find(it => num >= it.value)
+  return item ? (num / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
+}
 
 export default {
   name: 'courseCard',
   props: ['name', 'instructor', 'unit', 'price', 'course'],
 
   data () {
-    return {
-      FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
-      openCourse: false
-    }
+    return { FORMAT_THE_IAMGE_URL }
   },
 
   computed: {
     ...mapState('authentication', ['user']),
-    ...mapState('shoppingCart', ['shoppingCartDataList']),
-    ...mapState('settings',['isEnglish', 'currency']),
-    CALCULATE_IMAGE_URL () {
-      if (process.env.NODE_ENV == 'development') {
-        return 'http://localhost:8000/media/' + this.course.cover
+    ...mapState('settings', ['isEnglish', 'currency']),
+
+    displayTitle () { return this.name || this.course.title },
+
+    formattedPrice () {
+      try {
+        const prices = JSON.parse(this.course.currency)
+        const raw = parseFloat(prices[this.currency])
+        return formatPrice(raw)
+      } catch (e) {
+        return '—'
       }
-      return 'https://api.stc.training' + '/media/' + this.course.cover
-      // return location.origin + '/media/' + this.course.cover
     }
   },
-  mounted () {
-    this.changeTheLayoutStyle(this.isEnglish)
-  },
-  watch: {
-    isEnglish (val) {
-      this.changeTheLayoutStyle(val)
-    },
-  },
+
   methods: {
     ...mapActions('shoppingCart', ['setShoppingCartDataListAction']),
 
-    GO_TO_THE_COURSE_LEARNING_CLASS () {
+    goToDetails () {
+      this.$router.push({
+        name: 'course-details',
+        params: { pk: this.course.pk, name: this.course.title, id: this.course.id }
+      })
+    },
+
+    goToClassroom () {
       window.location.href = `${location.origin}/classroom/#/class/${this.course.pk}/`
     },
 
-    FORMAT_COUSRE_PRICE(num, digits) {
-      const lookup = [
-        { value: 1, symbol: "" },
-        { value: 1e3, symbol: "k" },
-        { value: 1e6, symbol: "M" },
-        { value: 1e9, symbol: "G" },
-        { value: 1e12, symbol: "T" },
-        { value: 1e15, symbol: "P" },
-        { value: 1e18, symbol: "E" }
-      ];
-
-      if ( (num.toString().split('.')[0] == 0) || num == 0 ) {
-        return num
-      }
-      const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
-      var item = lookup.slice().reverse().find(function(item) {
-        return num >= item.value;
-      });
-      return item ? (num / item.value).toFixed(digits).replace(rx, "$1") + item.symbol : "0";
-    },
-
-    changeTheLayoutStyle(value) {
-        if (value) {
-            this.$jquery('.cart > img').css({
-                'transform': 'translateX(48%)'
-            })
-        } else {
-            this.$jquery('.cart > img').css({
-                'transform': 'translateX(0)'
-            })
-        }
-    },
-
-    AddTheCourseToTheBasket (){
-      const data = {
-        user: this.user,
-        course: this.course
-      }
-
-      this.setShoppingCartDataListAction(data)
-
-      // TODO: Go to the shopping cart
+    addToCart () {
+      this.setShoppingCartDataListAction({ user: this.user, course: this.course })
       this.$router.push({ name: 'cart' })
     }
   }
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
+.public-course-card {
+  block-size: 100%;
 
+  &__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    img {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform var(--ds-duration-slow) var(--ds-ease-out);
+    }
+  }
+
+  &:hover &__media img { transform: scale(1.05); }
+
+  &__badge {
+    position: absolute;
+    inset-block-start: var(--ds-space-3);
+    inset-inline-start: var(--ds-space-3);
+  }
+
+  &__title {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-md);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-text);
+    line-height: var(--ds-leading-tight);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-block-size: calc(var(--ds-text-md) * var(--ds-leading-tight) * 2);
+  }
+
+  &__price {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    .currency {
+      font-size: var(--ds-text-sm);
+      color: var(--ds-text-muted);
+      font-family: var(--ds-font-body);
+    }
+    .amount {
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-xl);
+      font-weight: var(--ds-weight-bold);
+      color: var(--ds-accent-600);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+  }
+}
 </style>
