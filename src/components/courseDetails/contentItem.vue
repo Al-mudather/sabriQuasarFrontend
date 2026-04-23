@@ -1,15 +1,19 @@
 <template>
 <div>
-  <!-- <pre>{{content}}</pre> -->
-    <div class="info flex q-mb-sm">
-        <div class="mage q-ml-sm">
-          <!-- <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" /> -->
-          <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" />
-          <img v-else src="~assets/img/padlock.png" alt="" />
-        </div>
-        <h6 class="video" v-if="content.isFree"  @click="OPEN_FREE_VIDEO_COURSE($event ,content)">{{ formatTitle }}</h6>
-        <h6 v-else >{{ formatTitle }}</h6>
-    </div>
+    <component
+      :is="content.isFree ? 'button' : 'div'"
+      class="content-row"
+      :class="{ 'content-row--locked': !content.isFree, 'content-row--free': content.isFree }"
+      :type="content.isFree ? 'button' : null"
+      @click="content.isFree && OPEN_FREE_VIDEO_COURSE($event, content)"
+    >
+      <span class="content-row__icon" aria-hidden="true">
+        <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" />
+        <img v-else src="~assets/img/padlock.png" alt="" />
+      </span>
+      <span class="content-row__title">{{ formatTitle }}</span>
+      <ds-badge v-if="content.isFree" variant="success" size="sm">{{ $t('مجاني') }}</ds-badge>
+    </component>
 
     <q-dialog v-model="card" persistent>
       <q-card class="my-card">
@@ -180,23 +184,61 @@ export default {
 }
 </script>
 
-<style lang="scss">
-.vjs-button {
-  background-color: transparent !important;
-}
+<style lang="scss" scoped>
+.content-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  inline-size: 100%;
+  text-align: inherit;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border: 0;
+  border-radius: var(--ds-radius-md);
+  background: transparent;
+  color: var(--ds-text);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-normal);
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-out),
+    color            var(--ds-duration-fast) var(--ds-ease-out);
 
-.my-card {
-  width: 100rem;
-  min-width: 23rem;
-}
-.video {
-  cursor: pointer;
-  color: $positive !important;
-  transition: all ease-in-out 0.3s;
-  backface-visibility: hidden;
+  &--locked {
+    color: var(--ds-text-muted);
+    cursor: default;
+  }
 
-  &:hover {
-    transform: scale(1.05);
+  &--free {
+    cursor: pointer;
+    &:hover {
+      background: var(--ds-brand-50);
+      color: var(--ds-brand-700);
+    }
+    &:focus-visible {
+      outline: 2px solid transparent;
+      box-shadow: var(--ds-shadow-focus);
+    }
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    inline-size: 1.15rem;
+    block-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    img { max-inline-size: 100%; max-block-size: 100%; opacity: 0.7; }
+  }
+
+  &--free &__icon img { opacity: 1; }
+
+  &__title {
+    flex: 1;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style>
+
