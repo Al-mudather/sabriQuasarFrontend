@@ -1,13 +1,10 @@
 <template>
- <section  class="profile q-mt-xl q-pa-sm">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="privacy">
-            <div class="title">
-              <img src="~assets/img/tit.png" alt="">
-              <h3>{{ isEnglish ? 'Privacy Policy' : 'سياسة الخصوصيه' }}</h3>
-            </div>
+  <main class="legal-page">
+    <header class="legal-page__hero">
+      <h1>{{ isEnglish ? 'Privacy Policy' : 'سياسة الخصوصيه' }}</h1>
+    </header>
+
+    <section class="legal-page__content">
             <div class="Conditions"> 
               <h3 class="condH">{{ isEnglish ? 'Important note' : 'ملاحظه مهمة' }}</h3>
               <p class="condP">
@@ -1530,627 +1527,97 @@ have about working with the API.
               </p>
             </div>
 
-          </div>
-      </div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </main>
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import { mapState } from 'vuex'
 
 export default {
-  name: 'Privacy',
-  data () {
-    return {
-    }
-  },
-
+  name: 'PrivacyPolicy',
   computed: {
     ...mapState('settings', ['isEnglish'])
   }
 }
 </script>
-<style lang="scss">
-@import "src/assets/css/sass/helpers/_variables.scss";
-@import "src/assets/css/sass/helpers/_mixins.scss";
 
-.uses {
-    margin-top: 1rem !important;
+<style lang="scss" scoped>
+.legal-page {
+  background: var(--ds-surface-muted);
+  min-block-size: 100vh;
+
+  &__hero {
+    background: linear-gradient(135deg, var(--ds-brand-700), var(--ds-brand-600));
+    color: var(--ds-text-onBrand);
+    padding: var(--ds-space-10) var(--ds-space-4);
+
+    h1 {
+      max-inline-size: 1120px;
+      margin: 0 auto;
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-3xl);
+      font-weight: var(--ds-weight-bold);
+
+      @media (min-width: 900px) { font-size: var(--ds-text-4xl); }
+    }
+  }
+
+  &__content {
+    max-inline-size: 880px;
+    margin-inline: auto;
+    padding: var(--ds-space-8) var(--ds-space-3) var(--ds-space-16);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-5);
+
+    @media (min-width: 600px) { padding-inline: var(--ds-space-4); }
+  }
 }
 
-.profile {
-    .title {
-        img {
-            opacity: 1;
-        }
-        h3 {
-            font-family: "cairoB";
-            font-size: 18px;
-            color: #787878;
-            margin: -29px 18px 39px 0;
-        }
-    }
-    .cn-pay {
-        padding: 0 10.1%;
-        display: block;
-        /*--box-pay--*/
-        .box-pay {
-            margin: 0 0 30px 0;
-            .inv {
-                text-align: center;
-                .box {
-                    border: 1px solid #ddd;
-                    border-radius: 62px;
-                    max-width: 80%;
-                    display: block;
-                    height: 40px;
-                    padding: 5px 0 0 0;
-                    margin: 0 auto 12px auto;
+// The original template uses .Conditions and .uses section blocks with
+// .condH headings and .condP paragraphs — keep those class hooks and
+// style them to match the DS card look used in the Terms page.
+::v-deep {
+  .Conditions,
+  .uses {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    padding: var(--ds-space-5);
+    box-shadow: var(--ds-shadow-xs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-3);
+  }
 
-                    h2 {
-                        display: inline-block;
-                        font-family: "cairoR";
-                        font-size: 15px;
-                        color: #7b86fa;
-                        span {
-                            color: #fcd462;
-                        }
-                    }
-                    img {
-                        display: inline-block;
-                        width: 30px;
-                        margin: -9px 0 0 0;
-                    }
-                    svg {  
-                        display: none;
-                        width: 46px;
-                        margin: -11px 0 0 0;
-                    }
-                }
-                .detaii {
-                    border-radius: 62px;
-                    max-width: 80%;
-                    display: block;
-                    height: 45px;
-                    padding: 11px 0 0 0;
-                    background-color: #7b86fa;
-                    position: relative;
-                    top: -6px;
-                    text-align: center;
-                    margin: 0 auto;
-                    a{
-                        display: block;
-                        font-family: "cairoR";
-                        font-size: 15px;
-                        color: #fff;
-                        text-decoration: none;
-                    }
-                    svg {  
-                        margin: 0 0 0 0;
-                    }
-                }
-            }
-            .data {
-                text-align: center;
-                background: #fff;
-                box-shadow: 4px 8px 9px #e5e4e4;
-                padding: 53px 0;
-                height: 237px;
-                border-radius: 32px;
-                img {
-                    width: 70px;
-                    text-align: center;
-                    margin: 0 0 12px 0;
-                }
-                h2 {
-                    font-family: "cairoR";
-                    font-size: 19px;
-                    color: #32ba7c;
-                    margin: 0 0 10px 0;
-                }
-                p {
-                    font-family: "cairoR";
-                    font-size: 16px;
-                    color: #313131;
-                }
-            }
-        }
-        /*--box-done--*/
-        .box-done {
-            .inv {
-                opacity: 1;
-                .box {
-                    opacity: 1;
-                    h2 {
-                        opacity: 1;
-                        span {
-                            opacity: 1;
-                        }
-                    }
-                    img {
-                        opacity: 1;
-                    }
-                }
-                svg {  
-                   opacity: 1;
-                }
-            }
-            .data {
-                opacity: 1;
-                img {
-                    opacity: 1;
-                }
-                h2 {
-                    opacity: 1;
-                }
-                p {
-  opacity: 1;
-                }
-            }
-        }
-        /*--box-wait--*/
-        .box-wait {
-            .inv {
-                opacity: 1;
-                .box {
-                    opacity: 1;
-                    h2 {
-                        opacity: 1;
-                        span {
-                            opacity: 1;
-                        }
-                    }
-                    img {
-                        opacity: 1;
-                    }
-                }
-                svg {  
-                   opacity: 1;
-                }
-            }
-            .data {
-                opacity: 1;
-                img {
-                    opacity: 1;
-                }
-                h2 {
-                    color: #7b86fa;
-                }
-                p {
-                    opacity: 1;
-                }
-            }
-        }
-        /*--box-unacceptable--*/
-        .box-unacceptable {
-            .inv {
-                opacity: 1;
-                .box {
-                    opacity: 1;
-                    h2 {
-                        opacity: 1;
-                        span {
-                            opacity: 1;
-                        }
-                    }
-                    img {
-                        opacity: 1;
-                    }
-                }
-                svg {  
-                   opacity: 1;
-                }
-            }
-            .data {
-                opacity: 1;
-                img {
-                    opacity: 1;
-                }
-                h2 {
-                    color: #ff5f5a;
-                }
-                p {
-                    opacity: 1;
-                }
-            }
-        }
-        /*--pending-request--*/
-        .pending-request {
-            opacity: 1;
-            .inv {
-                opacity: 1;
-                .box {
-                    opacity: 1;
-                    h2 {
-                        opacity: 1;
-                        span {
-                            opacity: 1;
-                        }
-                    }
-                    img {
-                        opacity: 1;
-                    }
-                }
-                svg {  
-                   opacity: 1;
-                }
-            }
-            .data {
-                padding: 24px 0 0 0;
-                img {
-                    width: 35px;
-                }
-                h2 {
-                    color: #dc8638;
-                    display: inline-block;
-                    margin: 0 5px 0 0
-                }
-                .money {
-                    background: #D97A22;
-                    max-width: 201px;
-                    margin: 27px auto 0 auto;
-                    border-radius: 30px;
-                    padding: 10px 0 10px 0;
-                    h3 {
-                        display: inline-block;
-                        font-family: "cairoB";
-                        font-size: 15px;
-                        color: #fff;
-                        margin: 0 -17px 10px 0;
-                    }
-                    .price {
-                        display: inline-block;
-                        background: #FCD462;
-                        border-radius: 37px;
-                        float: left;
-                        position: relative;
-                        left: 6px;
-                        top: -2px;
-                        h4 {
-                            font-size: 15px;
-                            font-family: "cairoB";
-                            padding: 8px 15px 0 15px;
-                            color: #787878;
-                            span {
-                                color: #fff;
-                                margin: 0 0 0 6px;
-                            }
-                        }
-                    }
-                }
-                .viewpay {
-                    opacity: 1;
-                    .box {
-                        max-width: 180px;
-                        margin: 0 auto;
-                        background: #fad25e;
-                        padding: 9px 0 9px 0;
-                        border-radius: 34px;
-                        cursor: pointer;
-                        img {
-                            opacity: 1;
-                        }
-                        h2 {
-                            color: #787878;
-                            display: inline-block;
-                            margin: 0 5px 0 0;
-                            font-size: 18px;
-                        }
-                    }
-                    svg {
-                        width: 80px;
-                        position: relative;
-                        top: 1px;
-                    }
-                }
-            }
-        }
-    }
-    .msPay{
-        display: none;
-        margin: 0 auto;
-        text-align: center;
-        h3{
-            font-size: 19px;
-            font-family: 'cairoR';
-            color: #7B7B7B;
-            margin: 35px 0 0 0;
-        }
-    }
-    .cer{
-        background-color: #3A54A1;
-        width: 841px;
-        height: 595px;
-        margin: 0 auto 30px auto;
-        padding: 20px;
-        position: relative;
-        overflow: hidden;
-        .backg{
-            position: absolute;
-            top: 0; 
-            z-index: 4;
-        }
-        .boodW{
-            background-color: #fff;
-            padding: 25px;
-            height: 555px;
-            position: relative;
-            svg{
-                position:absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-            }
-            .heddd{
-                margin: 0 0 0 0;
-                text-align: center;
-                position: relative;
-                z-index: 5;
-                .left{
-                    float: right;
-                    margin: -9px 0 0 0;
-                }
-                .right{
-                    float: left;
-                }
-                span{
-                    font-size: 16px;
-                    color: #5D5D5D;
-                    font-family: 'segoR';
-                }
-                h2{
-                    font-size: 26px;
-                    color: #2F2F2F;
-                    font-family: 'segoI';
-                }
-                img{
-                    margin: 10px 0 0 0;
-                }
-            }
-            .name{
-                text-align: center;
-                position: relative;
-                margin: 7px 0 0 0;
-                z-index: 5;
-                h3{
-                    font-size: 30px;
-                    color: #1A1818;
-                    font-family: 'segoB';
-                }
-                svg{
-                    position: absolute;
-                    left: 0;
-                    right: 0;
-                    top: 39px;
-                    margin: 0 auto;     
-                }
-                span{
-                    font-size: 16px;
-                    color: #5D5D5D;
-                    font-family: 'segoI';
-                    display: block;
-                    margin: 15px 0 0 0;
-                }
-                h4{
-                    color: #1A1818;
-                    font-size: 26px;
-                    font-family: 'segosR';
-                    margin: 12px 0 0 0;
-                }
-            }
-            .detaills{
-                margin: 20px 0 0 0;
-                padding: 0 109px 0 109px;
-                .hours{
-                    position: relative;
-                    z-index: 5;
-                    text-align: left;
-                    width: 146px;
-                    display: inline-block;
-                    span{
-                        font-size: 16px;
-                        color: #5D5D5D;
-                        font-family: 'segoI';
-                    }
-                    h3{
-                        display: inline-block;
-                        font-family: 'segosB';
-                        font-size: 23px;
-                        color: #1A1818;
-                        span{
-                            display: inline-block;
-                            color: #1A1818;
-                            margin-left: 11px;
-                        }
-                    }
-                }
-                .date{
-                    position: relative;
-                    z-index: 5;
-                    text-align: left;
-                    width: 382px;
-                    display: inline-block;
-                    h4{
-                        font-size: 16px;
-                        color: #5D5D5D;
-                        font-family: 'segoI';
-                    }
-                    h3{
-                        display: inline-block;
-                        font-family: 'segoB';
-                        color: #1A1818;
-                        font-size: 18px;
-                        margin-right: 10px;
-                    }
-                    span{
-                        font-size: 16px;
-                        color: #5D5D5D;
-                        font-family: 'segoI';
-                        display: inline-block;
-                        margin-right: 10px;
-                    }
-                }
-            }
-            .ended{
-                position: relative;
-                z-index: 5;
-                margin: 10px 0 0 0;
-                ul{
-                    li{
-                        list-style: none;
-                        display: inline-block;
-                        margin-right: 38px;
-                        margin-left: 35px;
-                        text-align: left;
-                        span{
-                            color: #1A1818;
-                            font-family: 'segoI';
-                            font-size: 17px;
-                        }
-                        h3{
-                            font-size: 15px;
-                            color: #5D5D5D;
-                            font-family: 'segoI';
-                        }
-                    }
-                }
-            }
-            .number{
-                position: relative;
-                z-index: 5;
-                margin: -6px 0 0 0;
-                ul{
-                    li{
-                        list-style: none;
-                        display: inline-block;
-                        margin-right: 34px;
-                        margin-left: 2px;
-                        h3{
-                            display: inline-block;
-                            font-size: 13px;
-                            color: #5D5D5D;
-                            font-family: 'segoI';
-                            span{
-                                font-size: 16px;
-                                display: inline-block;
-                                color: #5D5D5D;
-                                font-family: 'segoI';
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+  .Conditions {
+    border-inline-start: 4px solid var(--ds-accent-300);
+    background: var(--ds-accent-50);
+    .condH { color: var(--ds-accent-600); }
+  }
 
+  .condH {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-xl);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-text);
+    margin: 0;
+  }
 
-    .downlodd{
-        margin: 0 auto 40px auto;
-        text-align: center;
-        button{
-            font-size: 16px;
-            color: #fff;
-            font-family: 'cairoR';
-            background-color: #7B86FA;
-            width: 183px;
-            height: 46px;
-            transition: all ease-in-out .4s;
-            outline: 0;
-            &:hover{
-                background-color: #fad25e;
-                color: #1A1818;
-            }
-        }
-    }
+  .condP {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-md);
+    line-height: var(--ds-leading-arabic);
+    color: var(--ds-text);
+    margin: 0;
+    white-space: pre-line;
+  }
 
+  br { display: none; }
 
-    /*الاسئلة الشائعــــــة*/
-    .faq{
-        max-width: 726px;
-        margin: 0 auto;
-        .accord{
-            padding: 0 10px 0 10px;
-            .card{
-                margin: 0 0 10px 0;
-                border: 0;
-                .card-header{
-                    background-color: #7B86FA;
-                    border-bottom:2px solid #F2F2F2;
-                    padding: 0;
-                    a{
-                        color: #fff;
-                        font-size: 16px;
-                        font-family: 'cairoR';
-                        cursor: pointer;
-                        //maxMobile
-                        @media(max-width:767px){
-                            font-size: 15px;
-                        }
-                        .linke{
-                            background-color: #6D76D8;
-                            width: 49px;
-                            height: 52px;
-                            display: inline-block;
-                            text-align: center;
-                            margin:0 -20px 0 9px;
-                            line-height:3;
-                        }
-                    }
-                }
-                .collapse{
-                    .card-body{
-                        background-color: #fff;
-                        p{
-                            font-size: 16px;
-                            color: #5D5D5D;
-                            font-family: 'cairoR';
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /* سياســة الخصوصيــة*/
-
-    .privacy{
-
-        .Conditions{
-            margin-bottom: 40px;
-            .condH{
-                color: #fff;
-                font-family: 'cairoB';
-                font-size:18px;
-                padding: 10px;
-                background-color: #7B86FA;
-                margin-bottom: 20px;
-            }
-            .condP{
-                font-family: 'cairoR';
-                font-size: 16px;
-                color: $textColor;
-                margin: 0;
-            }
-        }
-
-        .uses{
-            .condH{
-                color: #fff;
-                font-family: 'cairoB';
-                font-size:18px;
-                padding: 10px;
-                background-color: #7B86FA;
-                margin-bottom: 20px;
-            }
-            .condP{
-                font-family: 'cairoR';
-                font-size: 16px;
-                color: $textColor;
-                margin: 0;
-            }
-        }
-    }
+  // Legacy .title block from the original — the hero already carries
+  // the page heading, so hide any residual in-body titles.
+  .privacy > .title { display: none; }
 }
 </style>
