@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-// import example from './module-example'
 import settings from './settings'
 import pyramidManagement from './pyramid_management'
 import authentication from './authentication'

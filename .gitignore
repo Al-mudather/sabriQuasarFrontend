@@ -38,3 +38,12 @@ mykeys.jks
 sign_android.bat
 stctraining.apk
 stctraining.apk.idsig
+
+# Commit yarn only (package-lock causes install drift)
+package-lock.json
+
+# Block accidental Finder/OS duplicate files
+*.bak
+* copy.*
+* copy [0-9].*
+*_old.*
