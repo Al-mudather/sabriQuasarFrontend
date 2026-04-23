@@ -582,7 +582,7 @@ export default {
     .text-input {
       flex: 1;
 
-      ::v-deep .q-field__control {
+      :deep(.q-field__control) {
         border: none !important;
         border-radius: 20px !important;
         background: transparent !important;
@@ -590,11 +590,11 @@ export default {
         padding: 0 !important;
       }
 
-      ::v-deep .q-field__outlined {
+      :deep(.q-field__outlined) {
         border: none !important;
       }
 
-      ::v-deep .q-field__native {
+      :deep(.q-field__native) {
         padding: 8px 12px !important;
         font-size: 14px !important;
         line-height: 1.4 !important;
@@ -602,12 +602,12 @@ export default {
         resize: none !important;
       }
 
-      ::v-deep .q-field__control::before,
-      ::v-deep .q-field__control::after {
+      :deep(.q-field__control::before),
+      :deep(.q-field__control::after) {
         border: none !important;
       }
 
-      ::v-deep .q-placeholder {
+      :deep(.q-placeholder) {
         color: #999 !important;
       }
     }

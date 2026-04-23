@@ -756,22 +756,22 @@ export default {
 
     /* DsCard stacks media / body / footer vertically via its internal layout;
        we force horizontal on wide screens via CSS grid on the root. */
-    ::v-deep .ds-card__media {
+    :deep(.ds-card__media) {
       grid-column: 1 / 2;
       grid-row: 1 / span 3;
     }
-    ::v-deep .ds-card__body {
+    :deep(.ds-card__body) {
       grid-column: 2 / 3;
     }
-    ::v-deep .ds-card__footer {
+    :deep(.ds-card__footer) {
       grid-column: 2 / 3;
     }
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
-      ::v-deep .ds-card__media,
-      ::v-deep .ds-card__body,
-      ::v-deep .ds-card__footer {
+      :deep(.ds-card__media),
+      :deep(.ds-card__body),
+      :deep(.ds-card__footer) {
         grid-column: 1 / -1;
       }
     }
@@ -783,13 +783,13 @@ export default {
     color: var(--ds-cream, var(--ds-text-on-indigo));
 
     /* Zero-out body & footer padding — body is overlaid on media. */
-    ::v-deep .ds-card__body {
+    :deep(.ds-card__body) {
       display: none;
     }
-    ::v-deep .ds-card__footer {
+    :deep(.ds-card__footer) {
       display: none;
     }
-    ::v-deep .ds-card__media {
+    :deep(.ds-card__media) {
       block-size: 100%;
     }
   }
@@ -859,8 +859,8 @@ export default {
   }
 
   /* ---------- Public/Enrolled body — tight, uniform spacing ---------- */
-  &--public ::v-deep .ds-card__body,
-  &--enrolled ::v-deep .ds-card__body {
+  &--public :deep(.ds-card__body),
+  &--enrolled :deep(.ds-card__body) {
     padding-block-start: calc(var(--ds-space-4) + 12px);
     padding-inline: var(--ds-space-5);
     padding-block-end: var(--ds-space-3);
@@ -872,8 +872,8 @@ export default {
     min-block-size: 0;
   }
 
-  &--public ::v-deep .ds-card__footer,
-  &--enrolled ::v-deep .ds-card__footer {
+  &--public :deep(.ds-card__footer),
+  &--enrolled :deep(.ds-card__footer) {
     margin-block-start: auto;
     padding-inline: var(--ds-space-5);
     padding-block-end: var(--ds-space-4);
@@ -904,7 +904,7 @@ export default {
     display: flex;
     flex-direction: column;
 
-    ::v-deep .ds-card__body {
+    :deep(.ds-card__body) {
       flex: 1 1 auto;
       display: flex;
       flex-direction: column;
@@ -912,7 +912,7 @@ export default {
       min-inline-size: 0;
     }
 
-    ::v-deep .ds-card__footer {
+    :deep(.ds-card__footer) {
       margin-block-start: auto;
     }
   }

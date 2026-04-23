@@ -66,7 +66,7 @@ export default {
 
   &__number {
     font-variant-numeric: tabular-nums;
-    ::v-deep span {
+    :deep(span) {
       font-size: 0.7em;
       color: var(--ds-accent-500);
       margin-inline-start: 0.1em;

@@ -179,7 +179,7 @@ export default {
   &__media {
     position: relative;
     line-height: 0;
-    ::v-deep img, ::v-deep video {
+    :deep(img), :deep(video) {
       width: 100%;
       height: auto;
       display: block;

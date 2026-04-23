@@ -1581,7 +1581,7 @@ export default {
 // The original template uses .Conditions and .uses section blocks with
 // .condH headings and .condP paragraphs — keep those class hooks and
 // style them to match the DS card look used in the Terms page.
-::v-deep {
+:deep(*) {
   .Conditions,
   .uses {
     background: var(--ds-surface);

@@ -485,7 +485,7 @@ export default {
 }
 
 .profile-card {
-  ::v-deep .ds-card__body {
+  :deep(.ds-card__body) {
     padding: var(--ds-space-6);
     display: flex;
     flex-direction: column;

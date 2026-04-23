@@ -133,11 +133,11 @@ export default {
     background-color var(--ds-duration-fast) var(--ds-ease-out),
     transform        var(--ds-duration-fast) var(--ds-ease-out);
 
-  ::v-deep .ds-card__body {
+  :deep(.ds-card__body) {
     padding: var(--ds-space-4);
   }
 
-  &--compact ::v-deep .ds-card__body {
+  &--compact :deep(.ds-card__body) {
     padding: var(--ds-space-3);
   }
 

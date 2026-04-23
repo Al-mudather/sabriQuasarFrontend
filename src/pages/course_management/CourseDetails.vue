@@ -729,7 +729,7 @@ export default {
   &__tabs {
     margin-block-start: var(--ds-space-8);
 
-    ::v-deep .ds-tabs__panels {
+    :deep(.ds-tabs__panels) {
       display: flex;
       flex-direction: column;
       gap: var(--ds-space-5);

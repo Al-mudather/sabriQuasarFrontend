@@ -457,7 +457,7 @@ export default {
 .referral-card {
   margin-block-end: var(--ds-space-6);
 
-  ::v-deep .ds-card__body {
+  :deep(.ds-card__body) {
     padding: var(--ds-space-6);
     display: flex;
     flex-direction: column;

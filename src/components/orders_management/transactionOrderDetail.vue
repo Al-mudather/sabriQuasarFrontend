@@ -237,7 +237,7 @@ export default {
   text-align: center;
   flex: 1;
 
-  ::v-deep .dot {
+  :deep(.dot) {
     inline-size: 1.5rem;
     block-size: 1.5rem;
     border-radius: 50%;

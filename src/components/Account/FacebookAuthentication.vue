@@ -218,7 +218,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.social ::v-deep .q-btn {
+.social :deep(.q-btn) {
   border-radius: var(--ds-radius-pill);
   font-family: var(--ds-font-heading);
   font-weight: var(--ds-weight-medium);

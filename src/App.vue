@@ -4,26 +4,28 @@
   </div>
 </template>
 <script>
-import { mapActions, mapState, mapGetters } from "vuex";
 import LogRocket from "logrocket";
 import { LocalStorage } from "quasar";
+import { useAuthStore } from "src/stores/auth";
 
 export default {
   name: "App",
+  setup() {
+    const auth = useAuthStore();
+    return { auth };
+  },
   data() {
     return {};
   },
 
   computed: {
-    ...mapState("authentication", ["token"]),
-    ...mapGetters("authentication", ["user"]),
+    token() { return this.auth.token; },
+    user()  { return this.auth.user; },
   },
   methods: {
-    ...mapActions("authentication", [
-      "RE_LOGIN_USER",
-      "logOutAction",
-      "DESTROY_THE_USER_REFRESH_TOKEN",
-    ]),
+    RE_LOGIN_USER()              { return this.auth.RE_LOGIN_USER(); },
+    logOutAction()                { return this.auth.logOutAction(); },
+    DESTROY_THE_USER_REFRESH_TOKEN() { return this.auth.DESTROY_THE_USER_REFRESH_TOKEN(); },
   },
 
   async unmounted() {

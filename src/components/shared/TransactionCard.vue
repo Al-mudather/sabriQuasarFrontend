@@ -259,7 +259,7 @@ export default {
 <style lang="scss" scoped>
 .tx-card {
   // DsCard supplies surface/radius/elevation. We tune padding here.
-  ::v-deep .ds-card__body {
+  :deep(.ds-card__body) {
     padding: var(--ds-space-6);
     gap: var(--ds-space-4);
     line-height: var(--ds-leading-arabic);
@@ -295,7 +295,7 @@ export default {
     justify-content: center;
     inline-size: 12px;
     block-size: 12px;
-    ::v-deep svg { inline-size: 12px; block-size: 12px; }
+    :deep(svg) { inline-size: 12px; block-size: 12px; }
   }
 
   &__badge--breath {

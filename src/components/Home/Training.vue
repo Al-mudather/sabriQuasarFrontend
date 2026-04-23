@@ -218,7 +218,7 @@ export default {
 }
 
 // Tab nav — kept minimal; swiper handles layout
-::v-deep .home-training__tabs .nav-link {
+:deep(.home-training__tabs) .nav-link {
   display: inline-flex;
   align-items: center;
   gap: var(--ds-space-2);

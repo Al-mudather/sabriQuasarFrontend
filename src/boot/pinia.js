@@ -1,7 +1,5 @@
-// Install the Pinia root alongside the Vuex 4 root. Quasar's default "store"
-// slot picks up src/store/index.js (Vuex) so Options-API components keep
-// working; this boot file installs Pinia so new stores can coexist during
-// the Track B -> C migration window.
+// Install the Pinia root. Vuex has been removed; all state now lives in
+// Pinia stores under src/stores/ (auth, cart, pyramid, settings).
 
 import { boot } from 'quasar/wrappers'
 import { createPinia } from 'pinia'

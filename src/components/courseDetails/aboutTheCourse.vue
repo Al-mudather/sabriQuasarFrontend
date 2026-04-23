@@ -44,7 +44,7 @@ export default {
     line-height: var(--ds-leading-arabic);
     color: var(--ds-text);
 
-    ::v-deep {
+    :deep(*) {
       p { margin: 0 0 var(--ds-space-3); }
       p:last-child { margin-block-end: 0; }
       ul, ol { padding-inline-start: var(--ds-space-5); margin: 0 0 var(--ds-space-3); }

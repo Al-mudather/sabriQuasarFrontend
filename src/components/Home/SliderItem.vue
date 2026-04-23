@@ -178,7 +178,7 @@ export default {
   flex-wrap: wrap;
 }
 
-.slide__countdown ::v-deep > * {
+.slide__countdown :deep(>) * {
   display: flex;
   gap: var(--ds-space-3, 0.75rem);
   flex-wrap: wrap;
