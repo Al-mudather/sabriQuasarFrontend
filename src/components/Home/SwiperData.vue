@@ -79,7 +79,7 @@ export default {
 <style lang="scss">
 @import "src/css/helpers/_functions.scss";
 @import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variabels.scss";
+@import "src/css/helpers/_variables.scss";
 
 /*--- Start opinions ---*/
 .opinions {

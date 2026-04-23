@@ -259,7 +259,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "src/css/helpers/_variabels.scss";
+@import "src/css/helpers/_variables.scss";
 
 // Chat Toggle Button
 .chat-toggle {

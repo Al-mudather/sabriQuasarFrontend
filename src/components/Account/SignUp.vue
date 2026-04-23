@@ -286,7 +286,7 @@ export default {
 </script>
  
 <style lang="scss">
-@import "src/assets/css/sass/helpers/_variabels.scss";
+@import "src/assets/css/sass/helpers/_variables.scss";
 @import "src/assets/css/sass/helpers/_mixins.scss";
 @import "src/assets/css/account.scss";
 

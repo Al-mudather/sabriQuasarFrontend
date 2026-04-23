@@ -117,7 +117,7 @@ export default {
 <style lang="scss">
 @import "src/css/helpers/_functions.scss";
 @import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variabels.scss";
+@import "src/css/helpers/_variables.scss";
 
 .password{
     padding: 50px 0;

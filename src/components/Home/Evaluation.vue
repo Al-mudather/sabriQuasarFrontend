@@ -78,7 +78,7 @@ export default {
 <style lang="scss" scope>
 @import "src/css/helpers/_functions.scss";
 @import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variabels.scss";
+@import "src/css/helpers/_variables.scss";
 /*--- Start Evaluation ---*/
 .evaluation {
     padding: 20px 0;

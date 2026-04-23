@@ -319,7 +319,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variabels.scss";
+@import "src/css/helpers/_variables.scss";
 .logOutBtn {
   height: 41px;
   width: 137px;

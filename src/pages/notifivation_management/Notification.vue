@@ -121,7 +121,7 @@ export default {
 </script>
 <style lang="scss">
 @import "src/css/helpers/_mixins.scss";
-@import "src/css/helpers/_variabels.scss";
+@import "src/css/helpers/_variables.scss";
 /*--============= Start Notification page =============--*/
 .Notific{
     padding: 10px;
