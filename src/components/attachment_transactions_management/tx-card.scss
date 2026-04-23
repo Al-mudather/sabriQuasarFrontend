@@ -1,0 +1,76 @@
+// Shared styles for transaction status cards:
+// Transaction_completed, Transaction_under_processing, Transaction_rejected,
+// Transaction_hanged. Variant background keyed off a BEM modifier.
+
+.tx-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-space-4);
+  box-shadow: var(--ds-shadow-xs);
+  block-size: 100%;
+
+  &--completed  { border-inline-start: 4px solid var(--ds-success); }
+  &--pending    { border-inline-start: 4px solid var(--ds-warning); }
+  &--rejected   { border-inline-start: 4px solid var(--ds-danger); }
+  &--hanging    { border-inline-start: 4px solid var(--ds-neutral-300); }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-2);
+  }
+
+  &__invoice {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-1);
+    font-family: var(--ds-font-heading);
+    font-variant-numeric: tabular-nums;
+    color: var(--ds-text);
+    font-size: var(--ds-text-sm);
+
+    img { block-size: 1rem; inline-size: auto; }
+  }
+
+  &__details {
+    background: transparent;
+    border: 0;
+    color: var(--ds-brand-600);
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-weight-medium);
+    cursor: pointer;
+    padding: var(--ds-space-1) var(--ds-space-2);
+    border-radius: var(--ds-radius-sm);
+    transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+
+    &:hover { background: var(--ds-brand-50); }
+    &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ds-space-2);
+    padding-block: var(--ds-space-3);
+
+    img {
+      inline-size: auto;
+      block-size: auto;
+      max-block-size: 72px;
+      max-inline-size: 100%;
+    }
+  }
+
+  &__upload {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+  }
+}
