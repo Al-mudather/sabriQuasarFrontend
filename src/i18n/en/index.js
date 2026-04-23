@@ -314,7 +314,7 @@ export default {
       "اذهب الى الدرس" : "Go to the lesson",
  
         
-  "_comment_src_components_notifivation_management_NotificationCard.vue": "src_components_notifivation_management_NotificationCard.vue",
+  "_comment_src_components_notification_management_NotificationCard.vue": "src_components_notification_management_NotificationCard.vue",
         
  
       "السؤال :" : "the question :",
@@ -612,7 +612,7 @@ export default {
       "extColor;                            margin: 0;                        }                    }                }                .right{                    h2{                        text-align: center;                    }                }                .linke{                    text-decoration: none;                    margin: 0 20px 0 0;                    position: absolute;                    width: 86px;                    cursor: pointer;                    h3{                        font-size: 12px;                        display: inline-block;                        color: #ffff;                        font-family: cairoR;                        .mage{                            width: auto;                            display: inline-block;                            margin: 0;                            position: unset;                        }                    }                }                .share{                    text-align: center;                    margin: 0 0 7px 0;                    padding: 10px;                    form{                        position: relative;                        text-align: center;                        width: 78%;                        margin: 0 auto;                        top: 17px;                        //maxMobile                        @mediamax-width:767px" : "extColor; margin: 0; }}} .right {h2 {text-align: center; }} .linke {text-decoration: none; margin: 0 20px 0 0; position: absolute; width: 86px; cursor: pointer; h3 {font-size: 12px; display: inline-block; color: #ffff; font-family: cairoR; .mage {width: auto; display: inline-block; margin: 0; position: unset; }}} .share {text-align: center; margin: 0 0 7px 0; padding: 10px; form {position: relative; text-align: center; width: 78%; margin: 0 auto; top: 17px; // maxMobile @ mediamax-width: 767px",
  
         
-  "_comment_src_pages_notifivation_management_Notification.vue": "src_pages_notifivation_management_Notification.vue",
+  "_comment_src_pages_notification_management_Notification.vue": "src_pages_notification_management_Notification.vue",
         
  
       "الإشعارات" : "Notices",

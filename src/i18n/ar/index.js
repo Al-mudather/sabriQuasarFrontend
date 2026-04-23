@@ -291,8 +291,8 @@ export default {
 
   "اذهب الى الدرس": "اذهب الى الدرس",
 
-  "_comment_src_components_notifivation_management_NotificationCard.vue":
-    "src_components_notifivation_management_NotificationCard.vue",
+  "_comment_src_components_notification_management_NotificationCard.vue":
+    "src_components_notification_management_NotificationCard.vue",
 
   "السؤال :": "السؤال :",
 
@@ -586,8 +586,8 @@ export default {
   "extColor;                            margin: 0;                        }                    }                }                .right{                    h2{                        text-align: center;                    }                }                .linke{                    text-decoration: none;                    margin: 0 20px 0 0;                    position: absolute;                    width: 86px;                    cursor: pointer;                    h3{                        font-size: 12px;                        display: inline-block;                        color: #ffff;                        font-family: cairoR;                        .mage{                            width: auto;                            display: inline-block;                            margin: 0;                            position: unset;                        }                    }                }                .share{                    text-align: center;                    margin: 0 0 7px 0;                    padding: 10px;                    form{                        position: relative;                        text-align: center;                        width: 78%;                        margin: 0 auto;                        top: 17px;                        //maxMobile                        @mediamax-width:767px":
     "extColor. الهامش: 0؛ }}} .right {h2 {text-align: center؛ }} .linke {زخرفة النص: لا شيء ؛ الهامش: 0 20px 0 0 ؛ الموقف: مطلق. العرض: 86 بكسل ؛ المؤشر: المؤشر. h3 {حجم الخط: 12 بكسل ؛ عرض: مضمنة كتلة ؛ اللون: #ffff ؛ عائلة الخطوط: cairoR؛ .mage {width: auto؛ عرض: مضمنة كتلة ؛ الهامش: 0؛ الموقف: unset؛ }}} .Share {text-align: center؛ الهامش: 0 0 7px 0 ؛ الحشو: 10 بكسل ؛ شكل {الموقف: نسبي؛ محاذاة النص: مركز ؛ العرض: 78٪؛ الهامش: 0 تلقائي ؛ أعلى: 17 بكسل ؛ // maxMobile @ mediamax-width: 767 بكسل",
 
-  "_comment_src_pages_notifivation_management_Notification.vue":
-    "src_pages_notifivation_management_Notification.vue",
+  "_comment_src_pages_notification_management_Notification.vue":
+    "src_pages_notification_management_Notification.vue",
 
   الإشعارات: "الإشعارات",
 
