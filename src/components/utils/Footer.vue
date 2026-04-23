@@ -1,127 +1,80 @@
 <template>
-  <footer>
-    <div class="container">
-      <div class="row">
-        <!--links-->
-        <div class="col-lg-4 col-md-4 col-sm-12">
-          <div class="links">
-            <a
-              class="links__link"
-              @click="$router.push({ name: 'termsAndConditions' })"
-              >{{ isEnglish ? "Terms and Conditions" : "الأحكام والشروط" }}</a
-            >
-            <a
-              class="links__link"
-              @click="$router.push({ name: 'privacyPolicy' })"
-              >{{ isEnglish ? "Privacy Policy" : "سياسة الخصوصيه" }}</a
-            >
-          </div>
-        </div>
-        <!--logo-->
-        <div class="col-lg-4 col-md-4 col-sm-12">
-          <div class="logo">
-            <img src="~assets/img/suppo.png" alt="" />
-            <h2>جميع الحقوق محفوظة 2024-2021</h2>
-          </div>
-        </div>
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <nav class="site-footer__links">
+        <a class="site-footer__link" @click="$router.push({ name: 'terms-and-conditions' })">
+          {{ isEnglish ? 'Terms and Conditions' : 'الأحكام والشروط' }}
+        </a>
+        <a class="site-footer__link" @click="$router.push({ name: 'privacy-policy' })">
+          {{ isEnglish ? 'Privacy Policy' : 'سياسة الخصوصيه' }}
+        </a>
+      </nav>
+
+      <div class="site-footer__brand">
+        <img src="~assets/img/suppo.png" alt="" />
+        <p>{{ isEnglish ? 'All rights reserved 2024–2021' : 'جميع الحقوق محفوظة 2024-2021' }}</p>
       </div>
     </div>
   </footer>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState } from 'vuex'
 
 export default {
-  name: "Footer",
-
-  computed: {
-    ...mapState("settings", ["isEnglish"]),
-  },
-};
+  name: 'Footer',
+  computed: { ...mapState('settings', ['isEnglish']) }
+}
 </script>
-<style lang="scss">
-.links {
-  &__link {
-    color: white !important;
-    cursor: pointer;
-    transition: all 5ms cubic-bezier(0.075, 0.82, 0.165, 1);
 
-    &:hover {
-      transform: scale(1.1);
-    }
+<style lang="scss" scoped>
+.site-footer {
+  background: var(--ds-brand-800);
+  color: rgba(255, 255, 255, 0.85);
+  padding: var(--ds-space-8) var(--ds-space-4);
+  margin-block-start: var(--ds-space-16);
+
+  &__inner {
+    max-inline-size: 1200px;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-6);
+    flex-wrap: wrap;
   }
-}
-/*--- Start Footer ---*/
-footer {
-  padding: 10px 0;
-  margin: 150px 0 0 0;
-  .support {
+
+  &__links {
+    display: flex;
+    gap: var(--ds-space-5);
+    flex-wrap: wrap;
+  }
+
+  &__link {
+    color: rgba(255, 255, 255, 0.8);
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-sm);
     cursor: pointer;
-    text-align: center;
-    position: fixed;
-    bottom: 27px;
-    right: 17px;
-    z-index: 5;
-    img {
-      width: auto;
-    }
+    text-decoration: none;
+    transition: color var(--ds-duration-fast) var(--ds-ease-out);
+    &:hover { color: var(--ds-accent-300); }
   }
-  .foo {
-    background-color: #f9f9f9;
-    .copright {
-      text-align: center;
-      background-color: #f9f9f9;
-      width: 173px;
-      margin: 0 auto;
-      padding: 10px;
-      border-radius: 55px;
-      position: relative;
-      top: -41px;
-      h3 {
-        font-size: 16px;
-        color: #5666b9;
-        font-family: "cairoB";
-        margin: 0 auto;
-        line-height: 1.5;
-        position: relative;
-        width: 161px;
-        top: -35px;
-        text-align: center;
-        span {
-          color: #5666b9;
-          font-family: "cairoB";
-        }
-      }
-      .logos {
-        position: relative;
-        margin: -42px 0 0 0;
-        text-align: center;
-        img {
-          width: auto;
-        }
-      }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-3);
+
+    img {
+      block-size: 2rem;
+      inline-size: auto;
     }
-    .method {
-      text-align: center;
-      margin: -54px 0 0 0;
-      ul {
-        list-style: none;
-        margin: 0;
-        h3 {
-          color: $textColor;
-          font-size: 18px;
-          font-family: "cairoR";
-          display: inline-block;
-          margin-left: 10px;
-        }
-        li {
-          margin-left: 20px;
-          display: inline-block;
-        }
-      }
+    p {
+      margin: 0;
+      font-size: var(--ds-text-sm);
+      color: rgba(255, 255, 255, 0.7);
+      font-variant-numeric: tabular-nums;
     }
   }
 }
-/*--- End Footer ---*/
 </style>

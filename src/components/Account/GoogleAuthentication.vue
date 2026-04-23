@@ -186,30 +186,11 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@import "src/assets/css/sass/helpers/_variables.scss";
-@import "src/assets/css/sass/helpers/_mixins.scss";
-@import "src/assets/css/account.scss";
-
-.q-btn__content {
-    padding-right: 0 !important;
-    padding-left: 0 !important;
-}
-
-.q-btn {
-    &> span {
-        margin-right: 0 !important;
-        margin-left: 0 !important;
-        &> span {
-            margin-right: 0 !important;
-            margin-left: 0 !important;
-        }
-    }
-}
-
-.q-icon {
-    margin-left: 0 !important;
-    margin-right: 0.3rem;
-
+<style lang="scss" scoped>
+.social ::v-deep .q-btn {
+  border-radius: var(--ds-radius-pill);
+  font-family: var(--ds-font-heading);
+  font-weight: var(--ds-weight-medium);
+  text-transform: none;
 }
 </style>

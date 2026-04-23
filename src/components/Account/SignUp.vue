@@ -1,324 +1,174 @@
 <template>
-    <AccountHeader
-        :prevRoute="prevRoute"
-        :dialogName="$t('إنشاء حساب جديد')"
-    >
-        <!--
-        Signup Section
-        -->
-        <div class="signup">
-            <!-- <div class="logBy"> -->
-            <div class="row q-ma-md q-pt-xl justify-center">
-                <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/>
-                <!-- <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" class="col-11 q-ma-sm"/> -->
-            </div>
-            <div @click="GO_TO_THE_TERMS_AND_CONDETIONS_PAGE" style="cursor: pointer" class="text-center textStyle  q-mb-md">
-                {{ isEnglish ? 'By using the platform, you agree to the terms and conditions of the platform' : 'بإستخدامك للمنصه فانت توافق على شروط و احكام المنصه' }}
-            </div>
-            <!-- <form @submit="REGISTER_NEW_USER($event)"> -->
-            <!-- <form>
-                <div class="text-h6">التسجيل عن طريق facebook أو Gmail فقط</div>
-                <div class="row">
-                    <div class="col-lg-12 col-xs-12">
-                        <div class="inp">
-                            <input
-                                class="input"
-                                id="fullName"
-                                disabled
-                                v-model="fullName"
-                                type="text"
-                                :placeholder="$t('الاسم الحقيقي')"
-                            />
-                        </div>
-                        <div class="inp">
-                            <img src="~assets/img/gmail.png" alt="" />
-                            <input
-                                class="input"
-                                id="regEmail"
-                                disabled
-                                v-model="email"
-                                type="email"
-                                :placeholder="$t('الإيميل')"
-                            />
-                        </div>
-                        <div class="inp">
-                            <img src="~assets/img/password.png" alt="" />
-                            <input
-                                class="input"
-                                id="regPassword"
-                                v-model="password1"
-                                disabled
-                                type="password"
-                                :placeholder="$t('كلمة المرور')"
-                            />
-                            <img
-                                class="closee"
-                                src="~assets/img/eye.png"
-                                alt=""
-                            />
-                        </div>
-                        <div class="inp">
-                            <img src="~assets/img/password.png" alt="" />
-                            <input
-                                class="input"
-                                id="regPassword2"
-                                v-model="password2"
-                                disabled
-                                type="password"
-                                :placeholder="$t('إعادة كلمة المرور')"
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div class="next">
-                    <button disabled class="action_btn" type="submit" id="siginUpAction" style="outline: none; border: none; background: transparent; box-shadow: none; cursor: pointer">
-                        <svg
-                            class="nexx neex_1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="61.667"
-                            height="54"
-                            viewBox="0 0 61.667 54"
-                        >
-                            <g
-                                id="Group_363"
-                                data-name="Group 363"
-                                transform="translate(0 54)"
-                            >
-                                <path
-                                    id="Path_55"
-                                    data-name="Path 595"
-                                    d="M61.667-27A23.678,23.678,0,0,0,38-50.667H28.333A23.678,23.678,0,0,0,4.667-27,23.678,23.678,0,0,0,28.333-3.333H38A23.678,23.678,0,0,0,61.667-27Z"
-                                    fill="#fbc74b"
-                                    fill-rule="evenodd"
-                                />
-                                <path
-                                    id="Path_56"
-                                    data-name="Path 596"
-                                    d="M28.333-1.333,27,0A27.013,27.013,0,0,1,0-27,27.013,27.013,0,0,1,27-54l1.333,1.333A25.679,25.679,0,0,0,2.667-27,25.679,25.679,0,0,0,28.333-1.333Z"
-                                    fill="#fbc74b"
-                                    fill-rule="evenodd"
-                                />
-                            </g>
-                        </svg>
-                        <img src="~assets/img/back.png" alt="" />
-                    </button>
-                </div>
-            </form> -->
-            <q-inner-loading :showing="visible">
-                <q-spinner-hourglass color="primary" size="70px" />
-            </q-inner-loading>
-        </div>
-    </AccountHeader>
+  <AccountHeader :prevRoute="prevRoute" :dialogName="$t('إنشاء حساب جديد')">
+    <section class="auth-form">
+      <p class="auth-form__lead">
+        {{ isEnglish
+          ? 'Create your account in seconds — sign up with your Google account.'
+          : 'أنشئ حسابك في ثوانٍ — سجّل عبر حساب Google.' }}
+      </p>
+
+      <div class="auth-form__social">
+        <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" />
+      </div>
+
+      <p class="auth-form__terms" @click="GO_TO_THE_TERMS_AND_CONDETIONS_PAGE">
+        {{ isEnglish
+          ? 'By using the platform, you agree to the terms and conditions of the platform'
+          : 'بإستخدامك للمنصه فانت توافق على شروط و احكام المنصه' }}
+      </p>
+
+      <q-inner-loading :showing="visible">
+        <q-spinner-hourglass color="primary" size="70px" />
+      </q-inner-loading>
+    </section>
+  </AccountHeader>
 </template>
 
 <script>
-import { RegisterNewUser } from "src/queries/account_management/mutation/RegisterNewUser";
-import { GetMyProfileData } from "src/queries/account_management/query/GetMyProfileData";
-import { mapActions, mapState } from "vuex";
-import AccountHeader from "src/components/utils/accountHeader";
-import GoogleAuthentication from 'src/components/Account/GoogleAuthentication';
-// import FacebookAuthentication from 'src/components/Account/FacebookAuthentication';
+import { RegisterNewUser } from 'src/queries/account_management/mutation/RegisterNewUser'
+import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
+import { mapActions, mapState } from 'vuex'
+import AccountHeader from 'src/components/utils/accountHeader'
+import GoogleAuthentication from 'src/components/Account/GoogleAuthentication'
 
 export default {
+  name: 'SignUp',
+  components: { AccountHeader, GoogleAuthentication },
 
-    data() {
-        return {
-            facebookLabel: "إنشاء حساب جديد بإستخدام FACEBOOK",
-            googleLabel: "إنشاء حساب جديد بإستخدام Google",
-            visible: false,
-            prevRoute: null,
-            fullName: "",
-            email: "",
-            password1: "",
-            password2: "",
-            errorMessages: []
-        };
+  data () {
+    return {
+      facebookLabel: 'إنشاء حساب جديد بإستخدام FACEBOOK',
+      googleLabel: 'إنشاء حساب جديد بإستخدام Google',
+      visible: false,
+      prevRoute: null,
+      fullName: '',
+      email: '',
+      password1: '',
+      password2: '',
+      errorMessages: []
+    }
+  },
+
+  computed: { ...mapState('settings', ['isEnglish']) },
+
+  beforeRouteEnter (to, from, next) {
+    next(vm => { vm.prevRoute = from.fullPath })
+  },
+
+  mounted () {
+    if (this.isEnglish) {
+      this.facebookLabel = 'SignUp using Facebook'
+      this.googleLabel   = 'SignUp using Google'
+    }
+  },
+
+  methods: {
+    ...mapActions('authentication', [
+      'loginAction',
+      'setSignUpDialogAction',
+      'setRegisterationDialogAction',
+      'SET_USER_DATA_ACTION'
+    ]),
+
+    GO_TO_THE_TERMS_AND_CONDETIONS_PAGE () { this.$router.push({ name: 'terms-and-conditions' }) },
+
+    errorHandler (errorsObj) {
+      for (const key in errorsObj) {
+        for (const val of errorsObj[key]) {
+          this.$q.notify({
+            type: 'warning',
+            progress: true,
+            multiLine: true,
+            position: 'top',
+            message: val.message
+          })
+        }
+      }
     },
 
-    components: {
-        AccountHeader,
-        GoogleAuthentication
-        // FacebookAuthentication
-    },
-
-    beforeRouteEnter(to, from, next) {
-
-        next(vm => {
-            vm.prevRoute = from.fullPath
+    async REGISTER_NEW_USER () {
+      // Legacy email/password signup. The flow is preserved so the
+      // /api remains compatible, but the UI only exposes Google signup
+      // since email signup was disabled product-wide.
+      if (!this.fullName || !this.email || !this.password1) {
+        this.$q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'All Fields are required' })
+        return
+      }
+      if (this.password1 !== this.password2) {
+        this.$q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'passwords are not the same' })
+        return
+      }
+      this.visible = true
+      this.errorMessages = []
+      try {
+        const signUp_res = await this.$apollo.mutate({
+          mutation: RegisterNewUser,
+          variables: {
+            email: this.email,
+            fullName: this.fullName,
+            password1: this.password1,
+            password2: this.password2
+          }
         })
-    },
-
-    mounted() {
-        if (this.isEnglish) {
-            this.facebookLabel = 'SignUp using Facebook'
-            this.googleLabel =  'SignUp using Google' 
-        } else {
-            this.facebookLabel = "إنشاء حساب جديد بإستخدام FACEBOOK"
-            this.googleLabel =  "إنشاء حساب جديد بإستخدام Google" 
+        if (signUp_res.data.register.success) {
+          const tokenAuth = {
+            token: signUp_res.data.register.token,
+            refresh: signUp_res.data.register.refreshToken
+          }
+          await this.loginAction(tokenAuth)
+          const profile = await this.$apollo.query({ query: GetMyProfileData })
+          this.SET_USER_DATA_ACTION(profile.data.me)
+          this.$q.notify({
+            type: 'warning',
+            progress: true,
+            multiLine: true,
+            position: 'top',
+            message: this.$t('يجب ان تقوم بتفعيل حسابك الإلكتروني')
+          })
+          this.$router.push({ name: 'password-confirm' })
+        } else if (signUp_res.data.register.errors) {
+          this.errorHandler(signUp_res.data.register.errors)
         }
-    },
-
-    computed: {
-        ...mapState('settings', ['isEnglish'])
-    },
-
-    methods: {
-        ...mapActions("authentication", [
-            "loginAction",
-            "setSignUpDialogAction",
-            "setRegisterationDialogAction",
-            "SET_USER_DATA_ACTION"
-        ]),
-
-        GO_TO_THE_TERMS_AND_CONDETIONS_PAGE() {
-            this.$router.push({ name: "termsAndConditions" });
-        },
-
-        errorHandler(errorsObj) {
-            for (const key in errorsObj) {
-                for (const val of errorsObj[key]) {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: val.message
-                    })
-                }
-            }
-        },
-
-        async REGISTER_NEW_USER(event) {
-            event.preventDefault();
-            try {
-                if (this.fullName && this.email&& this.password1 ) {
-                    if (this.password1 === this.password2) {
-                        // Start the loder
-                        this.visible = true
-                        this.errorMessages = [];
-                        const signUp_res = await this.$apollo.mutate({
-                            mutation: RegisterNewUser,
-                            variables: {
-                                email: this.email,
-                                fullName: this.fullName,
-                                password1: this.password1,
-                                password2: this.password2
-                            }
-                        })
-                        
-                        if (signUp_res.data.register.success){
-                            const tokenAuth = {
-                                token: signUp_res.data.register.token,
-                                refresh: signUp_res.data.register.refreshToken
-                            }
-
-                            this.loginAction(tokenAuth).then(() => {
-
-                                try {
-                                    this.$apollo.query({
-                                        query: GetMyProfileData
-                                    }).then(res => {
-                                        this.SET_USER_DATA_ACTION(res.data.me)
-                                        this.$q.notify({
-                                            type: 'warning',
-                                            progress: true,
-                                            multiLine: true,
-                                            position: 'top',
-                                            message: this.$t('يجب ان تقوم بتفعيل حسابك الإلكتروني')
-                                        })
-                                    })
-                                } catch (error) {
-                                }
-                            });
-                            this.GotToConfirmationPage();
-                        } else if (signUp_res.data.register.errors) {
-                            this.visible = false
-                            this.errorHandler(signUp_res.data.register.errors);
-                        }
-
-                    } else {
-                        this.$q.notify({
-                            type: 'warning',
-                            progress: true,
-                            multiLine: true,
-                            position: 'top',
-                            message: "passwords are not the same"
-                        })
-                    }
-                } else {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: "All Fields are required"
-                    })
-                }
-                
-            } catch (error) {
-                if (error.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: this.$t('هذا الحساب مسجل مسبقا')
-                    })
-                } else {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: 'There were some errors please try again latter'
-                    })
-                }
-                // Close the loder
-                this.visible = false
-            }
-        },
-
-        GotToConfirmationPage() {
-            this.$router.push({ name: "password-confirm" });
-        }
+      } catch (error) {
+        const msg = error && error.message === 'GraphQL error: UNIQUE constraint failed: account_manager_user.email'
+          ? this.$t('هذا الحساب مسجل مسبقا')
+          : 'There were some errors please try again latter'
+        this.$q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: msg })
+      } finally {
+        this.visible = false
+      }
     }
-};
+  }
+}
 </script>
- 
-<style lang="scss">
-@import "src/assets/css/sass/helpers/_variables.scss";
-@import "src/assets/css/sass/helpers/_mixins.scss";
-@import "src/assets/css/account.scss";
 
-.input {
-    font-size: 1.5rem;
-    font-family: inherit;
-    color: inherit;
-    padding: 1.5rem 2rem;
-    border-radius: 2px;
-    background-color: rgba($color-white, .5);
-    // border: none;
-    border-bottom: 3px solid transparent;
-    width: 90%;
-    display: block;
-    transition: all .3s;
+<style lang="scss" scoped>
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
 
-    // @include respond(tab-port) {
-    //     width: 100%;
-    // }
+  &__lead {
+    font-size: var(--ds-text-md);
+    color: var(--ds-text);
+    text-align: center;
+    line-height: var(--ds-leading-arabic);
+    margin: 0;
+  }
 
-    &:focus {
-        outline: none;
-        box-shadow: 0 1rem 2rem rgba($color-black, .1);
-        border-bottom: 3px solid $color-primary !important;
-    }
+  &__social {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+  }
 
-    &:focus:invalid {
-        border-bottom: 3px solid $color-secondary-dark !important;
-    }
-
-    &::-webkit-input-placeholder {
-        color: $color-grey-dark-2;
-    }
+  &__terms {
+    font-size: var(--ds-text-sm);
+    color: var(--ds-text-muted);
+    text-align: center;
+    margin: 0;
+    cursor: pointer;
+    &:hover { color: var(--ds-brand-600); text-decoration: underline; }
+  }
 }
 </style>
