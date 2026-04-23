@@ -75,9 +75,6 @@ export default {
                 }
             });
             const syberPayDetails = syberpayPaymentresult.data.createSyberpayCheckout;
-            console.log('sssssssssssssssssssss')
-            console.log(syberPayDetails)
-            console.log('sssssssssssssssssssss')
             if (this.$_.get(syberPayDetails, "[errors]")) {
                 this.visible = false;
                 alert(details.errors.nonFieldErrors);

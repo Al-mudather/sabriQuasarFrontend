@@ -137,7 +137,6 @@ export default {
                   })
                 } else if (result.data.passwordChange.errors) {
                   
-                  console.log(result.data.passwordChange);
 
                   this.errorHandler(result.data.passwordChange.errors);
                 }

@@ -106,7 +106,6 @@ export default {
             if (typeof errorsObj == 'object') {
                 for (const key of Object.keys(errorsObj))
                     for (const val of errorsObj[key] ) {
-                        console.log( val)
                         if (typeof val.message == 'object') {
                             this.$q.notify({
                                 type: 'warning',

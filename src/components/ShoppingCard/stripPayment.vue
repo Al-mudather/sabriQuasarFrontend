@@ -47,7 +47,6 @@ export default {
       for (const key in errorsObj) {
         // console.log(errorsObj[key])
         for (const val of errorsObj[key]) {
-          console.log(val);
           this.$q.notify({
             type: "warning",
             progress: true,
@@ -83,7 +82,6 @@ export default {
         const stripPaymentUrl = await this.getStripPaymentUrlFromTheBackend(
           orderResult
         );
-        console.log(stripPaymentUrl);
         // TODO: Make the payment
         stripe.redirectToCheckout({
           sessionId: stripPaymentUrl,
@@ -160,7 +158,6 @@ export default {
           cancelUrl: location.origin + "/#/cart/cancel",
         },
       });
-      console.log(stripPaymentresult);
       const stripDetails = stripPaymentresult.data.createStripeCheckout;
       if (this.$_.get(stripDetails, "[errors]")) {
         this.visible = false;

@@ -62,7 +62,6 @@ export default {
     errorHandler(errorsObj) {
       for (const key in errorsObj) {
         for (const val of errorsObj[key]) {
-          console.log(val);
           this.$q.notify({
             type: "warning",
             progress: true,

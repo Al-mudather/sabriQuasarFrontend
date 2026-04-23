@@ -73,7 +73,6 @@ export default {
       this.$router.push({ name: 'login' })
     },
     errorHandler (errorsObj) {
-      console.log(errorsObj)
       for (const key in errorsObj) {
         for (const val of errorsObj[key]) {
           this.errorMessages.push(val.message)
@@ -94,7 +93,6 @@ export default {
 
           if (res.data.passwordReset.success) {
             this.$router.push({ name: 'login' })
-            console.log(res.data.passwordReset.success)
           } else if (res.data.passwordReset.errors) this.errorHandler(res.data.passwordReset.errors)
         })
       } else {

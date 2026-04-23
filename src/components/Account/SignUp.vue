@@ -175,7 +175,6 @@ export default {
         },
 
         errorHandler(errorsObj) {
-            console.log(errorsObj);
             for (const key in errorsObj) {
                 for (const val of errorsObj[key]) {
                     this.$q.notify({

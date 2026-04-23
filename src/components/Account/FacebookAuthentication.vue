@@ -83,7 +83,6 @@ export default {
         },
         // TODO: Google and Facebook Register
         loginAuthMutation(accessToken, provider, email = "") {
-            console.log(" Triggering Apollo ");
             this.visible = true
             this.$apollo
                 .mutate({

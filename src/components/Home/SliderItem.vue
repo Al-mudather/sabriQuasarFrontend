@@ -119,10 +119,8 @@ export default {
   methods: {
 
     startCallBack: function(x) {
-      console.log(x);
     },
     endCallBack: function(x) {
-      console.log(x);
     },
 
     FORMAT_COURSE_COVER_IMAGE () {

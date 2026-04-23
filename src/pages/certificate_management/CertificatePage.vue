@@ -68,9 +68,6 @@ export default {
 
       update (data) {
         this.myCertificate = data.allCertificates
-        console.log('dddddddddddddddddddddd')
-        console.log( this.myCertificate )
-        console.log('dddddddddddddddddddddd')
       }
     }
   },
