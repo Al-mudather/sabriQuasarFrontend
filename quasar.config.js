@@ -22,7 +22,6 @@ module.exports = configure(function (/* ctx */) {
     // envparser is a plain CJS helper consumed by this config (build.env),
     // not a runtime boot file. Only runtime boot files are listed here.
     boot: [
-      'pinia',
       'main',
       'backend',
       'customFiles',

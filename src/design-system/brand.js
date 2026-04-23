@@ -7,9 +7,10 @@
  * paths or hex codes elsewhere.
  */
 
-// Quasar resolves the `src` alias to `/src`. Using `require` so the
-// bundler fingerprints these paths at build time.
-const logoFull = require('src/assets/brand/logo-full.jpg');
+// Vite resolves this URL-import at build time and fingerprints the asset.
+// (The earlier `require()` call was a webpack-era pattern and doesn't work
+// in ESM/Vite — it crashed the app at module load with "require is not defined".)
+import logoFull from 'src/assets/brand/logo-full.jpg'
 
 export const LOGO = {
   /** Full-colour lockup — default header usage. */
