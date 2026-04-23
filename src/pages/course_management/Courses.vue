@@ -4,7 +4,7 @@
     <header class="catalog__head">
       <div class="catalog__head-inner">
         <ds-breadcrumb class="catalog__crumbs">
-          <ds-breadcrumb-item :to="{ name: 'home' }">
+          <ds-breadcrumb-item :to="{ name: 'Home' }">
             {{ $t('الرئيسية') }}
           </ds-breadcrumb-item>
           <ds-breadcrumb-item>
