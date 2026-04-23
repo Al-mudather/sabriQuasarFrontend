@@ -116,6 +116,13 @@ const routes = [
     ]
   },
 
+  // Dev-only design system showcase. Kept out of production bundle splits
+  // by convention — the route resolves but is intentionally undocumented
+  // for end users.
+  ...(process.env.NODE_ENV === 'development'
+    ? [{ path: '/design-system', name: 'design-system', component: () => import('src/pages/DesignSystem.vue') }]
+    : []),
+
   // Always leave this as last one,
   // but you can also remove it
   {

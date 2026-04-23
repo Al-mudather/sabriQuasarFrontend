@@ -1,0 +1,76 @@
+@use "sass:map";
+
+// =============================================================
+// RTL-safe mixins. Use these instead of hand-rolled
+// margin-left / padding-right / left / right.
+// =============================================================
+
+@mixin ds-inline-start($value) { margin-inline-start: $value; }
+@mixin ds-inline-end($value)   { margin-inline-end:   $value; }
+@mixin ds-pad-inline($start, $end: $start) {
+  padding-inline-start: $start;
+  padding-inline-end:   $end;
+}
+
+// =============================================================
+// Focus ring — use on any interactive element.
+// Transparent outline preserves layout; box-shadow paints ring.
+// =============================================================
+@mixin ds-focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--ds-shadow-focus);
+}
+
+// =============================================================
+// Breakpoints — mobile-first only.
+// =============================================================
+@mixin ds-above($bp) {
+  @if $bp == sm      { @media (min-width: 600px)  { @content; } }
+  @else if $bp == md { @media (min-width: 900px)  { @content; } }
+  @else if $bp == lg { @media (min-width: 1200px) { @content; } }
+  @else if $bp == xl { @media (min-width: 1536px) { @content; } }
+}
+
+// =============================================================
+// Typography helpers
+// =============================================================
+@mixin ds-heading($size: xl) {
+  font-family: var(--ds-font-heading);
+  font-weight: var(--ds-weight-bold);
+  line-height: var(--ds-leading-tight);
+  color: var(--ds-text);
+  @if     $size == 4xl { font-size: var(--ds-text-4xl); }
+  @else if $size == 3xl { font-size: var(--ds-text-3xl); }
+  @else if $size == 2xl { font-size: var(--ds-text-2xl); }
+  @else if $size == xl  { font-size: var(--ds-text-xl);  }
+  @else if $size == lg  { font-size: var(--ds-text-lg);  }
+  @else                 { font-size: var(--ds-text-md);  }
+}
+
+@mixin ds-body($size: md) {
+  font-family: var(--ds-font-body);
+  font-weight: var(--ds-weight-regular);
+  line-height: var(--ds-leading-arabic);
+  color: var(--ds-text);
+  @if     $size == lg { font-size: var(--ds-text-lg); }
+  @else if $size == sm { font-size: var(--ds-text-sm); }
+  @else if $size == xs { font-size: var(--ds-text-xs); }
+  @else                { font-size: var(--ds-text-md); }
+}
+
+// =============================================================
+// Truncation
+// =============================================================
+@mixin ds-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin ds-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,2 +1,5 @@
-// app global css in SCSS form
+// Global app styles. Kept intentionally thin — real styling
+// lives in the design system (src/design-system/*) and is
+// consumed via CSS custom properties.
 
+@import "../design-system/tokens.scss";

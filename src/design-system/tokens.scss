@@ -1,0 +1,180 @@
+// =============================================================
+// Design tokens — single source of truth for color, type,
+// spacing, radius, shadow, motion. Consumed via both CSS custom
+// properties (runtime overridable, theme-switching friendly) and
+// SCSS variables (compile-time, for media queries / math).
+//
+// Brand direction: navy + gold, Arabic-first, medical-professional.
+// Anti-templates: gradient blobs, neon purples, over-rounded UIs.
+// =============================================================
+
+:root {
+  // -----------------------------------------------------------
+  // Color — brand
+  // -----------------------------------------------------------
+  --ds-brand-50:  #eaf1fb;
+  --ds-brand-100: #c9daf0;
+  --ds-brand-200: #9fbde0;
+  --ds-brand-300: #6d99cf;
+  --ds-brand-400: #3f78bd;
+  --ds-brand-500: #1c5ca5;   // hover-lighter
+  --ds-brand-600: #104982;   // primary — existing $mainColor
+  --ds-brand-700: #0c3a6a;
+  --ds-brand-800: #0a2c52;
+  --ds-brand-900: #061e39;
+
+  // Accent — gold (CTAs, highlights)
+  --ds-accent-50:  #fff6dc;
+  --ds-accent-100: #ffe7a4;
+  --ds-accent-200: #fdd66d;
+  --ds-accent-300: #fcc74c;   // existing $yalloColor
+  --ds-accent-400: #f1b42a;
+  --ds-accent-500: #d69b18;
+  --ds-accent-600: #a8780f;
+
+  // Neutrals (warm-cool gray)
+  --ds-neutral-0:    #ffffff;
+  --ds-neutral-50:   #f7f8fa;
+  --ds-neutral-100:  #eef0f4;
+  --ds-neutral-200:  #dde1e9;
+  --ds-neutral-300:  #c2c8d4;
+  --ds-neutral-400:  #9ba3b2;
+  --ds-neutral-500:  #7b7b7b;   // existing $textColor
+  --ds-neutral-600:  #5b6271;
+  --ds-neutral-700:  #3f4656;
+  --ds-neutral-800:  #262b38;
+  --ds-neutral-900:  #13161e;
+
+  // Semantic
+  --ds-success: #1f9d55;
+  --ds-success-bg: #e4f6ec;
+  --ds-warning: #c28418;
+  --ds-warning-bg: #fef3dc;
+  --ds-danger:  #c23138;
+  --ds-danger-bg: #fbe5e7;
+  --ds-info:    var(--ds-brand-500);
+  --ds-info-bg: var(--ds-brand-50);
+
+  // Surface tokens (derived — swap for dark mode later)
+  --ds-surface:        var(--ds-neutral-0);
+  --ds-surface-muted:  var(--ds-neutral-50);
+  --ds-surface-sunken: var(--ds-neutral-100);
+  --ds-text:           var(--ds-neutral-800);
+  --ds-text-muted:     var(--ds-neutral-500);
+  --ds-text-onBrand:   var(--ds-neutral-0);
+  --ds-border:         var(--ds-neutral-200);
+  --ds-border-strong:  var(--ds-neutral-300);
+
+  // -----------------------------------------------------------
+  // Typography
+  // -----------------------------------------------------------
+  --ds-font-body:    'cairoR', 'Cairo', 'Segoe UI', 'Tahoma', sans-serif;
+  --ds-font-heading: 'cairoB', 'Cairo', 'Segoe UI', 'Tahoma', sans-serif;
+
+  // Fluid type scale: clamp(min, preferred, max). 16px base.
+  --ds-text-2xs: clamp(0.70rem, 0.68rem + 0.1vw, 0.75rem);    // 11-12
+  --ds-text-xs:  clamp(0.78rem, 0.76rem + 0.1vw, 0.82rem);    // 12.5-13
+  --ds-text-sm:  clamp(0.88rem, 0.85rem + 0.15vw, 0.94rem);   // 14-15
+  --ds-text-md:  clamp(1.00rem, 0.96rem + 0.2vw,  1.08rem);   // 16-17
+  --ds-text-lg:  clamp(1.12rem, 1.07rem + 0.25vw, 1.22rem);   // 18-19.5
+  --ds-text-xl:  clamp(1.28rem, 1.20rem + 0.4vw,  1.44rem);   // 20.5-23
+  --ds-text-2xl: clamp(1.50rem, 1.38rem + 0.6vw,  1.75rem);   // 24-28
+  --ds-text-3xl: clamp(1.85rem, 1.65rem + 1vw,   2.25rem);    // 29-36
+  --ds-text-4xl: clamp(2.30rem, 2.00rem + 1.5vw, 2.90rem);    // 36-46
+
+  --ds-leading-tight:  1.25;
+  --ds-leading-normal: 1.55;
+  --ds-leading-arabic: 1.85;   // Arabic text needs more breathing room
+
+  --ds-weight-regular: 400;
+  --ds-weight-medium:  500;
+  --ds-weight-bold:    700;
+
+  // -----------------------------------------------------------
+  // Spacing — 4px base
+  // -----------------------------------------------------------
+  --ds-space-0:  0;
+  --ds-space-1:  0.25rem;    // 4
+  --ds-space-2:  0.5rem;     // 8
+  --ds-space-3:  0.75rem;    // 12
+  --ds-space-4:  1rem;       // 16
+  --ds-space-5:  1.25rem;    // 20
+  --ds-space-6:  1.5rem;     // 24
+  --ds-space-8:  2rem;       // 32
+  --ds-space-10: 2.5rem;     // 40
+  --ds-space-12: 3rem;       // 48
+  --ds-space-16: 4rem;       // 64
+  --ds-space-20: 5rem;       // 80
+  --ds-space-24: 6rem;       // 96
+
+  // -----------------------------------------------------------
+  // Radius
+  // -----------------------------------------------------------
+  --ds-radius-xs:  4px;
+  --ds-radius-sm:  6px;
+  --ds-radius-md:  10px;
+  --ds-radius-lg:  14px;
+  --ds-radius-xl:  20px;
+  --ds-radius-2xl: 28px;
+  --ds-radius-pill: 999px;
+
+  // -----------------------------------------------------------
+  // Shadow — subtle, layered (never "drop-shadow with bad blur")
+  // -----------------------------------------------------------
+  --ds-shadow-xs: 0 1px 2px rgba(13, 22, 43, 0.04);
+  --ds-shadow-sm: 0 1px 3px rgba(13, 22, 43, 0.06), 0 1px 2px rgba(13, 22, 43, 0.04);
+  --ds-shadow-md: 0 4px 10px rgba(13, 22, 43, 0.06), 0 2px 4px rgba(13, 22, 43, 0.04);
+  --ds-shadow-lg: 0 12px 24px rgba(13, 22, 43, 0.08), 0 4px 8px rgba(13, 22, 43, 0.04);
+  --ds-shadow-focus: 0 0 0 3px rgba(16, 73, 130, 0.25);
+
+  // -----------------------------------------------------------
+  // Motion
+  // -----------------------------------------------------------
+  --ds-duration-instant: 80ms;
+  --ds-duration-fast:    160ms;
+  --ds-duration-base:    240ms;
+  --ds-duration-slow:    400ms;
+
+  --ds-ease-out:    cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ds-ease-in:     cubic-bezier(0.42, 0, 1, 1);
+  --ds-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  // -----------------------------------------------------------
+  // Z-index
+  // -----------------------------------------------------------
+  --ds-z-base:     1;
+  --ds-z-raised:   10;
+  --ds-z-sticky:   100;
+  --ds-z-overlay:  1000;
+  --ds-z-modal:    2000;
+  --ds-z-toast:    3000;
+}
+
+// =============================================================
+// SCSS bridge — lets SCSS consumers use the same tokens in
+// media queries, functions, and math where CSS vars can't reach.
+// =============================================================
+
+// Breakpoints (mobile-first)
+$ds-bp-sm: 600px;
+$ds-bp-md: 900px;
+$ds-bp-lg: 1200px;
+$ds-bp-xl: 1536px;
+
+// Container max-widths
+$ds-container-sm: 560px;
+$ds-container-md: 840px;
+$ds-container-lg: 1120px;
+$ds-container-xl: 1320px;
+
+// =============================================================
+// Reduced motion — respect OS preference globally
+// =============================================================
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ds-duration-instant: 0ms;
+    --ds-duration-fast:    0ms;
+    --ds-duration-base:    0ms;
+    --ds-duration-slow:    0ms;
+  }
+}
