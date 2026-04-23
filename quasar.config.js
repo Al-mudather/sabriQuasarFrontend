@@ -76,7 +76,7 @@ module.exports = configure(function (/* ctx */) {
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#property-framework
     framework: {
       iconSet: 'material-icons',
-      lang: 'en-US',
+      lang: 'ar',
       config: {
         // Brand tokens mirror src/design-system/tokens.scss.
         // Royal Indigo is the locked primary (STC logo color).

@@ -127,12 +127,11 @@ export default {
 
         try {
           await import(
-            /* webpackInclude: /(de|en-us)\.js$/ */
             "quasar/lang/" + langIso
           ).then((lang) => {
             Quasar.lang.set({
               ...lang.default,
-              rtl: true,
+              rtl: false,
             });
           });
 
@@ -158,10 +157,8 @@ export default {
         this.settings.setIsEnglish(value);
 
         try {
-          Quasar.lang.set({
-            isoName: "ar",
-            nativeName: "العربية",
-          });
+          const lang = await import("quasar/lang/ar");
+          Quasar.lang.set({ ...lang.default, rtl: true });
 
           this.$jquery(".backgroun").css({
             transform: "rotate(360deg)",

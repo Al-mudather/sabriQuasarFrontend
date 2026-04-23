@@ -38,16 +38,18 @@ export default {
     this.settings.setIsEnglish(this.isEnglish)
     this.$i18n.locale = this.isEnglish ? 'en' : 'ar'
 
-    if (this.isEnglish) {
-      try {
+    // Lang-pack rtl flag drives html.dir. Omitting rtl:true for Arabic
+    // (or setting rtl:true for English) flips the whole page to LTR and
+    // breaks Arabic glyph shaping. Keep these flags accurate.
+    try {
+      if (this.isEnglish) {
         const lang = await import('quasar/lang/en-us')
+        Quasar.lang.set({ ...lang.default, rtl: false })
+      } else {
+        const lang = await import('quasar/lang/ar')
         Quasar.lang.set({ ...lang.default, rtl: true })
-      } catch (err) { /* lang pack missing; no-op */ }
-    } else {
-      try {
-        Quasar.lang.set({ isoName: 'ar', nativeName: 'العربية' })
-      } catch (err) { /* no-op */ }
-    }
+      }
+    } catch (err) { /* lang pack missing; no-op */ }
   }
 }
 </script>

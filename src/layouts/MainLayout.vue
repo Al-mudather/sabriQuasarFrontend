@@ -44,12 +44,16 @@ export default {
       this.$i18n.locale = isEnglish ? 'en' : 'ar'
       this.settings.setIsEnglish(isEnglish)
 
+      // rtl flag on the lang pack drives html.dir. Omitting rtl:true for
+      // Arabic (or setting rtl:true for English) flips the whole page to
+      // LTR and breaks Arabic glyph shaping.
       try {
         if (isEnglish) {
-          const lang = await import(/* webpackInclude: /(de|en-us)\.js$/ */ 'quasar/lang/en-us')
-          Quasar.lang.set({ ...lang.default, rtl: true })
+          const lang = await import('quasar/lang/en-us')
+          Quasar.lang.set({ ...lang.default, rtl: false })
         } else {
-          Quasar.lang.set({ isoName: 'ar', nativeName: 'العربية' })
+          const lang = await import('quasar/lang/ar')
+          Quasar.lang.set({ ...lang.default, rtl: true })
         }
       } catch (err) { /* lang pack missing; no-op */ }
     }

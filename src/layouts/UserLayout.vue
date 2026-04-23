@@ -237,9 +237,10 @@ export default {
       try {
         if (isEnglish) {
           const lang = await import('quasar/lang/en-us')
-          Quasar.lang.set({ ...lang.default, rtl: true })
+          Quasar.lang.set({ ...lang.default, rtl: false })
         } else {
-          Quasar.lang.set({ isoName: 'ar', nativeName: 'العربية' })
+          const lang = await import('quasar/lang/ar')
+          Quasar.lang.set({ ...lang.default, rtl: true })
         }
       } catch (err) { /* lang pack missing; no-op */ }
     }

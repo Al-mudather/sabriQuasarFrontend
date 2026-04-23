@@ -101,7 +101,10 @@ export default {
   }
 }
 
-:global(html[dir='rtl']) .ds-breadcrumb-item__sep {
+// `:global(html[dir='rtl']) ...` compiled incorrectly under Vue 3 scoped
+// styles (dropped the inner selector and flipped the whole <html>). Plain
+// ancestor-attr selector compiles correctly and targets only the separator.
+[dir='rtl'] .ds-breadcrumb-item__sep {
   transform: scaleX(-1);
 }
 </style>

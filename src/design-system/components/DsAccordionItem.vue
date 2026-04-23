@@ -245,8 +245,8 @@ export default {
   }
 }
 
-:global(html[dir='rtl']) .ds-accordion-item__chevron {
-  // chevron SVG points down by default; rotation logic identical in RTL
-  // (vertical rotation is direction-agnostic)
-}
+// chevron SVG points down by default; rotation logic is vertical and
+// therefore direction-agnostic — no RTL override needed. (Left note instead
+// of an empty `:global(html[dir='rtl'])` rule, which the Vue scoped-style
+// parser was mis-compiling into a whole-document scaleX(-1) flip.)
 </style>
