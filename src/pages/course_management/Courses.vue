@@ -5,45 +5,45 @@
       <div class="catalog__head-inner">
         <ds-breadcrumb class="catalog__crumbs">
           <ds-breadcrumb-item :to="{ name: 'Home' }">
-            {{ $t('الرئيسية') }}
+            الرئيسية
           </ds-breadcrumb-item>
           <ds-breadcrumb-item>
-            {{ $t('الدورات') }}
+            الدورات
           </ds-breadcrumb-item>
         </ds-breadcrumb>
 
-        <h1 class="catalog__title">{{ $t('جميع الدورات') }}</h1>
+        <h1 class="catalog__title">جميع الدورات</h1>
 
         <p class="catalog__subtitle">
           <template v-if="totalCount !== null">
-            {{ formatNum(totalCount) }} {{ $t('دورة متاحة') }}
+            {{ formatNum(totalCount) }} دورة متاحة
           </template>
           <template v-else>
-            {{ $t('استكشف مكتبة الدورات التدريبية') }}
+            استكشف مكتبة الدورات التدريبية
           </template>
         </p>
       </div>
     </header>
 
     <div class="catalog__shell">
-      <!-- =========== Sidebar (inline-end in RTL) =========== -->
+      <!-- =========== Sidebar (inline-start — right in RTL, left in LTR) =========== -->
       <aside class="catalog__sidebar" aria-label="filters">
         <div class="filter-panel">
           <div class="filter-panel__head">
-            <h2 class="filter-panel__heading">{{ $t('الفلاتر') }}</h2>
+            <h2 class="filter-panel__heading">الفلاتر</h2>
             <button
               v-if="hasActiveFilters"
               type="button"
               class="filter-panel__clear"
               @click="clearAllFilters"
             >
-              {{ $t('مسح الفلاتر') }}
+              مسح الفلاتر
             </button>
           </div>
 
           <!-- Speciality group -->
           <section class="filter-panel__group">
-            <h3 class="filter-panel__group-title">{{ $t('التخصص') }}</h3>
+            <h3 class="filter-panel__group-title">التخصص</h3>
             <div v-if="specialitiesLoading" class="filter-panel__skeletons">
               <ds-skeleton v-for="i in 5" :key="i" shape="line" width="80%" />
             </div>
@@ -58,7 +58,7 @@
                     @change="setSpeciality(null)"
                   />
                   <span class="check__mark" aria-hidden="true"></span>
-                  <span class="check__label">{{ $t('كل التخصصات') }}</span>
+                  <span class="check__label">كل التخصصات</span>
                 </label>
               </li>
               <li
@@ -83,7 +83,7 @@
 
           <!-- Price group -->
           <section class="filter-panel__group">
-            <h3 class="filter-panel__group-title">{{ $t('السعر') }}</h3>
+            <h3 class="filter-panel__group-title">السعر</h3>
             <ul class="filter-panel__list">
               <li
                 v-for="f in priceFilters"
@@ -124,24 +124,24 @@
               v-model="searchInput"
               type="search"
               class="catalog__search-input"
-              :placeholder="$t('ابحث عن دورة...')"
-              :aria-label="$t('البحث في الدورات')"
+              placeholder="ابحث عن دورة..."
+              aria-label="البحث في الدورات"
             />
           </div>
 
           <div class="catalog__sort">
             <label for="sort-select" class="catalog__sort-label">
-              {{ $t('ترتيب:') }}
+              ترتيب:
             </label>
             <select
               id="sort-select"
               v-model="sortValue"
               class="catalog__sort-select"
             >
-              <option value="newest">{{ $t('الأحدث') }}</option>
-              <option value="popular">{{ $t('الأكثر طلباً') }}</option>
-              <option value="price_asc">{{ $t('السعر: من الأقل') }}</option>
-              <option value="price_desc">{{ $t('السعر: من الأعلى') }}</option>
+              <option value="newest">الأحدث</option>
+              <option value="popular">الأكثر طلباً</option>
+              <option value="price_asc">السعر: من الأقل</option>
+              <option value="price_desc">السعر: من الأعلى</option>
             </select>
           </div>
         </div>
@@ -182,8 +182,8 @@
           v-else-if="!coursesLoading && coursesEdgeCount <= 0"
           variant="search"
           size="md"
-          :title="$t('لا توجد دورات تطابق البحث')"
-          :body="$t('جرّب إزالة بعض الفلاتر أو تعديل كلمات البحث')"
+          title="لا توجد دورات تطابق البحث"
+          body="جرّب إزالة بعض الفلاتر أو تعديل كلمات البحث"
         />
 
         <div v-else>
@@ -209,7 +209,7 @@
               :loading="coursesLoading"
               @click="loadMore()"
             >
-              {{ $t('تحميل المزيد') }}
+              تحميل المزيد
             </ds-button>
           </div>
         </div>
@@ -266,7 +266,10 @@ export default {
     )
 
     // Reactive query variables — shared ref so useQuery updates on filter change.
-    const queryVars = reactive({ first: 12, orderBy: ['-createdAt'], isDraft: false })
+    // Schema-allowed orderBy fields for allCourses include `created`, `title`,
+    // `course_fee`, etc. `createdAt` is NOT a valid key and triggers a
+    // "Cannot resolve keyword 'created_at'" error — use `-created` instead.
+    const queryVars = reactive({ first: 12, orderBy: ['-created'], isDraft: false })
     /** @type {import('@vue/apollo-composable').UseQueryReturn<GetAllCoursesResult, GetAllCoursesVars>} */
     const coursesQuery = useQuery(GetAllCourses, () => queryVars, {
       fetchPolicy: 'cache-and-network'
@@ -289,10 +292,13 @@ export default {
       if (Number.isFinite(Number(tc))) totalCount.value = Number(tc)
     })
 
+    // Retained in setup closure (not returned) so fetchMore/refetch are still
+    // accessible to methods. We stash a non-reserved-prefix handle on `this`
+    // via the returned object below.
     return {
       auth,
       settings,
-      _coursesQuery: coursesQuery,
+      coursesQueryRef: coursesQuery,
       queryVars,
       specialitiesLoading,
       specialitiesEdges,
@@ -323,19 +329,19 @@ export default {
   computed: {
     priceFilters () {
       return [
-        { id: 'all',  label: this.$t('الكل') },
-        { id: 'free', label: this.$t('مجاناً') },
-        { id: 'paid', label: this.$t('مدفوعة') }
+        { id: 'all',  label: 'الكل' },
+        { id: 'free', label: 'مجاناً' },
+        { id: 'paid', label: 'مدفوعة' }
       ]
     },
 
     orderBy () {
       switch (this.sortValue) {
-        case 'price_asc':  return ['courseFee']
-        case 'price_desc': return ['-courseFee']
-        case 'popular':    return ['-enrolled']
+        case 'price_asc':  return ['course_fee']
+        case 'price_desc': return ['-course_fee']
+        case 'popular':    return ['-created']
         case 'newest':
-        default:           return ['-createdAt']
+        default:           return ['-created']
       }
     },
 
@@ -380,14 +386,14 @@ export default {
       if (this.search && this.search.trim()) {
         chips.push({
           key: 'search',
-          label: `${this.$t('بحث')}: "${this.search.trim()}"`,
+          label: `بحث: "${this.search.trim()}"`,
           onClear: () => { this.searchInput = ''; this.search = '' }
         })
       }
       if (this.activeSpecialityID) {
         chips.push({
           key: `spec-${this.activeSpecialityID}`,
-          label: this.activeSpecialityLabel || this.$t('تخصص محدد'),
+          label: this.activeSpecialityLabel || 'تخصص محدد',
           onClear: () => this.setSpeciality(null)
         })
       }
@@ -497,7 +503,7 @@ export default {
     async loadMore () {
       const data = this.coursesData
       if (!data || !data.allCourses || !data.allCourses.pageInfo.hasNextPage) return
-      await this._coursesQuery.fetchMore({
+      await this.coursesQueryRef.fetchMore({
         variables: {
           ...this.queryVariables,
           cursor: data.allCourses.pageInfo.endCursor
@@ -574,7 +580,8 @@ export default {
   gap: var(--ds-space-6);
 
   @media (min-width: 960px) {
-    grid-template-columns: 1fr 280px; /* main then sidebar (sidebar inline-end via order in RTL) */
+    /* sidebar first (inline-start — right in RTL, left in LTR), then main */
+    grid-template-columns: 280px 1fr;
     padding: var(--ds-space-8) var(--ds-space-6) var(--ds-space-16);
     gap: var(--ds-space-8);
   }
@@ -582,7 +589,7 @@ export default {
 
 .catalog__sidebar {
   @media (min-width: 960px) {
-    grid-column: 2 / 3;
+    grid-column: 1 / 2; /* inline-start */
     grid-row: 1 / 2;
     position: sticky;
     inset-block-start: var(--ds-space-6);
@@ -591,7 +598,7 @@ export default {
 }
 
 .catalog__main {
-  grid-column: 1 / 2;
+  grid-column: 2 / 3; /* inline-end */
   min-inline-size: 0;
 }
 

@@ -28,35 +28,34 @@
 </template>
 
 <script>
-export default {
+import { defineComponent, inject, computed, onBeforeUnmount } from 'vue';
+import { DsBreadcrumbKey } from './DsBreadcrumb.vue';
+
+export default defineComponent({
   name: 'DsBreadcrumbItem',
-  inject: {
-    dsBreadcrumb: { default: null },
-  },
   props: {
     to: { type: [String, Object], default: null },
     href: { type: String, default: null },
   },
-  data() {
-    return { tickKey: 0 };
+  setup(props) {
+    const api = inject(DsBreadcrumbKey, null);
+    const token = {};
+
+    let unregister = null;
+    if (api) {
+      unregister = api.register(token);
+      onBeforeUnmount(() => {
+        if (unregister) unregister();
+      });
+    }
+
+    const separator = computed(() => (api ? api.separator.value : '›'));
+    const isCurrent = computed(() => (api ? api.isLast(token) : false));
+    const tagName = computed(() => (props.to ? 'router-link' : 'a'));
+
+    return { separator, isCurrent, tagName };
   },
-  computed: {
-    separator() {
-      return this.dsBreadcrumb ? this.dsBreadcrumb.state.separator : '›';
-    },
-    isCurrent() {
-      // eslint-disable-next-line no-unused-expressions
-      this.tickKey;
-      return !!this.$_dsIsLast;
-    },
-    tagName() {
-      if (this.to) return 'router-link';
-      return 'a';
-    },
-  },
-  mounted() { this.tickKey += 1; },
-  updated() { this.tickKey += 1; },
-};
+});
 </script>
 
 <style lang="scss" scoped>

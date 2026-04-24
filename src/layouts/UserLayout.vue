@@ -42,13 +42,15 @@
             role="main"
             aria-label="محتوى الحساب"
           >
-            <transition
-              appear
-              enter-active-class="animated fadeIn"
-              leave-active-class="animated fadeOut"
-            >
-              <router-view />
-            </transition>
+            <router-view v-slot="{ Component }">
+              <transition
+                appear
+                enter-active-class="animated fadeIn"
+                leave-active-class="animated fadeOut"
+              >
+                <component :is="Component" />
+              </transition>
+            </router-view>
           </main>
         </div>
 

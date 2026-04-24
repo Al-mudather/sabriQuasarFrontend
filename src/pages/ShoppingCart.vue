@@ -51,13 +51,15 @@
         role="main"
         aria-label="محتوى السلة"
       >
-        <transition
-          appear
-          enter-active-class="animated fadeIn"
-          leave-active-class="animated fadeOut"
-        >
-          <router-view />
-        </transition>
+        <router-view v-slot="{ Component }">
+          <transition
+            appear
+            enter-active-class="animated fadeIn"
+            leave-active-class="animated fadeOut"
+          >
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </main>
     </q-page-container>
 

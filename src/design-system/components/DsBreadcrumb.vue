@@ -10,48 +10,37 @@
 </template>
 
 <script>
-export default {
+import { defineComponent, shallowReactive, computed, provide } from 'vue';
+
+export const DsBreadcrumbKey = Symbol('DsBreadcrumb');
+
+export default defineComponent({
   name: 'DsBreadcrumb',
-  provide() {
-    const state = {};
-    Object.defineProperty(state, 'separator', {
-      enumerable: true,
-      get: () => this.separator,
-    });
-    Object.defineProperty(state, 'count', {
-      enumerable: true,
-      get: () => this.itemCount,
-    });
-    return { dsBreadcrumb: { state, getIndex: this.getIndex } };
-  },
   props: {
     separator: { type: String, default: '›' },
   },
-  data() {
-    return { itemCount: 0 };
+  setup(props) {
+    // Use shallowReactive so stored tokens are not wrapped in proxies
+    // (keeps reference equality stable for isLast comparison).
+    const items = shallowReactive([]);
+
+    const api = {
+      separator: computed(() => props.separator),
+      register(item) {
+        items.push(item);
+        return () => {
+          const i = items.indexOf(item);
+          if (i !== -1) items.splice(i, 1);
+        };
+      },
+      isLast(item) {
+        return items.length > 0 && items[items.length - 1] === item;
+      },
+    };
+
+    provide(DsBreadcrumbKey, api);
   },
-  mounted() {
-    this.refreshCount();
-  },
-  updated() {
-    this.refreshCount();
-  },
-  methods: {
-    refreshCount() {
-      const items = (this.$children || []).filter(
-        (c) => c.$options && c.$options.name === 'DsBreadcrumbItem',
-      );
-      this.itemCount = items.length;
-      items.forEach((c, i) => {
-        c.$_dsIndex = i;
-        c.$_dsIsLast = i === items.length - 1;
-      });
-    },
-    getIndex() {
-      return this.itemCount;
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
