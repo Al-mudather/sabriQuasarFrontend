@@ -80,37 +80,26 @@
               </li>
             </ul>
           </section>
-
-          <!-- Price group -->
-          <section class="filter-panel__group">
-            <h3 class="filter-panel__group-title">السعر</h3>
-            <ul class="filter-panel__list">
-              <li
-                v-for="f in priceFilters"
-                :key="f.id"
-                class="filter-panel__item"
-              >
-                <label class="check">
-                  <input
-                    type="radio"
-                    name="price"
-                    :value="f.id"
-                    :checked="activePriceFilter === f.id"
-                    @change="applyPriceFilter(f.id)"
-                  />
-                  <span class="check__mark" aria-hidden="true"></span>
-                  <span class="check__label">{{ f.label }}</span>
-                </label>
-              </li>
-            </ul>
-          </section>
         </div>
       </aside>
 
       <!-- =========== Main content =========== -->
       <section class="catalog__main">
-        <!-- Toolbar: search + sort -->
+        <!-- Toolbar: search + sort + mobile filter trigger -->
         <div class="catalog__toolbar">
+          <button
+            type="button"
+            class="catalog__filter-trigger"
+            aria-label="الفلاتر"
+            @click="mobileFilterOpen = true"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 6h18M6 12h12M10 18h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>الفلاتر</span>
+            <span v-if="activeFilterCount" class="catalog__filter-badge">{{ activeFilterCount }}</span>
+          </button>
+
           <div class="catalog__search">
             <svg
               viewBox="0 0 24 24"
@@ -215,6 +204,86 @@
         </div>
       </section>
     </div>
+
+    <!-- =========== Mobile filter bottom sheet =========== -->
+    <q-dialog v-model="mobileFilterOpen" position="bottom">
+      <div class="filter-sheet">
+        <div class="filter-sheet__grabber" aria-hidden="true"></div>
+
+        <div class="filter-sheet__head">
+          <h2 class="filter-sheet__heading">الفلاتر</h2>
+          <button
+            type="button"
+            class="filter-sheet__close"
+            aria-label="إغلاق"
+            @click="mobileFilterOpen = false"
+          >
+            ✕
+          </button>
+        </div>
+
+        <section class="filter-sheet__section">
+          <label class="filter-sheet__label">البحث</label>
+          <div class="catalog__search">
+            <svg viewBox="0 0 24 24" class="catalog__search-icon" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input
+              v-model="searchInput"
+              type="search"
+              class="catalog__search-input"
+              placeholder="ابحث عن دورة..."
+              aria-label="البحث في الدورات"
+            />
+          </div>
+        </section>
+
+        <section class="filter-sheet__section">
+          <label class="filter-sheet__label">التخصص</label>
+          <div v-if="specialitiesLoading" class="filter-panel__skeletons">
+            <ds-skeleton v-for="i in 6" :key="i" shape="pill" width="30%" />
+          </div>
+          <div v-else class="filter-sheet__pills">
+            <button
+              type="button"
+              class="pill"
+              :class="{ 'pill--active': activeSpecialityID === null }"
+              @click="setSpeciality(null)"
+            >
+              كل التخصصات
+            </button>
+            <button
+              v-for="spec in specialitiesEdges"
+              :key="spec.node.id"
+              type="button"
+              class="pill"
+              :class="{ 'pill--active': activeSpecialityID === spec.node.pk }"
+              @click="setSpeciality(spec.node.pk)"
+            >
+              {{ spec.node.speciality }}
+            </button>
+          </div>
+        </section>
+
+        <div class="filter-sheet__footer">
+          <ds-button
+            v-if="hasActiveFilters"
+            variant="ghost"
+            @click="clearAllFilters"
+          >
+            مسح الفلاتر
+          </ds-button>
+          <ds-button
+            variant="primary"
+            full-width
+            @click="mobileFilterOpen = false"
+          >
+            عرض النتائج
+          </ds-button>
+        </div>
+      </div>
+    </q-dialog>
   </main>
 </template>
 
@@ -238,7 +307,6 @@ import type {
   GetAllSpecialitiesVars,
 } from 'src/types/courses/types'
 
-type PriceFilterId = 'all' | 'free' | 'paid'
 type SortValue = 'newest' | 'popular' | 'price_asc' | 'price_desc'
 
 interface Chip {
@@ -268,15 +336,9 @@ const search = ref('')
 const searchTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const activeSpecialityID = ref<number | null>(null)
 const activeSpecialityLabel = ref('')
-const activePriceFilter = ref<PriceFilterId>('all')
 const sortValue = ref<SortValue>('newest')
 const totalCount = ref<number | null>(null)
-
-const priceFilters: ReadonlyArray<{ id: PriceFilterId; label: string }> = [
-  { id: 'all', label: 'الكل' },
-  { id: 'free', label: 'مجاناً' },
-  { id: 'paid', label: 'مدفوعة' },
-]
+const mobileFilterOpen = ref(false)
 
 // ---------------------------------------------------------------------------
 // Specialities — sidebar filter list
@@ -339,8 +401,6 @@ const queryVariables = computed<GetAllCoursesVars>(() => {
   const s = search.value.trim()
   if (s) vars.title_Icontains = s
   if (activeSpecialityID.value) vars.courseSpeciality = activeSpecialityID.value
-  if (activePriceFilter.value === 'free') vars.isPaid = false
-  if (activePriceFilter.value === 'paid') vars.isPaid = true
   return vars
 })
 
@@ -356,11 +416,15 @@ watch(
 )
 
 const hasActiveFilters = computed(
-  () =>
-    !!activeSpecialityID.value ||
-    activePriceFilter.value !== 'all' ||
-    !!search.value.trim(),
+  () => !!activeSpecialityID.value || !!search.value.trim(),
 )
+
+const activeFilterCount = computed(() => {
+  let n = 0
+  if (activeSpecialityID.value) n += 1
+  if (search.value.trim()) n += 1
+  return n
+})
 
 const activeChips = computed<Chip[]>(() => {
   const chips: Chip[] = []
@@ -377,14 +441,6 @@ const activeChips = computed<Chip[]>(() => {
       key: `spec-${activeSpecialityID.value}`,
       label: activeSpecialityLabel.value || 'تخصص محدد',
       onClear: () => setSpeciality(null),
-    })
-  }
-  if (activePriceFilter.value !== 'all') {
-    const f = priceFilters.find(x => x.id === activePriceFilter.value)
-    chips.push({
-      key: `price-${activePriceFilter.value}`,
-      label: f ? f.label : '',
-      onClear: () => applyPriceFilter('all'),
     })
   }
   return chips
@@ -448,16 +504,11 @@ function setSpeciality (pk: number | null): void {
   }
 }
 
-function applyPriceFilter (id: PriceFilterId): void {
-  activePriceFilter.value = id
-}
-
 function clearAllFilters (): void {
   searchInput.value = ''
   search.value = ''
   activeSpecialityID.value = null
   activeSpecialityLabel.value = ''
-  activePriceFilter.value = 'all'
 }
 
 async function loadMore (): Promise<void> {
@@ -826,5 +877,148 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   margin-block-start: var(--ds-space-8);
+}
+
+/* ---------- Mobile filter trigger (hidden on desktop) ---------- */
+.catalog__filter-trigger {
+  display: none;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: 0.6rem var(--ds-space-3);
+  background: var(--ds-surface-elevated, #ffffff);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill, 9999px);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text);
+  cursor: pointer;
+
+  svg { inline-size: 1.125rem; block-size: 1.125rem; }
+
+  &:hover { border-color: var(--ds-brand-600); }
+  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+
+  @media (max-width: 959px) { display: inline-flex; }
+}
+
+.catalog__filter-badge {
+  min-inline-size: 20px;
+  block-size: 20px;
+  padding-inline: 6px;
+  border-radius: 9999px;
+  background: var(--ds-brand-600);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide desktop sidebar on mobile; sheet takes over */
+@media (max-width: 959px) {
+  .catalog__sidebar { display: none; }
+}
+
+/* ---------- Bottom-sheet filter panel (mobile) ---------- */
+.filter-sheet {
+  background: var(--ds-surface-elevated, #ffffff);
+  border-start-start-radius: var(--ds-radius-xl, 20px);
+  border-start-end-radius: var(--ds-radius-xl, 20px);
+  padding: var(--ds-space-4) var(--ds-space-5) var(--ds-space-6);
+  inline-size: 100%;
+  max-block-size: 85vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+.filter-sheet__grabber {
+  inline-size: 40px;
+  block-size: 4px;
+  border-radius: 9999px;
+  background: var(--ds-border);
+  margin: 0 auto var(--ds-space-2);
+}
+
+.filter-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filter-sheet__heading {
+  font-family: var(--ds-font-heading);
+  font-weight: 700;
+  font-size: var(--ds-text-lg);
+  color: var(--ds-ink, var(--ds-text));
+  margin: 0;
+}
+
+.filter-sheet__close {
+  background: none;
+  border: 0;
+  font-size: 1.25rem;
+  color: var(--ds-text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  &:hover { color: var(--ds-text); }
+}
+
+.filter-sheet__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+}
+
+.filter-sheet__label {
+  font-family: var(--ds-font-heading);
+  font-weight: 600;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink, var(--ds-text));
+  letter-spacing: 0.02em;
+}
+
+.filter-sheet__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+
+.pill {
+  appearance: none;
+  border: 1px solid var(--ds-border);
+  background: var(--ds-surface);
+  color: var(--ds-text);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  padding: 0.5rem 0.9rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-out),
+    border-color var(--ds-duration-fast) var(--ds-ease-out),
+    color var(--ds-duration-fast) var(--ds-ease-out);
+
+  &:hover { border-color: var(--ds-brand-600); }
+  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+
+  &--active {
+    background: var(--ds-brand-600);
+    border-color: var(--ds-brand-600);
+    color: #fff;
+  }
+}
+
+.filter-sheet__footer {
+  display: flex;
+  gap: var(--ds-space-3);
+  padding-block-start: var(--ds-space-4);
+  border-block-start: 1px solid var(--ds-border);
+  position: sticky;
+  inset-block-end: 0;
+  background: var(--ds-surface-elevated, #ffffff);
 }
 </style>

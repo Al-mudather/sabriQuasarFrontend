@@ -37,6 +37,7 @@ export const GetAllCourses = gql`
           pk
           title
           isPaid
+          enrolled
           courseFee
           courseFeeInSdg
           profile

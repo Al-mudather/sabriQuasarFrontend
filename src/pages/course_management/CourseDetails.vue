@@ -223,22 +223,22 @@
   </main>
 </template>
 
-<script>
-/** @typedef {import('src/types/courses/types').CourseDetail} CourseDetail */
-/** @typedef {import('src/types/courses/types').CoursePricing} CoursePricing */
-/** @typedef {import('src/types/courses/types').CurrencyCode} CurrencyCode */
-
+<script setup lang="ts">
+import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { useHead } from '@unhead/vue'
+import { storeToRefs } from 'pinia'
+import { apolloClient } from 'src/apollo/client'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
-import { storeToRefs } from 'pinia'
-import { apolloClient } from 'src/apollo/client'
-import { useHead } from '@unhead/vue'
-import { computed } from 'vue'
-import _ from 'lodash'
 import { GetCourseByID } from 'src/graphql/course_management/query/GetCourseByID'
 import { FORMAT_THE_IAMGE_URL, FORMAT_THE_WEB_SIT_URL } from 'src/utils/functions.js'
+import { contourDrift } from 'src/design-system/motion'
+import type { CourseDetail, CoursePricing } from 'src/types/courses/types'
+import type { GetCourseByIdResult, GetCourseByIdVars } from 'src/types/courses/types'
 
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
@@ -247,9 +247,7 @@ import DsBreadcrumb from 'src/design-system/components/DsBreadcrumb.vue'
 import DsBreadcrumbItem from 'src/design-system/components/DsBreadcrumbItem.vue'
 import DsTabs from 'src/design-system/components/DsTabs.vue'
 import DsTab from 'src/design-system/components/DsTab.vue'
-
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
-
 import aboutTheCourse from 'components/courseDetails/aboutTheCourse.vue'
 import whatIwillLearn from 'components/courseDetails/whatIwillLearn.vue'
 import coursePreRequisites from 'components/courseDetails/coursePreRequisites.vue'
@@ -257,221 +255,205 @@ import courseUnits from 'components/courseDetails/courseUnits.vue'
 import courseInstructors from 'components/courseDetails/courseInstructors.vue'
 import relatedCoureses from 'src/components/courseDetails/relatedCoureses.vue'
 
-import { contourDrift } from 'src/design-system/motion'
+// ---------------------------------------------------------------------------
+// Stores + router
+// ---------------------------------------------------------------------------
+const route = useRoute()
+const router = useRouter()
+const $q = useQuasar()
 
-export default {
-  name: 'CourseDetails',
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const cart = useCartStore()
+const pyramid = usePyramidStore()
 
-  components: {
-    DsButton,
-    DsSkeleton,
-    DsEmptyState,
-    DsBreadcrumb,
-    DsBreadcrumbItem,
-    DsTabs,
-    DsTab,
-    PriceDisplay,
-    aboutTheCourse,
-    whatIwillLearn,
-    coursePreRequisites,
-    courseUnits,
-    courseInstructors,
-    relatedCoureses
-  },
+const { user } = storeToRefs(auth)
+const { currency } = storeToRefs(settings)
 
-  setup () {
-    const auth = useAuthStore()
-    const settings = useSettingsStore()
-    const cart = useCartStore()
-    const pyramid = usePyramidStore()
-    const { token, user } = storeToRefs(auth)
-    const { currency, isEnglish } = storeToRefs(settings)
-    return { auth, settings, cart, pyramid, token, user, currency, isEnglish }
-  },
+// ---------------------------------------------------------------------------
+// Local state
+// ---------------------------------------------------------------------------
+const courseID = ref('')
+const coursePK = ref('')
+const courseData = ref<CourseDetail | null>(null)
+const errorLoading = ref(false)
+const activeTab = ref('overview')
+const hero = ref<HTMLElement | null>(null)
 
-  data () {
-    return {
-      FORMAT_THE_IAMGE_URL,
-      FORMAT_THE_WEB_SIT_URL,
-      courseID: '',
-      coursePK: '',
-      courseData: null,
-      errorLoading: false,
-      activeTab: 'overview',
-      motionHandles: []
-    }
-  },
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const motionHandles = ref<any[]>([])
 
-  created () {
-    // Bind <head> to the reactive courseData — migrates `metaInfo` → `useHead`.
-    useHead({
-      title: computed(() => (this.courseData && this.courseData.title) || ''),
-      meta: computed(() => {
-        const c = this.courseData || {}
-        const title = c.title || ''
-        const brief = (c.brief || '').replace(/<[^>]*>/g, '').slice(0, 160)
-        const image = c.profile ? FORMAT_THE_IAMGE_URL(c.profile) : ''
-        const url = (c.pk && c.id)
-          ? FORMAT_THE_WEB_SIT_URL(`#/course/${c.title}/${c.pk}/${c.id}`)
-          : ''
-        return [
-          { name: 'description', content: brief },
-          { name: 'twitter:card', content: 'summary_large_image' },
-          { name: 'twitter:title', content: title },
-          { name: 'twitter:description', content: brief },
-          { name: 'twitter:image', content: image },
-          { property: 'og:title', content: title },
-          { property: 'og:image', content: image },
-          { property: 'og:url', content: url }
-        ]
-      })
+// ---------------------------------------------------------------------------
+// Head / SEO
+// ---------------------------------------------------------------------------
+useHead({
+  title: computed(() => courseData.value?.title ?? ''),
+  meta: computed(() => {
+    const c = courseData.value
+    const title = c?.title ?? ''
+    const brief = (c?.brief ?? '').replace(/<[^>]*>/g, '').slice(0, 160)
+    const image = c?.profile ? FORMAT_THE_IAMGE_URL(c.profile) : ''
+    const url = (c?.pk && c?.id)
+      ? FORMAT_THE_WEB_SIT_URL(`#/course/${c.title}/${c.pk}/${c.id}`)
+      : ''
+    return [
+      { name: 'description', content: brief },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: brief },
+      { name: 'twitter:image', content: image },
+      { property: 'og:title', content: title },
+      { property: 'og:image', content: image },
+      { property: 'og:url', content: url },
+    ]
+  }),
+})
+
+// ---------------------------------------------------------------------------
+// Computed
+// ---------------------------------------------------------------------------
+const selectedCurrency = computed<string>(() =>
+  (currency.value || 'SAR').toUpperCase(),
+)
+
+const parsedPrices = computed<CoursePricing | null>(() => {
+  if (!courseData.value?.currency) return null
+  // Apollo's CourseNode.currency typePolicy parses the JSONString at read time.
+  return courseData.value.currency as unknown as CoursePricing
+})
+
+const currentPrice = computed<number | null>(() => {
+  const prices = parsedPrices.value
+  if (!prices) return null
+  const value = parseFloat(String((prices as Record<string, number>)[selectedCurrency.value]))
+  return Number.isFinite(value) ? value : null
+})
+
+const hasPrice = computed<boolean>(
+  () => Number.isFinite(currentPrice.value) && (currentPrice.value ?? 0) > 0,
+)
+
+const lessonTotal = computed<number>(() => {
+  const edges = courseData.value?.courseunitSet?.edges ?? []
+  return edges.reduce((sum, edge) => {
+    return sum + (edge?.node?.courseunitcontentSet?.totalCount ?? 0)
+  }, 0)
+})
+
+const specialityLabel = computed<string>(
+  () => courseData.value?.courseSpeciality?.speciality ?? '',
+)
+
+const leadInstructor = computed<{ name: string; image: string; initial: string } | null>(() => {
+  const edges = courseData.value?.courseinstructorSet?.edges ?? []
+  if (!edges.length) return null
+  const instructor = edges[0]?.node?.instructor
+  if (!instructor) return null
+  const firstName = instructor.user?.firstName ?? ''
+  const lastName = instructor.user?.lastName ?? ''
+  const username = instructor.user?.username ?? ''
+  const name = (`${firstName} ${lastName}`).trim() || username.split('@')[0]
+  return {
+    name,
+    image: instructor.image ?? '',
+    initial: (name || '?').trim().charAt(0),
+  }
+})
+
+const truncatedBrief = computed<string>(() => {
+  const raw = courseData.value?.brief ?? ''
+  if (!raw) return ''
+  const text = String(raw).replace(/<[^>]*>/g, '').trim()
+  return text.length > 260 ? text.slice(0, 260) + '…' : text
+})
+
+const isEnrolled = computed<boolean>(
+  () => !!(courseData.value?.enrolled),
+)
+
+// ---------------------------------------------------------------------------
+// Watch route params → reload
+// ---------------------------------------------------------------------------
+watch(
+  () => route.params,
+  (params) => { void loadCourse(params) },
+  { immediate: true, deep: true },
+)
+
+// ---------------------------------------------------------------------------
+// Methods
+// ---------------------------------------------------------------------------
+async function loadCourse (params: Record<string, string | string[]>): Promise<void> {
+  if (!params || !params.pk) return
+  courseID.value = String(params.id ?? '')
+  coursePK.value = String(params.pk)
+  const marketerCode = params.code ? String(params.code) : undefined
+  if (marketerCode) pyramid.setRegisterationCode(marketerCode)
+  errorLoading.value = false
+  courseData.value = null
+
+  try {
+    const res = await apolloClient.query<GetCourseByIdResult, GetCourseByIdVars>({
+      query: GetCourseByID,
+      variables: { coursePk: parseInt(String(params.pk), 10) },
     })
-  },
-
-  computed: {
-    selectedCurrency () {
-      return (this.currency || 'SAR').toUpperCase()
-    },
-
-    parsedPrices () {
-      if (!this.courseData || !this.courseData.currency) return null
-      // Apollo's CourseNode.currency typePolicy in src/apollo/client.js parses
-      // the JSONString scalar at cache-read time, so `courseData.currency`
-      // is already an object here — no defensive JSON.parse needed.
-      /** @type {CoursePricing} */
-      const pricing = this.courseData.currency
-      return pricing
-    },
-
-    currentPrice () {
-      const prices = this.parsedPrices
-      if (!prices) return null
-      const value = parseFloat(prices[this.selectedCurrency])
-      return Number.isFinite(value) ? value : null
-    },
-
-    hasPrice () {
-      return Number.isFinite(this.currentPrice) && this.currentPrice > 0
-    },
-
-    lessonTotal () {
-      const edges = _.get(this.courseData, '[courseunitSet][edges]', []) || []
-      return edges.reduce((sum, edge) => {
-        return sum + (_.get(edge, '[node][courseunitcontentSet][totalCount]', 0) || 0)
-      }, 0)
-    },
-
-    specialityLabel () {
-      return _.get(this.courseData, '[courseSpeciality][name]', '')
-    },
-
-    leadInstructor () {
-      const edges = _.get(this.courseData, '[courseinstructorSet][edges]', []) || []
-      if (!edges.length) return null
-      const instructor = _.get(edges, '[0][node][instructor]')
-      if (!instructor) return null
-      const firstName = _.get(instructor, '[user][firstName]', '') || ''
-      const lastName = _.get(instructor, '[user][lastName]', '') || ''
-      const username = _.get(instructor, '[user][username]', '') || ''
-      const name = (`${firstName} ${lastName}`).trim() || username.split('@')[0]
-      return {
-        name,
-        image: instructor.image || '',
-        initial: (name || '?').trim().charAt(0)
-      }
-    },
-
-    truncatedBrief () {
-      const raw = _.get(this.courseData, '[brief]', '')
-      if (!raw) return ''
-      const text = String(raw).replace(/<[^>]*>/g, '').trim()
-      return text.length > 260 ? text.slice(0, 260) + '…' : text
-    },
-
-    isEnrolled () {
-      return !!_.get(this.courseData, '[isEnrolled]', false)
+    if (res?.data?.course) {
+      courseData.value = res.data.course
+    } else {
+      errorLoading.value = true
     }
-  },
-
-  watch: {
-    '$route.params': {
-      immediate: true,
-      deep: true,
-      handler: 'loadCourse'
-    }
-  },
-
-  mounted () {
-    this.$nextTick(() => {
-      if (this.$refs.hero) {
-        const handle = contourDrift(this.$refs.hero, { distance: '1.5%', duration: 32 })
-        if (handle) this.motionHandles.push(handle)
-      }
-    })
-  },
-
-  beforeUnmount () {
-    this.motionHandles.forEach(h => h && h.kill && h.kill())
-    this.motionHandles = []
-  },
-
-  methods: {
-    async loadCourse (params) {
-      if (!params || !params.pk) return
-      this.courseID = params.id
-      this.coursePK = params.pk
-      const marketerCode = _.get(params, '[code]')
-      if (marketerCode) this.pyramid.setRegisterationCode(marketerCode)
-      this.errorLoading = false
-      this.courseData = null
-
-      try {
-        const res = await apolloClient.query({
-          query: GetCourseByID,
-          variables: { coursePk: parseInt(params.pk, 10) }
-        })
-        if (res && res.data && res.data.course) {
-          this.courseData = res.data.course
-        } else {
-          this.errorLoading = true
-        }
-      } catch (e) {
-        this.errorLoading = true
-      }
-    },
-
-    formatCount (n) {
-      const num = Number(n)
-      if (!Number.isFinite(num)) return '0'
-      if (num >= 1000) return `${(num / 1000).toFixed(num >= 10000 ? 0 : 1).replace(/\.0$/, '')}K`
-      return String(num)
-    },
-
-    addToCart () {
-      if (!this.courseData) return
-      this.cart.addCourseToCart({ user: this.user, course: this.courseData })
-      this.$q && this.$q.notify && this.$q.notify({
-        type: 'positive',
-        position: 'top',
-        message: this.$t('تمت الإضافة إلى السلة'),
-        progress: true,
-        timeout: 2200
-      })
-    },
-
-    enrolNow () {
-      if (!this.courseData) return
-      this.cart.addCourseToCart({ user: this.user, course: this.courseData })
-      this.$router.push({ name: 'cart' })
-    },
-
-    continueToClassroom () {
-      const pk = this.coursePK || _.get(this.courseData, '[pk]')
-      if (!pk) return
-      window.location.href = `${location.origin}/classroom/#/class/${pk}/`
-    }
+  } catch {
+    errorLoading.value = true
   }
 }
+
+function formatCount (n: number | null | undefined): string {
+  const num = Number(n)
+  if (!Number.isFinite(num)) return '0'
+  if (num >= 1000) return `${(num / 1000).toFixed(num >= 10000 ? 0 : 1).replace(/\.0$/, '')}K`
+  return String(num)
+}
+
+function addToCart (): void {
+  if (!courseData.value) return
+  cart.addCourseToCart({ user: user.value, course: courseData.value })
+  $q.notify({
+    type: 'positive',
+    position: 'top',
+    message: 'تمت الإضافة إلى السلة',
+    progress: true,
+    timeout: 2200,
+  })
+}
+
+function enrolNow (): void {
+  if (!courseData.value) return
+  cart.addCourseToCart({ user: user.value, course: courseData.value })
+  void router.push({ name: 'cart' })
+}
+
+function continueToClassroom (): void {
+  const pk = coursePK.value || courseData.value?.pk
+  if (!pk) return
+  window.location.href = `${location.origin}/classroom/#/class/${pk}/`
+}
+
+// ---------------------------------------------------------------------------
+// Lifecycle
+// ---------------------------------------------------------------------------
+onMounted(() => {
+  nextTick(() => {
+    if (hero.value) {
+      const handle = contourDrift(hero.value, { distance: '1.5%', duration: 32 })
+      if (handle) motionHandles.value.push(handle)
+    }
+  })
+})
+
+onBeforeUnmount(() => {
+  motionHandles.value.forEach((h) => h?.kill?.())
+  motionHandles.value = []
+})
 </script>
 
 <style lang="scss" scoped>

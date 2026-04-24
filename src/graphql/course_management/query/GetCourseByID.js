@@ -51,10 +51,12 @@ query GetCourseByID($coursePk:Int) {
         }
       }
     },
+    enrolled,
     courseSpeciality {
       id,
-      pk
-    }, 
+      pk,
+      speciality
+    },
     courseLanguage{
       id,
       pk,

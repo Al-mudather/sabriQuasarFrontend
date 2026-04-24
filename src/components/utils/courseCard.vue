@@ -8,7 +8,7 @@
           :alt="displayTitle"
         />
         <img v-else src="~assets/img/moza.png" :alt="displayTitle" />
-        <ds-badge v-if="course.enrolled" variant="success" class="public-course-card__badge">
+        <ds-badge v-if="isEnrolled" variant="success" class="public-course-card__badge">
           مشترك
         </ds-badge>
       </div>
@@ -17,14 +17,22 @@
     <h3 class="public-course-card__title">{{ displayTitle }}</h3>
 
     <div class="public-course-card__price">
-      <span class="currency">{{ currency }}</span>
-      <span class="amount">{{ formattedPrice }}</span>
+      <template v-if="isFree">
+        <span class="amount amount--free">مجاناً</span>
+      </template>
+      <template v-else-if="displayAmount !== null">
+        <span class="amount">{{ formatAmount(displayAmount) }}</span>
+        <span class="currency">{{ displayCurrency }}</span>
+      </template>
+      <template v-else>
+        <span class="amount amount--muted">السعر عند الطلب</span>
+      </template>
     </div>
 
     <template #footer>
       <div class="public-course-card__actions">
         <ds-button
-          v-if="course.enrolled"
+          v-if="isEnrolled"
           variant="accent"
           full-width
           @click.stop="goToClassroom"
@@ -52,74 +60,97 @@
   </ds-card>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import type { Course, CoursePricing, CurrencyCode } from 'src/types/courses/types'
 
-const formatPrice = (num, digits = 3) => {
-  const lookup = [
-    { value: 1, symbol: '' },
-    { value: 1e3, symbol: 'k' },
-    { value: 1e6, symbol: 'M' },
-    { value: 1e9, symbol: 'B' }
-  ]
-  if (!Number.isFinite(num) || num === 0) return String(num)
-  const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
-  const item = lookup.slice().reverse().find(it => num >= it.value)
-  return item ? (num / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
+interface Props {
+  course: Course
+  name?: string
+  instructor?: string
+  unit?: string
+  price?: number | string | null
 }
 
-export default {
-  name: 'courseCard',
-  props: ['name', 'instructor', 'unit', 'price', 'course'],
+const props = defineProps<Props>()
 
-  setup () {
-    const auth = useAuthStore()
-    const settings = useSettingsStore()
-    const cart = useCartStore()
-    const { user } = storeToRefs(auth)
-    const { isEnglish, currency } = storeToRefs(settings)
-    return { auth, settings, cart, user, isEnglish, currency }
-  },
+const router = useRouter()
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const cart = useCartStore()
+const { user } = storeToRefs(auth)
+const { currency } = storeToRefs(settings)
 
-  data () {
-    return { FORMAT_THE_IAMGE_URL }
-  },
+const displayTitle = computed(() => props.name || props.course.title)
 
-  computed: {
-    displayTitle () { return this.name || this.course.title },
+const isEnrolled = computed(() => Boolean(props.course.enrolled))
 
-    formattedPrice () {
-      try {
-        const prices = JSON.parse(this.course.currency)
-        const raw = parseFloat(prices[this.currency])
-        return formatPrice(raw)
-      } catch (e) {
-        return '—'
-      }
-    }
-  },
+const pricing = computed<CoursePricing | null>(() => {
+  // CourseNode.currency arrives pre-parsed from the Apollo typePolicy in
+  // src/apollo/client.js. Treat it as CoursePricing directly.
+  const raw = props.course.currency
+  if (!raw || typeof raw !== 'object') return null
+  return raw as CoursePricing
+})
 
-  methods: {
-    goToDetails () {
-      this.$router.push({
-        name: 'course-details',
-        params: { pk: this.course.pk, name: this.course.title, id: this.course.id }
-      })
-    },
+const selectedCurrency = computed<CurrencyCode>(
+  () => (currency.value as CurrencyCode) || 'SDG',
+)
 
-    goToClassroom () {
-      window.location.href = `${location.origin}/classroom/#/class/${this.course.pk}/`
-    },
-
-    addToCart () {
-      this.cart.addCourseToCart({ user: this.user, course: this.course })
-      this.$router.push({ name: 'cart' })
+const displayAmount = computed<number | null>(() => {
+  const map = pricing.value
+  if (map) {
+    const priced = map[selectedCurrency.value]
+    if (typeof priced === 'number' && Number.isFinite(priced) && priced > 0) {
+      return priced
     }
   }
+  // Fallback to CourseNode.courseFee (number) when the currency map is absent
+  // or doesn't carry the selected currency.
+  const fee = Number(props.course.courseFee)
+  if (Number.isFinite(fee) && fee > 0) return fee
+  return null
+})
+
+const isFree = computed(() => {
+  if (displayAmount.value === 0) return true
+  if (displayAmount.value === null) {
+    // no pricing object and no fee — fall through to 'السعر عند الطلب'
+    return false
+  }
+  return false
+})
+
+const displayCurrency = computed(() => selectedCurrency.value)
+
+function formatAmount (n: number): string {
+  try {
+    return new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 2 }).format(n)
+  } catch {
+    return String(n)
+  }
+}
+
+function goToDetails (): void {
+  router.push({
+    name: 'course-details',
+    params: { pk: String(props.course.pk), name: props.course.title, id: props.course.id },
+  })
+}
+
+function goToClassroom (): void {
+  window.location.href = `${location.origin}/classroom/#/class/${props.course.pk}/`
+}
+
+function addToCart (): void {
+  cart.addCourseToCart({ user: user.value, course: props.course })
+  router.push({ name: 'cart' })
 }
 </script>
 
@@ -165,7 +196,7 @@ export default {
   &__price {
     display: inline-flex;
     align-items: baseline;
-    gap: 0.25rem;
+    gap: 0.35rem;
     .currency {
       font-size: var(--ds-text-sm);
       color: var(--ds-text-muted);
@@ -177,6 +208,9 @@ export default {
       font-weight: var(--ds-weight-bold);
       color: var(--ds-accent-600);
       font-variant-numeric: tabular-nums;
+
+      &--free { color: var(--ds-success, #16a34a); }
+      &--muted { color: var(--ds-text-muted); font-size: var(--ds-text-md); }
     }
   }
 
