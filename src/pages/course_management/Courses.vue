@@ -208,65 +208,89 @@
     <!-- =========== Mobile filter bottom sheet =========== -->
     <q-dialog v-model="mobileFilterOpen" position="bottom">
       <div class="filter-sheet">
-        <div class="filter-sheet__grabber" aria-hidden="true"></div>
+        <!-- Sticky header -->
+        <header class="filter-sheet__head">
+          <div class="filter-sheet__grabber" aria-hidden="true"></div>
+          <div class="filter-sheet__head-row">
+            <h2 class="filter-sheet__heading">الفلاتر</h2>
+            <button
+              type="button"
+              class="filter-sheet__close"
+              aria-label="إغلاق"
+              @click="mobileFilterOpen = false"
+            >
+              ✕
+            </button>
+          </div>
+        </header>
 
-        <div class="filter-sheet__head">
-          <h2 class="filter-sheet__heading">الفلاتر</h2>
-          <button
-            type="button"
-            class="filter-sheet__close"
-            aria-label="إغلاق"
-            @click="mobileFilterOpen = false"
-          >
-            ✕
-          </button>
+        <!-- Scrollable body -->
+        <div class="filter-sheet__body">
+          <section class="filter-sheet__section">
+            <label for="sheet-search" class="filter-sheet__label">البحث</label>
+            <div class="sheet-search">
+              <svg viewBox="0 0 24 24" class="sheet-search__icon" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <input
+                id="sheet-search"
+                v-model="searchInput"
+                type="text"
+                inputmode="search"
+                class="sheet-search__input"
+                placeholder="ابحث عن دورة..."
+                aria-label="البحث في الدورات"
+                dir="rtl"
+              />
+            </div>
+          </section>
+
+          <section class="filter-sheet__section">
+            <label for="sheet-sort" class="filter-sheet__label">الترتيب</label>
+            <select
+              id="sheet-sort"
+              v-model="sortValue"
+              class="sheet-select"
+              dir="rtl"
+            >
+              <option value="newest">الأحدث</option>
+              <option value="popular">الأكثر طلباً</option>
+              <option value="price_asc">السعر: من الأقل</option>
+              <option value="price_desc">السعر: من الأعلى</option>
+            </select>
+          </section>
+
+          <section class="filter-sheet__section">
+            <label class="filter-sheet__label">التخصص</label>
+            <div v-if="specialitiesLoading" class="filter-panel__skeletons">
+              <ds-skeleton v-for="i in 6" :key="i" shape="pill" width="30%" />
+            </div>
+            <div v-else class="filter-sheet__pills">
+              <button
+                type="button"
+                class="pill"
+                :class="{ 'pill--active': activeSpecialityID === null }"
+                @click="setSpeciality(null)"
+              >
+                كل التخصصات
+              </button>
+              <button
+                v-for="spec in specialitiesEdges"
+                :key="spec.node.id"
+                type="button"
+                class="pill"
+                :class="{ 'pill--active': activeSpecialityID === spec.node.pk }"
+                @click="setSpeciality(spec.node.pk)"
+              >
+                {{ spec.node.speciality }}
+              </button>
+            </div>
+          </section>
         </div>
 
-        <section class="filter-sheet__section">
-          <label class="filter-sheet__label">البحث</label>
-          <div class="catalog__search">
-            <svg viewBox="0 0 24 24" class="catalog__search-icon" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
-              <path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <input
-              v-model="searchInput"
-              type="search"
-              class="catalog__search-input"
-              placeholder="ابحث عن دورة..."
-              aria-label="البحث في الدورات"
-            />
-          </div>
-        </section>
-
-        <section class="filter-sheet__section">
-          <label class="filter-sheet__label">التخصص</label>
-          <div v-if="specialitiesLoading" class="filter-panel__skeletons">
-            <ds-skeleton v-for="i in 6" :key="i" shape="pill" width="30%" />
-          </div>
-          <div v-else class="filter-sheet__pills">
-            <button
-              type="button"
-              class="pill"
-              :class="{ 'pill--active': activeSpecialityID === null }"
-              @click="setSpeciality(null)"
-            >
-              كل التخصصات
-            </button>
-            <button
-              v-for="spec in specialitiesEdges"
-              :key="spec.node.id"
-              type="button"
-              class="pill"
-              :class="{ 'pill--active': activeSpecialityID === spec.node.pk }"
-              @click="setSpeciality(spec.node.pk)"
-            >
-              {{ spec.node.speciality }}
-            </button>
-          </div>
-        </section>
-
-        <div class="filter-sheet__footer">
+        <!-- Sticky footer -->
+        <footer class="filter-sheet__footer">
           <ds-button
             v-if="hasActiveFilters"
             variant="ghost"
@@ -281,7 +305,7 @@
           >
             عرض النتائج
           </ds-button>
-        </div>
+        </footer>
       </div>
     </q-dialog>
   </main>
@@ -915,23 +939,40 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-/* Hide desktop sidebar on mobile; sheet takes over */
+/* Hide desktop sidebar + toolbar search/sort on mobile; sheet takes over */
 @media (max-width: 959px) {
   .catalog__sidebar { display: none; }
+  .catalog__search { display: none; }
+  .catalog__sort { display: none; }
+  .catalog__toolbar {
+    justify-content: flex-start;
+    gap: var(--ds-space-2);
+  }
 }
 
 /* ---------- Bottom-sheet filter panel (mobile) ---------- */
+/* Three-part layout: sticky header, scrollable body, sticky footer.
+   q-dialog position="bottom" renders a full-width card aligned to the bottom;
+   we clamp height so header+footer stay in view and only body scrolls. */
 .filter-sheet {
   background: var(--ds-surface-elevated, #ffffff);
   border-start-start-radius: var(--ds-radius-xl, 20px);
   border-start-end-radius: var(--ds-radius-xl, 20px);
-  padding: var(--ds-space-4) var(--ds-space-5) var(--ds-space-6);
   inline-size: 100%;
+  block-size: 85vh;
   max-block-size: 85vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-4);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+}
+
+.filter-sheet__head {
+  position: sticky;
+  inset-block-start: 0;
+  background: var(--ds-surface-elevated, #ffffff);
+  padding: var(--ds-space-2) var(--ds-space-5) var(--ds-space-3);
+  border-block-end: 1px solid var(--ds-border);
+  z-index: 2;
 }
 
 .filter-sheet__grabber {
@@ -939,10 +980,10 @@ onUnmounted(() => {
   block-size: 4px;
   border-radius: 9999px;
   background: var(--ds-border);
-  margin: 0 auto var(--ds-space-2);
+  margin: 0 auto var(--ds-space-3);
 }
 
-.filter-sheet__head {
+.filter-sheet__head-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -967,10 +1008,18 @@ onUnmounted(() => {
   &:hover { color: var(--ds-text); }
 }
 
+.filter-sheet__body {
+  overflow-y: auto;
+  padding: var(--ds-space-4) var(--ds-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+}
+
 .filter-sheet__section {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-3);
+  gap: var(--ds-space-2);
 }
 
 .filter-sheet__label {
@@ -979,6 +1028,61 @@ onUnmounted(() => {
   font-size: var(--ds-text-sm);
   color: var(--ds-ink, var(--ds-text));
   letter-spacing: 0.02em;
+}
+
+/* Sheet-scoped search — isolated from .catalog__search so RTL icon placement
+   and input padding are unambiguous. */
+.sheet-search {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+}
+
+.sheet-search__input {
+  inline-size: 100%;
+  block-size: 44px;
+  padding-inline-start: 2.5rem;
+  padding-inline-end: var(--ds-space-3);
+  background: var(--ds-surface-elevated, #ffffff);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill, 9999px);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-md);
+  color: var(--ds-text);
+  outline: 0;
+  text-align: start;
+
+  &:focus {
+    border-color: var(--ds-brand-600);
+    box-shadow: var(--ds-shadow-focus);
+  }
+  &::placeholder { color: var(--ds-text-muted); }
+}
+
+.sheet-search__icon {
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  inline-size: 18px;
+  block-size: 18px;
+  color: var(--ds-text-muted);
+  pointer-events: none;
+}
+
+.sheet-select {
+  inline-size: 100%;
+  block-size: 44px;
+  padding: 0 var(--ds-space-3);
+  background: var(--ds-surface-elevated, #ffffff);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md, 8px);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-md);
+  color: var(--ds-text);
+  text-align: start;
+  outline: 0;
+  &:focus { border-color: var(--ds-brand-600); box-shadow: var(--ds-shadow-focus); }
 }
 
 .filter-sheet__pills {
@@ -1013,12 +1117,13 @@ onUnmounted(() => {
 }
 
 .filter-sheet__footer {
-  display: flex;
-  gap: var(--ds-space-3);
-  padding-block-start: var(--ds-space-4);
-  border-block-start: 1px solid var(--ds-border);
   position: sticky;
   inset-block-end: 0;
   background: var(--ds-surface-elevated, #ffffff);
+  display: flex;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-5);
+  border-block-start: 1px solid var(--ds-border);
+  z-index: 2;
 }
 </style>
