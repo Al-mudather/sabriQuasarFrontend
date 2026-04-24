@@ -371,7 +371,9 @@ export default {
     resolvedTo () {
       if (this.to) return this.to
       if (!this.course) return null
-      if (this.course.pk && this.course.name) {
+      // Strict null/undefined check: pk === 0 is still a valid route target.
+      // The original falsy check silently disabled navigation for pk=0 cards.
+      if (this.course.pk != null && this.course.name) {
         return {
           name: 'course-details',
           params: {

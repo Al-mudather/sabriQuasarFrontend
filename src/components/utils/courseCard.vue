@@ -68,10 +68,19 @@ import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
-import type { Course, CoursePricing, CurrencyCode } from 'src/types/courses/types'
+import type {
+  Course,
+  CourseInSpeciality,
+  CoursePricing,
+  CurrencyCode,
+} from 'src/types/courses/types'
 
+// Accept both the rich `Course` shape (from `GetAllCourses`) and the lighter
+// `CourseInSpeciality` shape (from `GetAllCoursesInSpeciality`). The card only
+// reads fields common to both (pk, id, title, cover, courseFee, currency,
+// enrolled) — TS enforces we don't reach for fields the narrower shape lacks.
 interface Props {
-  course: Course
+  course: Course | CourseInSpeciality
   name?: string
   instructor?: string
   unit?: string
@@ -149,6 +158,10 @@ function goToClassroom (): void {
 }
 
 function addToCart (): void {
+  if (!auth.isAuthenticated) {
+    router.push({ name: 'login', query: { redirect: '/courses' } })
+    return
+  }
   cart.addCourseToCart({ user: user.value, course: props.course })
   router.push({ name: 'cart' })
 }

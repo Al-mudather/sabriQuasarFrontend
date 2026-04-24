@@ -42,8 +42,8 @@ export const useAuthStore = defineStore('authentication', {
   state: () => ({
     /** @type {boolean} */
     navbarSearch: true,
-    /** @type {AuthSessionUser | Record<string, never> | null} */
-    user: userProfileStorage.getUser() || {},
+    /** @type {AuthSessionUser | null} */
+    user: userProfileStorage.getUser() || null,
     /** @type {string | null} */
     token: tokenStorage.getAccessToken() || null,
     /** @type {string | null} */
@@ -56,7 +56,11 @@ export const useAuthStore = defineStore('authentication', {
     // call sites that used `mapGetters('authentication', ['user', 'token'])`.
     userGetter: (state) => state.user,
     tokenGetter: (state) => state.token,
-    navbarSearchGetter: (state) => state.navbarSearch
+    navbarSearchGetter: (state) => state.navbarSearch,
+    // Single source of truth for "is the user logged in?". Components must
+    // consult this before any action that relies on session identity
+    // (add to cart, enrol, open classroom, view profile, etc.).
+    isAuthenticated: (state) => !!(state.token && state.user)
   },
 
   actions: {

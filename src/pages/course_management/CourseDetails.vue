@@ -384,7 +384,11 @@ watch(
 // Methods
 // ---------------------------------------------------------------------------
 async function loadCourse (params: Record<string, string | string[]>): Promise<void> {
-  if (!params || !params.pk) return
+  if (!params || !params.pk) {
+    errorLoading.value = true
+    courseData.value = null
+    return
+  }
   courseID.value = String(params.id ?? '')
   coursePK.value = String(params.pk)
   const marketerCode = params.code ? String(params.code) : undefined
@@ -414,8 +418,23 @@ function formatCount (n: number | null | undefined): string {
   return String(num)
 }
 
+function redirectToLogin (): void {
+  $q.notify({
+    type: 'info',
+    position: 'top',
+    message: 'سجل دخول أولاً للمتابعة',
+    progress: true,
+    timeout: 2000,
+  })
+  void router.push({
+    name: 'login',
+    query: { redirect: route.fullPath },
+  })
+}
+
 function addToCart (): void {
   if (!courseData.value) return
+  if (!auth.isAuthenticated) { redirectToLogin(); return }
   cart.addCourseToCart({ user: user.value, course: courseData.value })
   $q.notify({
     type: 'positive',
@@ -428,6 +447,7 @@ function addToCart (): void {
 
 function enrolNow (): void {
   if (!courseData.value) return
+  if (!auth.isAuthenticated) { redirectToLogin(); return }
   cart.addCourseToCart({ user: user.value, course: courseData.value })
   void router.push({ name: 'cart' })
 }
