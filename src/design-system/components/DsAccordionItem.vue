@@ -60,12 +60,17 @@
   </div>
 </template>
 
+<script lang="ts">
+// Module-scope id counter for auto-generated item names. Lives in a separate
+// `<script>` block so `defineProps()` can reference it via the module closure
+// even though defineProps hoists above the setup body.
+let __dsAccUid = 0
+</script>
+
 <script setup lang="ts">
 import { ref, computed, watch, inject, onMounted, onBeforeUnmount, onUpdated } from 'vue'
 
 defineOptions({ name: 'DsAccordionItem' })
-
-let uid = 0
 
 interface AccordionApi {
   state: { opened: (string | number)[]; multi: boolean }
@@ -85,7 +90,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  name: () => `ds-acc-${uid += 1}`,
+  name: () => `ds-acc-${++__dsAccUid}`,
   title: '',
   subtitle: '',
   icon: '',

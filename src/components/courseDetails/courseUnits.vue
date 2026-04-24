@@ -1,40 +1,56 @@
 <template>
-  <section class="course-units">
-    <header class="course-units__head">
-      <h2>{{ $t('المحتويـات') }}</h2>
-      <ds-badge v-if="totalUnits > 0" variant="brand">
-        {{ totalUnits }} {{ $t('وحدات') }}
-      </ds-badge>
+  <section class="cd-content">
+    <header class="cd-content__head">
+      <h2>{{ $t('محتوى الدورة') }}</h2>
+      <p v-if="!loading" class="cd-content__summary">
+        <span>{{ totalUnits }} {{ $t('وحدات') }}</span>
+        <span class="cd-content__dot" aria-hidden="true">·</span>
+        <span>{{ totalLessons }} {{ $t('درس') }}</span>
+      </p>
     </header>
 
-    <div v-if="units.length === 0 && !loading" class="course-units__empty">
+    <div v-if="units.length === 0 && !loading" class="cd-content__empty">
       <ds-empty-state
         :title="$t('لا توجد محتويات حتى الآن')"
         size="sm"
       />
     </div>
 
-    <div v-else-if="loading" class="course-units__skeleton">
+    <div v-else-if="loading && units.length === 0" class="cd-content__skeleton">
       <ds-skeleton v-for="n in 3" :key="'u-' + n" shape="rect" height="3.5rem" />
     </div>
 
-    <ul v-else class="course-units__list">
-      <li v-for="(edge, idx) in units" :key="edge.node?.pk ?? idx" class="unit">
-        <details :open="idx === 0">
-          <summary class="unit__head">
-            <span class="unit__index">{{ idx + 1 }}</span>
-            <span class="unit__title">{{ edge.node?.title ?? '' }}</span>
-            <svg
-              class="unit__chevron"
-              viewBox="0 0 16 16"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </summary>
+    <template v-else>
+      <div class="cd-content__toolbar">
+        <button
+          type="button"
+          class="cd-content__expand-all"
+          @click="toggleExpandAll"
+        >
+          {{ allOpen ? $t('طي الكل') : $t('توسيع الكل') }}
+        </button>
+      </div>
 
-          <div class="unit__body">
+      <ds-accordion
+        v-model="openedUnits"
+        :multi="true"
+      >
+        <ds-accordion-item
+          v-for="(edge, idx) in units"
+          :key="edge.node?.pk ?? idx"
+          :name="String(edge.node?.pk ?? idx)"
+        >
+          <template #title>
+            <span class="cd-content__unit-index">{{ idx + 1 }}</span>
+            <span class="cd-content__unit-title">{{ edge.node?.title ?? '' }}</span>
+          </template>
+          <template #subtitle>
+            <span class="cd-content__unit-meta">
+              {{ lectureCountFor(edge) }} {{ $t('درس') }}
+            </span>
+          </template>
+
+          <div class="cd-content__unit-body">
             <template v-if="edge.node?.isExternal">
               <div
                 v-for="content in (edge.node.external?.courseunitcontentSet?.edges ?? [])"
@@ -58,16 +74,20 @@
               </div>
             </template>
           </div>
-        </details>
-      </li>
-    </ul>
+        </ds-accordion-item>
+      </ds-accordion>
+    </template>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import contentItem from 'components/courseDetails/contentItem.vue'
+import DsAccordion from 'src/design-system/components/DsAccordion.vue'
+import DsAccordionItem from 'src/design-system/components/DsAccordionItem.vue'
+import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
+import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
 import { GetAllCourseUnitsByCourseID } from 'src/graphql/course_management/query/GetAllCourseUnitsByCourseID'
 import type {
   GetAllCourseUnitsByCourseIdResult,
@@ -86,11 +106,11 @@ const props = defineProps<{
 
 const { result, loading: qLoading } = useQuery<GetAllCourseUnitsByCourseIdResult, GetAllCourseUnitsByCourseIdVars>(
   GetAllCourseUnitsByCourseID,
-  () => ({ courseID: props.course_id, limit: 5 }),
+  () => ({ courseID: props.course_id, limit: 50 }),
   { errorPolicy: 'all' },
 )
 
-const units = computed(
+const units = computed<UnitEdge[]>(
   () => (result.value?.allCourseUnits?.edges ?? [])
     .filter((e): e is UnitEdge => !!e && !!e.node),
 )
@@ -99,34 +119,108 @@ const totalUnits = computed(
   () => result.value?.allCourseUnits?.totalCount ?? units.value.length,
 )
 
+const totalLessons = computed(() =>
+  units.value.reduce((sum, edge) => sum + lectureCountFor(edge), 0),
+)
+
 const loading = computed(() => qLoading.value && units.value.length === 0)
+
+function lectureCountFor (edge: UnitEdge): number {
+  if (edge.node?.isExternal) {
+    return edge.node?.external?.courseunitcontentSet?.totalCount ?? 0
+  }
+  return edge.node?.courseunitcontentSet?.edges?.length ?? 0
+}
 
 function isRenderableContent (modelName: string | null | undefined): boolean {
   return RENDERABLE.includes(modelName ?? '')
 }
+
+// Opened-unit state: open the first unit by default; reset on course change.
+const openedUnits = ref<(string | number)[]>([])
+const allOpen = computed(
+  () => units.value.length > 0 && openedUnits.value.length === units.value.length,
+)
+
+watch(
+  units,
+  (next, prev) => {
+    // Seed first-open only once after the first populate, or whenever the
+    // course_id changes (which re-fires the query and resets `prev` to []).
+    if (!next.length) { openedUnits.value = []; return }
+    const firstName = String(next[0]?.node?.pk ?? 0)
+    if (!prev || !prev.length) {
+      openedUnits.value = [firstName]
+    }
+  },
+  { immediate: true },
+)
+
+watch(() => props.course_id, () => { openedUnits.value = [] })
+
+function toggleExpandAll (): void {
+  if (allOpen.value) {
+    openedUnits.value = []
+  } else {
+    openedUnits.value = units.value.map((e, i) => String(e.node?.pk ?? i))
+  }
+}
 </script>
 
 <style lang="scss" scoped>
-.course-units {
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-lg);
-  padding: var(--ds-space-5);
-  box-shadow: var(--ds-shadow-xs);
+.cd-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
 
   &__head {
     display: flex;
-    align-items: center;
-    gap: var(--ds-space-3);
-    margin-block-end: var(--ds-space-4);
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--ds-space-2);
 
     h2 {
       font-family: var(--ds-font-heading);
       font-size: var(--ds-text-xl);
-      font-weight: var(--ds-weight-bold);
+      font-weight: 700;
       color: var(--ds-text);
       margin: 0;
+      letter-spacing: -0.01em;
     }
+  }
+
+  &__summary {
+    margin: 0;
+    display: inline-flex;
+    gap: var(--ds-space-2);
+    align-items: center;
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-text-muted);
+  }
+
+  &__dot { color: var(--ds-text-muted); }
+
+  &__toolbar {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__expand-all {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: var(--ds-font-heading);
+    font-weight: 600;
+    font-size: var(--ds-text-sm);
+    color: var(--ds-brand-600);
+    padding: var(--ds-space-1) var(--ds-space-2);
+    border-radius: var(--ds-radius-sm);
+
+    &:hover { color: var(--ds-brand-700); text-decoration: underline; }
+    &:focus-visible { outline: 2px solid var(--ds-brand-600); outline-offset: 2px; }
   }
 
   &__skeleton {
@@ -135,82 +229,39 @@ function isRenderableContent (modelName: string | null | undefined): boolean {
     gap: var(--ds-space-2);
   }
 
-  &__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-space-2);
-  }
-}
-
-.unit {
-  details {
-    background: var(--ds-surface-muted);
-    border: 1px solid var(--ds-border);
-    border-radius: var(--ds-radius-md);
-    overflow: hidden;
-    transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
-
-    &[open] { background: var(--ds-surface); }
-    &[open] .unit__chevron { transform: rotate(180deg); }
-  }
-
-  summary {
-    list-style: none;
-    cursor: pointer;
-    padding: var(--ds-space-3) var(--ds-space-4);
-    display: flex;
-    align-items: center;
-    gap: var(--ds-space-3);
-    user-select: none;
-
-    &::-webkit-details-marker { display: none; }
-
-    &:hover { background: var(--ds-surface-muted); }
-    &:focus-visible {
-      outline: 2px solid transparent;
-      box-shadow: var(--ds-shadow-focus);
-    }
-  }
-
-  &__index {
-    flex-shrink: 0;
-    inline-size: 1.75rem;
-    block-size: 1.75rem;
+  &__unit-index {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: var(--ds-brand-600);
-    color: var(--ds-text-onBrand);
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
     border-radius: 50%;
+    background: var(--ds-brand-600);
+    color: var(--ds-text-onBrand, #fff);
     font-family: var(--ds-font-heading);
     font-size: var(--ds-text-sm);
-    font-weight: var(--ds-weight-bold);
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
+    margin-inline-end: var(--ds-space-2);
   }
 
-  &__title {
-    flex: 1;
+  &__unit-title {
     font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-md);
-    font-weight: var(--ds-weight-medium);
+    font-weight: 600;
     color: var(--ds-text);
-    min-inline-size: 0;
   }
 
-  &__chevron {
-    inline-size: 1rem;
-    block-size: 1rem;
+  &__unit-meta {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
     color: var(--ds-text-muted);
-    flex-shrink: 0;
-    transition: transform var(--ds-duration-fast) var(--ds-ease-out);
   }
 
-  &__body {
-    padding: 0 var(--ds-space-4) var(--ds-space-3);
-    border-block-start: 1px solid var(--ds-border);
+  &__unit-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-1);
+    padding-block: var(--ds-space-2);
   }
 }
 </style>
