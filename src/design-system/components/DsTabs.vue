@@ -44,150 +44,146 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'DsTabs',
-  provide() {
-    const state = {};
-    Object.defineProperty(state, 'active', {
-      enumerable: true,
-      get: () => this.currentValue,
-    });
-    return {
-      dsTabs: {
-        state,
-        register: this.register,
-        unregister: this.unregister,
-      },
-    };
-  },
-  emits: ['update:modelValue', 'change'],
-  props: {
-    modelValue: { type: [String, Number], default: null },
-    align: {
-      type: String,
-      default: 'start',
-      validator: (v) => ['start', 'center', 'end', 'stretch'].includes(v),
-    },
-    size: {
-      type: String,
-      default: 'md',
-      validator: (v) => ['sm', 'md', 'lg'].includes(v),
-    },
-  },
-  data() {
-    return {
-      tabs: [],
-      tabRefs: [],
-      indicator: { offset: 0, width: 0 },
-    };
-  },
-  computed: {
-    currentValue() {
-      if (this.modelValue != null) return this.modelValue;
-      const first = this.tabs.find((t) => !t.disabled);
-      return first ? first.name : null;
-    },
-    isRTL() {
-      if (typeof document === 'undefined') return false;
-      return document.documentElement.getAttribute('dir') === 'rtl';
-    },
-    indicatorStyle() {
-      return {
-        transform: `translateX(${this.indicator.offset}px)`,
-        width: `${this.indicator.width}px`,
-      };
-    },
-  },
-  watch: {
-    currentValue() {
-      this.$nextTick(this.updateIndicator);
-    },
-    tabs() {
-      this.$nextTick(this.updateIndicator);
-    },
-  },
-  mounted() {
-    this.$nextTick(this.updateIndicator);
-    window.addEventListener('resize', this.updateIndicator);
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.updateIndicator);
-  },
-  updated() {
-    this.$nextTick(this.updateIndicator);
-  },
-  methods: {
-    setTabRef(el) {
-      if (el && !this.tabRefs.includes(el)) this.tabRefs.push(el);
-    },
-    register(tab) {
-      if (!this.tabs.find((t) => t.name === tab.name)) {
-        this.tabs.push(tab);
-      }
-    },
-    unregister(name) {
-      this.tabs = this.tabs.filter((t) => t.name !== name);
-      this.tabRefs = [];
-    },
-    select(tab) {
-      if (tab.disabled) return;
-      this.$emit('update:modelValue', tab.name);
-      this.$emit('change', tab.name);
-    },
-    updateIndicator() {
-      const list = this.$refs.list;
-      if (!list) return;
-      const activeIdx = this.tabs.findIndex((t) => t.name === this.currentValue);
-      if (activeIdx < 0) {
-        this.indicator = { offset: 0, width: 0 };
-        return;
-      }
-      const btn = list.querySelectorAll('.ds-tabs__tab')[activeIdx];
-      if (!btn) return;
-      this.indicator = {
-        offset: btn.offsetLeft,
-        width: btn.offsetWidth,
-      };
-    },
-    onKeydown(e, idx) {
-      const key = e.key;
-      const rtl = this.isRTL;
-      let dir = 0;
-      if (key === 'ArrowRight') dir = rtl ? -1 : 1;
-      else if (key === 'ArrowLeft') dir = rtl ? 1 : -1;
-      else if (key === 'Home') dir = -999;
-      else if (key === 'End') dir = 999;
-      else if (key === 'Enter' || key === ' ') {
-        e.preventDefault();
-        this.select(this.tabs[idx]);
-        return;
-      } else return;
+<script setup lang="ts">
+import { ref, computed, watch, provide, onMounted, onBeforeUnmount, onUpdated, nextTick } from 'vue'
 
-      e.preventDefault();
-      const n = this.tabs.length;
-      if (!n) return;
-      let next;
-      if (dir === -999) next = this.tabs.findIndex((t) => !t.disabled);
-      else if (dir === 999) {
-        for (let i = n - 1; i >= 0; i -= 1) {
-          if (!this.tabs[i].disabled) { next = i; break; }
-        }
-      } else {
-        next = idx;
-        for (let step = 0; step < n; step += 1) {
-          next = (next + dir + n) % n;
-          if (!this.tabs[next].disabled) break;
-        }
-      }
-      if (next == null) return;
-      const btns = this.$refs.list.querySelectorAll('.ds-tabs__tab');
-      const el = btns[next];
-      if (el) el.focus();
-      this.select(this.tabs[next]);
-    },
-  },
-};
+defineOptions({ name: 'DsTabs' })
+
+interface TabEntry {
+  name: string | number
+  label: string
+  icon: string
+  disabled: boolean
+}
+
+interface Props {
+  modelValue?: string | number | null
+  align?: 'start' | 'center' | 'end' | 'stretch'
+  size?: 'sm' | 'md' | 'lg'
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: null,
+  align: 'start',
+  size: 'md',
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', val: string | number): void
+  (e: 'change', val: string | number): void
+}>()
+
+const tabs = ref<TabEntry[]>([])
+const tabRefs = ref<HTMLElement[]>([])
+const indicator = ref({ offset: 0, width: 0 })
+const list = ref<HTMLElement | null>(null)
+
+const currentValue = computed(() => {
+  if (props.modelValue != null) return props.modelValue
+  const first = tabs.value.find((t) => !t.disabled)
+  return first ? first.name : null
+})
+
+const isRTL = computed(() => {
+  if (typeof document === 'undefined') return false
+  return document.documentElement.getAttribute('dir') === 'rtl'
+})
+
+const indicatorStyle = computed(() => ({
+  transform: `translateX(${indicator.value.offset}px)`,
+  width: `${indicator.value.width}px`,
+}))
+
+function setTabRef(el: Element | null): void {
+  if (el && !tabRefs.value.includes(el as HTMLElement)) tabRefs.value.push(el as HTMLElement)
+}
+
+function register(tab: TabEntry): void {
+  if (!tabs.value.find((t) => t.name === tab.name)) {
+    tabs.value.push(tab)
+  }
+}
+
+function unregister(name: string | number): void {
+  tabs.value = tabs.value.filter((t) => t.name !== name)
+  tabRefs.value = []
+}
+
+function select(tab: TabEntry): void {
+  if (tab.disabled) return
+  emit('update:modelValue', tab.name)
+  emit('change', tab.name)
+}
+
+function updateIndicator(): void {
+  if (!list.value) return
+  const activeIdx = tabs.value.findIndex((t) => t.name === currentValue.value)
+  if (activeIdx < 0) {
+    indicator.value = { offset: 0, width: 0 }
+    return
+  }
+  const btn = list.value.querySelectorAll('.ds-tabs__tab')[activeIdx] as HTMLElement | undefined
+  if (!btn) return
+  indicator.value = { offset: btn.offsetLeft, width: btn.offsetWidth }
+}
+
+watch(currentValue, () => { void nextTick(updateIndicator) })
+watch(tabs, () => { void nextTick(updateIndicator) })
+
+onMounted(() => {
+  void nextTick(updateIndicator)
+  window.addEventListener('resize', updateIndicator)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateIndicator)
+})
+
+onUpdated(() => { void nextTick(updateIndicator) })
+
+function onKeydown(e: KeyboardEvent, idx: number): void {
+  const key = e.key
+  const rtl = isRTL.value
+  let dir = 0
+  if (key === 'ArrowRight') dir = rtl ? -1 : 1
+  else if (key === 'ArrowLeft') dir = rtl ? 1 : -1
+  else if (key === 'Home') dir = -999
+  else if (key === 'End') dir = 999
+  else if (key === 'Enter' || key === ' ') {
+    e.preventDefault()
+    select(tabs.value[idx])
+    return
+  } else return
+
+  e.preventDefault()
+  const n = tabs.value.length
+  if (!n) return
+  let next: number | undefined
+  if (dir === -999) next = tabs.value.findIndex((t) => !t.disabled)
+  else if (dir === 999) {
+    for (let i = n - 1; i >= 0; i -= 1) {
+      if (!tabs.value[i].disabled) { next = i; break }
+    }
+  } else {
+    next = idx
+    for (let step = 0; step < n; step += 1) {
+      next = (next + dir + n) % n
+      if (!tabs.value[next].disabled) break
+    }
+  }
+  if (next == null) return
+  const btns = list.value!.querySelectorAll('.ds-tabs__tab')
+  const el = btns[next] as HTMLElement | undefined
+  if (el) el.focus()
+  select(tabs.value[next])
+}
+
+// Reactive provide — getter on state so DsTab always reads the current active
+const state = {
+  get active() { return currentValue.value },
+}
+
+provide('dsTabs', { state, register, unregister })
 </script>
 
 <style lang="scss" scoped>

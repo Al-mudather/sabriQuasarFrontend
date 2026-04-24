@@ -85,68 +85,87 @@
   </div>
 </template>
 
-<script>
-let _uid = 0;
+<script setup lang="ts">
+import { ref, computed, useSlots } from 'vue'
 
-export default {
-  name: 'DsTextarea',
-  inheritAttrs: false,
-  emits: ['update:modelValue', 'focus', 'blur'],
-  props: {
-    modelValue:  { type: [String, Number], default: '' },
-    label:       { type: String, default: '' },
-    placeholder: { type: String, default: '' },
-    disabled:    { type: Boolean, default: false },
-    required:    { type: Boolean, default: false },
-    error:       { type: String, default: '' },
-    rows:        { type: Number, default: 4 },
-    maxlength:   { type: Number, default: null },
-    size: {
-      type: String,
-      default: 'md',
-      validator: v => ['sm', 'md', 'lg'].includes(v)
-    },
-    id: { type: String, default: null }
-  },
-  data() {
-    return {
-      focused: false,
-      localUid: `ds-textarea-${++_uid}`
-    };
-  },
-  computed: {
-    inputId() {
-      return this.id || this.localUid;
-    },
-    currentLength() {
-      return this.value == null ? 0 : String(this.value).length;
-    },
-    nearLimit() {
-      if (!this.maxlength) return false;
-      return this.currentLength >= Math.floor(this.maxlength * 0.9);
-    },
-    describedBy() {
-      if (this.error) return `${this.inputId}-error`;
-      if (this.$slots.helper) return `${this.inputId}-helper`;
-      return null;
-    }
-  },
-  methods: {
-    onInput(e) {
-      this.$emit('update:modelValue', e.target.value);
-    },
-    onFocus(e) {
-      this.focused = true;
-      this.$emit('focus', e);
-    },
-    onBlur(e) {
-      this.focused = false;
-      this.$emit('blur', e);
-    },
-    focus() { this.$refs.input && this.$refs.input.focus(); },
-    blur()  { this.$refs.input && this.$refs.input.blur(); }
-  }
-};
+defineOptions({ name: 'DsTextarea', inheritAttrs: false })
+
+let _uid = 0
+
+interface Props {
+  modelValue?: string | number
+  label?: string
+  placeholder?: string
+  disabled?: boolean
+  required?: boolean
+  error?: string
+  rows?: number
+  maxlength?: number | null
+  size?: 'sm' | 'md' | 'lg'
+  id?: string | null
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
+  label: '',
+  placeholder: '',
+  disabled: false,
+  required: false,
+  error: '',
+  rows: 4,
+  maxlength: null,
+  size: 'md',
+  id: null,
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', val: string): void
+  (e: 'focus', event: FocusEvent): void
+  (e: 'blur', event: FocusEvent): void
+  (e: 'change', val: string): void
+  (e: 'keydown', event: KeyboardEvent): void
+}>()
+
+const slots = useSlots()
+const focused = ref(false)
+const localUid = `ds-textarea-${++_uid}`
+const input = ref<HTMLTextAreaElement | null>(null)
+
+const inputId = computed(() => props.id || localUid)
+
+const currentLength = computed(() =>
+  props.modelValue == null ? 0 : String(props.modelValue).length
+)
+
+const nearLimit = computed(() => {
+  if (!props.maxlength) return false
+  return currentLength.value >= Math.floor(props.maxlength * 0.9)
+})
+
+const describedBy = computed(() => {
+  if (props.error) return `${inputId.value}-error`
+  if (slots.helper) return `${inputId.value}-helper`
+  return null
+})
+
+function onInput(e: Event): void {
+  emit('update:modelValue', (e.target as HTMLTextAreaElement).value)
+}
+
+function onFocus(e: FocusEvent): void {
+  focused.value = true
+  emit('focus', e)
+}
+
+function onBlur(e: FocusEvent): void {
+  focused.value = false
+  emit('blur', e)
+}
+
+function focus(): void { input.value?.focus() }
+function blur(): void  { input.value?.blur() }
+
+defineExpose({ focus, blur })
 </script>
 
 <style lang="scss" scoped>

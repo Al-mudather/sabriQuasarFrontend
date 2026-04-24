@@ -31,30 +31,33 @@
   </span>
 </template>
 
-<script>
-export default {
-  name: 'DsTag',
-  props: {
-    variant: {
-      type: String,
-      default: 'taupe',
-      validator: v => ['indigo', 'terracotta', 'taupe', 'ghost'].includes(v)
-    },
-    size: {
-      type: String,
-      default: 'md',
-      validator: v => ['sm', 'md'].includes(v)
-    },
-    closable:   { type: Boolean, default: false },
-    active:     { type: Boolean, default: false },
-    icon:       { type: String,  default: null },
-    closeLabel: { type: String,  default: 'إزالة' }
-  },
-  methods: {
-    onClose (e) {
-      this.$emit('close', e)
-    }
-  }
+<script setup lang="ts">
+defineOptions({ name: 'DsTag' })
+
+interface Props {
+  variant?: 'indigo' | 'terracotta' | 'taupe' | 'ghost'
+  size?: 'sm' | 'md'
+  closable?: boolean
+  active?: boolean
+  icon?: string | null
+  closeLabel?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'taupe',
+  size: 'md',
+  closable: false,
+  active: false,
+  icon: null,
+  closeLabel: 'إزالة',
+})
+
+const emit = defineEmits<{
+  (e: 'close', event: MouseEvent): void
+}>()
+
+function onClose(e: MouseEvent): void {
+  emit('close', e)
 }
 </script>
 

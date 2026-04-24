@@ -4,82 +4,87 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'DsAccordion',
-  provide() {
-    const state = {};
-    Object.defineProperty(state, 'opened', {
-      enumerable: true,
-      get: () => this.internalOpened,
-    });
-    Object.defineProperty(state, 'multi', {
-      enumerable: true,
-      get: () => this.multi,
-    });
-    return {
-      dsAccordion: {
-        state,
-        toggle: this.toggle,
-        isOpen: this.isOpen,
-        focusNeighbor: this.focusNeighbor,
-        registerRef: this.registerRef,
-        unregisterRef: this.unregisterRef,
-      },
-    };
-  },
-  emits: ['update:modelValue', 'change'],
-  props: {
-    multi: { type: Boolean, default: false },
-    modelValue: { type: Array, default: null },
-  },
-  data() {
-    return {
-      internalOpened: this.modelValue ? [...this.modelValue] : [],
-      refs: [],
-    };
-  },
-  watch: {
-    modelValue(val) {
-      if (val) this.internalOpened = [...val];
-    },
-  },
-  methods: {
-    isOpen(name) {
-      return this.internalOpened.includes(name);
-    },
-    toggle(name) {
-      let next;
-      if (this.internalOpened.includes(name)) {
-        next = this.internalOpened.filter((n) => n !== name);
-      } else if (this.multi) {
-        next = [...this.internalOpened, name];
-      } else {
-        next = [name];
-      }
-      this.internalOpened = next;
-      this.$emit('update:modelValue', next);
-      this.$emit('change', next);
-    },
-    registerRef(name, el) {
-      const existing = this.refs.find((r) => r.name === name);
-      if (existing) existing.el = el;
-      else this.refs.push({ name, el });
-    },
-    unregisterRef(name) {
-      this.refs = this.refs.filter((r) => r.name !== name);
-    },
-    focusNeighbor(name, direction) {
-      if (!this.refs.length) return;
-      const idx = this.refs.findIndex((r) => r.name === name);
-      if (idx < 0) return;
-      const n = this.refs.length;
-      const next = (idx + direction + n) % n;
-      const target = this.refs[next];
-      if (target && target.el && target.el.focus) target.el.focus();
-    },
-  },
-};
+<script setup lang="ts">
+import { ref, watch, provide } from 'vue'
+
+defineOptions({ name: 'DsAccordion' })
+
+interface Props {
+  multi?: boolean
+  modelValue?: (string | number)[] | null
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  multi: false,
+  modelValue: null,
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', val: (string | number)[]): void
+  (e: 'change', val: (string | number)[]): void
+}>()
+
+interface AccordionRef { name: string | number; el: HTMLElement | null }
+
+const internalOpened = ref<(string | number)[]>(props.modelValue ? [...props.modelValue] : [])
+const refs = ref<AccordionRef[]>([])
+
+watch(() => props.modelValue, (val) => {
+  if (val) internalOpened.value = [...val]
+})
+
+function isOpen(name: string | number): boolean {
+  return internalOpened.value.includes(name)
+}
+
+function toggle(name: string | number): void {
+  let next: (string | number)[]
+  if (internalOpened.value.includes(name)) {
+    next = internalOpened.value.filter((n) => n !== name)
+  } else if (props.multi) {
+    next = [...internalOpened.value, name]
+  } else {
+    next = [name]
+  }
+  internalOpened.value = next
+  emit('update:modelValue', next)
+  emit('change', next)
+}
+
+function registerRef(name: string | number, el: HTMLElement | null): void {
+  const existing = refs.value.find((r) => r.name === name)
+  if (existing) existing.el = el
+  else refs.value.push({ name, el })
+}
+
+function unregisterRef(name: string | number): void {
+  refs.value = refs.value.filter((r) => r.name !== name)
+}
+
+function focusNeighbor(name: string | number, direction: number): void {
+  if (!refs.value.length) return
+  const idx = refs.value.findIndex((r) => r.name === name)
+  if (idx < 0) return
+  const n = refs.value.length
+  const next = (idx + direction + n) % n
+  const target = refs.value[next]
+  if (target?.el?.focus) target.el.focus()
+}
+
+// Reactive provide — getters on state object so children always read current values
+const state = {
+  get opened() { return internalOpened.value },
+  get multi() { return props.multi },
+}
+
+provide('dsAccordion', {
+  state,
+  toggle,
+  isOpen,
+  focusNeighbor,
+  registerRef,
+  unregisterRef,
+})
 </script>
 
 <style lang="scss" scoped>

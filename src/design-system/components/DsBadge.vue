@@ -9,41 +9,32 @@
   </span>
 </template>
 
-<script>
-export default {
-  name: 'DsBadge',
-  props: {
-    variant: {
-      type: String,
-      default: 'taupe',
-      // Preserve legacy values (neutral/brand/accent/info) + new names
-      validator: v => [
-        'indigo', 'terracotta', 'taupe',
-        'success', 'warning', 'danger', 'ghost',
-        // legacy aliases
-        'neutral', 'brand', 'accent', 'info'
-      ].includes(v)
-    },
-    size: {
-      type: String,
-      default: 'md',
-      validator: v => ['sm', 'md'].includes(v)
-    },
-    icon: { type: String, default: null }
-  },
-  computed: {
-    resolvedVariant () {
-      // Map legacy names forward to the new vocabulary
-      const map = {
-        neutral: 'taupe',
-        brand:   'indigo',
-        accent:  'terracotta',
-        info:    'indigo'
-      }
-      return map[this.variant] || this.variant
-    }
-  }
+<script setup lang="ts">
+import { computed } from 'vue'
+
+defineOptions({ name: 'DsBadge' })
+
+interface Props {
+  variant?: 'indigo' | 'terracotta' | 'taupe' | 'success' | 'warning' | 'danger' | 'ghost' | 'neutral' | 'brand' | 'accent' | 'info'
+  size?: 'sm' | 'md'
+  icon?: string | null
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'taupe',
+  size: 'md',
+  icon: null,
+})
+
+const resolvedVariant = computed(() => {
+  const map: Record<string, string> = {
+    neutral: 'taupe',
+    brand:   'indigo',
+    accent:  'terracotta',
+    info:    'indigo',
+  }
+  return map[props.variant!] || props.variant
+})
 </script>
 
 <style lang="scss" scoped>

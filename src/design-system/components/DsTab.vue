@@ -9,48 +9,51 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'DsTab',
-  inject: {
-    dsTabs: { default: null },
-  },
-  props: {
-    name: { type: [String, Number], required: true },
-    label: { type: String, default: '' },
-    icon: { type: String, default: '' },
-    disabled: { type: Boolean, default: false },
-  },
-  computed: {
-    isActive() {
-      return this.dsTabs && this.dsTabs.state.active === this.name;
-    },
-  },
-  watch: {
-    name() { this.registerSelf(); },
-    label() { this.registerSelf(); },
-    icon() { this.registerSelf(); },
-    disabled() { this.registerSelf(); },
-  },
-  created() {
-    this.registerSelf();
-  },
-  beforeUnmount() {
-    if (this.dsTabs) this.dsTabs.unregister(this.name);
-  },
-  methods: {
-    registerSelf() {
-      if (!this.dsTabs) return;
-      this.dsTabs.unregister(this.name);
-      this.dsTabs.register({
-        name: this.name,
-        label: this.label,
-        icon: this.icon,
-        disabled: this.disabled,
-      });
-    },
-  },
-};
+<script setup lang="ts">
+import { computed, watch, inject, onBeforeUnmount } from 'vue'
+
+defineOptions({ name: 'DsTab' })
+
+interface TabsApi {
+  state: { active: string | number | null }
+  register: (tab: { name: string | number; label: string; icon: string; disabled: boolean }) => void
+  unregister: (name: string | number) => void
+}
+
+interface Props {
+  name: string | number
+  label?: string
+  icon?: string
+  disabled?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  label: '',
+  icon: '',
+  disabled: false,
+})
+
+const dsTabs = inject<TabsApi | null>('dsTabs', null)
+
+const isActive = computed(() => dsTabs ? dsTabs.state.active === props.name : false)
+
+function registerSelf(): void {
+  if (!dsTabs) return
+  dsTabs.unregister(props.name)
+  dsTabs.register({ name: props.name, label: props.label, icon: props.icon, disabled: props.disabled })
+}
+
+// Register immediately (replaces `created`)
+registerSelf()
+
+watch(() => props.name, registerSelf)
+watch(() => props.label, registerSelf)
+watch(() => props.icon, registerSelf)
+watch(() => props.disabled, registerSelf)
+
+onBeforeUnmount(() => {
+  if (dsTabs) dsTabs.unregister(props.name)
+})
 </script>
 
 <style lang="scss" scoped>

@@ -71,48 +71,47 @@
   </div>
 </template>
 
-<script>
-// DsProgressBar — linear (pill) or vine (growing curved path).
-// Preserved API: value, size (sm/md/lg), variant (brand/accent/success),
-// indeterminate, showLabel.
-// Extended: variant aliases (indigo/terracotta), label (string above),
-// mode (linear|vine).
-export default {
-  name: 'DsProgressBar',
-  props: {
-    value:         { type: Number, default: 0 },
-    size:          { type: String, default: 'md', validator: v => ['sm', 'md', 'lg'].includes(v) },
-    variant:       {
-      type: String,
-      default: 'brand',
-      validator: v => ['brand', 'indigo', 'accent', 'terracotta', 'success'].includes(v)
-    },
-    indeterminate: { type: Boolean, default: false },
-    showLabel:     { type: Boolean, default: false },
-    label:         { type: String, default: '' },
-    mode:          { type: String, default: 'linear', validator: v => ['linear', 'vine'].includes(v) }
-  },
-  computed: {
-    clampedValue () { return Math.max(0, Math.min(100, Math.round(this.value))) },
-    // Normalize variant aliases so the class matches CSS.
-    normalizedVariant () {
-      if (this.variant === 'indigo') return 'brand'
-      if (this.variant === 'terracotta') return 'accent'
-      return this.variant
-    },
-    vineStyle () {
-      // Path length of the cubic-bezier above is ~320 units. We use CSS
-      // pathLength-agnostic stroke-dasharray: 1 0 via `pathLength` trick below.
-      const pct = this.clampedValue / 100
-      return {
-        strokeDasharray: '1',
-        strokeDashoffset: String(1 - pct),
-        // pathLength normalizes to 1 on modern browsers
-        ['--vine-progress']: pct
-      }
-    }
-  }
+<script setup lang="ts">
+import { computed } from 'vue'
+
+defineOptions({ name: 'DsProgressBar' })
+
+interface Props {
+  value?: number
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'brand' | 'indigo' | 'accent' | 'terracotta' | 'success'
+  indeterminate?: boolean
+  showLabel?: boolean
+  label?: string
+  mode?: 'linear' | 'vine'
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  value: 0,
+  size: 'md',
+  variant: 'brand',
+  indeterminate: false,
+  showLabel: false,
+  label: '',
+  mode: 'linear',
+})
+
+const clampedValue = computed(() => Math.max(0, Math.min(100, Math.round(props.value))))
+
+const normalizedVariant = computed(() => {
+  if (props.variant === 'indigo') return 'brand'
+  if (props.variant === 'terracotta') return 'accent'
+  return props.variant
+})
+
+const vineStyle = computed(() => {
+  const pct = clampedValue.value / 100
+  return {
+    strokeDasharray: '1',
+    strokeDashoffset: String(1 - pct),
+    '--vine-progress': pct,
+  }
+})
 </script>
 
 <style lang="scss" scoped>

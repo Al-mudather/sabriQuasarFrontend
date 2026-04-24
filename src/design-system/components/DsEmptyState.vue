@@ -149,32 +149,43 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'DsEmptyState',
-  props: {
-    // Preserved original API
-    title:       { type: String, default: '' },
-    description: { type: String, default: '' },
-    icon:        { type: String, default: null },
-    size:        { type: String, default: 'md', validator: v => ['sm', 'md', 'lg'].includes(v) },
-    // Extended API
-    body:        { type: String, default: '' },
-    ctaLabel:    { type: String, default: '' },
-    ctaTo:       { type: [String, Object], default: null },
-    variant:     {
-      type: String,
-      default: 'default',
-      validator: v => ['default', 'search', 'error', 'success'].includes(v)
-    }
-  },
-  methods: {
-    onCtaClick (e) {
-      this.$emit('cta-click', e)
-      if (this.ctaTo && this.$router) {
-        try { this.$router.push(this.ctaTo) } catch (_) { /* noop */ }
-      }
-    }
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+defineOptions({ name: 'DsEmptyState' })
+
+interface Props {
+  title?: string
+  description?: string
+  icon?: string | null
+  size?: 'sm' | 'md' | 'lg'
+  body?: string
+  ctaLabel?: string
+  ctaTo?: string | Record<string, unknown> | null
+  variant?: 'default' | 'search' | 'error' | 'success'
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  title: '',
+  description: '',
+  icon: null,
+  size: 'md',
+  body: '',
+  ctaLabel: '',
+  ctaTo: null,
+  variant: 'default',
+})
+
+const emit = defineEmits<{
+  (e: 'cta-click', event: MouseEvent): void
+}>()
+
+const router = useRouter()
+
+function onCtaClick(e: MouseEvent): void {
+  emit('cta-click', e)
+  if (props.ctaTo) {
+    try { void router.push(props.ctaTo as Parameters<typeof router.push>[0]) } catch (_) { /* noop */ }
   }
 }
 </script>

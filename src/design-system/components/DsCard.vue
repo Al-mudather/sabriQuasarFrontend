@@ -32,87 +32,95 @@
   </component>
 </template>
 
-<script>
-export default {
-  name: 'DsCard',
-  props: {
-    tag:         { type: String,  default: 'div' },
-    variant:     {
-      type: String,
-      default: 'default',
-      validator: v => ['default', 'indigo-hero', 'ghost'].includes(v)
-    },
-    elevation:   {
-      type: String,
-      default: 'sm',
-      validator: v => ['flat', 'xs', 'sm', 'md', 'lg'].includes(v)
-    },
-    interactive: { type: Boolean, default: false },
-    href:        { type: String,  default: null },
-    to:          { type: [String, Object], default: null }
-  },
-  data () {
-    return {
-      isTilting: false,
-      tiltX: 0,
-      tiltY: 0,
-      lift: 0,
-      hoverCapable: true,
-      reducedMotion: false
-    }
-  },
-  computed: {
-    resolvedTag () {
-      if (this.to) return 'router-link'
-      if (this.href) return 'a'
-      return this.tag
-    },
-    tiltStyle () {
-      if (!this.isTilting) return null
-      return {
-        transform: `perspective(900px) rotateX(${this.tiltY}deg) rotateY(${this.tiltX}deg) translateY(${this.lift}px)`
-      }
-    }
-  },
-  mounted () {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      this.hoverCapable = window.matchMedia('(hover: hover)').matches
-      this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    }
-  },
-  methods: {
-    handleClick (e) {
-      if (this.interactive) this.$emit('click', e)
-    },
-    handleKey (e) {
-      if (this.interactive && !this.href && !this.to) this.$emit('click', e)
-    },
-    canTilt () {
-      return this.interactive && this.hoverCapable && !this.reducedMotion
-    },
-    onPointerEnter () {
-      if (!this.canTilt()) return
-      this.isTilting = true
-      this.lift = -2
-    },
-    onPointerMove (e) {
-      if (!this.canTilt()) return
-      const rect = this.$el.getBoundingClientRect()
-      const cx = rect.left + rect.width / 2
-      const cy = rect.top + rect.height / 2
-      const dx = (e.clientX - cx) / (rect.width / 2)
-      const dy = (e.clientY - cy) / (rect.height / 2)
-      // Cap at 3 degrees, per spec
-      this.tiltX = Math.max(-3, Math.min(3, dx * 3))
-      this.tiltY = Math.max(-3, Math.min(3, -dy * 3))
-    },
-    onPointerLeave () {
-      this.isTilting = false
-      this.tiltX = 0
-      this.tiltY = 0
-      this.lift = 0
-    }
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+
+defineOptions({ name: 'DsCard' })
+
+interface Props {
+  tag?: string
+  variant?: 'default' | 'indigo-hero' | 'ghost'
+  elevation?: 'flat' | 'xs' | 'sm' | 'md' | 'lg'
+  interactive?: boolean
+  href?: string | null
+  to?: string | Record<string, unknown> | null
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  tag: 'div',
+  variant: 'default',
+  elevation: 'sm',
+  interactive: false,
+  href: null,
+  to: null,
+})
+
+const emit = defineEmits<{
+  (e: 'click', event: MouseEvent | KeyboardEvent): void
+}>()
+
+const isTilting = ref(false)
+const tiltX = ref(0)
+const tiltY = ref(0)
+const lift = ref(0)
+const hoverCapable = ref(true)
+const reducedMotion = ref(false)
+
+const resolvedTag = computed(() => {
+  if (props.to) return 'router-link'
+  if (props.href) return 'a'
+  return props.tag
+})
+
+const tiltStyle = computed(() => {
+  if (!isTilting.value) return null
+  return {
+    transform: `perspective(900px) rotateX(${tiltY.value}deg) rotateY(${tiltX.value}deg) translateY(${lift.value}px)`,
   }
+})
+
+onMounted(() => {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    hoverCapable.value = window.matchMedia('(hover: hover)').matches
+    reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  }
+})
+
+function handleClick(e: MouseEvent): void {
+  if (props.interactive) emit('click', e)
+}
+
+function handleKey(e: KeyboardEvent): void {
+  if (props.interactive && !props.href && !props.to) emit('click', e)
+}
+
+function canTilt(): boolean {
+  return props.interactive && hoverCapable.value && !reducedMotion.value
+}
+
+function onPointerEnter(): void {
+  if (!canTilt()) return
+  isTilting.value = true
+  lift.value = -2
+}
+
+function onPointerMove(e: PointerEvent & { currentTarget: HTMLElement }): void {
+  if (!canTilt()) return
+  const el = (e.currentTarget as HTMLElement) ?? (e.target as HTMLElement)
+  const rect = el.getBoundingClientRect()
+  const cx = rect.left + rect.width / 2
+  const cy = rect.top + rect.height / 2
+  const dx = (e.clientX - cx) / (rect.width / 2)
+  const dy = (e.clientY - cy) / (rect.height / 2)
+  tiltX.value = Math.max(-3, Math.min(3, dx * 3))
+  tiltY.value = Math.max(-3, Math.min(3, -dy * 3))
+}
+
+function onPointerLeave(): void {
+  isTilting.value = false
+  tiltX.value = 0
+  tiltY.value = 0
+  lift.value = 0
 }
 </script>
 

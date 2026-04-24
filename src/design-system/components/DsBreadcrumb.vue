@@ -9,38 +9,39 @@
   </nav>
 </template>
 
-<script>
-import { defineComponent, shallowReactive, computed, provide } from 'vue';
+<script setup lang="ts">
+import { shallowReactive, computed, provide } from 'vue'
+import { DsBreadcrumbKey } from './ds-breadcrumb-key'
 
-export const DsBreadcrumbKey = Symbol('DsBreadcrumb');
+defineOptions({ name: 'DsBreadcrumb' })
 
-export default defineComponent({
-  name: 'DsBreadcrumb',
-  props: {
-    separator: { type: String, default: '›' },
+interface Props {
+  separator?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  separator: '›',
+})
+
+// Use shallowReactive so stored tokens are not wrapped in proxies
+// (keeps reference equality stable for isLast comparison).
+const items = shallowReactive<object[]>([])
+
+const api = {
+  separator: computed(() => props.separator),
+  register(item: object): () => void {
+    items.push(item)
+    return () => {
+      const i = items.indexOf(item)
+      if (i !== -1) items.splice(i, 1)
+    }
   },
-  setup(props) {
-    // Use shallowReactive so stored tokens are not wrapped in proxies
-    // (keeps reference equality stable for isLast comparison).
-    const items = shallowReactive([]);
-
-    const api = {
-      separator: computed(() => props.separator),
-      register(item) {
-        items.push(item);
-        return () => {
-          const i = items.indexOf(item);
-          if (i !== -1) items.splice(i, 1);
-        };
-      },
-      isLast(item) {
-        return items.length > 0 && items[items.length - 1] === item;
-      },
-    };
-
-    provide(DsBreadcrumbKey, api);
+  isLast(item: object): boolean {
+    return items.length > 0 && items[items.length - 1] === item
   },
-});
+}
+
+provide(DsBreadcrumbKey, api)
 </script>
 
 <style lang="scss" scoped>

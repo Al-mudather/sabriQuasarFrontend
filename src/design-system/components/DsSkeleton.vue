@@ -37,71 +37,66 @@
   />
 </template>
 
-<script>
-// DsSkeleton — warm-tinted shimmer primitive.
-// API preserved: `shape` (rect/line/circle/pill) still accepted via `type` alias.
-// Extended: `type` (text/circle/rect/card), `rows` for multi-line text blocks.
-export default {
-  name: 'DsSkeleton',
-  props: {
-    // Legacy prop — kept for 26 existing call sites.
-    shape: {
-      type: String,
-      default: null,
-      validator: v => v === null || ['rect', 'line', 'circle', 'pill'].includes(v)
-    },
-    // New preferred prop.
-    type: {
-      type: String,
-      default: null,
-      validator: v => v === null || ['text', 'circle', 'rect', 'card', 'line', 'pill'].includes(v)
-    },
-    width:  { type: String, default: '100%' },
-    height: { type: String, default: null },
-    radius: { type: String, default: null },
-    rows:   { type: Number, default: 1 },
-    animated: { type: Boolean, default: true }
-  },
-  computed: {
-    effectiveType () {
-      // `type` wins if provided; otherwise map legacy `shape`; default to 'rect'.
-      const t = this.type || this.shape || 'rect'
-      // `line` is an alias for a single-row text bar.
-      if (t === 'line') return 'text'
-      return t
-    },
-    rowsSafe () {
-      return Math.max(1, Math.min(20, this.rows || 1))
-    },
-    animatedEffective () {
-      return this.animated
-    },
-    customStyle () {
-      const style = { width: this.width }
-      if (this.height) style.height = this.height
-      if (this.radius) style.borderRadius = this.radius
-      // Circle default size if user didn't provide one.
-      if (this.effectiveType === 'circle' && !this.height && (!this.width || this.width === '100%')) {
-        style.width = '48px'
-        style.height = '48px'
-      }
-      return style
-    },
-    cardStyle () {
-      const s = { width: this.width }
-      if (this.height) s.height = this.height
-      return s
-    }
-  },
-  methods: {
-    lineStyle (i) {
-      const isLast = i === this.rowsSafe - 1
-      const w = isLast && this.rowsSafe > 1 ? '70%' : (this.width && this.width !== '100%' ? this.width : '100%')
-      const s = { width: w }
-      if (this.height) s.height = this.height
-      return s
-    }
+<script setup lang="ts">
+import { computed } from 'vue'
+
+defineOptions({ name: 'DsSkeleton' })
+
+interface Props {
+  // Legacy prop — kept for existing call sites.
+  shape?: 'rect' | 'line' | 'circle' | 'pill' | null
+  // New preferred prop.
+  type?: 'text' | 'circle' | 'rect' | 'card' | 'line' | 'pill' | null
+  width?: string
+  height?: string | null
+  radius?: string | null
+  rows?: number
+  animated?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  shape: null,
+  type: null,
+  width: '100%',
+  height: null,
+  radius: null,
+  rows: 1,
+  animated: true,
+})
+
+const effectiveType = computed(() => {
+  const t = props.type || props.shape || 'rect'
+  if (t === 'line') return 'text'
+  return t
+})
+
+const rowsSafe = computed(() => Math.max(1, Math.min(20, props.rows || 1)))
+
+const animatedEffective = computed(() => props.animated)
+
+const customStyle = computed(() => {
+  const style: Record<string, string> = { width: props.width }
+  if (props.height) style.height = props.height
+  if (props.radius) style.borderRadius = props.radius
+  if (effectiveType.value === 'circle' && !props.height && (!props.width || props.width === '100%')) {
+    style.width = '48px'
+    style.height = '48px'
   }
+  return style
+})
+
+const cardStyle = computed(() => {
+  const s: Record<string, string> = { width: props.width }
+  if (props.height) s.height = props.height
+  return s
+})
+
+function lineStyle(i: number): Record<string, string> {
+  const isLast = i === rowsSafe.value - 1
+  const w = isLast && rowsSafe.value > 1 ? '70%' : (props.width && props.width !== '100%' ? props.width : '100%')
+  const s: Record<string, string> = { width: w }
+  if (props.height) s.height = props.height
+  return s
 }
 </script>
 

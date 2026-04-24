@@ -60,88 +60,93 @@
   </div>
 </template>
 
-<script>
-let uid = 0;
+<script setup lang="ts">
+import { ref, computed, watch, inject, onMounted, onBeforeUnmount, onUpdated } from 'vue'
 
-export default {
-  name: 'DsAccordionItem',
-  inject: {
-    dsAccordion: { default: null },
-  },
-  props: {
-    name: {
-      type: [String, Number],
-      default: () => `ds-acc-${uid += 1}`,
-    },
-    title: { type: String, default: '' },
-    subtitle: { type: String, default: '' },
-    icon: { type: String, default: '' },
-    disabled: { type: Boolean, default: false },
-  },
-  data() {
-    return {
-      bodyHeight: 0,
-      _rafId: null,
-    };
-  },
-  computed: {
-    open() {
-      return this.dsAccordion ? this.dsAccordion.isOpen(this.name) : false;
-    },
-    headerId() { return `${this.name}-header`; },
-    bodyId()   { return `${this.name}-body`; },
-    panelStyle() {
-      return {
-        maxHeight: this.open ? `${this.bodyHeight}px` : '0px',
-      };
-    },
-  },
-  watch: {
-    open() {
-      this.measure();
-    },
-  },
-  mounted() {
-    this.measure();
-    if (this.dsAccordion) this.dsAccordion.registerRef(this.name, this.$refs.header);
-    this._ro = typeof ResizeObserver !== 'undefined'
-      ? new ResizeObserver(() => this.measure())
-      : null;
-    if (this._ro && this.$refs.inner) this._ro.observe(this.$refs.inner);
-  },
-  beforeUnmount() {
-    if (this.dsAccordion) this.dsAccordion.unregisterRef(this.name);
-    if (this._ro) this._ro.disconnect();
-  },
-  updated() {
-    this.measure();
-  },
-  methods: {
-    measure() {
-      if (!this.$refs.inner) return;
-      const h = this.$refs.inner.scrollHeight;
-      if (h !== this.bodyHeight) this.bodyHeight = h;
-    },
-    onToggle() {
-      if (this.disabled || !this.dsAccordion) return;
-      this.dsAccordion.toggle(this.name);
-    },
-    onKeydown(e) {
-      if (!this.dsAccordion) return;
-      const k = e.key;
-      if (k === 'Enter' || k === ' ') {
-        e.preventDefault();
-        this.onToggle();
-      } else if (k === 'ArrowDown') {
-        e.preventDefault();
-        this.dsAccordion.focusNeighbor(this.name, 1);
-      } else if (k === 'ArrowUp') {
-        e.preventDefault();
-        this.dsAccordion.focusNeighbor(this.name, -1);
-      }
-    },
-  },
-};
+defineOptions({ name: 'DsAccordionItem' })
+
+let uid = 0
+
+interface AccordionApi {
+  state: { opened: (string | number)[]; multi: boolean }
+  toggle: (name: string | number) => void
+  isOpen: (name: string | number) => boolean
+  focusNeighbor: (name: string | number, direction: number) => void
+  registerRef: (name: string | number, el: HTMLElement | null) => void
+  unregisterRef: (name: string | number) => void
+}
+
+interface Props {
+  name?: string | number
+  title?: string
+  subtitle?: string
+  icon?: string
+  disabled?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  name: () => `ds-acc-${uid += 1}`,
+  title: '',
+  subtitle: '',
+  icon: '',
+  disabled: false,
+})
+
+const dsAccordion = inject<AccordionApi | null>('dsAccordion', null)
+
+const bodyHeight = ref(0)
+const header = ref<HTMLElement | null>(null)
+const inner = ref<HTMLElement | null>(null)
+let ro: ResizeObserver | null = null
+
+const open = computed(() => dsAccordion ? dsAccordion.isOpen(props.name) : false)
+const headerId = computed(() => `${props.name}-header`)
+const bodyId = computed(() => `${props.name}-body`)
+const panelStyle = computed(() => ({
+  maxHeight: open.value ? `${bodyHeight.value}px` : '0px',
+}))
+
+function measure(): void {
+  if (!inner.value) return
+  const h = inner.value.scrollHeight
+  if (h !== bodyHeight.value) bodyHeight.value = h
+}
+
+watch(open, () => { measure() })
+
+onMounted(() => {
+  measure()
+  if (dsAccordion) dsAccordion.registerRef(props.name, header.value)
+  ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => measure()) : null
+  if (ro && inner.value) ro.observe(inner.value)
+})
+
+onBeforeUnmount(() => {
+  if (dsAccordion) dsAccordion.unregisterRef(props.name)
+  if (ro) ro.disconnect()
+})
+
+onUpdated(() => { measure() })
+
+function onToggle(): void {
+  if (props.disabled || !dsAccordion) return
+  dsAccordion.toggle(props.name)
+}
+
+function onKeydown(e: KeyboardEvent): void {
+  if (!dsAccordion) return
+  const k = e.key
+  if (k === 'Enter' || k === ' ') {
+    e.preventDefault()
+    onToggle()
+  } else if (k === 'ArrowDown') {
+    e.preventDefault()
+    dsAccordion.focusNeighbor(props.name, 1)
+  } else if (k === 'ArrowUp') {
+    e.preventDefault()
+    dsAccordion.focusNeighbor(props.name, -1)
+  }
+}
 </script>
 
 <style lang="scss" scoped>

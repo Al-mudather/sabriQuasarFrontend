@@ -43,35 +43,42 @@
   </q-dialog>
 </template>
 
-<script>
-export default {
-  name: "DsModal",
-  emits: ["update:modelValue", "show", "hide"],
-  props: {
-    modelValue: { type: Boolean, default: false },
-    persistent: { type: Boolean, default: false },
-    size: {
-      type: String,
-      default: "md",
-      validator: (v) => ["sm", "md", "lg", "xl"].includes(v),
-    },
-    danger: { type: Boolean, default: false },
-    closeLabel: { type: String, default: "Close" },
-  },
-  computed: {
-    contentClass() {
-      return ["ds-modal-backdrop"];
-    },
-  },
-  methods: {
-    onInput(val) {
-      this.$emit("update:modelValue", val);
-    },
-    close() {
-      this.$emit("update:modelValue", false);
-    },
-  },
-};
+<script setup lang="ts">
+import { computed } from 'vue'
+
+defineOptions({ name: 'DsModal' })
+
+interface Props {
+  modelValue?: boolean
+  persistent?: boolean
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  danger?: boolean
+  closeLabel?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: false,
+  persistent: false,
+  size: 'md',
+  danger: false,
+  closeLabel: 'Close',
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', val: boolean): void
+  (e: 'show'): void
+  (e: 'hide'): void
+}>()
+
+const contentClass = computed(() => ['ds-modal-backdrop'])
+
+function onInput(val: boolean): void {
+  emit('update:modelValue', val)
+}
+
+function close(): void {
+  emit('update:modelValue', false)
+}
 </script>
 
 <style lang="scss">

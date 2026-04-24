@@ -37,83 +37,85 @@
   </component>
 </template>
 
-<script>
-import { magnetic } from 'src/design-system/motion';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { magnetic } from 'src/design-system/motion'
 
-export default {
-  name: 'DsButton',
-  props: {
-    tag:        { type: String, default: 'button' },
-    nativeType: { type: String, default: 'button' },
-    href:       { type: String, default: null },
-    variant: {
-      type: String,
-      default: 'primary',
-      validator: v => [
-        'primary',
-        'secondary',
-        'ghost',
-        'danger',
-        'destructive',
-        'accent'
-      ].includes(v)
-    },
-    size: {
-      type: String,
-      default: 'md',
-      validator: v => ['sm', 'md', 'lg'].includes(v)
-    },
-    fullWidth:       { type: Boolean, default: false },
-    disabled:        { type: Boolean, default: false },
-    loading:         { type: Boolean, default: false },
-    pill:            { type: Boolean, default: false },
-    magneticEnabled: { type: Boolean, default: true },
-    magneticStrength:{ type: Number,  default: 4 }
-  },
-  computed: {
-    // 'danger' kept as alias for 'destructive' to preserve call-site API
-    resolvedVariant() {
-      return this.variant === 'danger' ? 'destructive' : this.variant;
-    }
-  },
-  watch: {
-    disabled(v)        { if (v) this.teardownMagnetic(); else this.setupMagnetic(); },
-    loading(v)         { if (v) this.teardownMagnetic(); else this.setupMagnetic(); },
-    magneticEnabled(v) { if (v) this.setupMagnetic(); else this.teardownMagnetic(); }
-  },
-  mounted() {
-    this.setupMagnetic();
-  },
-  beforeUnmount() {
-    this.teardownMagnetic();
-  },
-  methods: {
-    onClick(e) {
-      if (this.disabled || this.loading) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      this.$emit('click', e);
-    },
-    setupMagnetic() {
-      this.teardownMagnetic();
-      if (!this.magneticEnabled || this.disabled || this.loading) return;
-      const el = this.$refs.root && this.$refs.root.$el
-        ? this.$refs.root.$el
-        : this.$refs.root;
-      if (!el) return;
-      // magnetic() already respects prefers-reduced-motion
-      this._magneticHandle = magnetic(el, { strength: this.magneticStrength });
-    },
-    teardownMagnetic() {
-      if (this._magneticHandle && typeof this._magneticHandle.kill === 'function') {
-        this._magneticHandle.kill();
-      }
-      this._magneticHandle = null;
-    }
+defineOptions({ name: 'DsButton' })
+
+interface Props {
+  tag?: string
+  nativeType?: string
+  href?: string | null
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'destructive' | 'accent'
+  size?: 'sm' | 'md' | 'lg'
+  fullWidth?: boolean
+  disabled?: boolean
+  loading?: boolean
+  pill?: boolean
+  magneticEnabled?: boolean
+  magneticStrength?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  tag: 'button',
+  nativeType: 'button',
+  href: null,
+  variant: 'primary',
+  size: 'md',
+  fullWidth: false,
+  disabled: false,
+  loading: false,
+  pill: false,
+  magneticEnabled: true,
+  magneticStrength: 4,
+})
+
+const emit = defineEmits<{
+  (e: 'click', event: MouseEvent): void
+}>()
+
+// 'danger' kept as alias for 'destructive' to preserve call-site API
+const resolvedVariant = computed(() =>
+  props.variant === 'danger' ? 'destructive' : props.variant
+)
+
+const root = ref<HTMLElement | null>(null)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let magneticHandle: { kill: () => void } | null = null
+
+function teardownMagnetic(): void {
+  if (magneticHandle && typeof magneticHandle.kill === 'function') {
+    magneticHandle.kill()
   }
-};
+  magneticHandle = null
+}
+
+function setupMagnetic(): void {
+  teardownMagnetic()
+  if (!props.magneticEnabled || props.disabled || props.loading) return
+  const el = root.value && (root.value as unknown as { $el: HTMLElement }).$el
+    ? (root.value as unknown as { $el: HTMLElement }).$el
+    : root.value
+  if (!el) return
+  magneticHandle = magnetic(el, { strength: props.magneticStrength })
+}
+
+watch(() => props.disabled, (v) => { if (v) teardownMagnetic(); else setupMagnetic() })
+watch(() => props.loading, (v) => { if (v) teardownMagnetic(); else setupMagnetic() })
+watch(() => props.magneticEnabled, (v) => { if (v) setupMagnetic(); else teardownMagnetic() })
+
+onMounted(() => { setupMagnetic() })
+onBeforeUnmount(() => { teardownMagnetic() })
+
+function onClick(e: MouseEvent): void {
+  if (props.disabled || props.loading) {
+    e.preventDefault()
+    e.stopPropagation()
+    return
+  }
+  emit('click', e)
+}
 </script>
 
 <style lang="scss" scoped>

@@ -72,69 +72,83 @@
   </div>
 </template>
 
-<script>
-let _uid = 0;
+<script setup lang="ts">
+import { ref, computed, useSlots } from 'vue'
 
-export default {
-  name: 'DsInput',
-  inheritAttrs: false,
-  emits: ['update:modelValue', 'focus', 'blur'],
-  props: {
-    modelValue:  { type: [String, Number], default: '' },
-    type:        {
-      type: String,
-      default: 'text',
-      validator: v => ['text', 'email', 'password', 'number', 'tel', 'url', 'search'].includes(v)
-    },
-    label:       { type: String, default: '' },
-    placeholder: { type: String, default: '' },
-    disabled:    { type: Boolean, default: false },
-    required:    { type: Boolean, default: false },
-    error:       { type: String, default: '' },
-    size: {
-      type: String,
-      default: 'md',
-      validator: v => ['sm', 'md', 'lg'].includes(v)
-    },
-    id:               { type: String, default: null },
-    directionalIcon:  { type: Boolean, default: false }
-  },
-  data() {
-    return {
-      focused: false,
-      localUid: `ds-input-${++_uid}`
-    };
-  },
-  computed: {
-    inputId() {
-      return this.id || this.localUid;
-    },
-    describedBy() {
-      if (this.error) return `${this.inputId}-error`;
-      if (this.$slots.helper) return `${this.inputId}-helper`;
-      return null;
-    }
-  },
-  methods: {
-    onInput(e) {
-      this.$emit('update:modelValue', e.target.value);
-    },
-    onFocus(e) {
-      this.focused = true;
-      this.$emit('focus', e);
-    },
-    onBlur(e) {
-      this.focused = false;
-      this.$emit('blur', e);
-    },
-    focus() {
-      this.$refs.input && this.$refs.input.focus();
-    },
-    blur() {
-      this.$refs.input && this.$refs.input.blur();
-    }
-  }
-};
+defineOptions({ name: 'DsInput', inheritAttrs: false })
+
+let _uid = 0
+
+interface Props {
+  modelValue?: string | number
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'
+  label?: string
+  placeholder?: string
+  disabled?: boolean
+  required?: boolean
+  error?: string
+  size?: 'sm' | 'md' | 'lg'
+  id?: string | null
+  directionalIcon?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
+  type: 'text',
+  label: '',
+  placeholder: '',
+  disabled: false,
+  required: false,
+  error: '',
+  size: 'md',
+  id: null,
+  directionalIcon: false,
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', val: string): void
+  (e: 'focus', event: FocusEvent): void
+  (e: 'blur', event: FocusEvent): void
+  (e: 'change', val: string): void
+  (e: 'keydown', event: KeyboardEvent): void
+}>()
+
+const slots = useSlots()
+const focused = ref(false)
+const localUid = `ds-input-${++_uid}`
+const input = ref<HTMLInputElement | null>(null)
+
+const inputId = computed(() => props.id || localUid)
+
+const describedBy = computed(() => {
+  if (props.error) return `${inputId.value}-error`
+  if (slots.helper) return `${inputId.value}-helper`
+  return null
+})
+
+function onInput(e: Event): void {
+  emit('update:modelValue', (e.target as HTMLInputElement).value)
+}
+
+function onFocus(e: FocusEvent): void {
+  focused.value = true
+  emit('focus', e)
+}
+
+function onBlur(e: FocusEvent): void {
+  focused.value = false
+  emit('blur', e)
+}
+
+function focus(): void {
+  input.value?.focus()
+}
+
+function blur(): void {
+  input.value?.blur()
+}
+
+defineExpose({ focus, blur })
 </script>
 
 <style lang="scss" scoped>

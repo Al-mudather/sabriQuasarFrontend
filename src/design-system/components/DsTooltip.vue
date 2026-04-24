@@ -15,33 +15,32 @@
   </span>
 </template>
 
-<script>
-const POSITION_MAP = {
-  top:    { anchor: "top middle",    self: "bottom middle" },
-  bottom: { anchor: "bottom middle", self: "top middle" },
-  start:  { anchor: "center start",  self: "center end" },
-  end:    { anchor: "center end",    self: "center start" },
-};
+<script setup lang="ts">
+import { computed } from 'vue'
 
-export default {
-  name: "DsTooltip",
-  props: {
-    text: { type: String, required: true },
-    position: {
-      type: String,
-      default: "top",
-      validator: (v) => ["top", "bottom", "start", "end"].includes(v),
-    },
-    delay: { type: Number, default: 400 },
-  },
-  computed: {
-    resolved() {
-      return POSITION_MAP[this.position] || POSITION_MAP.top;
-    },
-    anchor() { return this.resolved.anchor; },
-    self()   { return this.resolved.self; },
-  },
-};
+defineOptions({ name: 'DsTooltip' })
+
+const POSITION_MAP: Record<string, { anchor: string; self: string }> = {
+  top:    { anchor: 'top middle',    self: 'bottom middle' },
+  bottom: { anchor: 'bottom middle', self: 'top middle' },
+  start:  { anchor: 'center start',  self: 'center end' },
+  end:    { anchor: 'center end',    self: 'center start' },
+}
+
+interface Props {
+  text: string
+  position?: 'top' | 'bottom' | 'start' | 'end'
+  delay?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  position: 'top',
+  delay: 400,
+})
+
+const resolved = computed(() => POSITION_MAP[props.position] || POSITION_MAP['top'])
+const anchor = computed(() => resolved.value.anchor)
+const self = computed(() => resolved.value.self)
 </script>
 
 <style lang="scss">

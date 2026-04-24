@@ -27,35 +27,41 @@
   </li>
 </template>
 
-<script>
-import { defineComponent, inject, computed, onBeforeUnmount } from 'vue';
-import { DsBreadcrumbKey } from './DsBreadcrumb.vue';
+<script setup lang="ts">
+import { computed, inject, onBeforeUnmount } from 'vue'
+import { DsBreadcrumbKey } from './ds-breadcrumb-key'
 
-export default defineComponent({
-  name: 'DsBreadcrumbItem',
-  props: {
-    to: { type: [String, Object], default: null },
-    href: { type: String, default: null },
-  },
-  setup(props) {
-    const api = inject(DsBreadcrumbKey, null);
-    const token = {};
+defineOptions({ name: 'DsBreadcrumbItem' })
 
-    let unregister = null;
-    if (api) {
-      unregister = api.register(token);
-      onBeforeUnmount(() => {
-        if (unregister) unregister();
-      });
-    }
+interface Props {
+  to?: string | Record<string, unknown> | null
+  href?: string | null
+}
 
-    const separator = computed(() => (api ? api.separator.value : '›'));
-    const isCurrent = computed(() => (api ? api.isLast(token) : false));
-    const tagName = computed(() => (props.to ? 'router-link' : 'a'));
+const props = withDefaults(defineProps<Props>(), {
+  to: null,
+  href: null,
+})
 
-    return { separator, isCurrent, tagName };
-  },
-});
+const api = inject(DsBreadcrumbKey, null) as {
+  separator: { value: string }
+  register: (item: object) => () => void
+  isLast: (item: object) => boolean
+} | null
+
+const token: object = {}
+
+let unregister: (() => void) | null = null
+if (api) {
+  unregister = api.register(token)
+  onBeforeUnmount(() => {
+    if (unregister) unregister()
+  })
+}
+
+const separator = computed(() => (api ? api.separator.value : '›'))
+const isCurrent = computed(() => (api ? api.isLast(token) : false))
+const tagName = computed(() => (props.to ? 'router-link' : 'a'))
 </script>
 
 <style lang="scss" scoped>
