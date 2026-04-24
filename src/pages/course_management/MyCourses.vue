@@ -161,7 +161,7 @@
             size="md"
             full-width
             class="mc-card__cta"
-            @click="goToClassroom(item.course)"
+            @click="goToClassroom(item)"
           >
             {{ item.isCompleted ? $t('إعادة المشاهدة') : $t('متابعة الدورة') }}
           </ds-button>
@@ -358,10 +358,12 @@ function goToCoursesPage(): void {
   void router.push({ name: 'courses' })
 }
 
-function goToClassroom(course: { pk: number | null }): void {
-  const id = course.pk
-  if (!id) return
-  window.location.href = `${location.origin}/classroom/#/class/${id}/`
+function goToClassroom(item: CourseCardViewModel): void {
+  // The classroom cockpit is keyed on *course* pk; the enrollment resolves
+  // server-side via `enrollmentByCourseForCurrentUser`.
+  const coursePk = item.pk
+  if (!coursePk) return
+  void router.push({ name: 'classroom-shell', params: { coursePk: String(coursePk) } })
 }
 
 function resetFilters(): void {

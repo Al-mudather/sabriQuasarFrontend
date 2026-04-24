@@ -61,3 +61,13 @@ export type ArchiveQuestionReplyVars = ArchiveQuestionReplyMutationVariables
 
 export type QnaSubscriptionPayload = QuestionAndAnswerSubscription
 export type QnaSubscriptionVars = QuestionAndAnswerSubscriptionVariables
+
+// --- Additive: subscription payload sub-entities ---------------------------
+// Narrow extractors used by the cache-merging subscription handler.
+
+export type QnaSubscriptionEnvelope = NonNullable<
+  QuestionAndAnswerSubscription['questionAnswerSubscription']
+>
+
+export type QnaSubscriptionQuestion = NonNullable<QnaSubscriptionEnvelope['question']>
+export type QnaSubscriptionAnswer = NonNullable<QnaSubscriptionEnvelope['answer']>

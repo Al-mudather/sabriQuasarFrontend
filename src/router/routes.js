@@ -110,6 +110,22 @@ const routes = [
     ]
   },
 
+  // Internal classroom — self-contained layout (no AppHeader/AppFooter).
+  // The classroom runs as a /classroom/class/:coursePk cockpit with its
+  // own route tree so deep-links to a specific content item survive refresh.
+  {
+    path: '/classroom',
+    component: () => import('layouts/ClassroomLayout.vue'),
+    beforeEnter: requireAuthentication,
+    children: [
+      { path: 'class/:coursePk(\\d+)',                             name: 'classroom-shell',       component: () => import('pages/classroom/ClassroomShell.vue') },
+      { path: 'class/:coursePk(\\d+)/content/:contentPk(\\d+)',    name: 'classroom-content',     component: () => import('pages/classroom/ClassroomContentView.vue') },
+      { path: 'class/:coursePk(\\d+)/overview',                    name: 'classroom-overview',    component: () => import('pages/classroom/ClassroomOverview.vue') },
+      { path: 'class/:coursePk(\\d+)/qa',                          name: 'classroom-qa',          component: () => import('pages/classroom/ClassroomQA.vue') },
+      { path: 'class/:coursePk(\\d+)/certificate',                 name: 'classroom-certificate', component: () => import('pages/classroom/ClassroomCertificate.vue') }
+    ]
+  },
+
   // Dev-only design system showcase. Only compiled into the bundle in
   // development builds.
   ...(process.env.NODE_ENV === 'development'

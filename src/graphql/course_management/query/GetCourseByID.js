@@ -38,11 +38,18 @@ query GetCourseByID($coursePk:Int) {
       edges {
         node{
           id,
+          pk,
+          title,
+          order,
           courseunitcontentSet {
             totalCount,
             edges {
               node {
                 id,
+                pk,
+                order,
+                isFree,
+                isMandatory,
                 modelName,
                 modelValue
               }

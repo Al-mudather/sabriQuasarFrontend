@@ -1,3 +1,5 @@
+import classroom from './classroom.js'
+
 /**
  * Created By : Ibrahim Algadi
  * Title      : Automated collection of JavaScript Files And Translation Using Python
@@ -5,6 +7,8 @@
  */
 
 export default {
+  classroom,
+
   "_comment_src_App.vue": "src_App.vue",
 
   "لقد قمت بحجب اللإشعارات , الرجاء السماح لها بالظهور لتتمتع باخر التحديثات على المنصه":

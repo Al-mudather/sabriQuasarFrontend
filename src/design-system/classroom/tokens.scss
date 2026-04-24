@@ -1,0 +1,99 @@
+// =============================================================
+// Classroom tokens — ADDITIVE overrides layered on top of the
+// base design system (`src/design-system/tokens.scss`). These
+// tokens are scoped conceptually to the internal classroom
+// experience under `/classroom/*` routes and are NOT meant to
+// override site-wide brand tokens.
+//
+// The classroom runs a dark, theater-leaning surface palette
+// (deep indigo-washed near-blacks + cream text), with the same
+// Royal Indigo + Terracotta accent pair from the base system.
+// Values are exposed both at `:root` (so parents of the scope
+// can read them) and under a `.classroom-scope` selector (so
+// they can be opt-in for a subtree without bleeding into the
+// rest of the marketing site).
+//
+// Consumers:
+//   - `/src/components/classroom/*`
+//   - `/src/pages/classroom/*` (wrapped in `.classroom-scope`)
+//
+// Do NOT add non-classroom tokens here. Do NOT mutate base
+// tokens — layer on top by referencing them via `var(--ds-*)`.
+// =============================================================
+
+:root,
+.classroom-scope {
+  // -----------------------------------------------------------
+  // Surfaces — deep indigo-washed near-blacks for theater feel
+  // -----------------------------------------------------------
+  --cls-surface:          #0F0B1A;   // page/background surface
+  --cls-surface-elevated: #1A1430;   // cards, side panel, modals
+  --cls-rail-bg:          #120E22;   // curriculum rail background
+  --cls-rail-hover:       #1E1834;   // rail row hover state
+
+  // -----------------------------------------------------------
+  // Text — cream-on-dark, warm tint. Never pure white.
+  // -----------------------------------------------------------
+  --cls-text-primary: #F5F2EA;
+  --cls-text-muted:   #9890A8;
+  --cls-text-dim:     #6B6478;
+
+  // -----------------------------------------------------------
+  // Accents — reuse base brand; fall back to locked hex.
+  // -----------------------------------------------------------
+  --cls-accent:      var(--ds-terracotta, #C1623C);
+  --cls-accent-soft: rgba(193, 98, 60, 0.16);
+  --cls-indigo:      var(--ds-royal-indigo, #322873);
+
+  // Progress — indigo → terracotta sweep
+  --cls-progress-gradient: linear-gradient(90deg, #322873, #C1623C);
+
+  // -----------------------------------------------------------
+  // Dividers & focus
+  // -----------------------------------------------------------
+  --cls-divider:    rgba(245, 242, 234, 0.08);
+  --cls-focus-ring: 2px solid #C1623C;
+
+  // -----------------------------------------------------------
+  // Layout — theater dimensions & rail/panel widths
+  // -----------------------------------------------------------
+  --cls-theater-maxw:      1440px;
+  --cls-rail-w:            320px;
+  --cls-rail-w-collapsed:  64px;
+  --cls-panel-w:           360px;
+  --cls-header-h:          56px;
+  --cls-footer-h:          48px;
+
+  // -----------------------------------------------------------
+  // Radius — tighter set than base, tuned for dense UI.
+  // -----------------------------------------------------------
+  --cls-radius-sm: 8px;
+  --cls-radius-md: 12px;
+  --cls-radius-lg: 16px;
+
+  // -----------------------------------------------------------
+  // Status — content progress states.
+  // -----------------------------------------------------------
+  --cls-status-complete:   #5A8E3A;
+  --cls-status-inprogress: #C1623C;
+  --cls-status-locked:     #6B6478;
+
+  // -----------------------------------------------------------
+  // Motion — snappier than marketing surface.
+  // Animate only transform + opacity where possible.
+  // -----------------------------------------------------------
+  --cls-ease:     cubic-bezier(0.2, 0.8, 0.2, 1);
+  --cls-dur-fast: 180ms;
+  --cls-dur-med:  220ms;
+}
+
+// =============================================================
+// Reduced motion — collapse classroom transitions.
+// =============================================================
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  .classroom-scope {
+    --cls-dur-fast: 0ms;
+    --cls-dur-med:  0ms;
+  }
+}

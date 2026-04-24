@@ -151,6 +151,7 @@ import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { GetCourseByID } from 'src/graphql/course_management/query/GetCourseByID'
+import { useQuery } from '@vue/apollo-composable'
 import { FORMAT_THE_WEB_SIT_URL, FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import type { CourseDetail, CoursePricing } from 'src/types/courses/types'
 import type { GetCourseByIdResult, GetCourseByIdVars } from 'src/types/courses/types'
@@ -393,9 +394,11 @@ function enrolNow (): void {
 }
 
 function continueToClassroom (): void {
-  const pk = coursePK.value || courseData.value?.pk
-  if (!pk) return
-  window.location.href = `${location.origin}/classroom/#/class/${pk}/`
+  // Classroom cockpit is keyed by *course* pk; the enrollment resolves
+  // server-side via `enrollmentByCourseForCurrentUser`.
+  const cpk = parseInt(coursePK.value, 10)
+  if (!cpk || Number.isNaN(cpk)) return
+  void router.push({ name: 'classroom-shell', params: { coursePk: String(cpk) } })
 }
 
 function shareCourse (): void {

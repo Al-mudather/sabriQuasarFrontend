@@ -1,3 +1,5 @@
+import classroom from './classroom.js'
+
 
 
 /** 
@@ -8,6 +10,8 @@
 
 
 export default {
+  classroom,
+
  
         
   "_comment_src_App.vue": "src_App.vue",
