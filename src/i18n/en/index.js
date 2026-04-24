@@ -223,7 +223,7 @@ export default {
  
       "الإشعارت" : "Notice",
  
-      "الملف الشخصي" : "Profile personly",
+      "الملف الشخصي" : "Personal profile",
  
       "خــروج" : "exit",
  
