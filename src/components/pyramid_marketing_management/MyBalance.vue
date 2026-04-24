@@ -4,15 +4,15 @@
     <div class="balance-card__body">
       <h3>{{ $t('حسابــي') }}</h3>
       <div class="balance-card__amount">
-        <span class="balance-card__value">{{ FORMAT_COUSRE_PRICE(myBalance, 3) }}</span>
+        <span class="balance-card__value">{{ formatPrice(myBalance, 3) }}</span>
         <span class="balance-card__currency">SDG</span>
       </div>
-      <ds-button variant="accent" size="sm" full-width @click="withdraw = true">
+      <ds-button variant="accent" size="sm" full-width @click="withdrawOpen = true">
         {{ $t('طلب سحب') }}
       </ds-button>
     </div>
 
-    <q-dialog v-model="withdraw" persistent>
+    <q-dialog v-model="withdrawOpen" persistent>
       <q-card class="balance-dialog">
         <h3>{{ $t('الكميه') }}</h3>
         <q-input
@@ -26,7 +26,7 @@
           <ds-button variant="ghost" @click="cancelWithdraw">
             {{ $t('إلغاء') }}
           </ds-button>
-          <ds-button variant="primary" @click="ORDER_BALANCE_WITHDRAW">
+          <ds-button variant="primary" @click="orderBalanceWithdraw">
             {{ $t('تأكيد') }}
           </ds-button>
         </div>
@@ -35,92 +35,106 @@
   </div>
 </template>
 
-<script>
-import { computed } from 'vue'
-import { useQuery } from '@vue/apollo-composable'
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useQuery, useMutation } from '@vue/apollo-composable'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { MyPyramidWithdraws } from 'src/graphql/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
 import { MyPyramidBalance } from 'src/graphql/pyramid_marketing_management/query/MyPyramidBalanceQuery'
 import { WithdrawPyramidBalance } from 'src/graphql/pyramid_marketing_management/mutation/MakePyramidWithdraw'
-import { apolloClient } from 'src/apollo/client'
+import type {
+  MyPyramidBalanceResult,
+  MyPyramidBalanceVars,
+  MakePyramidWithdrawResult,
+  MakePyramidWithdrawVars,
+} from 'src/types/pyramid/types'
+
+const $q = useQuasar()
+const { t } = useI18n()
+
+const { result } = useQuery<MyPyramidBalanceResult, MyPyramidBalanceVars>(
+  MyPyramidBalance,
+  undefined,
+  { errorPolicy: 'all' },
+)
+const myBalance = computed<number>(() => {
+  const v = result.value?.myPyramidBalance?.balance
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+})
+
+const withdrawMutation = useMutation<MakePyramidWithdrawResult, MakePyramidWithdrawVars>(
+  WithdrawPyramidBalance,
+  {
+    refetchQueries: [
+      { query: MyPyramidBalance },
+      { query: MyPyramidWithdraws },
+    ],
+  },
+)
+
+const withdrawOpen = ref(false)
+const amount = ref<number | null>(null)
 
 const priceLookup = [
   { value: 1, symbol: '' }, { value: 1e3, symbol: 'k' },
-  { value: 1e6, symbol: 'M' }, { value: 1e9, symbol: 'B' }
-]
+  { value: 1e6, symbol: 'M' }, { value: 1e9, symbol: 'B' },
+] as const
 
-export default {
-  name: 'MyBalance',
+function formatPrice(num: number, digits = 3): string {
+  try {
+    const n = Number(num)
+    if (!Number.isFinite(n) || n === 0) return String(num)
+    const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
+    const item = [...priceLookup].reverse().find(it => n >= it.value)
+    return item ? (n / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
+  } catch { return String(num) }
+}
 
-  setup () {
-    const { result } = useQuery(MyPyramidBalance, null, { errorPolicy: 'all' })
-    const myBalance = computed(() => result.value?.myPyramidBalance?.balance || 0.0)
-    return { myBalance }
-  },
+function cancelWithdraw(): void {
+  amount.value = null
+  withdrawOpen.value = false
+}
 
-  data () { return { withdraw: false, amount: null } },
-
-  methods: {
-    FORMAT_COUSRE_PRICE (num, digits = 3) {
-      try {
-        const n = Number(num)
-        if (!Number.isFinite(n) || n === 0) return String(num)
-        const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
-        const item = priceLookup.slice().reverse().find(it => n >= it.value)
-        return item ? (n / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
-      } catch (e) { return num }
-    },
-
-    cancelWithdraw () {
-      this.amount = null
-      this.withdraw = false
-    },
-
-    errorHandler (errorsObj) {
-      if (typeof errorsObj === 'object' && errorsObj && errorsObj.message) {
-        this.$q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: errorsObj.message })
-      } else {
-        for (const key in errorsObj) {
-          for (const val of errorsObj[key]) {
-            const msg = (typeof val.message === 'object' && val.message.msg) ? val.message.msg : val.message
-            this.$q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: msg })
-          }
-        }
-      }
-    },
-
-    async ORDER_BALANCE_WITHDRAW () {
-      if (this.amount > this.myBalance || this.amount <= 0) {
-        this.$q.notify({
-          type: 'warning',
-          position: 'top',
-          progress: true,
-          multiLine: true,
-          message: "You can't withdraw what you don't have (-_-), or 0 cash"
-        })
-        return
-      }
-      const res = await apolloClient.mutate({
-        mutation: WithdrawPyramidBalance,
-        variables: { amount: this.amount, input: {} },
-        refetchQueries: [
-          { query: MyPyramidBalance },
-          { query: MyPyramidWithdraws }
-        ]
-      })
-      const { success, errors } = res.data.makePyramidWithdraw
-      if (success) {
-        this.$q.notify({
-          type: 'positive',
-          position: 'top',
-          progress: true,
-          multiLine: true,
-          message: 'The withdraw order has been requested.'
-        })
-        this.withdraw = false
-      } else if (errors) {
-        this.errorHandler(errors)
+function errorHandler(errorsObj: Record<string, Array<{ message: string | { msg: string } }>>): void {
+  if (typeof errorsObj === 'object' && errorsObj && (errorsObj as { message?: string }).message) {
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: (errorsObj as { message: string }).message })
+  } else {
+    for (const key in errorsObj) {
+      for (const val of errorsObj[key]) {
+        const msg = typeof val.message === 'object' && val.message ? val.message.msg : val.message
+        $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: msg })
       }
     }
+  }
+}
+
+async function orderBalanceWithdraw(): Promise<void> {
+  const amt = Number(amount.value)
+  if (!Number.isFinite(amt) || amt > myBalance.value || amt <= 0) {
+    $q.notify({
+      type: 'warning',
+      position: 'top',
+      progress: true,
+      multiLine: true,
+      message: t("You can't withdraw what you don't have (-_-), or 0 cash"),
+    })
+    return
+  }
+  const res = await withdrawMutation.mutate({ amount: amt, input: {} })
+  const payload = res?.data?.makePyramidWithdraw
+  if (payload?.success) {
+    $q.notify({
+      type: 'positive',
+      position: 'top',
+      progress: true,
+      multiLine: true,
+      message: t('The withdraw order has been requested.'),
+    })
+    withdrawOpen.value = false
+  } else if (payload?.errors) {
+    errorHandler(payload.errors as Record<string, Array<{ message: string | { msg: string } }>>)
   }
 }
 </script>

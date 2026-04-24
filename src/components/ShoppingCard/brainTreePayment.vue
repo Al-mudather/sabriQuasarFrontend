@@ -22,79 +22,66 @@
     </div>
 </template>
 
-<script>
-/**
- * Cart/checkout feature types for the Braintree capture component.
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/types/cart/types').CaptureBraintreeCheckoutResult} CaptureBraintreeCheckoutResult
- * @typedef {import('src/types/cart/types').CaptureBraintreeCheckoutVars} CaptureBraintreeCheckoutVars
- */
+<script setup lang="ts">
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { CaptureBraintreeCheckout } from 'src/graphql/checkout_management/mutation/CaptureBraintreeCheckout.js'
-import { storeToRefs } from "pinia";
-import { useCartStore } from "src/stores/cart";
-import { apolloClient } from "src/apollo/client";
+import type {
+  CaptureBraintreeCheckoutResult,
+  CaptureBraintreeCheckoutVars,
+} from 'src/types/cart/types'
+import { useCartStore } from 'src/stores/cart'
+import { apolloClient } from 'src/apollo/client'
 
-export default {
-    setup () {
-        const cart = useCartStore();
-        const { shoppingCartDataList, braintreeClientToken, orderData } = storeToRefs(cart);
-        return { cart, shoppingCartDataList, braintreeClientToken, orderData };
-    },
+const router = useRouter()
+const $q = useQuasar()
+const cart = useCartStore()
+const { braintreeClientToken, orderData } = storeToRefs(cart)
 
-    data () {
-        return {
-            visible: false,
-            btnVisible: true
-        };
-    },
+const visible = ref<boolean>(false)
+const btnVisible = ref<boolean>(true)
 
-    methods: {
-        errorHandler(errorsObj) {
-            for (const key in errorsObj) {
-                for (const val of errorsObj[key]) {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: val.PaymentUrl
-                    })
-                }
-            }
-        },
-        
-
-        async START_THE_PAYMENT_AFTER_GETING_THE_CLIENT_TOKEN (payload) {
-            const braintreePaymentresult = await apolloClient.mutate({
-                mutation: CaptureBraintreeCheckout,
-                variables: {
-                    orderId: this.orderData.order.pk,
-                    nonce: payload.nonce
-                }
-            });
-
-            let success = braintreePaymentresult.data.captureBraintreeCheckout.success;
-            let errors = braintreePaymentresult.data.captureBraintreeCheckout.errors;
-
-            if (success) {
-                //TODO: Delete the order
-                this.cart.setOrderData(null)
-                //TODO: Go to the Success page
-                this.$router.push({ name: 'cart-success' })
-            }
-
-            if (errors) {
-                //TODO:Show the errors
-                this.errorHandler(errors)
-            }
-        },
-        onError () {},
-
-        
+function errorHandler (errorsObj: unknown): void {
+  if (typeof errorsObj !== 'object' || errorsObj == null) return
+  for (const key of Object.keys(errorsObj as Record<string, unknown>)) {
+    const entries = (errorsObj as Record<string, unknown[]>)[key]
+    if (!Array.isArray(entries)) continue
+    for (const val of entries) {
+      const v = val as Record<string, unknown>
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: String(v.PaymentUrl ?? '') })
     }
-};
+  }
+}
+
+async function START_THE_PAYMENT_AFTER_GETING_THE_CLIENT_TOKEN (payload: { nonce: string }): Promise<void> {
+  const od = orderData.value as Record<string, unknown> | null
+  const orderPk = (od?.order as Record<string, unknown> | undefined)?.pk as number | undefined
+  if (orderPk == null) return
+
+  const result = await apolloClient.mutate<CaptureBraintreeCheckoutResult, CaptureBraintreeCheckoutVars>({
+    mutation: CaptureBraintreeCheckout,
+    variables: {
+      orderId: orderPk,
+      nonce: payload.nonce
+    }
+  })
+
+  const success = result.data?.captureBraintreeCheckout?.success
+  const errors = result.data?.captureBraintreeCheckout?.errors
+
+  if (success) {
+    cart.setOrderData(null)
+    router.push({ name: 'cart-success' })
+  }
+
+  if (errors) {
+    errorHandler(errors)
+  }
+}
+
+function onError (): void {}
 </script>
 
 <style></style>

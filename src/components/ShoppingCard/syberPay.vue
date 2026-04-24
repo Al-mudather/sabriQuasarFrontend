@@ -8,98 +8,77 @@
     </div>
 </template>
 
-<script>
-/**
- * Cart/checkout feature types for the Syberpay component. The 'syberpay'
- * PaymentProvider variant is kept in the union for UI parity; no
- * CreateSyberpayCheckout / CaptureSyberpayCheckout Result/Vars aliases are
- * exported from src/types/cart/types.ts yet (see TODO there).
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- */
-import { CreateNewOrderWithBulkOrderDetails } from "src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
-import { CreateSyberpayCheckout } from 'src/graphql/checkout_management/mutation/CreateSyberpayCheckout';
-import { storeToRefs } from "pinia";
-import { useCartStore } from "src/stores/cart";
-import { apolloClient } from "src/apollo/client";
-import { openURL } from "quasar";
+<script setup lang="ts">
+// Syberpay: CreateSyberpayCheckout / CaptureSyberpayCheckout are not yet in
+// generated.ts (see TODO in src/types/cart/types.ts). The mutation call is
+// typed via an inline interface until the backend/codegen is updated.
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useQuasar, openURL } from 'quasar'
+import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
+import { CreateSyberpayCheckout } from 'src/graphql/checkout_management/mutation/CreateSyberpayCheckout'
+import type {
+  CreateOrderResult,
+  CreateOrderVars,
+} from 'src/types/cart/types'
+import { useCartStore } from 'src/stores/cart'
+import { apolloClient } from 'src/apollo/client'
 
-export default {
-    setup () {
-        const cart = useCartStore();
-        const { shoppingCartDataList } = storeToRefs(cart);
-        return { cart, shoppingCartDataList };
-    },
-    data() {
-        return {
-            visible: false
-        };
-    },
-    methods: {
-        async buyTheCoursesUsingSyberPay() {
-            this.visible = true;
-            // TODO: Extract all courses ids
-            const courseIds = this.getOrdersIds();
-            // TODO: Make the order
-            const orderResult = await this.getOrderResult(courseIds);
-            // TODO: get the syber pay key from the backend
-            // { code for the key here }
-            // TODO: Get the stripe url from the backend
-            const syberPayPaymentUrl = await this.getSyberPayPaymentUrlFromTheBackend(
-                orderResult
-            );
-            // TODO: Make the payment
-            openURL(syberPayPaymentUrl)
-            // stripe.redirectToCheckout({
-            //     sessionId: syberPayPaymentUrl
-            // });
-            this.visible = false;
-        },
+// Syberpay mutation result shape (not yet in generated.ts)
+interface CreateSyberpayCheckoutResult {
+  createSyberpayCheckout?: {
+    success?: boolean | null
+    errors?: unknown
+    paymentUrl?: string | null
+  } | null
+}
+interface CreateSyberpayCheckoutVars {
+  orderId: number
+}
 
-        getOrdersIds() {
-            return this.$_.map(this.shoppingCartDataList, "[course][pk]");
-        },
+const $q = useQuasar()
+const cart = useCartStore()
+const { shoppingCartDataList } = storeToRefs(cart)
 
-        async getOrderResult(courseIds) {
-            const result = await apolloClient.mutate({
-                mutation: CreateNewOrderWithBulkOrderDetails,
-                variables: {
-                    courseIds: courseIds
-                }
-            });
+const visible = ref<boolean>(false)
 
-            const dataObj = result.data.createNewOrderWithBulkOrderDetails;
+function getOrdersIds (): number[] {
+  return shoppingCartDataList.value
+    .map(item => item.course.pk)
+    .filter((pk): pk is number => pk != null)
+}
 
-            if (this.$_.get(dataObj, "[errors]")) {
-                this.visible = false;
-                alert(dataObj.errors.nonFieldErrors);
-            }
+async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']> | undefined> {
+  const result = await apolloClient.mutate<CreateOrderResult, CreateOrderVars>({
+    mutation: CreateNewOrderWithBulkOrderDetails,
+    variables: { courseIds }
+  })
+  const dataObj = result.data?.createNewOrderWithBulkOrderDetails
+  if (dataObj?.errors) { visible.value = false }
+  if (dataObj?.success) return dataObj
+  return undefined
+}
 
-            if (this.$_.get(dataObj, "[success]")) {
-                return dataObj;
-            }
-        },
+async function getSyberPayPaymentUrl (orderPk: number): Promise<string | null | undefined> {
+  const result = await apolloClient.mutate<CreateSyberpayCheckoutResult, CreateSyberpayCheckoutVars>({
+    mutation: CreateSyberpayCheckout,
+    variables: { orderId: orderPk }
+  })
+  const details = result.data?.createSyberpayCheckout
+  if (details?.errors) { visible.value = false }
+  if (details?.success) return details.paymentUrl
+  return null
+}
 
-        async getSyberPayPaymentUrlFromTheBackend(orderResult) {
-            const syberpayPaymentresult = await apolloClient.mutate({
-                mutation: CreateSyberpayCheckout,
-                variables: {
-                    orderId: orderResult.order.pk,
-                }
-            });
-            const syberPayDetails = syberpayPaymentresult.data.createSyberpayCheckout;
-            if (this.$_.get(syberPayDetails, "[errors]")) {
-                this.visible = false;
-                alert(details.errors.nonFieldErrors);
-            }
-
-            if (this.$_.get(syberPayDetails, "[success]")) {
-                return syberPayDetails.paymentUrl;
-            }
-        }
-    }
-};
+async function buyTheCoursesUsingSyberPay (): Promise<void> {
+  visible.value = true
+  const courseIds = getOrdersIds()
+  const orderResult = await getOrderResult(courseIds)
+  if (!orderResult?.order?.pk) { visible.value = false; return }
+  const paymentUrl = await getSyberPayPaymentUrl(orderResult.order.pk)
+  if (paymentUrl) openURL(paymentUrl)
+  visible.value = false
+}
 </script>
 
 <style></style>

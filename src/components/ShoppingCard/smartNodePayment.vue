@@ -8,113 +8,73 @@
     </div>
 </template>
 
-<script>
-/**
- * Cart/checkout feature types for the SmartNode component.
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/types/cart/types').CreateSmartNodeCheckoutResult} CreateSmartNodeCheckoutResult
- * @typedef {import('src/types/cart/types').CreateSmartNodeCheckoutVars} CreateSmartNodeCheckoutVars
- */
-import { CreateSmartNodeCheckout } from 'src/graphql/checkout_management/mutation/CreateSmartNodeCheckout';
-import { storeToRefs } from "pinia";
-import { useCartStore } from "src/stores/cart";
-import { apolloClient } from "src/apollo/client";
-import { openURL } from "quasar";
+<script setup lang="ts">
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useQuasar, openURL } from 'quasar'
+import { CreateSmartNodeCheckout } from 'src/graphql/checkout_management/mutation/CreateSmartNodeCheckout'
+import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
+import type {
+  CreateSmartNodeCheckoutResult,
+  CreateSmartNodeCheckoutVars,
+  CreateOrderResult,
+  CreateOrderVars,
+} from 'src/types/cart/types'
+import { useCartStore } from 'src/stores/cart'
+import { apolloClient } from 'src/apollo/client'
 
-export default {
-    setup () {
-        const cart = useCartStore();
-        const { shoppingCartDataList } = storeToRefs(cart);
-        return { cart, shoppingCartDataList };
-    },
-    data() {
-        return {
-            visible: false
-        };
-    },
-    methods: {
-        async buyTheCoursesUsingSmartNode() {
-            try {
-                this.visible = true;
-                // TODO: Extract all courses ids
-                const courseIds = this.getOrdersIds();
-                // TODO: Make the order
-                const orderResult = await this.getOrderResult(courseIds);
-                // TODO: get the syber pay key from the backend
-                // { code for the key here }
-                // TODO: Get the stripe url from the backend
-                const syberPayPaymentUrl = await this.makeSmartNodePayment(
-                    orderResult
-                );
-                // TODO: Make the payment
-                openURL(syberPayPaymentUrl)
-                // stripe.redirectToCheckout({
-                //     sessionId: syberPayPaymentUrl
-                // });
-            } catch (error) {
-                this.visible = false;
-                this.$q.notify({
-                    type: 'warning',
-                    progress: true,
-                    multiLine: true,
-                    position: 'top',
-                    message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
-                })
-                
-            }
-        },
+const $q = useQuasar()
+const cart = useCartStore()
+const { shoppingCartDataList } = storeToRefs(cart)
 
-        getOrdersIds() {
-            return this.$_.map(this.shoppingCartDataList, "[course][pk]");
-        },
+const visible = ref<boolean>(false)
 
-        async getOrderResult(courseIds) {
-            const result = await apolloClient.mutate({
-                mutation: CreateNewOrderWithBulkOrderDetails,
-                variables: {
-                    courseIds: courseIds
-                }
-            });
+function getOrdersIds (): number[] {
+  return shoppingCartDataList.value
+    .map(item => item.course.pk)
+    .filter((pk): pk is number => pk != null)
+}
 
-            const dataObj = result.data.createNewOrderWithBulkOrderDetails;
+async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']> | undefined> {
+  const result = await apolloClient.mutate<CreateOrderResult, CreateOrderVars>({
+    mutation: CreateNewOrderWithBulkOrderDetails,
+    variables: { courseIds }
+  })
+  const dataObj = result.data?.createNewOrderWithBulkOrderDetails
+  if (dataObj?.errors) { visible.value = false }
+  if (dataObj?.success) return dataObj
+  return undefined
+}
 
-            if (this.$_.get(dataObj, "[errors]")) {
-                this.visible = false;
-                alert(dataObj.errors.nonFieldErrors);
-            }
+async function makeSmartNodePayment (orderPk: number): Promise<string | null | undefined> {
+  const result = await apolloClient.mutate<CreateSmartNodeCheckoutResult, CreateSmartNodeCheckoutVars>({
+    mutation: CreateSmartNodeCheckout,
+    variables: { card: '', expDate: '', ipin: '', orderId: orderPk }
+  })
+  const details = result.data?.createSmartNodeCheckout
+  if (details?.errors) { visible.value = false }
+  // CreateSmartNodeCheckoutMutation doesn't include paymentUrl in the selection
+  // (generated.ts only returns success + errors). Cast for now until backend
+  // adds paymentUrl to the SmartNode mutation response.
+  const detailsExt = details as (typeof details & { paymentUrl?: string | null }) | null | undefined
+  if (detailsExt?.success) return detailsExt.paymentUrl
+  return null
+}
 
-            if (this.$_.get(dataObj, "[success]")) {
-                return dataObj;
-            }
-        },
-
-        async makeSmartNodePayment(orderResult) {
-            const smartNoderesult = await apolloClient.mutate({
-                mutation: CreateSmartNodeCheckout,
-                variables: {
-                    card: '',
-                    expDate: '',
-                    ipin: '',
-                    orderId: orderResult.order.pk,
-                }
-            });
-            const smartNodeDetails = smartNoderesult.data.createSmartNodeCheckout;
-            // console.log('sssssssssssssssssssss')
-            // console.log(smartNodeDetails)
-            // console.log('sssssssssssssssssssss')
-            if (this.$_.get(smartNodeDetails, "[errors]")) {
-                this.visible = false;
-                alert(details.errors.nonFieldErrors);
-            }
-
-            if (this.$_.get(smartNodeDetails, "[success]")) {
-                return smartNodeDetails.paymentUrl;
-            }
-        }
-    }
-};
+async function buyTheCoursesUsingSmartNode (): Promise<void> {
+  try {
+    visible.value = true
+    const courseIds = getOrdersIds()
+    const orderResult = await getOrderResult(courseIds)
+    if (!orderResult?.order?.pk) { visible.value = false; return }
+    const paymentUrl = await makeSmartNodePayment(orderResult.order.pk)
+    if (paymentUrl) openURL(paymentUrl)
+    visible.value = false
+  } catch {
+    visible.value = false
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
+  }
+}
 </script>
 
 <style></style>

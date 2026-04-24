@@ -15,185 +15,131 @@
   </div>
 </template>
 
-<script>
-/**
- * Cart/checkout feature types for the Stripe pay-button component. Calls
- * the CreateStripeCheckout mutation + StripePublishableKey query via
- * apolloClient.* (untyped runtime); aliases below document the expected shapes.
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/types/cart/types').CreateStripeCheckoutResult} CreateStripeCheckoutResult
- * @typedef {import('src/types/cart/types').CreateStripeCheckoutVars} CreateStripeCheckoutVars
- * @typedef {import('src/types/cart/types').StripePublishableKeyResult} StripePublishableKeyResult
- * @typedef {import('src/types/cart/types').StripePublishableKeyVars} StripePublishableKeyVars
- */
-import { CreateNewOrderWithBulkOrderDetails } from "src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
-import { CreateStripeCheckout } from "src/graphql/checkout_management/mutation/CreateStripeCheckout";
-import { StripePublishableKey } from "src/graphql/checkout_management/query/StripePublishableKey";
-import { storeToRefs } from "pinia";
-import { useCartStore } from "src/stores/cart";
-import { useSettingsStore } from "src/stores/settings";
-import { apolloClient } from "src/apollo/client";
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useQuasar } from 'quasar'
+import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
+import { CreateStripeCheckout } from 'src/graphql/checkout_management/mutation/CreateStripeCheckout'
+import { StripePublishableKey } from 'src/graphql/checkout_management/query/StripePublishableKey'
+import type {
+  CreateStripeCheckoutResult,
+  CreateStripeCheckoutVars,
+  StripePublishableKeyResult,
+  StripePublishableKeyVars,
+  CreateOrderResult,
+  CreateOrderVars,
+} from 'src/types/cart/types'
+import { useCartStore } from 'src/stores/cart'
+import { useSettingsStore } from 'src/stores/settings'
+import { apolloClient } from 'src/apollo/client'
 
-export default {
-  setup () {
-    const cart = useCartStore();
-    const settings = useSettingsStore();
-    const { shoppingCartDataList } = storeToRefs(cart);
-    const { currency } = storeToRefs(settings);
-    return { cart, settings, shoppingCartDataList, currency };
-  },
-  data() {
-    return {
-      errorMessages: [],
-      alert: false,
-      visible: false,
-    };
-  },
-  watch: {
-    errorMessages(value) {
-      if (value.length > 0) {
-        this.alert = true;
-      }
-    },
-  },
-  methods: {
-    errorHandler(errorsObj) {
-      // console.log(errorsObj);
-      for (const key in errorsObj) {
-        // console.log(errorsObj[key])
-        for (const val of errorsObj[key]) {
-          this.$q.notify({
-            type: "warning",
-            progress: true,
-            multiLine: true,
-            position: "top",
-            message: val.message,
-          });
-          // this.errorMessages.push(val.message || val.PaymentUrl);
-        }
-      }
-    },
-    async buyTheCoursesUsingStripe() {
-      try {
-        this.visible = true;
+const $q = useQuasar()
+const cart = useCartStore()
+const settings = useSettingsStore()
+const { shoppingCartDataList } = storeToRefs(cart)
+const { currency } = storeToRefs(settings)
 
-        // Check if Stripe is loaded
-        if (!this.$Stripe || typeof this.$Stripe !== "function") {
-          throw new Error("Stripe not loaded");
-        }
+const errorMessages = ref<string[]>([])
+const alert = ref<boolean>(false)
+const visible = ref<boolean>(false)
 
-        // TODO: Extract all courses ids
-        const courseIds = this.getOrdersIds();
-        // TODO: Make the order
-        const orderResult = await this.getOrderResult(courseIds);
-        // TODO: Save the order result to the store for the success checkout
-        this.cart.setSaveCheckoutOrderID(orderResult.order.pk);
-        // TODO: Get the stripe key from the backend
-        const stripKey = await this.getStripeKeyFromTheBackend();
-        // TODO: Intialize the stripe objct with strip key to make the payment
-        const stripe = this.$Stripe(stripKey);
-        // console.log(stripe);
-        // TODO: Get the stripe url from the backend
-        const stripPaymentUrl = await this.getStripPaymentUrlFromTheBackend(
-          orderResult
-        );
-        // TODO: Make the payment
-        stripe.redirectToCheckout({
-          sessionId: stripPaymentUrl,
-        });
-        this.visible = false;
-      } catch (error) {
-        this.visible = false;
-        console.error("Stripe payment error:", error);
+watch(errorMessages, (value) => {
+  if (value.length > 0) alert.value = true
+})
 
-        if (
-          error.message === "Stripe not loaded" ||
-          error.message === "this.$Stripe is not a function"
-        ) {
-          this.$q.notify({
-            type: "warning",
-            progress: true,
-            multiLine: true,
-            position: "top",
-            message:
-              "Stripe غير محمل، يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى",
-          });
-        } else {
-          this.$q.notify({
-            type: "warning",
-            progress: true,
-            multiLine: true,
-            position: "top",
-            message: "حدث خطأ في عملية الدفع، يرجى المحاولة مرة أخرى",
-          });
-        }
-      }
-    },
+function errorHandler (errorsObj: unknown): void {
+  if (typeof errorsObj !== 'object' || errorsObj == null) return
+  for (const key of Object.keys(errorsObj as Record<string, unknown>)) {
+    const entries = (errorsObj as Record<string, unknown[]>)[key]
+    if (!Array.isArray(entries)) continue
+    for (const val of entries) {
+      const v = val as Record<string, unknown>
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: String(v.message ?? '') })
+    }
+  }
+}
 
-    getOrdersIds() {
-      return this.$_.map(this.shoppingCartDataList, "[course][pk]");
-    },
+function getOrdersIds (): number[] {
+  return shoppingCartDataList.value
+    .map(item => item.course.pk)
+    .filter((pk): pk is number => pk != null)
+}
 
-    async getOrderResult(courseIds) {
-      const result = await apolloClient.mutate({
-        mutation: CreateNewOrderWithBulkOrderDetails,
-        variables: {
-          courseIds: courseIds,
-        },
-      });
-      const dataObj = result.data.createNewOrderWithBulkOrderDetails;
+async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']> | undefined> {
+  const result = await apolloClient.mutate<CreateOrderResult, CreateOrderVars>({
+    mutation: CreateNewOrderWithBulkOrderDetails,
+    variables: { courseIds }
+  })
+  const dataObj = result.data?.createNewOrderWithBulkOrderDetails
+  if (dataObj?.errors) { visible.value = false; errorHandler(dataObj.errors) }
+  if (dataObj?.success) return dataObj
+  return undefined
+}
 
-      if (this.$_.get(dataObj, "[errors]")) {
-        this.visible = false;
-        this.errorHandler(dataObj.errors);
-      }
+async function getStripeKeyFromTheBackend (): Promise<string> {
+  const result = await apolloClient.query<StripePublishableKeyResult, StripePublishableKeyVars>({
+    query: StripePublishableKey
+  })
+  const raw = result.data?.stripePublishableKey
+  if (raw && typeof raw === 'object') {
+    return (raw as Record<string, string>).publisableKey ?? ''
+  }
+  return ''
+}
 
-      if (this.$_.get(dataObj, "[success]")) {
-        return dataObj;
-      }
-    },
+async function getStripePaymentUrl (orderResult: NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']>): Promise<string | null | undefined> {
+  if (!orderResult.order?.pk) return null
+  const result = await apolloClient.mutate<CreateStripeCheckoutResult, CreateStripeCheckoutVars>({
+    mutation: CreateStripeCheckout,
+    variables: {
+      orderId: orderResult.order.pk,
+      currency: currency.value,
+      successUrl: location.origin + '/#/cart/success',
+      cancelUrl: location.origin + '/#/cart/cancel'
+    }
+  })
+  const details = result.data?.createStripeCheckout
+  if (details?.errors) {
+    visible.value = false
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
+  }
+  if (details?.success) return details.paymentUrl
+  return null
+}
 
-    async getStripeKeyFromTheBackend() {
-      const stripeKeyResult = await apolloClient.query({
-        query: StripePublishableKey,
-      });
+async function buyTheCoursesUsingStripe (): Promise<void> {
+  try {
+    visible.value = true
 
-      return JSON.parse(
-        this.$_.get(stripeKeyResult, "[data][stripePublishableKey]")
-      ).publisableKey;
-    },
+    const stripeGlobal = (window as Record<string, unknown>)['Stripe']
+    if (typeof stripeGlobal !== 'function') {
+      throw new Error('Stripe not loaded')
+    }
 
-    async getStripPaymentUrlFromTheBackend(orderResult) {
-      const stripPaymentresult = await apolloClient.mutate({
-        mutation: CreateStripeCheckout,
-        variables: {
-          orderId: orderResult.order.pk,
-          currency: this.currency,
-          successUrl: location.origin + "/#/cart/success",
-          cancelUrl: location.origin + "/#/cart/cancel",
-        },
-      });
-      const stripDetails = stripPaymentresult.data.createStripeCheckout;
-      if (this.$_.get(stripDetails, "[errors]")) {
-        this.visible = false;
-        // this.errorHandler(stripDetails.errors)
-        this.$q.notify({
-          type: "warning",
-          progress: true,
-          multiLine: true,
-          position: "top",
-          message: "انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه",
-        });
-      }
+    const courseIds = getOrdersIds()
+    const orderResult = await getOrderResult(courseIds)
+    if (!orderResult?.order?.pk) { visible.value = false; return }
 
-      if (this.$_.get(stripDetails, "[success]")) {
-        return stripDetails.paymentUrl;
-      }
-    },
-  },
-};
+    cart.setSaveCheckoutOrderID(orderResult.order.pk)
+
+    const stripeKey = await getStripeKeyFromTheBackend()
+    const stripe = (stripeGlobal as (key: string) => { redirectToCheckout: (opts: { sessionId: string }) => void })(stripeKey)
+    const sessionId = await getStripePaymentUrl(orderResult)
+
+    if (sessionId) stripe.redirectToCheckout({ sessionId })
+
+    visible.value = false
+  } catch (error: unknown) {
+    visible.value = false
+    const msg = error instanceof Error ? error.message : ''
+    if (msg === 'Stripe not loaded') {
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'Stripe غير محمل، يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى' })
+    } else {
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'حدث خطأ في عملية الدفع، يرجى المحاولة مرة أخرى' })
+    }
+  }
+}
 </script>
 
 <style></style>

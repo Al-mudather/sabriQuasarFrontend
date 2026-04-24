@@ -27,7 +27,22 @@ import type {
   StripePublishableKeyQuery,
   StripePublishableKeyQueryVariables,
   PaypalPublishableKeyQuery,
-  PaypalPublishableKeyQueryVariables
+  PaypalPublishableKeyQueryVariables,
+  // Order management
+  CreateNewOrderWithBulkOrderDetailsMutation,
+  CreateNewOrderWithBulkOrderDetailsMutationVariables,
+  // Bankak (bank transfer)
+  UploadAttachmentTransactionMutation,
+  UploadAttachmentTransactionMutationVariables,
+  // Notifications (success page)
+  GetMyNotificationsQuery,
+  GetMyNotificationsQueryVariables,
+  // Checkout subscription (layout shell)
+  CheckoutSubscriptionSubscription,
+  CheckoutSubscriptionSubscriptionVariables,
+  // Pyramid affiliate check
+  CheckPyramidAffiliateQuery,
+  CheckPyramidAffiliateQueryVariables,
 } from 'src/graphql/generated'
 
 // ---------------------------------------------------------------------------
@@ -129,3 +144,36 @@ export type StripePublishableKeyVars = StripePublishableKeyQueryVariables
 
 export type PaypalPublishableKeyResult = PaypalPublishableKeyQuery
 export type PaypalPublishableKeyVars = PaypalPublishableKeyQueryVariables
+
+// ---------------------------------------------------------------------------
+// Order management
+// ---------------------------------------------------------------------------
+export type CreateOrderResult = CreateNewOrderWithBulkOrderDetailsMutation
+export type CreateOrderVars = CreateNewOrderWithBulkOrderDetailsMutationVariables
+
+/** Convenience: the payload nested under createNewOrderWithBulkOrderDetails */
+export type CreateOrderPayload = NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']>
+
+// ---------------------------------------------------------------------------
+// Bankak (bank transfer attachment)
+// ---------------------------------------------------------------------------
+export type UploadAttachmentResult = UploadAttachmentTransactionMutation
+export type UploadAttachmentVars = UploadAttachmentTransactionMutationVariables
+
+// ---------------------------------------------------------------------------
+// Notifications (success page query)
+// ---------------------------------------------------------------------------
+export type GetMyNotificationsResult = GetMyNotificationsQuery
+export type GetMyNotificationsVars = GetMyNotificationsQueryVariables
+
+// ---------------------------------------------------------------------------
+// Checkout subscription (cart layout shell)
+// ---------------------------------------------------------------------------
+export type CheckoutSubscriptionResult = CheckoutSubscriptionSubscription
+export type CheckoutSubscriptionVars = CheckoutSubscriptionSubscriptionVariables
+
+// ---------------------------------------------------------------------------
+// Pyramid affiliate check (cart entry guard)
+// ---------------------------------------------------------------------------
+export type CheckPyramidAffiliateResult = CheckPyramidAffiliateQuery
+export type CheckPyramidAffiliateVars = CheckPyramidAffiliateQueryVariables

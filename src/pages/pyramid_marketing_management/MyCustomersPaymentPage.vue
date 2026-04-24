@@ -48,45 +48,37 @@
   </main>
 </template>
 
-<script>
-import { AllMarketerAttachmentTransaction } from 'src/graphql/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
-import { useQuery } from '@vue/apollo-composable'
+<script setup lang="ts">
 import { computed } from 'vue'
-import _ from 'lodash'
+import { useQuery } from '@vue/apollo-composable'
+import { useI18n } from 'vue-i18n'
+import { AllMarketerAttachmentTransaction } from 'src/graphql/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
 import Transaction_completed from 'src/components/attachment_transactions_management/Transaction_completed.vue'
 import Transaction_under_processing from 'src/components/attachment_transactions_management/Transaction_under_processing.vue'
 import Transaction_rejected from 'src/components/attachment_transactions_management/Transaction_rejected.vue'
 import Transaction_hanged from 'src/components/attachment_transactions_management/Transaction_hanged.vue'
+import type {
+  AllMarketerAttachmentTransactionQuery,
+  AllMarketerAttachmentTransactionQueryVariables,
+} from 'src/graphql/generated'
 
-export default {
-  name: 'MyCustomersPaymentPage',
+const { t } = useI18n()
 
-  components: {
-    'Transaction-completed': Transaction_completed,
-    'Transaction-under-processing': Transaction_under_processing,
-    'Transaction-rejected': Transaction_rejected,
-    'Transaction-hanged': Transaction_hanged
-  },
+const { result } = useQuery<AllMarketerAttachmentTransactionQuery, AllMarketerAttachmentTransactionQueryVariables>(
+  AllMarketerAttachmentTransaction,
+)
 
-  setup () {
-    const q = useQuery(AllMarketerAttachmentTransaction)
-    const customersTransactionsList = computed(
-      () => q.result.value?.allMarketerAttachmentTransaction || null
-    )
-    return { customersTransactionsList }
-  },
+const customersTransactionsList = computed(
+  () => result.value?.allMarketerAttachmentTransaction ?? null,
+)
 
-  data () {
-    return {
-      rejectedByTheManager: this.$t('الطلب مرفوض من الإداره'),
-      rejectedByTheMe: this.$t('الطلب مرفوض بواسطتي')
-    }
-  },
+const transactions = computed(() =>
+  (customersTransactionsList.value?.edges ?? [])
+    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+)
 
-  computed: {
-    transactions () { return _.get(this.customersTransactionsList, 'edges', []) || [] }
-  }
-}
+const rejectedByTheManager = t('الطلب مرفوض من الإداره')
+const rejectedByTheMe = t('الطلب مرفوض بواسطتي')
 </script>
 
 <style lang="scss" scoped>

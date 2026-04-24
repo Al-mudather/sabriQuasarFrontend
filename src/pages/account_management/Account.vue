@@ -40,21 +40,14 @@
   </main>
 </template>
 
-<script>
+<script setup lang="ts">
 import { LOGO, BRAND } from 'src/design-system/brand'
 
-export default {
-  name: 'Account',
-  data () {
-    return {
-      logo: LOGO.full,
-      brandName: BRAND.nameAr,
-      acronym: BRAND.acronym,
-      headline: 'مرحباً بك في رحلتك الطبية',
-      tagline: 'تعلّم بثقة. تمرّن بإتقان. تقدّم بخطى واثقة.'
-    }
-  }
-}
+const logo = LOGO.full
+const brandName = BRAND.nameAr
+const acronym = BRAND.acronym
+const headline = 'مرحباً بك في رحلتك الطبية'
+const tagline = 'تعلّم بثقة. تمرّن بإتقان. تقدّم بخطى واثقة.'
 </script>
 
 <style lang="scss" scoped>

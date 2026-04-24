@@ -44,55 +44,47 @@
   </main>
 </template>
 
-<script>
-/**
- * Auth feature types handled by this page.
- *
- * @typedef {import('src/types/auth/types').VerifyAccountResult} VerifyAccountResult
- * @typedef {import('src/types/auth/types').VerifyAccountVariables} VerifyAccountVariables
- */
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useMutation } from '@vue/apollo-composable'
 import { VerifyUserAccount } from 'src/graphql/account_management/mutation/VerifyUserAccount'
+import type { VerifyAccountResult, VerifyAccountVariables } from 'src/types/auth/types'
 
-export default {
-  name: 'VerifyEmail',
+const route = useRoute()
+const router = useRouter()
 
-  data () { return { state: 'loading' } },
+const { mutate: verifyAccount } = useMutation<VerifyAccountResult, VerifyAccountVariables>(VerifyUserAccount)
 
-  methods: {
-    goLogin ()   { this.$router.push({ name: 'login' }) },
-    goConfirm () { this.$router.push({ name: 'password-confirm' }) },
+type VerifyState = 'loading' | 'success' | 'error'
+const state = ref<VerifyState>('loading')
 
-    async verify (token) {
-      this.state = 'loading'
-      try {
-        /** @type {{ data: VerifyAccountResult }} */
-        const res = await this.$apollo.mutate({
-          mutation: VerifyUserAccount,
-          variables: /** @type {VerifyAccountVariables} */ ({ token })
-        })
-        const ok = (res && res.data && (res.data.success || (res.data.verifyAccount && res.data.verifyAccount.success)))
-        if (ok) {
-          this.state = 'success'
-          setTimeout(() => { this.$router.push({ name: 'login' }) }, 1800)
-        } else {
-          this.state = 'error'
-        }
-      } catch (e) {
-        this.state = 'error'
-      }
+function goLogin (): void   { void router.push({ name: 'login' }) }
+function goConfirm (): void { void router.push({ name: 'password-confirm' }) }
+
+async function verify (token: string): Promise<void> {
+  state.value = 'loading'
+  try {
+    const res = await verifyAccount({ token })
+    const ok = res?.data?.verifyAccount?.success ?? false
+    if (ok) {
+      state.value = 'success'
+      setTimeout(() => { void router.push({ name: 'login' }) }, 1800)
+    } else {
+      state.value = 'error'
     }
-  },
-
-  watch: {
-    '$route.params': {
-      immediate: true,
-      deep: true,
-      handler (params) {
-        if (params && params.token) this.verify(params.token)
-      }
-    }
+  } catch {
+    state.value = 'error'
   }
 }
+
+watch(
+  () => route.params,
+  (params) => {
+    if (params?.token) void verify(String(params.token))
+  },
+  { immediate: true, deep: true },
+)
 </script>
 
 <style lang="scss" scoped>

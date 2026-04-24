@@ -51,113 +51,118 @@
   </main>
 </template>
 
-<script>
-/**
- * Auth feature types handled by this page.
- *
- * Note: `ResetUserPassword` maps to the `UserPasswordReset` operation in the
- * schema (see TODO in src/types/auth/types.ts).
- *
- * @typedef {import('src/types/auth/types').PasswordResetResult} PasswordResetResult
- * @typedef {import('src/types/auth/types').PasswordResetVariables} PasswordResetVariables
- */
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
+import { useMutation } from '@vue/apollo-composable'
 import { ResetUserPassword } from 'src/graphql/account_management/mutation/ResetUserPassword'
 import DsInput from 'src/design-system/components/DsInput.vue'
+import type { PasswordResetResult, PasswordResetVariables } from 'src/types/auth/types'
 
-export default {
-  name: 'PasswordResetForm',
-  components: { DsInput },
+const { t } = useI18n()
+const $q = useQuasar()
+const route = useRoute()
+const router = useRouter()
 
-  data () {
-    return {
-      newPassword1: '',
-      newPassword2: '',
-      token: '',
-      visible: false,
-      apiError: '',
-      fieldErrors: { newPassword1: '', newPassword2: '' }
+const { mutate: resetPassword } = useMutation<PasswordResetResult, PasswordResetVariables>(ResetUserPassword)
+
+// ---------------------------------------------------------------------------
+// Local state
+// ---------------------------------------------------------------------------
+const newPassword1 = ref('')
+const newPassword2 = ref('')
+const token = ref('')
+const visible = ref(false)
+const apiError = ref('')
+const fieldErrors = ref({ newPassword1: '', newPassword2: '' })
+
+// ---------------------------------------------------------------------------
+// Route param → token
+// ---------------------------------------------------------------------------
+watch(
+  () => route.params,
+  (params) => { token.value = String(params.token ?? '') },
+  { immediate: true, deep: true },
+)
+
+// ---------------------------------------------------------------------------
+// Computed — password strength
+// ---------------------------------------------------------------------------
+const strengthValue = computed(() => {
+  const p = newPassword1.value
+  let score = 0
+  if (p.length >= 6)  score += 25
+  if (p.length >= 10) score += 20
+  if (/[A-Z]/.test(p) && /[a-z]/.test(p)) score += 20
+  if (/\d/.test(p))   score += 15
+  if (/[^A-Za-z0-9]/.test(p)) score += 20
+  return Math.min(100, score)
+})
+
+type StrengthTier = 'weak' | 'medium' | 'strong'
+
+const strengthTier = computed<StrengthTier>(() => {
+  const v = strengthValue.value
+  if (v < 40) return 'weak'
+  if (v < 70) return 'medium'
+  return 'strong'
+})
+
+const strengthLabel = computed(() => {
+  const map: Record<StrengthTier, string> = {
+    weak: t('ضعيفة'),
+    medium: t('متوسطة'),
+    strong: t('قوية'),
+  }
+  return map[strengthTier.value]
+})
+
+// ---------------------------------------------------------------------------
+// Methods
+// ---------------------------------------------------------------------------
+function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
+  const generic: string[] = []
+  const map: Record<string, keyof typeof fieldErrors.value> = {
+    newPassword1: 'newPassword1',
+    newPassword2: 'newPassword2',
+  }
+  for (const key in errorsObj) {
+    for (const val of errorsObj[key]) {
+      const field = map[key]
+      if (field) fieldErrors.value[field] = val.message
+      else generic.push(val.message)
     }
-  },
+  }
+  if (generic.length) apiError.value = generic.join(' — ')
+}
 
-  watch: {
-    '$route.params': {
-      immediate: true,
-      deep: true,
-      handler (params) { this.token = params.token }
+async function ResetTheUserPassword (): Promise<void> {
+  apiError.value = ''
+  fieldErrors.value = { newPassword1: '', newPassword2: '' }
+  if (newPassword1.value !== newPassword2.value) {
+    fieldErrors.value.newPassword2 = t('كلمتا المرور غير متطابقتين')
+    return
+  }
+  visible.value = true
+  try {
+    const res = await resetPassword({
+      token: token.value,
+      newPassword1: newPassword1.value,
+      newPassword2: newPassword2.value,
+    })
+    const payload = res?.data?.passwordReset
+    if (payload?.success) {
+      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: t('تم تعيين كلمة المرور بنجاح') })
+      void router.push({ name: 'login' })
+    } else if (payload?.errors) {
+      errorHandler(payload.errors as Record<string, Array<{ message: string }>>)
     }
-  },
-
-  computed: {
-    strengthValue () {
-      const p = this.newPassword1 || ''
-      let score = 0
-      if (p.length >= 6) score += 25
-      if (p.length >= 10) score += 20
-      if (/[A-Z]/.test(p) && /[a-z]/.test(p)) score += 20
-      if (/\d/.test(p)) score += 15
-      if (/[^A-Za-z0-9]/.test(p)) score += 20
-      return Math.min(100, score)
-    },
-    strengthTier () {
-      const v = this.strengthValue
-      if (v < 40) return 'weak'
-      if (v < 70) return 'medium'
-      return 'strong'
-    },
-    strengthLabel () {
-      return { weak: this.$t('ضعيفة'), medium: this.$t('متوسطة'), strong: this.$t('قوية') }[this.strengthTier]
-    }
-  },
-
-  methods: {
-    errorHandler (errorsObj) {
-      const generic = []
-      const map = { newPassword1: 'newPassword1', newPassword2: 'newPassword2' }
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          const t = map[key]
-          if (t) this.fieldErrors[t] = val.message
-          else generic.push(val.message)
-        }
-      }
-      if (generic.length) this.apiError = generic.join(' — ')
-    },
-
-    async ResetTheUserPassword () {
-      this.apiError = ''
-      this.fieldErrors = { newPassword1: '', newPassword2: '' }
-      if (this.newPassword1 !== this.newPassword2) {
-        this.fieldErrors.newPassword2 = this.$t('كلمتا المرور غير متطابقتين')
-        return
-      }
-      this.visible = true
-      try {
-        /** @type {{ data: PasswordResetResult }} */
-        const res = await this.$apollo.mutate({
-          mutation: ResetUserPassword,
-          variables: /** @type {PasswordResetVariables} */ ({
-            token: this.token,
-            newPassword1: this.newPassword1,
-            newPassword2: this.newPassword2
-          })
-        })
-        if (res.data.passwordReset.success) {
-          const toast = this.$toast
-          if (typeof toast === 'function') {
-            toast({ type: 'success', message: this.$t('تم تعيين كلمة المرور بنجاح') })
-          } else {
-            this.$q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: this.$t('تم تعيين كلمة المرور بنجاح') })
-          }
-          this.$router.push({ name: 'login' })
-        } else if (res.data.passwordReset.errors) {
-          this.errorHandler(res.data.passwordReset.errors)
-        }
-      } catch (e) {
-        this.apiError = this.$t('تعذر تعيين كلمة المرور. قد يكون الرابط منتهياً.')
-      } finally {
-        this.visible = false
-      }
-    }
+  } catch {
+    apiError.value = t('تعذر تعيين كلمة المرور. قد يكون الرابط منتهياً.')
+  } finally {
+    visible.value = false
   }
 }
 </script>

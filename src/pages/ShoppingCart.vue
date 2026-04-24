@@ -67,31 +67,28 @@
   </q-layout>
 </template>
 
-<script>
-/**
- * Cart layout shell. Binds `shoppingCartDataList` from the Pinia cart store
- * (typed as CartEntry[] in src/types/cart/types.ts) and hosts the nested
- * cart-step router views. The `useSubscription(CheckoutSubscription)` call
- * below has no matching Result/Vars alias in the cart feature module — the
- * subscription lives outside the per-provider Stripe/Paypal/Braintree/
- * SmartNode surface.
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- */
+<script setup lang="ts">
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { CheckoutSubscription } from 'src/graphql/notification_management/subscription/CheckoutSubscription'
+import type {
+  CheckoutSubscriptionResult,
+  CheckoutSubscriptionVars,
+  CheckPyramidAffiliateResult,
+  CheckPyramidAffiliateVars,
+} from 'src/types/cart/types'
 import { useCartStore } from 'src/stores/cart'
 import { storeToRefs } from 'pinia'
 import { useSubscription } from '@vue/apollo-composable'
 import { apolloClient } from 'src/apollo/client'
-import { onBeforeRouteUpdate, onBeforeRouteLeave } from 'vue-router'
-import { ref } from 'vue'
+import { onBeforeRouteUpdate, onBeforeRouteLeave, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useQuasar } from 'quasar'
 
 // Route-name → zero-indexed step. Order: cart, login, userInfo, payment, success.
-const STEP_BY_ROUTE = {
+const STEP_BY_ROUTE: Record<string, number> = {
   cart: 0,
   'login-cart': 1,
   'user-info': 2,
@@ -102,80 +99,66 @@ const STEP_BY_ROUTE = {
 // Steps that benefit from the two-column (items + summary) layout.
 const WIDE_STEPS = new Set(['cart', 'payment'])
 
-export default {
-  name: 'ShoppingCartLayout',
+const route = useRoute()
+const router = useRouter()
+const $q = useQuasar()
+const cart = useCartStore()
+const { shoppingCartDataList } = storeToRefs(cart)
+const prevRoute = ref<string | null>(null)
 
-  components: { AppHeader, AppFooter },
+// Passive subscription — fires for cache updates, no direct use of result here.
+useSubscription<CheckoutSubscriptionResult, CheckoutSubscriptionVars>(CheckoutSubscription)
 
-  setup () {
-    const cart = useCartStore()
-    const { shoppingCartDataList } = storeToRefs(cart)
-    const prevRoute = ref(null)
+// Track previous route for back-navigation UX.
+onBeforeRouteUpdate((to, from) => { prevRoute.value = from.fullPath })
+onBeforeRouteLeave((to, from) => { prevRoute.value = from.fullPath })
 
-    // Passive subscription — fires for cache updates, no direct use of result here.
-    useSubscription(CheckoutSubscription)
+const steps = [
+  { key: 'cart',     label: 'السلة' },
+  { key: 'login',    label: 'تسجيل الدخول' },
+  { key: 'billing',  label: 'معلومات الفوترة' },
+  { key: 'payment',  label: 'الدفع' },
+  { key: 'confirm',  label: 'تأكيد' }
+]
 
-    // Track previous route for back-navigation UX — Vue Router 4 replacement
-    // for the old beforeRouteEnter `next(vm => ...)` callback. We capture the
-    // "from" path on route changes into/through this layout.
-    onBeforeRouteUpdate((to, from) => { prevRoute.value = from.fullPath })
-    onBeforeRouteLeave((to, from) => { prevRoute.value = from.fullPath })
+const activeIndex = computed((): number => {
+  const routeName = route.name as string | undefined
+  if (routeName != null && STEP_BY_ROUTE[routeName] != null) return STEP_BY_ROUTE[routeName]
+  const p = route.path || ''
+  if (p.includes('/cart/success'))   return 4
+  if (p.includes('/cart/payment'))   return 3
+  if (p.includes('/cart/userInfo'))  return 2
+  if (p.includes('/cart/loginCart')) return 1
+  return 0
+})
 
-    return { cart, shoppingCartDataList, prevRoute }
-  },
+const isWideStep = computed((): boolean => {
+  return WIDE_STEPS.has(route.name as string)
+})
 
-  computed: {
-    steps () {
-      return [
-        { key: 'cart',     label: 'السلة' },
-        { key: 'login',    label: 'تسجيل الدخول' },
-        { key: 'billing',  label: 'معلومات الفوترة' },
-        { key: 'payment',  label: 'الدفع' },
-        { key: 'confirm',  label: 'تأكيد' }
-      ]
-    },
-
-    activeIndex () {
-      const routeName = this.$route.name
-      if (STEP_BY_ROUTE[routeName] != null) return STEP_BY_ROUTE[routeName]
-      const p = this.$route.path || ''
-      if (p.indexOf('/cart/success')   !== -1) return 4
-      if (p.indexOf('/cart/payment')   !== -1) return 3
-      if (p.indexOf('/cart/userInfo')  !== -1) return 2
-      if (p.indexOf('/cart/loginCart') !== -1) return 1
-      return 0
-    },
-
-    isWideStep () {
-      return WIDE_STEPS.has(this.$route.name)
-    }
-  },
-
-  mounted () {
-    this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
-    // Vue 3 removed $root event bus. The 'activateShoppingProgress' handler
-    // was a no-op; all cart-progress state now flows through Pinia + route.
-  },
-
-  methods: {
-    async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
-      try {
-        await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
-      } catch (e) {
-        if (e.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-          this.$q.notify({
-            type: 'positive',
-            progress: true,
-            multiLine: true,
-            position: 'top',
-            message: 'You must inter the registeration code'
-          })
-          this.$router.push({ name: 'registeration-code' })
-        }
-      }
+async function checkPyramidRegistration (): Promise<void> {
+  try {
+    await apolloClient.query<CheckPyramidAffiliateResult, CheckPyramidAffiliateVars>({
+      query: CheckTheUserPermissionToUsePlatforme
+    })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : ''
+    if (msg === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
+      $q.notify({
+        type: 'positive',
+        progress: true,
+        multiLine: true,
+        position: 'top',
+        message: 'You must inter the registeration code'
+      })
+      router.push({ name: 'registeration-code' })
     }
   }
 }
+
+onMounted(() => {
+  checkPyramidRegistration()
+})
 </script>
 
 <style lang="scss" scoped>

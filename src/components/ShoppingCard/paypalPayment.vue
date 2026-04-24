@@ -25,196 +25,129 @@
     </div>
 </template>
 
-<script>
-/**
- * Cart/checkout feature types for the Paypal component. Note: a
- * CreatePaypalCheckout aliased Result/Vars pair is not yet exported from
- * src/types/cart/types.ts (see TODO there); only the capture step is
- * typed below.
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/types/cart/types').CapturePaypalCheckoutResult} CapturePaypalCheckoutResult
- * @typedef {import('src/types/cart/types').CapturePaypalCheckoutVars} CapturePaypalCheckoutVars
- * @typedef {import('src/types/cart/types').PaypalPublishableKeyResult} PaypalPublishableKeyResult
- * @typedef {import('src/types/cart/types').PaypalPublishableKeyVars} PaypalPublishableKeyVars
- */
-import { CreateNewOrderWithBulkOrderDetails } from "src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
+<script setup lang="ts">
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
 import { PaypalPublishableKey } from 'src/graphql/checkout_management/query/PaypalPublishableKey'
 import { CreatePaypalCheckout } from 'src/graphql/checkout_management/mutation/CreatePaypalCheckout'
 import { CapturePaypalCheckout } from 'src/graphql/checkout_management/mutation/CapturePaypalCheckout'
+import type {
+  CapturePaypalCheckoutResult,
+  CapturePaypalCheckoutVars,
+  PaypalPublishableKeyResult,
+  PaypalPublishableKeyVars,
+  CreateOrderResult,
+  CreateOrderVars,
+} from 'src/types/cart/types'
+import { useCartStore } from 'src/stores/cart'
+import { apolloClient } from 'src/apollo/client'
 
-import { storeToRefs } from "pinia";
-import { useCartStore } from "src/stores/cart";
-import { apolloClient } from "src/apollo/client";
+// Runtime type for the PayPal JS SDK injected by index.html.
+interface PayPalButtonsConfig {
+  createOrder: () => Promise<string>
+  onApprove: (data: { orderID: string }) => Promise<void>
+}
+interface PayPalSDK {
+  Buttons: (config: PayPalButtonsConfig) => { render: (selector: string) => void }
+}
 
-export default {
-    setup () {
-        const cart = useCartStore();
-        const { shoppingCartDataList } = storeToRefs(cart);
-        return { cart, shoppingCartDataList };
-    },
+const router = useRouter()
+const $q = useQuasar()
+const cart = useCartStore()
+const { shoppingCartDataList } = storeToRefs(cart)
 
-    data () {
-        return {
-            visible: false,
-            errorMessages: [],
-            btnVisible: true
-        };
-    },
+const visible = ref<boolean>(false)
+const errorMessages = ref<string[]>([])
+const btnVisible = ref<boolean>(true)
 
-    methods: {
-        errorHandler(errorsObj) {
-            for (const key in errorsObj) {
-                for (const val of errorsObj[key]) {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: val.message
-                    })
-                }
-            }
-        },
-
-        async buyTheCoursesUsingPaypal () {
-            this.visible = true
-            this.btnVisible = false
-            this.errorMessages = []
-
-            try {
-                const courseIds = this.getOrdersIds();
-
-                const orderResult = await this.getOrderResult(courseIds);
-
-                const paypalPaymentUrl = await this.getpaypalPaymentUrlFromTheBackend(
-                    orderResult
-                );
-
-                // window.setTimeout( () =>{
-                    paypal.Buttons({
-
-                    // Call your server to set up the transaction
-                    createOrder: async (data, actions) => {
-                        
-                        return paypalPaymentUrl
-
-                        // return fetch('/demo/checkout/api/paypal/order/create/', {
-                        //     method: 'post'
-                        // }).then(function(res) {
-                        //     return res.json();
-                        // }).then(function(orderData) {
-                        //     return orderData.id;
-                        // });
-                    },
-
-                    // Call your server to finalize the transaction
-                    onApprove: async (data, actions) => {
-
-                        const paypalResult = await apolloClient.mutate({
-                            mutation: CapturePaypalCheckout,
-                            variables: {
-                                orderId: data.orderID
-                            }
-                        });
-
-                        if (paypalResult.data.capturePaypalCheckout.success) {
-                            this.$router.push({ name: 'cart-success' })
-                        }
-                        
-                    }
-
-                }).render('#paypal-button-container');
-                // }, 5000);
-               
-
-                // this.visible = true;
-                // TODO: Extract all courses ids
-                // const courseIds = this.getOrdersIds();
-                // // TODO: Make the order
-                // const orderResult = await this.getOrderResult(courseIds);
-                // // TODO: get the paypal key from the backend
-                // const paypalKey = await this.getPaypalKeyFromTheBackend();
-                // // TODO: Get the paypal url from the backend
-                // const paypalPaymentUrl = await this.getpaypalPaymentUrlFromTheBackend(
-                //     orderResult
-                // );
-                // // TODO: Make the payment
-                // openURL(paypalPaymentUrl);
-
-                this.visible = false;
-            } catch (error) {
-                this.visible = false
-                this.btnVisible = true
-                if ( (error.message === 'Network error: Network Error') || (error.message === 'paypal is not defined')) {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
-                    })
-                }
-            }         
-            
-        },
-
-        getOrdersIds () {
-            return this.$_.map(this.shoppingCartDataList, "[course][pk]");
-        },
-
-        async getPaypalKeyFromTheBackend () {
-            const paypalKeyResult = await apolloClient.query({
-                query: PaypalPublishableKey
-            });
-
-            return JSON.parse(
-                this.$_.get(paypalKeyResult, "[data][paypalPublishableKey]")
-            ).publisableKey;
-        },
-
-        async getOrderResult (courseIds) {
-            const result = await apolloClient.mutate({
-                mutation: CreateNewOrderWithBulkOrderDetails,
-                variables: {
-                    courseIds: courseIds
-                }
-            });
-
-            const dataObj = result.data.createNewOrderWithBulkOrderDetails;
-
-            if (this.$_.get(dataObj, "[errors]")) {
-                this.visible = false;
-                this.errorHandler(dataObj.errors)
-                // alert(dataObj.errors.nonFieldErrors);
-            }
-
-            if (this.$_.get(dataObj, "[success]")) {
-                return dataObj;
-            }
-        },
-
-        async getpaypalPaymentUrlFromTheBackend (orderResult) {
-            // TODO: Get the paypal url
-            const paypalPaymentresult = await apolloClient.mutate({
-                mutation: CreatePaypalCheckout,
-                variables: {
-                    orderId: orderResult.order.pk
-                }
-            });
-            const paypalDetails =
-                paypalPaymentresult.data.createPaypalCheckout;
-            if (this.$_.get(paypalDetails, "[errors]")) {
-                this.visible = false;
-            }
-
-            if (this.$_.get(paypalDetails, "[success]")) {
-                return paypalDetails.paymentUrl;
-            }
-        }
+function errorHandler (errorsObj: unknown): void {
+  if (typeof errorsObj !== 'object' || errorsObj == null) return
+  for (const key of Object.keys(errorsObj as Record<string, unknown>)) {
+    const entries = (errorsObj as Record<string, unknown[]>)[key]
+    if (!Array.isArray(entries)) continue
+    for (const val of entries) {
+      const v = val as Record<string, unknown>
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: String(v.message ?? '') })
     }
-};
+  }
+}
+
+function getOrdersIds (): number[] {
+  return shoppingCartDataList.value
+    .map(item => item.course.pk)
+    .filter((pk): pk is number => pk != null)
+}
+
+async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']> | undefined> {
+  const result = await apolloClient.mutate<CreateOrderResult, CreateOrderVars>({
+    mutation: CreateNewOrderWithBulkOrderDetails,
+    variables: { courseIds }
+  })
+  const dataObj = result.data?.createNewOrderWithBulkOrderDetails
+  if (dataObj?.errors) {
+    visible.value = false
+    errorHandler(dataObj.errors)
+  }
+  if (dataObj?.success) return dataObj
+  return undefined
+}
+
+async function getPaypalPaymentUrl (orderPk: number): Promise<string | null | undefined> {
+  const result = await apolloClient.mutate({
+    mutation: CreatePaypalCheckout,
+    variables: { orderId: orderPk }
+  })
+  const details = (result.data as Record<string, unknown>)?.createPaypalCheckout as Record<string, unknown> | null | undefined
+  if (details?.errors) { visible.value = false }
+  if (details?.success) return details.paymentUrl as string
+  return null
+}
+
+async function buyTheCoursesUsingPaypal (): Promise<void> {
+  visible.value = true
+  btnVisible.value = false
+  errorMessages.value = []
+
+  try {
+    const courseIds = getOrdersIds()
+    const orderResult = await getOrderResult(courseIds)
+    if (!orderResult?.order?.pk) { visible.value = false; return }
+
+    const paypalPaymentUrl = await getPaypalPaymentUrl(orderResult.order.pk)
+    if (!paypalPaymentUrl) { visible.value = false; return }
+
+    // Runtime guard for the PayPal SDK injected by index.html.
+    const paypalSDK = (window as Record<string, unknown>)['paypal'] as PayPalSDK | undefined
+    if (!paypalSDK?.Buttons) {
+      throw new Error('paypal is not defined')
+    }
+
+    paypalSDK.Buttons({
+      createOrder: async () => paypalPaymentUrl,
+      onApprove: async (data) => {
+        const paypalResult = await apolloClient.mutate<CapturePaypalCheckoutResult, CapturePaypalCheckoutVars>({
+          mutation: CapturePaypalCheckout,
+          variables: { orderId: data.orderID }
+        })
+        if (paypalResult.data?.capturePaypalCheckout?.success) {
+          router.push({ name: 'cart-success' })
+        }
+      }
+    }).render('#paypal-button-container')
+
+    visible.value = false
+  } catch (error: unknown) {
+    visible.value = false
+    btnVisible.value = true
+    const msg = error instanceof Error ? error.message : ''
+    if (msg === 'Network error: Network Error' || msg === 'paypal is not defined') {
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
+    }
+  }
+}
 </script>
 
 <style></style>

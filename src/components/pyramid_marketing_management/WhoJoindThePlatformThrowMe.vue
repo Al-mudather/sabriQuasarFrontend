@@ -5,19 +5,21 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { MyPyramidAffiliates } from 'src/graphql/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe.js'
+import type {
+  MyPyramidAffiliatesQuery,
+  MyPyramidAffiliatesQueryVariables,
+} from 'src/graphql/generated'
 
-export default {
-  name: 'WhoJoindThePlatformThrowMe',
-  setup () {
-    const { result } = useQuery(MyPyramidAffiliates, null, { errorPolicy: 'all' })
-    const count = computed(() => result.value?.myPyramidAffiliates || 0)
-    return { count }
-  }
-}
+const { result } = useQuery<MyPyramidAffiliatesQuery, MyPyramidAffiliatesQueryVariables>(
+  MyPyramidAffiliates,
+  undefined,
+  { errorPolicy: 'all' },
+)
+const count = computed(() => result.value?.myPyramidAffiliates ?? 0)
 </script>
 
 <style lang="scss" scoped>

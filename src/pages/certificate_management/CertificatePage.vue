@@ -3,7 +3,7 @@
     <header class="certs-page__head">
       <h1 class="certs-page__title">{{ $t('شهاداتي') }}</h1>
       <p v-if="!isLoading && certificates.length > 0" class="certs-page__subtitle">
-        {{ $t('لديك {n} شهادات').replace('{n}', certificates.length) }}
+        {{ $t('لديك {n} شهادات').replace('{n}', String(certificates.length)) }}
       </p>
     </header>
 
@@ -133,168 +133,190 @@
   </main>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar, exportFile } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
-import moment from 'moment'
-import { exportFile } from 'quasar'
 import { useAuthStore } from 'src/stores/auth'
 import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
-import { computed } from 'vue'
 import { AllCertificates } from 'src/graphql/certificatesManagement/query/GetAllCertificates.js'
+import type {
+  AllCertificatesResult,
+  AllCertificatesVars,
+} from 'src/types/certificates/types'
 
-/** @typedef {import('src/types/certificates/types').Certificate} Certificate */
-/** @typedef {import('src/types/certificates/types').AllCertificatesResult} AllCertificatesResult */
-/** @typedef {import('src/types/certificates/types').AllCertificatesVars} AllCertificatesVars */
+// -----------------------------------------------------------------------
+// Stores / composables
+// -----------------------------------------------------------------------
+const router = useRouter()
+const $q = useQuasar()
+const { t } = useI18n()
 
-export default {
-  name: 'CertificatePage',
+const auth = useAuthStore()
+const { user, token } = storeToRefs(auth)
 
-  setup () {
-    const auth = useAuthStore()
-    const { user, token } = storeToRefs(auth)
+// -----------------------------------------------------------------------
+// Query
+// -----------------------------------------------------------------------
+const certQuery = useQuery<AllCertificatesResult, AllCertificatesVars>(
+  AllCertificates,
+  () => ({
+    filters: JSON.stringify({ user__id: user.value?.pk ?? null }),
+  }),
+)
+const myCertificate = computed(() => certQuery.result.value?.allCertificates ?? null)
+const queryLoading = certQuery.loading
 
-    /** @type {ReturnType<typeof useQuery<AllCertificatesResult, AllCertificatesVars>>} */
-    const certQuery = useQuery(
-      AllCertificates,
-      () => ({ filters: JSON.stringify({ user__id: user.value && user.value.pk }) })
-    )
-    const myCertificate = computed(() => certQuery.result.value?.allCertificates || null)
-    const queryLoading = certQuery.loading
+// -----------------------------------------------------------------------
+// Derived state
+// -----------------------------------------------------------------------
+type CertEdge = NonNullable<
+  NonNullable<AllCertificatesResult['allCertificates']>['edges'][number]
+>
 
-    return { user, token, myCertificate, _queryLoading: queryLoading }
-  },
+const certificates = computed<CertEdge[]>(
+  () =>
+    (myCertificate.value?.edges ?? []).filter(
+      (e): e is CertEdge => !!e && !!e.node,
+    ),
+)
 
-  data () {
-    return {
-      downloadingPk: null
-    }
-  },
+const isLoading = computed(() => queryLoading.value && certificates.value.length === 0)
 
-  computed: {
-    certificates () {
-      return (this.myCertificate && this.myCertificate.edges) || []
-    },
+const downloadingPk = ref<number | null>(null)
 
-    isLoading () {
-      return this._queryLoading && this.certificates.length === 0
-    }
-  },
+// -----------------------------------------------------------------------
+// Helper functions
+// -----------------------------------------------------------------------
+function courseNameOf (cert: CertEdge): string {
+  const node = cert.node
+  if (!node) return ''
+  return (
+    node.enrollment?.course?.title ??
+    node.batch?.courseName ??
+    ''
+  )
+}
 
-  methods: {
-    courseNameOf (cert) {
-      const node = cert && cert.node
-      if (!node) return ''
-      return (node.enrollment && node.enrollment.course && node.enrollment.course.title) ||
-             (node.batch && node.batch.courseName) ||
-             ''
-    },
+function instructorOf (_cert: CertEdge): string {
+  // API currently doesn't expose instructor on certificate.
+  return ''
+}
 
-    instructorOf (cert) {
-      const node = cert && cert.node
-      if (!node) return ''
-      // API currently doesn't expose instructor on certificate.
-      // Fallback to user fullName if batch/enrollment doesn't carry it.
-      return ''
-    },
+function issueDateOf (cert: CertEdge): string | null {
+  const node = cert.node
+  if (!node) return null
+  return node.issueDate ?? node.endDate ?? node.created ?? null
+}
 
-    issueDateOf (cert) {
-      const node = cert && cert.node
-      if (!node) return null
-      return node.issueDate || node.endDate || node.created || null
-    },
-
-    isoOf (cert) {
-      const d = this.issueDateOf(cert)
-      return d ? moment(d).toISOString() : ''
-    },
-
-    serialOf (cert) {
-      return (cert && cert.node && cert.node.serial) || ''
-    },
-
-    isDownloadable (cert) {
-      const node = cert && cert.node
-      if (!node) return false
-      // isPrintable signals the backend has finalised the PDF.
-      return node.isPrintable !== false
-    },
-
-    formatArabicDate (d) {
-      if (!d) return this.$t('—')
-      try {
-        return new Intl.DateTimeFormat('ar-EG', {
-          day: 'numeric', month: 'long', year: 'numeric'
-        }).format(new Date(d))
-      } catch (_) {
-        return moment(d).format('YYYY-MM-DD')
-      }
-    },
-
-    async downloadCertificate (cert) {
-      if (!this.user || !this.user.certificateName) {
-        this.$q && this.$q.notify && this.$q.notify({
-          type: 'warning',
-          progress: true,
-          multiLine: true,
-          position: 'top',
-          message: this.$t('يجب تعيين اسم شهادة التدريب من ملفك الشخصي')
-        })
-        this.$router.push({ name: 'user-profile' })
-        return
-      }
-
-      const pk = cert.node.pk
-      this.downloadingPk = pk
-      try {
-        const res = await axios({
-          method: 'GET',
-          url: `${location.origin}/api/enrollment/certificate/download/${pk}`,
-          responseType: 'arraybuffer',
-          headers: {
-            'Authorization': `JWT ${this.token}`,
-            'Content-Type': 'application/json'
-          }
-        })
-        if (res.data) {
-          const fileName = `${this.courseNameOf(cert)}-${this.user.username}.pdf`
-          exportFile(fileName, res.data, {
-            encoding: 'windows-1252',
-            mimeType: 'application/pdf'
-          })
-        }
-      } catch (_) {
-        // apolloProvider / axios interceptor surfaces errors globally
-      } finally {
-        this.downloadingPk = null
-      }
-    },
-
-    async shareCertificate (cert) {
-      const title = this.courseNameOf(cert)
-      const text = this.$t('شهادتي من مركز د. صبري أبوقرون للتدريب')
-      const url = `${location.origin}/Certificates#${cert.node.pk}`
-      if (navigator.share) {
-        try {
-          await navigator.share({ title, text, url })
-          return
-        } catch (_) { /* user cancelled */ }
-      }
-      try {
-        await navigator.clipboard.writeText(url)
-        this.$q && this.$q.notify && this.$q.notify({
-          type: 'positive',
-          position: 'top',
-          message: this.$t('تم نسخ الرابط')
-        })
-      } catch (_) { /* noop */ }
-    },
-
-    goToMyCourses () {
-      this.$router.push({ name: 'my-courses' })
-    }
+function isoOf (cert: CertEdge): string {
+  const d = issueDateOf(cert)
+  if (!d) return ''
+  try {
+    return new Date(d).toISOString()
+  } catch {
+    return ''
   }
 }
+
+function serialOf (cert: CertEdge): string {
+  return cert.node?.serial ?? ''
+}
+
+function isDownloadable (cert: CertEdge): boolean {
+  const node = cert.node
+  if (!node) return false
+  return node.isPrintable !== false
+}
+
+function formatArabicDate (d: string | null): string {
+  if (!d) return t('—')
+  try {
+    return new Intl.DateTimeFormat('ar-EG', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date(d))
+  } catch {
+    return d
+  }
+}
+
+// -----------------------------------------------------------------------
+// Actions
+// -----------------------------------------------------------------------
+async function downloadCertificate (cert: CertEdge): Promise<void> {
+  if (!user.value || !('certificateName' in user.value && user.value.certificateName)) {
+    $q.notify({
+      type: 'warning',
+      progress: true,
+      multiLine: true,
+      position: 'top',
+      message: t('يجب تعيين اسم شهادة التدريب من ملفك الشخصي'),
+    })
+    void router.push({ name: 'user-profile' })
+    return
+  }
+
+  const pk = cert.node?.pk
+  if (!pk) return
+  downloadingPk.value = pk
+  try {
+    const res = await axios({
+      method: 'GET',
+      url: `${location.origin}/api/enrollment/certificate/download/${pk}`,
+      responseType: 'arraybuffer',
+      headers: {
+        Authorization: `JWT ${token.value}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    if (res.data) {
+      const nameSlug = user.value?.fullName ?? user.value?.email ?? 'user'
+      const fileName = `${courseNameOf(cert)}-${nameSlug}.pdf`
+      exportFile(fileName, res.data as ArrayBuffer, {
+        encoding: 'windows-1252',
+        mimeType: 'application/pdf',
+      })
+    }
+  } catch {
+    // Apollo/axios interceptor surfaces errors globally
+  } finally {
+    downloadingPk.value = null
+  }
+}
+
+async function shareCertificate (cert: CertEdge): Promise<void> {
+  const title = courseNameOf(cert)
+  const text = t('شهادتي من مركز د. صبري أبوقرون للتدريب')
+  const url = `${location.origin}/Certificates#${cert.node?.pk}`
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url })
+      return
+    } catch {
+      /* user cancelled */
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url)
+    $q.notify({
+      type: 'positive',
+      position: 'top',
+      message: t('تم نسخ الرابط'),
+    })
+  } catch {
+    /* noop */
+  }
+}
+
+function goToMyCourses (): void {
+  void router.push({ name: 'my-courses' })
+}
+
 </script>
 
 <style lang="scss" scoped>

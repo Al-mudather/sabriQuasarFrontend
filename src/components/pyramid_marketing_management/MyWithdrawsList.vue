@@ -11,7 +11,7 @@
     </ds-empty-state>
 
     <div v-else class="withdraws__grid">
-      <article v-for="order in withdrawEdges" :key="order.node.pk" class="withdraw-card">
+      <article v-for="order in withdrawEdges" :key="order.node.pk ?? order.node.id" class="withdraw-card">
         <header class="withdraw-card__head">
           <img src="~assets/img/clock.png" alt="" aria-hidden="true" />
           <time>{{ formatTime(order.node.created) }}</time>
@@ -23,7 +23,7 @@
           {{ $t('في إنتظار المعالجة') }}
         </ds-badge>
         <div class="withdraw-card__amount">
-          <span>{{ FORMAT_COUSRE_PRICE(order.node.amount, 3) }}</span>
+          <span>{{ formatPrice(order.node.amount, 3) }}</span>
           <small>SDG</small>
         </div>
         <footer class="withdraw-card__via">
@@ -35,45 +35,47 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { MyPyramidWithdraws } from 'src/graphql/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
-import moment from 'moment'
+import type {
+  MyPyramidWithdrawsResult,
+  MyPyramidWithdrawsVars,
+} from 'src/types/pyramid/types'
+
+const { result } = useQuery<MyPyramidWithdrawsResult, MyPyramidWithdrawsVars>(
+  MyPyramidWithdraws,
+  undefined,
+  { errorPolicy: 'all' },
+)
+
+const withdrawEdges = computed(() =>
+  (result.value?.myPyramidWithdraws?.edges ?? [])
+    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+)
 
 const priceLookup = [
   { value: 1, symbol: '' }, { value: 1e3, symbol: 'k' },
-  { value: 1e6, symbol: 'M' }, { value: 1e9, symbol: 'B' }
-]
+  { value: 1e6, symbol: 'M' }, { value: 1e9, symbol: 'B' },
+] as const
 
-export default {
-  name: 'MyWithdrawsList',
+function formatPrice(num: number | null | undefined, digits = 3): string {
+  try {
+    const n = Number(num)
+    if (!Number.isFinite(n) || n === 0) return String(num)
+    const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
+    const item = [...priceLookup].reverse().find(it => n >= it.value)
+    return item ? (n / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
+  } catch { return String(num) }
+}
 
-  setup () {
-    const { result } = useQuery(MyPyramidWithdraws, null, { errorPolicy: 'all' })
-    const withdrawLists = computed(() => result.value?.myPyramidWithdraws || [])
-    return { withdrawLists }
-  },
-
-  computed: {
-    withdrawEdges () { return this.$_.get(this.withdrawLists, 'edges', []) || [] }
-  },
-
-  methods: {
-    FORMAT_COUSRE_PRICE (num, digits = 3) {
-      try {
-        const n = Number(num)
-        if (!Number.isFinite(n) || n === 0) return String(num)
-        const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
-        const item = priceLookup.slice().reverse().find(it => n >= it.value)
-        return item ? (n / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
-      } catch (e) { return num }
-    },
-
-    formatTime (time) {
-      return time ? moment(time, 'HH:mm:ss').format('YYYY-MM-DD') : 'Not Defined'
-    }
-  }
+function formatTime(time: string | null | undefined): string {
+  if (!time) return 'Not Defined'
+  // time arrives as an ISO string; take the date portion
+  try {
+    return new Date(time).toISOString().slice(0, 10)
+  } catch { return time }
 }
 </script>
 

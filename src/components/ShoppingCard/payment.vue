@@ -191,22 +191,12 @@
   </section>
 </template>
 
-<script>
-/**
- * Cart/checkout feature types. This component reaches the Stripe checkout
- * mutation + publishable-key query directly via apolloClient.*; the aliases
- * below document the expected shapes even though the calls are untyped at
- * runtime (no useMutation/useQuery composable here).
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/types/cart/types').CreateStripeCheckoutResult} CreateStripeCheckoutResult
- * @typedef {import('src/types/cart/types').CreateStripeCheckoutVars} CreateStripeCheckoutVars
- * @typedef {import('src/types/cart/types').StripePublishableKeyResult} StripePublishableKeyResult
- * @typedef {import('src/types/cart/types').StripePublishableKeyVars} StripePublishableKeyVars
- */
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import _ from 'lodash'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 
 import { useCartStore } from 'src/stores/cart'
 import { useSettingsStore } from 'src/stores/settings'
@@ -217,254 +207,245 @@ import { StripePublishableKey } from 'src/graphql/checkout_management/query/Stri
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 
+import type {
+  CartEntry,
+  CreateStripeCheckoutResult,
+  CreateStripeCheckoutVars,
+  StripePublishableKeyResult,
+  StripePublishableKeyVars,
+  CreateOrderResult,
+  CreateOrderVars,
+  CheckPyramidAffiliateResult,
+  CheckPyramidAffiliateVars,
+} from 'src/types/cart/types'
+import type {
+  GetMyProfileResult,
+  GetMyProfileVariables,
+} from 'src/types/auth/types'
+
 import bankakPayment from 'src/components/ShoppingCard/bankakPay.vue'
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
 
-export default {
-  name: 'paymentCartpage',
+const router = useRouter()
+const $q = useQuasar()
+const { t } = useI18n()
+const cart = useCartStore()
+const settings = useSettingsStore()
+const { shoppingCartDataList, totalPaymentFees } = storeToRefs(cart)
+const { currency } = storeToRefs(settings)
 
-  components: {
-    'bankak-payment': bankakPayment,
-    PriceDisplay
+const showBankakPayment = ref<boolean>(false)
+const showStripePayment = ref<boolean>(false)
+const stripeLoading = ref<boolean>(false)
+const selectedMethod = ref<string | null>(null)
+
+interface PaymentMethod {
+  id: string
+  title: string
+  subtitle: string
+  icon: string
+  badge: string
+}
+
+const availableMethods = computed((): PaymentMethod[] => [
+  {
+    id: 'bankak',
+    title: t('إرفاق إشعار بنكي'),
+    subtitle: t('البنوك السودانية — تفعيل خلال 24 ساعة'),
+    icon: 'account_balance',
+    badge: t('الأكثر استخداماً')
   },
+  {
+    id: 'stripe',
+    title: t('بطاقة ائتمانية (Visa / Mastercard)'),
+    subtitle: t('تفعيل فوري — دفع مشفر عبر Stripe'),
+    icon: 'credit_card',
+    badge: t('فوري')
+  }
+])
 
-  setup () {
-    const cart = useCartStore()
-    const settings = useSettingsStore()
-    const { shoppingCartDataList, totalPaymentFees } = storeToRefs(cart)
-    const { currency } = storeToRefs(settings)
-    return { cart, settings, shoppingCartDataList, totalPaymentFees, currency }
-  },
-
-  data () {
-    return {
-      showBankakPayment: false,
-      showStripePayment: false,
-      stripeLoading: false,
-      selectedMethod: null,
-      lodash: _
+function itemAmount (item: CartEntry): number {
+  try {
+    const raw = item.course.currency
+    if (raw && typeof raw === 'object') {
+      return parseFloat(String((raw as Record<string, number>)[currency.value])) || 0
     }
-  },
+    return 0
+  } catch {
+    return 0
+  }
+}
 
-  computed: {
-    availableMethods () {
-      // Only expose methods that are actually wired up today: bankak + stripe.
-      return [
-        {
-          id: 'bankak',
-          title: this.$t('إرفاق إشعار بنكي'),
-          subtitle: this.$t('البنوك السودانية — تفعيل خلال 24 ساعة'),
-          icon: 'account_balance',
-          badge: this.$t('الأكثر استخداماً')
-        },
-        {
-          id: 'stripe',
-          title: this.$t('بطاقة ائتمانية (Visa / Mastercard)'),
-          subtitle: this.$t('تفعيل فوري — دفع مشفر عبر Stripe'),
-          icon: 'credit_card',
-          badge: this.$t('فوري')
-        }
-      ]
-    }
-  },
+function confirmMethod (): void {
+  if (selectedMethod.value === 'bankak') {
+    showBankakPayment.value = true
+    showStripePayment.value = false
+  } else if (selectedMethod.value === 'stripe') {
+    showStripePayment.value = true
+    showBankakPayment.value = false
+  }
+}
 
-  async created () {
-    this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
+function goBackToOptions (): void {
+  showBankakPayment.value = false
+  showStripePayment.value = false
+}
 
-    try {
-      const res = await apolloClient.query({ query: GetMyProfileData })
-      if (res.data.me && res.data.me.pk) {
-        const me = res.data.me
-        if (!(me.fullName && (me.phoneNumber2 || me.phoneNumber3))) {
-          this.$q.notify({
-            type: 'negative',
-            progress: true,
-            multiLine: true,
-            position: 'top',
-            message: 'يجب ان تكمل بياناتك الشخصيه'
-          })
-          this.$router.push({ name: 'user-info' })
-        }
-      }
-    } catch (_) { /* silent */ }
-  },
+function calculateDollarAmount (): string {
+  let sum = 0.0
+  for (const item of shoppingCartDataList.value) {
+    const c = item.course as Record<string, unknown>
+    sum += parseFloat(String(c.courseFee ?? 0))
+  }
+  return sum.toFixed(2)
+}
 
-  mounted () {
-    this.WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT()
-    if (this.shoppingCartDataList.length === 0) {
-      this.$q.notify({
-        type: 'negative',
-        progress: true,
-        multiLine: true,
-        position: 'top',
-        message: 'لا يمكنك شراء لا شيء'
-      })
-      this.$router.push({ name: 'Home' })
-    }
-  },
+function getOrdersIds (): number[] {
+  return shoppingCartDataList.value
+    .map(item => item.course.pk)
+    .filter((pk): pk is number => pk != null)
+}
 
-  methods: {
-    itemAmount (item) {
-      try {
-        const map = JSON.parse(item.course.currency)
-        return parseFloat(map[this.currency]) || 0
-      } catch (_) {
-        return 0
-      }
-    },
+function removeCourseFromCart (item: CartEntry): void {
+  const data = shoppingCartDataList.value.filter(el => el.course.id !== item.course.id)
+  cart.setCartList(data)
+}
 
-    confirmMethod () {
-      if (this.selectedMethod === 'bankak') {
-        this.showBankakPayment = true
-        this.showStripePayment = false
-      } else if (this.selectedMethod === 'stripe') {
-        this.showStripePayment = true
-        this.showBankakPayment = false
-      }
-    },
-
-    goBackToOptions () {
-      this.showBankakPayment = false
-      this.showStripePayment = false
-    },
-
-    calculateDollarAmount () {
-      let sum = 0.0
-      for (const item of this.shoppingCartDataList) {
-        sum += parseFloat(item.course.courseFee || 0)
-      }
-      return sum.toFixed(2)
-    },
-
-    async initiateStripePayment () {
-      try {
-        this.stripeLoading = true
-
-        if (!this.$Stripe || typeof this.$Stripe !== 'function') {
-          throw new Error('Stripe not loaded')
-        }
-
-        const courseIds = this.getOrdersIds()
-        const orderResult = await this.getOrderResult(courseIds)
-
-        this.cart.setSaveCheckoutOrderID(orderResult.order.pk)
-
-        const stripeKey = await this.getStripeKeyFromTheBackend()
-        const stripe = this.$Stripe(stripeKey)
-        const stripePaymentUrl = await this.getStripPaymentUrlFromTheBackend(orderResult)
-
-        stripe.redirectToCheckout({ sessionId: stripePaymentUrl })
-
-        this.stripeLoading = false
-      } catch (error) {
-        this.stripeLoading = false
-        if (error.message === 'Stripe not loaded' || error.message === 'this.$Stripe is not a function') {
-          this.$q.notify({
-            type: 'warning', progress: true, multiLine: true, position: 'top',
-            message: 'Stripe غير محمل، يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى'
-          })
-        } else {
-          this.$q.notify({
-            type: 'warning', progress: true, multiLine: true, position: 'top',
-            message: 'حدث خطأ في عملية الدفع، يرجى المحاولة مرة أخرى'
-          })
-        }
-      }
-    },
-
-    getOrdersIds () {
-      return this.$_.map(this.shoppingCartDataList, '[course][pk]')
-    },
-
-    async getOrderResult (courseIds) {
-      const result = await apolloClient.mutate({
-        mutation: CreateNewOrderWithBulkOrderDetails,
-        variables: { courseIds: courseIds }
-      })
-      const dataObj = result.data.createNewOrderWithBulkOrderDetails
-      if (this.$_.get(dataObj, '[errors]')) {
-        this.stripeLoading = false
-        this.errorHandler(dataObj.errors)
-      }
-      if (this.$_.get(dataObj, '[success]')) return dataObj
-    },
-
-    async getStripeKeyFromTheBackend () {
-      const stripeKeyResult = await apolloClient.query({ query: StripePublishableKey })
-      return JSON.parse(this.$_.get(stripeKeyResult, '[data][stripePublishableKey]')).publisableKey
-    },
-
-    async getStripPaymentUrlFromTheBackend (orderResult) {
-      const stripPaymentResult = await apolloClient.mutate({
-        mutation: CreateStripeCheckout,
-        variables: {
-          orderId: orderResult.order.pk,
-          currency: 'USD',
-          successUrl: location.origin + '/#/cart/success',
-          cancelUrl: location.origin + '/#/cart/cancel'
-        }
-      })
-      const stripDetails = stripPaymentResult.data.createStripeCheckout
-      if (this.$_.get(stripDetails, '[errors]')) {
-        this.stripeLoading = false
-        this.$q.notify({
-          type: 'warning', progress: true, multiLine: true, position: 'top',
-          message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه'
-        })
-      }
-      if (this.$_.get(stripDetails, '[success]')) return stripDetails.paymentUrl
-    },
-
-    errorHandler (errorsObj) {
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          this.$q.notify({
-            type: 'warning', progress: true, multiLine: true, position: 'top',
-            message: val.message
-          })
-        }
-      }
-    },
-
-    async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
-      try {
-        const join_permission_res = await apolloClient.query({
-          query: CheckTheUserPermissionToUsePlatforme
-        })
-        const errors = this.$_.get(join_permission_res, '[errors]')
-        if (errors) {
-          for (let error of errors) {
-            if (error.message.includes('PyramidAffiliate matching query does not exist.')) {
-              this.$router.push({ name: 'registeration-code' })
-            }
-          }
-        }
-      } catch (e) {
-        if (e.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-          this.$router.push({ name: 'registeration-code' })
-        }
-      }
-    },
-
-    WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT () {
-      this.shoppingCartDataList.map(item => {
-        if (parseInt(item.course.courseFee) === 0 || parseInt(item.course.courseFeeInSdg) === 0) {
-          this.removeCourseFromCart(item)
-          this.$q.notify({
-            type: 'warning', progress: true, multiLine: true, position: 'top',
-            message: 'هذا الكورس تحت التحضير'
-          })
-        }
-      })
-    },
-
-    removeCourseFromCart (item) {
-      const data = this.shoppingCartDataList
-      this.lodash.remove(data, element => element.course.id === item.course.id)
-      this.cart.setCartList(data)
+function errorHandler (errorsObj: unknown): void {
+  if (typeof errorsObj !== 'object' || errorsObj == null) return
+  for (const key of Object.keys(errorsObj as Record<string, unknown>)) {
+    const entries = (errorsObj as Record<string, unknown[]>)[key]
+    if (!Array.isArray(entries)) continue
+    for (const val of entries) {
+      const v = val as Record<string, unknown>
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: String(v.message ?? '') })
     }
   }
 }
+
+async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']> | undefined> {
+  const result = await apolloClient.mutate<CreateOrderResult, CreateOrderVars>({
+    mutation: CreateNewOrderWithBulkOrderDetails,
+    variables: { courseIds }
+  })
+  const dataObj = result.data?.createNewOrderWithBulkOrderDetails
+  if (dataObj?.errors) {
+    stripeLoading.value = false
+    errorHandler(dataObj.errors)
+  }
+  if (dataObj?.success) return dataObj
+  return undefined
+}
+
+async function getStripeKeyFromTheBackend (): Promise<string> {
+  const stripeKeyResult = await apolloClient.query<StripePublishableKeyResult, StripePublishableKeyVars>({
+    query: StripePublishableKey
+  })
+  const raw = stripeKeyResult.data?.stripePublishableKey
+  if (raw && typeof raw === 'object') {
+    return (raw as Record<string, string>).publisableKey ?? ''
+  }
+  return ''
+}
+
+async function getStripePaymentUrl (orderResult: NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']>): Promise<string | null | undefined> {
+  if (!orderResult.order?.pk) return null
+  const result = await apolloClient.mutate<CreateStripeCheckoutResult, CreateStripeCheckoutVars>({
+    mutation: CreateStripeCheckout,
+    variables: {
+      orderId: orderResult.order.pk,
+      currency: 'USD',
+      successUrl: location.origin + '/#/cart/success',
+      cancelUrl: location.origin + '/#/cart/cancel'
+    }
+  })
+  const details = result.data?.createStripeCheckout
+  if (details?.errors) {
+    stripeLoading.value = false
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
+  }
+  if (details?.success) return details.paymentUrl
+  return null
+}
+
+async function initiateStripePayment (): Promise<void> {
+  try {
+    stripeLoading.value = true
+
+    // Runtime guard for the Stripe SDK injected by index.html.
+    const stripeGlobal = (window as Record<string, unknown>)['Stripe']
+    if (typeof stripeGlobal !== 'function') {
+      throw new Error('Stripe not loaded')
+    }
+
+    const courseIds = getOrdersIds()
+    const orderResult = await getOrderResult(courseIds)
+    if (!orderResult?.order?.pk) { stripeLoading.value = false; return }
+
+    cart.setSaveCheckoutOrderID(orderResult.order.pk)
+
+    const stripeKey = await getStripeKeyFromTheBackend()
+    const stripe = (stripeGlobal as (key: string) => { redirectToCheckout: (opts: { sessionId: string }) => void })(stripeKey)
+    const sessionId = await getStripePaymentUrl(orderResult)
+
+    if (sessionId) stripe.redirectToCheckout({ sessionId })
+
+    stripeLoading.value = false
+  } catch (error: unknown) {
+    stripeLoading.value = false
+    const msg = error instanceof Error ? error.message : ''
+    if (msg === 'Stripe not loaded') {
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'Stripe غير محمل، يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى' })
+    } else {
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'حدث خطأ في عملية الدفع، يرجى المحاولة مرة أخرى' })
+    }
+  }
+}
+
+async function checkPyramidRegistration (): Promise<void> {
+  try {
+    await apolloClient.query<CheckPyramidAffiliateResult, CheckPyramidAffiliateVars>({
+      query: CheckTheUserPermissionToUsePlatforme
+    })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : ''
+    if (msg.includes('PyramidAffiliate matching query does not exist.')) {
+      router.push({ name: 'registeration-code' })
+    }
+  }
+}
+
+function purgeZeroCostItems (): void {
+  shoppingCartDataList.value.forEach(item => {
+    const c = item.course as Record<string, unknown>
+    const fee = parseInt(String(c.courseFee ?? ''), 10)
+    const feeSDG = parseInt(String(c.courseFeeInSdg ?? ''), 10)
+    if (fee === 0 || feeSDG === 0) {
+      removeCourseFromCart(item)
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'هذا الكورس تحت التحضير' })
+    }
+  })
+}
+
+onMounted(async () => {
+  checkPyramidRegistration()
+
+  try {
+    const res = await apolloClient.query<GetMyProfileResult, GetMyProfileVariables>({ query: GetMyProfileData })
+    const me = res.data?.me
+    if (me?.pk && !(me.fullName && (me.phoneNumber2 || me.phoneNumber3))) {
+      $q.notify({ type: 'negative', progress: true, multiLine: true, position: 'top', message: 'يجب ان تكمل بياناتك الشخصيه' })
+      router.push({ name: 'user-info' })
+    }
+  } catch { /* silent */ }
+
+  purgeZeroCostItems()
+
+  if (shoppingCartDataList.value.length === 0) {
+    $q.notify({ type: 'negative', progress: true, multiLine: true, position: 'top', message: 'لا يمكنك شراء لا شيء' })
+    router.push({ name: 'Home' })
+  }
+})
 </script>
 
 <style lang="scss" scoped>

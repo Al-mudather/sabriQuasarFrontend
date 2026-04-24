@@ -144,145 +144,163 @@
   </main>
 </template>
 
-<script>
-/** @typedef {import('src/types/courses/types').Course} Course */
-
+<script setup lang="ts">
+import { computed, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useQuery } from '@vue/apollo-composable'
+import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
+import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import { useSettingsStore } from 'src/stores/settings'
+import { useAuthStore } from 'src/stores/auth'
 import CourseCard from 'src/components/shared/CourseCard.vue'
 import StatCard from 'src/components/shared/StatCard.vue'
 import DsTabs from 'src/design-system/components/DsTabs.vue'
 import DsTab from 'src/design-system/components/DsTab.vue'
-import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
-import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
-import { useSettingsStore } from 'src/stores/settings'
-import { useQuery } from '@vue/apollo-composable'
-import { computed } from 'vue'
+import type { AllEnrollmentsResult, AllEnrollmentsVars, Enrollment } from 'src/types/enrollments/types'
 
-/**
- * Progress derivation
- * ------------------------------------------------------------------
- * The backend does not expose a precomputed `progress` field on an
- * enrollment. It exposes:
- *   enrollment.learningprogressSet.totalCount            (lessons done)
- *   course.courseunitSet.edges[].node.courseunitcontentSet.totalCount (lessons total)
- * We compute progress percent client-side from those two numbers.
- */
-function computeProgress (enrollmentNode) {
-  const course = enrollmentNode && enrollmentNode.course
-  if (!course || !course.courseunitSet) return 0
-  const done = (enrollmentNode.learningprogressSet && enrollmentNode.learningprogressSet.totalCount) || 0
-  const total = (course.courseunitSet.edges || []).reduce(
-    (acc, u) => acc + ((u.node && u.node.courseunitcontentSet && u.node.courseunitcontentSet.totalCount) || 0),
-    0
+// ---------------------------------------------------------------------------
+// Stores / router
+// ---------------------------------------------------------------------------
+const settings = useSettingsStore()
+const auth = useAuthStore()
+const router = useRouter()
+const { t } = useI18n()
+
+// ---------------------------------------------------------------------------
+// Auth guard
+// ---------------------------------------------------------------------------
+onMounted(() => {
+  settings.setActiveNav('BORD')
+  if (!auth.isAuthenticated) {
+    void router.push({ name: 'login', query: { redirect: '/my-courses' } })
+  }
+})
+
+// ---------------------------------------------------------------------------
+// Local state
+// ---------------------------------------------------------------------------
+const activeTab = ref<string>('in-progress')
+
+// ---------------------------------------------------------------------------
+// Query
+// ---------------------------------------------------------------------------
+const enrollQuery = useQuery<AllEnrollmentsResult, AllEnrollmentsVars>(
+  AllEnrollmentsForCurrentUser,
+  { limit: 100, cursor: '' },
+  { fetchPolicy: 'network-only' },
+)
+
+const allEnrollmentsData = computed(
+  () => enrollQuery.result.value?.allEnrollmentsForCurrentUser ?? null,
+)
+
+// ---------------------------------------------------------------------------
+// Enrollment edges — null-stripped
+// ---------------------------------------------------------------------------
+const enrollmentEdges = computed(
+  () => (allEnrollmentsData.value?.edges ?? [])
+    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+)
+
+// ---------------------------------------------------------------------------
+// Progress derivation
+// The backend does not expose a precomputed `progress` field on an enrollment.
+// It exposes:
+//   enrollment.learningprogressSet.totalCount   (lessons done)
+//   course.courseunitSet.edges[].node.courseunitcontentSet.totalCount (lessons total)
+// We compute progress percent client-side from those two numbers.
+// ---------------------------------------------------------------------------
+function computeProgress(enrollmentNode: Enrollment): number {
+  const course = enrollmentNode.course
+  if (!course?.courseunitSet) return 0
+  const done = enrollmentNode.learningprogressSet?.totalCount ?? 0
+  const total = (course.courseunitSet.edges ?? []).reduce(
+    (acc, u) => acc + (u?.node?.courseunitcontentSet?.totalCount ?? 0),
+    0,
   )
   if (total <= 0) return 0
   return Math.max(0, Math.min(100, Math.round((done / total) * 100)))
 }
 
-export default {
-  name: 'MyCourses',
-
-  components: { CourseCard, StatCard, DsTabs, DsTab },
-
-  setup () {
-    const settings = useSettingsStore()
-    // TODO: AllEnrollmentsForCurrentUser belongs to the enrollment feature and
-    // has no matching Result/Vars alias in src/types/courses/types.ts.
-    // Wire up typed generics once the enrollments feature types land.
-    const enrollQuery = useQuery(
-      AllEnrollmentsForCurrentUser,
-      { limit: 100, cursor: '' },
-      { fetchPolicy: 'network-only' }
-    )
-    const allEnrollmentsForCurrentUser = computed(
-      () => enrollQuery.result.value?.allEnrollmentsForCurrentUser || null
-    )
-    return {
-      settings,
-      allEnrollmentsForCurrentUser,
-      _enrollLoading: enrollQuery.loading
-    }
-  },
-
-  data () {
-    return {
-      activeTab: 'in-progress'
-    }
-  },
-
-  computed: {
-    enrollments () {
-      return (this.allEnrollmentsForCurrentUser && this.allEnrollmentsForCurrentUser.edges) || []
-    },
-
-    isLoading () {
-      return this._enrollLoading && this.enrollments.length === 0
-    },
-
-    /**
-     * Normalised view-model for the CourseCard shared component.
-     * Shared card expects: { id, pk, name, coverImage, category, progress }
-     */
-    items () {
-      return this.enrollments.map((edge) => {
-        const node = edge.node || {}
-        const c = node.course || {}
-        return {
-          key: node.id || c.id || c.pk,
-          pk: c.pk,
-          enrollmentPk: node.pk,
-          progress: computeProgress(node),
-          course: {
-            id: c.id,
-            pk: c.pk,
-            name: c.title,
-            coverImage: c.cover ? FORMAT_THE_IAMGE_URL(c.cover) : null,
-            category: null,
-            progress: computeProgress(node)
-          }
-        }
-      })
-    },
-
-    total () { return this.items.length },
-
-    inProgressList () {
-      return this.items.filter(i => i.progress > 0 && i.progress < 100)
-    },
-
-    completedList () {
-      return this.items.filter(i => i.progress >= 100)
-    },
-
-    allList () { return this.items },
-
-    inProgressCount () { return this.inProgressList.length },
-    completedCount () { return this.completedList.length },
-
-    // Only surfaced if we can derive an honest value. We do not fake.
-    hoursWatched () { return 0 },
-
-    subheadingText () {
-      if (this.total === 0) return this.$t('ابدأ رحلتك التعليمية الآن')
-      return this.$t('تتابع الآن {n} دورات', { n: this.total })
-        // graceful fallback for plain $t without interpolation
-        .replace('{n}', this.total)
-    }
-  },
-
-  mounted () {
-    this.settings.setActiveNav('BORD')
-  },
-
-  methods: {
-    goToCoursesPage () {
-      this.$router.push({ name: 'courses' })
-    },
-    goToClassroom ({ pk } = {}) {
-      const id = pk || ''
-      if (!id) return
-      window.location.href = `${location.origin}/classroom/#/class/${id}/`
-    }
+// ---------------------------------------------------------------------------
+// View-model items — flattened for CourseCard shared component
+// ---------------------------------------------------------------------------
+interface CourseCardViewModel {
+  key: string
+  pk: number | null
+  enrollmentPk: number | null
+  progress: number
+  course: {
+    id: string
+    pk: number | null
+    name: string
+    coverImage: string | null
+    category: null
+    progress: number
   }
+}
+
+const items = computed<CourseCardViewModel[]>(() =>
+  enrollmentEdges.value.map((edge) => {
+    const node = edge.node!
+    const c = node.course
+    const progress = computeProgress(node)
+    return {
+      key: node.id ?? c.id ?? String(c.pk),
+      pk: c.pk,
+      enrollmentPk: node.pk,
+      progress,
+      course: {
+        id: c.id,
+        pk: c.pk,
+        name: c.title,
+        coverImage: c.cover ? FORMAT_THE_IAMGE_URL(c.cover) : null,
+        category: null,
+        progress,
+      },
+    }
+  }),
+)
+
+// ---------------------------------------------------------------------------
+// Derived counts / lists
+// ---------------------------------------------------------------------------
+const total = computed(() => items.value.length)
+const isLoading = computed(() => enrollQuery.loading.value && items.value.length === 0)
+
+const inProgressList = computed(() =>
+  items.value.filter((i) => i.progress > 0 && i.progress < 100),
+)
+const completedList = computed(() =>
+  items.value.filter((i) => i.progress >= 100),
+)
+const allList = computed(() => items.value)
+
+const inProgressCount = computed(() => inProgressList.value.length)
+const completedCount = computed(() => completedList.value.length)
+
+// Only surfaced if we can derive an honest value. We do not fake.
+const hoursWatched = computed(() => 0)
+
+const subheadingText = computed<string>(() => {
+  if (total.value === 0) return t('ابدأ رحلتك التعليمية الآن')
+  return t('تتابع الآن {n} دورات', { n: total.value })
+    // graceful fallback for plain $t without interpolation
+    .replace('{n}', String(total.value))
+})
+
+// ---------------------------------------------------------------------------
+// Methods
+// ---------------------------------------------------------------------------
+function goToCoursesPage(): void {
+  void router.push({ name: 'courses' })
+}
+
+function goToClassroom(course: { pk: number | null }): void {
+  const id = course.pk
+  if (!id) return
+  window.location.href = `${location.origin}/classroom/#/class/${id}/`
 }
 </script>
 

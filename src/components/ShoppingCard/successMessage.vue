@@ -73,55 +73,40 @@
   </section>
 </template>
 
-<script>
-/**
- * Post-checkout success page. Reads `checkoutOrderID` from the cart store
- * and clears the cart when the CHECKOUT_SUCCESS notification arrives. The
- * notification query is not one of the per-provider checkout ops aliased in
- * src/types/cart/types.ts, so only the generic cart aliases apply.
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- */
-import { computed, watch } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
 import { GetMyNotifications } from 'src/graphql/notification_management/query/MyNotifications'
+import type {
+  GetMyNotificationsResult,
+  GetMyNotificationsVars,
+} from 'src/types/cart/types'
 import { useCartStore } from 'src/stores/cart'
 import { useAuthStore } from 'src/stores/auth'
 
-export default {
-  name: 'successCartpage',
+const cart = useCartStore()
+const auth = useAuthStore()
+const { checkoutOrderID } = storeToRefs(cart)
+const { user } = storeToRefs(auth)
 
-  setup () {
-    const cart = useCartStore()
-    const auth = useAuthStore()
-    const { checkoutOrderID } = storeToRefs(cart)
-    const { user } = storeToRefs(auth)
+const { result, onResult } = useQuery<GetMyNotificationsResult, GetMyNotificationsVars>(
+  GetMyNotifications,
+  () => ({
+    orderBy: ['-id'],
+    type: 'CHECKOUT_DONE',
+    extraData: `<Order ${checkoutOrderID.value}>`
+  }),
+  { errorPolicy: 'all' }
+)
 
-    const { result, onResult } = useQuery(
-      GetMyNotifications,
-      () => ({
-        orderBy: ['-id'],
-        type: 'CHECKOUT_DONE',
-        extraData: `<Order ${checkoutOrderID.value}>`
-      }),
-      { errorPolicy: 'all' }
-    )
-
-    onResult((r) => {
-      try {
-        if (r.data?.myNotifications?.edges?.[0]?.node?.title === 'CHECKOUT_SUCCESS') {
-          cart.deleteCart()
-        }
-      } catch (_) { /* silent */ }
-    })
-
-    const myNotifications = computed(() => result.value?.myNotifications || null)
-
-    return { cart, auth, checkoutOrderID, user, myNotifications }
+onResult((r) => {
+  if (r.data?.myNotifications?.edges?.[0]?.node?.title === 'CHECKOUT_SUCCESS') {
+    cart.deleteCart()
   }
-}
+})
+
+const myNotifications = computed(() => result.value?.myNotifications ?? null)
 </script>
 
 <style lang="scss" scoped>

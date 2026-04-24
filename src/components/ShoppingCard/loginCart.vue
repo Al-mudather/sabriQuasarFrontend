@@ -67,59 +67,43 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { onMounted } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 
-export default {
-  name: 'loginCartpage',
+const router = useRouter()
+const $q = useQuasar()
+const auth = useAuthStore()
+const { user, token } = storeToRefs(auth)
 
-  setup () {
-    const auth = useAuthStore()
-    const { user, token } = storeToRefs(auth)
-    return { auth, user, token }
-  },
+onMounted(() => {
+  if (token.value) {
+    router.push({ name: 'user-info' })
+  }
+})
 
-  data () {
-    return {
-      lodash: this.$_
-    }
-  },
+function GoToLoginPage (): void {
+  router.push({ name: 'login', query: { redirect: '/cart/userInfo' } })
+}
 
-  mounted () {
-    if (this.token) {
-      this.$router.push({ name: 'user-info' })
-    }
-  },
+function GoToSignUpPage (): void {
+  router.push({ name: 'signUp', query: { redirect: '/cart/userInfo' } })
+}
 
-  methods: {
-    GoToLoginPage () {
-      this.$router.push({
-        name: 'login',
-        query: { redirect: '/cart/userInfo' }
-      })
-    },
-
-    GoToSignUpPage () {
-      this.$router.push({
-        name: 'signUp',
-        query: { redirect: '/cart/userInfo' }
-      })
-    },
-
-    GoToPaymentCartPage () {
-      if (!this.$_.isEmpty(this.user)) {
-        this.$router.push({ name: 'user-info' })
-      } else {
-        this.$q.notify({
-          type: 'warning',
-          progress: true,
-          multiLine: true,
-          position: 'top',
-          message: 'يجب تسجيل الدخول اولا'
-        })
-      }
-    }
+function GoToPaymentCartPage (): void {
+  if (user.value != null) {
+    router.push({ name: 'user-info' })
+  } else {
+    $q.notify({
+      type: 'warning',
+      progress: true,
+      multiLine: true,
+      position: 'top',
+      message: 'يجب تسجيل الدخول اولا'
+    })
   }
 }
 </script>

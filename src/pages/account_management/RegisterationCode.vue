@@ -51,144 +51,141 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 /**
  * This page lives under account_management but its sole mutation
- * (`JoinPlatform`) belongs to the pyramid feature, not auth. No auth
- * feature types are handled here — kept as a marker for the scope audit.
+ * (`JoinPlatform`) belongs to the pyramid feature, not auth.
  */
-import { JoinPlatform } from 'src/graphql/pyramid_marketing_management/mutation/JoinPlatform'
-import { usePyramidStore } from 'src/stores/pyramid'
-import { storeToRefs } from 'pinia'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import { useMutation } from '@vue/apollo-composable'
+import { storeToRefs } from 'pinia'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { JoinPlatform } from 'src/graphql/pyramid_marketing_management/mutation/JoinPlatform'
+import type { JoinPlatformResult, JoinPlatformVars } from 'src/types/pyramid/types'
 
-export default {
-  name: 'RegisterationCode',
+const { t } = useI18n()
+const $q = useQuasar()
+const router = useRouter()
+const pyramid = usePyramidStore()
+const { registerationCode } = storeToRefs(pyramid)
 
-  setup () {
-    const pyramid = usePyramidStore()
-    const { registerationCode } = storeToRefs(pyramid)
-    const joinPlatform = useMutation(JoinPlatform)
-    return { pyramid, registerationCode, _joinPlatform: joinPlatform }
-  },
+const { mutate: joinPlatformMutate } = useMutation<JoinPlatformResult, JoinPlatformVars>(JoinPlatform)
 
-  data () {
-    return {
-      digits: ['', '', '', '', '', ''],
-      visible: false,
-      cooldown: 60,
-      timer: null,
-      apiError: '',
-      otpRefs: []
-    }
-  },
+// ---------------------------------------------------------------------------
+// Local state
+// ---------------------------------------------------------------------------
+const digits = ref<string[]>(['', '', '', '', '', ''])
+const visible = ref(false)
+const cooldown = ref(60)
+const timer = ref<ReturnType<typeof setInterval> | null>(null)
+const apiError = ref('')
+const otpRefs = ref<HTMLInputElement[]>([])
 
-  computed: {
-    r_code () { return this.digits.join('') },
-    isComplete () { return this.digits.every(d => d !== '') }
-  },
+// ---------------------------------------------------------------------------
+// Computed
+// ---------------------------------------------------------------------------
+const r_code = computed(() => digits.value.join(''))
+const isComplete = computed(() => digits.value.every(d => d !== ''))
 
-  beforeUnmount () {
-    this.pyramid.setRegisterationCode('')
-    if (this.timer) clearInterval(this.timer)
-  },
+// ---------------------------------------------------------------------------
+// Methods
+// ---------------------------------------------------------------------------
+function focusBox (i: number): void {
+  otpRefs.value[i]?.focus()
+}
 
-  mounted () {
-    if (this.registerationCode && this.registerationCode.length > 4) {
-      const clean = String(this.registerationCode).replace(/\D/g, '').slice(0, 6).padEnd(6, '')
-      this.digits = clean.split('').map(c => c.trim())
-      if (this.isComplete) this.REGISTER_THE_USER_WITH_REGISTERATION_CODE()
-    } else {
-      this.$nextTick(() => { this.focusBox(0) })
-    }
-    this.startCooldown()
-  },
+function onInput (e: Event, i: number): void {
+  const input = e.target as HTMLInputElement
+  const v = input.value.replace(/\D/g, '')
+  const char = v.slice(-1) || ''
+  digits.value[i] = char
+  if (char && i < 5) focusBox(i + 1)
+}
 
-  methods: {
-    focusBox (i) {
-      const el = this.otpRefs[i]
-      if (el) el.focus()
-    },
-
-    onInput (e, i) {
-      const v = e.target.value.replace(/\D/g, '')
-      const char = v.slice(-1) || ''
-      this.digits[i] = char
-      if (char && i < 5) this.focusBox(i + 1)
-    },
-
-    onKeydown (e, i) {
-      if (e.key === 'Backspace' && !this.digits[i] && i > 0) {
-        this.focusBox(i - 1)
-      } else if (e.key === 'ArrowLeft' && i < 5) {
-        this.focusBox(i + 1)
-      } else if (e.key === 'ArrowRight' && i > 0) {
-        this.focusBox(i - 1)
-      } else if (e.key === 'Enter' && this.isComplete) {
-        this.REGISTER_THE_USER_WITH_REGISTERATION_CODE()
-      }
-    },
-
-    onPaste (e) {
-      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6)
-      if (!text) return
-      e.preventDefault()
-      for (let i = 0; i < 6; i++) this.digits[i] = text[i] || ''
-      this.focusBox(Math.min(text.length, 5))
-    },
-
-    startCooldown () {
-      this.cooldown = 60
-      if (this.timer) clearInterval(this.timer)
-      this.timer = setInterval(() => {
-        this.cooldown = Math.max(0, this.cooldown - 1)
-        if (this.cooldown === 0) clearInterval(this.timer)
-      }, 1000)
-    },
-
-    resend () {
-      this.$q.notify({
-        type: 'info',
-        progress: true,
-        multiLine: true,
-        position: 'top',
-        message: this.$t('تم إعادة إرسال الكود')
-      })
-      this.startCooldown()
-    },
-
-    async REGISTER_THE_USER_WITH_REGISTERATION_CODE () {
-      if (!this.isComplete) {
-        this.apiError = this.$t('يرجى إدخال الكود كاملاً')
-        return
-      }
-      this.apiError = ''
-      this.visible = true
-      try {
-        const res = await this._joinPlatform.mutate({ marketingCode: this.r_code, input: {} })
-        if (res.data.joinPlatform.success) {
-          this.$q.notify({
-            type: 'positive',
-            progress: true,
-            multiLine: true,
-            position: 'top',
-            message: this.$t('مرحباً بك')
-          })
-          this.pyramid.setRegisterationCode('')
-          this.$router.push({ name: 'Home' })
-        }
-      } catch (e) {
-        if (e.message === 'GraphQL error: Pyramid matching query does not exist.') {
-          this.apiError = this.$t('هذا الكود غير صحيح — يرجى التحقق والمحاولة مجدداً.')
-        } else {
-          this.apiError = this.$t('تعذّر التحقق من الكود.')
-        }
-      } finally {
-        this.visible = false
-      }
-    }
+function onKeydown (e: KeyboardEvent, i: number): void {
+  if (e.key === 'Backspace' && !digits.value[i] && i > 0) {
+    focusBox(i - 1)
+  } else if (e.key === 'ArrowLeft' && i < 5) {
+    focusBox(i + 1)
+  } else if (e.key === 'ArrowRight' && i > 0) {
+    focusBox(i - 1)
+  } else if (e.key === 'Enter' && isComplete.value) {
+    void REGISTER_THE_USER_WITH_REGISTERATION_CODE()
   }
 }
+
+function onPaste (e: ClipboardEvent): void {
+  const text = (e.clipboardData ?? (window as Window & { clipboardData?: DataTransfer }).clipboardData)
+    ?.getData('text')
+    .replace(/\D/g, '')
+    .slice(0, 6) ?? ''
+  if (!text) return
+  e.preventDefault()
+  for (let i = 0; i < 6; i++) digits.value[i] = text[i] ?? ''
+  focusBox(Math.min(text.length, 5))
+}
+
+function startCooldown (): void {
+  cooldown.value = 60
+  if (timer.value) clearInterval(timer.value)
+  timer.value = setInterval(() => {
+    cooldown.value = Math.max(0, cooldown.value - 1)
+    if (cooldown.value === 0 && timer.value) clearInterval(timer.value)
+  }, 1000)
+}
+
+function resend (): void {
+  $q.notify({ type: 'info', progress: true, multiLine: true, position: 'top', message: t('تم إعادة إرسال الكود') })
+  startCooldown()
+}
+
+async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
+  if (!isComplete.value) {
+    apiError.value = t('يرجى إدخال الكود كاملاً')
+    return
+  }
+  apiError.value = ''
+  visible.value = true
+  try {
+    const res = await joinPlatformMutate({ marketingCode: r_code.value, input: {} })
+    if (res?.data?.joinPlatform?.success) {
+      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: t('مرحباً بك') })
+      pyramid.setRegisterationCode('')
+      void router.push({ name: 'Home' })
+    }
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : ''
+    if (msg === 'GraphQL error: Pyramid matching query does not exist.') {
+      apiError.value = t('هذا الكود غير صحيح — يرجى التحقق والمحاولة مجدداً.')
+    } else {
+      apiError.value = t('تعذّر التحقق من الكود.')
+    }
+  } finally {
+    visible.value = false
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Lifecycle
+// ---------------------------------------------------------------------------
+onMounted(() => {
+  if (registerationCode.value && registerationCode.value.length > 4) {
+    const clean = String(registerationCode.value).replace(/\D/g, '').slice(0, 6).padEnd(6, '')
+    digits.value = clean.split('').map(c => c.trim())
+    if (isComplete.value) void REGISTER_THE_USER_WITH_REGISTERATION_CODE()
+  } else {
+    void nextTick(() => { focusBox(0) })
+  }
+  startCooldown()
+})
+
+onBeforeUnmount(() => {
+  pyramid.setRegisterationCode('')
+  if (timer.value) clearInterval(timer.value)
+})
 </script>
 
 <style lang="scss" scoped>

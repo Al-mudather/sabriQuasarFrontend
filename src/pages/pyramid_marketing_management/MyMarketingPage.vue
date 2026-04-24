@@ -124,287 +124,252 @@
   </main>
 </template>
 
-<script>
-import { useSettingsStore } from 'src/stores/settings'
-import { storeToRefs } from 'pinia'
+<script setup lang="ts">
+import { computed, ref } from 'vue'
 import { useQuery, useMutation } from '@vue/apollo-composable'
-import { computed } from 'vue'
-import _ from 'lodash'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
 import StatCard from 'src/components/shared/StatCard.vue'
 import TransactionCard from 'src/components/shared/TransactionCard.vue'
-import { MyPyramidBalance }     from 'src/graphql/pyramid_marketing_management/query/MyPyramidBalanceQuery'
-import { MyPyramidWithdraws }   from 'src/graphql/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
-import { MyPyramidAffiliates }  from 'src/graphql/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe'
-import { MyPyramidAccount }     from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
+import { MyPyramidBalance } from 'src/graphql/pyramid_marketing_management/query/MyPyramidBalanceQuery'
+import { MyPyramidWithdraws } from 'src/graphql/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
+import { MyPyramidAffiliates } from 'src/graphql/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe'
+import { MyPyramidAccount } from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
 import { MyPyramidLedgerReward } from 'src/graphql/pyramid_marketing_management/query/MyPyramidLedgerRewardQuery'
 import { WithdrawPyramidBalance } from 'src/graphql/pyramid_marketing_management/mutation/MakePyramidWithdraw'
+import type {
+  MyPyramidBalanceResult,
+  MyPyramidBalanceVars,
+  MyPyramidWithdrawsResult,
+  MyPyramidWithdrawsVars,
+  MyPyramidAccountResult,
+  MyPyramidAccountVars,
+  MyPyramidLedgerRewardResult,
+  MyPyramidLedgerRewardVars,
+  MakePyramidWithdrawResult,
+  MakePyramidWithdrawVars,
+  PyramidWithdraw,
+} from 'src/types/pyramid/types'
+import type {
+  MyPyramidAffiliatesQuery,
+  MyPyramidAffiliatesQueryVariables,
+} from 'src/graphql/generated'
 
-/** @typedef {import('src/types/pyramid/types').PyramidAccount} PyramidAccount */
-/** @typedef {import('src/types/pyramid/types').PyramidBalance} PyramidBalance */
-/** @typedef {import('src/types/pyramid/types').PyramidWithdraw} PyramidWithdraw */
-/** @typedef {import('src/types/pyramid/types').PyramidLedgerRewardValue} PyramidLedgerRewardValue */
-/** @typedef {import('src/types/pyramid/types').PyramidLedgerPayload} PyramidLedgerPayload */
-/** @typedef {import('src/types/pyramid/types').MyPyramidBalanceResult} MyPyramidBalanceResult */
-/** @typedef {import('src/types/pyramid/types').MyPyramidBalanceVars} MyPyramidBalanceVars */
-/** @typedef {import('src/types/pyramid/types').MyPyramidWithdrawsResult} MyPyramidWithdrawsResult */
-/** @typedef {import('src/types/pyramid/types').MyPyramidWithdrawsVars} MyPyramidWithdrawsVars */
-/** @typedef {import('src/types/pyramid/types').MyPyramidAccountResult} MyPyramidAccountResult */
-/** @typedef {import('src/types/pyramid/types').MyPyramidAccountVars} MyPyramidAccountVars */
-/** @typedef {import('src/types/pyramid/types').MyPyramidLedgerRewardResult} MyPyramidLedgerRewardResult */
-/** @typedef {import('src/types/pyramid/types').MyPyramidLedgerRewardVars} MyPyramidLedgerRewardVars */
-/** @typedef {import('src/types/pyramid/types').MyPyramidMarketersResult} MyPyramidMarketersResult */
-/** @typedef {import('src/types/pyramid/types').MyPyramidMarketersVars} MyPyramidMarketersVars */
-/** @typedef {import('src/types/pyramid/types').MakePyramidWithdrawResult} MakePyramidWithdrawResult */
-/** @typedef {import('src/types/pyramid/types').MakePyramidWithdrawVars} MakePyramidWithdrawVars */
+const $q = useQuasar()
+const { t } = useI18n()
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const { currency } = storeToRefs(settings)
+
+// ---------------------------------------------------------------------------
+// Queries
+// ---------------------------------------------------------------------------
+const balanceQuery = useQuery<MyPyramidBalanceResult, MyPyramidBalanceVars>(MyPyramidBalance)
+const affiliatesQuery = useQuery<MyPyramidAffiliatesQuery, MyPyramidAffiliatesQueryVariables>(MyPyramidAffiliates)
+const accountQuery = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(MyPyramidAccount)
+const rewardQuery = useQuery<MyPyramidLedgerRewardResult, MyPyramidLedgerRewardVars>(MyPyramidLedgerReward)
+const withdrawsQuery = useQuery<MyPyramidWithdrawsResult, MyPyramidWithdrawsVars>(MyPyramidWithdraws)
+
+const loadingWithdraws = withdrawsQuery.loading
+
+// ---------------------------------------------------------------------------
+// Mutation
+// ---------------------------------------------------------------------------
+const withdrawMutation = useMutation<MakePyramidWithdrawResult, MakePyramidWithdrawVars>(
+  WithdrawPyramidBalance,
+  {
+    refetchQueries: [
+      { query: MyPyramidBalance },
+      { query: MyPyramidWithdraws },
+    ],
+  },
+)
+
+// ---------------------------------------------------------------------------
+// Derived state
+// ---------------------------------------------------------------------------
+const myPyramidBalance = computed(() => balanceQuery.result.value?.myPyramidBalance ?? null)
+const myPyramidAffiliates = computed(() => affiliatesQuery.result.value?.myPyramidAffiliates ?? 0)
+const myPyramidAccount = computed(() => accountQuery.result.value?.myPyramidAccount ?? null)
 
 /**
- * Narrow the ledger-reward scalar safely. Backend may return number, a
- * JSON-encoded string keyed by currency, or (after a cache round-trip) a
- * pre-parsed object. Returns null for unparseable strings rather than
- * leaking a parse exception.
- *
- * @param {PyramidLedgerRewardValue} raw
- * @returns {PyramidLedgerPayload | number | null}
+ * Ledger reward leak fix.
+ * Schema: `myPyramidLedgerReward: Float` — codegen types it `number | null`.
+ * No typePolicy in Apollo client parses this field (only CourseNode.currency
+ * has a policy). The value arrives as a plain number from the server, so we
+ * consume it directly as `number | null`. The old `JSON.parse` was defensive
+ * code against an earlier string-encoded payload — the current schema (Float)
+ * makes it unnecessary and the type wouldn't allow it.
  */
-function parseLedger (raw) {
-  if (raw == null) return null
-  if (typeof raw === 'number') return raw
-  if (typeof raw === 'string') {
-    try { return JSON.parse(raw) } catch { return null }
+const myPyramidLedgerReward = computed<number | null>(
+  () => rewardQuery.result.value?.myPyramidLedgerReward ?? null,
+)
+
+const withdrawEdges = computed(() =>
+  (withdrawsQuery.result.value?.myPyramidWithdraws?.edges ?? [])
+    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+)
+
+const referralCode = computed<string>(
+  () => myPyramidAccount.value?.pyramidCode ?? '',
+)
+
+const shareUrl = computed<string>(() => {
+  if (!referralCode.value) return ''
+  try {
+    return `${location.origin}/#/register?ref=${encodeURIComponent(referralCode.value)}`
+  } catch { return '' }
+})
+
+const affiliatesCount = computed<number>(() => {
+  const v = Number(myPyramidAffiliates.value)
+  return Number.isFinite(v) ? v : 0
+})
+
+const activeBalance = computed<number>(() => {
+  const v = Number(myPyramidBalance.value?.balance ?? 0)
+  return Number.isFinite(v) ? v : 0
+})
+
+/**
+ * totalEarnings — consumes the typed Float directly.
+ * The old code had: `JSON.parse(raw)` then currency-keyed lookup.
+ * Since `myPyramidLedgerReward` is `Float | null` in the schema, no parsing
+ * is needed; we read the number and return it (no currency keying).
+ */
+const totalEarnings = computed<number>(() => {
+  const v = myPyramidLedgerReward.value
+  if (v == null) return 0
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+})
+
+const withdraws = computed<PyramidWithdraw[]>(() =>
+  withdrawEdges.value.map(e => e.node),
+)
+
+const pendingPayouts = computed<number>(
+  () => withdraws.value.filter(w => !w.isDone).length,
+)
+
+// ---------------------------------------------------------------------------
+// UI state
+// ---------------------------------------------------------------------------
+const copied = ref(false)
+const withdrawOpen = ref(false)
+const withdrawAmount = ref<number | null>(null)
+const withdrawLoading = ref(false)
+
+// ---------------------------------------------------------------------------
+// Methods
+// ---------------------------------------------------------------------------
+function mapWithdraw(w: PyramidWithdraw) {
+  return {
+    id: w.pk,
+    courseName: `${t('طلب سحب')} #${w.pk}`,
+    amount: w.amount,
+    currency: currency.value,
+    createdAt: w.created,
+    updatedAt: w.updated,
   }
-  return raw // already an object (cache-read parsed)
 }
 
-export default {
-  name: 'MyMarketingPage',
-  components: { StatCard, TransactionCard },
-
-  setup () {
-    const settings = useSettingsStore()
-    const { currency } = storeToRefs(settings)
-
-    /** @type {ReturnType<typeof useQuery<MyPyramidBalanceResult, MyPyramidBalanceVars>>} */
-    const balanceQuery    = useQuery(MyPyramidBalance)
-    /** @type {ReturnType<typeof useQuery<MyPyramidMarketersResult, MyPyramidMarketersVars>>} */
-    const affiliatesQuery = useQuery(MyPyramidAffiliates)
-    /** @type {ReturnType<typeof useQuery<MyPyramidAccountResult, MyPyramidAccountVars>>} */
-    const accountQuery    = useQuery(MyPyramidAccount)
-    /** @type {ReturnType<typeof useQuery<MyPyramidLedgerRewardResult, MyPyramidLedgerRewardVars>>} */
-    const rewardQuery     = useQuery(MyPyramidLedgerReward)
-    /** @type {ReturnType<typeof useQuery<MyPyramidWithdrawsResult, MyPyramidWithdrawsVars>>} */
-    const withdrawsQuery  = useQuery(MyPyramidWithdraws)
-
-    /** @type {import('vue').ComputedRef<PyramidBalance | null>} */
-    const myPyramidBalance = computed(() => balanceQuery.result.value?.myPyramidBalance || null)
-    /** @type {import('vue').ComputedRef<number>} */
-    const myPyramidAffiliates = computed(() => affiliatesQuery.result.value?.myPyramidAffiliates || 0)
-    /** @type {import('vue').ComputedRef<PyramidAccount | null>} */
-    const myPyramidAccount = computed(() => accountQuery.result.value?.myPyramidAccount || null)
-    /** @type {import('vue').ComputedRef<PyramidLedgerRewardValue>} */
-    const myPyramidLedgerReward = computed(() => rewardQuery.result.value?.myPyramidLedgerReward || null)
-    const myPyramidWithdraws = computed(() => withdrawsQuery.result.value?.myPyramidWithdraws || null)
-    const loadingWithdraws = withdrawsQuery.loading
-
-    /** @type {ReturnType<typeof useMutation<MakePyramidWithdrawResult, MakePyramidWithdrawVars>>} */
-    const withdrawMutation = useMutation(WithdrawPyramidBalance, {
-      refetchQueries: [
-        { query: MyPyramidBalance },
-        { query: MyPyramidWithdraws }
-      ]
-    })
-
-    return {
-      currency,
-      myPyramidBalance,
-      myPyramidAffiliates,
-      myPyramidAccount,
-      myPyramidLedgerReward,
-      myPyramidWithdraws,
-      loadingWithdraws,
-      _withdraw: withdrawMutation
+async function copyCode(): Promise<void> {
+  if (!auth.isAuthenticated) return
+  if (!referralCode.value) return
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(referralCode.value)
+    } else {
+      const ta = document.createElement('textarea')
+      ta.value = referralCode.value
+      ta.setAttribute('readonly', '')
+      ta.style.position = 'absolute'
+      ta.style.left = '-9999px'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
     }
-  },
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 1600)
+    $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم نسخ رمز الدعوة') })
+  } catch {
+    $q.notify({ type: 'warning', position: 'top', progress: true, message: t('تعذر النسخ') })
+  }
+}
 
-  data () {
-    return {
-      // UI
-      copied: false,
-      withdrawOpen: false,
-      withdrawAmount: null,
-      withdrawLoading: false
+async function shareCode(): Promise<void> {
+  if (!auth.isAuthenticated) return
+  if (!referralCode.value) return
+  const text = `${t('انضم معي إلى مركز د. صبري أبوقرون للتدريب')}\n${shareUrl.value}`
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: 'STC', text, url: shareUrl.value })
+      return
     }
-  },
+  } catch { /* user cancelled */ }
+  try {
+    await navigator.clipboard.writeText(shareUrl.value)
+    $q.notify({ type: 'info', position: 'top', progress: true, message: t('تم نسخ رابط الدعوة') })
+  } catch { /* noop */ }
+}
 
-  computed: {
-    referralCode () {
-      return _.get(this.myPyramidAccount, 'pyramidCode') || ''
-    },
+function cancelWithdraw(): void {
+  withdrawAmount.value = null
+  withdrawOpen.value = false
+}
 
-    shareUrl () {
-      if (!this.referralCode) return ''
-      try {
-        return `${location.origin}/#/register?ref=${encodeURIComponent(this.referralCode)}`
-      } catch (e) { return '' }
-    },
-
-    affiliatesCount () {
-      const v = Number(this.myPyramidAffiliates)
-      return Number.isFinite(v) ? v : 0
-    },
-
-    activeBalance () {
-      const v = Number(_.get(this.myPyramidBalance, 'balance', 0))
-      return Number.isFinite(v) ? v : 0
-    },
-
-    // Earnings may arrive as a JSON string keyed by currency, or a flat number.
-    totalEarnings () {
-      /** @type {PyramidLedgerRewardValue} */
-      const raw = this.myPyramidLedgerReward
-      const parsed = parseLedger(raw)
-      if (parsed == null) return 0
-      if (typeof parsed === 'number') return Number.isFinite(parsed) ? parsed : 0
-      if (typeof parsed === 'object') {
-        const byCurrency = parsed[this.currency]
-        if (byCurrency != null) {
-          const n = Number(byCurrency)
-          return Number.isFinite(n) ? n : 0
-        }
-        if (typeof parsed.amount === 'number' && Number.isFinite(parsed.amount)) {
-          return parsed.amount
-        }
-      }
-      return 0
-    },
-
-    withdraws () {
-      return (_.get(this.myPyramidWithdraws, 'edges', []) || []).map(e => e.node)
-    },
-
-    pendingPayouts () {
-      return this.withdraws.filter(w => !w.isDone).length
-    }
-  },
-
-  methods: {
-    /** @param {PyramidWithdraw} w */
-    mapWithdraw (w) {
-      return {
-        id: w.pk,
-        courseName: `${this.$t('طلب سحب')} #${w.pk}`,
-        amount: w.amount,
-        currency: this.currency,
-        createdAt: w.created,
-        updatedAt: w.updated
-      }
-    },
-
-    async copyCode () {
-      if (!this.referralCode) return
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(this.referralCode)
-        } else {
-          const ta = document.createElement('textarea')
-          ta.value = this.referralCode
-          ta.setAttribute('readonly', '')
-          ta.style.position = 'absolute'
-          ta.style.left = '-9999px'
-          document.body.appendChild(ta)
-          ta.select()
-          document.execCommand('copy')
-          document.body.removeChild(ta)
-        }
-        this.copied = true
-        setTimeout(() => { this.copied = false }, 1600)
-        this.$q.notify({
-          type: 'positive',
-          position: 'top',
-          progress: true,
-          message: this.$t('تم نسخ رمز الدعوة')
-        })
-      } catch (e) {
-        this.$q.notify({
-          type: 'warning',
-          position: 'top',
-          progress: true,
-          message: this.$t('تعذر النسخ')
-        })
-      }
-    },
-
-    async shareCode () {
-      if (!this.referralCode) return
-      const text = `${this.$t('انضم معي إلى مركز د. صبري أبوقرون للتدريب')}\n${this.shareUrl}`
-      try {
-        if (navigator.share) {
-          await navigator.share({ title: 'STC', text, url: this.shareUrl })
-          return
-        }
-      } catch (e) { /* user cancelled */ }
-      // Fallback — copy the share URL
-      try {
-        await navigator.clipboard.writeText(this.shareUrl)
-        this.$q.notify({
-          type: 'info',
-          position: 'top',
-          progress: true,
-          message: this.$t('تم نسخ رابط الدعوة')
-        })
-      } catch (e) { /* noop */ }
-    },
-
-    cancelWithdraw () {
-      this.withdrawAmount = null
-      this.withdrawOpen = false
-    },
-
-    errorHandler (errorsObj) {
-      if (errorsObj && errorsObj.message && typeof errorsObj.message !== 'object') {
-        this.$q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: errorsObj.message })
-        return
-      }
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          const msg = (typeof val.message === 'object' && val.message && val.message.msg) ? val.message.msg : val.message
-          this.$q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: msg })
-        }
-      }
-    },
-
-    async submitWithdraw () {
-      const amt = Number(this.withdrawAmount)
-      if (!Number.isFinite(amt) || amt <= 0 || amt > this.activeBalance) {
-        this.$q.notify({
-          type: 'warning',
-          position: 'top',
-          progress: true,
-          multiLine: true,
-          message: this.$t('يرجى إدخال مبلغ صالح ضمن رصيدك المتاح.')
-        })
-        return
-      }
-      this.withdrawLoading = true
-      try {
-        const res = await this._withdraw.mutate({ amount: amt, input: {} })
-        const { success, errors } = res.data.makePyramidWithdraw
-        if (success) {
-          this.$q.notify({
-            type: 'positive',
-            position: 'top',
-            progress: true,
-            multiLine: true,
-            message: this.$t('تم إرسال طلب السحب')
-          })
-          this.withdrawOpen = false
-          this.withdrawAmount = null
-        } else if (errors) {
-          this.errorHandler(errors)
-        }
-      } catch (e) { /* apollo surfaces */ }
-      finally { this.withdrawLoading = false }
+function errorHandler(errorsObj: Record<string, Array<{ message: string | { msg: string } }>>): void {
+  if (errorsObj && (errorsObj as { message?: string }).message) {
+    const msg = (errorsObj as { message: string }).message
+    if (typeof msg !== 'object') {
+      $q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: msg })
+      return
     }
   }
+  for (const key in errorsObj) {
+    for (const val of errorsObj[key]) {
+      const msg = typeof val.message === 'object' && val.message ? val.message.msg : val.message
+      $q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: msg })
+    }
+  }
+}
+
+async function submitWithdraw(): Promise<void> {
+  const amt = Number(withdrawAmount.value)
+  if (!Number.isFinite(amt) || amt <= 0 || amt > activeBalance.value) {
+    $q.notify({
+      type: 'warning',
+      position: 'top',
+      progress: true,
+      multiLine: true,
+      message: t('يرجى إدخال مبلغ صالح ضمن رصيدك المتاح.'),
+    })
+    return
+  }
+  withdrawLoading.value = true
+  try {
+    const res = await withdrawMutation.mutate({ amount: amt, input: {} })
+    const payload = res?.data?.makePyramidWithdraw
+    if (payload?.success) {
+      $q.notify({
+        type: 'positive',
+        position: 'top',
+        progress: true,
+        multiLine: true,
+        message: t('تم إرسال طلب السحب'),
+      })
+      withdrawOpen.value = false
+      withdrawAmount.value = null
+    } else if (payload?.errors) {
+      errorHandler(payload.errors as Record<string, Array<{ message: string | { msg: string } }>>)
+    }
+  } catch { /* apollo surfaces */ }
+  finally { withdrawLoading.value = false }
 }
 </script>
 

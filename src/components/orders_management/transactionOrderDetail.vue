@@ -10,33 +10,33 @@
     <ol class="order-card__steps">
       <li class="step step--done">
         <CheckDot :done="true" />
-        <span>{{ $t('شراء') }}</span>
+        <span>{{ t('شراء') }}</span>
       </li>
       <li class="step" :class="{ 'step--done': myOrder.marketerEndorse }">
         <CheckDot :done="myOrder.marketerEndorse" />
-        <span>{{ $t('معالجة') }}</span>
+        <span>{{ t('معالجة') }}</span>
       </li>
       <li class="step" :class="{ 'step--done': myOrder.doneVerification }">
         <CheckDot :done="myOrder.doneVerification" />
-        <span>{{ $t('مكتمل') }}</span>
+        <span>{{ t('مكتمل') }}</span>
       </li>
     </ol>
 
     <div class="order-card__amount">
-      <span class="label">{{ $t('المدفوع') }}</span>
+      <span class="label">{{ t('المدفوع') }}</span>
       <span class="value">
-        {{ FORMAT_COUSRE_PRICE(myOrder.order.totalAmount, 3) }}
+        {{ formatCoursePrice(myOrder.order.totalAmount, 3) }}
         <small>{{ myOrder.order.currency }}</small>
       </span>
     </div>
 
     <ds-button v-if="myOrder.retryPlease" variant="secondary" size="sm" full-width @click="bill = true">
-      {{ $t('رؤية فاتورة الدفع') }}
+      {{ t('رؤية فاتورة الدفع') }}
     </ds-button>
 
     <q-dialog v-model="bill" persistent>
       <q-card class="order-bill">
-        <img class="order-bill__img" :src="FORMAT_IMAGE(myOrder.attachment)" alt="" />
+        <img class="order-bill__img" :src="formatImage(myOrder.attachment)" alt="" />
         <file-upload
           imgeSize="4000000"
           :accept="'.png,.jpg, image/*'"
@@ -44,11 +44,11 @@
           v-on:File_Handler="reuploadImageHandler"
         />
         <div class="order-bill__actions">
-          <ds-button variant="primary" :loading="loading" @click="RE_UPLOAD_THE_TRANSACTION_BILL">
-            {{ $t('إعادة ارفاق الفاتوره') }}
+          <ds-button variant="primary" :loading="loading" @click="reUploadTheTransactionBill">
+            {{ t('إعادة ارفاق الفاتوره') }}
           </ds-button>
           <ds-button variant="ghost" @click="bill = false">
-            {{ $t('إلغاء') }}
+            {{ t('إلغاء') }}
           </ds-button>
         </div>
       </q-card>
@@ -56,112 +56,145 @@
   </article>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, h } from 'vue'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { useMutation } from '@vue/apollo-composable'
 import FileUpload from 'src/components/utils/FileUploader.vue'
 import { ReUploadAttachmentTransaction } from 'src/graphql/attachment_transactions_management/mutation/ReUploadAttachmentTransaction'
 import { MyAttachmentTransactions } from 'src/graphql/attachment_transactions_management/query/TheUserAttachmentTransactionsQuery'
+import type {
+  ReUploadAttachmentResult,
+  ReUploadAttachmentVars,
+  UserAttachmentTransaction,
+} from 'src/types/attachments/types'
 
-const CheckDot = {
-  functional: true,
-  props: ['done'],
-  render (h, { props }) {
-    return h('span', { class: ['dot', props.done ? 'dot--done' : 'dot--pending'] }, [
-      h('svg', {
-        attrs: { viewBox: '0 0 16 16', 'aria-hidden': 'true' }
-      }, [
-        props.done
-          ? h('path', { attrs: { d: 'M3 8.2l3.3 3.3L13 5', stroke: 'currentColor', 'stroke-width': '2', fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' } })
-          : h('circle', { attrs: { cx: '8', cy: '8', r: '3', fill: 'currentColor' } })
-      ])
-    ])
-  }
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
+interface Props {
+  myOrder: UserAttachmentTransaction
+}
+const props = defineProps<Props>()
+
+// ---------------------------------------------------------------------------
+// Inline functional sub-component: CheckDot
+// ---------------------------------------------------------------------------
+const CheckDot = (checkProps: { done: boolean }) => {
+  const cls = ['dot', checkProps.done ? 'dot--done' : 'dot--pending']
+  const inner = checkProps.done
+    ? h('path', {
+        d: 'M3 8.2l3.3 3.3L13 5',
+        stroke: 'currentColor',
+        'stroke-width': '2',
+        fill: 'none',
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      })
+    : h('circle', { cx: '8', cy: '8', r: '3', fill: 'currentColor' })
+  return h('span', { class: cls }, [
+    h('svg', { viewBox: '0 0 16 16', 'aria-hidden': 'true' }, [inner]),
+  ])
 }
 
+// ---------------------------------------------------------------------------
+// Composables
+// ---------------------------------------------------------------------------
+const $q = useQuasar()
+const { t } = useI18n()
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+const bill = ref(false)
+const loading = ref(false)
+const bankakBill = ref<File | null>(null)
+const bankakBillName = t('فاتورة بنكك')
+
+// ---------------------------------------------------------------------------
+// Mutation
+// ---------------------------------------------------------------------------
+const reupload = useMutation<ReUploadAttachmentResult, ReUploadAttachmentVars>(
+  ReUploadAttachmentTransaction,
+  { refetchQueries: [{ query: MyAttachmentTransactions }] },
+)
+
+// ---------------------------------------------------------------------------
+// Price lookup table
+// ---------------------------------------------------------------------------
 const priceLookup = [
-  { value: 1, symbol: '' }, { value: 1e3, symbol: 'k' },
-  { value: 1e6, symbol: 'M' }, { value: 1e9, symbol: 'B' }
+  { value: 1, symbol: '' },
+  { value: 1e3, symbol: 'k' },
+  { value: 1e6, symbol: 'M' },
+  { value: 1e9, symbol: 'B' },
 ]
 
-export default {
-  name: 'transactionOrderDetail',
-  components: { FileUpload, CheckDot },
-  props: ['myOrder'],
+// ---------------------------------------------------------------------------
+// Methods
+// ---------------------------------------------------------------------------
+function reuploadImageHandler (val: File): void {
+  bankakBill.value = val
+}
 
-  data () {
-    return {
-      bill: false,
-      loading: false,
-      bankakBill: null,
-      bankakBillName: this.$t('فاتورة بنكك'),
-      confirm: { marketerEndorse: true,  retryPlease: false },
-      reject:  { marketerEndorse: false, retryPlease: true  }
-    }
-  },
+function formatCoursePrice (num: number | null | undefined, digits = 3): string {
+  const n = Number(num)
+  if (!Number.isFinite(n) || n === 0) return String(num)
+  const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
+  const item = priceLookup.slice().reverse().find(it => n >= it.value)
+  return item ? (n / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
+}
 
-  methods: {
-    reuploadImageHandler (val) { this.bankakBill = val },
+function formatImage (imageUrl: string | null | undefined): string {
+  if (!imageUrl) return ''
+  if (process.env.NODE_ENV === 'development') return `http://localhost:8000/media/${imageUrl}`
+  return `https://api.stc.training/media/${imageUrl}`
+}
 
-    FORMAT_COUSRE_PRICE (num, digits = 3) {
-      const n = Number(num)
-      if (!Number.isFinite(n) || n === 0) return String(num)
-      const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
-      const item = priceLookup.slice().reverse().find(it => n >= it.value)
-      return item ? (n / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
-    },
-
-    FORMAT_IMAGE (imageUrl) {
-      if (process.env.NODE_ENV === 'development') return `http://localhost:8000/media/${imageUrl}`
-      return `https://api.stc.training/media/${imageUrl}`
-    },
-
-    errorHandler (errorsObj) {
-      if (typeof errorsObj === 'object' && errorsObj !== null && !errorsObj.message) {
-        for (const key in errorsObj) {
-          for (const val of errorsObj[key]) {
-            this.$q.notify({
-              type: 'warning',
-              progress: true,
-              multiLine: true,
-              position: 'top',
-              message: val.message
-            })
-          }
-        }
-      } else {
-        this.$q.notify({
+function errorHandler (errorsObj: unknown): void {
+  if (typeof errorsObj === 'object' && errorsObj !== null && !('message' in errorsObj)) {
+    const errMap = errorsObj as Record<string, Array<{ message: string }>>
+    for (const key in errMap) {
+      for (const val of errMap[key]) {
+        $q.notify({
           type: 'warning',
           progress: true,
           multiLine: true,
           position: 'top',
-          message: errorsObj.message || String(errorsObj)
+          message: val.message,
         })
       }
-    },
-
-    async RE_UPLOAD_THE_TRANSACTION_BILL () {
-      this.loading = true
-      try {
-        const re_upload_res = await this.$apollo.mutate({
-          mutation: ReUploadAttachmentTransaction,
-          variables: { id: this.myOrder.pk, input: { attachment: this.bankakBill } },
-          refetchQueries: [{ query: MyAttachmentTransactions }]
-        })
-        const { success, errors } = re_upload_res.data.reUploadAttachmentTransaction
-        if (success) {
-          this.$q.notify({
-            type: 'positive',
-            position: 'top',
-            progress: true,
-            multiLine: true,
-            message: 'The transaction has been reuploaded'
-          })
-          this.bill = false
-        } else if (errors) {
-          this.errorHandler(errors)
-        }
-      } catch (e) { /* apolloProvider surfaces error */ }
-      finally { this.loading = false }
     }
+  } else {
+    const msg = (errorsObj as { message?: string })?.message ?? String(errorsObj)
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: msg })
+  }
+}
+
+async function reUploadTheTransactionBill (): Promise<void> {
+  const orderId = props.myOrder.pk
+  if (orderId == null) return
+  loading.value = true
+  try {
+    const res = await reupload.mutate({
+      id: orderId,
+      input: { attachment: bankakBill.value },
+    })
+    const payload = res?.data?.reUploadAttachmentTransaction
+    if (payload?.success) {
+      $q.notify({
+        type: 'positive',
+        position: 'top',
+        progress: true,
+        multiLine: true,
+        message: 'The transaction has been reuploaded',
+      })
+      bill.value = false
+    } else if (payload?.errors) {
+      errorHandler(payload.errors)
+    }
+  } catch { /* apolloProvider surfaces error */ } finally {
+    loading.value = false
   }
 }
 </script>

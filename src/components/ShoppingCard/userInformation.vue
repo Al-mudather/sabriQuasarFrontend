@@ -116,164 +116,146 @@
   </section>
 </template>
 
-<script>
-/**
- * Cart-checkout billing-info step. This component gates progression to
- * the payment step and does not itself invoke any per-provider checkout
- * mutation — only account_management.UpdateUserProfile + GetMyProfileData.
- * The cart feature aliases are referenced for consistency with siblings.
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- */
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { apolloClient } from 'src/apollo/client'
 import { UpdateUserProfile } from 'src/graphql/account_management/mutation/UpdateUserProfile'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
-import { apolloClient } from 'src/apollo/client'
+import type {
+  UpdateProfileMutationResult,
+  UpdateProfileVariables,
+  GetMyProfileResult,
+  GetMyProfileVariables,
+} from 'src/types/auth/types'
 
 import DsInput from 'src/design-system/components/DsInput.vue'
 import DsTextarea from 'src/design-system/components/DsTextarea.vue'
 
-export default {
-  name: 'userInformation',
+const router = useRouter()
+const $q = useQuasar()
+const { t } = useI18n()
 
-  components: { DsInput, DsTextarea },
+const fullName = ref<string>('')
+const email = ref<string>('')
+const countryCode = ref<string>('+966')
+const whatsAppNumber = ref<string>('')
+const telegramNumber = ref<string>('')
+const country = ref<string>('')
+const city = ref<string>('')
+const notes = ref<string>('')
+const submitting = ref<boolean>(false)
+const errors = reactive({ fullName: '', phone: '', email: '' })
 
-  data () {
-    return {
-      fullName: '',
-      email: '',
-      countryCode: '+966',
-      whatsAppNumber: '',
-      telegramNumber: '',
-      country: '',
-      city: '',
-      notes: '',
-      submitting: false,
-      errors: {
-        fullName: '',
-        phone: '',
-        email: ''
-      },
-      countryCodes: [
-        { code: '+966', flag: '🇸🇦' },
-        { code: '+971', flag: '🇦🇪' },
-        { code: '+20',  flag: '🇪🇬' },
-        { code: '+249', flag: '🇸🇩' },
-        { code: '+962', flag: '🇯🇴' },
-        { code: '+965', flag: '🇰🇼' },
-        { code: '+974', flag: '🇶🇦' },
-        { code: '+973', flag: '🇧🇭' },
-        { code: '+968', flag: '🇴🇲' },
-        { code: '+212', flag: '🇲🇦' },
-        { code: '+216', flag: '🇹🇳' },
-        { code: '+213', flag: '🇩🇿' },
-        { code: '+964', flag: '🇮🇶' },
-        { code: '+961', flag: '🇱🇧' },
-        { code: '+967', flag: '🇾🇪' }
-      ]
+const countryCodes = [
+  { code: '+966', flag: '🇸🇦' },
+  { code: '+971', flag: '🇦🇪' },
+  { code: '+20',  flag: '🇪🇬' },
+  { code: '+249', flag: '🇸🇩' },
+  { code: '+962', flag: '🇯🇴' },
+  { code: '+965', flag: '🇰🇼' },
+  { code: '+974', flag: '🇶🇦' },
+  { code: '+973', flag: '🇧🇭' },
+  { code: '+968', flag: '🇴🇲' },
+  { code: '+212', flag: '🇲🇦' },
+  { code: '+216', flag: '🇹🇳' },
+  { code: '+213', flag: '🇩🇿' },
+  { code: '+964', flag: '🇮🇶' },
+  { code: '+961', flag: '🇱🇧' },
+  { code: '+967', flag: '🇾🇪' }
+]
+
+onMounted(async () => {
+  try {
+    const res = await apolloClient.query<GetMyProfileResult, GetMyProfileVariables>({
+      query: GetMyProfileData
+    })
+    const me = res.data?.me
+    if (me?.pk) {
+      if (me.fullName && (me.phoneNumber2 || me.phoneNumber3)) {
+        router.push({ name: 'payment' })
+        return
+      }
+      fullName.value = me.fullName || ''
+      whatsAppNumber.value = me.phoneNumber2 || ''
+      telegramNumber.value = me.phoneNumber3 || ''
+      email.value = me.email || ''
     }
-  },
+  } catch {
+    // silent — form will render empty
+  }
+})
 
-  async created () {
-    try {
-      const res = await apolloClient.query({ query: GetMyProfileData })
-      if (res.data.me && res.data.me.pk) {
-        const me = res.data.me
-        if (me.fullName && (me.phoneNumber2 || me.phoneNumber3)) {
-          // Profile already complete — move on without spamming a toast.
-          this.$router.push({ name: 'payment' })
-          return
-        }
-        this.fullName = me.fullName || ''
-        this.whatsAppNumber = me.phoneNumber2 || ''
-        this.telegramNumber = me.phoneNumber3 || ''
-        this.email = me.email || ''
-      }
-    } catch (_) {
-      // silent — form will render empty
+function validate (): boolean {
+  errors.fullName = ''
+  errors.phone = ''
+  errors.email = ''
+  let ok = true
+
+  if (!fullName.value || fullName.value.trim().length < 2) {
+    errors.fullName = t('يرجى إدخال اسمك الكامل')
+    ok = false
+  }
+  if (!whatsAppNumber.value || whatsAppNumber.value.replace(/\D/g, '').length < 6) {
+    errors.phone = t('يرجى إدخال رقم هاتف صحيح')
+    ok = false
+  }
+  if (email.value && !/^\S+@\S+\.\S+$/.test(email.value)) {
+    errors.email = t('صيغة البريد الإلكتروني غير صحيحة')
+    ok = false
+  }
+  return ok
+}
+
+function errorHandler (errorsObj: unknown): void {
+  if (typeof errorsObj !== 'object' || errorsObj == null) return
+  for (const key of Object.keys(errorsObj as Record<string, unknown>)) {
+    const entries = (errorsObj as Record<string, unknown[]>)[key]
+    if (!Array.isArray(entries)) continue
+    for (const val of entries) {
+      const v = val as Record<string, unknown>
+      const msg = typeof v.message === 'object'
+        ? ((v.message as Record<string, unknown>).msg as string ?? JSON.stringify(v.message))
+        : `${v.message} : ${key}`
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: msg })
     }
-  },
+  }
+}
 
-  methods: {
-    validate () {
-      this.errors = { fullName: '', phone: '', email: '' }
-      let ok = true
+async function UPDATE_THE_USER_PROFILE (e?: Event): Promise<void> {
+  if (e && e.preventDefault) e.preventDefault()
+  if (!validate()) return
 
-      if (!this.fullName || this.fullName.trim().length < 2) {
-        this.errors.fullName = this.$t('يرجى إدخال اسمك الكامل')
-        ok = false
-      }
-      if (!this.whatsAppNumber || this.whatsAppNumber.replace(/\D/g, '').length < 6) {
-        this.errors.phone = this.$t('يرجى إدخال رقم هاتف صحيح')
-        ok = false
-      }
-      if (this.email && !/^\S+@\S+\.\S+$/.test(this.email)) {
-        this.errors.email = this.$t('صيغة البريد الإلكتروني غير صحيحة')
-        ok = false
-      }
-      return ok
-    },
+  submitting.value = true
+  try {
+    const fullPhone = whatsAppNumber.value
+      ? `${countryCode.value}${whatsAppNumber.value.replace(/\D/g, '')}`
+      : null
 
-    async UPDATE_THE_USER_PROFILE (e) {
-      if (e && e.preventDefault) e.preventDefault()
-      if (!this.validate()) return
-
-      this.submitting = true
-      try {
-        const fullPhone = this.whatsAppNumber
-          ? `${this.countryCode}${this.whatsAppNumber.replace(/\D/g, '')}`
-          : null
-
-        const res = await apolloClient.mutate({
-          mutation: UpdateUserProfile,
-          variables: {
-            input: {
-              fullName: this.fullName,
-              phoneNumber2: fullPhone,
-              phoneNumber3: this.telegramNumber || null
-            }
-          }
-        })
-
-        const payload = res.data.updateUserProfile
-        if (payload && payload.errors && Object.keys(payload.errors).length) {
-          this.errorHandler(payload.errors)
-          this.submitting = false
-          return
-        }
-
-        this.$q.notify({
-          type: 'positive',
-          multiLine: true,
-          progress: true,
-          position: 'top',
-          message: 'تم حفظ بياناتك'
-        })
-        this.$router.push({ name: 'payment' })
-      } catch (_) {
-        this.submitting = false
-      }
-    },
-
-    errorHandler (errorsObj) {
-      if (typeof errorsObj !== 'object' || errorsObj == null) return
-      for (const key of Object.keys(errorsObj)) {
-        const entries = errorsObj[key]
-        if (!Array.isArray(entries)) continue
-        for (const val of entries) {
-          const msg = typeof val.message === 'object'
-            ? (val.message.msg || JSON.stringify(val.message))
-            : `${val.message} : ${key}`
-          this.$q.notify({
-            type: 'warning',
-            progress: true,
-            multiLine: true,
-            position: 'top',
-            message: msg
-          })
+    const res = await apolloClient.mutate<UpdateProfileMutationResult, UpdateProfileVariables>({
+      mutation: UpdateUserProfile,
+      variables: {
+        input: {
+          fullName: fullName.value,
+          phoneNumber2: fullPhone,
+          phoneNumber3: telegramNumber.value || null
         }
       }
+    })
+
+    const payload = res.data?.updateUserProfile
+    if (payload?.errors && typeof payload.errors === 'object' && Object.keys(payload.errors).length) {
+      errorHandler(payload.errors)
+      submitting.value = false
+      return
     }
+
+    $q.notify({ type: 'positive', multiLine: true, progress: true, position: 'top', message: 'تم حفظ بياناتك' })
+    router.push({ name: 'payment' })
+  } catch {
+    submitting.value = false
   }
 }
 </script>

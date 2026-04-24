@@ -57,14 +57,14 @@
       <div v-else class="notifications-page__list">
         <app-notification
           v-for="n in filtered"
-          :key="n.pk"
+          :key="n.pk ?? undefined"
           :notification="mapNotification(n)"
           @read="onRead"
           @click="onNotificationClick"
         />
 
         <div v-if="hasMore" class="notifications-page__more">
-          <ds-button variant="secondary" @click="LOAD_MORE_DATA">
+          <ds-button variant="secondary" @click="loadMoreData">
             {{ $t('عرض المزيد') }}
           </ds-button>
         </div>
@@ -73,19 +73,36 @@
   </main>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import AppNotification from 'src/components/shared/Notification.vue'
 import { GetAllMyNotifications } from 'src/graphql/notification_management/query/GetAllMyNotifications'
 import { useSettingsStore } from 'src/stores/settings'
 import { useQuery } from '@vue/apollo-composable'
-import { computed, ref } from 'vue'
-import _ from 'lodash'
+import type {
+  MyNotificationsResult,
+  MyNotificationsVars,
+  Notification,
+} from 'src/types/notifications/types'
 
-/** @typedef {import('src/types/notifications/types').Notification} Notification */
-/** @typedef {import('src/types/notifications/types').MyNotificationsResult} MyNotificationsResult */
-/** @typedef {import('src/types/notifications/types').MyNotificationsVars} MyNotificationsVars */
+// -----------------------------------------------------------------------
+// Stores / composables
+// -----------------------------------------------------------------------
+const router = useRouter()
+const $q = useQuasar()
+const { t } = useI18n()
+const settings = useSettingsStore()
 
-const TYPE_BUCKET = {
+// -----------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------
+type NotificationTypeBucket = 'transactions' | 'courses' | 'marketing'
+type FilterKey = 'all' | 'unread' | NotificationTypeBucket
+
+const TYPE_BUCKET: Record<string, NotificationTypeBucket> = {
   CHECKOUT_DONE: 'transactions',
   PAYMENT: 'transactions',
   WITHDRAW: 'transactions',
@@ -95,10 +112,10 @@ const TYPE_BUCKET = {
   CERTIFICATE: 'courses',
   REFERRAL: 'marketing',
   AFFILIATE: 'marketing',
-  PYRAMID: 'marketing'
+  PYRAMID: 'marketing',
 }
 
-const VISUAL_TYPE = {
+const VISUAL_TYPE: Record<string, string> = {
   CHECKOUT_DONE: 'success',
   PAYMENT: 'success',
   WITHDRAW: 'info',
@@ -108,152 +125,188 @@ const VISUAL_TYPE = {
   CERTIFICATE: 'success',
   REFERRAL: 'info',
   AFFILIATE: 'info',
-  PYRAMID: 'info'
+  PYRAMID: 'info',
 }
 
-export default {
-  name: 'Notification',
-  components: { AppNotification },
+// -----------------------------------------------------------------------
+// Query
+// -----------------------------------------------------------------------
+const notifQuery = useQuery<MyNotificationsResult, MyNotificationsVars>(
+  GetAllMyNotifications,
+  { orderBy: ['-id'], limit: 15 },
+)
 
-  setup () {
-    const settings = useSettingsStore()
-    /** @type {ReturnType<typeof useQuery<MyNotificationsResult, MyNotificationsVars>>} */
-    const notifQuery = useQuery(
-      GetAllMyNotifications,
-      { orderBy: ['-id'], limit: 15 }
-    )
+const myNotifications = computed(() => notifQuery.result.value?.myNotifications ?? null)
+const loading = notifQuery.loading
 
-    const myNotifications = computed(() => notifQuery.result.value?.myNotifications || null)
-    const loading = notifQuery.loading
+// -----------------------------------------------------------------------
+// Local state
+// -----------------------------------------------------------------------
+const activeFilter = ref<FilterKey>('all')
+const readLocal = ref<Record<number, boolean>>({})
 
-    const readLocal = ref({})
+// -----------------------------------------------------------------------
+// Derived state
+// -----------------------------------------------------------------------
+type NotifNode = Notification
 
-    return {
-      settings,
-      _notifQuery: notifQuery,
-      myNotifications,
-      loading,
-      readLocal
-    }
-  },
+const notifications = computed<NotifNode[]>(() =>
+  (myNotifications.value?.edges ?? [])
+    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node)
+    .map(e => e.node as NotifNode),
+)
 
-  data () {
-    return {
-      activeFilter: 'all'
-    }
-  },
+const hasMore = computed(
+  () => myNotifications.value?.pageInfo?.hasNextPage ?? false,
+)
 
-  computed: {
-    notifications () {
-      return (_.get(this.myNotifications, 'edges', []) || []).map(e => e.node)
-    },
-    hasMore () { return _.get(this.myNotifications, '[pageInfo][hasNextPage]', false) },
-    unreadCount () {
-      return this.notifications.filter(n => !this.readLocal[n.pk]).length
-    },
-    bucketCounts () {
-      const counts = { all: this.notifications.length, unread: this.unreadCount, courses: 0, transactions: 0, marketing: 0 }
-      for (const n of this.notifications) {
-        const b = TYPE_BUCKET[n.type]
-        if (b && counts[b] != null) counts[b] += 1
-      }
-      return counts
-    },
-    filters () {
-      const c = this.bucketCounts
-      return [
-        { key: 'all',          label: this.$t('الكل'),          count: c.all },
-        { key: 'unread',       label: this.$t('غير مقروءة'),    count: c.unread },
-        { key: 'courses',      label: this.$t('الدورات'),       count: c.courses },
-        { key: 'transactions', label: this.$t('المعاملات'),     count: c.transactions },
-        { key: 'marketing',    label: this.$t('التسويق'),       count: c.marketing }
-      ]
-    },
-    filtered () {
-      if (this.activeFilter === 'all') return this.notifications
-      if (this.activeFilter === 'unread') {
-        return this.notifications.filter(n => !this.readLocal[n.pk])
-      }
-      return this.notifications.filter(n => TYPE_BUCKET[n.type] === this.activeFilter)
-    }
-  },
+const unreadCount = computed(
+  () => notifications.value.filter(n => n.pk != null && !readLocal.value[n.pk]).length,
+)
 
-  mounted () { this.settings.setActiveNav('NOTIFICATION') },
+const bucketCounts = computed(() => {
+  const counts: Record<string, number> = {
+    all: notifications.value.length,
+    unread: unreadCount.value,
+    courses: 0,
+    transactions: 0,
+    marketing: 0,
+  }
+  for (const n of notifications.value) {
+    const b = TYPE_BUCKET[n.type]
+    if (b && counts[b] != null) counts[b] += 1
+  }
+  return counts
+})
 
-  methods: {
-    mapNotification (n) {
-      return {
-        pk: n.pk,
-        title: n.title || this.typeFallbackTitle(n.type),
-        body: n.description || '',
-        type: VISUAL_TYPE[n.type] || 'info',
-        timestamp: n.created || n.updated,
-        read: !!this.readLocal[n.pk],
-        _raw: n
-      }
-    },
+interface FilterItem {
+  key: FilterKey
+  label: string
+  count: number | null
+}
 
-    typeFallbackTitle (type) {
-      const map = {
-        CHECKOUT_DONE: this.$t('تمت عملية الدفع'),
-        QUESTION_ASK: this.$t('سؤال جديد'),
-        QUESTION_ANS: this.$t('تمت الإجابة على سؤالك'),
-        REFERRAL: this.$t('إحالة جديدة'),
-        AFFILIATE: this.$t('تحديث تسويقي')
-      }
-      return map[type] || this.$t('إشعار')
-    },
+const filters = computed<FilterItem[]>(() => {
+  const c = bucketCounts.value
+  return [
+    { key: 'all',          label: t('الكل'),          count: c.all ?? null },
+    { key: 'unread',       label: t('غير مقروءة'),    count: c.unread ?? null },
+    { key: 'courses',      label: t('الدورات'),       count: c.courses ?? null },
+    { key: 'transactions', label: t('المعاملات'),     count: c.transactions ?? null },
+    { key: 'marketing',    label: t('التسويق'),       count: c.marketing ?? null },
+  ]
+})
 
-    onRead (n) {
-      if (n && n.pk != null) this.readLocal[n.pk] = true
-    },
+const filtered = computed<NotifNode[]>(() => {
+  if (activeFilter.value === 'all') return notifications.value
+  if (activeFilter.value === 'unread') {
+    return notifications.value.filter(n => n.pk != null && !readLocal.value[n.pk])
+  }
+  return notifications.value.filter(n => TYPE_BUCKET[n.type] === activeFilter.value)
+})
 
-    onNotificationClick (evt) {
-      const n = evt && evt.notification && evt.notification._raw
-      if (!n) return
-      const type = n.type
-      if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
-        let courseID = null
-        try {
-          courseID = parseInt(String(n.extraData || '').split('::')[0].split(' ')[1].replace('>', ''))
-        } catch (e) { /* malformed — ignore */ }
-        if (courseID) window.location.href = `${location.origin}/classroom/#/class/${courseID}/`
-      } else if (type === 'CHECKOUT_DONE') {
-        this.$router.push({ name: 'my-courses' })
-      }
-    },
+// -----------------------------------------------------------------------
+// Methods
+// -----------------------------------------------------------------------
+interface MappedNotification {
+  pk: number | null
+  title: string
+  body: string
+  type: string
+  timestamp: string
+  read: boolean
+  _raw: NotifNode
+}
 
-    markAllRead () {
-      for (const n of this.notifications) this.readLocal[n.pk] = true
-      this.$q.notify({
-        type: 'positive',
-        position: 'top',
-        progress: true,
-        message: this.$t('تم تعيين جميع الإشعارات كمقروءة')
-      })
-    },
+function typeFallbackTitle (type: string): string {
+  const map: Record<string, string> = {
+    CHECKOUT_DONE: t('تمت عملية الدفع'),
+    QUESTION_ASK: t('سؤال جديد'),
+    QUESTION_ANS: t('تمت الإجابة على سؤالك'),
+    REFERRAL: t('إحالة جديدة'),
+    AFFILIATE: t('تحديث تسويقي'),
+  }
+  return map[type] ?? t('إشعار')
+}
 
-    async LOAD_MORE_DATA () {
-      await this._notifQuery.fetchMore({
-        variables: { cursor: this.myNotifications.pageInfo.endCursor },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          const newEdges = fetchMoreResult.myNotifications.edges
-          const pageInfo = fetchMoreResult.myNotifications.pageInfo
-          if (newEdges.length) {
-            return {
-              myNotifications: {
-                __typename: previousResult.myNotifications.__typename,
-                edges: [...previousResult.myNotifications.edges, ...newEdges],
-                pageInfo
-              }
-            }
-          }
-          return previousResult
-        }
-      })
-    }
+function mapNotification (n: NotifNode): MappedNotification {
+  return {
+    pk: n.pk,
+    title: n.title || typeFallbackTitle(n.type),
+    body: n.description ?? '',
+    type: VISUAL_TYPE[n.type] ?? 'info',
+    timestamp: n.created ?? n.updated,
+    read: n.pk != null ? !!readLocal.value[n.pk] : false,
+    _raw: n,
   }
 }
+
+function onRead (n: MappedNotification): void {
+  if (n?.pk != null) readLocal.value[n.pk] = true
+}
+
+function onNotificationClick (evt: { notification?: MappedNotification }): void {
+  const n = evt?.notification?._raw
+  if (!n) return
+  const type = n.type
+  if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
+    let courseID: number | null = null
+    try {
+      courseID = parseInt(
+        String(n.extraData ?? '').split('::')[0].split(' ')[1].replace('>', ''),
+      )
+    } catch {
+      /* malformed — ignore */
+    }
+    if (courseID) window.location.href = `${location.origin}/classroom/#/class/${courseID}/`
+  } else if (type === 'CHECKOUT_DONE') {
+    void router.push({ name: 'my-courses' })
+  }
+}
+
+function markAllRead (): void {
+  for (const n of notifications.value) {
+    if (n.pk != null) readLocal.value[n.pk] = true
+  }
+  $q.notify({
+    type: 'positive',
+    position: 'top',
+    progress: true,
+    message: t('تم تعيين جميع الإشعارات كمقروءة'),
+  })
+}
+
+async function loadMoreData (): Promise<void> {
+  const pageInfo = myNotifications.value?.pageInfo
+  if (!pageInfo?.hasNextPage) return
+  await notifQuery.fetchMore({
+    variables: { cursor: pageInfo.endCursor },
+    updateQuery: (
+      previousResult: MyNotificationsResult,
+      { fetchMoreResult }: { fetchMoreResult: MyNotificationsResult },
+    ): MyNotificationsResult => {
+      const prev = previousResult.myNotifications
+      const next = fetchMoreResult?.myNotifications
+      if (!next || !prev) return previousResult
+      const newEdges = next.edges
+      if (!newEdges.length) return previousResult
+      return {
+        myNotifications: {
+          __typename: prev.__typename,
+          totalCount: next.totalCount,
+          pageInfo: next.pageInfo,
+          edges: [...prev.edges, ...newEdges],
+        },
+      }
+    },
+  })
+}
+
+// -----------------------------------------------------------------------
+// Lifecycle
+// -----------------------------------------------------------------------
+onMounted(() => {
+  settings.setActiveNav('NOTIFICATION')
+})
 </script>
 
 <style lang="scss" scoped>

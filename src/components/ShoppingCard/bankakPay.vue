@@ -31,202 +31,122 @@
   </div>
 </template>
 
-<script>
-/**
- * Cart/checkout feature types for the Bankak (bank transfer) upload flow.
- * The provider is outside the Stripe/Braintree/SmartNode/Paypal/Syberpay set,
- * so only the generic cart aliases are referenced here.
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- */
-import FileUpload from "src/components/utils/FileUploader.vue";
-import { CreateNewOrderWithBulkOrderDetails } from "src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
-import { UploadAttachmentTransaction } from "src/graphql/checkout_management/mutation/UploadAttachmentTransaction";
-import { storeToRefs } from "pinia";
-import { useCartStore } from "src/stores/cart";
-import { useSettingsStore } from "src/stores/settings";
-import { apolloClient } from "src/apollo/client";
+<script setup lang="ts">
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { useCartStore } from 'src/stores/cart'
+import { useSettingsStore } from 'src/stores/settings'
+import { apolloClient } from 'src/apollo/client'
+import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
+import { UploadAttachmentTransaction } from 'src/graphql/checkout_management/mutation/UploadAttachmentTransaction'
+import type {
+  CreateOrderResult,
+  CreateOrderVars,
+  UploadAttachmentResult,
+  UploadAttachmentVars,
+} from 'src/types/cart/types'
+import FileUpload from 'src/components/utils/FileUploader.vue'
 
-export default {
-  setup () {
-    const cart = useCartStore();
-    const settings = useSettingsStore();
-    const { shoppingCartDataList } = storeToRefs(cart);
-    const { currency } = storeToRefs(settings);
-    return { cart, settings, shoppingCartDataList, currency };
-  },
-  data() {
-    return {
-      visible: false,
-      bankakBill: "",
-      bankakLabel: "إشعار بنكك الأبيض",
-      othersLabel: this.$t("اضغط للإرفاق فاتورة الدفع"),
-    };
-  },
-  components: { FileUpload },
+const router = useRouter()
+const $q = useQuasar()
+const { t } = useI18n()
+const cart = useCartStore()
+const settings = useSettingsStore()
+const { shoppingCartDataList } = storeToRefs(cart)
+const { currency } = storeToRefs(settings)
 
-  methods: {
-    paymentImageHandler(val) {
-      this.bankakBill = val;
-    },
+const visible = ref<boolean>(false)
+const bankakBill = ref<string>('')
+const bankakLabel = 'إشعار بنكك الأبيض'
+const othersLabel = t('اضغط للإرفاق فاتورة الدفع')
 
-    errorHandler(errorsObj) {
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          this.$q.notify({
-            type: "warning",
-            progress: true,
-            multiLine: true,
-            position: "top",
-            message: val.message,
-          });
+function paymentImageHandler (val: string): void {
+  bankakBill.value = val
+}
+
+function errorHandler (errorsObj: unknown): void {
+  if (typeof errorsObj !== 'object' || errorsObj == null) return
+  for (const key of Object.keys(errorsObj as Record<string, unknown>)) {
+    const entries = (errorsObj as Record<string, unknown[]>)[key]
+    if (!Array.isArray(entries)) continue
+    for (const val of entries) {
+      const v = val as Record<string, unknown>
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: String(v.message ?? '') })
+    }
+  }
+}
+
+function getOrdersIds (): number[] {
+  return shoppingCartDataList.value
+    .map(item => item.course.pk)
+    .filter((pk): pk is number => pk != null)
+}
+
+async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']> | undefined> {
+  try {
+    const result = await apolloClient.mutate<CreateOrderResult, CreateOrderVars>({
+      mutation: CreateNewOrderWithBulkOrderDetails,
+      variables: { courseIds }
+    })
+    const dataObj = result.data?.createNewOrderWithBulkOrderDetails
+    if (dataObj?.errors) {
+      visible.value = false
+      errorHandler(dataObj.errors)
+    }
+    if (dataObj?.success) return dataObj
+    return undefined
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : ''
+    if (msg.includes('User already has valid enrollment in the course')) {
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'لديك اشتراك مسبق في هذا الكورس' })
+    }
+    return undefined
+  }
+}
+
+async function SEND_THE_PAYMENT (): Promise<void> {
+  try {
+    visible.value = true
+    if (!bankakBill.value) {
+      $q.notify({ type: 'negative', progress: true, multiLine: true, position: 'top', message: 'You are not allowed to upload an empty data' })
+      visible.value = false
+      return
+    }
+
+    const courseIds = getOrdersIds()
+    const orderResult = await getOrderResult(courseIds)
+    if (!orderResult?.order?.pk) { visible.value = false; return }
+
+    const bankakPaymentResult = await apolloClient.mutate<UploadAttachmentResult, UploadAttachmentVars>({
+      mutation: UploadAttachmentTransaction,
+      variables: {
+        input: {
+          order: orderResult.order.pk,
+          attachment: bankakBill.value
         }
       }
-    },
+    })
 
-    getOrdersIds() {
-      return this.$_.map(this.shoppingCartDataList, "[course][pk]");
-    },
-
-    async getOrderResult(courseIds) {
-      try {
-        const result = await apolloClient.mutate({
-          mutation: CreateNewOrderWithBulkOrderDetails,
-          variables: {
-            courseIds: courseIds,
-          },
-        });
-        const dataObj = result.data.createNewOrderWithBulkOrderDetails;
-        console;
-
-        if (this.$_.get(dataObj, "[errors]")) {
-          this.visible = false;
-          this.errorHandler(dataObj.errors);
-        }
-
-        if (this.$_.get(dataObj, "[success]")) {
-          return dataObj;
-        }
-      } catch (error) {
-        if (
-          error.message ==
-          "GraphQL error: User already has valid enrollment in the course ..."
-        ) {
-          this.$q.notify({
-            type: "warning",
-            progress: true,
-            multiLine: true,
-            position: "top",
-            // message: error.message,
-            message: "لديك اشتراك مسبق في هذا الكورس",
-          });
-        }
-        if (
-          error.message.includes(
-            "User already has valid enrollment in the course ..."
-          )
-        ) {
-          this.$q.notify({
-            type: "warning",
-            progress: true,
-            multiLine: true,
-            position: "top",
-            // message: error.message,
-            message: "لديك اشتراك مسبق في هذا الكورس",
-          });
-        }
-      }
-    },
-
-    async SEND_THE_PAYMENT() {
-      try {
-        this.visible = true;
-        if (this.bankakBill) {
-          // TODO: Extract all courses ids
-          const courseIds = this.getOrdersIds();
-          // TODO: Make the order
-          const orderResult = await this.getOrderResult(courseIds);
-          // TODO: Make payment using bankak
-          const bankakPaymentResult = await apolloClient.mutate({
-            mutation: UploadAttachmentTransaction,
-            variables: {
-              input: {
-                order: orderResult.order.pk,
-                attachment: this.bankakBill,
-                // attachment: null
-              },
-            },
-          });
-          const dataObj = this.$_.get(
-            bankakPaymentResult,
-            "[data][uploadAttachmentTransaction]"
-          );
-          const errors = this.$_.get(bankakPaymentResult, "[errors]");
-          if (errors) {
-            this.visible = false;
-            this.$q.notify({
-              type: "warning",
-              progress: true,
-              multiLine: true,
-              position: "top",
-              message: errors,
-            });
-            if (
-              errors[0].message ==
-              "PyramidAffiliate matching query does not exist."
-            ) {
-              this.$router.push({ name: "registeration-code" });
-            }
-          }
-
-          if (this.$_.get(dataObj, "[success]")) {
-            this.visible = false;
-            //TODO:
-            this.cart.deleteCart();
-            //TODO: Go to the Success page
-            this.$router.push({ name: "cart-success" });
-          }
-        } else {
-          this.$q.notify({
-            type: "negative",
-            progress: true,
-            multiLine: true,
-            position: "top",
-            message: "You are not allowed to upload an empty data",
-          });
-          this.visible = false;
-        }
-      } catch (error) {
-        this.$q.notify({
-          type: "negative",
-          progress: true,
-          multiLine: true,
-          position: "top",
-          message: error.message,
-        });
-        this.visible = false;
-        if (
-          error.message ==
-          "GraphQL error: User already has valid enrollment in the course ..."
-        ) {
-          // console.log('llllllllllllllllllllll')
-          // console.log(error.message)
-          // console.log('llllllllllllllllllllll')
-          this.$q.notify({
-            type: "warning",
-            progress: true,
-            multiLine: true,
-            position: "top",
-            // message: error.message,
-            message:
-              "لديك اشتراك مسبق في احد الكورسات اللتي قمت بشرائها, الرجاء قم بشراء كورس لم تمتلكه من قبل",
-          });
-        }
-      }
-    },
-  },
-};
+    const dataObj = bankakPaymentResult.data?.uploadAttachmentTransaction
+    if (dataObj?.success) {
+      visible.value = false
+      cart.deleteCart()
+      router.push({ name: 'cart-success' })
+    } else {
+      visible.value = false
+    }
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : ''
+    $q.notify({ type: 'negative', progress: true, multiLine: true, position: 'top', message: msg })
+    visible.value = false
+    if (msg.includes('User already has valid enrollment in the course')) {
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'لديك اشتراك مسبق في احد الكورسات اللتي قمت بشرائها, الرجاء قم بشراء كورس لم تمتلكه من قبل' })
+    }
+  }
+}
 </script>
 
 <style lang="scss">

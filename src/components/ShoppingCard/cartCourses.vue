@@ -178,23 +178,22 @@
   </section>
 </template>
 
-<script>
-/**
- * Cart/checkout feature types for the cart-listing page. Fires the
- * CreateBraintreeCheckout mutation via apolloClient.mutate directly.
- *
- * @typedef {import('src/types/cart/types').CartEntry} CartEntry
- * @typedef {import('src/types/cart/types').CartItem} CartItem
- * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/types/cart/types').CreateBraintreeCheckoutResult} CreateBraintreeCheckoutResult
- * @typedef {import('src/types/cart/types').CreateBraintreeCheckoutVars} CreateBraintreeCheckoutVars
- */
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import _ from 'lodash'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { useCartStore } from 'src/stores/cart'
 import { useSettingsStore } from 'src/stores/settings'
 import { apolloClient } from 'src/apollo/client'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import type {
+  CartEntry,
+  CreateBraintreeCheckoutResult,
+  CreateBraintreeCheckoutVars,
+  CreateOrderResult,
+  CreateOrderVars,
+} from 'src/types/cart/types'
 
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
 import { CreateBraintreeCheckout } from 'src/graphql/checkout_management/mutation/CreateBraintreeCheckout.js'
@@ -202,176 +201,151 @@ import { CreateBraintreeCheckout } from 'src/graphql/checkout_management/mutatio
 import DsInput from 'src/design-system/components/DsInput.vue'
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
 
-export default {
-  name: 'cartCoursesPage',
+const router = useRouter()
+const $q = useQuasar()
+const cart = useCartStore()
+const settings = useSettingsStore()
+const { shoppingCartDataList } = storeToRefs(cart)
+const { currency } = storeToRefs(settings)
 
-  components: { DsInput, PriceDisplay },
+const promoCode = ref<string>('')
+const promoApplied = ref<boolean>(false)
+const discountAmount = ref<number>(0)
 
-  setup () {
-    const cart = useCartStore()
-    const settings = useSettingsStore()
-    const { shoppingCartDataList } = storeToRefs(cart)
-    const { isEnglish, currency } = storeToRefs(settings)
-    return { cart, settings, shoppingCartDataList, isEnglish, currency }
-  },
+const hasItems = computed(() => shoppingCartDataList.value && shoppingCartDataList.value.length > 0)
 
-  data () {
-    return {
-      FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
-      lodash: _,
-      promoCode: '',
-      promoApplied: false,
-      discountAmount: 0
+function itemAmount (item: CartEntry): number {
+  try {
+    const raw = item.course.currency
+    if (raw && typeof raw === 'object') {
+      return parseFloat(String((raw as Record<string, number>)[currency.value])) || 0
     }
-  },
-
-  computed: {
-    hasItems () {
-      return this.shoppingCartDataList && this.shoppingCartDataList.length > 0
-    },
-
-    subtotal () {
-      if (!this.hasItems) return 0
-      let sum = 0.0
-      for (const item of this.shoppingCartDataList) {
-        sum += this.itemAmount(item)
-      }
-      return sum
-    },
-
-    totalDue () {
-      const t = this.subtotal - this.discountAmount
-      return t > 0 ? t : 0
-    }
-  },
-
-  watch: {
-    subtotal: {
-      immediate: true,
-      handler (v) {
-        // Persist total fees for downstream steps (unchanged behaviour).
-        this.cart.setTotalPaymentFees(v)
-      }
-    }
-  },
-
-  mounted () {
-    this.WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT()
-  },
-
-  methods: {
-    itemAmount (item) {
-      try {
-        const map = JSON.parse(item.course.currency)
-        return parseFloat(map[this.currency]) || 0
-      } catch (_) {
-        return 0
-      }
-    },
-
-    instructorName (item) {
-      const c = item.course || {}
-      if (c.instructorName) return c.instructorName
-      if (c.instructor) {
-        if (typeof c.instructor === 'string') return c.instructor
-        return c.instructor.fullName || c.instructor.name || ''
-      }
-      return ''
-    },
-
-    applyPromo () {
-      // Placeholder promo logic — kept client-side until a backend mutation exists.
-      // Preserves the UI contract (promo code input + applied state) without
-      // forging a discount the server doesn't know about.
-      if (!this.promoCode) return
-      this.promoApplied = true
-      this.discountAmount = 0
-      this.$q.notify({
-        type: 'info',
-        progress: true,
-        position: 'top',
-        message: 'سيتم التحقق من كود الخصم في خطوة الدفع'
-      })
-    },
-
-    async getBraintreePaymentUrlFromTheBackend (orderResult) {
-      const braintreePaymentresult = await apolloClient.mutate({
-        mutation: CreateBraintreeCheckout,
-        variables: {
-          orderId: orderResult.order.pk
-        }
-      })
-      const braintreeDetails = braintreePaymentresult.data.createBraintreeCheckout
-      if (this.$_.get(braintreeDetails, '[success]')) {
-        return braintreeDetails.braintreeClientToken
-      }
-    },
-
-    async buyTheCoursesUsingBraintree () {
-      try {
-        const courseIds = this.getOrdersIds()
-        const orderResult = await this.getOrderResult(courseIds)
-        const braintreeClientToken = await this.getBraintreePaymentUrlFromTheBackend(orderResult)
-        this.cart.setBraintreeClientToken(braintreeClientToken)
-        this.cart.setOrderData(orderResult)
-      } catch (error) {
-        // silent
-      }
-    },
-
-    getOrdersIds () {
-      return this.$_.map(this.shoppingCartDataList, '[course][pk]')
-    },
-
-    async getOrderResult (courseIds) {
-      const result = await apolloClient.mutate({
-        mutation: CreateNewOrderWithBulkOrderDetails,
-        variables: { courseIds: courseIds }
-      })
-      const dataObj = result.data.createNewOrderWithBulkOrderDetails
-      if (this.$_.get(dataObj, '[success]')) return dataObj
-    },
-
-    WHEN_THE_BASKET_CONTAIN_COURSE_WITH_ZERO_COST_DELETE_IT () {
-      this.shoppingCartDataList.map(item => {
-        if (parseInt(item.course.courseFee) === 0 || parseInt(item.course.courseFeeInSdg) === 0) {
-          this.removeCourseFromCart(item)
-          this.$q.notify({
-            type: 'warning',
-            progress: true,
-            multiLine: true,
-            position: 'top',
-            message: 'هذا الكورس تحت التحضير'
-          })
-        }
-      })
-    },
-
-    goToAuthenticationCartPage () {
-      if (this.shoppingCartDataList.length > 0) {
-        this.$router.push({ name: 'login-cart' })
-      } else {
-        this.$q.notify({
-          type: 'warning',
-          progress: true,
-          multiLine: true,
-          position: 'top',
-          message: 'Please fill the basket first'
-        })
-      }
-    },
-
-    removeCourseFromCart (item) {
-      const data = this.shoppingCartDataList
-      this.lodash.remove(data, element => element.course.id === item.course.id)
-      this.cart.setCartList(data)
-    },
-
-    deleteTheShoppCart () {
-      this.cart.deleteCart()
-    }
+    return 0
+  } catch {
+    return 0
   }
 }
+
+const subtotal = computed((): number => {
+  if (!hasItems.value) return 0
+  let sum = 0.0
+  for (const item of shoppingCartDataList.value) {
+    sum += itemAmount(item)
+  }
+  return sum
+})
+
+const totalDue = computed((): number => {
+  const t = subtotal.value - discountAmount.value
+  return t > 0 ? t : 0
+})
+
+watch(subtotal, (v) => {
+  cart.setTotalPaymentFees(v)
+}, { immediate: true })
+
+function instructorName (item: CartEntry): string {
+  const c = item.course as Record<string, unknown>
+  if (c.instructorName && typeof c.instructorName === 'string') return c.instructorName
+  if (c.instructor) {
+    if (typeof c.instructor === 'string') return c.instructor
+    const inst = c.instructor as Record<string, unknown>
+    return (inst.fullName as string) || (inst.name as string) || ''
+  }
+  return ''
+}
+
+function applyPromo (): void {
+  if (!promoCode.value) return
+  promoApplied.value = true
+  discountAmount.value = 0
+  $q.notify({
+    type: 'info',
+    progress: true,
+    position: 'top',
+    message: 'سيتم التحقق من كود الخصم في خطوة الدفع'
+  })
+}
+
+async function getBraintreeClientToken (orderId: number): Promise<string | null | undefined> {
+  const result = await apolloClient.mutate<CreateBraintreeCheckoutResult, CreateBraintreeCheckoutVars>({
+    mutation: CreateBraintreeCheckout,
+    variables: { orderId }
+  })
+  const details = result.data?.createBraintreeCheckout
+  if (details?.success) return details.braintreeClientToken
+  return null
+}
+
+async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']> | undefined> {
+  const result = await apolloClient.mutate<CreateOrderResult, CreateOrderVars>({
+    mutation: CreateNewOrderWithBulkOrderDetails,
+    variables: { courseIds }
+  })
+  const dataObj = result.data?.createNewOrderWithBulkOrderDetails
+  if (dataObj?.success) return dataObj
+  return undefined
+}
+
+function getOrdersIds (): number[] {
+  return shoppingCartDataList.value
+    .map(item => item.course.pk)
+    .filter((pk): pk is number => pk != null)
+}
+
+async function buyTheCoursesUsingBraintree (): Promise<void> {
+  try {
+    const courseIds = getOrdersIds()
+    const orderResult = await getOrderResult(courseIds)
+    if (!orderResult?.order?.pk) return
+    const token = await getBraintreeClientToken(orderResult.order.pk)
+    cart.setBraintreeClientToken(token ?? null)
+    cart.setOrderData(orderResult)
+  } catch {
+    // silent
+  }
+}
+
+function removeCourseFromCart (item: CartEntry): void {
+  const data = shoppingCartDataList.value.filter(el => el.course.id !== item.course.id)
+  cart.setCartList(data)
+}
+
+function purgeZeroCostItems (): void {
+  shoppingCartDataList.value.forEach(item => {
+    const c = item.course as Record<string, unknown>
+    const fee = parseInt(String(c.courseFee ?? ''), 10)
+    const feeSDG = parseInt(String(c.courseFeeInSdg ?? ''), 10)
+    if (fee === 0 || feeSDG === 0) {
+      removeCourseFromCart(item)
+      $q.notify({
+        type: 'warning',
+        progress: true,
+        multiLine: true,
+        position: 'top',
+        message: 'هذا الكورس تحت التحضير'
+      })
+    }
+  })
+}
+
+function goToAuthenticationCartPage (): void {
+  if (shoppingCartDataList.value.length > 0) {
+    router.push({ name: 'login-cart' })
+  } else {
+    $q.notify({
+      type: 'warning',
+      progress: true,
+      multiLine: true,
+      position: 'top',
+      message: 'Please fill the basket first'
+    })
+  }
+}
+
+onMounted(() => {
+  purgeZeroCostItems()
+})
 </script>
 
 <style lang="scss" scoped>

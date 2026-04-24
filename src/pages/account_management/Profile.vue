@@ -239,219 +239,187 @@
   </main>
 </template>
 
-<script>
-/**
- * Auth feature types handled by this page.
- *
- * @typedef {import('src/types/auth/types').GetMyProfileResult} GetMyProfileResult
- * @typedef {import('src/types/auth/types').GetMyProfileVariables} GetMyProfileVariables
- * @typedef {import('src/types/auth/types').AuthUser} AuthUser
- * @typedef {import('src/types/auth/types').UpdateProfileMutationResult} UpdateProfileMutationResult
- * @typedef {import('src/types/auth/types').UpdateProfileVariables} UpdateProfileVariables
- * @typedef {import('src/types/auth/types').UpdateProfileResult} UpdateProfileResult
- * @typedef {import('src/types/auth/types').UserGender} UserGender
- */
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
+import { useQuery, useMutation } from '@vue/apollo-composable'
+import { storeToRefs } from 'pinia'
+import { useSettingsStore } from 'src/stores/settings'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
 import { UpdateUserProfile } from 'src/graphql/account_management/mutation/UpdateUserProfile'
-import { useSettingsStore } from 'src/stores/settings'
-import { storeToRefs } from 'pinia'
-import { useQuery, useMutation } from '@vue/apollo-composable'
-import { computed } from 'vue'
 import DsInput from 'src/design-system/components/DsInput.vue'
+import type {
+  GetMyProfileResult,
+  GetMyProfileVariables,
+  UpdateProfileMutationResult,
+  UpdateProfileVariables,
+} from 'src/types/auth/types'
 
-export default {
-  name: 'Profile',
+const { t } = useI18n()
+const $q = useQuasar()
+const settings = useSettingsStore()
+const { isEnglish, currency } = storeToRefs(settings)
 
-  components: { DsInput },
+// ---------------------------------------------------------------------------
+// Query
+// ---------------------------------------------------------------------------
+const profileQuery = useQuery<GetMyProfileResult, GetMyProfileVariables>(GetMyProfileData)
+const me = computed(() => profileQuery.result.value?.me ?? null)
 
-  setup () {
-    const settings = useSettingsStore()
-    const { isEnglish, currency } = storeToRefs(settings)
+// ---------------------------------------------------------------------------
+// Mutation
+// ---------------------------------------------------------------------------
+const { mutate: updateProfileMutate } = useMutation<UpdateProfileMutationResult, UpdateProfileVariables>(
+  UpdateUserProfile,
+  { refetchQueries: [{ query: GetMyProfileData }] },
+)
 
-    const profileQuery = /** @type {import('@vue/apollo-composable').UseQueryReturn<GetMyProfileResult, GetMyProfileVariables>} */ (
-      useQuery(GetMyProfileData)
-    )
-    const me = computed(() => profileQuery.result.value?.me || null)
+// ---------------------------------------------------------------------------
+// Local state
+// ---------------------------------------------------------------------------
+const saving = ref(false)
+const editingInfo = ref(false)
+const fullName = ref('')
+const whatsAppNumber = ref('')
+const telegramNumber = ref('')
+const email = ref('')
+const gender = ref('')
+// emailVerified is not in the schema — kept as false default
+const emailVerified = ref(false)
 
-    const updateProfile = /** @type {import('@vue/apollo-composable').UseMutationReturn<UpdateProfileMutationResult, UpdateProfileVariables>} */ (
-      useMutation(UpdateUserProfile, {
-        refetchQueries: [{ query: GetMyProfileData }]
-      })
-    )
+interface Snapshot {
+  fullName: string
+  whatsAppNumber: string
+  telegramNumber: string
+  gender: string
+}
+const snapshot = ref<Snapshot | null>(null)
 
-    return {
-      settings,
-      isEnglish,
-      currency,
-      me,
-      _updateProfile: updateProfile
-    }
-  },
+// security
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
 
-  data () {
-    return {
-      saving: false,
-      editingInfo: false,
-      fullName: '',
-      whatsAppNumber: '',
-      telegramNumber: '',
-      email: '',
-      gender: '',
-      emailVerified: false,
-      // snapshot for cancel
-      snapshot: null,
-      // security
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-      // preferences
-      currencies: ['SAR', 'SDG', 'EUR', 'GBP', 'USD'],
-      prefs: { courses: true, transactions: true, marketing: false }
-    }
-  },
+// preferences
+const currencies = ['SAR', 'SDG', 'EUR', 'GBP', 'USD']
+const prefs = ref({ courses: true, transactions: true, marketing: false })
 
-  computed: {
-    genders () {
-      return [
-        { value: 'male',   label: this.$t('ذكر') },
-        { value: 'female', label: this.$t('أنثى') }
-      ]
-    },
-    initials () {
-      const n = (this.fullName || this.email || '').trim()
-      if (!n) return '؟'
-      const parts = n.split(/\s+/).filter(Boolean)
-      if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
-      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
-    },
-    canChangePassword () {
-      return this.currentPassword && this.newPassword && this.newPassword === this.confirmPassword
-    }
-  },
+// ---------------------------------------------------------------------------
+// Computed
+// ---------------------------------------------------------------------------
+const genders = computed(() => [
+  { value: 'male',   label: t('ذكر') },
+  { value: 'female', label: t('أنثى') },
+])
 
-  watch: {
-    me (value) {
-      if (!value) return
-      this.email          = value.email || ''
-      this.fullName       = value.fullName || ''
-      this.whatsAppNumber = value.phoneNumber2 || ''
-      this.telegramNumber = value.phoneNumber3 || ''
-      if (value.gender === 'MALE')   this.gender = 'male'
-      if (value.gender === 'FEMALE') this.gender = 'female'
-      // emailVerified not on schema — keep defensive default
-      this.emailVerified = !!value.emailVerified
-    }
-  },
+const initials = computed(() => {
+  const n = (fullName.value || email.value || '').trim()
+  if (!n) return '؟'
+  const parts = n.split(/\s+/).filter(Boolean)
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+})
 
-  mounted () {
-    this.settings.setActiveNav('PROFILE')
-  },
+const canChangePassword = computed(
+  () => currentPassword.value && newPassword.value && newPassword.value === confirmPassword.value,
+)
 
-  methods: {
-    startEditInfo () {
-      this.snapshot = {
-        fullName: this.fullName,
-        whatsAppNumber: this.whatsAppNumber,
-        telegramNumber: this.telegramNumber,
-        gender: this.gender
-      }
-      this.editingInfo = true
-    },
+// ---------------------------------------------------------------------------
+// Sync me → local fields
+// ---------------------------------------------------------------------------
+watch(me, (value) => {
+  if (!value) return
+  email.value          = value.email ?? ''
+  fullName.value       = value.fullName ?? ''
+  whatsAppNumber.value = value.phoneNumber2 ?? ''
+  telegramNumber.value = value.phoneNumber3 ?? ''
+  if (value.gender === 'MALE')   gender.value = 'male'
+  if (value.gender === 'FEMALE') gender.value = 'female'
+  // emailVerified is not on the schema — stays false
+})
 
-    cancelEditInfo () {
-      if (this.snapshot) {
-        this.fullName       = this.snapshot.fullName
-        this.whatsAppNumber = this.snapshot.whatsAppNumber
-        this.telegramNumber = this.snapshot.telegramNumber
-        this.gender         = this.snapshot.gender
-      }
-      this.editingInfo = false
-    },
+// ---------------------------------------------------------------------------
+// Lifecycle
+// ---------------------------------------------------------------------------
+onMounted(() => {
+  settings.setActiveNav('PROFILE')
+})
 
-    setLang (flag) {
-      this.settings.setIsEnglish(flag)
-      this.$q.notify && this.$q.notify({
-        type: 'positive',
-        position: 'top',
-        progress: true,
-        message: this.$t('تم تحديث اللغة')
-      })
-    },
+// ---------------------------------------------------------------------------
+// Methods
+// ---------------------------------------------------------------------------
+function startEditInfo (): void {
+  snapshot.value = {
+    fullName: fullName.value,
+    whatsAppNumber: whatsAppNumber.value,
+    telegramNumber: telegramNumber.value,
+    gender: gender.value,
+  }
+  editingInfo.value = true
+}
 
-    setCurrency (val) {
-      this.settings.setCurrency(val)
-      this.$q.notify && this.$q.notify({
-        type: 'positive',
-        position: 'top',
-        progress: true,
-        message: this.$t('تم تحديث العملة')
-      })
-    },
+function cancelEditInfo (): void {
+  if (snapshot.value) {
+    fullName.value       = snapshot.value.fullName
+    whatsAppNumber.value = snapshot.value.whatsAppNumber
+    telegramNumber.value = snapshot.value.telegramNumber
+    gender.value         = snapshot.value.gender
+  }
+  editingInfo.value = false
+}
 
-    resendVerification () {
-      this.$q.notify({
-        type: 'info',
-        position: 'top',
-        progress: true,
-        message: this.$t('تم إرسال رابط التأكيد إلى بريدك.')
-      })
-    },
+function setLang (flag: boolean): void {
+  settings.setIsEnglish(flag)
+  $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم تحديث اللغة') })
+}
 
-    changePassword () {
-      // Password mutation not wired on this schema — placeholder flow.
-      if (!this.canChangePassword) return
-      this.$q.notify({
-        type: 'positive',
-        position: 'top',
-        progress: true,
-        message: this.$t('تم طلب تغيير كلمة المرور.')
-      })
-      this.currentPassword = ''
-      this.newPassword = ''
-      this.confirmPassword = ''
-    },
+function setCurrency (val: string): void {
+  settings.setCurrency(val)
+  $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم تحديث العملة') })
+}
 
-    errorHandler (errorsObj) {
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          this.$q.notify({
-            type: 'warning',
-            progress: true,
-            multiLine: true,
-            position: 'top',
-            message: val.message
-          })
-        }
-      }
-    },
+function resendVerification (): void {
+  $q.notify({ type: 'info', position: 'top', progress: true, message: t('تم إرسال رابط التأكيد إلى بريدك.') })
+}
 
-    async UpdateUserProfileData () {
-      this.saving = true
-      try {
-        const result = await this._updateProfile.mutate({
-          input: {
-            fullName: this.fullName,
-            phoneNumber2: this.whatsAppNumber,
-            phoneNumber3: this.telegramNumber,
-            gender: this.gender
-          }
-        })
-        if (result.data.updateUserProfile.success) {
-          this.$q.notify({
-            type: 'positive',
-            position: 'top',
-            progress: true,
-            multiLine: true,
-            message: this.$t('تم تحديث بياناتك بنجاح')
-          })
-          this.editingInfo = false
-        } else if (result.data.updateUserProfile.errors) {
-          this.errorHandler(result.data.updateUserProfile.errors)
-        }
-      } catch (e) { /* apolloProvider surfaces the error toast */ }
-      finally { this.saving = false }
+function changePassword (): void {
+  // Password mutation not wired on this schema — placeholder flow.
+  if (!canChangePassword.value) return
+  $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم طلب تغيير كلمة المرور.') })
+  currentPassword.value = ''
+  newPassword.value     = ''
+  confirmPassword.value = ''
+}
+
+function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
+  for (const key in errorsObj) {
+    for (const val of errorsObj[key]) {
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: val.message })
     }
   }
+}
+
+async function UpdateUserProfileData (): Promise<void> {
+  saving.value = true
+  try {
+    const result = await updateProfileMutate({
+      input: {
+        fullName: fullName.value,
+        phoneNumber2: whatsAppNumber.value,
+        phoneNumber3: telegramNumber.value,
+        gender: gender.value,
+      },
+    })
+    const payload = result?.data?.updateUserProfile
+    if (payload?.success) {
+      $q.notify({ type: 'positive', position: 'top', progress: true, multiLine: true, message: t('تم تحديث بياناتك بنجاح') })
+      editingInfo.value = false
+    } else if (payload?.errors) {
+      errorHandler(payload.errors as Record<string, Array<{ message: string }>>)
+    }
+  } catch { /* apolloProvider surfaces the error toast */ }
+  finally { saving.value = false }
 }
 </script>
 

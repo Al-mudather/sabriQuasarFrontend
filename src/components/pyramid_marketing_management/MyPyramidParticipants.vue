@@ -4,7 +4,7 @@
     <h3 class="pyramid-card__title">{{ $t('عدد المسوقين في شبكتي التسويقيه') }}</h3>
     <div class="pyramid-card__value">{{ myPyramidMarketersCount }}</div>
 
-    <form class="pyramid-card__share" @submit.prevent="CopyTheLinkHandler">
+    <form class="pyramid-card__share" @submit.prevent="copyTheLinkHandler">
       <input id="shar-link" type="text" :value="myMarketingCode" readonly />
       <button
         type="submit"
@@ -18,51 +18,54 @@
   </div>
 </template>
 
-<script>
-import { computed } from 'vue'
+<script setup lang="ts">
+import { computed, ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { MyPyramidMarketers } from 'src/graphql/pyramid_marketing_management/query/MyPyramidMarketers'
 import { copyToClipboard } from 'quasar'
 import { usePyramidStore } from 'src/stores/pyramid'
+import type {
+  MyPyramidMarketersResult,
+  MyPyramidMarketersVars,
+} from 'src/types/pyramid/types'
 
-export default {
-  name: 'MyPyramidParticipants',
+const $q = useQuasar()
+const { t } = useI18n()
+const pyramid = usePyramidStore()
+const { myMarketingCode } = storeToRefs(pyramid)
 
-  setup () {
-    const pyramid = usePyramidStore()
-    const { myMarketingCode } = storeToRefs(pyramid)
-    const { result } = useQuery(MyPyramidMarketers, null, { errorPolicy: 'all' })
-    const myPyramidMarketersCount = computed(() => result.value?.myPyramidMarketers || 0)
-    return { pyramid, myMarketingCode, myPyramidMarketersCount }
-  },
+const { result } = useQuery<MyPyramidMarketersResult, MyPyramidMarketersVars>(
+  MyPyramidMarketers,
+  undefined,
+  { errorPolicy: 'all' },
+)
+const myPyramidMarketersCount = computed(() => result.value?.myPyramidMarketers ?? 0)
 
-  data () {
-    return {
-      message: this.$t('انسخ الرابط')
-    }
-  },
+const message = ref(t('انسخ الرابط'))
 
-  mounted () { this.pyramid.fetchMyMarketingCode() },
+onMounted(() => {
+  void pyramid.fetchMyMarketingCode()
+})
 
-  methods: {
-    async CopyTheLinkHandler () {
-      const copyText = document.getElementById('shar-link')
-      copyText.focus()
-      copyText.select()
-      try {
-        await copyToClipboard(copyText.value)
-        this.message = this.$t('تم النسخ')
-        this.$q.notify({
-          type: 'positive',
-          progress: true,
-          multiLine: true,
-          position: 'top',
-          message: this.$t('تم النسخ')
-        })
-      } catch (e) { /* no-op */ }
-    }
-  }
+async function copyTheLinkHandler(): Promise<void> {
+  const el = document.getElementById('shar-link') as HTMLInputElement | null
+  if (!el) return
+  el.focus()
+  el.select()
+  try {
+    await copyToClipboard(el.value)
+    message.value = t('تم النسخ')
+    $q.notify({
+      type: 'positive',
+      progress: true,
+      multiLine: true,
+      position: 'top',
+      message: t('تم النسخ'),
+    })
+  } catch { /* no-op */ }
 }
 </script>
 
