@@ -7,7 +7,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import videojs from 'video.js'
-import 'videojs-contrib-hls'
 import 'videojs-contrib-quality-levels'
 import videojsqualityselector from 'videojs-hls-quality-selector'
 

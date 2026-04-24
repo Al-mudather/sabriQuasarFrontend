@@ -268,6 +268,16 @@
             {{ $t ? $t('سجل الآن') : 'سجل الآن' }}
           </ds-button>
         </div>
+        <ds-button
+          v-if="resolvedTo"
+          variant="ghost"
+          size="sm"
+          full-width
+          class="course-card__details-cta"
+          @click.stop="onDetails"
+        >
+          {{ $t ? $t('التفاصيل') : 'التفاصيل' }}
+        </ds-button>
       </template>
     </template>
   </ds-card>
@@ -281,6 +291,7 @@
 // course.coverImage is absent. No external stock photo services.
 
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import DsCard from 'src/design-system/components/DsCard.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
@@ -424,6 +435,11 @@ function formatPrice (n: unknown): string {
 
 function onCta (e: Event): void {
   emit('cta-click', { course: props.course, variant: props.variant ?? 'public', event: e })
+}
+
+const router = useRouter()
+function onDetails (): void {
+  if (resolvedTo.value) void router.push(resolvedTo.value as Parameters<typeof router.push>[0])
 }
 </script>
 
@@ -873,6 +889,10 @@ function onCta (e: Event): void {
   /* ---------- CTA block tweaks ---------- */
   &__cta {
     white-space: nowrap;
+  }
+
+  &__details-cta {
+    margin-block-start: var(--ds-space-2);
   }
 
   /* ---------- Placeholder cover (no API image) ---------- */
