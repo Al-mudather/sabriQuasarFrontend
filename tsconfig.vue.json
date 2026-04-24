@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "types": ["node", "quasar"]
+  },
+  "include": [
+    "src/graphql/**/*.ts",
+    "src/types/**/*.ts",
+    "src/types/globals.d.ts",
+    "src/**/*.vue"
+  ]
+}

@@ -21,7 +21,9 @@
     "test:e2e": "cross-env E2E_TEST=true start-test \"quasar dev\" http-get://localhost:8080 \"cypress open\"",
     "test:e2e:ci": "cross-env E2E_TEST=true start-test \"quasar dev\" http-get://localhost:8080 \"cypress run\"",
     "codegen": "graphql-codegen --config codegen.yml",
-    "codegen:check": "graphql-codegen --config codegen.yml --check"
+    "codegen:check": "graphql-codegen --config codegen.yml --check",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:vue": "vue-tsc --noEmit -p tsconfig.vue.json"
   },
   "dependencies": {
     "@apollo/client": "^3.9.0",
@@ -86,7 +88,8 @@
     "request-promise": "^4.2.6",
     "typescript": "^5.3.0",
     "video.js": "^8.3.0",
-    "vue-jest": "^5.0.0-alpha.10"
+    "vue-jest": "^5.0.0-alpha.10",
+    "vue-tsc": "^2.1.10"
   },
   "browserslist": [
     "last 10 Chrome versions",

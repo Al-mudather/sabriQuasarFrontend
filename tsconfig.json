@@ -5,6 +5,8 @@
     "moduleResolution": "node",
     "ignoreDeprecations": "5.0",
     "strict": true,
+    "allowJs": true,
+    "checkJs": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -15,7 +17,11 @@
     "baseUrl": ".",
     "paths": {
       "src/*": ["src/*"]
-    }
+    },
+    "types": ["node", "quasar"]
   },
-  "include": ["src/graphql/**/*.ts", "src/types/**/*.ts"]
+  "include": [
+    "src/graphql/**/*.ts",
+    "src/types/**/*.ts"
+  ]
 }
