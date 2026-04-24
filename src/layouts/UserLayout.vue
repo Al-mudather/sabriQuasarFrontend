@@ -26,7 +26,7 @@
             role="complementary"
             aria-label="قائمة الحساب"
           >
-            <SidebarContent
+            <UserSidebar
               :user-name="userDisplayName"
               :user-role="userRoleLabel"
               :user-avatar="userAvatar"
@@ -64,7 +64,7 @@
           <template #header>
             <span class="user-layout__drawer-title">حسابي</span>
           </template>
-          <SidebarContent
+          <UserSidebar
             :user-name="userDisplayName"
             :user-role="userRoleLabel"
             :user-avatar="userAvatar"
@@ -82,13 +82,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, h, defineComponent } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { LocalStorage, Quasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
+import UserSidebar from 'src/components/shared/UserSidebar.vue'
 import DsModal from 'src/design-system/components/DsModal.vue'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
@@ -104,7 +105,8 @@ const { user } = storeToRefs(auth)
 const { isEnglish } = storeToRefs(settings)
 
 // ---------------------------------------------------------------------------
-// Inline sidebar renderer — kept local so the layout stays self-contained.
+// Nav link definitions (icons as inline SVG HTML strings; consumed via v-html
+// inside <UserSidebar>).
 // ---------------------------------------------------------------------------
 interface NavLink { to: string; label: string; icon: string }
 
@@ -114,67 +116,8 @@ const ICON = {
   cert:      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5"/><path d="M9 13.5 7.5 21l4.5-2 4.5 2L15 13.5"/></svg>',
   bell:      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 5 2 7 2 7H4s2-2 2-7Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>',
   orders:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 7Z"/><path d="M9 7a3 3 0 1 1 6 0"/></svg>',
-  marketing: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h4l7-5v12l-7-5H3z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg>',
-  payments:  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>'
+  marketing: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h4l7-5v12l-7-5H3z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg>'
 }
-
-const SidebarContent = defineComponent({
-  name: 'UserSidebarContent',
-  props: {
-    userName:   { type: String,   default: '' },
-    userRole:   { type: String,   default: '' },
-    userAvatar: { type: String,   default: '' },
-    navLinks:   { type: Array as () => NavLink[], required: true as const },
-    isActive:   { type: Function as unknown as () => (to: string) => boolean, required: true as const }
-  },
-  emits: ['navigate', 'logout'],
-  setup (props, { emit }) {
-    return () => {
-      const avatarNode = props.userAvatar
-        ? h('img', { class: 'user-sidebar__avatar-img', src: props.userAvatar, alt: props.userName })
-        : h('span', { class: 'user-sidebar__avatar-initial' }, (props.userName || 'u').slice(0, 1))
-
-      return h('div', { class: 'user-sidebar' }, [
-        h('div', { class: 'user-sidebar__card' }, [
-          h('div', { class: 'user-sidebar__avatar' }, [avatarNode]),
-          h('div', { class: 'user-sidebar__identity' }, [
-            h('span', { class: 'user-sidebar__name' }, props.userName || 'مرحباً'),
-            h('span', { class: 'user-sidebar__role' }, props.userRole)
-          ])
-        ]),
-        h('hr', { class: 'user-sidebar__divider', 'aria-hidden': 'true' }),
-
-        h('nav', { class: 'user-sidebar__nav', 'aria-label': 'تنقل الحساب' },
-          props.navLinks.map((link: NavLink) => h('router-link', {
-            key: link.to,
-            to: link.to,
-            class: ['user-sidebar__link', { 'is-active': props.isActive(link.to) }],
-            'aria-current': props.isActive(link.to) ? 'page' : undefined,
-            onClick: () => emit('navigate')
-          }, () => [
-            h('span', { class: 'user-sidebar__link-icon', 'aria-hidden': 'true', innerHTML: link.icon }),
-            h('span', { class: 'user-sidebar__link-label' }, link.label)
-          ]))
-        ),
-
-        h('hr', { class: 'user-sidebar__divider', 'aria-hidden': 'true' }),
-
-        h('button', {
-          class: 'user-sidebar__logout',
-          type: 'button',
-          onClick: () => emit('logout')
-        }, [
-          h('span', {
-            class: 'user-sidebar__link-icon',
-            'aria-hidden': 'true',
-            innerHTML: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/></svg>'
-          }),
-          h('span', 'تسجيل الخروج')
-        ])
-      ])
-    }
-  }
-})
 
 // ---------------------------------------------------------------------------
 // Layout state
@@ -187,7 +130,7 @@ const navLinks: NavLink[] = [
   { to: '/Certificates',    label: 'الشهادات',        icon: ICON.cert },
   { to: '/notification',    label: 'الإشعارات',       icon: ICON.bell },
   { to: '/myOrders',        label: 'طلباتي',          icon: ICON.orders },
-  { to: '/myMarketingPage', label: 'التسويق الشبكي',  icon: ICON.marketing }
+  { to: '/myMarketingPage', label: 'صفحتي التسويقية', icon: ICON.marketing }
 ]
 
 const userDisplayName = computed<string>(() => {
@@ -256,7 +199,7 @@ watch(isEnglish, (value) => { void applyLocale(value) })
 
 <style lang="scss" scoped>
 .user-layout {
-  max-width: 1200px;
+  max-inline-size: 1200px;
   margin-inline: auto;
   padding-inline: clamp(1rem, 4vw, 2rem);
   padding-block: clamp(1.5rem, 4vw, 3rem);
@@ -310,7 +253,7 @@ watch(isEnglish, (value) => { void applyLocale(value) })
 }
 
 .user-layout__main {
-  max-width: 960px;
+  max-inline-size: 960px;
   padding: clamp(1.5rem, 4vw, 3rem);
   background: var(--ds-ivory, var(--ds-cream));
   border: 1px solid var(--ds-border);
@@ -324,160 +267,5 @@ watch(isEnglish, (value) => { void applyLocale(value) })
   font-weight: var(--ds-weight-semibold);
   font-size: var(--ds-text-lg);
   color: var(--ds-indigo);
-}
-</style>
-
-<style lang="scss">
-/* Non-scoped so the functional SidebarContent render can match without
-   Vue's scoped attribute rewriting. */
-.user-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-3);
-  padding: var(--ds-space-4);
-  background: var(--ds-cream);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-lg);
-  box-shadow: var(--ds-shadow-xs);
-}
-
-.user-sidebar__card {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-3);
-  padding-block-end: var(--ds-space-1);
-}
-
-.user-sidebar__avatar {
-  flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--ds-cream-sunken);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ds-indigo);
-  font-family: var(--ds-font-heading);
-  font-weight: var(--ds-weight-semibold);
-  font-size: 16px;
-}
-
-.user-sidebar__avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.user-sidebar__avatar-initial {
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.user-sidebar__identity {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.user-sidebar__name {
-  font-family: var(--ds-font-heading);
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1.3;
-  color: var(--ds-ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.user-sidebar__role {
-  font-family: var(--ds-font-body);
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--ds-taupe);
-}
-
-.user-sidebar__divider {
-  border: 0;
-  height: 1px;
-  width: 100%;
-  background: var(--ds-cream-sunken);
-  margin: var(--ds-space-1) 0;
-}
-
-.user-sidebar__nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.user-sidebar__link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ds-space-3);
-  padding: 12px 16px;
-  border-radius: var(--ds-radius-sm);
-  border-inline-start: 2px solid transparent;
-  font-family: var(--ds-font-body);
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 1.85;
-  color: var(--ds-ink);
-  text-decoration: none;
-  transition:
-    background-color var(--ds-duration-fast) var(--ds-ease-out),
-    color            var(--ds-duration-fast) var(--ds-ease-out),
-    border-color     var(--ds-duration-fast) var(--ds-ease-out);
-}
-
-.user-sidebar__link-icon {
-  flex: 0 0 auto;
-  display: inline-flex;
-  color: var(--ds-indigo);
-}
-
-.user-sidebar__link-label { flex: 1 1 auto; min-width: 0; }
-
-.user-sidebar__link:hover,
-.user-sidebar__link:focus-visible {
-  background: var(--ds-cream-sunken);
-  color: var(--ds-indigo);
-}
-
-.user-sidebar__link.is-active {
-  background: var(--ds-cream-sunken);
-  color: var(--ds-indigo);
-  border-inline-start-color: var(--ds-terracotta);
-}
-
-.user-sidebar__logout {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ds-space-3);
-  padding: 12px 16px;
-  border-radius: var(--ds-radius-sm);
-  font-family: var(--ds-font-body);
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 1.85;
-  color: var(--ds-danger, #B84A3A);
-  cursor: pointer;
-  text-align: start;
-  transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
-
-  .user-sidebar__link-icon { color: var(--ds-danger, #B84A3A); }
-
-  &:hover,
-  &:focus-visible {
-    background: rgba(184, 74, 58, 0.08);
-  }
 }
 </style>

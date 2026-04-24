@@ -57,6 +57,8 @@
           type="button"
           role="tab"
           :aria-selected="statusFilter === chip.value"
+          :aria-pressed="statusFilter === chip.value"
+          :aria-label="`${chip.label} (${chip.count})`"
           class="chip"
           :class="{ 'chip--active': statusFilter === chip.value }"
           @click="statusFilter = chip.value"
@@ -476,49 +478,86 @@ function resetFilters(): void {
   &__chips {
     display: inline-flex;
     flex-wrap: wrap;
-    gap: var(--ds-space-1);
-    padding: 4px;
-    background: var(--ds-surface-muted, rgba(27, 20, 16, 0.04));
-    border-radius: 999px;
-    border: 1px solid var(--ds-border);
+    gap: var(--ds-space-2);
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
   }
 
   .chip {
     display: inline-flex;
     align-items: center;
     gap: var(--ds-space-2);
-    padding: 6px var(--ds-space-3);
+    padding-block: 6px;
+    padding-inline: var(--ds-space-3);
     background: transparent;
-    border: none;
+    border: 1px solid var(--ds-border);
     border-radius: 999px;
     font-family: var(--ds-font-body);
     font-size: var(--ds-text-sm);
-    color: var(--ds-taupe, var(--ds-text-muted));
+    color: var(--ds-text-muted, var(--ds-taupe));
     cursor: pointer;
     transition:
       background-color var(--ds-duration-fast, 150ms) ease,
-      color var(--ds-duration-fast, 150ms) ease;
+      color            var(--ds-duration-fast, 150ms) ease,
+      border-color     var(--ds-duration-fast, 150ms) ease,
+      box-shadow       var(--ds-duration-fast, 150ms) ease;
 
-    &:hover {
-      color: var(--ds-ink, var(--ds-text));
+    &:hover,
+    &:focus-visible {
+      color: var(--ds-brand-600, #322873);
+      border-color: var(--ds-brand-300, #897dc3);
+      background: rgba(50, 40, 115, 0.04);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ds-brand-300, #897dc3);
+      outline-offset: 2px;
     }
 
     &--active {
       background: var(--ds-surface-elevated, #fff);
       color: var(--ds-brand-600, #322873);
+      border-color: var(--ds-brand-600, #322873);
       box-shadow: var(--ds-shadow-xs);
     }
 
+    &--active:hover,
+    &--active:focus-visible {
+      color: var(--ds-brand-600, #322873);
+      border-color: var(--ds-brand-600, #322873);
+      background: var(--ds-surface-elevated, #fff);
+    }
+
+    &__label {
+      line-height: 1;
+    }
+
     &__count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-inline-size: 1.5rem;
+      padding-block: 2px;
+      padding-inline: 6px;
+      border-radius: 999px;
+      background: var(--ds-border);
       font-family: var(--ds-font-mono, var(--ds-font-body));
       font-size: var(--ds-text-xs);
       font-variant-numeric: tabular-nums;
-      color: var(--ds-taupe, var(--ds-text-muted));
-      opacity: 0.85;
+      color: var(--ds-text-muted, var(--ds-taupe));
+      line-height: 1;
+    }
+
+    &:hover &__count,
+    &:focus-visible &__count {
+      color: var(--ds-brand-600, #322873);
     }
 
     &--active &__count {
-      color: var(--ds-brand-600, #322873);
+      background: var(--ds-brand-600, #322873);
+      color: var(--ds-ivory, #fbf6ee);
     }
   }
 

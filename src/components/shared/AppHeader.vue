@@ -93,6 +93,22 @@
       <template #header>
         <span class="app-header__drawer-title">القائمة</span>
       </template>
+
+      <!-- Identity strip (authenticated) -->
+      <div v-if="isAuthenticated" class="app-header__drawer-identity">
+        <span class="app-header__account-avatar app-header__account-avatar--lg">
+          <span v-if="avatarInitial" class="app-header__account-avatar-initial">{{ avatarInitial }}</span>
+          <svg v-else viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+          </svg>
+        </span>
+        <span class="app-header__drawer-identity-text">
+          <span class="app-header__account-name">{{ userDisplayName || 'مرحباً' }}</span>
+          <span class="app-header__account-role">{{ userRoleLabel }}</span>
+        </span>
+      </div>
+
       <nav
         class="app-header__drawer-nav"
         aria-label="التنقل الرئيسي"
@@ -109,6 +125,7 @@
           {{ link.label }}
         </router-link>
       </nav>
+
       <template v-if="showAuthCtas" #footer>
         <div class="app-header__drawer-footer">
           <router-link
@@ -134,7 +151,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import DsButton from 'src/design-system/components/DsButton.vue'
@@ -156,7 +173,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const route = useRoute()
 const auth = useAuthStore()
-const { isAuthenticated } = storeToRefs(auth)
+const { isAuthenticated, user } = storeToRefs(auth)
 
 const isScrolled = ref(false)
 const drawerOpen = ref(false)
@@ -164,19 +181,46 @@ const drawerOpen = ref(false)
 const logoSrc = LOGO.full
 const brandNameAr = BRAND.nameAr
 
+const BASE_LINKS: { to: string; label: string }[] = [
+  { to: '/',        label: 'الرئيسية' },
+  { to: '/courses', label: 'الدورات' },
+  { to: '/cart/',   label: 'السلة' },
+]
+
+const AUTH_LINKS: { to: string; label: string }[] = [
+  { to: '/myCourses',       label: 'دوراتي' },
+  { to: '/Certificates',    label: 'الشهادات' },
+  { to: '/notification',    label: 'الإشعارات' },
+  { to: '/myOrders',        label: 'طلباتي' },
+  { to: '/myMarketingPage', label: 'صفحتي التسويقية' },
+  { to: '/profile',         label: 'الملف الشخصي' },
+]
+
 const navLinks = computed<{ to: string; label: string }[]>(() => {
-  const links = [
-    { to: '/',        label: 'الرئيسية' },
-    { to: '/courses', label: 'الدورات' },
-    { to: '/cart/',   label: 'السلة' }
-  ]
-  if (isAuthenticated.value) {
-    links.push({ to: '/myCourses', label: 'دوراتي' })
-  }
-  return links
+  return isAuthenticated.value ? [...BASE_LINKS, ...AUTH_LINKS] : BASE_LINKS
 })
 
 const showAuthCtas = computed<boolean>(() => props.showAuthCta && !isAuthenticated.value)
+
+const userDisplayName = computed<string>(() => {
+  const u = user.value as Record<string, unknown> | null
+  if (!u) return ''
+  return (u.fullName as string) || (u.name as string) || (u.username as string) || ''
+})
+
+const userRoleLabel = computed<string>(() => {
+  const u = user.value as Record<string, unknown> | null
+  if (!u) return 'متعلم'
+  const role = u.role ?? u.userType
+  if (role === 'trainer' || role === 'TRAINER') return 'مدرب'
+  if (role === 'admin'   || role === 'ADMIN')   return 'مشرف'
+  return 'متعلم'
+})
+
+const avatarInitial = computed<string>(() => {
+  const name = userDisplayName.value
+  return name ? name.trim().charAt(0).toUpperCase() : ''
+})
 
 function onScroll (): void {
   isScrolled.value = window.scrollY > 20
@@ -187,6 +231,10 @@ function isActive (to: string): boolean {
   if (to === '/') return route.path === '/'
   return route.path.indexOf(to) === 0
 }
+
+watch(() => route.path, () => {
+  drawerOpen.value = false
+})
 
 onMounted(() => {
   if (props.sticky && typeof window !== 'undefined') {
@@ -308,8 +356,9 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 32px;
+  gap: clamp(12px, 1.4vw, 22px);
 }
 
 .app-header__nav-item {
@@ -320,8 +369,9 @@ onBeforeUnmount(() => {
   position: relative;
   font-family: var(--ds-font-body);
   font-weight: var(--ds-weight-medium);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.4;
+  white-space: nowrap;
   color: var(--ds-ink);
   text-decoration: none;
   padding-block: var(--ds-space-1);
@@ -408,6 +458,186 @@ onBeforeUnmount(() => {
   }
 }
 
+/* ---------- Account dropdown ---------- */
+.app-header__account {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.app-header__account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: 4px 8px 4px 4px;
+  background: transparent;
+  border: 1px solid var(--ds-border);
+  border-radius: 999px;
+  color: var(--ds-ink);
+  cursor: pointer;
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-out),
+    border-color     var(--ds-duration-fast) var(--ds-ease-out),
+    color            var(--ds-duration-fast) var(--ds-ease-out);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--ds-cream-sunken);
+    border-color: var(--ds-border-strong);
+    color: var(--ds-indigo);
+  }
+}
+
+.app-header--transparent:not(.is-scrolled) .app-header__account-trigger {
+  color: var(--ds-ivory);
+  border-color: var(--ds-border-on-indigo);
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(251, 247, 240, 0.12);
+  }
+}
+
+.app-header__account-avatar {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ds-cream-sunken);
+  color: var(--ds-indigo);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ds-font-heading);
+  font-weight: var(--ds-weight-semibold);
+  font-size: 14px;
+  overflow: hidden;
+
+  &--lg {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+.app-header__account-avatar-initial {
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.app-header__account-caret {
+  transition: transform var(--ds-duration-fast) var(--ds-ease-out);
+
+  &.is-open {
+    transform: rotate(180deg);
+  }
+}
+
+.app-header__account-menu {
+  position: absolute;
+  inset-block-start: calc(100% + var(--ds-space-2));
+  inset-inline-end: 0;
+  min-width: 260px;
+  padding: var(--ds-space-2);
+  background: var(--ds-cream);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-md);
+  z-index: calc(var(--ds-z-sticky) + 1);
+}
+
+.app-header__account-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-2);
+}
+
+.app-header__account-identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app-header__account-name {
+  font-family: var(--ds-font-heading);
+  font-weight: var(--ds-weight-semibold);
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--ds-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-header__account-role {
+  font-family: var(--ds-font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ds-taupe);
+}
+
+.app-header__account-divider {
+  border: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--ds-cream-sunken);
+  margin: var(--ds-space-1) 0;
+}
+
+.app-header__account-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: 10px 12px;
+  border-radius: var(--ds-radius-sm);
+  font-family: var(--ds-font-body);
+  font-weight: var(--ds-weight-medium);
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ds-ink);
+  text-decoration: none;
+  transition:
+    background-color var(--ds-duration-fast) var(--ds-ease-out),
+    color            var(--ds-duration-fast) var(--ds-ease-out);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--ds-cream-sunken);
+    color: var(--ds-indigo);
+  }
+
+  &.is-active {
+    background: var(--ds-cream-sunken);
+    color: var(--ds-indigo);
+  }
+}
+
+.app-header__account-item-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--ds-indigo);
+}
+
+.app-header__account-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Menu transition */
+.app-header-menu-enter-active,
+.app-header-menu-leave-active {
+  transition:
+    opacity var(--ds-duration-fast) var(--ds-ease-out),
+    transform var(--ds-duration-fast) var(--ds-ease-out);
+}
+.app-header-menu-enter-from,
+.app-header-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
 /* ---------- Hamburger (mobile) ---------- */
 .app-header__hamburger {
   display: inline-flex;
@@ -458,6 +688,34 @@ onBeforeUnmount(() => {
   color: var(--ds-indigo);
 }
 
+.app-header__drawer-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3);
+  margin-block-end: var(--ds-space-3);
+  background: var(--ds-cream-sunken);
+  border-radius: var(--ds-radius-md);
+}
+
+.app-header__drawer-identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app-header__drawer-section-label {
+  font-family: var(--ds-font-heading);
+  font-weight: var(--ds-weight-semibold);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ds-taupe);
+  padding: var(--ds-space-2);
+  margin-block-start: var(--ds-space-3);
+}
+
 .app-header__drawer-nav {
   display: flex;
   flex-direction: column;
@@ -473,11 +731,9 @@ onBeforeUnmount(() => {
   text-decoration: none;
   padding: var(--ds-space-3) var(--ds-space-2);
   border-radius: var(--ds-radius-sm);
-  border-inline-end: 3px solid transparent;
   transition:
     background-color var(--ds-duration-fast) var(--ds-ease-out),
-    color            var(--ds-duration-fast) var(--ds-ease-out),
-    border-color     var(--ds-duration-fast) var(--ds-ease-out);
+    color            var(--ds-duration-fast) var(--ds-ease-out);
 
   &:hover,
   &:focus-visible {
@@ -487,8 +743,15 @@ onBeforeUnmount(() => {
 
   &.is-active {
     color: var(--ds-indigo);
-    border-inline-end-color: var(--ds-terracotta);
-    background: rgba(193, 98, 60, 0.06);
+    background: rgba(193, 98, 60, 0.08);
+  }
+
+  &--account {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-3);
+
+    .app-header__account-item-icon { color: var(--ds-indigo); }
   }
 }
 
