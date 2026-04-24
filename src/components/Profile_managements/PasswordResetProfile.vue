@@ -8,7 +8,7 @@
       <li v-for="(m, i) in errorMessages" :key="i">{{ m }}</li>
     </ul>
 
-    <form @submit.prevent="UpdateUserPassowrd" class="pwd-reset__form">
+    <form @submit.prevent="updateUserPassword" class="pwd-reset__form">
       <div class="pwd-reset__grid">
         <q-input
           rounded outlined
@@ -38,72 +38,73 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useMutation } from '@vue/apollo-composable'
+import { useQuasar } from 'quasar'
 import { ChangeUserPassword } from 'src/graphql/account_management/mutation/ChangeUserPassword'
 import { tokenStorage } from 'src/localStorageService'
+import type {
+  ChangePasswordMutationResult,
+  ChangePasswordVariables,
+} from 'src/types/auth/types'
 
-export default {
-  name: 'PasswordResetProfile',
+const $q = useQuasar()
 
-  data () {
-    return {
-      visible: false,
-      oldPassword: '',
-      newPassword1: '',
-      newPassword2: '',
-      errorMessages: []
-    }
-  },
+const visible = ref(false)
+const oldPassword = ref('')
+const newPassword1 = ref('')
+const newPassword2 = ref('')
+const errorMessages = ref<string[]>([])
 
-  methods: {
-    errorHandler (errorsObj) {
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) this.errorMessages.push(val.message)
-      }
-    },
+const { mutate: changePassword } = useMutation<ChangePasswordMutationResult, ChangePasswordVariables>(
+  ChangeUserPassword,
+)
 
-    resetFields () {
-      this.oldPassword = ''
-      this.newPassword1 = ''
-      this.newPassword2 = ''
-    },
-
-    async UpdateUserPassowrd () {
-      if (!this.oldPassword) return
-      if (this.newPassword1 !== this.newPassword2) {
-        this.errorMessages = ['passwords are not the same']
-        return
-      }
-      this.errorMessages = []
-      this.visible = true
-      try {
-        const result = await this.$apollo.mutate({
-          mutation: ChangeUserPassword,
-          variables: {
-            oldPassword: this.oldPassword,
-            newPassword1: this.newPassword1,
-            newPassword2: this.newPassword2
-          }
-        })
-        if (result.data.passwordChange.success) {
-          this.resetFields()
-          tokenStorage.setToken({
-            token: result.data.passwordChange.token,
-            refresh: result.data.passwordChange.refreshToken
-          })
-          this.$q.notify({
-            type: 'positive',
-            multiLine: true,
-            progress: true,
-            message: 'Password was changed successfully'
-          })
-        } else if (result.data.passwordChange.errors) {
-          this.errorHandler(result.data.passwordChange.errors)
-        }
-      } catch (e) { /* apolloProvider surfaces */ }
-      finally { this.visible = false }
-    }
+function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
+  for (const key in errorsObj) {
+    for (const val of errorsObj[key]) errorMessages.value.push(val.message)
   }
+}
+
+function resetFields (): void {
+  oldPassword.value = ''
+  newPassword1.value = ''
+  newPassword2.value = ''
+}
+
+async function updateUserPassword (): Promise<void> {
+  if (!oldPassword.value) return
+  if (newPassword1.value !== newPassword2.value) {
+    errorMessages.value = ['passwords are not the same']
+    return
+  }
+  errorMessages.value = []
+  visible.value = true
+  try {
+    const result = await changePassword({
+      oldPassword: oldPassword.value,
+      newPassword1: newPassword1.value,
+      newPassword2: newPassword2.value,
+    })
+    const passwordChange = result?.data?.passwordChange
+    if (passwordChange?.success) {
+      resetFields()
+      tokenStorage.setToken({
+        token: passwordChange.token,
+        refresh: passwordChange.refreshToken,
+      })
+      $q.notify({
+        type: 'positive',
+        multiLine: true,
+        progress: true,
+        message: 'Password was changed successfully',
+      })
+    } else if (passwordChange?.errors) {
+      errorHandler(passwordChange.errors as Record<string, Array<{ message: string }>>)
+    }
+  } catch { /* apolloProvider surfaces */ }
+  finally { visible.value = false }
 }
 </script>
 

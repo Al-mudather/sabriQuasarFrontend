@@ -1531,18 +1531,14 @@ have about working with the API.
   </main>
 </template>
 
-<script>
-import { useSettingsStore } from 'src/stores/settings'
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { useSettingsStore } from 'src/stores/settings'
 
-export default {
-  name: 'PrivacyPolicy',
-  setup () {
-    const settings = useSettingsStore()
-    const { isEnglish } = storeToRefs(settings)
-    return { isEnglish }
-  }
-}
+defineOptions({ name: 'PrivacyPolicy' })
+
+const settings = useSettingsStore()
+const { isEnglish } = storeToRefs(settings)
 </script>
 
 <style lang="scss" scoped>

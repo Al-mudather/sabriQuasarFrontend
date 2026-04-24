@@ -1,229 +1,158 @@
 <template>
-    <div class="social">
-        <!-- <img src="~assets/img/facebook.png" alt="" /> -->
-        <q-btn class="full-width" :label="label" icon="la la-facebook" @click="helloFacebookAuth" color="primary" />
-        <q-inner-loading :showing="visible">
-            <q-spinner-hourglass color="primary" size="70px" />
-        </q-inner-loading>
-    </div>
+  <div class="social">
+    <q-btn class="full-width" :label="label" icon="la la-facebook" @click="helloFacebookAuth" color="primary" />
+    <q-inner-loading :showing="visible">
+      <q-spinner-hourglass color="primary" size="70px" />
+    </q-inner-loading>
+  </div>
 </template>
 
-<script>
-/**
- * Auth feature types handled by this component.
- *
- * @typedef {import('src/types/auth/types').SocialAuthMutationResult} SocialAuthMutationResult
- * @typedef {import('src/types/auth/types').SocialAuthVariables} SocialAuthVariables
- * @typedef {import('src/types/auth/types').SocialAuthResult} SocialAuthResult
- * @typedef {import('src/types/auth/types').SocialAuthProfile} SocialAuthProfile
- */
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
+import { apolloClient } from 'src/apollo/client'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { SocialAuth } from 'src/graphql/account_management/mutation/CreateSocailAuth'
 import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
-import { SocialAuth } from "src/graphql/account_management/mutation/CreateSocailAuth";
 import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
-import { useAuthStore } from "src/stores/auth";
-import { useSettingsStore } from "src/stores/settings";
-import { usePyramidStore } from "src/stores/pyramid";
-import { apolloClient } from "src/apollo/client";
+import type { SocialAuthMutationResult, SocialAuthVariables } from 'src/types/auth/types'
 
-export default {
-    name: "FacebookAuthentication",
-    setup () {
-        const auth = useAuthStore();
-        const settings = useSettingsStore();
-        const pyramid = usePyramidStore();
-        return { auth, settings, pyramid };
-    },
-    data () {
-        return {
-            visible: false
-        }
-    },
+interface Props {
+  prevRoute?: string | null
+  label?: string
+}
 
-    props:['prevRoute', 'label'],
+defineProps<Props>()
 
-    methods: {
+const { t } = useI18n()
+const router = useRouter()
+const $q = useQuasar()
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const pyramid = usePyramidStore()
 
-        GoToHomePage() {
-            this.$router.push({ name: "Home" });
-        },
+const visible = ref(false)
 
-        async IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE () {
-            try {
-                const res = await apolloClient.query({
-                    query: AllEnrollmentsForCurrentUser,
-                })
+async function isUserEnrolled (): Promise<boolean> {
+  try {
+    const res = await apolloClient.query({ query: AllEnrollmentsForCurrentUser })
+    return (res.data?.allEnrollmentsForCurrentUser?.edges?.length ?? 0) > 0
+  } catch {
+    return false
+  }
+}
 
-                if (res.data.allEnrollmentsForCurrentUser.edges.length > 0) {
-                    return true
-                } else {
-                    return false
-                }
-
-            } catch (error) {
-                return false
-            }
-        },
-
-        async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
-            try {
-                const join_permission_res = await apolloClient.query({query: CheckTheUserPermissionToUsePlatforme})
-                //TODO:If the user is a marketer, then git his marketing code
-                this.pyramid.fetchMyMarketingCode()
-                //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
-                const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
-                //TODO: delete the marketer code
-                this.pyramid.setMyMarketingCode('')
-                if (res) {
-                    this.$router.push({ name: "my-courses" })
-                } else {
-                    this.$router.push({ name: "Home" })
-                }
-            } catch (e) {
-                if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-                    this.$q.notify({
-                        type: 'positive',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: 'You must inter the registeration code'
-                    })
-                    // TODO: Go to code registeration page
-                    this.$router.push({ name: 'registeration-code' })
-                }
-
-            }
-        },
-        // TODO: Google and Facebook Register
-        loginAuthMutation(accessToken, provider, email = "") {
-            this.visible = true
-            apolloClient
-                .mutate(/** @type {{ mutation: unknown, variables: SocialAuthVariables }} */ ({
-                    mutation: SocialAuth,
-                    variables: {
-                        provider: provider,
-                        accessToken: accessToken,
-                        email: email
-                    }
-                }))
-                .then(result => {
-                    this.visible = false
-                    /** @type {SocialAuthResult} */
-                    const userData = result.data.socialAuth
-                    if (userData) {
-                        Promise.resolve(this.auth.login(userData)).then(() => {
-
-                            try {
-                                const userCur = userData.social.user.userCurrency
-                                if (userCur) {
-                                    userCur == 'SDG' ? this.settings.setCurrency('SDG') : this.settings.setCurrency('USD')
-                                }
-
-                                //TODO: Set the external user id for notification
-                                let externalUserId = userData.social.user.email; // You will supply the external user id to the OneSignal SDK 
-                                OneSignal.push(function() { 
-                                    OneSignal.setExternalUserId(externalUserId); 
-                                });
-                            } catch (error) {
-                            }
-                            // TODO: Go To the home page
-                            if (userData.token) {
-                                this.$q.notify({
-                                    type: 'positive',
-                                    progress: true,
-                                    multiLine: true,
-                                    position: 'top',
-                                    message: this.$t('تم تسجيل الدخول بنجاح')
-                                })
-                                // TODO: See if the user thas the reqisteration code
-                                this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
-                                // this.$router.push({ name: 'registeration-code' })
-                            }
-                        });
-                    }
-                }).catch((error) => {
-                    this.visible = false
-                });
-        },
-
-        helloFacebookAuth(network = "facebook") {
-            const hello = this.hello;
-
-            this.$jquery(document).ready( () => {
-                this.$jquery.ajaxSetup({ cache: true });
-                this.$jquery.getScript('https://connect.facebook.net/en_US/sdk.js', () => {
-                    FB.init({
-                        appId: '757236575189030',
-                        version: 'v2.7',
-                        cookie     : true,                     // Enable cookies to allow the server to access the session.
-                        xfbml      : true,
-                    }); 
-                    this.$jquery('#loginbutton,#feedbutton').removeAttr('disabled');
-
-                    FB.logout( (out) => {
-                    } )
-
-                    FB.login( (log_res) => {
-                        if (log_res.status === 'connected') {
-                            FB.getLoginStatus( (res) => {
-                                const access_token = res.authResponse.accessToken
-                                    hello('facebook')
-                                    .api(`/me?access_token=${access_token}`)
-                                    .then( (res_data) => {
-                                        const email = res_data.email
-
-                                        this.loginAuthMutation(
-                                            access_token,
-                                            "facebook",
-                                            email
-                                        );
-                                    } )
-                            } );
-                        } else {
-                        }
-                    }, {scope: 'email'} );
-                });
-            });
-
-
-            // hello('facebook')
-            // .login({
-            //     scope: "public_profile,email",
-            //     force: true
-            // })
-            // .then(r => {
-            //     const access_token = r.authResponse.access_token
-
-            //     // Call user information, for the given network
-            //     hello('facebook')
-            //     .api(`/me?access_token=${access_token}`)
-            //     .then(res => {
-
-            //         // var facebookRes = hello('facebook').getAuthResponse();
-            //         // console.log("lllllllllllllllll");
-            //         // console.log(res);
-            //         // console.log("lllllllllllllllll");
-            //         try {
-            //             this.loginAuthMutation(
-            //                 access_token,
-            //                 "facebook",
-            //                 res.email
-            //             );
-            //         } catch (error) {
-            //             console.log("eeeeeeeeeeeeeeeeeeeee");
-            //             console.log(error);
-            //             console.log("eeeeeeeeeeeeeeeeeeeee");
-            //         }
-            //     }, (e) => {
-            //         console.log("eeeeeeeeeeeeeeeeeeeee");
-            //         console.log(e);
-            //         console.log("eeeeeeeeeeeeeeeeeeeee");
-            //     }
-
-            //     );
-            // });
-        }
+async function checkRegistrationCode (): Promise<void> {
+  try {
+    await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
+    pyramid.fetchMyMarketingCode()
+    const hasCourses = await isUserEnrolled()
+    pyramid.setMyMarketingCode('')
+    void router.push({ name: hasCourses ? 'my-courses' : 'Home' })
+  } catch (e: unknown) {
+    const err = e as { message?: string }
+    if (err.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
+      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: 'You must inter the registeration code' })
+      void router.push({ name: 'registeration-code' })
     }
-};
+  }
+}
+
+async function loginAuthMutation (accessToken: string, provider: string, email = ''): Promise<void> {
+  visible.value = true
+  try {
+    const result = await apolloClient.mutate<SocialAuthMutationResult, SocialAuthVariables>({
+      mutation: SocialAuth,
+      variables: { provider, accessToken, email }
+    })
+    const userData = result?.data?.socialAuth
+    if (userData) {
+      await auth.login(userData)
+      try {
+        const userCur = userData.social?.user?.userCurrency
+        if (userCur) settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')
+
+        const userEmail = userData.social?.user?.email
+        if (userEmail && typeof window !== 'undefined' && 'OneSignal' in window) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(window as any).OneSignal.push(function () {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ;(window as any).OneSignal.setExternalUserId(userEmail)
+          })
+        }
+      } catch { /* OneSignal optional */ }
+
+      if (userData.token) {
+        $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: t('تم تسجيل الدخول بنجاح') })
+        await checkRegistrationCode()
+      }
+    }
+  } catch {
+    /* silent — FB errors handled by SDK overlay */
+  } finally {
+    visible.value = false
+  }
+}
+
+function helloFacebookAuth (): void {
+  // Runtime guard: FB SDK is loaded dynamically below via a script injection.
+  // We do not call window.FB directly — instead we inject the SDK and call FB
+  // only once it confirms it is available (FB.init callback). The `FB` global
+  // is declared below using a loose window cast to avoid @ts-expect-error.
+  if (typeof window === 'undefined') return
+
+  const win = window as Window & {
+    FB?: {
+      init: (opts: Record<string, unknown>) => void
+      logout: (cb: () => void) => void
+      login: (cb: (res: { status: string }) => void, opts: { scope: string }) => void
+      getLoginStatus: (cb: (res: { authResponse: { accessToken: string } }) => void) => void
+    }
+    hello?: (network: string) => {
+      api: (path: string) => Promise<{ email?: string }>
+    }
+  }
+
+  const jq = (win as unknown as { jQuery?: (sel: unknown) => { ready: (fn: () => void) => void; ajaxSetup: (opts: Record<string, unknown>) => void; getScript: (url: string, cb: () => void) => void } }).jQuery
+
+  if (!jq) {
+    // jQuery not available — skip Facebook auth
+    return
+  }
+
+  jq(document).ready(() => {
+    jq.ajaxSetup({ cache: true })
+    jq.getScript('https://connect.facebook.net/en_US/sdk.js', () => {
+      if (!win.FB) return
+      win.FB.init({
+        appId: '757236575189030',
+        version: 'v2.7',
+        cookie: true,
+        xfbml: true,
+      })
+
+      win.FB.logout(() => { /* clear any stale session */ })
+
+      win.FB.login((logRes) => {
+        if (logRes.status === 'connected') {
+          win.FB!.getLoginStatus((res) => {
+            const accessToken = res.authResponse.accessToken
+            if (!win.hello) return
+            void win.hello('facebook')
+              .api(`/me?access_token=${accessToken}`)
+              .then((resData) => {
+                void loginAuthMutation(accessToken, 'facebook', resData.email ?? '')
+              })
+          })
+        }
+      }, { scope: 'email' })
+    })
+  })
+}
 </script>
 
 <style lang="scss" scoped>

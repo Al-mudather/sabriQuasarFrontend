@@ -30,10 +30,8 @@
   </section>
 </template>
 
-<script>
-export default {
-  name: 'TestimonialSpread'
-}
+<script setup lang="ts">
+// No props, no store access — pure presentational.
 </script>
 
 <style lang="scss" scoped>

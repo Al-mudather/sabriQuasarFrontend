@@ -19,11 +19,11 @@
     </div>
 
     <ul v-else class="course-units__list">
-      <li v-for="(unit, idx) in units" :key="$_.get(unit, '[node][pk]')" class="unit">
+      <li v-for="(edge, idx) in units" :key="edge.node?.pk ?? idx" class="unit">
         <details :open="idx === 0">
           <summary class="unit__head">
             <span class="unit__index">{{ idx + 1 }}</span>
-            <span class="unit__title">{{ $_.get(unit, '[node][title]') }}</span>
+            <span class="unit__title">{{ edge.node?.title ?? '' }}</span>
             <svg
               class="unit__chevron"
               viewBox="0 0 16 16"
@@ -35,25 +35,25 @@
           </summary>
 
           <div class="unit__body">
-            <template v-if="$_.get(unit, '[node][isExternal]')">
+            <template v-if="edge.node?.isExternal">
               <div
-                v-for="content in $_.get(unit, '[node][external][courseunitcontentSet][edges]')"
-                :key="$_.get(content, '[node][pk]')"
+                v-for="content in (edge.node.external?.courseunitcontentSet?.edges ?? [])"
+                :key="content?.node?.pk ?? ''"
               >
                 <content-item
-                  v-if="isRenderableContent(content)"
-                  :content="content.node"
+                  v-if="isRenderableContent(content?.node?.modelName)"
+                  :content="content!.node!"
                 />
               </div>
             </template>
             <template v-else>
               <div
-                v-for="content in $_.get(unit, '[node][courseunitcontentSet][edges]')"
-                :key="$_.get(content, '[node][pk]')"
+                v-for="content in (edge.node?.courseunitcontentSet?.edges ?? [])"
+                :key="content?.node?.pk ?? ''"
               >
                 <content-item
-                  v-if="isRenderableContent(content)"
-                  :content="content.node"
+                  v-if="isRenderableContent(content?.node?.modelName)"
+                  :content="content!.node!"
                 />
               </div>
             </template>
@@ -64,40 +64,45 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import contentItem from 'components/courseDetails/contentItem.vue'
 import { GetAllCourseUnitsByCourseID } from 'src/graphql/course_management/query/GetAllCourseUnitsByCourseID'
+import type {
+  GetAllCourseUnitsByCourseIdResult,
+  GetAllCourseUnitsByCourseIdVars,
+} from 'src/types/courses/types'
+
+type UnitEdge = NonNullable<
+  NonNullable<GetAllCourseUnitsByCourseIdResult['allCourseUnits']>['edges'][number]
+>
 
 const RENDERABLE = ['ContentVideo', 'ContentFile', 'ContentQuiz']
 
-export default {
-  name: 'courseUnits',
-  components: { contentItem },
-  props: ['course_id'],
+const props = defineProps<{
+  course_id: string
+}>()
 
-  setup (props) {
-    const { result, loading: qLoading } = useQuery(
-      GetAllCourseUnitsByCourseID,
-      () => ({ courseID: props.course_id, limit: 5 }),
-      { errorPolicy: 'all' }
-    )
-    const allUnitsData = computed(() => result.value?.allCourseUnits || [])
-    return { allUnitsData, qLoading }
-  },
+const { result, loading: qLoading } = useQuery<GetAllCourseUnitsByCourseIdResult, GetAllCourseUnitsByCourseIdVars>(
+  GetAllCourseUnitsByCourseID,
+  () => ({ courseID: props.course_id, limit: 5 }),
+  { errorPolicy: 'all' },
+)
 
-  computed: {
-    units () { return this.$_.get(this.allUnitsData, 'edges', []) || [] },
-    totalUnits () { return this.$_.get(this.allUnitsData, 'totalCount', this.units.length) },
-    loading () { return this.qLoading && this.units.length === 0 }
-  },
+const units = computed(
+  () => (result.value?.allCourseUnits?.edges ?? [])
+    .filter((e): e is UnitEdge => !!e && !!e.node),
+)
 
-  methods: {
-    isRenderableContent (content) {
-      return RENDERABLE.includes(this.$_.get(content, '[node][modelName]'))
-    }
-  }
+const totalUnits = computed(
+  () => result.value?.allCourseUnits?.totalCount ?? units.value.length,
+)
+
+const loading = computed(() => qLoading.value && units.value.length === 0)
+
+function isRenderableContent (modelName: string | null | undefined): boolean {
+  return RENDERABLE.includes(modelName ?? '')
 }
 </script>
 

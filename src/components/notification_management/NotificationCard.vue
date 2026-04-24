@@ -1,5 +1,11 @@
 <template>
-  <article class="notif-card" @click="goToTheNotificationSource" role="button" tabindex="0" @keydown.enter="goToTheNotificationSource">
+  <article
+    class="notif-card"
+    role="button"
+    tabindex="0"
+    @click="goToTheNotificationSource"
+    @keydown.enter="goToTheNotificationSource"
+  >
     <img src="~assets/img/man.png" alt="" class="notif-card__avatar" />
     <div class="notif-card__body">
       <p v-if="notification.type === 'QUESTION_ASK'">
@@ -21,32 +27,38 @@
   </article>
 </template>
 
-<script>
-export default {
-  name: 'NotificationCard',
-  props: ['notification'],
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import type { Notification } from 'src/types/notifications/types'
 
-  data () { return { courseID: '' } },
+interface Props {
+  notification: Notification
+}
 
-  mounted () {
-    const type = this.$_.get(this.notification, '[type]')
-    if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
-      const extraData = this.$_.get(this.notification, '[extraData]', '')
-      try {
-        this.courseID = parseInt(extraData.split('::')[0].split(' ')[1].replace('>', ''))
-      } catch (e) { /* malformed payload; ignore */ }
-    }
-  },
+const props = defineProps<Props>()
 
-  methods: {
-    goToTheNotificationSource () {
-      const type = this.$_.get(this.notification, '[type]')
-      if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
-        window.location.href = `${location.origin}/classroom/#/class/${this.courseID}/`
-      } else if (type === 'CHECKOUT_DONE') {
-        this.$router.push({ name: 'my-courses' })
-      }
-    }
+const router = useRouter()
+const courseID = ref('')
+
+onMounted(() => {
+  const type = props.notification?.type
+  if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
+    const extraData = props.notification?.extraData ?? ''
+    try {
+      courseID.value = String(
+        parseInt(String(extraData).split('::')[0].split(' ')[1].replace('>', ''))
+      )
+    } catch { /* malformed payload; ignore */ }
+  }
+})
+
+function goToTheNotificationSource (): void {
+  const type = props.notification?.type
+  if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
+    window.location.href = `${location.origin}/classroom/#/class/${courseID.value}/`
+  } else if (type === 'CHECKOUT_DONE') {
+    void router.push({ name: 'my-courses' })
   }
 }
 </script>

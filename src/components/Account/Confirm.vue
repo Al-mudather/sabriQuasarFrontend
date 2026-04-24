@@ -8,12 +8,12 @@
     </div>
 
     <header class="auth-card__head">
-      <h1 class="auth-card__title">{{ $t('تم إرسال رابط التفعيل') }}</h1>
+      <h1 class="auth-card__title">{{ t('تم إرسال رابط التفعيل') }}</h1>
       <p class="auth-card__subtitle">
-        {{ $t('أرسلنا لك رابط تفعيل على بريدك الإلكتروني. افتح الرابط لإكمال التحقق من الحساب.') }}
+        {{ t('أرسلنا لك رابط تفعيل على بريدك الإلكتروني. افتح الرابط لإكمال التحقق من الحساب.') }}
       </p>
       <p class="auth-card__hint">
-        {{ $t('لم يصلك الرابط؟ أعد الإرسال من هنا.') }}
+        {{ t('لم يصلك الرابط؟ أعد الإرسال من هنا.') }}
       </p>
     </header>
 
@@ -21,105 +21,108 @@
       <ds-input
         v-model="email"
         type="email"
-        :label="$t('البريد الإلكتروني')"
+        :label="t('البريد الإلكتروني')"
         autocomplete="email"
         autofocus
-        @keydown.enter="RESEND_USER_EMAIL"
+        @keydown.enter="resendUserEmail"
       />
       <ds-button
         variant="accent"
         size="lg"
         full-width
         :loading="loader"
-        @click="RESEND_USER_EMAIL"
+        @click="resendUserEmail"
       >
-        {{ $t('إرسال') }}
+        {{ t('إرسال') }}
       </ds-button>
       <ds-button variant="ghost" size="lg" full-width @click="showResend = false">
-        {{ $t('إلغاء') }}
+        {{ t('إلغاء') }}
       </ds-button>
     </div>
 
     <div v-else class="auth-card__actions">
       <ds-button variant="accent" size="lg" full-width @click="showResend = true">
-        {{ $t('إعادة الإرسال') }}
+        {{ t('إعادة الإرسال') }}
       </ds-button>
-      <ds-button variant="ghost" size="lg" full-width @click="GoToHomePage">
-        {{ $t('العودة إلى الرئيسية') }}
+      <ds-button variant="ghost" size="lg" full-width @click="goToHomePage">
+        {{ t('العودة إلى الرئيسية') }}
       </ds-button>
     </div>
   </div>
 </template>
 
-<script>
-/**
- * Auth feature types handled by this component.
- *
- * @typedef {import('src/types/auth/types').ResendActivationEmailResult} ResendActivationEmailResult
- * @typedef {import('src/types/auth/types').ResendActivationEmailVariables} ResendActivationEmailVariables
- */
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
+import { useMutation } from '@vue/apollo-composable'
 import { ResendActivationEmail } from 'src/graphql/account_management/mutation/ResendActivationEmail'
 import DsInput from 'src/design-system/components/DsInput.vue'
+import type { ResendActivationEmailResult, ResendActivationEmailVariables } from 'src/types/auth/types'
 
-export default {
-  name: 'Confirm',
-  components: { DsInput },
+const { t } = useI18n()
+const router = useRouter()
+const $q = useQuasar()
 
-  data () { return { showResend: false, loader: false, email: '' } },
+const showResend = ref(false)
+const loader = ref(false)
+const email = ref('')
 
-  methods: {
-    GoToHomePage () { this.$router.push({ name: 'Home' }) },
+const { mutate: resendEmail } = useMutation<ResendActivationEmailResult, ResendActivationEmailVariables>(
+  ResendActivationEmail
+)
 
-    errorHandler (errorsObj) {
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          this.$q.notify({
-            type: 'warning',
-            progress: true,
-            multiLine: true,
-            position: 'top',
-            message: val.message
-          })
-        }
-      }
-    },
+function goToHomePage (): void {
+  void router.push({ name: 'Home' })
+}
 
-    async RESEND_USER_EMAIL () {
-      if (!this.email) {
-        this.$q.notify({
-          type: 'warning',
-          progress: true,
-          multiLine: true,
-          position: 'top',
-          message: this.$t('بريدك الإلكتروني مطلوب')
-        })
-        return
-      }
-      this.loader = true
-      try {
-        /** @type {{ data: ResendActivationEmailResult }} */
-        const result = await this.$apollo.mutate({
-          mutation: ResendActivationEmail,
-          variables: /** @type {ResendActivationEmailVariables} */ ({ email: this.email })
-        })
-        if (result.data.resendActivationEmail.success) {
-          this.$q.notify({
-            type: 'positive',
-            progress: true,
-            multiLine: true,
-            position: 'top',
-            message: this.$t('تم إرسال البريد بنجاح')
-          })
-          this.showResend = false
-        } else if (result.data.resendActivationEmail.errors) {
-          this.errorHandler(result.data.resendActivationEmail.errors)
-        }
-      } catch (error) {
-        if (error && error.errors) this.errorHandler(error.errors)
-      } finally {
-        this.loader = false
-      }
+function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
+  for (const key in errorsObj) {
+    for (const val of errorsObj[key]) {
+      $q.notify({
+        type: 'warning',
+        progress: true,
+        multiLine: true,
+        position: 'top',
+        message: val.message
+      })
     }
+  }
+}
+
+async function resendUserEmail (): Promise<void> {
+  if (!email.value) {
+    $q.notify({
+      type: 'warning',
+      progress: true,
+      multiLine: true,
+      position: 'top',
+      message: t('بريدك الإلكتروني مطلوب')
+    })
+    return
+  }
+  loader.value = true
+  try {
+    const result = await resendEmail({ email: email.value })
+    const payload = result?.data?.resendActivationEmail
+    if (payload?.success) {
+      $q.notify({
+        type: 'positive',
+        progress: true,
+        multiLine: true,
+        position: 'top',
+        message: t('تم إرسال البريد بنجاح')
+      })
+      showResend.value = false
+    } else if (payload?.errors) {
+      errorHandler(payload.errors as Record<string, Array<{ message: string }>>)
+    }
+  } catch (error: unknown) {
+    const err = error as { errors?: Record<string, Array<{ message: string }>> }
+    if (err.errors) errorHandler(err.errors)
+  } finally {
+    loader.value = false
   }
 }
 </script>

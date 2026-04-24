@@ -2,10 +2,8 @@
     <div>
     </div>
 </template>
-<script>
-export default {
-  name: 'emptyContainer'
-}
+<script setup lang="ts">
+// intentionally empty — component is a layout placeholder
 </script>
 <style>
 

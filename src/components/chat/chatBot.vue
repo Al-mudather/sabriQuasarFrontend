@@ -114,148 +114,113 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "MudassirChat",
-  data() {
-    return {
-      userInput: "",
-      chatHistory: [],
-      isTyping: false,
-      chatOpen: false,
-      hasNewMessage: false,
-      unreadCount: 0,
-    };
+<script setup lang="ts">
+import { ref, watch, nextTick } from 'vue'
+
+interface ChatMessage {
+  sender: 'user' | 'assistant'
+  text: string
+  timestamp: Date
+}
+
+const messagesContainer = ref<HTMLElement | null>(null)
+
+const userInput = ref('')
+const chatHistory = ref<ChatMessage[]>([])
+const isTyping = ref(false)
+const chatOpen = ref(false)
+const hasNewMessage = ref(false)
+const unreadCount = ref(0)
+
+function toggleChat (): void {
+  chatOpen.value = !chatOpen.value
+  if (chatOpen.value) {
+    hasNewMessage.value = false
+    unreadCount.value = 0
+    nextTick(() => scrollToBottom())
+  }
+}
+
+async function sendMessage (): Promise<void> {
+  const input = userInput.value.trim()
+  if (!input || isTyping.value) return
+
+  chatHistory.value.push({ sender: 'user', text: input, timestamp: new Date() })
+  userInput.value = ''
+  isTyping.value = true
+  nextTick(() => scrollToBottom())
+
+  try {
+    const res = await fetch('https://tz8k0f84.rpcl.host/webhook/stc-support', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: input })
+    })
+
+    const data = await res.json() as unknown
+
+    let fullResponse = 'عذراً، لم أتمكن من فهم ذلك.'
+    if (data) {
+      if (Array.isArray(data) && (data[0] as Record<string, unknown>)?.output) {
+        fullResponse = String((data[0] as Record<string, unknown>).output)
+      } else if ((data as Record<string, unknown>).output) {
+        fullResponse = String((data as Record<string, unknown>).output)
+      } else if ((data as Record<string, unknown>).reply) {
+        fullResponse = String((data as Record<string, unknown>).reply)
+      }
+    }
+
+    await typeMessage(fullResponse)
+  } catch (error) {
+    console.error('Chat error:', error)
+    chatHistory.value.push({
+      sender: 'assistant',
+      text: 'عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.',
+      timestamp: new Date()
+    })
+  }
+
+  isTyping.value = false
+  nextTick(() => scrollToBottom())
+}
+
+async function typeMessage (message: string): Promise<void> {
+  let displayed = ''
+  const messageObj: ChatMessage = { sender: 'assistant', text: '', timestamp: new Date() }
+  chatHistory.value.push(messageObj)
+
+  for (let i = 0; i < message.length; i++) {
+    displayed += message[i]
+    messageObj.text = displayed
+    await new Promise<void>((r) => setTimeout(r, 30))
+    nextTick(() => scrollToBottom())
+  }
+}
+
+function scrollToBottom (): void {
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+  }
+}
+
+function formatTime (timestamp: Date | null): string {
+  if (!timestamp) return ''
+  return new Date(timestamp).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' })
+}
+
+watch(
+  chatHistory,
+  (newHistory) => {
+    if (!chatOpen.value && newHistory.length > 0) {
+      const lastMessage = newHistory[newHistory.length - 1]
+      if (lastMessage.sender === 'assistant') {
+        hasNewMessage.value = true
+        unreadCount.value++
+      }
+    }
   },
-  methods: {
-    toggleChat() {
-      this.chatOpen = !this.chatOpen;
-      if (this.chatOpen) {
-        this.hasNewMessage = false;
-        this.unreadCount = 0;
-        this.$nextTick(() => {
-          this.scrollToBottom();
-        });
-      }
-    },
-
-    async sendMessage() {
-      const input = this.userInput.trim();
-      if (!input || this.isTyping) return;
-
-      // Add user message
-      this.chatHistory.push({
-        sender: "user",
-        text: input,
-        timestamp: new Date(),
-      });
-
-      this.userInput = "";
-      this.isTyping = true;
-
-      this.$nextTick(() => {
-        this.scrollToBottom();
-      });
-
-      try {
-        // Send to n8n webhook
-        const res = await fetch(
-          "https://tz8k0f84.rpcl.host/webhook/stc-support",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: input }),
-          }
-        );
-
-        const data = await res.json();
-
-        // Extract response from n8n webhook - handle both array and object formats
-        let fullResponse = "عذراً، لم أتمكن من فهم ذلك.";
-
-        if (data) {
-          // If response is an array, get first element's output
-          if (Array.isArray(data) && data[0] && data[0].output) {
-            fullResponse = data[0].output;
-          }
-          // If response is direct object with output field
-          else if (data.output) {
-            fullResponse = data.output;
-          }
-          // Fallback: check for reply field (original format)
-          else if (data.reply) {
-            fullResponse = data.reply;
-          }
-        }
-
-        // Simulate typing effect with real response
-        await this.typeMessage(fullResponse);
-      } catch (error) {
-        console.error("Chat error:", error);
-        this.chatHistory.push({
-          sender: "assistant",
-          text: "عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.",
-          timestamp: new Date(),
-        });
-      }
-
-      this.isTyping = false;
-      this.$nextTick(() => {
-        this.scrollToBottom();
-      });
-    },
-
-    async typeMessage(message) {
-      let displayed = "";
-      const messageObj = {
-        sender: "assistant",
-        text: "",
-        timestamp: new Date(),
-      };
-
-      this.chatHistory.push(messageObj);
-
-      for (let i = 0; i < message.length; i++) {
-        displayed += message[i];
-        messageObj.text = displayed;
-        await new Promise((r) => setTimeout(r, 30));
-        this.$nextTick(() => {
-          this.scrollToBottom();
-        });
-      }
-    },
-
-    scrollToBottom() {
-      if (this.$refs.messagesContainer) {
-        this.$refs.messagesContainer.scrollTop =
-          this.$refs.messagesContainer.scrollHeight;
-      }
-    },
-
-    formatTime(timestamp) {
-      if (!timestamp) return "";
-      return new Date(timestamp).toLocaleTimeString("ar", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    },
-  },
-
-  watch: {
-    chatHistory: {
-      handler(newHistory) {
-        if (!this.chatOpen && newHistory.length > 0) {
-          const lastMessage = newHistory[newHistory.length - 1];
-          if (lastMessage.sender === "assistant") {
-            this.hasNewMessage = true;
-            this.unreadCount++;
-          }
-        }
-      },
-      deep: true,
-    },
-  },
-};
+  { deep: true }
+)
 </script>
 
 <style lang="scss" scoped>

@@ -5,11 +5,11 @@
     </header>
 
     <ul v-if="points.length" class="cd-learn-list">
-      <li v-for="point in points" :key="point.node.id">
+      <li v-for="edge in points" :key="edge.node?.id ?? ''">
         <svg class="cd-learn-list__check" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        <span>{{ point.node.points }}</span>
+        <span>{{ edge.node?.points }}</span>
       </li>
     </ul>
 
@@ -33,54 +33,71 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { GetAllWhatYouWillLearnByCourseID } from 'src/graphql/course_management/query/GetAllWhatYouWillLearnByCourseID'
+import type {
+  GetAllWhatYouWillLearnByCourseIdResult,
+  GetAllWhatYouWillLearnByCourseIdVars,
+} from 'src/types/courses/types'
 
-export default {
-  name: 'WhatIwillLearn',
-  props: ['course_id'],
+type OutcomeEdge = NonNullable<
+  NonNullable<GetAllWhatYouWillLearnByCourseIdResult['allWhatYouWillLearn']>['edges'][number]
+>
 
-  setup (props) {
-    const { result, loading, fetchMore } = useQuery(
-      GetAllWhatYouWillLearnByCourseID,
-      () => ({ courseID: props.course_id, limit: 5 }),
-      { errorPolicy: 'all' }
-    )
-    const allWhatYouWillLearn = computed(() => result.value?.allWhatYouWillLearn || { pageInfo: { hasNextPage: '' } })
-    return { allWhatYouWillLearn, loading, fetchMore }
-  },
+const props = defineProps<{
+  course_id: string
+}>()
 
-  computed: {
-    points () { return this.$_.get(this.allWhatYouWillLearn, 'edges', []) || [] },
-    hasNextPage () { return this.$_.get(this.allWhatYouWillLearn, '[pageInfo][hasNextPage]', false) }
-  },
+const { result, loading, fetchMore } = useQuery<
+  GetAllWhatYouWillLearnByCourseIdResult,
+  GetAllWhatYouWillLearnByCourseIdVars
+>(
+  GetAllWhatYouWillLearnByCourseID,
+  () => ({ courseID: props.course_id, limit: 5 }),
+  { errorPolicy: 'all' },
+)
 
-  methods: {
-    async loadMoreData () {
-      await this.fetchMore({
-        variables: {
-          courseID: this.course_id,
-          cursor: this.allWhatYouWillLearn.pageInfo.endCursor
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          const newEdges = fetchMoreResult.allWhatYouWillLearn.edges
-          const pageInfo = fetchMoreResult.allWhatYouWillLearn.pageInfo
-          if (newEdges.length) {
-            return {
-              allWhatYouWillLearn: {
-                __typename: previousResult.allWhatYouWillLearn.__typename,
-                edges: [...previousResult.allWhatYouWillLearn.edges, ...newEdges],
-                pageInfo
-              }
-            }
-          }
-          return previousResult
+const allWhatYouWillLearn = computed(
+  () => result.value?.allWhatYouWillLearn ?? null,
+)
+
+const points = computed(
+  () => (allWhatYouWillLearn.value?.edges ?? [])
+    .filter((e): e is OutcomeEdge => !!e && !!e.node),
+)
+
+const hasNextPage = computed(
+  () => allWhatYouWillLearn.value?.pageInfo?.hasNextPage ?? false,
+)
+
+async function loadMoreData (): Promise<void> {
+  const pageInfo = allWhatYouWillLearn.value?.pageInfo
+  if (!pageInfo) return
+  await fetchMore({
+    variables: {
+      courseID: props.course_id,
+      cursor: pageInfo.endCursor ?? undefined,
+    },
+    updateQuery: (
+      previousResult: GetAllWhatYouWillLearnByCourseIdResult,
+      { fetchMoreResult }: { fetchMoreResult: GetAllWhatYouWillLearnByCourseIdResult },
+    ): GetAllWhatYouWillLearnByCourseIdResult => {
+      const newEdges = fetchMoreResult.allWhatYouWillLearn?.edges ?? []
+      const newPageInfo = fetchMoreResult.allWhatYouWillLearn?.pageInfo
+      if (newEdges.length && previousResult.allWhatYouWillLearn && newPageInfo) {
+        return {
+          allWhatYouWillLearn: {
+            __typename: previousResult.allWhatYouWillLearn.__typename,
+            edges: [...previousResult.allWhatYouWillLearn.edges, ...newEdges],
+            pageInfo: newPageInfo,
+          },
         }
-      })
-    }
-  }
+      }
+      return previousResult
+    },
+  })
 }
 </script>
 

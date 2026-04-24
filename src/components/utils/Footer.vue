@@ -2,10 +2,10 @@
   <footer class="site-footer">
     <div class="site-footer__inner">
       <nav class="site-footer__links">
-        <a class="site-footer__link" @click="$router.push({ name: 'terms-and-conditions' })">
+        <a class="site-footer__link" @click="router.push({ name: 'terms-and-conditions' })">
           {{ isEnglish ? 'Terms and Conditions' : 'الأحكام والشروط' }}
         </a>
-        <a class="site-footer__link" @click="$router.push({ name: 'privacy-policy' })">
+        <a class="site-footer__link" @click="router.push({ name: 'privacy-policy' })">
           {{ isEnglish ? 'Privacy Policy' : 'سياسة الخصوصيه' }}
         </a>
       </nav>
@@ -18,18 +18,14 @@
   </footer>
 </template>
 
-<script>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 import { useSettingsStore } from 'src/stores/settings'
 
-export default {
-  name: 'Footer',
-  setup () {
-    const settings = useSettingsStore()
-    const { isEnglish } = storeToRefs(settings)
-    return { isEnglish }
-  }
-}
+const router = useRouter()
+const settings = useSettingsStore()
+const { isEnglish } = storeToRefs(settings)
 </script>
 
 <style lang="scss" scoped>

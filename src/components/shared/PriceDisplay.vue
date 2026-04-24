@@ -32,70 +32,70 @@
   </div>
 </template>
 
-<script>
-/** @typedef {import('src/types/courses/types').CoursePricing} CoursePricing */
-/** @typedef {import('src/types/courses/types').CurrencyCode} CurrencyCode */
+<script setup lang="ts">
+import { computed } from 'vue'
 
-export default {
-  name: 'PriceDisplay',
-  props: {
-    amount:         { type: Number, required: true },
-    originalAmount: { type: Number, default: null },
-    currency:       { type: String, default: 'SAR' },
-    size: {
-      type: String,
-      default: 'md',
-      validator: v => ['sm', 'md', 'lg', 'xl'].includes(v)
-    },
-    variant: {
-      type: String,
-      default: 'terracotta',
-      validator: v => ['terracotta', 'cream', 'ink'].includes(v)
-    },
-    locale:       { type: String, default: 'ar-EG' },
-    showDiscount: { type: Boolean, default: false },
-    perLabel:     { type: String, default: null }
-  },
-  computed: {
-    numberFormatter () {
-      try {
-        return new Intl.NumberFormat(this.locale, { style: 'decimal' })
-      } catch (e) {
-        return new Intl.NumberFormat('ar-EG', { style: 'decimal' })
-      }
-    },
-    formattedAmount () {
-      return this.numberFormatter.format(this.amount)
-    },
-    formattedOriginal () {
-      return this.originalAmount != null ? this.numberFormatter.format(this.originalAmount) : ''
-    },
-    formattedDiscount () {
-      return this.numberFormatter.format(this.discountPercent)
-    },
-    hasOriginal () {
-      return this.originalAmount != null && this.originalAmount > this.amount
-    },
-    discountPercent () {
-      if (!this.hasOriginal) return 0
-      return Math.round((1 - this.amount / this.originalAmount) * 100)
-    },
-    currencySymbol () {
-      const code = (this.currency || '').toUpperCase()
-      if (code === 'SAR') return 'ر.س'
-      if (code === 'AED') return 'د.إ'
-      return code
-    },
-    ariaLabel () {
-      let label = `${this.formattedAmount} ${this.currencySymbol}`
-      if (this.hasOriginal) {
-        label += ` (قبل الخصم ${this.formattedOriginal} ${this.currencySymbol})`
-      }
-      if (this.perLabel) label += ` ${this.perLabel}`
-      return label
-    }
-  }
+interface Props {
+  amount: number
+  originalAmount?: number | null
+  currency?: string
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  variant?: 'terracotta' | 'cream' | 'ink'
+  locale?: string
+  showDiscount?: boolean
+  perLabel?: string | null
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  originalAmount: null,
+  currency: 'SAR',
+  size: 'md',
+  variant: 'terracotta',
+  locale: 'ar-EG',
+  showDiscount: false,
+  perLabel: null
+})
+
+const numberFormatter = computed(() => {
+  try {
+    return new Intl.NumberFormat(props.locale, { style: 'decimal' })
+  } catch (e) {
+    return new Intl.NumberFormat('ar-EG', { style: 'decimal' })
+  }
+})
+
+const formattedAmount = computed(() => numberFormatter.value.format(props.amount))
+
+const hasOriginal = computed(() =>
+  props.originalAmount != null && props.originalAmount > props.amount
+)
+
+const discountPercent = computed(() => {
+  if (!hasOriginal.value || props.originalAmount == null) return 0
+  return Math.round((1 - props.amount / props.originalAmount) * 100)
+})
+
+const formattedOriginal = computed(() =>
+  props.originalAmount != null ? numberFormatter.value.format(props.originalAmount) : ''
+)
+
+const formattedDiscount = computed(() => numberFormatter.value.format(discountPercent.value))
+
+const currencySymbol = computed(() => {
+  const code = (props.currency ?? '').toUpperCase()
+  if (code === 'SAR') return 'ر.س'
+  if (code === 'AED') return 'د.إ'
+  return code
+})
+
+const ariaLabel = computed(() => {
+  let label = `${formattedAmount.value} ${currencySymbol.value}`
+  if (hasOriginal.value) {
+    label += ` (قبل الخصم ${formattedOriginal.value} ${currencySymbol.value})`
+  }
+  if (props.perLabel) label += ` ${props.perLabel}`
+  return label
+})
 </script>
 
 <style lang="scss" scoped>

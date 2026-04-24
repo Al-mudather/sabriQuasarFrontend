@@ -15,19 +15,23 @@
       <ds-badge variant="danger">{{ label }}</ds-badge>
     </div>
 
-    <TransactionDetails v-if="detail" :customerTrans="customerTrans" v-on:close="detail = false" />
+    <TransactionDetails v-if="detail" :customerTrans="customerTrans" @close="detail = false" />
   </article>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref } from 'vue'
 import TransactionDetails from 'src/components/attachment_transactions_management/Transaction_details.vue'
+import type { AttachmentTransaction } from 'src/types/attachments/types'
 
-export default {
-  name: 'TransactionRejected',
-  components: { TransactionDetails },
-  props: ['customerTrans', 'label'],
-  data () { return { detail: false } }
+interface Props {
+  customerTrans: AttachmentTransaction
+  label: string
 }
+
+defineProps<Props>()
+
+const detail = ref(false)
 </script>
 
 <style lang="scss" scoped>

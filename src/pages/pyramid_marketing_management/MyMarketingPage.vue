@@ -152,11 +152,9 @@ import type {
   MakePyramidWithdrawResult,
   MakePyramidWithdrawVars,
   PyramidWithdraw,
+  MyPyramidAffiliatesResult,
+  MyPyramidAffiliatesVars,
 } from 'src/types/pyramid/types'
-import type {
-  MyPyramidAffiliatesQuery,
-  MyPyramidAffiliatesQueryVariables,
-} from 'src/graphql/generated'
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -168,7 +166,7 @@ const { currency } = storeToRefs(settings)
 // Queries
 // ---------------------------------------------------------------------------
 const balanceQuery = useQuery<MyPyramidBalanceResult, MyPyramidBalanceVars>(MyPyramidBalance)
-const affiliatesQuery = useQuery<MyPyramidAffiliatesQuery, MyPyramidAffiliatesQueryVariables>(MyPyramidAffiliates)
+const affiliatesQuery = useQuery<MyPyramidAffiliatesResult, MyPyramidAffiliatesVars>(MyPyramidAffiliates)
 const accountQuery = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(MyPyramidAccount)
 const rewardQuery = useQuery<MyPyramidLedgerRewardResult, MyPyramidLedgerRewardVars>(MyPyramidLedgerReward)
 const withdrawsQuery = useQuery<MyPyramidWithdrawsResult, MyPyramidWithdrawsVars>(MyPyramidWithdraws)

@@ -4,11 +4,8 @@
   </q-page>
 </template>
 
-<script>
-
-export default {
-  name: 'HomeIndex'
-}
+<script setup lang="ts">
+defineOptions({ name: 'HomeIndex' })
 </script>
 <style lang="scss">
 

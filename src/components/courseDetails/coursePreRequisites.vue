@@ -5,11 +5,11 @@
     </header>
 
     <ul v-if="prerequisites.length" class="cd-prereq-list">
-      <li v-for="preReq in prerequisites" :key="preReq.node.id">
+      <li v-for="preReq in prerequisites" :key="preReq.node?.id ?? ''">
         <svg class="cd-prereq-list__dot" viewBox="0 0 16 16" aria-hidden="true">
           <circle cx="8" cy="8" r="3" fill="currentColor" />
         </svg>
-        <span>{{ preReq.node.prerequisite }}</span>
+        <span>{{ preReq.node?.prerequisite }}</span>
       </li>
     </ul>
 
@@ -20,32 +20,31 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { GetAllPreRequisitesByCourse } from 'src/graphql/course_management/query/GetAllPreRequisitesByCourse'
+import type {
+  GetAllPreRequisitesByCourseResult,
+  GetAllPreRequisitesByCourseVars,
+} from 'src/types/courses/types'
 
-export default {
-  name: 'CoursePreRequisites',
-  props: ['course_id'],
+const props = defineProps<{
+  course_id: string
+}>()
 
-  setup (props) {
-    const { result, loading } = useQuery(
-      GetAllPreRequisitesByCourse,
-      () => ({ courseID: props.course_id }),
-      { errorPolicy: 'all' }
-    )
-    const data = computed(() => result.value || '')
-    return { data, loading }
-  },
+const { result, loading } = useQuery<GetAllPreRequisitesByCourseResult, GetAllPreRequisitesByCourseVars>(
+  GetAllPreRequisitesByCourse,
+  () => ({ courseID: parseInt(props.course_id, 10) }),
+  { errorPolicy: 'all' },
+)
 
-  computed: {
-    prerequisites () {
-      return this.$_.get(this.data, '[allPrerequisiteByCourse][edges]', []) || []
-    },
-    hasContent () { return this.prerequisites.length > 0 }
-  }
-}
+const prerequisites = computed(
+  () => (result.value?.allPrerequisiteByCourse?.edges ?? [])
+    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+)
+
+const hasContent = computed(() => prerequisites.value.length > 0)
 </script>
 
 <style lang="scss" scoped>

@@ -36,10 +36,6 @@
     </section>
 </template>
 
-<script>
-export default {
-  name: 'ViewData',
-  props: {
-  }
-}
+<script setup lang="ts">
+// No props, no store access — pure presentational.
 </script>

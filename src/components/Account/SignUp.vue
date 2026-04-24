@@ -1,19 +1,19 @@
 <template>
   <div class="auth-card">
     <header class="auth-card__head">
-      <h1 class="auth-card__title">{{ $t('إنشاء حساب جديد') }}</h1>
+      <h1 class="auth-card__title">{{ t('إنشاء حساب جديد') }}</h1>
       <p class="auth-card__subtitle">
-        {{ $t('ابدأ رحلتك العلمية في دقيقة واحدة.') }}
+        {{ t('ابدأ رحلتك العلمية في دقيقة واحدة.') }}
       </p>
     </header>
 
     <div v-if="apiError" class="auth-card__banner" role="alert">{{ apiError }}</div>
 
-    <form @submit.prevent="REGISTER_NEW_USER" class="auth-card__form" novalidate>
+    <form @submit.prevent="registerNewUser" class="auth-card__form" novalidate>
       <ds-input
         v-model="fullName"
         type="text"
-        :label="$t('الاسم الكامل')"
+        :label="t('الاسم الكامل')"
         :error="fieldErrors.fullName"
         autocomplete="name"
         required
@@ -22,7 +22,7 @@
       <ds-input
         v-model="email"
         type="email"
-        :label="$t('البريد الإلكتروني')"
+        :label="t('البريد الإلكتروني')"
         :error="fieldErrors.email"
         autocomplete="email"
         required
@@ -30,7 +30,7 @@
 
       <div class="auth-card__phone">
         <div class="auth-card__phone-code">
-          <label class="auth-card__phone-label">{{ $t('الكود') }}</label>
+          <label class="auth-card__phone-label">{{ t('الكود') }}</label>
           <select v-model="countryCode" class="auth-card__phone-select">
             <option value="+249">+249</option>
             <option value="+966">+966</option>
@@ -45,7 +45,7 @@
           <ds-input
             v-model="phone"
             type="tel"
-            :label="$t('رقم الهاتف')"
+            :label="t('رقم الهاتف')"
             :error="fieldErrors.phone"
             autocomplete="tel"
           />
@@ -55,7 +55,7 @@
       <ds-input
         v-model="password1"
         type="password"
-        :label="$t('كلمة المرور')"
+        :label="t('كلمة المرور')"
         :error="fieldErrors.password1"
         autocomplete="new-password"
         required
@@ -64,7 +64,7 @@
       <ds-input
         v-model="password2"
         type="password"
-        :label="$t('تأكيد كلمة المرور')"
+        :label="t('تأكيد كلمة المرور')"
         :error="fieldErrors.password2"
         autocomplete="new-password"
         required
@@ -73,10 +73,10 @@
       <label class="auth-card__terms">
         <input type="checkbox" v-model="agreed" />
         <span>
-          {{ $t('أوافق على') }}
-          <a @click.stop.prevent="goTerms">{{ $t('الشروط والأحكام') }}</a>
-          {{ $t('و') }}
-          <a @click.stop.prevent="goPrivacy">{{ $t('سياسة الخصوصية') }}</a>
+          {{ t('أوافق على') }}
+          <a @click.stop.prevent="goTerms">{{ t('الشروط والأحكام') }}</a>
+          {{ t('و') }}
+          <a @click.stop.prevent="goPrivacy">{{ t('سياسة الخصوصية') }}</a>
         </span>
       </label>
 
@@ -89,151 +89,151 @@
         :loading="visible"
         :disabled="!agreed"
       >
-        {{ $t('إنشاء الحساب') }}
+        {{ t('إنشاء الحساب') }}
       </ds-button>
     </form>
 
     <div class="auth-card__social">
-      <div class="auth-card__divider"><span>{{ $t('أو') }}</span></div>
+      <div class="auth-card__divider"><span>{{ t('أو') }}</span></div>
       <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" />
     </div>
 
     <p class="auth-card__switch">
-      <span>{{ $t('لديك حساب بالفعل؟') }}</span>
-      <a @click="goLogin">{{ $t('تسجيل الدخول') }}</a>
+      <span>{{ t('لديك حساب بالفعل؟') }}</span>
+      <a @click="goLogin">{{ t('تسجيل الدخول') }}</a>
     </p>
   </div>
 </template>
 
-<script>
-/**
- * Auth feature types handled by this component.
- *
- * @typedef {import('src/types/auth/types').RegisterMutationResult} RegisterMutationResult
- * @typedef {import('src/types/auth/types').RegisterVariables} RegisterVariables
- * @typedef {import('src/types/auth/types').RegisterResult} RegisterResult
- * @typedef {import('src/types/auth/types').GetMyProfileResult} GetMyProfileResult
- * @typedef {import('src/types/auth/types').GetMyProfileVariables} GetMyProfileVariables
- * @typedef {import('src/types/auth/types').AuthUser} AuthUser
- */
-import { RegisterNewUser } from 'src/graphql/account_management/mutation/RegisterNewUser'
-import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
+import { apolloClient } from 'src/apollo/client'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
-import { apolloClient } from 'src/apollo/client'
+import { RegisterNewUser } from 'src/graphql/account_management/mutation/RegisterNewUser'
+import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue'
 import DsInput from 'src/design-system/components/DsInput.vue'
+import type {
+  RegisterMutationResult,
+  RegisterVariables,
+  GetMyProfileResult,
+  GetMyProfileVariables,
+} from 'src/types/auth/types'
 
-export default {
-  name: 'SignUp',
-  components: { GoogleAuthentication, DsInput },
+const { t } = useI18n()
+const router = useRouter()
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const { isEnglish } = storeToRefs(settings)
 
-  setup () {
-    const auth = useAuthStore()
-    const settings = useSettingsStore()
-    const { isEnglish } = storeToRefs(settings)
-    return { auth, settings, isEnglish }
-  },
+const googleLabel = ref('إنشاء حساب جديد بإستخدام Google')
+const visible = ref(false)
+const prevRoute = ref<string | null>(null)
+const fullName = ref('')
+const email = ref('')
+const countryCode = ref('+249')
+const phone = ref('')
+const password1 = ref('')
+const password2 = ref('')
+const agreed = ref(false)
+const apiError = ref('')
+const fieldErrors = ref({ fullName: '', email: '', phone: '', password1: '', password2: '' })
 
-  data () {
-    return {
-      googleLabel: 'إنشاء حساب جديد بإستخدام Google',
-      visible: false,
-      prevRoute: null,
-      fullName: '',
-      email: '',
-      countryCode: '+249',
-      phone: '',
-      password1: '',
-      password2: '',
-      agreed: false,
-      apiError: '',
-      fieldErrors: {
-        fullName: '', email: '', phone: '', password1: '', password2: ''
-      }
+onMounted(() => {
+  if (isEnglish.value) googleLabel.value = 'Sign up using Google'
+})
+
+function goTerms (): void {
+  void router.push({ name: 'terms-and-conditions' })
+}
+
+function goPrivacy (): void {
+  void router.push('/privacyPolicy').catch(() => router.push({ name: 'terms-and-conditions' }))
+}
+
+function goLogin (): void {
+  void router.push({ name: 'login' })
+}
+
+function resetErrors (): void {
+  apiError.value = ''
+  fieldErrors.value = { fullName: '', email: '', phone: '', password1: '', password2: '' }
+}
+
+type FieldKey = 'fullName' | 'email' | 'phone' | 'password1' | 'password2'
+
+function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
+  const generic: string[] = []
+  const map: Record<string, FieldKey> = {
+    fullName: 'fullName',
+    email: 'email',
+    phone: 'phone',
+    password1: 'password1',
+    password2: 'password2',
+    newPassword2: 'password2',
+  }
+  for (const key in errorsObj) {
+    for (const val of errorsObj[key]) {
+      const target = map[key]
+      if (target) fieldErrors.value[target] = val.message
+      else generic.push(val.message)
     }
-  },
+  }
+  if (generic.length) apiError.value = generic.join(' — ')
+}
 
-  beforeRouteEnter (to, from, next) {
-    next(vm => { vm.prevRoute = from.fullPath })
-  },
+function validate (): boolean {
+  resetErrors()
+  let ok = true
+  if (!fullName.value) { fieldErrors.value.fullName = t('الاسم مطلوب'); ok = false }
+  if (!email.value) { fieldErrors.value.email = t('البريد مطلوب'); ok = false }
+  if (!password1.value) { fieldErrors.value.password1 = t('كلمة المرور مطلوبة'); ok = false }
+  if (password1.value && password1.value.length < 6) { fieldErrors.value.password1 = t('كلمة المرور قصيرة جداً'); ok = false }
+  if (password1.value !== password2.value) { fieldErrors.value.password2 = t('كلمتا المرور غير متطابقتين'); ok = false }
+  return ok
+}
 
-  mounted () {
-    if (this.isEnglish) this.googleLabel = 'Sign up using Google'
-  },
-
-  methods: {
-    goTerms ()   { this.$router.push({ name: 'terms-and-conditions' }) },
-    goPrivacy () { this.$router.push('/privacyPolicy').catch(() => this.$router.push({ name: 'terms-and-conditions' })) },
-    goLogin ()   { this.$router.push({ name: 'login' }) },
-
-    resetErrors () {
-      this.apiError = ''
-      this.fieldErrors = { fullName: '', email: '', phone: '', password1: '', password2: '' }
-    },
-
-    errorHandler (errorsObj) {
-      const generic = []
-      const map = { fullName: 'fullName', email: 'email', phone: 'phone', password1: 'password1', password2: 'password2', newPassword2: 'password2' }
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          const target = map[key]
-          if (target) this.fieldErrors[target] = val.message
-          else generic.push(val.message)
-        }
+async function registerNewUser (): Promise<void> {
+  if (!validate()) return
+  visible.value = true
+  try {
+    const signUpRes = await apolloClient.mutate<RegisterMutationResult, RegisterVariables>({
+      mutation: RegisterNewUser,
+      variables: {
+        email: email.value,
+        fullName: fullName.value,
+        password1: password1.value,
+        password2: password2.value,
       }
-      if (generic.length) this.apiError = generic.join(' — ')
-    },
-
-    validate () {
-      this.resetErrors()
-      let ok = true
-      if (!this.fullName) { this.fieldErrors.fullName = this.$t('الاسم مطلوب'); ok = false }
-      if (!this.email)    { this.fieldErrors.email    = this.$t('البريد مطلوب'); ok = false }
-      if (!this.password1) { this.fieldErrors.password1 = this.$t('كلمة المرور مطلوبة'); ok = false }
-      if (this.password1 && this.password1.length < 6) { this.fieldErrors.password1 = this.$t('كلمة المرور قصيرة جداً'); ok = false }
-      if (this.password1 !== this.password2) { this.fieldErrors.password2 = this.$t('كلمتا المرور غير متطابقتين'); ok = false }
-      return ok
-    },
-
-    async REGISTER_NEW_USER () {
-      if (!this.validate()) return
-      this.visible = true
+    })
+    const register = signUpRes?.data?.register
+    if (register?.success) {
+      const tokenAuth = {
+        token: register.token,
+        refresh: register.refreshToken
+      }
+      await auth.login(tokenAuth)
       try {
-        /** @type {{ data: RegisterMutationResult }} */
-        const signUp_res = await apolloClient.mutate({
-          mutation: RegisterNewUser,
-          variables: /** @type {RegisterVariables} */ ({
-            email: this.email,
-            fullName: this.fullName,
-            password1: this.password1,
-            password2: this.password2
-          })
+        const profile = await apolloClient.query<GetMyProfileResult, GetMyProfileVariables>({
+          query: GetMyProfileData
         })
-        if (signUp_res.data.register.success) {
-          const tokenAuth = {
-            token: signUp_res.data.register.token,
-            refresh: signUp_res.data.register.refreshToken
-          }
-          await this.auth.login(tokenAuth)
-          try {
-            /** @type {{ data: GetMyProfileResult }} */
-            const profile = await apolloClient.query({ query: GetMyProfileData })
-            this.auth.setUser(profile.data.me)
-          } catch (e) { /* non-blocking */ }
-          this.$router.push({ name: 'registeration-code' })
-        } else if (signUp_res.data.register.errors) {
-          this.errorHandler(signUp_res.data.register.errors)
-        }
-      } catch (error) {
-        this.apiError = error && error.message === 'GraphQL error: UNIQUE constraint failed: account_manager_user.email'
-          ? this.$t('هذا الحساب مسجل مسبقاً')
-          : this.$t('حدث خطأ، يرجى المحاولة لاحقاً')
-      } finally {
-        this.visible = false
-      }
+        auth.setUser(profile.data?.me)
+      } catch { /* non-blocking */ }
+      void router.push({ name: 'registeration-code' })
+    } else if (register?.errors) {
+      errorHandler(register.errors as Record<string, Array<{ message: string }>>)
     }
+  } catch (error: unknown) {
+    const err = error as { message?: string }
+    apiError.value = err.message === 'GraphQL error: UNIQUE constraint failed: account_manager_user.email'
+      ? t('هذا الحساب مسجل مسبقاً')
+      : t('حدث خطأ، يرجى المحاولة لاحقاً')
+  } finally {
+    visible.value = false
   }
 }
 </script>

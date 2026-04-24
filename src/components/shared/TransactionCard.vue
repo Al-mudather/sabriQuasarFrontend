@@ -125,13 +125,22 @@
   </ds-card>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed } from 'vue'
 import DsCard from 'src/design-system/components/DsCard.vue'
 import DsBadge from 'src/design-system/components/DsBadge.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsTag from 'src/design-system/components/DsTag.vue'
 
-const STATUS_META = {
+type StatusKey = 'completed' | 'processing' | 'rejected' | 'hanged' | 'pending'
+
+interface StatusMeta {
+  variant: string
+  labelAr: string
+  iconSvg: string
+}
+
+const STATUS_META: Record<StatusKey, StatusMeta> = {
   completed: {
     variant: 'success',
     labelAr: 'مكتمل',
@@ -161,98 +170,118 @@ const STATUS_META = {
 
 const PAPERCLIP_SVG = '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" focusable="false"><path d="M10.5 5 L6 9.5 a1.8 1.8 0 0 0 2.5 2.5 L13 7.5 a3.2 3.2 0 0 0 -4.5 -4.5 L4 7.5 a4.6 4.6 0 0 0 6.5 6.5 L14 10.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
-let _uid = 0
+// Generate stable per-instance uid without instance-level counter
+const uid = Math.random().toString(36).slice(2, 8)
+const paperclipSvg = PAPERCLIP_SVG
 
-export default {
-  name: 'TransactionCard',
-  components: { DsCard, DsBadge, DsButton, DsTag },
-  props: {
-    transaction: {
-      type: Object,
-      default: () => ({})
-    },
-    status: {
-      type: String,
-      default: null,
-      validator: v => v === null || ['completed', 'processing', 'rejected', 'hanged', 'pending'].includes(v)
-    },
-    detailed: { type: Boolean, default: false },
-    actions:  { type: Array,   default: () => [] }
-  },
-  data () {
-    _uid += 1
-    return { uid: _uid, paperclipSvg: PAPERCLIP_SVG }
-  },
-  computed: {
-    resolvedStatus () {
-      const raw = this.status || this.transaction.status || 'pending'
-      return STATUS_META[raw] ? raw : 'pending'
-    },
-    meta () {
-      return STATUS_META[this.resolvedStatus]
-    },
-    courseName () {
-      return this.transaction.courseName || ''
-    },
-    courseTitleId () {
-      return `tx-card-title-${this.uid}`
-    },
-    hasMeta () {
-      const t = this.transaction || {}
-      return !!(t.id || t.createdAt || t.updatedAt || t.paymentMethod)
-    },
-    formattedAmount () {
-      const { amount, currency } = this.transaction || {}
-      if (amount == null) return ''
-      return this.formatAmount(amount, currency)
-    },
-    isFormattedCurrency () {
-      // When Intl.NumberFormat successfully renders currency glyph,
-      // we suppress the duplicated trailing currency code.
-      const { amount, currency } = this.transaction || {}
-      if (amount == null || !currency) return false
-      try {
-        new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(amount)
-        return true
-      } catch (e) {
-        return false
-      }
-    }
-  },
-  methods: {
-    formatAmount (value, currency) {
-      const n = Number(value)
-      if (!Number.isFinite(n)) return String(value)
-      try {
-        if (currency) {
-          return new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(n)
-        }
-        return new Intl.NumberFormat('ar-SA').format(n)
-      } catch (e) {
-        return new Intl.NumberFormat('ar-SA').format(n)
-      }
-    },
-    formatDate (iso) {
-      if (!iso) return ''
-      const d = new Date(iso)
-      if (isNaN(d.getTime())) return String(iso)
-      try {
-        return new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }).format(d)
-      } catch (e) {
-        return d.toLocaleString('ar-EG')
-      }
-    },
-    shortId (id) {
-      const s = String(id)
-      return `...${s.slice(-6)}`
-    },
-    onActionClick (action, event) {
-      if (action && typeof action.handler === 'function') {
-        action.handler(event, this.transaction)
-      }
-      this.$emit('action-click', { action, transaction: this.transaction, event })
-    }
+interface TransactionAction {
+  key?: string
+  label?: string
+  variant?: string
+  size?: string
+  loading?: boolean
+  disabled?: boolean
+  handler?: (event: Event, transaction: Record<string, unknown>) => void
+}
+
+interface Transaction {
+  status?: string
+  courseName?: string
+  id?: string
+  createdAt?: string
+  updatedAt?: string
+  paymentMethod?: string
+  amount?: number | null
+  currency?: string
+  rejectionReason?: string
+  notes?: string
+  attachmentUrl?: string
+  courseId?: string
+}
+
+interface Props {
+  transaction?: Transaction
+  status?: StatusKey | null
+  detailed?: boolean
+  actions?: TransactionAction[]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  transaction: () => ({}),
+  status: null,
+  detailed: false,
+  actions: () => []
+})
+
+const emit = defineEmits<{
+  (e: 'action-click', val: { action: TransactionAction; transaction: Transaction | undefined; event: Event }): void
+}>()
+
+const resolvedStatus = computed<StatusKey>(() => {
+  const raw = (props.status || props.transaction?.status || 'pending') as StatusKey
+  return STATUS_META[raw] ? raw : 'pending'
+})
+
+const meta = computed(() => STATUS_META[resolvedStatus.value])
+const courseName = computed(() => props.transaction?.courseName ?? '')
+const courseTitleId = computed(() => `tx-card-title-${uid}`)
+
+const hasMeta = computed(() => {
+  const t = props.transaction ?? {}
+  return !!(t.id || t.createdAt || t.updatedAt || t.paymentMethod)
+})
+
+const formattedAmount = computed(() => {
+  const { amount, currency } = props.transaction ?? {}
+  if (amount == null) return ''
+  return formatAmount(amount, currency)
+})
+
+const isFormattedCurrency = computed(() => {
+  const { amount, currency } = props.transaction ?? {}
+  if (amount == null || !currency) return false
+  try {
+    new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(amount)
+    return true
+  } catch (e) {
+    return false
   }
+})
+
+function formatAmount (value: number, currency?: string): string {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return String(value)
+  try {
+    if (currency) {
+      return new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(n)
+    }
+    return new Intl.NumberFormat('ar-SA').format(n)
+  } catch (e) {
+    return new Intl.NumberFormat('ar-SA').format(n)
+  }
+}
+
+function formatDate (iso?: string): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return String(iso)
+  try {
+    return new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }).format(d)
+  } catch (e) {
+    return d.toLocaleString('ar-EG')
+  }
+}
+
+function shortId (id?: string): string {
+  const s = String(id ?? '')
+  return `...${s.slice(-6)}`
+}
+
+function onActionClick (action: TransactionAction, event: Event): void {
+  if (action && typeof action.handler === 'function') {
+    action.handler(event, props.transaction as unknown as Record<string, unknown>)
+  }
+  emit('action-click', { action, transaction: props.transaction, event })
 }
 </script>
 

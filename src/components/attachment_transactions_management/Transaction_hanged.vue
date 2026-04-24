@@ -17,7 +17,7 @@
       <div class="tx-card__amount">
         <span class="label">{{ $t('المدفوع') }}</span>
         <span class="value">
-          {{ FORMAT_COUSRE_PRICE(customerTrans.order.totalAmount, 3) }}
+          {{ formatCoursePrice(customerTrans.order.totalAmount, 3) }}
           <small>{{ customerTrans.order.currency }}</small>
         </span>
       </div>
@@ -29,12 +29,12 @@
 
     <q-dialog v-model="bill" persistent>
       <q-card class="tx-bill">
-        <img class="tx-bill__img" :src="FORMAT_IMAGE(customerTrans.attachment)" alt="" />
+        <img class="tx-bill__img" :src="formatImage(customerTrans.attachment)" alt="" />
         <div class="tx-bill__actions">
-          <ds-button variant="primary" :loading="loading" @click="CONFIRM_OR_REJECT_TRANSACTION(confirm)">
+          <ds-button variant="primary" :loading="loading" @click="confirmOrRejectTransaction(confirmPayload)">
             {{ $t('تأكيد الدفع') }}
           </ds-button>
-          <ds-button variant="danger" :loading="loading" @click="CONFIRM_OR_REJECT_TRANSACTION(reject)">
+          <ds-button variant="danger" :loading="loading" @click="confirmOrRejectTransaction(rejectPayload)">
             {{ $t('غير معتمد') }}
           </ds-button>
           <ds-button variant="ghost" @click="bill = false">
@@ -44,72 +44,84 @@
       </q-card>
     </q-dialog>
 
-    <TransactionDetails v-if="detail" :customerTrans="customerTrans" v-on:close="detail = false" />
+    <TransactionDetails v-if="detail" :customerTrans="customerTrans" @close="detail = false" />
   </article>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useMutation } from '@vue/apollo-composable'
+import { useQuasar } from 'quasar'
+import TransactionDetails from 'src/components/attachment_transactions_management/Transaction_details.vue'
 import { MarketerConfirmAttachmentTransaction } from 'src/graphql/attachment_transactions_management/mutation/marketerConfirmAttachmentTransaction'
 import { AllMarketerAttachmentTransaction } from 'src/graphql/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
-import TransactionDetails from 'src/components/attachment_transactions_management/Transaction_details.vue'
+import type {
+  AttachmentTransaction,
+  MarketerConfirmAttachmentResult,
+  MarketerConfirmAttachmentVars,
+} from 'src/types/attachments/types'
+
+interface Props {
+  customerTrans: AttachmentTransaction
+}
+
+const props = defineProps<Props>()
+
+const $q = useQuasar()
+
+const bill = ref(false)
+const detail = ref(false)
+const loading = ref(false)
+
+const confirmPayload = { marketerEndorse: true, retryPlease: false }
+const rejectPayload = { marketerEndorse: false, retryPlease: true }
 
 const priceLookup = [
-  { value: 1, symbol: '' }, { value: 1e3, symbol: 'k' },
-  { value: 1e6, symbol: 'M' }, { value: 1e9, symbol: 'B' }
+  { value: 1, symbol: '' },
+  { value: 1e3, symbol: 'k' },
+  { value: 1e6, symbol: 'M' },
+  { value: 1e9, symbol: 'B' },
 ]
 
-export default {
-  name: 'TransactionHanged',
-  components: { TransactionDetails },
-  props: ['customerTrans'],
+function formatCoursePrice (num: unknown, digits = 3): string {
+  const n = Number(num)
+  if (!Number.isFinite(n) || n === 0) return String(num)
+  const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
+  const item = priceLookup.slice().reverse().find(it => n >= it.value)
+  return item ? (n / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
+}
 
-  data () {
-    return {
-      bill: false,
-      detail: false,
-      loading: false,
-      confirm: { marketerEndorse: true,  retryPlease: false },
-      reject:  { marketerEndorse: false, retryPlease: true  }
+function formatImage (imageUrl: string | null | undefined): string {
+  if (process.env.NODE_ENV === 'development') return `http://localhost:8000/media/${imageUrl ?? ''}`
+  return location.origin + `/media/${imageUrl ?? ''}`
+}
+
+const { mutate: confirmMutation } = useMutation<MarketerConfirmAttachmentResult, MarketerConfirmAttachmentVars>(
+  MarketerConfirmAttachmentTransaction,
+  () => ({
+    refetchQueries: [{ query: AllMarketerAttachmentTransaction }],
+  }),
+)
+
+async function confirmOrRejectTransaction (data: { marketerEndorse: boolean; retryPlease: boolean }): Promise<void> {
+  loading.value = true
+  try {
+    const res = await confirmMutation({
+      id: props.customerTrans.pk,
+      input: data,
+    })
+    if (res?.data?.marketerAttachmentTransactionConfirmation?.success) {
+      $q.notify({
+        type: 'positive',
+        position: 'top',
+        progress: true,
+        multiLine: true,
+        message: 'The transaction has been confirmed by you',
+      })
+      bill.value = false
     }
-  },
-
-  methods: {
-    FORMAT_COUSRE_PRICE (num, digits = 3) {
-      const n = Number(num)
-      if (!Number.isFinite(n) || n === 0) return String(num)
-      const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
-      const item = priceLookup.slice().reverse().find(it => n >= it.value)
-      return item ? (n / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
-    },
-
-    FORMAT_IMAGE (imageUrl) {
-      if (process.env.NODE_ENV === 'development') return `http://localhost:8000/media/${imageUrl}`
-      return location.origin + `/media/${imageUrl}`
-    },
-
-    async CONFIRM_OR_REJECT_TRANSACTION (data) {
-      this.loading = true
-      try {
-        const res = await this.$apollo.mutate({
-          mutation: MarketerConfirmAttachmentTransaction,
-          variables: { id: this.customerTrans.pk, input: data },
-          refetchQueries: [{ query: AllMarketerAttachmentTransaction }]
-        })
-        const { success, errors } = res.data.marketerAttachmentTransactionConfirmation
-        if (success) {
-          this.$q.notify({
-            type: 'positive',
-            position: 'top',
-            progress: true,
-            multiLine: true,
-            message: 'The transaction has been confirmed by you'
-          })
-          this.bill = false
-        }
-      } catch (e) { /* apolloProvider surfaces error */ }
-      finally { this.loading = false }
-    }
-  }
+  } catch { /* apolloProvider surfaces error */ }
+  finally { loading.value = false }
 }
 </script>
 

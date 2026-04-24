@@ -88,11 +88,13 @@
     </div>
 </template>
 
-<script>
-export default {
-  name: 'reviewCard',
-  props: ['courseName', 'reviewDetail']
+<script setup lang="ts">
+interface Props {
+  courseName?: string
+  reviewDetail?: string
 }
+
+defineProps<Props>()
 </script>
 
 <style>

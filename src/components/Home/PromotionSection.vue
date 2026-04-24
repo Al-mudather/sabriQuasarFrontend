@@ -1,7 +1,7 @@
 <template>
   <div class="promo">
     <swiper
-      v-if="allSlidersData && allSlidersData.length"
+      v-if="validSliders.length"
       ref="promoSwiper"
       class="promo__swiper"
       :modules="swiperModules"
@@ -12,11 +12,11 @@
       :autoplay="{ delay: 8000, disableOnInteraction: false }"
     >
       <swiper-slide
-        v-for="slide in allSlidersData"
-        :key="slide.node.pk"
+        v-for="node in validSliders"
+        :key="node.pk ?? node.id"
         class="promo__slide"
       >
-        <SliderItem :slider="slide.node" />
+        <SliderItem :slider="node" />
       </swiper-slide>
     </swiper>
 
@@ -24,58 +24,44 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Pagination, Autoplay } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
 
 import SliderItem from 'src/components/Home/SliderItem.vue'
+import type { AllHomePageSlidersResult, HomePageSlider } from 'src/types/marketing-content/types'
 
-export default {
-  name: 'PromotionSection',
-  data () {
-    return {
-      autoplay: false,
-      slide: 0,
-      swiperModules: [Pagination, Autoplay]
-    }
-  },
+// Edge type extracted from the sliders query result
+type SliderEdge = NonNullable<
+  NonNullable<AllHomePageSlidersResult['allHomePageSliders']>['edges'][number]
+>
 
-  props: ['allSlidersData'],
-
-  components: {
-    Swiper,
-    SwiperSlide,
-    SliderItem
-  },
-
-  watch: {
-    allSlidersData (val) {
-      if (val && val[0] && val[0].node) {
-        this.slide = val[0].node.pk
-      }
-    }
-  },
-
-  methods: {
-    CHANGE_THE_SLIDER () {
-      const parent = this.$jquery('.parientSlider')
-      const activeChild = parent.find('.active')
-      const nextChild = activeChild.next()
-      if (activeChild.length > 0) {
-        if (nextChild.length) {
-          nextChild.addClass('active')
-        } else {
-          parent.children().first().addClass('active')
-        }
-        activeChild.removeClass('active')
-      } else {
-        parent.children().first().addClass('active')
-      }
-    }
-  }
+interface Props {
+  allSlidersData?: SliderEdge[] | null
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  allSlidersData: null,
+})
+
+const swiperModules = [Pagination, Autoplay]
+const currentPk = ref<number | null>(null)
+
+const validSliders = computed<HomePageSlider[]>(() =>
+  (props.allSlidersData ?? []).flatMap((e) => (e.node ? [e.node] : []))
+)
+
+watch(
+  () => props.allSlidersData,
+  (val) => {
+    const first = val?.[0]?.node
+    if (first && first.pk != null) currentPk.value = first.pk
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>

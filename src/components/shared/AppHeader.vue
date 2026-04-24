@@ -133,60 +133,61 @@
   </header>
 </template>
 
-<script>
-import DsButton from 'src/design-system/components/DsButton.vue';
-import DsModal from 'src/design-system/components/DsModal.vue';
-import { LOGO, BRAND } from 'src/design-system/brand';
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
+import DsButton from 'src/design-system/components/DsButton.vue'
+import DsModal from 'src/design-system/components/DsModal.vue'
+import { LOGO, BRAND } from 'src/design-system/brand'
 
-export default {
-  name: 'AppHeader',
-  components: { DsButton, DsModal },
-  props: {
-    variant: {
-      type: String,
-      default: 'cream',
-      validator: v => ['cream', 'transparent'].includes(v)
-    },
-    sticky:      { type: Boolean, default: true },
-    showAuthCta: { type: Boolean, default: true }
-  },
-  data() {
-    return {
-      isScrolled: false,
-      drawerOpen: false,
-      navLinks: [
-        { to: '/',         label: 'الرئيسية' },
-        { to: '/courses',  label: 'الدورات' },
-        { to: '/cart/',    label: 'السلة' }
-      ]
-    };
-  },
-  computed: {
-    logoSrc()      { return LOGO.full; },
-    brandNameAr()  { return BRAND.nameAr; }
-  },
-  mounted() {
-    if (this.sticky && typeof window !== 'undefined') {
-      this.onScroll();
-      window.addEventListener('scroll', this.onScroll, { passive: true });
-    }
-  },
-  beforeUnmount() {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('scroll', this.onScroll);
-    }
-  },
-  methods: {
-    onScroll() {
-      this.isScrolled = window.scrollY > 20;
-    },
-    isActive(to) {
-      if (!this.$route) return false;
-      if (to === '/') return this.$route.path === '/';
-      return this.$route.path.indexOf(to) === 0;
-    }
+interface Props {
+  variant?: 'cream' | 'transparent'
+  sticky?: boolean
+  showAuthCta?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'cream',
+  sticky: true,
+  showAuthCta: true
+})
+
+const route = useRoute()
+
+const isScrolled = ref(false)
+const drawerOpen = ref(false)
+
+const logoSrc = LOGO.full
+const brandNameAr = BRAND.nameAr
+
+const navLinks = [
+  { to: '/',        label: 'الرئيسية' },
+  { to: '/courses', label: 'الدورات' },
+  { to: '/cart/',   label: 'السلة' }
+]
+
+function onScroll (): void {
+  isScrolled.value = window.scrollY > 20
+}
+
+function isActive (to: string): boolean {
+  if (!route) return false
+  if (to === '/') return route.path === '/'
+  return route.path.indexOf(to) === 0
+}
+
+onMounted(() => {
+  if (props.sticky && typeof window !== 'undefined') {
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
   }
-};
+})
+
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', onScroll)
+  }
+})
 </script>
 
 <style lang="scss" scoped>

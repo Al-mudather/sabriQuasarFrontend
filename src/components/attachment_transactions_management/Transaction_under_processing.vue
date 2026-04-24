@@ -15,19 +15,22 @@
       <ds-badge variant="warning">{{ $t('في إنتظار المعالجة') }}</ds-badge>
     </div>
 
-    <TransactionDetails v-if="detail" :customerTrans="customerTrans" v-on:close="detail = false" />
+    <TransactionDetails v-if="detail" :customerTrans="customerTrans" @close="detail = false" />
   </article>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref } from 'vue'
 import TransactionDetails from 'src/components/attachment_transactions_management/Transaction_details.vue'
+import type { AttachmentTransaction } from 'src/types/attachments/types'
 
-export default {
-  name: 'TransactionUnderProcessing',
-  components: { TransactionDetails },
-  props: ['customerTrans'],
-  data () { return { detail: false } }
+interface Props {
+  customerTrans: AttachmentTransaction
 }
+
+defineProps<Props>()
+
+const detail = ref(false)
 </script>
 
 <style lang="scss" scoped>

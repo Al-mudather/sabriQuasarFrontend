@@ -30,7 +30,7 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import DsCard from 'src/design-system/components/DsCard.vue'
 
 const ICONS = {
@@ -56,31 +56,29 @@ const ICONS = {
     </svg>`
 }
 
-export default {
-  name: 'ValueProps',
-  components: { DsCard },
-  data () {
-    return {
-      values: [
-        {
-          icon: ICONS.medical,
-          title: 'تدريب طبي معتمد',
-          body: 'مناهج متخصصة في علوم الدم، التخطيط الكهربائي، وعلم الأمراض — مبنية على أحدث المراجع الإكلينيكية.'
-        },
-        {
-          icon: ICONS.growth,
-          title: 'تطوير ذاتي عميق',
-          body: 'رحلات تحوّلية تُعيد تشكيل علاقتك بالعمل والحياة، بإشراف مدرب معتمد بخبرة تتجاوز العقدين.'
-        },
-        {
-          icon: ICONS.community,
-          title: 'مجتمع من المتعلمين',
-          body: 'تنضم لشبكة من الأطباء والمهنيين الذين يشاركونك الرحلة، ويدعمون نموك بعد انتهاء كل دورة.'
-        }
-      ]
-    }
-  }
+interface ValueItem {
+  icon: string
+  title: string
+  body: string
 }
+
+const values: ValueItem[] = [
+  {
+    icon: ICONS.medical,
+    title: 'تدريب طبي معتمد',
+    body: 'مناهج متخصصة في علوم الدم، التخطيط الكهربائي، وعلم الأمراض — مبنية على أحدث المراجع الإكلينيكية.'
+  },
+  {
+    icon: ICONS.growth,
+    title: 'تطوير ذاتي عميق',
+    body: 'رحلات تحوّلية تُعيد تشكيل علاقتك بالعمل والحياة، بإشراف مدرب معتمد بخبرة تتجاوز العقدين.'
+  },
+  {
+    icon: ICONS.community,
+    title: 'مجتمع من المتعلمين',
+    body: 'تنضم لشبكة من الأطباء والمهنيين الذين يشاركونك الرحلة، ويدعمون نموك بعد انتهاء كل دورة.'
+  }
+]
 </script>
 
 <style lang="scss" scoped>

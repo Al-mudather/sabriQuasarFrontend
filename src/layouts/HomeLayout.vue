@@ -16,42 +16,36 @@
   </q-layout>
 </template>
 
-<script>
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { Quasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
-import { Quasar } from 'quasar'
-import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
-import { storeToRefs } from 'pinia'
 
-export default {
-  name: 'HomeLayout',
-  components: { AppHeader, AppFooter },
+defineOptions({ name: 'HomeLayout' })
 
-  setup () {
-    const auth = useAuthStore()
-    const settings = useSettingsStore()
-    const { token } = storeToRefs(auth)
-    const { isEnglish } = storeToRefs(settings)
-    return { token, isEnglish, settings }
-  },
+const { locale } = useI18n()
+const settings = useSettingsStore()
+const { isEnglish } = storeToRefs(settings)
 
-  async mounted () {
-    this.settings.setIsEnglish(this.isEnglish)
-    this.$i18n.locale = this.isEnglish ? 'en' : 'ar'
+onMounted(async () => {
+  settings.setIsEnglish(isEnglish.value)
+  locale.value = isEnglish.value ? 'en' : 'ar'
 
-    // Lang-pack rtl flag drives html.dir. Omitting rtl:true for Arabic
-    // (or setting rtl:true for English) flips the whole page to LTR and
-    // breaks Arabic glyph shaping. Keep these flags accurate.
-    try {
-      if (this.isEnglish) {
-        const lang = await import('quasar/lang/en-us')
-        Quasar.lang.set({ ...lang.default, rtl: false })
-      } else {
-        const lang = await import('quasar/lang/ar')
-        Quasar.lang.set({ ...lang.default, rtl: true })
-      }
-    } catch (err) { /* lang pack missing; no-op */ }
-  }
-}
+  // Lang-pack rtl flag drives html.dir. Omitting rtl:true for Arabic
+  // (or setting rtl:true for English) flips the whole page to LTR and
+  // breaks Arabic glyph shaping. Keep these flags accurate.
+  try {
+    if (isEnglish.value) {
+      const lang = await import('quasar/lang/en-us')
+      Quasar.lang.set({ ...lang.default, rtl: false })
+    } else {
+      const lang = await import('quasar/lang/ar')
+      Quasar.lang.set({ ...lang.default, rtl: true })
+    }
+  } catch { /* lang pack missing; no-op */ }
+})
 </script>

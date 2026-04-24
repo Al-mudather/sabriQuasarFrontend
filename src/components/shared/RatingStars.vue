@@ -57,86 +57,89 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
 const STAR_PATH = 'M12 2.5l2.95 5.98 6.6.96-4.77 4.65 1.12 6.57L12 17.77l-5.9 3.09 1.12-6.57L2.45 9.64l6.6-.96L12 2.5z'
 
-export default {
-  name: 'RatingStars',
-  emits: ['update:modelValue', 'change'],
-  props: {
-    modelValue:  { type: Number, default: 0 },
-    count:       { type: Number, default: null },
-    size: {
-      type: String,
-      default: 'md',
-      validator: v => ['sm', 'md', 'lg'].includes(v)
-    },
-    interactive: { type: Boolean, default: false },
-    variant: {
-      type: String,
-      default: 'terracotta',
-      validator: v => ['terracotta', 'cream', 'ink'].includes(v)
-    },
-    precision: {
-      type: String,
-      default: 'half',
-      validator: v => ['half', 'full'].includes(v)
-    },
-    locale:      { type: String, default: 'ar-EG' }
-  },
-  data () {
-    return { hoverValue: null }
-  },
-  computed: {
-    starPath () { return STAR_PATH },
-    displayValue () {
-      const raw = this.hoverValue != null ? this.hoverValue : this.modelValue
-      const clamped = Math.max(0, Math.min(5, raw || 0))
-      if (this.precision === 'full') return Math.round(clamped)
-      return Math.round(clamped * 2) / 2
-    },
-    formattedCount () {
-      if (this.count == null) return ''
-      try {
-        return new Intl.NumberFormat(this.locale, { style: 'decimal' }).format(this.count)
-      } catch (e) {
-        return String(this.count)
-      }
-    },
-    groupAriaLabel () {
-      const v = this.displayValue
-      return `التقييم ${v} من 5${this.count != null ? '، ' + this.formattedCount + ' تقييم' : ''}`
-    }
-  },
-  methods: {
-    fillStyle (n) {
-      const v = this.displayValue
-      let pct = 0
-      if (v >= n) pct = 100
-      else if (v > n - 1) pct = Math.max(0, Math.min(100, (v - (n - 1)) * 100))
-      // pct is fraction filled from the logical start.
-      // Use `inset` with inline-end cut so it is RTL-aware via logical prop.
-      return { 'clip-path': `inset(0 ${100 - pct}% 0 0)` }
-    },
-    onHover (n) {
-      if (!this.interactive) return
-      this.hoverValue = n
-    },
-    onTrackLeave () {
-      this.hoverValue = null
-    },
-    onSelect (n) {
-      if (!this.interactive) return
-      this.$emit('update:modelValue', n)
-      this.$emit('change', n)
-    },
-    onKey (delta) {
-      if (!this.interactive) return
-      const next = Math.max(0, Math.min(5, Math.round((this.modelValue || 0) + delta)))
-      this.$emit('update:modelValue', next)
-      this.$emit('change', next)
-    }
+interface Props {
+  modelValue?: number
+  count?: number | null
+  size?: 'sm' | 'md' | 'lg'
+  interactive?: boolean
+  variant?: 'terracotta' | 'cream' | 'ink'
+  precision?: 'half' | 'full'
+  locale?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: 0,
+  count: null,
+  size: 'md',
+  interactive: false,
+  variant: 'terracotta',
+  precision: 'half',
+  locale: 'ar-EG'
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', v: number): void
+  (e: 'change', v: number): void
+}>()
+
+const hoverValue = ref<number | null>(null)
+
+const starPath = STAR_PATH
+
+const displayValue = computed(() => {
+  const raw = hoverValue.value != null ? hoverValue.value : props.modelValue
+  const clamped = Math.max(0, Math.min(5, raw || 0))
+  if (props.precision === 'full') return Math.round(clamped)
+  return Math.round(clamped * 2) / 2
+})
+
+const formattedCount = computed(() => {
+  if (props.count == null) return ''
+  try {
+    return new Intl.NumberFormat(props.locale, { style: 'decimal' }).format(props.count)
+  } catch (e) {
+    return String(props.count)
   }
+})
+
+const groupAriaLabel = computed(() => {
+  const v = displayValue.value
+  return `التقييم ${v} من 5${props.count != null ? '، ' + formattedCount.value + ' تقييم' : ''}`
+})
+
+function fillStyle (n: number): Record<string, string> {
+  const v = displayValue.value
+  let pct = 0
+  if (v >= n) pct = 100
+  else if (v > n - 1) pct = Math.max(0, Math.min(100, (v - (n - 1)) * 100))
+  return { 'clip-path': `inset(0 ${100 - pct}% 0 0)` }
+}
+
+function onHover (n: number): void {
+  if (!props.interactive) return
+  hoverValue.value = n
+}
+
+function onTrackLeave (): void {
+  hoverValue.value = null
+}
+
+function onSelect (n: number): void {
+  if (!props.interactive) return
+  emit('update:modelValue', n)
+  emit('change', n)
+}
+
+function onKey (delta: number): void {
+  if (!props.interactive) return
+  const next = Math.max(0, Math.min(5, Math.round((props.modelValue || 0) + delta)))
+  emit('update:modelValue', next)
+  emit('change', next)
 }
 </script>
 

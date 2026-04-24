@@ -2,19 +2,19 @@
   <div class="auth-card">
     <template v-if="!sent">
       <header class="auth-card__head">
-        <h1 class="auth-card__title">{{ $t('استعادة كلمة المرور') }}</h1>
+        <h1 class="auth-card__title">{{ t('استعادة كلمة المرور') }}</h1>
         <p class="auth-card__subtitle">
-          {{ $t('أدخل بريدك الإلكتروني وسنرسل إليك رابطاً لإعادة تعيين كلمة المرور.') }}
+          {{ t('أدخل بريدك الإلكتروني وسنرسل إليك رابطاً لإعادة تعيين كلمة المرور.') }}
         </p>
       </header>
 
       <div v-if="apiError" class="auth-card__banner" role="alert">{{ apiError }}</div>
 
-      <form @submit.prevent="sendEmailConfirmationToTheUser" class="auth-card__form" novalidate>
+      <form @submit.prevent="sendEmailConfirmation" class="auth-card__form" novalidate>
         <ds-input
           v-model="email"
           type="email"
-          :label="$t('البريد الإلكتروني')"
+          :label="t('البريد الإلكتروني')"
           :error="fieldError"
           autocomplete="email"
           required
@@ -28,7 +28,7 @@
           full-width
           :loading="visible"
         >
-          {{ $t('إرسال رابط الاستعادة') }}
+          {{ t('إرسال رابط الاستعادة') }}
         </ds-button>
 
         <ds-button
@@ -39,7 +39,7 @@
           full-width
           @click="goLogin"
         >
-          {{ $t('العودة إلى تسجيل الدخول') }}
+          {{ t('العودة إلى تسجيل الدخول') }}
         </ds-button>
       </form>
     </template>
@@ -52,72 +52,71 @@
             <path d="M14 24l7 7 14-14" />
           </svg>
         </div>
-        <h1 class="auth-card__title">{{ $t('تم إرسال الرابط إلى بريدك') }}</h1>
+        <h1 class="auth-card__title">{{ t('تم إرسال الرابط إلى بريدك') }}</h1>
         <p class="auth-card__subtitle">
-          {{ $t('تحقق من صندوق الوارد — الرابط صالح لمدة قصيرة. إن لم تجده، راجع مجلد الرسائل غير المرغوبة.') }}
+          {{ t('تحقق من صندوق الوارد — الرابط صالح لمدة قصيرة. إن لم تجده، راجع مجلد الرسائل غير المرغوبة.') }}
         </p>
         <ds-button variant="ghost" size="lg" full-width @click="goLogin">
-          {{ $t('العودة إلى تسجيل الدخول') }}
+          {{ t('العودة إلى تسجيل الدخول') }}
         </ds-button>
       </div>
     </template>
   </div>
 </template>
 
-<script>
-/**
- * Auth feature types handled by this component.
- *
- * @typedef {import('src/types/auth/types').PasswordResetEmailResult} PasswordResetEmailResult
- * @typedef {import('src/types/auth/types').PasswordResetEmailVariables} PasswordResetEmailVariables
- */
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useMutation } from '@vue/apollo-composable'
 import { UserPasswordResetEmail } from 'src/graphql/account_management/mutation/UserPasswordResetEmail'
 import DsInput from 'src/design-system/components/DsInput.vue'
+import type { PasswordResetEmailResult, PasswordResetEmailVariables } from 'src/types/auth/types'
 
-export default {
-  name: 'ResetPassword',
-  components: { DsInput },
+const { t } = useI18n()
+const router = useRouter()
 
-  data () {
-    return { email: '', visible: false, sent: false, apiError: '', fieldError: '' }
-  },
+const email = ref('')
+const visible = ref(false)
+const sent = ref(false)
+const apiError = ref('')
+const fieldError = ref('')
 
-  methods: {
-    goLogin () { this.$router.push({ name: 'login' }) },
+const { mutate: sendResetEmail } = useMutation<PasswordResetEmailResult, PasswordResetEmailVariables>(
+  UserPasswordResetEmail
+)
 
-    errorHandler (errorsObj) {
-      const generic = []
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          if (key === 'email') this.fieldError = val.message
-          else generic.push(val.message)
-        }
-      }
-      if (generic.length) this.apiError = generic.join(' — ')
-    },
+function goLogin (): void {
+  void router.push({ name: 'login' })
+}
 
-    async sendEmailConfirmationToTheUser () {
-      this.apiError = ''
-      this.fieldError = ''
-      this.visible = true
-      try {
-        /** @type {{ data: PasswordResetEmailResult, errors?: unknown }} */
-        const res = await this.$apollo.mutate({
-          mutation: UserPasswordResetEmail,
-          variables: /** @type {PasswordResetEmailVariables} */ ({ email: this.email })
-        })
-        if (res.data.sendPasswordResetEmail.success) {
-          this.sent = true
-        } else if (res.data.sendPasswordResetEmail.errors) {
-          this.errorHandler(res.data.sendPasswordResetEmail.errors)
-        }
-        if (res.errors) this.errorHandler(res.errors)
-      } catch (error) {
-        this.apiError = this.$t('تعذر إرسال البريد الإلكتروني، حاول مجدداً')
-      } finally {
-        this.visible = false
-      }
+function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
+  const generic: string[] = []
+  for (const key in errorsObj) {
+    for (const val of errorsObj[key]) {
+      if (key === 'email') fieldError.value = val.message
+      else generic.push(val.message)
     }
+  }
+  if (generic.length) apiError.value = generic.join(' — ')
+}
+
+async function sendEmailConfirmation (): Promise<void> {
+  apiError.value = ''
+  fieldError.value = ''
+  visible.value = true
+  try {
+    const res = await sendResetEmail({ email: email.value })
+    const payload = res?.data?.sendPasswordResetEmail
+    if (payload?.success) {
+      sent.value = true
+    } else if (payload?.errors) {
+      errorHandler(payload.errors as Record<string, Array<{ message: string }>>)
+    }
+  } catch {
+    apiError.value = t('تعذر إرسال البريد الإلكتروني، حاول مجدداً')
+  } finally {
+    visible.value = false
   }
 }
 </script>

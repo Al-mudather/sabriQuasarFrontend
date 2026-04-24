@@ -1,9 +1,9 @@
 <template>
   <div class="auth-card">
     <header class="auth-card__head">
-      <h1 class="auth-card__title">{{ $t('تسجيل الدخول') }}</h1>
+      <h1 class="auth-card__title">{{ t('تسجيل الدخول') }}</h1>
       <p class="auth-card__subtitle">
-        {{ $t('أهلاً بعودتك. أدخل بياناتك لمتابعة رحلتك.') }}
+        {{ t('أهلاً بعودتك. أدخل بياناتك لمتابعة رحلتك.') }}
       </p>
     </header>
 
@@ -11,11 +11,11 @@
       <span>{{ apiError }}</span>
     </div>
 
-    <form @submit.prevent="LoginUser" class="auth-card__form" novalidate>
+    <form @submit.prevent="loginUser" class="auth-card__form" novalidate>
       <ds-input
         v-model="email"
         type="email"
-        :label="$t('البريد الإلكتروني')"
+        :label="t('البريد الإلكتروني')"
         :error="fieldErrors.email"
         autocomplete="email"
         required
@@ -25,7 +25,7 @@
       <ds-input
         v-model="password"
         type="password"
-        :label="$t('كلمة المرور')"
+        :label="t('كلمة المرور')"
         :error="fieldErrors.password"
         autocomplete="current-password"
         required
@@ -35,10 +35,10 @@
       <div class="auth-card__row">
         <label class="auth-card__remember">
           <input type="checkbox" v-model="remember" />
-          <span>{{ $t('تذكرني') }}</span>
+          <span>{{ t('تذكرني') }}</span>
         </label>
         <a class="auth-card__link" @click="goToPasswordResetPage">
-          {{ $t('نسيت كلمة المرور؟') }}
+          {{ t('نسيت كلمة المرور؟') }}
         </a>
       </div>
 
@@ -50,7 +50,7 @@
         full-width
         :loading="visible"
       >
-        {{ $t('تسجيل الدخول') }}
+        {{ t('تسجيل الدخول') }}
       </ds-button>
 
       <ds-button
@@ -61,17 +61,17 @@
         full-width
         @click="goToSignUpPage"
       >
-        {{ $t('إنشاء حساب جديد') }}
+        {{ t('إنشاء حساب جديد') }}
       </ds-button>
     </form>
 
     <div class="auth-card__social">
-      <div class="auth-card__divider"><span>{{ $t('أو') }}</span></div>
+      <div class="auth-card__divider"><span>{{ t('أو') }}</span></div>
       <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" />
       <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" />
     </div>
 
-    <p class="auth-card__fineprint" @click="GO_TO_THE_TERMS_AND_CONDETIONS_PAGE">
+    <p class="auth-card__fineprint" @click="goToTermsPage">
       {{ isEnglish
         ? 'By continuing you agree to the platform terms and conditions.'
         : 'بمتابعتك فإنك توافق على شروط وأحكام المنصة.' }}
@@ -79,154 +79,150 @@
   </div>
 </template>
 
-<script>
-/**
- * Auth feature types handled by this component.
- *
- * @typedef {import('src/types/auth/types').LoginMutationResult} LoginMutationResult
- * @typedef {import('src/types/auth/types').LoginVariables} LoginVariables
- * @typedef {import('src/types/auth/types').LoginResult} LoginResult
- * @typedef {import('src/types/auth/types').LoginSessionUser} LoginSessionUser
- */
-import { LoginUserWithEmail } from 'src/graphql/account_management/mutation/LoginUserWithEmail'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
+import { apolloClient } from 'src/apollo/client'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { usePyramidStore } from 'src/stores/pyramid'
-import { apolloClient } from 'src/apollo/client'
+import { LoginUserWithEmail } from 'src/graphql/account_management/mutation/LoginUserWithEmail'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue'
 import FacebookAuthentication from 'src/components/Account/FacebookAuthentication.vue'
 import DsInput from 'src/design-system/components/DsInput.vue'
+import type { LoginMutationResult, LoginVariables } from 'src/types/auth/types'
 
-export default {
-  name: 'Login',
-  components: { GoogleAuthentication, FacebookAuthentication, DsInput },
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const pyramid = usePyramidStore()
+const { isEnglish } = storeToRefs(settings)
 
-  setup () {
-    const auth = useAuthStore()
-    const settings = useSettingsStore()
-    const pyramid = usePyramidStore()
-    const { isEnglish } = storeToRefs(settings)
-    return { auth, settings, pyramid, isEnglish }
-  },
+const facebookLabel = ref('تسجيل الدخول عن طريق Facebook')
+const googleLabel = ref('تسجيل الدخول عن طريق Google')
+const email = ref('')
+const password = ref('')
+const remember = ref(true)
+const prevRoute = ref<string | null>(null)
+const visible = ref(false)
+const apiError = ref('')
+const fieldErrors = ref({ email: '', password: '' })
 
-  data () {
-    return {
-      facebookLabel: 'تسجيل الدخول عن طريق Facebook',
-      googleLabel: 'تسجيل الدخول عن طريق Google',
-      email: '',
-      password: '',
-      remember: true,
-      prevRoute: null,
-      visible: false,
-      apiError: '',
-      fieldErrors: { email: '', password: '' }
+onMounted(() => {
+  if (isEnglish.value) {
+    facebookLabel.value = 'Login using Facebook'
+    googleLabel.value = 'Login using Google'
+  }
+})
+
+function goToTermsPage (): void {
+  void router.push({ name: 'terms-and-conditions' })
+}
+
+function goToPasswordResetPage (): void {
+  void router.push({ name: 'password-reset' })
+}
+
+function goToSignUpPage (): void {
+  void router.push({ name: 'signUp' })
+}
+
+function resetErrors (): void {
+  apiError.value = ''
+  fieldErrors.value = { email: '', password: '' }
+}
+
+function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
+  const generic: string[] = []
+  for (const key in errorsObj) {
+    for (const val of errorsObj[key]) {
+      if (key === 'email' || key === 'password') {
+        fieldErrors.value[key] = val.message
+      } else {
+        generic.push(val.message)
+      }
     }
-  },
+  }
+  if (generic.length) apiError.value = generic.join(' — ')
+}
 
-  beforeRouteEnter (to, from, next) {
-    next(vm => { vm.prevRoute = from.fullPath })
-  },
+function redirectAfterLogin (fallback?: string): boolean {
+  const target = route.query?.redirect
+  if (target) {
+    void router.push(target as string).catch(() => {})
+    return true
+  }
+  if (fallback) void router.push(fallback).catch(() => {})
+  return false
+}
 
-  mounted () {
-    if (this.isEnglish) {
-      this.facebookLabel = 'Login using Facebook'
-      this.googleLabel   = 'Login using Google'
+async function isUserEnrolled (): Promise<boolean> {
+  try {
+    const res = await apolloClient.query({ query: AllEnrollmentsForCurrentUser })
+    return (res.data?.allEnrollmentsForCurrentUser?.edges?.length ?? 0) > 0
+  } catch {
+    return false
+  }
+}
+
+async function checkRegistrationCode (): Promise<void> {
+  try {
+    await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
+    pyramid.fetchMyMarketingCode()
+    const hasCourses = await isUserEnrolled()
+    pyramid.setMyMarketingCode('')
+    void router.push({ name: hasCourses ? 'my-courses' : 'Home' })
+  } catch (e: unknown) {
+    const err = e as { message?: string }
+    if (err.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
+      void router.push({ name: 'registeration-code' })
     }
-  },
+  }
+}
 
-  methods: {
-    GO_TO_THE_TERMS_AND_CONDETIONS_PAGE () { this.$router.push({ name: 'terms-and-conditions' }) },
-    goToPasswordResetPage ()                { this.$router.push({ name: 'password-reset' }) },
-    goToSignUpPage ()                       { this.$router.push({ name: 'signUp' }) },
-
-    resetErrors () {
-      this.apiError = ''
-      this.fieldErrors = { email: '', password: '' }
-    },
-
-    errorHandler (errorsObj) {
-      const generic = []
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) {
-          if (key === 'email' || key === 'password') {
-            this.fieldErrors[key] = val.message
-          } else {
-            generic.push(val.message)
+async function loginUser (): Promise<void> {
+  resetErrors()
+  visible.value = true
+  try {
+    const result = await apolloClient.mutate<LoginMutationResult, LoginVariables>({
+      mutation: LoginUserWithEmail,
+      variables: { email: email.value, password: password.value }
+    })
+    const tokenAuth = result?.data?.tokenAuth
+    if (tokenAuth?.success) {
+      if (tokenAuth.user?.verified) {
+        try {
+          const userCur = tokenAuth.user.userCurrency
+          if (userCur) settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')
+          const userEmail = tokenAuth.user.email
+          if (userEmail && typeof window !== 'undefined' && 'OneSignal' in window) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ;(window as any).OneSignal.push(function () {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ;(window as any).OneSignal.setExternalUserId(userEmail)
+            })
           }
-        }
+        } catch { /* OneSignal optional */ }
+
+        await auth.login(tokenAuth)
+        if (redirectAfterLogin()) return
+        await checkRegistrationCode()
+      } else {
+        void router.push({ name: 'password-confirm' })
       }
-      if (generic.length) this.apiError = generic.join(' — ')
-    },
-
-    redirectAfterLogin (fallback) {
-      const target = this.$route.query && this.$route.query.redirect
-      if (target) {
-        this.$router.push(target).catch(() => {})
-        return true
-      }
-      if (fallback) this.$router.push(fallback).catch(() => {})
-      return false
-    },
-
-    async LoginUser () {
-      this.resetErrors()
-      this.visible = true
-      try {
-        /** @type {{ data: LoginMutationResult }} */
-        const result = await apolloClient.mutate({
-          mutation: LoginUserWithEmail,
-          variables: /** @type {LoginVariables} */ ({ email: this.email, password: this.password })
-        })
-        if (result.data.tokenAuth.success) {
-          if (result.data.tokenAuth.user.verified) {
-            try {
-              const userCur = result.data.tokenAuth.user.userCurrency
-              if (userCur) this.settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')
-              // eslint-disable-next-line no-undef
-              if (typeof OneSignal !== 'undefined') {
-                const externalUserId = result.data.tokenAuth.user.email
-                // eslint-disable-next-line no-undef
-                OneSignal.push(function () { OneSignal.setExternalUserId(externalUserId) })
-              }
-            } catch (e) { /* OneSignal optional */ }
-
-            await this.auth.login(result.data.tokenAuth)
-            if (this.redirectAfterLogin()) return
-            this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
-          } else {
-            this.$router.push({ name: 'password-confirm' })
-          }
-        } else if (result.data.tokenAuth.errors) {
-          this.errorHandler(result.data.tokenAuth.errors)
-        }
-      } catch (e) {
-        this.apiError = this.$t('تعذر تسجيل الدخول. تحقق من بياناتك وحاول مجدداً.')
-      } finally { this.visible = false }
-    },
-
-    async IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE () {
-      try {
-        const res = await apolloClient.query({ query: AllEnrollmentsForCurrentUser })
-        return res.data.allEnrollmentsForCurrentUser.edges.length > 0
-      } catch (e) { return false }
-    },
-
-    async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
-      try {
-        await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
-        this.pyramid.fetchMyMarketingCode()
-        const hasCourses = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
-        this.pyramid.setMyMarketingCode('')
-        this.$router.push({ name: hasCourses ? 'my-courses' : 'Home' })
-      } catch (e) {
-        if (e.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-          this.$router.push({ name: 'registeration-code' })
-        }
-      }
+    } else if (tokenAuth?.errors) {
+      errorHandler(tokenAuth.errors as Record<string, Array<{ message: string }>>)
     }
+  } catch {
+    apiError.value = t('تعذر تسجيل الدخول. تحقق من بياناتك وحاول مجدداً.')
+  } finally {
+    visible.value = false
   }
 }
 </script>

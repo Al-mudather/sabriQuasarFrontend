@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="rootEl"
     class="stat-card"
     :class="[`stat-card--${size}`, `stat-card--${variant}`]"
     role="figure"
@@ -39,153 +40,150 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { counterUp } from 'src/design-system/motion'
 import { gsap } from 'gsap'
 
-const SIZES = { sm: 180, md: 240, lg: 300 }
-const STROKES = { sm: 3, md: 3.5, lg: 4 }
+const SIZES: Record<string, number> = { sm: 180, md: 240, lg: 300 }
+const STROKES: Record<string, number> = { sm: 3, md: 3.5, lg: 4 }
 
-export default {
-  name: 'StatCard',
-  props: {
-    value:    { type: Number, required: true },
-    label:    { type: String, default: '' },
-    suffix:   { type: String, default: '' },
-    max:      { type: Number, default: null },
-    size: {
-      type: String,
-      default: 'md',
-      validator: v => ['sm', 'md', 'lg'].includes(v)
-    },
-    variant: {
-      type: String,
-      default: 'indigo',
-      validator: v => ['indigo', 'terracotta'].includes(v)
-    },
-    animated: { type: Boolean, default: true },
-    locale:   { type: String, default: 'ar-EG' }
-  },
-  data () {
-    return {
-      prefersReduced: false,
-      hasPlayed:      false
-    }
-  },
-  computed: {
-    svgSize ()    { return SIZES[this.size] || SIZES.md },
-    strokeWidth () { return STROKES[this.size] || STROKES.md },
-    center ()     { return this.svgSize / 2 },
-    radius ()     { return (this.svgSize / 2) - (this.strokeWidth * 2) },
-    circumference () { return 2 * Math.PI * this.radius },
-    targetFraction () {
-      if (this.max && this.max > 0) {
-        return Math.max(0, Math.min(1, this.value / this.max))
-      }
-      return 0.75
-    },
-    targetOffset () {
-      return this.circumference * (1 - this.targetFraction)
-    },
-    initialOffset () {
-      if (!this.animated || this.prefersReduced) return this.targetOffset
-      return this.circumference
-    },
-    initialDisplay () {
-      if (!this.animated || this.prefersReduced) {
-        return this.formatNumber(this.value)
-      }
-      return this.formatNumber(0)
-    },
-    ariaLabel () {
-      const num = this.formatNumber(this.value)
-      return `${num}${this.suffix || ''} ${this.label || ''}`.trim()
-    }
-  },
-  mounted () {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      this.prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    }
+interface Props {
+  value: number
+  label?: string
+  suffix?: string
+  max?: number | null
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'indigo' | 'terracotta'
+  animated?: boolean
+  locale?: string
+}
 
-    if (!this.animated || this.prefersReduced) {
-      this.paintFinalState()
-      return
-    }
+const props = withDefaults(defineProps<Props>(), {
+  label: '',
+  suffix: '',
+  max: null,
+  size: 'md',
+  variant: 'indigo',
+  animated: true,
+  locale: 'ar-EG'
+})
 
-    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
-      this.play()
-      return
-    }
+// Refs for DOM elements
+const arc = ref<SVGCircleElement | null>(null)
+const number = ref<HTMLSpanElement | null>(null)
+const rootEl = ref<HTMLElement | null>(null)
 
-    this._observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && !this.hasPlayed) {
-          this.play()
-        }
-      })
-    }, { threshold: 0.35 })
+const prefersReduced = ref(false)
+const hasPlayed = ref(false)
 
-    this._observer.observe(this.$el)
-  },
-  beforeUnmount () {
-    if (this._observer) {
-      this._observer.disconnect()
-      this._observer = null
-    }
-    if (this._counterTween && typeof this._counterTween.kill === 'function') {
-      this._counterTween.kill()
-    }
-    if (this._arcTween && typeof this._arcTween.kill === 'function') {
-      this._arcTween.kill()
-    }
-  },
-  methods: {
-    formatNumber (v) {
-      try {
-        return new Intl.NumberFormat(this.locale, { maximumFractionDigits: 0 })
-          .format(Math.round(v))
-      } catch (e) {
-        return String(Math.round(v))
-      }
-    },
-    paintFinalState () {
-      this.$nextTick(() => {
-        if (this.$refs.number) this.$refs.number.textContent = this.formatNumber(this.value)
-        if (this.$refs.arc)    this.$refs.arc.setAttribute('stroke-dashoffset', this.targetOffset)
-      })
-    },
-    play () {
-      if (this.hasPlayed) return
-      this.hasPlayed = true
+let observer: IntersectionObserver | null = null
+let counterTween: { kill?: () => void } | null = null
+let arcTween: { kill?: () => void } | null = null
 
-      // Counter-up for the number — uses the DS motion primitive.
-      this._counterTween = counterUp(this.$refs.number, {
-        from: 0,
-        to: this.value,
-        duration: 1.2,
-        format: v => this.formatNumber(v)
-      })
+const svgSize = computed(() => SIZES[props.size] ?? SIZES['md'])
+const strokeWidth = computed(() => STROKES[props.size] ?? STROKES['md'])
+const center = computed(() => svgSize.value / 2)
+const radius = computed(() => (svgSize.value / 2) - (strokeWidth.value * 2))
+const circumference = computed(() => 2 * Math.PI * radius.value)
 
-      // Arc fill tween (ring's dashoffset), paired timing with counterUp.
-      if (this.$refs.arc) {
-        if (this.prefersReduced) {
-          this.$refs.arc.setAttribute('stroke-dashoffset', this.targetOffset)
-        } else {
-          this._arcTween = gsap.to(this.$refs.arc, {
-            attr: { 'stroke-dashoffset': this.targetOffset },
-            duration: 1.2,
-            ease: 'power2.out'
-          })
-        }
-      }
+const targetFraction = computed(() => {
+  if (props.max && props.max > 0) {
+    return Math.max(0, Math.min(1, props.value / props.max))
+  }
+  return 0.75
+})
 
-      if (this._observer) {
-        this._observer.disconnect()
-        this._observer = null
-      }
-    }
+const targetOffset = computed(() => circumference.value * (1 - targetFraction.value))
+
+const initialOffset = computed(() => {
+  if (!props.animated || prefersReduced.value) return targetOffset.value
+  return circumference.value
+})
+
+const initialDisplay = computed(() => {
+  if (!props.animated || prefersReduced.value) return formatNumber(props.value)
+  return formatNumber(0)
+})
+
+const ariaLabel = computed(() => {
+  const num = formatNumber(props.value)
+  return `${num}${props.suffix || ''} ${props.label || ''}`.trim()
+})
+
+function formatNumber (v: number): string {
+  try {
+    return new Intl.NumberFormat(props.locale, { maximumFractionDigits: 0 }).format(Math.round(v))
+  } catch (e) {
+    return String(Math.round(v))
   }
 }
+
+function paintFinalState (): void {
+  nextTick(() => {
+    if (number.value) number.value.textContent = formatNumber(props.value)
+    if (arc.value) arc.value.setAttribute('stroke-dashoffset', String(targetOffset.value))
+  })
+}
+
+function play (): void {
+  if (hasPlayed.value) return
+  hasPlayed.value = true
+
+  counterTween = counterUp(number.value!, {
+    from: 0,
+    to: props.value,
+    duration: 1.2,
+    format: (v: number) => formatNumber(v)
+  })
+
+  if (arc.value) {
+    if (prefersReduced.value) {
+      arc.value.setAttribute('stroke-dashoffset', String(targetOffset.value))
+    } else {
+      arcTween = gsap.to(arc.value, {
+        attr: { 'stroke-dashoffset': targetOffset.value },
+        duration: 1.2,
+        ease: 'power2.out'
+      })
+    }
+  }
+
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    prefersReduced.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  }
+
+  if (!props.animated || prefersReduced.value) {
+    paintFinalState()
+    return
+  }
+
+  if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+    play()
+    return
+  }
+
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && !hasPlayed.value) play()
+    })
+  }, { threshold: 0.35 })
+
+  if (rootEl.value) observer.observe(rootEl.value)
+})
+
+onBeforeUnmount(() => {
+  if (observer) { observer.disconnect(); observer = null }
+  if (counterTween && typeof counterTween.kill === 'function') counterTween.kill()
+  if (arcTween && typeof arcTween.kill === 'function') arcTween.kill()
+})
 </script>
 
 <style lang="scss" scoped>

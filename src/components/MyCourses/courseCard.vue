@@ -37,55 +37,59 @@
   </ds-card>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import type { Enrollment } from 'src/types/enrollments/types'
 
-export default {
-  name: 'CourseCard',
+interface Props {
+  course: Enrollment['course']
+  totalFinishedCourseContents?: number
+}
 
-  props: {
-    course: { type: Object, required: true },
-    totalFinishedCourseContents: { type: Number, default: 0 }
-  },
+const props = withDefaults(defineProps<Props>(), {
+  totalFinishedCourseContents: 0,
+})
 
-  data () {
-    return { FORMAT_THE_IAMGE_URL }
-  },
+const { t } = useI18n()
 
-  computed: {
-    progressPercent () {
-      const total = this.course.courseunitSet.edges.reduce(
-        (acc, unit) => acc + unit.node.courseunitcontentSet.totalCount,
-        0
-      )
-      if (total <= 0) return 0
-      return Math.round((this.totalFinishedCourseContents / total) * 100)
-    },
+const progressPercent = computed(() => {
+  const total = (props.course.courseunitSet.edges ?? []).reduce(
+    (acc, unit) => acc + (unit?.node?.courseunitcontentSet.totalCount ?? 0),
+    0
+  )
+  if (total <= 0) return 0
+  return Math.round((props.totalFinishedCourseContents / total) * 100)
+})
 
-    isCompleted () { return this.progressPercent >= 100 },
-    isNotStarted () { return this.progressPercent === 0 },
-    isInProgress () { return !this.isCompleted && !this.isNotStarted },
+const isCompleted = computed(() => progressPercent.value >= 100)
+const isNotStarted = computed(() => progressPercent.value === 0)
+const isInProgress = computed(() => !isCompleted.value && !isNotStarted.value)
 
-    statusBadge () {
-      if (this.isCompleted)  return { label: this.$t('مكتمل'),     variant: 'success' }
-      if (this.isInProgress) return { label: this.$t('قيد التقدم'), variant: 'brand' }
-      return null
-    },
+interface BadgeConfig {
+  label: string
+  variant: string
+}
 
-    ctaLabel () {
-      if (this.isCompleted)  return this.$t('مراجعة الكورس')
-      if (this.isInProgress) return this.$t('متابعة التعلم')
-      return this.$t('اذهب الى الدرس')
-    },
+const statusBadge = computed<BadgeConfig | null>(() => {
+  if (isCompleted.value) return { label: t('مكتمل'), variant: 'success' }
+  if (isInProgress.value) return { label: t('قيد التقدم'), variant: 'brand' }
+  return null
+})
 
-    classroomUrl () {
-      return `${location.origin}/classroom/#/class/${this.course.pk}/`
-    }
-  },
+const ctaLabel = computed(() => {
+  if (isCompleted.value) return t('مراجعة الكورس')
+  if (isInProgress.value) return t('متابعة التعلم')
+  return t('اذهب الى الدرس')
+})
 
-  methods: {
-    openClassroom () { window.location.href = this.classroomUrl }
-  }
+const classroomUrl = computed(
+  () => `${location.origin}/classroom/#/class/${props.course.pk}/`
+)
+
+function openClassroom (): void {
+  window.location.href = classroomUrl.value
 }
 </script>
 

@@ -15,15 +15,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'SwiperHeader',
-  data () {
-    return {}
-  },
-  components: {},
-  methods: {}
-}
+<script setup lang="ts">
+// No props, no store access — pure presentational.
 </script>
 
 <style lang="scss" scoped>

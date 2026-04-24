@@ -27,29 +27,29 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from 'src/stores/settings'
+import type { CurrencyCode } from 'src/types/courses/types'
 
-export default {
-  name: 'Currency',
-  setup () {
-    const settings = useSettingsStore()
-    return { settings }
-  },
-  data () { return { showCurrency: false } },
-  methods: {
-    currencySelectionHandler (currency) {
-      this.settings.setCurrency(currency)
-      this.showCurrency = false
-      this.$q.notify({
-        type: 'positive',
-        progress: true,
-        multiLine: true,
-        position: 'top',
-        message: this.$t('تم تغيير العمله الى:') + currency
-      })
-    }
-  }
+const $q = useQuasar()
+const { t } = useI18n()
+const settings = useSettingsStore()
+
+const showCurrency = ref(false)
+
+function currencySelectionHandler (currency: CurrencyCode): void {
+  settings.setCurrency(currency)
+  showCurrency.value = false
+  $q.notify({
+    type: 'positive',
+    progress: true,
+    multiLine: true,
+    position: 'top',
+    message: t('تم تغيير العمله الى:') + currency
+  })
 }
 </script>
 

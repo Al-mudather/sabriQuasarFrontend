@@ -3,174 +3,140 @@
     <router-view />
   </div>
 </template>
-<script>
-import LogRocket from "logrocket";
-import { LocalStorage } from "quasar";
-import { useAuthStore } from "src/stores/auth";
+<script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
+import LogRocket from 'logrocket'
+import { LocalStorage } from 'quasar'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
 
-export default {
-  name: "App",
-  setup() {
-    const auth = useAuthStore();
-    return { auth };
-  },
-  data() {
-    return {};
-  },
+defineOptions({ name: 'App' })
 
-  computed: {
-    token() { return this.auth.token; },
-    user()  { return this.auth.user; },
-  },
-  methods: {
-    RE_LOGIN_USER()              { return this.auth.RE_LOGIN_USER(); },
-    logOutAction()                { return this.auth.logOutAction(); },
-    DESTROY_THE_USER_REFRESH_TOKEN() { return this.auth.DESTROY_THE_USER_REFRESH_TOKEN(); },
-  },
+const $q = useQuasar()
+const { t } = useI18n()
+const router = useRouter()
+const auth = useAuthStore()
+const { token, user } = storeToRefs(auth)
 
-  async unmounted() {
-    // TODO: Delete the user access token
-    // await this.DESTROY_THE_USER_REFRESH_TOKEN()
-    //TODO: Delete the user data
-    this.logOutAction();
-    //TODO: Clear the localStorage
-    localStorage.clear();
-    alert("You closed the STC platform");
-  },
+// ---------------------------------------------------------------------------
+// OneSignal DOMContentLoaded handler (registered once on mount)
+// ---------------------------------------------------------------------------
+function onDOMContentLoaded (): void {
+  window.OneSignal.push(() => {
+    // Show prompt again if push not yet enabled
+    window.OneSignal.isPushNotificationsEnabled(function (isEnabled: boolean) {
+      if (!isEnabled) {
+        window.OneSignal.showSlidedownPrompt({ force: true })
+      }
+    })
 
-  created() {
-    // //TODO: Clear the localStorage
-    // localStorage.clear()
+    window.OneSignal.on('popoverAllowClick', () => {
+      // Null-safe: only set external user id when authenticated and email exists
+      if (auth.isAuthenticated && user.value?.email) {
+        const externalUserId = user.value.email
+        window.OneSignal.push(function () {
+          window.OneSignal.setExternalUserId(externalUserId)
+        })
+      }
+    })
 
-    //TODO: logrocket
-    LogRocket.init("3bybms/stc");
+    window.OneSignal.on('notificationPermissionChange', (permissionChange: { to: string }) => {
+      const currentPermission = permissionChange.to
+      if (currentPermission === 'granted') {
+        $q.notify({
+          type: 'positive',
+          progress: true,
+          multiLine: true,
+          position: 'center',
+          message: t('تهانينا, الان يمكنك ان تكون مطلعا على كل ماهو جديد في المنصه التعليميه'),
+        })
 
-    // This is an example script - don't forget to change it!
-    LogRocket.identify("THE_USER_ID_IN_YOUR_APP", {
-      name: "STC User",
-      email: `1@stc.com`,
+        // Null-safe: only set external user id when authenticated and email exists
+        if (auth.isAuthenticated && user.value?.email) {
+          const externalUserId = user.value.email
+          window.OneSignal.push(function () {
+            window.OneSignal.setExternalUserId(externalUserId)
+          })
+        }
+      } else if (currentPermission === 'denied' || currentPermission === 'default') {
+        $q.notify({
+          type: 'negative',
+          progress: true,
+          multiLine: true,
+          position: 'center',
+          message: t('بعدم قبولك للإشعارات, لايمكننا ان نخبرك بمراحل امتلاكك للدوره التدريبيه اللتي تريدها, من فضلك اقبل الإشعارات'),
+        })
+      }
+    })
+  })
+}
 
-      // Add your own custom user variables here, ie:
-      subscriptionType: "customer",
-    });
+// ---------------------------------------------------------------------------
+// Lifecycle
+// ---------------------------------------------------------------------------
+onMounted(() => {
+  // LogRocket init
+  LogRocket.init('3bybms/stc')
+  LogRocket.identify('THE_USER_ID_IN_YOUR_APP', {
+    name: 'STC User',
+    email: '1@stc.com',
+    subscriptionType: 'customer',
+  })
 
-    //TODO: IF the user blocked the notification
-    if (Notification.permission == "denied") {
-      this.$q.notify({
-        type: "negative",
-        progress: true,
-        multiLine: true,
-        position: "top",
-        message: this.$t(
-          "لقد قمت بحجب اللإشعارات , الرجاء السماح لها بالظهور لتتمتع باخر التحديثات على المنصه"
-        ),
-      });
-    }
+  // Blocked notifications warning
+  if (Notification.permission === 'denied') {
+    $q.notify({
+      type: 'negative',
+      progress: true,
+      multiLine: true,
+      position: 'top',
+      message: t('لقد قمت بحجب اللإشعارات , الرجاء السماح لها بالظهور لتتمتع باخر التحديثات على المنصه'),
+    })
+  }
 
-    window.addEventListener("DOMContentLoaded", (event) => {
-      window.OneSignal.push(() => {
-        //TODO: IF the user not enabled the notification Show it again on visiting
-        window.OneSignal.isPushNotificationsEnabled(function (isEnabled) {
-          if (isEnabled) {
-          } else {
-            //TODO: Show the subscribe message again until the user accept it
-            window.OneSignal.showSlidedownPrompt({ force: true });
-          }
-        });
+  window.addEventListener('DOMContentLoaded', onDOMContentLoaded)
 
-        window.OneSignal.on("popoverAllowClick", () => {
-          //TODO: If the user allowed the subscription, set his email
-          if (this.user) {
-            //TODO: Set the external user id for notification
-            let externalUserId = this.user.email; // You will supply the external user id to the OneSignal SDK
-            OneSignal.push(function () {
-              OneSignal.setExternalUserId(externalUserId);
-            });
-          }
-        });
+  // Empty the nav bar
+  LocalStorage.set('activeNav', '')
 
-        window.OneSignal.on(
-          "notificationPermissionChange",
-          (permissionChange) => {
-            var currentPermission = permissionChange.to;
-            if (currentPermission == "granted") {
-              this.$q.notify({
-                type: "positive",
-                progress: true,
-                multiLine: true,
-                position: "center",
-                message: this.$t(
-                  "تهانينا, الان يمكنك ان تكون مطلعا على كل ماهو جديد في المنصه التعليميه"
-                ),
-              });
-
-              if (this.user.email) {
-                //TODO: Set the external user id for notification
-                let externalUserId = this.user.email; // You will supply the external user id to the OneSignal SDK
-                window.OneSignal.push(function () {
-                  window.OneSignal.setExternalUserId(externalUserId);
-                });
-              }
-            } else if (
-              currentPermission == "denied" ||
-              currentPermission == "default"
-            ) {
-              this.$q.notify({
-                type: "negative",
-                progress: true,
-                multiLine: true,
-                position: "center",
-                message: this.$t(
-                  "بعدم قبولك للإشعارات, لايمكننا ان نخبرك بمراحل امتلاكك للدوره التدريبيه اللتي تريدها, من فضلك اقبل الإشعارات"
-                ),
-              });
-            }
-          }
-        );
-      });
-    });
-
-    // console.log({router: this.$router})
-    //TODO: Empty the nav bar
-    LocalStorage.set("activeNav", "");
-
-    // TODO: If There is a token, reLogin the user
-    if (this.token) {
-      this.RE_LOGIN_USER()
-        .then((re) => {
-          if (re === false) {
-            this.$q.notify({
-              type: "warning",
-              progress: true,
-              multiLine: true,
-              position: "top",
-              message:
-                "لقد انتهت صلاحية دخولك للموقع... الرجاء الدخول مره اخرى لتتمكن من تطوير مهاراتك",
-            });
-            //TODO: Delete the user data
-            this.logOutAction();
-            //TODO: Go to login page
-            this.$router.push({ name: "login" });
-          }
-
-          this.$q.notify({
-            type: "positive",
+  // If there is a token, re-login the user
+  if (token.value) {
+    auth.RE_LOGIN_USER()
+      .then((re: boolean) => {
+        if (re === false) {
+          $q.notify({
+            type: 'warning',
             progress: true,
             multiLine: true,
-            position: "bottom",
-            message: this.$t("تم تسجيل الدخول"),
-          });
+            position: 'top',
+            message: 'لقد انتهت صلاحية دخولك للموقع... الرجاء الدخول مره اخرى لتتمكن من تطوير مهاراتك',
+          })
+          auth.logOutAction()
+          void router.push({ name: 'login' })
+          return
+        }
+        $q.notify({
+          type: 'positive',
+          progress: true,
+          multiLine: true,
+          position: 'bottom',
+          message: t('تم تسجيل الدخول'),
         })
-        .catch((e) => {
-          // console.log({ReloginError: e})
-          this.$router.push({ name: "login" });
-        });
-    }
-  },
-  async mounted() {
-    // GSAP-driven motion replaces legacy WOW; orchestration lives in src/design-system/motion.js
-  },
-};
+      })
+      .catch(() => {
+        void router.push({ name: 'login' })
+      })
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('DOMContentLoaded', onDOMContentLoaded)
+  auth.logOutAction()
+  localStorage.clear()
+})
 </script>
 <style>
 #q-app {

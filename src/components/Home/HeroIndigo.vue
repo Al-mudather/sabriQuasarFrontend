@@ -1,5 +1,5 @@
 <template>
-  <section class="hero-indigo" aria-label="STC hero">
+  <section ref="root" class="hero-indigo" aria-label="STC hero">
     <!-- Topographic contour overlay -->
     <svg class="hero-indigo__contour" viewBox="0 0 1600 800" preserveAspectRatio="none" aria-hidden="true">
       <path d="M0,180 C400,120 800,260 1600,160" />
@@ -82,52 +82,72 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import { LOGO } from 'src/design-system/brand'
 import { slowBreath, cascade, contourDrift } from 'src/design-system/motion'
 
-export default {
-  name: 'HeroIndigo',
-  components: { DsButton },
-  props: {
-    learnersCount: { type: Number, default: null },
-    coursesCount:  { type: Number, default: null }
-  },
-  computed: {
-    portraitSrc () { return LOGO.full },
-    learnersLabel () {
-      return Number.isFinite(this.learnersCount) && this.learnersCount > 0
-        ? new Intl.NumberFormat('ar-EG').format(this.learnersCount)
-        : '[metric]'
-    },
-    coursesLabel () {
-      return Number.isFinite(this.coursesCount) && this.coursesCount > 0
-        ? new Intl.NumberFormat('ar-EG').format(this.coursesCount)
-        : '[metric]'
-    }
-  },
-  mounted () {
-    this._breath = slowBreath(this.$refs.portrait)
-    this._drift = contourDrift(this.$el.querySelector('.hero-indigo__contour'))
-    const lines = [this.$refs.line1, this.$refs.line2, this.$refs.line3].filter(Boolean)
-    this._cascade = cascade(lines, { stagger: 0.08, y: 18, duration: 0.7 })
-    // Trust row cascade — delayed
-    this._trustTimer = setTimeout(() => {
-      if (this.$refs.trust) {
-        const items = this.$refs.trust.querySelectorAll('li')
-        this._trustCascade = cascade(items, { stagger: 0.06, y: 10, duration: 0.5 })
-      }
-    }, 200)
-  },
-  beforeUnmount () {
-    if (this._breath && this._breath.kill) this._breath.kill()
-    if (this._drift && this._drift.kill) this._drift.kill()
-    if (this._cascade && this._cascade.kill) this._cascade.kill()
-    if (this._trustCascade && this._trustCascade.kill) this._trustCascade.kill()
-    if (this._trustTimer) clearTimeout(this._trustTimer)
-  }
+interface Props {
+  learnersCount?: number | null
+  coursesCount?: number | null
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  learnersCount: null,
+  coursesCount: null,
+})
+
+// Template refs
+const root = ref<HTMLElement | null>(null)
+const portrait = ref<HTMLElement | null>(null)
+const line1 = ref<HTMLElement | null>(null)
+const line2 = ref<HTMLElement | null>(null)
+const line3 = ref<HTMLElement | null>(null)
+const trust = ref<HTMLElement | null>(null)
+
+type Motion = { kill?: () => void } | null
+
+let breath: Motion = null
+let drift: Motion = null
+let cascade_: Motion = null
+let trustCascade: Motion = null
+let trustTimer: ReturnType<typeof setTimeout> | null = null
+
+const portraitSrc = computed(() => LOGO.full)
+
+const learnersLabel = computed(() =>
+  Number.isFinite(props.learnersCount) && (props.learnersCount ?? 0) > 0
+    ? new Intl.NumberFormat('ar-EG').format(props.learnersCount as number)
+    : '[metric]'
+)
+
+const coursesLabel = computed(() =>
+  Number.isFinite(props.coursesCount) && (props.coursesCount ?? 0) > 0
+    ? new Intl.NumberFormat('ar-EG').format(props.coursesCount as number)
+    : '[metric]'
+)
+
+onMounted(() => {
+  breath = slowBreath(portrait.value) as Motion
+  drift = contourDrift(root.value?.querySelector('.hero-indigo__contour') ?? null) as Motion
+  const lines = [line1.value, line2.value, line3.value].filter(Boolean)
+  cascade_ = cascade(lines, { stagger: 0.08, y: 18, duration: 0.7 }) as Motion
+  trustTimer = setTimeout(() => {
+    if (trust.value) {
+      const items = trust.value.querySelectorAll('li')
+      trustCascade = cascade(items, { stagger: 0.06, y: 10, duration: 0.5 }) as Motion
+    }
+  }, 200)
+})
+
+onBeforeUnmount(() => {
+  breath?.kill?.()
+  drift?.kill?.()
+  cascade_?.kill?.()
+  trustCascade?.kill?.()
+  if (trustTimer !== null) clearTimeout(trustTimer)
+})
 </script>
 
 <style lang="scss" scoped>

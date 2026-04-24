@@ -10,11 +10,11 @@ import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { MyPyramidAffiliates } from 'src/graphql/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe.js'
 import type {
-  MyPyramidAffiliatesQuery,
-  MyPyramidAffiliatesQueryVariables,
-} from 'src/graphql/generated'
+  MyPyramidAffiliatesResult,
+  MyPyramidAffiliatesVars,
+} from 'src/types/pyramid/types'
 
-const { result } = useQuery<MyPyramidAffiliatesQuery, MyPyramidAffiliatesQueryVariables>(
+const { result } = useQuery<MyPyramidAffiliatesResult, MyPyramidAffiliatesVars>(
   MyPyramidAffiliates,
   undefined,
   { errorPolicy: 'all' },

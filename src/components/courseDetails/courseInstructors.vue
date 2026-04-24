@@ -15,18 +15,18 @@
         </div>
       </template>
 
-      <article v-for="instructor in instructors" :key="instructor.node.id" class="cd-instructor">
+      <article v-for="edge in instructors" :key="edge.node?.id ?? ''" class="cd-instructor">
         <img
-          v-if="$_.get(instructor, '[node][instructor][image]')"
-          :src="GET_IMAGE_URL($_.get(instructor, '[node][instructor][image]'))"
-          :alt="displayName(instructor)"
+          v-if="edge.node?.instructor?.image"
+          :src="getImageUrl(edge.node.instructor.image)"
+          :alt="displayName(edge)"
           class="cd-instructor__avatar"
         />
-        <img v-else src="~assets/img/user-13.jpg" :alt="displayName(instructor)" class="cd-instructor__avatar" />
+        <img v-else src="~assets/img/user-13.jpg" :alt="displayName(edge)" class="cd-instructor__avatar" />
         <div class="cd-instructor__text">
-          <h3 class="cd-instructor__name">{{ displayName(instructor) }}</h3>
+          <h3 class="cd-instructor__name">{{ displayName(edge) }}</h3>
           <p class="cd-instructor__qualification">
-            {{ $_.get(instructor, '[node][instructor][qualification]') }}
+            {{ edge.node?.instructor?.qualification ?? '' }}
           </p>
         </div>
       </article>
@@ -34,42 +34,44 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { GetAllCourseInstructors } from 'src/graphql/course_management/query/GetAllCourseInstructors'
+import type {
+  GetAllCourseInstructorsResult,
+  GetAllCourseInstructorsVars,
+} from 'src/types/courses/types'
 
-export default {
-  name: 'CourseInstructors',
-  props: ['course_id'],
+type InstructorEdge = NonNullable<
+  NonNullable<GetAllCourseInstructorsResult['allCourseInstructors']>['edges'][number]
+>
 
-  setup (props) {
-    const { result, loading } = useQuery(
-      GetAllCourseInstructors,
-      () => ({ courseID: props.course_id }),
-      { errorPolicy: 'all' }
-    )
-    const allCourseInstructors = computed(() => result.value?.allCourseInstructors || { edges: [] })
-    return { allCourseInstructors, loading }
-  },
+const props = defineProps<{
+  course_id: string
+}>()
 
-  computed: {
-    instructors () { return this.$_.get(this.allCourseInstructors, 'edges', []) }
-  },
+const { result, loading } = useQuery<GetAllCourseInstructorsResult, GetAllCourseInstructorsVars>(
+  GetAllCourseInstructors,
+  () => ({ courseID: props.course_id }),
+  { errorPolicy: 'all' },
+)
 
-  methods: {
-    displayName (instructor) {
-      const full = this.$_.get(instructor, '[node][instructor][user][fullName]')
-      if (full) return full
-      const username = this.$_.get(instructor, '[node][instructor][user][username]', '')
-      return username.split('@')[0]
-    },
+const instructors = computed(
+  () => (result.value?.allCourseInstructors?.edges ?? [])
+    .filter((e): e is InstructorEdge => !!e && !!e.node),
+)
 
-    GET_IMAGE_URL (img) {
-      if (process.env.NODE_ENV === 'development') return 'http://localhost:8000/media/' + img
-      return location.origin + '/media/' + img
-    }
-  }
+function displayName (edge: InstructorEdge): string {
+  const user = edge.node?.instructor?.user
+  if (!user) return ''
+  if (user.fullName) return user.fullName
+  return user.username.split('@')[0]
+}
+
+function getImageUrl (img: string): string {
+  if (process.env.NODE_ENV === 'development') return 'http://localhost:8000/media/' + img
+  return location.origin + '/media/' + img
 }
 </script>
 

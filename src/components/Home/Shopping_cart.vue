@@ -16,29 +16,30 @@
     </svg>
     <span class="cart-trigger__label">{{ $t('السلة') }}</span>
     <span
-      v-if="!$_.isEmpty(shoppingCartDataList)"
+      v-if="hasItems"
       class="cart-trigger__count"
       aria-live="polite"
     >
-      {{ $_.size(shoppingCartDataList) }}
+      {{ cartCount }}
     </span>
   </button>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useCartStore } from 'src/stores/cart'
 
-export default {
-  name: 'ShoppingCart',
-  setup () {
-    const cart = useCartStore()
-    const { shoppingCartDataList } = storeToRefs(cart)
-    return { cart, shoppingCartDataList }
-  },
-  methods: {
-    OpenShoppingCartSection () { this.$router.push({ name: 'cart' }) }
-  }
+const router = useRouter()
+const cart = useCartStore()
+const { shoppingCartDataList } = storeToRefs(cart)
+
+const cartCount = computed(() => shoppingCartDataList.value?.length ?? 0)
+const hasItems = computed(() => cartCount.value > 0)
+
+function OpenShoppingCartSection (): void {
+  router.push({ name: 'cart' })
 }
 </script>
 

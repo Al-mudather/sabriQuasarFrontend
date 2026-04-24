@@ -25,9 +25,9 @@
               <th>{{ $t('رقم التلجرام') }}</th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-for="detail in customerTrans.order.orderdetailsSet.edges" :key="detail.node.pk">
-              <td>{{ detail.node.course.title }}</td>
+          <tbody v-if="customerTrans.order.user">
+            <tr v-for="detail in customerTrans.order.orderdetailsSet?.edges" :key="detail?.node?.pk">
+              <td>{{ detail?.node?.course?.title }}</td>
               <td>{{ customerTrans.order.user.fullName }}</td>
               <td>{{ customerTrans.order.user.phoneNumber2 }}</td>
               <td>{{ customerTrans.order.user.phoneNumber3 }}</td>
@@ -39,14 +39,21 @@
   </q-dialog>
 </template>
 
-<script>
-export default {
-  name: 'TransactionDetails',
-  props: ['customerTrans'],
+<script setup lang="ts">
+import type { AttachmentTransaction } from 'src/types/attachments/types'
 
-  methods: {
-    CLOSE_THE_ATTACHEMENTS_DETAILS () { this.$emit('close') }
-  }
+interface Props {
+  customerTrans: AttachmentTransaction
+}
+
+defineProps<Props>()
+
+const emit = defineEmits<{
+  (e: 'close'): void
+}>()
+
+function CLOSE_THE_ATTACHEMENTS_DETAILS (): void {
+  emit('close')
 }
 </script>
 

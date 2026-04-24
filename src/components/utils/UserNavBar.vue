@@ -10,52 +10,38 @@
         <q-icon name="menu" size="24px" />
       </button>
 
-      <div class="user-nav__user" v-if="lodash.get(user, '[firstName]')">
+      <div class="user-nav__user" v-if="user?.firstName">
         <q-icon name="person" size="22px" class="user-nav__user-icon" />
         <h3 class="user-nav__user-name">
-          {{ lodash.get(user, "[firstName]") }}
-          {{ lodash.get(user, "[lastName]") }}
+          {{ user?.firstName }}
+          {{ user?.lastName }}
         </h3>
       </div>
-      <div class="user-nav__user" v-else-if="lodash.get(user, '[username]')">
+      <div class="user-nav__user" v-else-if="user?.username">
         <q-icon name="person" size="22px" class="user-nav__user-icon" />
         <h3 class="user-nav__user-name">
-          {{ lodash.get(user, "[username]") }}
+          {{ user?.username }}
         </h3>
       </div>
       <div class="user-nav__user heading" v-else>
-        {{ lodash.get(user, "[email]") }}
+        {{ user?.email }}
       </div>
     </div>
   </section>
 </template>
 
-<script>
-import { storeToRefs } from "pinia";
-import { useAuthStore } from "src/stores/auth";
-import { useSettingsStore } from "src/stores/settings";
+<script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
 
-export default {
-  name: "CoursesNavBar",
-  setup () {
-    const auth = useAuthStore();
-    const settings = useSettingsStore();
-    const { user, token } = storeToRefs(auth);
-    return { auth, settings, user, token };
-  },
-  data() {
-    return {
-      lodash: this.$_,
-      myNotifications: [],
-    };
-  },
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const { user } = storeToRefs(auth)
 
-  methods: {
-    changeMenuState() {
-      this.settings.setOpenMenu(true);
-    },
-  },
-};
+function changeMenuState (): void {
+  settings.setOpenMenu(true)
+}
 </script>
 
 <style lang="scss" scoped>

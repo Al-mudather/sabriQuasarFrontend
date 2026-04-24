@@ -12,11 +12,12 @@
   </section>
 </template>
 
-<script>
-export default {
-  name: 'AboutTheCourse',
-  props: ['courseData']
-}
+<script setup lang="ts">
+import type { CourseDetail } from 'src/types/courses/types'
+
+defineProps<{
+  courseData: CourseDetail | null
+}>()
 </script>
 
 <style lang="scss" scoped>

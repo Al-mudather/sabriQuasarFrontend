@@ -16,49 +16,42 @@
   </q-layout>
 </template>
 
-<script>
+<script setup lang="ts">
+import { watch, onMounted } from 'vue'
+import { LocalStorage, Quasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
-import { LocalStorage, Quasar } from 'quasar'
 import { useSettingsStore } from 'src/stores/settings'
-import { storeToRefs } from 'pinia'
 
-export default {
-  name: 'MainLayout',
-  components: { AppHeader, AppFooter },
+defineOptions({ name: 'MainLayout' })
 
-  setup () {
-    const settings = useSettingsStore()
-    const { isEnglish } = storeToRefs(settings)
-    return { isEnglish, settings }
-  },
+const { locale } = useI18n()
+const settings = useSettingsStore()
+const { isEnglish } = storeToRefs(settings)
 
-  mounted () {
-    this.applyLocale(LocalStorage.getItem('isEnglish'))
-  },
+async function applyLocale (val: boolean | null): Promise<void> {
+  locale.value = val ? 'en' : 'ar'
+  settings.setIsEnglish(val)
 
-  watch: {
-    isEnglish (value) { this.applyLocale(value) }
-  },
-
-  methods: {
-    async applyLocale (isEnglish) {
-      this.$i18n.locale = isEnglish ? 'en' : 'ar'
-      this.settings.setIsEnglish(isEnglish)
-
-      // rtl flag on the lang pack drives html.dir. Omitting rtl:true for
-      // Arabic (or setting rtl:true for English) flips the whole page to
-      // LTR and breaks Arabic glyph shaping.
-      try {
-        if (isEnglish) {
-          const lang = await import('quasar/lang/en-us')
-          Quasar.lang.set({ ...lang.default, rtl: false })
-        } else {
-          const lang = await import('quasar/lang/ar')
-          Quasar.lang.set({ ...lang.default, rtl: true })
-        }
-      } catch (err) { /* lang pack missing; no-op */ }
+  // rtl flag on the lang pack drives html.dir. Omitting rtl:true for
+  // Arabic (or setting rtl:true for English) flips the whole page to
+  // LTR and breaks Arabic glyph shaping.
+  try {
+    if (val) {
+      const lang = await import('quasar/lang/en-us')
+      Quasar.lang.set({ ...lang.default, rtl: false })
+    } else {
+      const lang = await import('quasar/lang/ar')
+      Quasar.lang.set({ ...lang.default, rtl: true })
     }
-  }
+  } catch { /* lang pack missing; no-op */ }
 }
+
+onMounted(() => {
+  void applyLocale(LocalStorage.getItem<boolean>('isEnglish'))
+})
+
+watch(isEnglish, (value) => { void applyLocale(value) })
 </script>

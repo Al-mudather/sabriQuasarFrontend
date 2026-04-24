@@ -58,13 +58,13 @@ import Transaction_under_processing from 'src/components/attachment_transactions
 import Transaction_rejected from 'src/components/attachment_transactions_management/Transaction_rejected.vue'
 import Transaction_hanged from 'src/components/attachment_transactions_management/Transaction_hanged.vue'
 import type {
-  AllMarketerAttachmentTransactionQuery,
-  AllMarketerAttachmentTransactionQueryVariables,
-} from 'src/graphql/generated'
+  AllMarketerAttachmentTransactionResult,
+  AllMarketerAttachmentTransactionVars,
+} from 'src/types/pyramid/types'
 
 const { t } = useI18n()
 
-const { result } = useQuery<AllMarketerAttachmentTransactionQuery, AllMarketerAttachmentTransactionQueryVariables>(
+const { result } = useQuery<AllMarketerAttachmentTransactionResult, AllMarketerAttachmentTransactionVars>(
   AllMarketerAttachmentTransaction,
 )
 

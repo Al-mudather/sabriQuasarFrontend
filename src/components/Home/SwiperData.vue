@@ -38,42 +38,15 @@
     </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
-
 import reviewCard from 'components/utils/reviewCard.vue'
-export default {
-  name: 'SwiperData',
-  data () {
-    return {
-      swiperOptions: {
-        effect: 'coverflow',
-        grabCursor: true,
-        centeredSlides: true,
-        slidesPerView: 'auto',
-        coverflowEffect: {
-          rotate: 500,
-          stretch: 0,
-          depth: 100,
-          modifier: 1,
-          slideShadows: false
-        }
-      }
-    }
-  },
-  components: {
-    Swiper,
-    SwiperSlide,
-    reviewCard
-  },
-  methods: {
-    onSwiper (swiper) {
-    },
-    onSlideChange () {
-    }
-  }
-}
+
+// Components auto-registered in <script setup>
+
+function onSwiper (_swiper: unknown): void { /* no-op */ }
+function onSlideChange (): void { /* no-op */ }
 </script>
 
 <style lang="scss">

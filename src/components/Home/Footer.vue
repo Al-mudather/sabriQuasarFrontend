@@ -6,12 +6,8 @@
   </footer>
 </template>
 
-<script>
-export default {
-  name: 'Footer',
-  props: {
-  }
-}
+<script setup lang="ts">
+// No props, no store access — pure presentational.
 </script>
 <style lang="scss">
 

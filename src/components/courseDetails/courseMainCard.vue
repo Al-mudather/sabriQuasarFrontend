@@ -15,22 +15,22 @@
     <ul class="course-main-card__meta">
       <li>
         <span class="label">{{ $t('الطلاب الملتحقين') }}</span>
-        <strong v-if="hasField('enrollmentCount')">
-          {{ enrollmentCount }}<span class="unit" v-if="courseData.enrollmentCount >= 1000">K</span>
+        <strong v-if="courseData && courseData.enrollmentCount != null">
+          {{ enrollmentCount }}<span class="unit" v-if="(courseData.enrollmentCount ?? 0) >= 1000">K</span>
         </strong>
         <ds-skeleton v-else shape="line" width="3ch" />
       </li>
       <li>
         <span class="label">{{ $t('عدد الساعات') }}</span>
-        <strong v-if="hasField('courseHours')">
+        <strong v-if="courseData && courseData.courseHours">
           {{ courseData.courseHours }}<span class="unit">H</span>
         </strong>
         <ds-skeleton v-else shape="line" width="3ch" />
       </li>
       <li>
         <span class="label">{{ $t('اللغة') }}</span>
-        <strong v-if="hasField('courseLanguage')">
-          {{ $_.get(courseData, '[courseLanguage][languageName]') }}
+        <strong v-if="courseData && courseData.courseLanguage">
+          {{ courseData.courseLanguage?.languageName }}
         </strong>
         <ds-skeleton v-else shape="line" width="4ch" />
       </li>
@@ -52,18 +52,18 @@
         size="lg"
         full-width
         :disabled="!hasPrice"
-        @click="AddTheCourseToTheBasket"
+        @click="addTheCourseToTheBasket"
       >
         {{ $t('أمتلك الأن') }}
       </ds-button>
 
       <!-- Affiliate share -->
       <form
-        v-if="$_.size(myMarketingCode) > 4"
+        v-if="myMarketingCode && myMarketingCode.length > 4"
         class="course-main-card__share"
-        @submit="COPY_THE_SHARING_LINK"
+        @submit="copyTheSharingLink"
       >
-        <input id="shar-link" type="text" :value="PREPARE_THE_COURSE_SHARING_LINK" readonly />
+        <input id="shar-link" type="text" :value="prepareCourseSharingLink" readonly />
         <button type="submit" class="course-main-card__share-btn" :aria-label="$t('انسخ الرابط')">
           <q-tooltip>{{ message }}</q-tooltip>
           <img src="~assets/img/copyed.png" alt="" />
@@ -73,108 +73,113 @@
   </ds-card>
 </template>
 
-<script>
-import { copyToClipboard } from 'quasar'
+<script setup lang="ts">
+import { computed, ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useQuasar, copyToClipboard } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import type { CourseDetail, CoursePricing } from 'src/types/courses/types'
 
 const priceLookup = [
   { value: 1,    symbol: '' },
   { value: 1e3,  symbol: 'k' },
   { value: 1e6,  symbol: 'M' },
-  { value: 1e9,  symbol: 'B' }
+  { value: 1e9,  symbol: 'B' },
 ]
 
-const formatPrice = (num, digits = 3) => {
+function formatPrice (num: number, digits = 3): string {
   if (!Number.isFinite(num) || num === 0) return String(num)
   const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
-  const item = priceLookup.slice().reverse().find(it => num >= it.value)
+  const item = [...priceLookup].reverse().find(it => num >= it.value)
   return item ? (num / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0'
 }
 
-export default {
-  name: 'CourseMainCard',
-  props: ['courseData'],
+const props = defineProps<{
+  courseData: CourseDetail | null
+}>()
 
-  setup () {
-    const auth = useAuthStore()
-    const settings = useSettingsStore()
-    const cart = useCartStore()
-    const pyramid = usePyramidStore()
-    const { user, token } = storeToRefs(auth)
-    const { currency } = storeToRefs(settings)
-    const { myMarketingCode } = storeToRefs(pyramid)
-    return { auth, settings, cart, pyramid, user, token, currency, myMarketingCode }
-  },
+const router = useRouter()
+const route = useRoute()
+const $q = useQuasar()
+const { t } = useI18n()
 
-  data () {
-    return {
-      FORMAT_THE_IAMGE_URL,
-      message: this.$t('انسخ الرابط')
-    }
-  },
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const cart = useCartStore()
+const pyramid = usePyramidStore()
 
-  mounted () {
-    if (this.token) this.pyramid.fetchMyMarketingCode()
-  },
+const { user, token } = storeToRefs(auth)
+const { currency } = storeToRefs(settings)
+const { myMarketingCode } = storeToRefs(pyramid)
 
-  computed: {
-    enrollmentCount () {
-      const n = this.$_.get(this.courseData, '[enrollmentCount]', 0)
-      return n >= 1000 ? Math.round(n / 1000) : n
-    },
+const message = ref(t('انسخ الرابط'))
 
-    hasPrice () {
-      try {
-        const prices = JSON.parse(this.courseData.currency)
-        return Number.isFinite(parseFloat(prices[this.currency]))
-      } catch (e) {
-        return false
-      }
-    },
+onMounted(() => {
+  if (token.value) pyramid.fetchMyMarketingCode()
+})
 
-    formattedPrice () {
-      if (!this.hasPrice) return ''
-      const prices = JSON.parse(this.courseData.currency)
-      return formatPrice(parseFloat(prices[this.currency]))
-    },
+const enrollmentCount = computed<number>(() => {
+  const n = props.courseData?.enrollmentCount ?? 0
+  return n >= 1000 ? Math.round(n / 1000) : n
+})
 
-    PREPARE_THE_COURSE_SHARING_LINK () {
-      return `${location.origin}/#/course/${this.myMarketingCode}/${this.$_.get(this.$route, '[params][pk]')}/${this.$_.get(this.$route, '[params][id]')}`
-    }
-  },
+const parsedPrices = computed<CoursePricing | null>(() => {
+  const raw = props.courseData?.currency
+  if (!raw) return null
+  // Apollo typePolicy parses CourseNode.currency at read time — it is already
+  // a plain object here. No JSON.parse needed.
+  return raw as unknown as CoursePricing
+})
 
-  methods: {
-    hasField (key) {
-      return !!this.$_.get(this.courseData, `[${key}]`)
-    },
+const hasPrice = computed<boolean>(() => {
+  const prices = parsedPrices.value
+  if (!prices) return false
+  const value = parseFloat(String((prices as Record<string, number>)[currency.value ?? '']))
+  return Number.isFinite(value) && value > 0
+})
 
-    COPY_THE_SHARING_LINK (e) {
-      e.preventDefault()
-      const copyText = document.getElementById('shar-link')
-      copyText.focus()
-      copyText.select()
-      copyToClipboard(copyText.value).then(() => {
-        this.message = this.$t('تم النسخ')
-        this.$q.notify({
-          type: 'positive',
-          progress: true,
-          multiLine: true,
-          position: 'top',
-          message: this.$t('تم النسخ')
-        })
-      }).catch(() => {})
-    },
+const formattedPrice = computed<string>(() => {
+  if (!hasPrice.value) return ''
+  const prices = parsedPrices.value as Record<string, number>
+  return formatPrice(parseFloat(String(prices[currency.value ?? ''])))
+})
 
-    AddTheCourseToTheBasket () {
-      this.cart.addCourseToCart({ user: this.user, course: this.courseData })
-      this.$router.push({ name: 'cart' })
-    }
-  }
+const prepareCourseSharingLink = computed<string>(() => {
+  const pk = route.params.pk as string | undefined ?? ''
+  const id = route.params.id as string | undefined ?? ''
+  return `${location.origin}/#/course/${myMarketingCode.value}/${pk}/${id}`
+})
+
+function copyTheSharingLink (e: Event): void {
+  e.preventDefault()
+  const el = document.getElementById('shar-link') as HTMLInputElement | null
+  if (!el) return
+  el.focus()
+  el.select()
+  copyToClipboard(el.value)
+    .then(() => {
+      message.value = t('تم النسخ')
+      $q.notify({
+        type: 'positive',
+        progress: true,
+        multiLine: true,
+        position: 'top',
+        message: t('تم النسخ'),
+      })
+    })
+    .catch(() => { /* ignore */ })
+}
+
+function addTheCourseToTheBasket (): void {
+  if (!props.courseData) return
+  cart.addCourseToCart({ user: user.value, course: props.courseData })
+  void router.push({ name: 'cart' })
 }
 </script>
 

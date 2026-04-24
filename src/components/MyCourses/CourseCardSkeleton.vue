@@ -12,10 +12,8 @@
   </ds-card>
 </template>
 
-<script>
-export default {
-  name: 'CourseCardSkeleton'
-}
+<script setup lang="ts">
+// No props, no store access — pure skeleton placeholder.
 </script>
 
 <style lang="scss" scoped>

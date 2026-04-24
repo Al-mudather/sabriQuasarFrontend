@@ -273,50 +273,15 @@
   </ds-card>
 </template>
 
-<script>
+<script setup lang="ts">
 // Unified CourseCard — merges legacy utils/courseCard, MyCourses/courseCard,
 // courseDetails/courseMainCard into one component with a `variant` prop.
 //
 // Phase 4 note: real API images only; inline SVG placeholder is used when
 // course.coverImage is absent. No external stock photo services.
 
-/** @typedef {import('src/types/courses/types').Course} Course */
-/** @typedef {import('src/types/courses/types').CourseDetail} CourseDetail */
-/** @typedef {import('src/types/courses/types').CoursePricing} CoursePricing */
-
-/**
- * The CourseCard accepts a normalised view-model shape rather than the raw
- * GraphQL Course node, because it is consumed by Home / Courses listing /
- * Cart / MyCourses with slightly different source shapes. Callers flatten
- * the domain `Course` (see src/types/courses/types.ts) into this shape.
- *
- * @typedef {Object} CourseCardPrice
- * @property {number} [current]
- * @property {number} [original]
- * @property {string} [currency]
- *
- * @typedef {Object} CourseCardInstructor
- * @property {string} [name]
- * @property {string} [avatar]
- *
- * @typedef {Object} CourseCardProps
- * @property {string} [id]
- * @property {number|string} [pk]
- * @property {string} [name]
- * @property {string} [coverImage]
- * @property {string} [category]
- * @property {string} [description]
- * @property {string} [duration]
- * @property {number} [lessonCount]
- * @property {string} [level]
- * @property {number} [rating]
- * @property {number} [ratingCount]
- * @property {number} [studentCount]
- * @property {number} [progress]
- * @property {CourseCardInstructor} [instructor]
- * @property {CourseCardPrice} [price]
- */
-
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import DsCard from 'src/design-system/components/DsCard.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsBadge from 'src/design-system/components/DsBadge.vue'
@@ -324,154 +289,141 @@ import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 import DsProgressBar from 'src/design-system/components/DsProgressBar.vue'
 import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
 
-export default {
-  name: 'CourseCard',
+interface CourseCardPrice {
+  current?: number
+  original?: number
+  currency?: string
+}
 
-  components: {
-    DsCard,
-    DsButton,
-    // eslint-disable-next-line vue/no-unused-components
-    DsBadge,
-    DsSkeleton,
-    DsProgressBar,
-    DsEmptyState
-  },
+interface CourseCardInstructor {
+  name?: string
+  avatar?: string
+}
 
-  props: {
-    variant: {
-      type: String,
-      default: 'public',
-      validator: v => ['public', 'enrolled', 'detail', 'featured'].includes(v)
-    },
-    course: {
-      type: Object,
-      default: null
-    },
-    loading: {
-      type: Boolean,
-      default: false
-    },
-    to: {
-      type: [String, Object],
-      default: null
-    }
-  },
+interface CourseCardCourse {
+  id?: string
+  pk?: number | string | null
+  name?: string
+  coverImage?: string
+  category?: string
+  description?: string
+  duration?: string
+  lessonCount?: number
+  level?: string
+  rating?: number
+  ratingCount?: number
+  studentCount?: number
+  progress?: number
+  instructor?: CourseCardInstructor
+  price?: CourseCardPrice
+}
 
-  computed: {
-    isArabic () {
-      // best-effort; falls back to ar when i18n not available
-      const loc = this.$i18n && this.$i18n.locale
-      return loc ? String(loc).toLowerCase().startsWith('ar') : true
-    },
+interface Props {
+  variant?: 'public' | 'enrolled' | 'detail' | 'featured'
+  course?: CourseCardCourse | null
+  loading?: boolean
+  to?: string | object | null
+}
 
-    hasCoverImage () {
-      return !!(this.course && this.course.coverImage)
-    },
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'public',
+  course: null,
+  loading: false,
+  to: null
+})
 
-    resolvedTo () {
-      if (this.to) return this.to
-      if (!this.course) return null
-      // Strict null/undefined check: pk === 0 is still a valid route target.
-      // The original falsy check silently disabled navigation for pk=0 cards.
-      if (this.course.pk != null && this.course.name) {
-        return {
-          name: 'course-details',
-          params: {
-            name: String(this.course.name),
-            pk: this.course.pk,
-            id: this.course.id || this.course.pk
-          }
-        }
+const emit = defineEmits<{
+  (e: 'cta-click', val: { course: CourseCardCourse | null | undefined; variant: string; event: Event }): void
+}>()
+
+const { locale } = useI18n()
+
+const isArabic = computed(() => String(locale.value).toLowerCase().startsWith('ar'))
+
+const resolvedTo = computed(() => {
+  if (props.to) return props.to
+  if (!props.course) return null
+  // Strict null/undefined check: pk === 0 is still a valid route target.
+  // The original falsy check silently disabled navigation for pk=0 cards.
+  if (props.course.pk != null && props.course.name) {
+    return {
+      name: 'course-details',
+      params: {
+        name: String(props.course.name),
+        pk: props.course.pk,
+        id: props.course.id || props.course.pk
       }
-      return null
-    },
-
-    clampedProgress () {
-      const p = this.course && Number(this.course.progress)
-      if (!Number.isFinite(p)) return 0
-      return Math.max(0, Math.min(100, Math.round(p)))
-    },
-
-    progressLabel () {
-      const tx = this.$t ? this.$t('التقدم') : 'التقدم'
-      return `${tx}: ${this.clampedProgress}%`
-    },
-
-    ringStyle () {
-      // circle r=16 → circumference = 2πr ≈ 100.53
-      const circ = 2 * Math.PI * 16
-      const offset = circ * (1 - this.clampedProgress / 100)
-      return {
-        strokeDasharray: `${circ}`,
-        strokeDashoffset: `${offset}`
-      }
-    },
-
-    avatarInitial () {
-      const name = this.course && this.course.instructor && this.course.instructor.name
-      return name ? String(name).trim().charAt(0) : '?'
-    },
-
-    currencyLabel () {
-      return (this.course && this.course.price && this.course.price.currency) || ''
-    },
-
-    hasDiscount () {
-      if (!this.course || !this.course.price) return false
-      const cur = Number(this.course.price.current)
-      const orig = Number(this.course.price.original)
-      return Number.isFinite(cur) && Number.isFinite(orig) && orig > cur
-    },
-
-    isFree () {
-      if (!this.course || !this.course.price) return true
-      const cur = Number(this.course.price.current)
-      return !Number.isFinite(cur) || cur <= 0
-    },
-
-    formattedPrice () {
-      return this.formatPrice(this.course && this.course.price && this.course.price.current)
-    },
-
-    formattedOriginalPrice () {
-      return this.formatPrice(this.course && this.course.price && this.course.price.original)
-    }
-  },
-
-  methods: {
-    formatNum (n, fractionDigits) {
-      if (!Number.isFinite(Number(n))) return ''
-      const locale = this.isArabic ? 'ar-EG' : 'en-US'
-      const opts = {}
-      if (Number.isFinite(fractionDigits)) {
-        opts.minimumFractionDigits = fractionDigits
-        opts.maximumFractionDigits = fractionDigits
-      }
-      try {
-        return new Intl.NumberFormat(locale, opts).format(Number(n))
-      } catch (_) {
-        return String(n)
-      }
-    },
-
-    formatPrice (n) {
-      const num = Number(n)
-      if (!Number.isFinite(num)) return '—'
-      const locale = this.isArabic ? 'ar-EG' : 'en-US'
-      try {
-        return new Intl.NumberFormat(locale, {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 2
-        }).format(num)
-      } catch (_) {
-        return String(num)
-      }
-    },
-
-    onCta (e) {
-      this.$emit('cta-click', { course: this.course, variant: this.variant, event: e })
     }
   }
+  return null
+})
+
+const clampedProgress = computed(() => {
+  const p = props.course ? Number(props.course.progress) : NaN
+  if (!Number.isFinite(p)) return 0
+  return Math.max(0, Math.min(100, Math.round(p)))
+})
+
+const progressLabel = computed(() => `التقدم: ${clampedProgress.value}%`)
+
+const ringStyle = computed(() => {
+  // circle r=16 → circumference = 2πr ≈ 100.53
+  const circ = 2 * Math.PI * 16
+  const offset = circ * (1 - clampedProgress.value / 100)
+  return { strokeDasharray: `${circ}`, strokeDashoffset: `${offset}` }
+})
+
+const avatarInitial = computed(() => {
+  const name = props.course?.instructor?.name
+  return name ? String(name).trim().charAt(0) : '?'
+})
+
+const currencyLabel = computed(() => props.course?.price?.currency ?? '')
+
+const hasDiscount = computed(() => {
+  if (!props.course?.price) return false
+  const cur = Number(props.course.price.current)
+  const orig = Number(props.course.price.original)
+  return Number.isFinite(cur) && Number.isFinite(orig) && orig > cur
+})
+
+const isFree = computed(() => {
+  if (!props.course?.price) return true
+  const cur = Number(props.course.price.current)
+  return !Number.isFinite(cur) || cur <= 0
+})
+
+const formattedPrice = computed(() => formatPrice(props.course?.price?.current))
+const formattedOriginalPrice = computed(() => formatPrice(props.course?.price?.original))
+
+function formatNum (n: unknown, fractionDigits?: number): string {
+  if (!Number.isFinite(Number(n))) return ''
+  const loc = isArabic.value ? 'ar-EG' : 'en-US'
+  const opts: Intl.NumberFormatOptions = {}
+  if (Number.isFinite(fractionDigits)) {
+    opts.minimumFractionDigits = fractionDigits
+    opts.maximumFractionDigits = fractionDigits
+  }
+  try {
+    return new Intl.NumberFormat(loc, opts).format(Number(n))
+  } catch (_) {
+    return String(n)
+  }
+}
+
+function formatPrice (n: unknown): string {
+  const num = Number(n)
+  if (!Number.isFinite(num)) return '—'
+  const loc = isArabic.value ? 'ar-EG' : 'en-US'
+  try {
+    return new Intl.NumberFormat(loc, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(num)
+  } catch (_) {
+    return String(num)
+  }
+}
+
+function onCta (e: Event): void {
+  emit('cta-click', { course: props.course, variant: props.variant ?? 'public', event: e })
 }
 </script>
 

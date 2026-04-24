@@ -22,19 +22,22 @@
   </main>
 </template>
 
-<script>
-export default {
-  name: 'AccountHeader',
-  props: ['dialogName', 'prevRoute'],
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
 
-  methods: {
-    goBackToThePreviousePage () {
-      if (this.prevRoute && this.prevRoute !== '/account/signUp') {
-        this.$router.push(this.prevRoute)
-      } else {
-        this.$router.push({ name: 'Home' })
-      }
-    }
+interface Props {
+  dialogName?: string
+  prevRoute?: string
+}
+
+const props = defineProps<Props>()
+const router = useRouter()
+
+function goBackToThePreviousePage (): void {
+  if (props.prevRoute && props.prevRoute !== '/account/signUp') {
+    router.push(props.prevRoute)
+  } else {
+    router.push({ name: 'Home' })
   }
 }
 </script>

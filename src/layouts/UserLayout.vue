@@ -81,173 +81,177 @@
   </q-layout>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, h, defineComponent } from 'vue'
+import { LocalStorage, Quasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
 import DsModal from 'src/design-system/components/DsModal.vue'
-import { LocalStorage, Quasar } from 'quasar'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
-import { storeToRefs } from 'pinia'
-import { h } from 'vue'
 
-// Inline sidebar renderer — kept local to UserLayout so the layout
-// stays self-contained without bleeding into src/components.
-const SidebarContent = {
-  name: 'UserSidebarContent',
-  props: {
-    userName:   { type: String, default: '' },
-    userRole:   { type: String, default: '' },
-    userAvatar: { type: String, default: '' },
-    navLinks:   { type: Array,  required: true },
-    isActive:   { type: Function, required: true }
-  },
-  emits: ['navigate', 'logout'],
-  render () {
-    const avatarNode = this.userAvatar
-      ? h('img', { class: 'user-sidebar__avatar-img', src: this.userAvatar, alt: this.userName })
-      : h('span', { class: 'user-sidebar__avatar-initial' }, (this.userName || 'u').slice(0, 1))
+defineOptions({ name: 'UserLayout' })
 
-    return h('div', { class: 'user-sidebar' }, [
-      // User card
-      h('div', { class: 'user-sidebar__card' }, [
-        h('div', { class: 'user-sidebar__avatar' }, [avatarNode]),
-        h('div', { class: 'user-sidebar__identity' }, [
-          h('span', { class: 'user-sidebar__name' }, this.userName || 'مرحباً'),
-          h('span', { class: 'user-sidebar__role' }, this.userRole)
-        ])
-      ]),
-      h('hr', { class: 'user-sidebar__divider', 'aria-hidden': 'true' }),
+const { locale } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const { user } = storeToRefs(auth)
+const { isEnglish } = storeToRefs(settings)
 
-      // Nav
-      h('nav', { class: 'user-sidebar__nav', 'aria-label': 'تنقل الحساب' },
-        this.navLinks.map(link => h('router-link', {
-          key: link.to,
-          to: link.to,
-          class: ['user-sidebar__link', { 'is-active': this.isActive(link.to) }],
-          'aria-current': this.isActive(link.to) ? 'page' : null,
-          onClick: () => this.$emit('navigate')
-        }, () => [
-          h('span', { class: 'user-sidebar__link-icon', 'aria-hidden': 'true', innerHTML: link.icon }),
-          h('span', { class: 'user-sidebar__link-label' }, link.label)
-        ]))
-      ),
-
-      h('hr', { class: 'user-sidebar__divider', 'aria-hidden': 'true' }),
-
-      // Logout
-      h('button', {
-        class: 'user-sidebar__logout',
-        type: 'button',
-        onClick: () => this.$emit('logout')
-      }, [
-        h('span', {
-          class: 'user-sidebar__link-icon',
-          'aria-hidden': 'true',
-          innerHTML: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/></svg>'
-        }),
-        h('span', 'تسجيل الخروج')
-      ])
-    ])
-  }
-}
+// ---------------------------------------------------------------------------
+// Inline sidebar renderer — kept local so the layout stays self-contained.
+// ---------------------------------------------------------------------------
+interface NavLink { to: string; label: string; icon: string }
 
 const ICON = {
-  profile:  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
-  courses:  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3V5Z"/><path d="M4 5v11a3 3 0 0 0 3 3"/></svg>',
-  cert:     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5"/><path d="M9 13.5 7.5 21l4.5-2 4.5 2L15 13.5"/></svg>',
-  bell:     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 5 2 7 2 7H4s2-2 2-7Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>',
-  orders:   '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 7Z"/><path d="M9 7a3 3 0 1 1 6 0"/></svg>',
-  marketing:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h4l7-5v12l-7-5H3z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg>',
-  payments: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>'
+  profile:   '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+  courses:   '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3V5Z"/><path d="M4 5v11a3 3 0 0 0 3 3"/></svg>',
+  cert:      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5"/><path d="M9 13.5 7.5 21l4.5-2 4.5 2L15 13.5"/></svg>',
+  bell:      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 5 2 7 2 7H4s2-2 2-7Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>',
+  orders:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 7Z"/><path d="M9 7a3 3 0 1 1 6 0"/></svg>',
+  marketing: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h4l7-5v12l-7-5H3z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg>',
+  payments:  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>'
 }
 
-export default {
-  name: 'UserLayout',
-  components: { AppHeader, AppFooter, DsModal, SidebarContent },
-
-  setup () {
-    const auth = useAuthStore()
-    const settings = useSettingsStore()
-    const { token, user } = storeToRefs(auth)
-    const { isEnglish } = storeToRefs(settings)
-    return { token, user, isEnglish, auth, settings }
+const SidebarContent = defineComponent({
+  name: 'UserSidebarContent',
+  props: {
+    userName:   { type: String,   default: '' },
+    userRole:   { type: String,   default: '' },
+    userAvatar: { type: String,   default: '' },
+    navLinks:   { type: Array as () => NavLink[], required: true as const },
+    isActive:   { type: Function as unknown as () => (to: string) => boolean, required: true as const }
   },
+  emits: ['navigate', 'logout'],
+  setup (props, { emit }) {
+    return () => {
+      const avatarNode = props.userAvatar
+        ? h('img', { class: 'user-sidebar__avatar-img', src: props.userAvatar, alt: props.userName })
+        : h('span', { class: 'user-sidebar__avatar-initial' }, (props.userName || 'u').slice(0, 1))
 
-  data () {
-    return {
-      drawerOpen: false,
-      navLinks: [
-        { to: '/profile',            label: 'الملف الشخصي',   icon: ICON.profile },
-        { to: '/myCourses',          label: 'دوراتي',          icon: ICON.courses },
-        { to: '/Certificates',       label: 'الشهادات',        icon: ICON.cert },
-        { to: '/notification',       label: 'الإشعارات',       icon: ICON.bell },
-        { to: '/myOrders',           label: 'طلباتي',          icon: ICON.orders },
-        { to: '/myMarketingPage',    label: 'التسويق الشبكي', icon: ICON.marketing }
-      ]
-    }
-  },
+      return h('div', { class: 'user-sidebar' }, [
+        h('div', { class: 'user-sidebar__card' }, [
+          h('div', { class: 'user-sidebar__avatar' }, [avatarNode]),
+          h('div', { class: 'user-sidebar__identity' }, [
+            h('span', { class: 'user-sidebar__name' }, props.userName || 'مرحباً'),
+            h('span', { class: 'user-sidebar__role' }, props.userRole)
+          ])
+        ]),
+        h('hr', { class: 'user-sidebar__divider', 'aria-hidden': 'true' }),
 
-  computed: {
-    userDisplayName () {
-      const u = this.user || {}
-      return u.fullName || u.name || u.username || ''
-    },
-    userRoleLabel () {
-      const u = this.user || {}
-      const role = u.role || u.userType
-      if (role === 'trainer' || role === 'TRAINER') return 'مدرب'
-      if (role === 'admin'   || role === 'ADMIN')   return 'مشرف'
-      return 'متعلم'
-    },
-    userAvatar () {
-      const u = this.user || {}
-      return u.avatar || u.photo || ''
-    }
-  },
+        h('nav', { class: 'user-sidebar__nav', 'aria-label': 'تنقل الحساب' },
+          props.navLinks.map((link: NavLink) => h('router-link', {
+            key: link.to,
+            to: link.to,
+            class: ['user-sidebar__link', { 'is-active': props.isActive(link.to) }],
+            'aria-current': props.isActive(link.to) ? 'page' : undefined,
+            onClick: () => emit('navigate')
+          }, () => [
+            h('span', { class: 'user-sidebar__link-icon', 'aria-hidden': 'true', innerHTML: link.icon }),
+            h('span', { class: 'user-sidebar__link-label' }, link.label)
+          ]))
+        ),
 
-  mounted () {
-    this.applyLocale(LocalStorage.getItem('isEnglish'))
-  },
+        h('hr', { class: 'user-sidebar__divider', 'aria-hidden': 'true' }),
 
-  watch: {
-    isEnglish (value) { this.applyLocale(value) }
-  },
-
-  methods: {
-    isActive (to) {
-      if (!this.$route) return false
-      return this.$route.path === to || this.$route.path.startsWith(to + '/')
-    },
-
-    handleDrawerLogout () {
-      this.drawerOpen = false
-      this.logOut()
-    },
-
-    async logOut () {
-      try {
-        await this.auth.logOut()
-      } catch (e) { /* graceful */ }
-      this.$router.push({ name: 'Home' }).catch(() => {})
-    },
-
-    async applyLocale (isEnglish) {
-      this.$i18n.locale = isEnglish ? 'en' : 'ar'
-      this.settings.setIsEnglish(isEnglish)
-
-      try {
-        if (isEnglish) {
-          const lang = await import('quasar/lang/en-us')
-          Quasar.lang.set({ ...lang.default, rtl: false })
-        } else {
-          const lang = await import('quasar/lang/ar')
-          Quasar.lang.set({ ...lang.default, rtl: true })
-        }
-      } catch (err) { /* lang pack missing; no-op */ }
+        h('button', {
+          class: 'user-sidebar__logout',
+          type: 'button',
+          onClick: () => emit('logout')
+        }, [
+          h('span', {
+            class: 'user-sidebar__link-icon',
+            'aria-hidden': 'true',
+            innerHTML: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/></svg>'
+          }),
+          h('span', 'تسجيل الخروج')
+        ])
+      ])
     }
   }
+})
+
+// ---------------------------------------------------------------------------
+// Layout state
+// ---------------------------------------------------------------------------
+const drawerOpen = ref(false)
+
+const navLinks: NavLink[] = [
+  { to: '/profile',         label: 'الملف الشخصي',   icon: ICON.profile },
+  { to: '/myCourses',       label: 'دوراتي',          icon: ICON.courses },
+  { to: '/Certificates',    label: 'الشهادات',        icon: ICON.cert },
+  { to: '/notification',    label: 'الإشعارات',       icon: ICON.bell },
+  { to: '/myOrders',        label: 'طلباتي',          icon: ICON.orders },
+  { to: '/myMarketingPage', label: 'التسويق الشبكي',  icon: ICON.marketing }
+]
+
+const userDisplayName = computed<string>(() => {
+  const u = user.value
+  if (!u) return ''
+  return (u as Record<string, unknown>).fullName as string
+    || (u as Record<string, unknown>).name as string
+    || (u as Record<string, unknown>).username as string
+    || ''
+})
+
+const userRoleLabel = computed<string>(() => {
+  const u = user.value
+  if (!u) return 'متعلم'
+  const role = (u as Record<string, unknown>).role ?? (u as Record<string, unknown>).userType
+  if (role === 'trainer' || role === 'TRAINER') return 'مدرب'
+  if (role === 'admin'   || role === 'ADMIN')   return 'مشرف'
+  return 'متعلم'
+})
+
+const userAvatar = computed<string>(() => {
+  const u = user.value
+  if (!u) return ''
+  return (u as Record<string, unknown>).avatar as string
+    || (u as Record<string, unknown>).photo as string
+    || ''
+})
+
+function isActive (to: string): boolean {
+  return route.path === to || route.path.startsWith(to + '/')
 }
+
+function handleDrawerLogout (): void {
+  drawerOpen.value = false
+  void logOut()
+}
+
+async function logOut (): Promise<void> {
+  try {
+    await auth.logOut()
+  } catch { /* graceful */ }
+  void router.push({ name: 'Home' }).catch(() => {})
+}
+
+async function applyLocale (val: boolean | null): Promise<void> {
+  locale.value = val ? 'en' : 'ar'
+  settings.setIsEnglish(val)
+
+  try {
+    if (val) {
+      const lang = await import('quasar/lang/en-us')
+      Quasar.lang.set({ ...lang.default, rtl: false })
+    } else {
+      const lang = await import('quasar/lang/ar')
+      Quasar.lang.set({ ...lang.default, rtl: true })
+    }
+  } catch { /* lang pack missing; no-op */ }
+}
+
+onMounted(() => {
+  void applyLocale(LocalStorage.getItem<boolean>('isEnglish'))
+})
+
+watch(isEnglish, (value) => { void applyLocale(value) })
 </script>
 
 <style lang="scss" scoped>

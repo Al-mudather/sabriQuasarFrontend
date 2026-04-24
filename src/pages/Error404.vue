@@ -22,12 +22,15 @@
   </main>
 </template>
 
-<script>
-export default {
-  name: 'Error404',
-  methods: {
-    goToHomePage () { this.$router.push({ name: 'Home' }) }
-  }
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+defineOptions({ name: 'Error404' })
+
+const router = useRouter()
+
+function goToHomePage (): void {
+  void router.push({ name: 'Home' })
 }
 </script>
 

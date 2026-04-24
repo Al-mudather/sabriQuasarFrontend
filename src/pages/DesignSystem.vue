@@ -131,47 +131,48 @@
   </main>
 </template>
 
-<script>
-export default {
-  name: 'DesignSystemPage',
-  data () {
-    return {
-      rtl: document.documentElement.getAttribute('dir') === 'rtl',
-      swatches: [
-        { label: 'Brand 600',  token: '--ds-brand-600',  value: 'var(--ds-brand-600)' },
-        { label: 'Brand 700',  token: '--ds-brand-700',  value: 'var(--ds-brand-700)' },
-        { label: 'Brand 50',   token: '--ds-brand-50',   value: 'var(--ds-brand-50)' },
-        { label: 'Accent 300', token: '--ds-accent-300', value: 'var(--ds-accent-300)' },
-        { label: 'Accent 500', token: '--ds-accent-500', value: 'var(--ds-accent-500)' },
-        { label: 'Neutral 800', token: '--ds-neutral-800', value: 'var(--ds-neutral-800)' },
-        { label: 'Neutral 500', token: '--ds-neutral-500', value: 'var(--ds-neutral-500)' },
-        { label: 'Neutral 100', token: '--ds-neutral-100', value: 'var(--ds-neutral-100)' },
-        { label: 'Success',    token: '--ds-success',    value: 'var(--ds-success)' },
-        { label: 'Warning',    token: '--ds-warning',    value: 'var(--ds-warning)' },
-        { label: 'Danger',     token: '--ds-danger',     value: 'var(--ds-danger)' }
-      ],
-      typeSamples: [
-        { label: '4xl', token: '--ds-text-4xl' },
-        { label: '3xl', token: '--ds-text-3xl' },
-        { label: '2xl', token: '--ds-text-2xl' },
-        { label: 'xl',  token: '--ds-text-xl'  },
-        { label: 'lg',  token: '--ds-text-lg'  },
-        { label: 'md',  token: '--ds-text-md'  },
-        { label: 'sm',  token: '--ds-text-sm'  }
-      ]
-    }
-  },
-  watch: {
-    rtl: {
-      immediate: true,
-      handler (v) { document.documentElement.setAttribute('dir', v ? 'rtl' : 'ltr') }
-    }
-  },
-  beforeUnmount () {
-    // Don't leave dir flipped when navigating away
-    document.documentElement.setAttribute('dir', 'rtl')
-  }
-}
+<script setup lang="ts">
+import { ref, watch, onBeforeUnmount } from 'vue'
+
+defineOptions({ name: 'DesignSystemPage' })
+
+interface Swatch { label: string; token: string; value: string }
+interface TypeSample { label: string; token: string }
+
+const rtl = ref(document.documentElement.getAttribute('dir') === 'rtl')
+
+const swatches: Swatch[] = [
+  { label: 'Brand 600',   token: '--ds-brand-600',   value: 'var(--ds-brand-600)' },
+  { label: 'Brand 700',   token: '--ds-brand-700',   value: 'var(--ds-brand-700)' },
+  { label: 'Brand 50',    token: '--ds-brand-50',    value: 'var(--ds-brand-50)' },
+  { label: 'Accent 300',  token: '--ds-accent-300',  value: 'var(--ds-accent-300)' },
+  { label: 'Accent 500',  token: '--ds-accent-500',  value: 'var(--ds-accent-500)' },
+  { label: 'Neutral 800', token: '--ds-neutral-800', value: 'var(--ds-neutral-800)' },
+  { label: 'Neutral 500', token: '--ds-neutral-500', value: 'var(--ds-neutral-500)' },
+  { label: 'Neutral 100', token: '--ds-neutral-100', value: 'var(--ds-neutral-100)' },
+  { label: 'Success',     token: '--ds-success',     value: 'var(--ds-success)' },
+  { label: 'Warning',     token: '--ds-warning',     value: 'var(--ds-warning)' },
+  { label: 'Danger',      token: '--ds-danger',      value: 'var(--ds-danger)' }
+]
+
+const typeSamples: TypeSample[] = [
+  { label: '4xl', token: '--ds-text-4xl' },
+  { label: '3xl', token: '--ds-text-3xl' },
+  { label: '2xl', token: '--ds-text-2xl' },
+  { label: 'xl',  token: '--ds-text-xl'  },
+  { label: 'lg',  token: '--ds-text-lg'  },
+  { label: 'md',  token: '--ds-text-md'  },
+  { label: 'sm',  token: '--ds-text-sm'  }
+]
+
+watch(rtl, (v) => {
+  document.documentElement.setAttribute('dir', v ? 'rtl' : 'ltr')
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  // Don't leave dir flipped when navigating away
+  document.documentElement.setAttribute('dir', 'rtl')
+})
 </script>
 
 <style lang="scss" scoped>

@@ -1,202 +1,127 @@
 <template>
-    <div class="social">
-        <!-- <img src="~assets/img/googel.png" alt="" /> -->
-        <q-btn class="full-width"  :label="label" icon="la la-google" @click="helloGoogleAuth" color="deep-orange"/>
-        <q-inner-loading :showing="visible">
-            <q-spinner-hourglass color="primary" size="70px" />
-        </q-inner-loading>
-    </div>
+  <div class="social">
+    <q-btn class="full-width" :label="label" icon="la la-google" @click="helloGoogleAuth" color="deep-orange" />
+    <q-inner-loading :showing="visible">
+      <q-spinner-hourglass color="primary" size="70px" />
+    </q-inner-loading>
+  </div>
 </template>
 
-<script>
-/**
- * Auth feature types handled by this component.
- *
- * @typedef {import('src/types/auth/types').SocialAuthMutationResult} SocialAuthMutationResult
- * @typedef {import('src/types/auth/types').SocialAuthVariables} SocialAuthVariables
- * @typedef {import('src/types/auth/types').SocialAuthResult} SocialAuthResult
- * @typedef {import('src/types/auth/types').SocialAuthProfile} SocialAuthProfile
- */
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
+import { apolloClient } from 'src/apollo/client'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { SocialAuth } from 'src/graphql/account_management/mutation/CreateSocailAuth'
 import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
-import { SocialAuth } from "src/graphql/account_management/mutation/CreateSocailAuth";
-import { useAuthStore } from "src/stores/auth";
-import { useSettingsStore } from "src/stores/settings";
-import { usePyramidStore } from "src/stores/pyramid";
-import { apolloClient } from "src/apollo/client";
+import type { SocialAuthMutationResult, SocialAuthVariables } from 'src/types/auth/types'
 
-export default {
-    name: "GoogleAuthentication",
-    setup () {
-        const auth = useAuthStore();
-        const settings = useSettingsStore();
-        const pyramid = usePyramidStore();
-        return { auth, settings, pyramid };
-    },
-    data () {
-        return {
-            visible: false
-        }
-    },
+interface Props {
+  prevRoute?: string | null
+  label?: string
+}
 
-    props:['prevRoute', 'label'],
+defineProps<Props>()
 
-    methods: {
+const { t } = useI18n()
+const router = useRouter()
+const $q = useQuasar()
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const pyramid = usePyramidStore()
 
-        GoToHomePage() {
-            this.$router.push({ name: "Home" });
-        },
+const visible = ref(false)
 
-        async IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE () {
-            try {
-                const res = await apolloClient.query({
-                    query: AllEnrollmentsForCurrentUser,
-                })
+async function isUserEnrolled (): Promise<boolean> {
+  try {
+    const res = await apolloClient.query({ query: AllEnrollmentsForCurrentUser })
+    return (res.data?.allEnrollmentsForCurrentUser?.edges?.length ?? 0) > 0
+  } catch {
+    return false
+  }
+}
 
-                if (res.data.allEnrollmentsForCurrentUser.edges.length > 0) {
-                    return true
-                } else {
-                    return false
-                }
-
-            } catch (error) {
-                return false
-            }
-        },
- 
-        async CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE () {
-            try {
-                const join_permission_res = await apolloClient.query({query: CheckTheUserPermissionToUsePlatforme})
-                const errors = this.$_.get(join_permission_res, '[errors]')
-
-                if (errors) {
-                    //TODO: Loop throw all the errors
-                    for (let error of errors) {
-                        if (error.message.includes("PyramidAffiliate matching query does not exist.")) {
-                            this.$router.push({ name: 'registeration-code' })
-                        }
-                    }
-
-                } else {
-                    //TODO:If the user is a marketer, then git his marketing code
-                    this.pyramid.fetchMyMarketingCode()
-                    //TODO: IF THE USER HASE ANY ENROLLMENT, SEND HIME TO HIS COURSES PAGE
-                    const res = await this.IS_THE_USER_HAS_VALED_INROLLMENTS_IN_ANY_COURSE()
-                    //TODO: Empty the marketer code if exists
-                    this.pyramid.setMyMarketingCode('')
-                    if (res) {
-                        this.$router.push({ name: "my-courses" })
-                    } else {
-                        this.$router.push({ name: "Home" })
-                    }
-                }
-
-            } catch (e) {
-                if ( e.message == 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-                    // this.$q.notify({
-                    //     type: 'positive',
-                    //     progress: true,
-                    //     multiLine: true,
-                    //     position: 'top',
-                    //     message: 'You must enter the registeration code'
-                    // })
-                    // TODO: Go to code registeration page
-                    this.$router.push({ name: 'registeration-code' })
-                }
-
-            }
-        },
-        // TODO: Google and Facebook Register
-        async loginAuthMutation(accessToken, provider, email = "") {
-            try { 
-                this.visible = true
-                /** @type {{ data: SocialAuthMutationResult }} */
-                const auth_res = await apolloClient.mutate({
-                        mutation: SocialAuth,
-                        variables: /** @type {SocialAuthVariables} */ ({
-                            provider: provider,
-                            accessToken: accessToken,
-                            email: email
-                        })
-                })
-
-                if (auth_res.data.socialAuth) {
-                    Promise.resolve(this.auth.login(auth_res.data.socialAuth)).then(() => {
-                        const userData = auth_res.data.socialAuth
-
-                        //TODO: Set the user currency
-                        try {
-                            const userCur = userData.social.user.userCurrency
-                            if (userCur) {
-                                userCur == 'SDG' ? this.settings.setCurrency('SDG') : this.settings.setCurrency('USD')
-                            }
-
-                            //TODO: Set the external user id for notification
-                            let externalUserId = userData.social.user.email; // You will supply the external user id to the OneSignal SDK 
-                            OneSignal.push(function() { 
-                                OneSignal.setExternalUserId(externalUserId); 
-                            });
-                        } catch (error) {
-                        }
-                        if (userData.token) {
-                            this.$q.notify({
-                                type: 'positive',
-                                progress: true,
-                                multiLine: true,
-                                position: 'top',
-                                message: this.$t('تم تسجيل الدخول بنجاح')
-                            })
-                            // TODO: See if the user thas the reqisteration code
-                            this.CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
-                        }
-                    });
-                }
-            } catch (error) {
-                this.visible = false
-                if (error.message === "GraphQL error: UNIQUE constraint failed: account_manager_user.email") {
-                    this.$q.notify({
-                        type: 'warning',
-                        progress: true,
-                        multiLine: true,
-                        position: 'top',
-                        message: this.$t('هذا الحساب مسجل مسبقا')
-                    })
-                }
-            }
-            
-        },
-
-        helloGoogleAuth(network = "google") {
-            const hello = this.hello;
-
-            hello("google")
-                .login({
-                    scope: "email",
-                    force: true
-                })
-                .then( (r) => {
-                    // console.log('/////////////////');
-                    // console.log(r.authResponse.access_token);
-                    // console.log('/////////////////');
-                    try {
-                        var google = hello("google").getAuthResponse();
-                        this.loginAuthMutation(
-                            google.access_token,
-                            "google-oauth2"
-                        );
-                        // this.loginAuthMutation(
-                        //     google.access_token,
-                        //     "google-oauth2"
-                        // );
-                    } catch (error) {
-                        // console.log('EEEEEEEEEEEEEE')
-                        // console.log(error.message)
-                        // console.log('EEEEEEEEEEEEEE')
-                    }
-                });
-        }
+async function checkRegistrationCode (): Promise<void> {
+  try {
+    await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
+    pyramid.fetchMyMarketingCode()
+    const hasCourses = await isUserEnrolled()
+    pyramid.setMyMarketingCode('')
+    void router.push({ name: hasCourses ? 'my-courses' : 'Home' })
+  } catch (e: unknown) {
+    const err = e as { message?: string }
+    if (err.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
+      void router.push({ name: 'registeration-code' })
     }
-};
+  }
+}
+
+async function loginAuthMutation (accessToken: string, provider: string, email = ''): Promise<void> {
+  visible.value = true
+  try {
+    const authRes = await apolloClient.mutate<SocialAuthMutationResult, SocialAuthVariables>({
+      mutation: SocialAuth,
+      variables: { provider, accessToken, email }
+    })
+    const userData = authRes?.data?.socialAuth
+    if (userData) {
+      await auth.login(userData)
+      try {
+        const userCur = userData.social?.user?.userCurrency
+        if (userCur) settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')
+
+        const userEmail = userData.social?.user?.email
+        if (userEmail && typeof window !== 'undefined' && 'OneSignal' in window) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(window as any).OneSignal.push(function () {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ;(window as any).OneSignal.setExternalUserId(userEmail)
+          })
+        }
+      } catch { /* OneSignal optional */ }
+
+      if (userData.token) {
+        $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: t('تم تسجيل الدخول بنجاح') })
+        await checkRegistrationCode()
+      }
+    }
+  } catch (error: unknown) {
+    const err = error as { message?: string }
+    if (err.message === 'GraphQL error: UNIQUE constraint failed: account_manager_user.email') {
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: t('هذا الحساب مسجل مسبقا') })
+    }
+  } finally {
+    visible.value = false
+  }
+}
+
+function helloGoogleAuth (): void {
+  if (typeof window === 'undefined') return
+
+  // hello.js is loaded globally (via index.html or a plugin).
+  // Guard its presence at runtime before calling.
+  const helloFn = (window as unknown as { hello?: (network: string) => {
+    login: (opts: { scope: string; force: boolean }) => Promise<unknown>
+    getAuthResponse: () => { access_token: string }
+  } }).hello
+
+  if (!helloFn) return
+
+  helloFn('google')
+    .login({ scope: 'email', force: true })
+    .then(() => {
+      try {
+        const googleAuth = helloFn('google').getAuthResponse()
+        void loginAuthMutation(googleAuth.access_token, 'google-oauth2')
+      } catch { /* ignore */ }
+    })
+    .catch(() => { /* user cancelled or SDK error */ })
+}
 </script>
 
 <style lang="scss" scoped>

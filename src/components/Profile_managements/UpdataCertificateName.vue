@@ -13,7 +13,7 @@
       {{ $t('تذكر اسمك الرباعي باللغه الإنجليزيه سوف يكتب في الشهاده و لايمكن تغييره مره اخرى... الأفضل كتابة اسمك من جواز السفر.') }}
     </q-banner>
 
-    <form @submit.prevent="UPDATA_THE_USER_CERTIFICATE_NAME" class="cert-name__form">
+    <form @submit.prevent="updataCertificateName" class="cert-name__form">
       <q-input
         rounded outlined
         :readonly="!!certificateNameData"
@@ -37,98 +37,102 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, watch, onMounted } from 'vue'
+import { useQuasar } from 'quasar'
+import { apolloClient } from 'src/apollo/client'
+import { useAuthStore } from 'src/stores/auth'
 import { UpdateCertificateNameQuery } from 'src/graphql/account_management/mutation/UpdateCertificateName'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
-import { useAuthStore } from 'src/stores/auth'
-import { apolloClient } from 'src/apollo/client'
+import type {
+  UpdateCertificateNameResult,
+  UpdateCertificateNameVariables,
+} from 'src/types/auth/types'
 
-export default {
-  name: 'UpdataCertificateName',
-  props: ['certificateNameData'],
+interface Props {
+  certificateNameData?: string | null
+}
 
-  setup () {
-    const auth = useAuthStore()
-    return { auth }
+const props = withDefaults(defineProps<Props>(), {
+  certificateNameData: null,
+})
+
+const $q = useQuasar()
+const auth = useAuthStore()
+
+const visible = ref(false)
+const certificateName = ref<string | null>(null)
+const certificateNameConfirm = ref<string | null>(null)
+
+watch(
+  () => props.certificateNameData,
+  (data) => {
+    if (data) certificateName.value = data
   },
+)
 
-  data () {
-    return {
-      visible: false,
-      certificateName: null,
-      certificateNameConfirm: null,
-      errorMessages: []
-    }
-  },
+onMounted(() => {
+  if (props.certificateNameData) certificateName.value = props.certificateNameData
+})
 
-  watch: {
-    certificateNameData (data) {
-      if (data) this.certificateName = data
-    }
-  },
-
-  mounted () {
-    if (this.certificateNameData) this.certificateName = this.certificateNameData
-  },
-
-  methods: {
-    errorHandler (errorsObj) {
-      for (const key in errorsObj) {
-        for (const val of errorsObj[key]) this.errorMessages.push(val.message)
-      }
-    },
-
-    resetFields () {
-      this.certificateName = null
-      this.certificateNameConfirm = null
-    },
-
-    async UPDATA_THE_USER_CERTIFICATE_NAME () {
-      if (this.certificateName !== this.certificateNameConfirm) {
-        this.$q.notify({
-          type: 'negative',
-          multiLine: true,
-          progress: true,
-          message: this.$t('اسمك الرباعي غير متطابق')
-        })
-        return
-      }
-      this.visible = true
-      try {
-        const result = await apolloClient.mutate({
-          mutation: UpdateCertificateNameQuery,
-          variables: {
-            input: {
-              certificateName: this.certificateName.toUpperCase(),
-              certificateNameConfirm: this.certificateNameConfirm.toUpperCase()
-            }
-          },
-          refetchQueries: [{ query: GetMyProfileData }]
-        })
-        const success = this.$_.get(result, '[data][updateCertificateName][success]')
-        const errors = this.$_.get(result, '[data][updateCertificateName][errors]')
-        if (success) {
-          this.resetFields()
-          this.$q.notify({
-            type: 'positive',
-            multiLine: true,
-            progress: true,
-            message: 'Certificate Name was set successfully'
-          })
-          this.auth.getMyProfileData()
-          this.$q.notify({
-            type: 'warning',
-            multiLine: true,
-            progress: true,
-            message: 'يمكنك الذهاب إلى صفحة شهاداتي لتحميل شهادتك'
-          })
-        } else if (errors) {
-          this.errorHandler(errors)
-        }
-      } catch (e) { /* apolloProvider surfaces error */ }
-      finally { this.visible = false }
+function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
+  for (const key in errorsObj) {
+    for (const val of errorsObj[key]) {
+      $q.notify({ type: 'negative', multiLine: true, progress: true, message: val.message })
     }
   }
+}
+
+function resetFields (): void {
+  certificateName.value = null
+  certificateNameConfirm.value = null
+}
+
+async function updataCertificateName (): Promise<void> {
+  if (certificateName.value !== certificateNameConfirm.value) {
+    $q.notify({
+      type: 'negative',
+      multiLine: true,
+      progress: true,
+      message: 'اسمك الرباعي غير متطابق',
+    })
+    return
+  }
+  if (!certificateName.value || !certificateNameConfirm.value) return
+  visible.value = true
+  try {
+    const result = await apolloClient.mutate<UpdateCertificateNameResult, UpdateCertificateNameVariables>({
+      mutation: UpdateCertificateNameQuery,
+      variables: {
+        input: {
+          certificateName: certificateName.value.toUpperCase(),
+          certificateNameConfirm: certificateNameConfirm.value.toUpperCase(),
+        },
+      },
+      refetchQueries: [{ query: GetMyProfileData }],
+    })
+    const success = result?.data?.updateCertificateName?.success
+    const errors = result?.data?.updateCertificateName?.errors
+    if (success) {
+      resetFields()
+      $q.notify({
+        type: 'positive',
+        multiLine: true,
+        progress: true,
+        message: 'Certificate Name was set successfully',
+      })
+      void auth.getMyProfileData()
+      $q.notify({
+        type: 'warning',
+        multiLine: true,
+        progress: true,
+        message: 'يمكنك الذهاب إلى صفحة شهاداتي لتحميل شهادتك',
+      })
+    } else if (errors) {
+      errorHandler(errors as Record<string, Array<{ message: string }>>)
+    }
+  } catch { /* apolloProvider surfaces error */ }
+  finally { visible.value = false }
 }
 </script>
 

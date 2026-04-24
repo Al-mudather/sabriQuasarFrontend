@@ -4,150 +4,85 @@
 </div>
 </template>
 
-<script>
-import videojs from 'video.js';
-import 'videojs-contrib-hls';
-import 'videojs-contrib-quality-levels';
-import videojsqualityselector from 'videojs-hls-quality-selector';
-import _ from 'lodash';
+<script setup lang="ts">
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import videojs from 'video.js'
+import 'videojs-contrib-hls'
+import 'videojs-contrib-quality-levels'
+import videojsqualityselector from 'videojs-hls-quality-selector'
 
-export default {
-  name: "VideoPlayer",
-  props: ['videoUuid'],
-  data() {
-    return {
-      player: null,
-      videoID: null,
-      videoOptions: {
-        controlBar: {
-          children: [
-            'playToggle',
-            'progressControl',
-            'volumePanel',
-            'qualitySelector',
-            'fullscreenToggle',
-          ],
-        },
-        // autoplay: true,
-        controls: true,
-        playbackRates: [0.5, 1, 1.5, 2],
-        html5: {
-          nativeAudioTracks: false,
-          nativeVideoTracks: false,
-          vhs: {
-            cacheEncryptionKeys: true
-          },
-          hls: {
-            overrideNative: true,
-            debug: true,
-            // withCredentials: true
-          }
-        },
-        // sources: [
-        //   {
-        //     src: "http://localhost:8000/media/hls/b7301ccff06a51b8fc3894b7dae161b4/playlist.m3u8",
-        //     type: "video/mp4"
-        //   }
-        // ]
-      }
-    }
-  },
-
-  mounted() {
-    //TODO: intializ the video id
-    this.videoID = this.videoUuid
-
-    this.player = videojs(this.$refs.videoPlayer, this.videoOptions, function onPlayerReady() {
-      this.hlsQualitySelector = videojsqualityselector
-
-
-      this.hlsQualitySelector({
-        displayCurrentQuality: true,
-      });
-
-    });
-
-    this.playVideo(this.videoUuid)
-
-    // this.player.src({
-    //   src: `https://video.cdn1.stc.training/stream/hls/${this.videoID}/playlist.m3u8`,
-    //   type: 'application/vnd.apple.mpegurl',
-    //   keySystems: {
-    //     'org.w3.clearkey': {
-    //       // getLicense: function (emeOptions, keyMessage, callback) {
-    //       //   console.log(emeOptions, keyMessage, callback)
-    //       //   // request license
-    //       //   // if err, callback(err)
-    //       //   // if success, callback(null, license)
-    //       // }
-    //     }
-    //   }
-    // });
-
-    // videojs.Hls.xhr.beforeRequest = (options) => {
-    //   // options.uri = options.uri.replace('example.com', 'foo.com');
-    //   if (options.uri.includes('.m3u8') || options.uri.includes('.ts')) {
-    //     console.log('Getting Video: ', options);
-    //     console.log("[*] Getting blob file as uri")
-    //   } else {
-    //     options.uri = `https://video.cdn1.stc.training/api/video/key/${this.videoID}/`;
-    //     // console.log('Getting Key: ', options);
-    //   }
-    //   // console.log('Getting Key: ', options);
-    //   return options;
-    // };
-
-  },
-  beforeDestroy() {
-    if (this.player) {
-      this.player.dispose()
-    }
-  },
-
-  watch: {
-    videoUuid (val) {
-      if (val) {
-        this.playVideo(val)
-      }
-    }
-
-  },
-
-  methods: {
-    async playVideo(videoUuid) {
-      //TODO: initializ the video src path
-      let src = `https://video.cdn1.stc.training/stream/hls/${videoUuid}/playlist.m3u8`
-      this.player.src({
-        src: src,
-        type: 'application/vnd.apple.mpegurl',
-        keySystems: {
-          'org.w3.clearkey': {
-            // getLicense: function (emeOptions, keyMessage, callback) {
-            //   console.log(emeOptions, keyMessage, callback)
-            //   // request license
-            //   // if err, callback(err)
-            //   // if success, callback(null, license)
-            // }
-          }
-        }
-      });
-
-      videojs.Hls.xhr.beforeRequest = (options) => {
-        // options.uri = options.uri.replace('example.com', 'foo.com');
-        if (options.uri.includes('.m3u8') || options.uri.includes('.ts')) {
-          // console.log('Getting Video: ', options);
-          // console.log("[*] Getting blob file as uri")
-        } else {
-          options.uri = `https://video.cdn1.stc.training/api/video/key/${videoUuid}/`;
-          // console.log('Getting Key: ', options);
-        }
-        // console.log('Getting Key: ', options);
-        return options;
-      };
-
-    }
-  },
+interface Props {
+  videoUuid?: string
 }
+
+const props = defineProps<Props>()
+
+const videoPlayer = ref<HTMLVideoElement | null>(null)
+let player: ReturnType<typeof videojs> | null = null
+
+const videoOptions = {
+  controlBar: {
+    children: [
+      'playToggle',
+      'progressControl',
+      'volumePanel',
+      'qualitySelector',
+      'fullscreenToggle',
+    ],
+  },
+  controls: true,
+  playbackRates: [0.5, 1, 1.5, 2],
+  html5: {
+    nativeAudioTracks: false,
+    nativeVideoTracks: false,
+    vhs: { cacheEncryptionKeys: true },
+    hls: { overrideNative: true, debug: true }
+  }
+}
+
+async function playVideo (videoUuid: string): Promise<void> {
+  if (!player) return
+  const src = `https://video.cdn1.stc.training/stream/hls/${videoUuid}/playlist.m3u8`
+  player.src({
+    src,
+    type: 'application/vnd.apple.mpegurl',
+    keySystems: { 'org.w3.clearkey': {} }
+  })
+
+  // videojs.Hls was removed in VHS/video.js 7+; guard at runtime.
+  const vjsAny = videojs as unknown as Record<string, unknown>
+  if (vjsAny['Hls'] && (vjsAny['Hls'] as Record<string, unknown>)['xhr']) {
+    const hlsXhr = (vjsAny['Hls'] as Record<string, unknown>)['xhr'] as {
+      beforeRequest?: (cb: (opts: { uri: string }) => { uri: string }) => void
+    }
+    if (typeof hlsXhr.beforeRequest === 'function') {
+      hlsXhr.beforeRequest((options: { uri: string }) => {
+        if (!options.uri.includes('.m3u8') && !options.uri.includes('.ts')) {
+          options.uri = `https://video.cdn1.stc.training/api/video/key/${videoUuid}/`
+        }
+        return options
+      })
+    }
+  }
+}
+
+onMounted(() => {
+  if (!videoPlayer.value) return
+  player = videojs(videoPlayer.value, videoOptions, function (this: ReturnType<typeof videojs>) {
+    (this as unknown as Record<string, unknown>)['hlsQualitySelector'] = videojsqualityselector;
+    (this as unknown as { hlsQualitySelector: (opts: { displayCurrentQuality: boolean }) => void })
+      .hlsQualitySelector({ displayCurrentQuality: true })
+  })
+  if (props.videoUuid) playVideo(props.videoUuid)
+})
+
+onBeforeUnmount(() => {
+  if (player) player.dispose()
+})
+
+watch(() => props.videoUuid, (val) => {
+  if (val) playVideo(val)
+})
 </script>
 
 <style scoped>

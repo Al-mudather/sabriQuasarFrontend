@@ -81,233 +81,126 @@
   </section>
 </template>
 
-<script>
-import { storeToRefs } from "pinia";
-import { useAuthStore } from "src/stores/auth";
-import { useSettingsStore } from "src/stores/settings";
-import { useCartStore } from "src/stores/cart";
-import { usePyramidStore } from "src/stores/pyramid";
-import { apolloClient } from "src/apollo/client";
-import { GetAllCourses } from "src/graphql/course_management/query/GetAllCourses";
-import { Quasar } from "quasar";
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useQuasar, Quasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { useCartStore } from 'src/stores/cart'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { apolloClient } from 'src/apollo/client'
+import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses'
+import type { GetAllCoursesResult, GetAllCoursesVars } from 'src/types/courses/types'
 
-export default {
-  name: "NavBar",
-  setup () {
-    const auth = useAuthStore();
-    const settings = useSettingsStore();
-    const cart = useCartStore();
-    const pyramid = usePyramidStore();
-    const { token, navbarSearch } = storeToRefs(auth);
-    const { isEnglish } = storeToRefs(settings);
-    return { auth, settings, cart, pyramid, token, navbarSearch, isEnglish };
+const route = useRoute()
+const router = useRouter()
+const $q = useQuasar()
+const { t } = useI18n()
+
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const cart = useCartStore()
+const pyramid = usePyramidStore()
+const { token } = storeToRefs(auth)
+const { isEnglish } = storeToRefs(settings)
+
+const hideFields = ref(false)
+const search = ref('')
+
+// Computed writable for the language toggle
+const _isEnglish = computed({
+  get: () => isEnglish.value,
+  set: (val: boolean) => settings.setIsEnglish(val)
+})
+
+// Watch route to hide fields on terms page
+watch(
+  () => route.name,
+  (name) => {
+    hideFields.value = name === 'termsAndConditions'
   },
-  data() {
-    return {
-      hideFields: false,
-      search: "",
-    };
-  },
+  { immediate: true }
+)
 
-  props: {},
+// Watch language toggle and update Quasar locale
+watch(isEnglish, async (value) => {
+  if (value) {
+    settings.setIsEnglish(true)
+    try {
+      const lang = await import('quasar/lang/en-us')
+      Quasar.lang.set({ ...lang.default, rtl: false })
+    } catch (_) { /* lang pack may not exist */ }
+  } else {
+    settings.setIsEnglish(false)
+    try {
+      const lang = await import('quasar/lang/ar')
+      Quasar.lang.set({ ...lang.default, rtl: true })
+    } catch (_) { /* lang pack may not exist */ }
+  }
+})
 
-  computed: {
-    _isEnglish: {
-      get() {
-        return this.isEnglish;
-      },
-      set(newVlaue) {
-        return this.settings.setIsEnglish(newVlaue);
-      },
-    },
-  },
+function changeMenuState (): void {
+  settings.setOpenMenu(true)
+}
 
-  watch: {
-    $route: {
-      handler: function (route) {
-        if (route.name === "termsAndConditions") {
-          this.hideFields = true;
-        } else {
-          this.hideFields = false;
-        }
-      },
-      deep: true,
-      immediate: true,
-    },
+function LOG_USER_OUT (): void {
+  pyramid.setMyMarketingCode('')
+  cart.deleteCart()
+  auth.logOut()
+  router.push({ name: 'Home' })
+}
 
-    async isEnglish(value) {
-      if (value) {
-        this.$i18n.locale = "en";
-        this.settings.setIsEnglish(value);
-        const langIso = "en-us";
+function showTheSearchingResult (event: Event): void {
+  event.preventDefault()
 
-        try {
-          await import(
-            "quasar/lang/" + langIso
-          ).then((lang) => {
-            Quasar.lang.set({
-              ...lang.default,
-              rtl: false,
-            });
-          });
+  if (!search.value.trim()) {
+    $q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: t('ما الذي تبحث عنه') })
+    return
+  }
 
-          // Adjust other layouts' cart styling when switching to English
-          this.$jquery(".backgroun").css({
-            transform: "rotate(180deg)",
-          });
-          this.$jquery(".shoppgCart > .cart svg").css({
-            transform: "translate(-20%, -30%)",
-          });
-          this.$jquery(".shoppgCart > .cart h3").css({
-            transform: "translate(35%, -100%)",
-          });
-          this.$jquery(".shoppgCart > .cart > .notifc").css({
-            transform: "translate(-5%,-43%)",
-          });
-        } catch (err) {
-          // Requested Quasar Language Pack does not exist,
-          // let's not break the app, so catching
-        }
-      } else {
-        this.$i18n.locale = "ar";
-        this.settings.setIsEnglish(value);
+  apolloClient
+    .query<GetAllCoursesResult, GetAllCoursesVars>({
+      query: GetAllCourses,
+      variables: { title_Icontains: search.value }
+    })
+    .then((res) => {
+      const edges = res.data?.allCourses?.edges ?? []
+      const searchResult = edges
+        .filter((e) => e?.node)
+        .map((e) => ({
+          label: e!.node!.title ?? '',
+          id: e!.node!.id,
+          pk: e!.node!.pk
+        }))
 
-        try {
-          const lang = await import("quasar/lang/ar");
-          Quasar.lang.set({ ...lang.default, rtl: true });
-
-          this.$jquery(".backgroun").css({
-            transform: "rotate(360deg)",
-          });
-          this.$jquery(".shoppgCart > .cart svg").css({
-            transform: "translate(0%, 0%)",
-          });
-          this.$jquery(".shoppgCart > .cart h3").css({
-            transform: "translate(0%, 0%)",
-          });
-        } catch (err) {}
-      }
-    },
-  },
-
-  methods: {
-    changeMenuState() {
-      this.settings.setOpenMenu(true);
-    },
-
-    LOG_USER_OUT() {
-      this.pyramid.setMyMarketingCode("");
-      this.cart.deleteCart();
-      try {
-        this.removeCookie();
-      } catch (error) {}
-      this.auth.logOut();
-      this.$router.push({ name: "Home" });
-    },
-
-    removeCookie() {
-      const token = "csrftoken";
-      this.$cookies.remove(token);
-    },
-
-    showTheSearchingResult(event) {
-      event.preventDefault();
-
-      if (!this.$_.isEmpty(this.search)) {
-        apolloClient
-          .query({
-            query: GetAllCourses,
-            variables: {
-              title_Icontains: this.search,
-            },
+      if (searchResult.length > 0) {
+        $q.bottomSheet({
+          style: { textAlign: 'center', padding: '20px', 'border-bottom': '1px solid #000 !important' },
+          actions: searchResult
+        })
+          .onOk((action: { label: string; pk: string; id: string }) => {
+            router.push({
+              name: 'course-details',
+              params: { name: action.label.replaceAll(' ', '-'), pk: action.pk, id: action.id }
+            })
           })
-          .then((res) => {
-            const searchResult = res.data.allCourses.edges.map((course) => {
-              return {
-                label: course.node.title,
-                id: course.node.id,
-                pk: course.node.pk,
-              };
-            });
-            if (!this.$_.isEmpty(searchResult)) {
-              this.$q
-                .bottomSheet({
-                  style: {
-                    textAlign: "center",
-                    padding: "20px",
-                    "border-bottom": "1px solid #000 !important",
-                  },
-                  actions: searchResult,
-                })
-                .onOk((action) => {
-                  this.$router.push({
-                    name: "course-details",
-                    params: {
-                      name: action.label.replaceAll(" ", "-"),
-                      pk: action.pk,
-                      id: action.id,
-                    },
-                  });
-                })
-                .onDismiss(() => {
-                  this.search = "";
-                });
-            } else {
-              this.$q.notify({
-                color: "negative",
-                position: "top",
-                progress: true,
-                multiLine: true,
-                message: this.$t("لا توجد نتائج"),
-              });
-            }
-          });
+          .onDismiss(() => { search.value = '' })
       } else {
-        this.$q.notify({
-          type: "warning",
-          position: "top",
-          progress: true,
-          multiLine: true,
-          message: this.$t("ما الذي تبحث عنه"),
-        });
+        $q.notify({ color: 'negative', position: 'top', progress: true, multiLine: true, message: t('لا توجد نتائج') })
       }
-    },
+    })
+}
 
-    goToCourses(e) {
-      e.preventDefault();
-      if (this.search) {
-        this.$router.push({
-          name: "courses",
-          params: { search: this.search },
-          query: { redirect: this.$route.fullPath },
-        });
-      } else {
-        this.$q.notify({
-          color: "success",
-          textColor: "white",
-          position: "top",
-          icon: "cloud_done",
-          message: "ما الذي تبحث عنه",
-        });
-      }
-    },
+function GO_TO_SIGN_UP_PAGE (): void {
+  router.push({ name: 'signUp', query: { redirect: route.fullPath } })
+}
 
-    GO_TO_SIGN_UP_PAGE() {
-      this.$router.push({
-        name: "signUp",
-        query: { redirect: this.$route.fullPath },
-      });
-    },
-
-    GO_TO_LOG_IN_PAGE() {
-      this.$router.push({
-        name: "login",
-        params: { redirect: this.$route.fullPath },
-        query: { redirect: this.$route.fullPath },
-      });
-    },
-  },
-};
+function GO_TO_LOG_IN_PAGE (): void {
+  router.push({ name: 'login', query: { redirect: route.fullPath } })
+}
 </script>
 
 <style lang="scss" scoped>

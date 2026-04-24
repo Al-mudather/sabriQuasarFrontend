@@ -1,21 +1,13 @@
 <template>
   <div class="my-pyramid">
-    <my-pyramid-participants class="my-pyramid__col" />
-    <my-pyramid-rewards class="my-pyramid__col" />
+    <MyPyramidParticipants class="my-pyramid__col" />
+    <MyPyramidRewards class="my-pyramid__col" />
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import MyPyramidParticipants from 'src/components/pyramid_marketing_management/MyPyramidParticipants.vue'
 import MyPyramidRewards from 'src/components/pyramid_marketing_management/MyPyramidRewards.vue'
-
-export default {
-  name: 'MyPyramid',
-  components: {
-    'my-pyramid-participants': MyPyramidParticipants,
-    'my-pyramid-rewards': MyPyramidRewards
-  }
-}
 </script>
 
 <style lang="scss" scoped>

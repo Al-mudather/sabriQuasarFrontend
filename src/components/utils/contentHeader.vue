@@ -24,20 +24,19 @@
     </div>
 </template>
 
-<script>
-export default {
-  data () {
-    return {
-      plussImage: true
-    }
-  },
-  props: ['headerText'],
+<script setup lang="ts">
+import { ref } from 'vue'
 
-  methods: {
-    ChangeTheSign (e) {
-      this.plussImage = !this.plussImage
-    }
-  }
+interface Props {
+  headerText?: string
+}
+
+defineProps<Props>()
+
+const plussImage = ref(true)
+
+function ChangeTheSign (): void {
+  plussImage.value = !plussImage.value
 }
 </script>
 

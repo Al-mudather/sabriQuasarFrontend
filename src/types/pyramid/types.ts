@@ -16,6 +16,10 @@ import type {
   MyPyramidMarketersQueryVariables,
   CheckPyramidAffiliateQuery,
   CheckPyramidAffiliateQueryVariables,
+  MyPyramidAffiliatesQuery,
+  MyPyramidAffiliatesQueryVariables,
+  AllMarketerAttachmentTransactionQuery,
+  AllMarketerAttachmentTransactionQueryVariables,
 
   // Mutations
   // codegen emits `WithdrawPyramidBalanceMutation` for the `MakePyramidWithdraw` op.
@@ -133,6 +137,12 @@ export type MyPyramidMarketersVars = MyPyramidMarketersQueryVariables
 
 export type CheckPyramidAffiliateResult = CheckPyramidAffiliateQuery
 export type CheckPyramidAffiliateVars = CheckPyramidAffiliateQueryVariables
+
+export type MyPyramidAffiliatesResult = MyPyramidAffiliatesQuery
+export type MyPyramidAffiliatesVars = MyPyramidAffiliatesQueryVariables
+
+export type AllMarketerAttachmentTransactionResult = AllMarketerAttachmentTransactionQuery
+export type AllMarketerAttachmentTransactionVars = AllMarketerAttachmentTransactionQueryVariables
 
 // --- Mutations -------------------------------------------------------------
 export type MakePyramidWithdrawResult = WithdrawPyramidBalanceMutation

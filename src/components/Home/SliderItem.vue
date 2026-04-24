@@ -3,51 +3,34 @@
     <div class="slide__media">
       <img
         class="slide__image"
-        :src="FORMAT_THE_IAMGE_URL(slider.slide.cover)"
-        :alt="slider.slide.title"
+        :src="FORMAT_THE_IAMGE_URL(slider.slide?.cover ?? '')"
+        :alt="slider.slide?.title ?? ''"
       />
     </div>
 
     <div class="slide__body">
       <div class="slide__heading">
-        <h2 class="slide__title">{{ slider.slide.title }}</h2>
-        <p class="slide__brief">{{ slider.slide.brief }}</p>
+        <h2 class="slide__title">{{ slider.slide?.title }}</h2>
+        <p class="slide__brief">{{ slider.slide?.brief }}</p>
       </div>
 
-      <div class="slide__countdown">
-        <vue-countdown-timer
-          :start-time="now"
-          :end-time="start"
-          :interval="1000"
-          :day-txt="'days'"
-          :hour-txt="'hours'"
-          :minutes-txt="'minutes'"
-          :seconds-txt="'seconds'"
-        >
-          <template slot="countdown" slot-scope="scope">
-            <div class="unit">
-              <h3 class="unit__value">{{ scope.props.seconds }}</h3>
-              <span class="unit__label">ثانيه</span>
-            </div>
-            <div class="unit">
-              <h3 class="unit__value">{{ scope.props.minutes }}</h3>
-              <span class="unit__label">دقيقة</span>
-            </div>
-            <div class="unit">
-              <h3 class="unit__value">{{ scope.props.hours }}</h3>
-              <span class="unit__label">ساعة</span>
-            </div>
-            <div class="unit">
-              <h3 class="unit__value">{{ scope.props.days }}</h3>
-              <span class="unit__label">يـوم</span>
-            </div>
-          </template>
-
-          <template slot="start-label"></template>
-          <template slot="end-label"></template>
-          <template slot="start-text"><span></span></template>
-          <template slot="end-text"><span></span></template>
-        </vue-countdown-timer>
+      <div v-if="remaining > 0" class="slide__countdown">
+        <div class="unit">
+          <h3 class="unit__value">{{ countdown.days }}</h3>
+          <span class="unit__label">يـوم</span>
+        </div>
+        <div class="unit">
+          <h3 class="unit__value">{{ countdown.hours }}</h3>
+          <span class="unit__label">ساعة</span>
+        </div>
+        <div class="unit">
+          <h3 class="unit__value">{{ countdown.minutes }}</h3>
+          <span class="unit__label">دقيقة</span>
+        </div>
+        <div class="unit">
+          <h3 class="unit__value">{{ countdown.seconds }}</h3>
+          <span class="unit__label">ثانيه</span>
+        </div>
       </div>
 
       <DsButton
@@ -61,68 +44,55 @@
   </div>
 </template>
 
-<script>
-const moment = require('moment')
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import type { HomePageSlider } from 'src/types/marketing-content/types'
 
-export default {
-  name: 'SliderItem',
-  data () {
-    return {
-      FORMAT_THE_IAMGE_URL: FORMAT_THE_IAMGE_URL,
-      now: 0,
-      start: 0
+interface Props {
+  slider: HomePageSlider
+}
+
+const props = defineProps<Props>()
+const router = useRouter()
+
+const now = ref(Date.now())
+let timer: ReturnType<typeof setInterval> | null = null
+
+const startMs = computed(() =>
+  props.slider.startDate ? new Date(props.slider.startDate).getTime() : 0
+)
+
+const remaining = computed(() => Math.max(0, startMs.value - now.value))
+
+const countdown = computed(() => {
+  const ms = remaining.value
+  const totalSecs = Math.floor(ms / 1000)
+  const days = Math.floor(totalSecs / 86400)
+  const hours = Math.floor((totalSecs % 86400) / 3600)
+  const minutes = Math.floor((totalSecs % 3600) / 60)
+  const seconds = totalSecs % 60
+  return { days, hours, minutes, seconds }
+})
+
+onMounted(() => {
+  timer = setInterval(() => { now.value = Date.now() }, 1000)
+})
+
+onBeforeUnmount(() => {
+  if (timer !== null) clearInterval(timer)
+})
+
+function goToCourseDetails (): void {
+  router.push({
+    name: 'course-details',
+    params: {
+      name: props.slider.slide?.title ?? '',
+      pk: String(props.slider.slide?.pk ?? ''),
+      id: props.slider.slide?.id ?? ''
     }
-  },
-
-  props: ['slider'],
-
-  components: {},
-
-  mounted () {
-    this.start = moment(this.slider.startDate)
-    this.now = moment(new Date())
-  },
-
-  methods: {
-    startCallBack: function (x) {},
-    endCallBack: function (x) {},
-
-    goToCourseDetails () {
-      this.$router.push({
-        name: 'course-details',
-        params: {
-          name: this.slider.slide.title,
-          pk: this.slider.slide.pk,
-          id: this.slider.slide.id
-        }
-      })
-    },
-
-    FORMAT_COURSE_COVER_IMAGE () {
-      if (process.env.NODE_ENV == 'development') {
-        return 'http://localhost:8000/media/' + this.slider.slide.cover
-      } else {
-        return 'https://api.stc.training' + '/media/' + this.slider.slide.cover
-      }
-    },
-
-    CHANGE_THE_SLIDER () {
-      const parent = this.$jquery('.parientSlider')
-      const activeChild = parent.find('.active')
-      const nextChild = activeChild.next()
-      if (activeChild.length > 0) {
-        if (nextChild.length) {
-          nextChild.addClass('active')
-        } else {
-          parent.children().first().addClass('active')
-        }
-        activeChild.removeClass('active')
-      } else {
-        parent.children().first().addClass('active')
-      }
-    }
-  }
+  })
 }
 </script>
 
@@ -176,13 +146,6 @@ export default {
   justify-content: center;
   gap: var(--ds-space-3, 0.75rem);
   flex-wrap: wrap;
-}
-
-.slide__countdown :deep(>) * {
-  display: flex;
-  gap: var(--ds-space-3, 0.75rem);
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
 .unit {

@@ -145,49 +145,40 @@
   </footer>
 </template>
 
-<script>
-import { LOGO, BRAND } from 'src/design-system/brand';
+<script setup lang="ts">
+import { LOGO, BRAND } from 'src/design-system/brand'
 
-export default {
-  name: 'AppFooter',
-  data() {
-    return {
-      locale: 'ar',
-      coursesLinks: [
-        { to: '/courses',              label: 'كل الدورات' },
-        { to: '/myCourses',            label: 'دوراتي' },
-        { to: '/cart/',                label: 'سلة المشتريات' }
-      ],
-      centerLinks: [
-        { to: '/',             label: 'الرئيسية' },
-        { to: '/courses',      label: 'الدورات' },
-        { to: '/profile',      label: 'حسابي' }
-      ],
-      supportLinks: [
-        { to: '/termsandConditions', label: 'الشروط والأحكام' },
-        { to: '/privacyPolicy',      label: 'سياسة الخصوصية' }
-      ],
-      socials: [
-        { name: 'instagram', href: '#', label: 'إنستغرام' },
-        { name: 'youtube',   href: '#', label: 'يوتيوب' },
-        { name: 'twitter',   href: '#', label: 'إكس / تويتر' },
-        { name: 'linkedin',  href: '#', label: 'لينكد إن' }
-      ]
-    };
-  },
-  computed: {
-    logoSrc()     { return LOGO.full; },
-    brandNameAr() { return BRAND.nameAr; },
-    brandNameEn() { return BRAND.nameEn; }
-  },
-  methods: {
-    setLocale(next) {
-      if (next === this.locale) return;
-      this.locale = next;
-      this.$emit('locale-change', next);
-    }
-  }
-};
+const emit = defineEmits<{
+  (e: 'locale-change', val: string): void
+}>()
+
+const logoSrc = LOGO.full
+const brandNameAr = BRAND.nameAr
+const brandNameEn = BRAND.nameEn
+
+const coursesLinks = [
+  { to: '/courses',   label: 'كل الدورات' },
+  { to: '/myCourses', label: 'دوراتي' },
+  { to: '/cart/',     label: 'سلة المشتريات' }
+]
+
+const centerLinks = [
+  { to: '/',         label: 'الرئيسية' },
+  { to: '/courses',  label: 'الدورات' },
+  { to: '/profile',  label: 'حسابي' }
+]
+
+const supportLinks = [
+  { to: '/termsandConditions', label: 'الشروط والأحكام' },
+  { to: '/privacyPolicy',      label: 'سياسة الخصوصية' }
+]
+
+const socials = [
+  { name: 'instagram', href: '#', label: 'إنستغرام' },
+  { name: 'youtube',   href: '#', label: 'يوتيوب' },
+  { name: 'twitter',   href: '#', label: 'إكس / تويتر' },
+  { name: 'linkedin',  href: '#', label: 'لينكد إن' }
+]
 </script>
 
 <style lang="scss" scoped>

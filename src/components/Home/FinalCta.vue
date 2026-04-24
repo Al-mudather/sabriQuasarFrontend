@@ -1,5 +1,5 @@
 <template>
-  <section class="final-cta" aria-label="ابدأ رحلتك">
+  <section ref="root" class="final-cta" aria-label="ابدأ رحلتك">
     <svg
       class="final-cta__contour"
       viewBox="0 0 1600 600"
@@ -29,20 +29,22 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import { contourDrift } from 'src/design-system/motion'
 
-export default {
-  name: 'FinalCta',
-  components: { DsButton },
-  mounted () {
-    this._drift = contourDrift(this.$el.querySelector('.final-cta__contour'))
-  },
-  beforeUnmount () {
-    if (this._drift && this._drift.kill) this._drift.kill()
-  }
-}
+const root = ref<HTMLElement | null>(null)
+let drift: { kill?: () => void } | null = null
+
+onMounted(() => {
+  const contour = root.value?.querySelector('.final-cta__contour') ?? null
+  drift = contourDrift(contour) as { kill?: () => void } | null
+})
+
+onBeforeUnmount(() => {
+  drift?.kill?.()
+})
 </script>
 
 <style lang="scss" scoped>
