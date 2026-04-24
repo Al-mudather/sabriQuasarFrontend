@@ -61,6 +61,7 @@
               :course-cover="courseData?.cover ?? null"
               @preview-content="onPreviewContent"
               @samples-changed="onSamplesChanged"
+              @open-preview="openPreview()"
             />
           </section>
 
@@ -480,6 +481,13 @@ onBeforeUnmount(() => { /* noop */ })
       border-block-start: 1px solid var(--ds-border);
       padding-block-start: var(--ds-space-8);
     }
+
+    // Collapse outer wrapper when the inner child rendered nothing (v-if
+    // evaluated to false, leaving only comment nodes). Per Selectors 4,
+    // :empty ignores comments — so a section whose only content is a Vue
+    // v-if placeholder matches. Keeps the rhythm tight when a feature
+    // (what-you-will-learn, requirements) has no data for a given course.
+    &:empty { display: none; }
   }
 
   /* Sticky rail */

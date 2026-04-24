@@ -88,18 +88,17 @@
                 :class="{ 'is-active': activeId === s.id }"
                 @click="emit('select', s.id)"
               >
-                <span class="preview-dialog__row-thumb" aria-hidden="true">
-                  <img
-                    v-if="s.thumbnail"
-                    :src="s.thumbnail"
-                    :alt="''"
-                  />
-                  <svg v-else viewBox="0 0 24 24" width="20" height="20">
+                <span
+                  class="preview-dialog__row-thumb"
+                  :class="{ 'is-active': activeId === s.id }"
+                  aria-hidden="true"
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18">
                     <circle
                       cx="12" cy="12" r="9"
                       stroke="currentColor" stroke-width="1.5" fill="none"
                     />
-                    <path d="M10 8l6 4-6 4V8z" fill="currentColor"/>
+                    <path d="M10.25 8.25 L15.5 12 L10.25 15.75 Z" fill="currentColor"/>
                   </svg>
                 </span>
                 <span class="preview-dialog__row-body">
@@ -199,12 +198,16 @@ const activeEmbedUrl = computed<string>(() => {
   if (activeVideoMeta.value || activeCipher.value) return ''
   const video = (m.video as string | undefined) ?? ''
   if (!video) return ''
+  // Crude key extraction preserved from the legacy contentItem flow.
   const i = video.indexOf('v')
   const videoKey = video.slice(i + 2)
   if (video.indexOf('youtube') > 0) {
-    return 'https://www.youtube.com/embed?=' + videoKey
+    // `?autoplay=1&mute=1` lands us in the browser-accepted autoplay path
+    // (unmuted autoplay is blocked until user gesture; muted autoplay
+    // survives first paint).
+    return `https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1&rel=0`
   }
-  return 'https://player.vimeo.com/video/' + String(video)
+  return `https://player.vimeo.com/video/${String(video)}?autoplay=1&muted=1`
 })
 
 // SmartNode player lifecycle ------------------------------------------------
@@ -353,31 +356,42 @@ onBeforeUnmount(uninitSmartPlayer)
   }
 
   // Video stage -------------------------------------------------------------
+  // Use the classic padding-block-end ratio box: iframes and third-party
+  // players often ship with intrinsic width/height attributes and don't
+  // respect `aspect-ratio` on a flex parent, so we force a fixed 16:9 slot
+  // and absolutely position every variant into it.
   &__stage {
     position: relative;
-    aspect-ratio: 16 / 9;
+    inline-size: 100%;
+    padding-block-end: 56.25%;
+    block-size: 0;
     border-radius: var(--ds-radius-md);
     overflow: hidden;
     background: #000;
     box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+    flex-shrink: 0;
   }
 
   &__player,
   &__smartnode,
   &__embed,
-  &__cipher {
+  &__cipher,
+  &__stage-empty {
+    position: absolute;
+    inset: 0;
     inline-size: 100%;
     block-size: 100%;
   }
 
-  &__smartnode :deep(*) {
-    inline-size: 100%;
-    block-size: 100%;
+  &__smartnode :deep(*),
+  &__cipher :deep(iframe),
+  &__cipher :deep(video) {
+    inline-size: 100% !important;
+    block-size: 100% !important;
+    border: 0;
   }
 
   &__stage-empty {
-    inline-size: 100%;
-    block-size: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -456,17 +470,22 @@ onBeforeUnmount(uninitSmartPlayer)
 
   &__row-thumb {
     flex: 0 0 auto;
-    inline-size: 3.25rem;
+    inline-size: 2.25rem;
     block-size: 2.25rem;
-    border-radius: var(--ds-radius-sm);
-    overflow: hidden;
-    background: rgba(246, 241, 234, 0.08);
+    border-radius: 50%;
+    background: rgba(246, 241, 234, 0.1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--ds-text-on-indigo, #f6f1ea);
+    transition:
+      background-color var(--ds-duration-fast) var(--ds-ease-out),
+      color var(--ds-duration-fast) var(--ds-ease-out);
 
-    img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+    &.is-active {
+      background: var(--ds-accent-300);
+      color: var(--ds-ink);
+    }
   }
 
   &__row-body {

@@ -140,7 +140,7 @@ const displayCurrency = computed(() => selectedCurrency.value)
 
 function formatAmount (n: number): string {
   try {
-    return new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 2 }).format(n)
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n)
   } catch {
     return String(n)
   }

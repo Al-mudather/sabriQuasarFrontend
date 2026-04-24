@@ -1,5 +1,5 @@
 <template>
-  <section class="cd-section">
+  <section v-if="points.length || loading" class="cd-section">
     <header class="cd-section__head">
       <h2>{{ $t('ما الذي سأتعلمه ؟') }}</h2>
     </header>
@@ -18,12 +18,6 @@
       <ds-skeleton shape="line" width="65%" />
       <ds-skeleton shape="line" width="74%" />
     </div>
-
-    <ds-empty-state
-      v-else
-      :title="$t('لا توجد أهداف تعلم محددة')"
-      size="sm"
-    />
 
     <div v-if="hasNextPage" class="cd-section__more">
       <ds-button variant="secondary" @click="loadMoreData">

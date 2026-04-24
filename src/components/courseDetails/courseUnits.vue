@@ -21,6 +21,30 @@
     </div>
 
     <template v-else>
+      <!-- Free-samples call-to-action: only when the course has at least one -->
+      <button
+        v-if="freeSamples.length"
+        type="button"
+        class="cd-content__free-cta"
+        @click="emit('open-preview')"
+      >
+        <span class="cd-content__free-cta-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M10 8 L16 12 L10 16 Z" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <span class="cd-content__free-cta-text">
+          <strong>{{ $t('شاهد الفيديوهات المجانية') }}</strong>
+          <span class="cd-content__free-cta-sub">
+            {{ freeSamples.length }} {{ $t('فيديو متاح للمعاينة') }}
+          </span>
+        </span>
+        <span class="cd-content__free-cta-chevron" aria-hidden="true">›</span>
+      </button>
+
       <div class="cd-content__toolbar">
         <button
           type="button"
@@ -131,6 +155,7 @@ interface FreeSample {
 const emit = defineEmits<{
   (e: 'preview-content', payload: PreviewPayload): void
   (e: 'samples-changed', list: FreeSample[]): void
+  (e: 'open-preview'): void
 }>()
 
 const { result, loading: qLoading } = useQuery<GetAllCourseUnitsByCourseIdResult, GetAllCourseUnitsByCourseIdVars>(
@@ -290,6 +315,82 @@ watch(freeSamples, (list) => emit('samples-changed', list), { immediate: true })
   }
 
   &__dot { color: var(--ds-text-muted); }
+
+  &__free-cta {
+    inline-size: 100%;
+    appearance: none;
+    border: 1px solid var(--ds-brand-600);
+    background: linear-gradient(
+      135deg,
+      var(--ds-brand-50, rgba(50, 40, 115, 0.08)) 0%,
+      rgba(50, 40, 115, 0.02) 100%
+    );
+    border-radius: var(--ds-radius-md);
+    padding: var(--ds-space-4) var(--ds-space-5);
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-4);
+    cursor: pointer;
+    color: var(--ds-text);
+    text-align: inherit;
+    transition:
+      background-color var(--ds-duration-fast) var(--ds-ease-out),
+      transform var(--ds-duration-fast) var(--ds-ease-out),
+      box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+
+    &:hover {
+      background: linear-gradient(135deg,
+        rgba(50, 40, 115, 0.12) 0%,
+        rgba(50, 40, 115, 0.04) 100%);
+      transform: translateY(-1px);
+      box-shadow: var(--ds-shadow-sm);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--ds-brand-600);
+      outline-offset: 2px;
+    }
+  }
+
+  &__free-cta-icon {
+    flex: 0 0 auto;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ds-brand-600);
+    color: var(--ds-text-onBrand, #f6f1ea);
+  }
+
+  &__free-cta-text {
+    flex: 1;
+    min-inline-size: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+
+    strong {
+      font-family: var(--ds-font-heading);
+      font-weight: 700;
+      font-size: var(--ds-text-md);
+      color: var(--ds-brand-700);
+    }
+  }
+
+  &__free-cta-sub {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__free-cta-chevron {
+    flex: 0 0 auto;
+    color: var(--ds-brand-600);
+    font-size: 1.25rem;
+    transform: rotate(180deg); // chevron points inline-end in RTL
+  }
 
   &__toolbar {
     display: flex;

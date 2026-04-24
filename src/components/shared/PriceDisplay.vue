@@ -51,7 +51,10 @@ const props = withDefaults(defineProps<Props>(), {
   currency: 'SAR',
   size: 'md',
   variant: 'terracotta',
-  locale: 'ar-EG',
+  // Price numerals stay Latin ("100,000" not "١٠٠٬٠٠٠") even in Arabic UI —
+  // tabular-nums + familiar grouping reads faster for monetary values. Pass
+  // `locale="ar-EG"` explicitly if an Arabic-Indic numeral is ever needed.
+  locale: 'en-US',
   showDiscount: false,
   perLabel: null
 })
@@ -60,7 +63,7 @@ const numberFormatter = computed(() => {
   try {
     return new Intl.NumberFormat(props.locale, { style: 'decimal' })
   } catch (e) {
-    return new Intl.NumberFormat('ar-EG', { style: 'decimal' })
+    return new Intl.NumberFormat('en-US', { style: 'decimal' })
   }
 })
 

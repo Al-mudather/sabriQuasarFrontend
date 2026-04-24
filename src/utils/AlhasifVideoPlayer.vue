@@ -47,6 +47,17 @@ async function playVideo (videoUuid: string): Promise<void> {
     type: 'application/vnd.apple.mpegurl',
     keySystems: { 'org.w3.clearkey': {} }
   })
+  // Auto-start playback after source is set. Browsers may block unmuted
+  // autoplay on first interaction — fall back to muted if rejected so the
+  // preview still moves instead of sitting on a frozen first frame.
+  try {
+    const p = player.play()
+    if (p && typeof (p as Promise<void>).catch === 'function') {
+      ;(p as Promise<void>).catch(() => {
+        try { player?.muted(true); void player?.play() } catch { /* ignore */ }
+      })
+    }
+  } catch { /* ignore — user can press play */ }
 
   // videojs.Hls was removed in VHS/video.js 7+; guard at runtime.
   const vjsAny = videojs as unknown as Record<string, unknown>
