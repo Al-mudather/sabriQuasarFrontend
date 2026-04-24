@@ -23,100 +23,104 @@ import { RefreshLoginUserWithEmail } from 'src/graphql/account_management/mutati
 import { RevokeUserRefreshToken } from 'src/graphql/account_management/mutation/RevokeUserRefreshToken.js'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData.js'
 
-/**
- * Shared auth feature types — see `src/types/auth/types.ts`.
- *
- * @typedef {import('src/types/auth/types').AuthSessionUser} AuthSessionUser
- * @typedef {import('src/types/auth/types').LoginResult} LoginResult
- * @typedef {import('src/types/auth/types').SocialAuthResult} SocialAuthResult
- * @typedef {import('src/types/auth/types').RegisterResult} RegisterResult
- * @typedef {import('src/types/auth/types').RefreshTokenMutationResult} RefreshTokenMutationResult
- * @typedef {import('src/types/auth/types').RefreshTokenVariables} RefreshTokenVariables
- * @typedef {import('src/types/auth/types').RevokeRefreshTokenMutationResult} RevokeRefreshTokenMutationResult
- * @typedef {import('src/types/auth/types').RevokeRefreshTokenVariables} RevokeRefreshTokenVariables
- * @typedef {import('src/types/auth/types').GetMyProfileResult} GetMyProfileResult
- * @typedef {import('src/types/auth/types').GetMyProfileVariables} GetMyProfileVariables
- */
+import type {
+  AuthSessionUser,
+  LoginResult,
+  SocialAuthResult,
+} from 'src/types/auth/types'
+
+// Load the pinia-plugin-persistedstate module augmentation so `persist: false`
+// is accepted as a valid option on DefineStoreOptions.
+import 'pinia-plugin-persistedstate'
+
+// ---------------------------------------------------------------------------
+// State interface
+// ---------------------------------------------------------------------------
+interface AuthState {
+  navbarSearch: boolean
+  user: AuthSessionUser | null
+  token: string | null
+  refreshToken: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Payload type for loginAction — covers email login, social auth, and any
+// legacy shape callers may pass (refresh token field names vary by flow).
+// ---------------------------------------------------------------------------
+type LoginPayload =
+  | (LoginResult & { social?: { user: AuthSessionUser } })
+  | (SocialAuthResult & { token: string; refreshToken?: string; user?: AuthSessionUser })
+  | { token: string; refresh?: string; refreshToken?: string; user?: AuthSessionUser; social?: { user: AuthSessionUser } }
 
 export const useAuthStore = defineStore('authentication', {
-  state: () => ({
-    /** @type {boolean} */
+  state: (): AuthState => ({
     navbarSearch: true,
-    /** @type {AuthSessionUser | null} */
     user: userProfileStorage.getUser() || null,
-    /** @type {string | null} */
     token: tokenStorage.getAccessToken() || null,
-    /** @type {string | null} */
-    refreshToken: tokenStorage.getRefreshToken() || null
+    refreshToken: tokenStorage.getRefreshToken() || null,
   }),
 
   getters: {
     // Name-parity with Vuex `getters.user` / `getters.token` / `getters.navbarSearch`.
     // State field names already match, so these getters are thin aliases for
     // call sites that used `mapGetters('authentication', ['user', 'token'])`.
-    userGetter: (state) => state.user,
-    tokenGetter: (state) => state.token,
-    navbarSearchGetter: (state) => state.navbarSearch,
+    userGetter: (state): AuthSessionUser | null => state.user,
+    tokenGetter: (state): string | null => state.token,
+    navbarSearchGetter: (state): boolean => state.navbarSearch,
     // Single source of truth for "is the user logged in?". Components must
     // consult this before any action that relies on session identity
     // (add to cart, enrol, open classroom, view profile, etc.).
-    isAuthenticated: (state) => !!(state.token && state.user)
+    isAuthenticated: (state): boolean => !!(state.token && state.user),
   },
 
   actions: {
     // ---- Direct state writers (formerly Vuex mutations) ---------------------
-    /** @param {AuthSessionUser} user */
-    updateUser (user) {
+    updateUser (user: AuthSessionUser): void {
       userProfileStorage.setUser(user)
       this.user = user
     },
-    /** @param {string | null} token */
-    updateToken (token) { this.token = token },
-    /** @param {string | null} refreshToken */
-    updateRefreshToken (refreshToken) { this.refreshToken = refreshToken },
-    /** @param {boolean} value */
-    updateNavebarSearcgDialog (value) { this.navbarSearch = value },
-    deleteData () {
+    updateToken (token: string | null): void { this.token = token },
+    updateRefreshToken (refreshToken: string | null): void { this.refreshToken = refreshToken },
+    updateNavebarSearcgDialog (value: boolean): void { this.navbarSearch = value },
+    deleteData (): void {
       this.user = null
       this.token = null
       this.refreshToken = null
     },
-    UPDATE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAM (data) {
+    UPDATE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAM (data: AuthSessionUser): void {
       this.user = data
       userProfileStorage.setUser(data)
     },
 
     // ---- Vuex actions, names preserved --------------------------------------
-    SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION (data) {
+    SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION (data: AuthSessionUser): void {
       this.UPDATE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAM(data)
     },
 
-    setNavbarSearchAction (value) {
+    setNavbarSearchAction (value: boolean): void {
       this.updateNavebarSearcgDialog(value)
     },
 
-    SET_USER_DATA_ACTION (value) {
+    SET_USER_DATA_ACTION (value: AuthSessionUser): void {
       this.updateUser(value)
     },
 
-    async GET_MY_PROFILE_DATA_ACTION () {
+    async GET_MY_PROFILE_DATA_ACTION (): Promise<unknown> {
       const res = await apolloClient.query({ query: GetMyProfileData })
-      this.updateUser(_.get(res, '[data][me]'))
+      this.updateUser(_.get(res, '[data][me]') as AuthSessionUser)
       return res
     },
 
-    /**
-     * @param {LoginResult | SocialAuthResult | { token: string, refresh?: string, refreshToken?: string, user?: AuthSessionUser, social?: { user: AuthSessionUser } }} payload
-     */
-    loginAction (payload) {
+    loginAction (payload: LoginPayload): Promise<void> {
       // Clear any stale token before writing the new one so the auth link
       // doesn't race a half-logged-in state on the next Apollo op.
       tokenStorage.clearToken()
       userProfileStorage.clearUserProfileStorage()
 
-      const user = payload.user || (payload.social ? payload.social.user : '')
-      const token = payload.token
-      const refresh = payload.refreshToken || ''
+      const p = payload as Record<string, unknown>
+      const user = (p['user'] || (p['social'] ? (p['social'] as Record<string, unknown>)['user'] : '')) as AuthSessionUser
+      const token = p['token'] as string
+      const refresh = (p['refreshToken'] as string | undefined) || ''
 
       tokenStorage.setToken({ token, refresh })
       this.updateUser(user)
@@ -128,20 +132,21 @@ export const useAuthStore = defineStore('authentication', {
       return Promise.resolve()
     },
 
-    async RE_LOGIN_USER () {
+    async RE_LOGIN_USER (): Promise<boolean> {
       if (!tokenStorage.getRefreshToken()) return true
       try {
         const data = await apolloClient.mutate({
           mutation: RefreshLoginUserWithEmail,
-          variables: { refreshToken: tokenStorage.getRefreshToken() }
+          variables: { refreshToken: tokenStorage.getRefreshToken() },
         })
-        if (data.data.refreshToken.success) {
+        const rt = (data.data as Record<string, Record<string, unknown>>)['refreshToken']
+        if (rt && rt['success']) {
           tokenStorage.setToken({
-            token: data.data.refreshToken.token,
-            refresh: data.data.refreshToken.refreshToken
+            token: rt['token'] as string,
+            refresh: rt['refreshToken'] as string,
           })
-          this.updateToken(data.data.refreshToken.token)
-          this.updateRefreshToken(data.data.refreshToken.refreshToken)
+          this.updateToken(rt['token'] as string)
+          this.updateRefreshToken(rt['refreshToken'] as string)
           return true
         }
         return false
@@ -150,15 +155,15 @@ export const useAuthStore = defineStore('authentication', {
       }
     },
 
-    DESTROY_THE_USER_REFRESH_TOKEN () {
+    DESTROY_THE_USER_REFRESH_TOKEN (): Promise<unknown> {
       return apolloClient.mutate({
         mutation: RevokeUserRefreshToken,
-        variables: { refreshToken: tokenStorage.getRefreshToken() }
+        variables: { refreshToken: tokenStorage.getRefreshToken() },
       })
     },
 
-    logOutAction () {
-      return new Promise((resolve) => {
+    logOutAction (): Promise<void> {
+      return new Promise<void>((resolve) => {
         tokenStorage.clearToken()
         userProfileStorage.clearUserProfileStorage()
         SessionStorage.set('shoppingCartList', [])
@@ -168,7 +173,7 @@ export const useAuthStore = defineStore('authentication', {
           progress: true,
           multiLine: true,
           position: 'top',
-          message: 'Logged Out Successfully'
+          message: 'Logged Out Successfully',
         })
         resolve()
       })
@@ -178,13 +183,13 @@ export const useAuthStore = defineStore('authentication', {
     // C1 and C2 adopted the idiomatic Pinia convention of dropping the `*Action`
     // suffix when they rewrote their mapActions() calls. These aliases preserve
     // both call styles so neither agent's work has to be revisited.
-    login (payload) { return this.loginAction(payload) },
-    logOut () { return this.logOutAction() },
-    setUser (value) { return this.SET_USER_DATA_ACTION(value) },
-    setUserAfterJoinPyramid (data) { return this.SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION(data) },
-    async getMyProfileData () { return this.GET_MY_PROFILE_DATA_ACTION() },
-    setNavbarSearch (value) { return this.setNavbarSearchAction(value) }
+    login (payload: LoginPayload): Promise<void> { return this.loginAction(payload) },
+    logOut (): Promise<void> { return this.logOutAction() },
+    setUser (value: AuthSessionUser): void { return this.SET_USER_DATA_ACTION(value) },
+    setUserAfterJoinPyramid (data: AuthSessionUser): void { return this.SET_THE_USER_DATA_AFTER_JOIN_THE_PYRAMID_PROGRAME_ACTION(data) },
+    async getMyProfileData (): Promise<unknown> { return this.GET_MY_PROFILE_DATA_ACTION() },
+    setNavbarSearch (value: boolean): void { return this.setNavbarSearchAction(value) },
   },
 
-  persist: false
+  persist: false,
 })
