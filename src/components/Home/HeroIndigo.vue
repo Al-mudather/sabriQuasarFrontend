@@ -129,9 +129,10 @@ const coursesLabel = computed(() =>
 )
 
 onMounted(() => {
-  breath = slowBreath(portrait.value) as Motion
-  drift = contourDrift(root.value?.querySelector('.hero-indigo__contour') ?? null) as Motion
-  const lines = [line1.value, line2.value, line3.value].filter(Boolean)
+  if (portrait.value) breath = slowBreath(portrait.value) as Motion
+  const contour = root.value?.querySelector('.hero-indigo__contour')
+  if (contour) drift = contourDrift(contour) as Motion
+  const lines = [line1.value, line2.value, line3.value].filter((el): el is HTMLElement => !!el)
   cascade_ = cascade(lines, { stagger: 0.08, y: 18, duration: 0.7 }) as Motion
   trustTimer = setTimeout(() => {
     if (trust.value) {

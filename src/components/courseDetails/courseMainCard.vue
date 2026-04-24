@@ -178,7 +178,16 @@ function copyTheSharingLink (e: Event): void {
 
 function addTheCourseToTheBasket (): void {
   if (!props.courseData) return
-  cart.addCourseToCart({ user: user.value, course: props.courseData })
+  const c = props.courseData
+  cart.addCourseToCart({
+    user: user.value,
+    course: {
+      id: c.id,
+      pk: c.pk,
+      name: c.title,
+      currency: (c.currency as Record<string, number> | null) ?? {},
+    },
+  })
   void router.push({ name: 'cart' })
 }
 </script>

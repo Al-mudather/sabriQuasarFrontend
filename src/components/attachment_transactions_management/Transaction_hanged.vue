@@ -107,7 +107,7 @@ async function confirmOrRejectTransaction (data: { marketerEndorse: boolean; ret
   loading.value = true
   try {
     const res = await confirmMutation({
-      id: props.customerTrans.pk,
+      id: props.customerTrans.pk ?? 0,
       input: data,
     })
     if (res?.data?.marketerAttachmentTransactionConfirmation?.success) {

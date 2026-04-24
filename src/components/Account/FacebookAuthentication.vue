@@ -71,7 +71,7 @@ async function loginAuthMutation (accessToken: string, provider: string, email =
     })
     const userData = result?.data?.socialAuth
     if (userData) {
-      await auth.login(userData)
+      await auth.login({ ...userData, token: userData.token ?? '' })
       try {
         const userCur = userData.social?.user?.userCurrency
         if (userCur) settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')
@@ -117,7 +117,7 @@ function helloFacebookAuth (): void {
     }
   }
 
-  const jq = (win as unknown as { jQuery?: (sel: unknown) => { ready: (fn: () => void) => void; ajaxSetup: (opts: Record<string, unknown>) => void; getScript: (url: string, cb: () => void) => void } }).jQuery
+  const jq = (win as unknown as { jQuery?: ((sel: unknown) => { ready: (fn: () => void) => void }) & { ajaxSetup: (opts: Record<string, unknown>) => void; getScript: (url: string, cb: () => void) => void } }).jQuery
 
   if (!jq) {
     // jQuery not available — skip Facebook auth
@@ -138,13 +138,15 @@ function helloFacebookAuth (): void {
       win.FB.logout(() => { /* clear any stale session */ })
 
       win.FB.login((logRes) => {
-        if (logRes.status === 'connected') {
+        const lr = logRes as { status?: string }
+        if (lr.status === 'connected') {
           win.FB!.getLoginStatus((res) => {
-            const accessToken = res.authResponse.accessToken
+            const r = res as { authResponse?: { accessToken?: string } }
+            const accessToken = r.authResponse?.accessToken ?? ''
             if (!win.hello) return
-            void win.hello('facebook')
+            void (win.hello as (n: string) => { api: (p: string) => Promise<{ email?: string }> })('facebook')
               .api(`/me?access_token=${accessToken}`)
-              .then((resData) => {
+              .then((resData: { email?: string }) => {
                 void loginAuthMutation(accessToken, 'facebook', resData.email ?? '')
               })
           })

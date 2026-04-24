@@ -30,25 +30,25 @@ import type {
 
 const { result: totalUsersResult } = useQuery<TotalUsersResult, TotalUsersVars>(
   GetTotalUsersStatistics,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 
 const { result: instructorsResult } = useQuery<AllInstructorCountResult, AllInstructorCountVars>(
   GetAllInstructorsStatiscs,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 
 const { result: coursesCountResult } = useQuery<GetAllCoursesCountResult, GetAllCoursesCountVars>(
   GetAllCoursesCountStatiscs,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 
 const { result: hoursResult } = useQuery<AllCoursesHoursResult, AllCoursesHoursVars>(
   GetAllCoursesHoursStatistics,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 

@@ -20,7 +20,12 @@ import { computed } from 'vue'
 
 defineOptions({ name: 'DsTooltip' })
 
-const POSITION_MAP: Record<string, { anchor: string; self: string }> = {
+type QPosition = 'top middle' | 'bottom middle' | 'center start' | 'center end' |
+  'top left' | 'top right' | 'top start' | 'top end' |
+  'center left' | 'center middle' | 'center right' |
+  'bottom left' | 'bottom right' | 'bottom start' | 'bottom end'
+
+const POSITION_MAP: Record<string, { anchor: QPosition; self: QPosition }> = {
   top:    { anchor: 'top middle',    self: 'bottom middle' },
   bottom: { anchor: 'bottom middle', self: 'top middle' },
   start:  { anchor: 'center start',  self: 'center end' },

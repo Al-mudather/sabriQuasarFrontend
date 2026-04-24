@@ -52,7 +52,7 @@
       <div v-else class="orders-page__grid">
         <transaction-card
           v-for="o in visibleOrders"
-          :key="o.pk ?? o.order?.pk"
+          :key="o.pk ?? o.order?.pk ?? ''"
           :transaction="mapOrder(o)"
           :status="mapStatus(o)"
           :actions="buildActions(o)"
@@ -71,7 +71,7 @@
           alt=""
         />
         <file-upload
-          imgeSize="4000000"
+          :imgeSize="4000000"
           :accept="'.png,.jpg, image/*'"
           :label="t('إعادة إرفاق الفاتورة')"
           v-on:File_Handler="reuploadImageHandler"
@@ -128,20 +128,20 @@ const auth = useAuthStore()
 type OrderStatus = 'completed' | 'processing' | 'rejected' | 'pending'
 
 interface TransactionDisplayItem {
-  id: string | number | null | undefined
-  courseName: string
-  amount: number | null | undefined
-  currency: string | null | undefined
-  createdAt: string | null | undefined
-  updatedAt: string | null | undefined
+  id?: string
+  courseName?: string
+  amount?: number | null
+  currency?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 interface TransactionAction {
-  key: string
-  label: string
-  variant: string
-  size: string
-  handler: () => void
+  key?: string
+  label?: string
+  variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'danger' | 'destructive'
+  size?: 'sm' | 'md' | 'lg'
+  handler?: (event: Event, transaction: Record<string, unknown>) => void
 }
 
 interface FilterChip {
@@ -195,14 +195,14 @@ function mapStatus (o: UserAttachmentTransaction): OrderStatus {
 function mapOrder (o: UserAttachmentTransaction): TransactionDisplayItem {
   const order = o.order ?? null
   return {
-    id: order?.invoiceNumber ?? o.pk,
+    id: order?.invoiceNumber ?? String(o.pk ?? ''),
     courseName: order?.invoiceNumber
       ? `${t('طلب رقم')} ${order.invoiceNumber}`
       : t('طلب'),
-    amount: order?.totalAmount,
-    currency: order?.currency ?? null,
-    createdAt: o.created,
-    updatedAt: o.updated,
+    amount: order?.totalAmount ?? null,
+    currency: order?.currency ?? undefined,
+    createdAt: o.created ?? undefined,
+    updatedAt: o.updated ?? undefined,
   }
 }
 
@@ -214,7 +214,7 @@ function buildActions (o: UserAttachmentTransaction): TransactionAction[] {
       label: t('رؤية الفاتورة'),
       variant: 'secondary',
       size: 'sm',
-      handler: () => openBill(o),
+      handler: (_e: Event) => openBill(o),
     })
   }
   actions.push({
@@ -222,7 +222,7 @@ function buildActions (o: UserAttachmentTransaction): TransactionAction[] {
     label: t('عرض التفاصيل'),
     variant: 'ghost',
     size: 'sm',
-    handler: () => viewDetails(o),
+    handler: (_e: Event) => viewDetails(o),
   })
   return actions
 }
@@ -274,7 +274,8 @@ function viewDetails (o: UserAttachmentTransaction): void {
   })
 }
 
-function reuploadImageHandler (val: File): void {
+function reuploadImageHandler (val: File | null): void {
+  if (!val) return
   bankakBill.value = val
 }
 

@@ -39,7 +39,7 @@ const { myMarketingCode } = storeToRefs(pyramid)
 
 const { result } = useQuery<MyPyramidMarketersResult, MyPyramidMarketersVars>(
   MyPyramidMarketers,
-  undefined,
+  {},
   { errorPolicy: 'all' },
 )
 const myPyramidMarketersCount = computed(() => result.value?.myPyramidMarketers ?? 0)

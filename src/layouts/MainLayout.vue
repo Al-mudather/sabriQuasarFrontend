@@ -33,7 +33,7 @@ const { isEnglish } = storeToRefs(settings)
 
 async function applyLocale (val: boolean | null): Promise<void> {
   locale.value = val ? 'en' : 'ar'
-  settings.setIsEnglish(val)
+  settings.setIsEnglish(val ?? false)
 
   // rtl flag on the lang pack drives html.dir. Omitting rtl:true for
   // Arabic (or setting rtl:true for English) flips the whole page to

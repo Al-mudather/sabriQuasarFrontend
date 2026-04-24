@@ -146,7 +146,7 @@
               :key="item.course.id"
               class="cart-payment__summary-item"
             >
-              <span class="cart-payment__summary-name">{{ item.course.title }}</span>
+              <span class="cart-payment__summary-name">{{ (item.course as unknown as Record<string, unknown>).title ?? item.course.name }}</span>
               <PriceDisplay
                 :amount="itemAmount(item)"
                 :currency="currency"
@@ -294,7 +294,7 @@ function goBackToOptions (): void {
 function calculateDollarAmount (): string {
   let sum = 0.0
   for (const item of shoppingCartDataList.value) {
-    const c = item.course as Record<string, unknown>
+    const c = item.course as unknown as Record<string, unknown>
     sum += parseFloat(String(c.courseFee ?? 0))
   }
   return sum.toFixed(2)
@@ -343,7 +343,7 @@ async function getStripeKeyFromTheBackend (): Promise<string> {
   })
   const raw = stripeKeyResult.data?.stripePublishableKey
   if (raw && typeof raw === 'object') {
-    return (raw as Record<string, string>).publisableKey ?? ''
+    return (raw as unknown as Record<string, string>).publisableKey ?? ''
   }
   return ''
 }
@@ -373,7 +373,7 @@ async function initiateStripePayment (): Promise<void> {
     stripeLoading.value = true
 
     // Runtime guard for the Stripe SDK injected by index.html.
-    const stripeGlobal = (window as Record<string, unknown>)['Stripe']
+    const stripeGlobal = (window as unknown as Record<string, unknown>)['Stripe']
     if (typeof stripeGlobal !== 'function') {
       throw new Error('Stripe not loaded')
     }
@@ -417,7 +417,7 @@ async function checkPyramidRegistration (): Promise<void> {
 
 function purgeZeroCostItems (): void {
   shoppingCartDataList.value.forEach(item => {
-    const c = item.course as Record<string, unknown>
+    const c = item.course as unknown as Record<string, unknown>
     const fee = parseInt(String(c.courseFee ?? ''), 10)
     const feeSDG = parseInt(String(c.courseFeeInSdg ?? ''), 10)
     if (fee === 0 || feeSDG === 0) {

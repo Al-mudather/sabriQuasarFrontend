@@ -19,8 +19,8 @@
       class="ds-tag__close"
       :aria-label="closeLabel"
       @click.stop="onClose"
-      @keydown.enter.prevent="onClose"
-      @keydown.space.prevent="onClose"
+      @keydown.enter.prevent="onCloseKey"
+      @keydown.space.prevent="onCloseKey"
     >
       <svg viewBox="0 0 14 14" width="10" height="10" aria-hidden="true" focusable="false">
         <path d="M2 2 L12 12 M12 2 L2 12"
@@ -58,6 +58,11 @@ const emit = defineEmits<{
 
 function onClose(e: MouseEvent): void {
   emit('close', e)
+}
+
+function onCloseKey(_e: KeyboardEvent): void {
+  // Fire close with a synthetic mouse event so consumers get a consistent type
+  emit('close', new MouseEvent('click'))
 }
 </script>
 

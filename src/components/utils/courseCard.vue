@@ -162,7 +162,16 @@ function addToCart (): void {
     router.push({ name: 'login', query: { redirect: '/courses' } })
     return
   }
-  cart.addCourseToCart({ user: user.value, course: props.course })
+  const c = props.course
+  cart.addCourseToCart({
+    user: user.value,
+    course: {
+      id: c.id,
+      pk: c.pk,
+      name: c.title,
+      currency: (c.currency as Record<string, number> | null) ?? {},
+    },
+  })
   router.push({ name: 'cart' })
 }
 </script>

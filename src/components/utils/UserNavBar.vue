@@ -17,10 +17,10 @@
           {{ user?.lastName }}
         </h3>
       </div>
-      <div class="user-nav__user" v-else-if="user?.username">
+      <div class="user-nav__user" v-else-if="(user as Record<string, unknown>)?.username">
         <q-icon name="person" size="22px" class="user-nav__user-icon" />
         <h3 class="user-nav__user-name">
-          {{ user?.username }}
+          {{ (user as Record<string, unknown>)?.username }}
         </h3>
       </div>
       <div class="user-nav__user heading" v-else>

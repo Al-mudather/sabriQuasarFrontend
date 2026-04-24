@@ -15,7 +15,7 @@
     <span
       v-else
       class="ds-breadcrumb-item__text"
-      :aria-current="isCurrent ? 'page' : null"
+      :aria-current="isCurrent ? 'page' : undefined"
     >
       <slot />
     </span>

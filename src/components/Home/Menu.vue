@@ -153,7 +153,7 @@ const { isEnglish } = storeToRefs(settings)
 
 const { result: pyramidResult } = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(
   MyPyramidAccount,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 const myPyramidAccount = computed(() => pyramidResult.value?.myPyramidAccount ?? null)

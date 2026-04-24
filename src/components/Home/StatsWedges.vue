@@ -56,19 +56,19 @@ import type {
 
 const { result: totalUsersResult } = useQuery<TotalUsersResult, TotalUsersVars>(
   GetTotalUsersStatistics,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 
 const { result: instructorsResult } = useQuery<AllInstructorCountResult, AllInstructorCountVars>(
   GetAllInstructorsStatiscs,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 
 const { result: hoursResult } = useQuery<AllCoursesHoursResult, AllCoursesHoursVars>(
   GetAllCoursesHoursStatistics,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 
@@ -76,7 +76,7 @@ const { result: hoursResult } = useQuery<AllCoursesHoursResult, AllCoursesHoursV
 // (avoids fetching a full edge list just to read totalCount)
 const { result: coursesCountResult } = useQuery<GetAllCoursesCountResult, GetAllCoursesCountVars>(
   GetAllCoursesCountStatiscs,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 
@@ -90,7 +90,7 @@ interface StatEntry {
   value: number
   label: string
   suffix?: string
-  variant: string
+  variant: 'indigo' | 'terracotta'
   max: number
 }
 

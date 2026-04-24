@@ -115,7 +115,7 @@
                 <div class="course-details__price" v-if="courseData">
                   <price-display
                     v-if="hasPrice"
-                    :amount="currentPrice"
+                    :amount="currentPrice ?? 0"
                     :currency="selectedCurrency"
                     size="xl"
                     variant="terracotta"
@@ -432,10 +432,22 @@ function redirectToLogin (): void {
   })
 }
 
+function buildCartItem () {
+  const c = courseData.value
+  if (!c) return null
+  return {
+    id: c.id,
+    pk: c.pk,
+    name: c.title,
+    currency: (c.currency as Record<string, number> | null) ?? {},
+  }
+}
+
 function addToCart (): void {
-  if (!courseData.value) return
+  const item = buildCartItem()
+  if (!item) return
   if (!auth.isAuthenticated) { redirectToLogin(); return }
-  cart.addCourseToCart({ user: user.value, course: courseData.value })
+  cart.addCourseToCart({ user: user.value, course: item })
   $q.notify({
     type: 'positive',
     position: 'top',
@@ -446,9 +458,10 @@ function addToCart (): void {
 }
 
 function enrolNow (): void {
-  if (!courseData.value) return
+  const item = buildCartItem()
+  if (!item) return
   if (!auth.isAuthenticated) { redirectToLogin(); return }
-  cart.addCourseToCart({ user: user.value, course: courseData.value })
+  cart.addCourseToCart({ user: user.value, course: item })
   void router.push({ name: 'cart' })
 }
 

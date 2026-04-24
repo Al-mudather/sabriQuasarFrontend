@@ -46,13 +46,17 @@ import type {
 
 const { result } = useQuery<MyPyramidWithdrawsResult, MyPyramidWithdrawsVars>(
   MyPyramidWithdraws,
-  undefined,
+  {},
   { errorPolicy: 'all' },
 )
 
+type WithdrawEdgeNN = NonNullable<NonNullable<NonNullable<MyPyramidWithdrawsResult['myPyramidWithdraws']>['edges'][number]>> & {
+  node: NonNullable<NonNullable<NonNullable<NonNullable<MyPyramidWithdrawsResult['myPyramidWithdraws']>['edges'][number]>>['node']>
+}
+
 const withdrawEdges = computed(() =>
   (result.value?.myPyramidWithdraws?.edges ?? [])
-    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+    .filter((e): e is WithdrawEdgeNN => !!e && !!e.node),
 )
 
 const priceLookup = [

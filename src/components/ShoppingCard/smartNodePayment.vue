@@ -49,7 +49,7 @@ async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateO
 async function makeSmartNodePayment (orderPk: number): Promise<string | null | undefined> {
   const result = await apolloClient.mutate<CreateSmartNodeCheckoutResult, CreateSmartNodeCheckoutVars>({
     mutation: CreateSmartNodeCheckout,
-    variables: { card: '', expDate: '', ipin: '', orderId: orderPk }
+    variables: { card: '', expDate: '', ipin: null, orderId: orderPk }
   })
   const details = result.data?.createSmartNodeCheckout
   if (details?.errors) { visible.value = false }

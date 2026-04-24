@@ -38,7 +38,7 @@
       <q-card class="order-bill">
         <img class="order-bill__img" :src="formatImage(myOrder.attachment)" alt="" />
         <file-upload
-          imgeSize="4000000"
+          :imgeSize="4000000"
           :accept="'.png,.jpg, image/*'"
           :label="bankakBillName"
           v-on:File_Handler="reuploadImageHandler"
@@ -133,7 +133,8 @@ const priceLookup = [
 // ---------------------------------------------------------------------------
 // Methods
 // ---------------------------------------------------------------------------
-function reuploadImageHandler (val: File): void {
+function reuploadImageHandler (val: File | null): void {
+  if (!val) return
   bankakBill.value = val
 }
 

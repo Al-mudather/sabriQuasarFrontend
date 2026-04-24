@@ -126,7 +126,7 @@ watch(isEnglish, async (value) => {
       const lang = await import('quasar/lang/' + langIso)
       Quasar.lang.set({ ...lang.default, rtl: false })
       // Adjust cart styling in outer layouts when switching locales
-      const $ = (window as Record<string, unknown>).jQuery as ((sel: string) => { css: (props: Record<string, string>) => void }) | undefined
+      const $ = (window as unknown as Record<string, unknown>).jQuery as ((sel: string) => { css: (props: Record<string, string>) => void }) | undefined
       if ($) {
         $('.backgroun').css({ transform: 'rotate(180deg)' })
         $('.shoppgCart > .cart svg').css({ transform: 'translate(-20%, -30%)' })
@@ -141,7 +141,7 @@ watch(isEnglish, async (value) => {
     try {
       const lang = await import('quasar/lang/ar')
       Quasar.lang.set({ ...lang.default, rtl: true })
-      const $ = (window as Record<string, unknown>).jQuery as ((sel: string) => { css: (props: Record<string, string>) => void }) | undefined
+      const $ = (window as unknown as Record<string, unknown>).jQuery as ((sel: string) => { css: (props: Record<string, string>) => void }) | undefined
       if ($) {
         $('.backgroun').css({ transform: 'rotate(360deg)' })
         $('.shoppgCart > .cart svg').css({ transform: 'translate(0%, 0%)' })
@@ -162,7 +162,7 @@ function removeCookie (): void {
   const tokenName = 'csrftoken'
   // $cookies is globally injected; access via window to avoid $-plugin typing
   try {
-    ;(window as Record<string, unknown>).$cookies && (window as Record<string, { remove: (t: string) => void }>).$cookies.remove(tokenName)
+    ;(window as unknown as Record<string, unknown>).$cookies && (window as unknown as Record<string, { remove: (t: string) => void }>).$cookies.remove(tokenName)
   } catch (_e) { /* ignore */ }
 }
 
@@ -210,7 +210,7 @@ async function showTheSearchingResult (event: Event): Promise<void> {
         style: {
           textAlign: 'center',
           padding: '20px',
-          'border-bottom': '1px solid #000 !important',
+          borderBottom: '1px solid #000',
         },
         actions: searchResult,
       })
@@ -218,7 +218,7 @@ async function showTheSearchingResult (event: Event): Promise<void> {
           void router.push({
             name: 'course-details',
             params: {
-              name: action.label.replaceAll(' ', '-'),
+              name: action.label.split(' ').join('-'),
               pk: String(action.pk),
               id: action.id,
             },

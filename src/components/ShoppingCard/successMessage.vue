@@ -25,8 +25,8 @@
       <span v-else-if="user && user.firstName && user.lastName">
         {{ user.firstName }} {{ user.lastName }}
       </span>
-      <span v-else-if="user && user.username">
-        {{ user.username.split('@')[0] }}
+      <span v-else-if="user && (user as Record<string, unknown>).username">
+        {{ ((user as Record<string, unknown>).username as string).split('@')[0] }}
       </span>
       — {{ $t('نسعد بانضمامك إلينا.') }}
     </p>

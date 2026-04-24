@@ -234,7 +234,7 @@ async function logOut (): Promise<void> {
 
 async function applyLocale (val: boolean | null): Promise<void> {
   locale.value = val ? 'en' : 'ar'
-  settings.setIsEnglish(val)
+  settings.setIsEnglish(val ?? false)
 
   try {
     if (val) {

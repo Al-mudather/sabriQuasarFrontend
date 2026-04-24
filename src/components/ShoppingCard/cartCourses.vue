@@ -40,9 +40,9 @@
             <DsCard tag="article" padding="sm" class="cart-courses__row">
               <div class="cart-courses__media">
                 <img
-                  v-if="item.course.cover"
-                  :src="FORMAT_THE_IAMGE_URL(item.course.cover)"
-                  :alt="item.course.title"
+                  v-if="(item.course as unknown as Record<string, unknown>).cover"
+                  :src="FORMAT_THE_IAMGE_URL((item.course as unknown as Record<string, unknown>).cover as string)"
+                  :alt="(item.course as unknown as Record<string, unknown>).title as string"
                   loading="lazy"
                 />
                 <div v-else class="cart-courses__media-fallback" aria-hidden="true">
@@ -51,7 +51,7 @@
               </div>
 
               <div class="cart-courses__info">
-                <h3 class="cart-courses__title">{{ item.course.title }}</h3>
+                <h3 class="cart-courses__title">{{ (item.course as unknown as Record<string, unknown>).title ?? item.course.name }}</h3>
                 <p
                   v-if="instructorName(item)"
                   class="cart-courses__instructor"
@@ -245,7 +245,7 @@ watch(subtotal, (v) => {
 }, { immediate: true })
 
 function instructorName (item: CartEntry): string {
-  const c = item.course as Record<string, unknown>
+  const c = item.course as unknown as Record<string, unknown>
   if (c.instructorName && typeof c.instructorName === 'string') return c.instructorName
   if (c.instructor) {
     if (typeof c.instructor === 'string') return c.instructor
@@ -313,7 +313,7 @@ function removeCourseFromCart (item: CartEntry): void {
 
 function purgeZeroCostItems (): void {
   shoppingCartDataList.value.forEach(item => {
-    const c = item.course as Record<string, unknown>
+    const c = item.course as unknown as Record<string, unknown>
     const fee = parseInt(String(c.courseFee ?? ''), 10)
     const feeSDG = parseInt(String(c.courseFeeInSdg ?? ''), 10)
     if (fee === 0 || feeSDG === 0) {

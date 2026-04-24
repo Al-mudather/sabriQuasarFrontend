@@ -240,12 +240,14 @@ function mapNotification (n: NotifNode): MappedNotification {
   }
 }
 
-function onRead (n: MappedNotification): void {
-  if (n?.pk != null) readLocal.value[n.pk] = true
+function onRead (n: unknown): void {
+  const mapped = n as MappedNotification | null
+  if (mapped?.pk != null) readLocal.value[mapped.pk] = true
 }
 
-function onNotificationClick (evt: { notification?: MappedNotification }): void {
-  const n = evt?.notification?._raw
+function onNotificationClick (evt: unknown): void {
+  const e = evt as { notification?: MappedNotification } | null
+  const n = e?.notification?._raw
   if (!n) return
   const type = n.type
   if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {

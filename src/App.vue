@@ -25,25 +25,31 @@ const { token, user } = storeToRefs(auth)
 // OneSignal DOMContentLoaded handler (registered once on mount)
 // ---------------------------------------------------------------------------
 function onDOMContentLoaded (): void {
+  if (!window.OneSignal) return
   window.OneSignal.push(() => {
+    if (!window.OneSignal) return
     // Show prompt again if push not yet enabled
-    window.OneSignal.isPushNotificationsEnabled(function (isEnabled: boolean) {
+    void window.OneSignal.isPushNotificationsEnabled?.()?.then((isEnabled) => {
       if (!isEnabled) {
-        window.OneSignal.showSlidedownPrompt({ force: true })
+        const os = window.OneSignal
+        if (os && typeof (os as Record<string, unknown>)['showSlidedownPrompt'] === 'function') {
+          ;(os as Record<string, (arg: Record<string, unknown>) => void>)['showSlidedownPrompt']({ force: true })
+        }
       }
     })
 
-    window.OneSignal.on('popoverAllowClick', () => {
+    window.OneSignal.on?.('popoverAllowClick', () => {
       // Null-safe: only set external user id when authenticated and email exists
       if (auth.isAuthenticated && user.value?.email) {
         const externalUserId = user.value.email
-        window.OneSignal.push(function () {
-          window.OneSignal.setExternalUserId(externalUserId)
+        window.OneSignal?.push(function () {
+          window.OneSignal?.setExternalUserId?.(externalUserId)
         })
       }
     })
 
-    window.OneSignal.on('notificationPermissionChange', (permissionChange: { to: string }) => {
+    window.OneSignal.on?.('notificationPermissionChange', ((...args: unknown[]) => {
+      const permissionChange = args[0] as { to: string }
       const currentPermission = permissionChange.to
       if (currentPermission === 'granted') {
         $q.notify({
@@ -57,8 +63,8 @@ function onDOMContentLoaded (): void {
         // Null-safe: only set external user id when authenticated and email exists
         if (auth.isAuthenticated && user.value?.email) {
           const externalUserId = user.value.email
-          window.OneSignal.push(function () {
-            window.OneSignal.setExternalUserId(externalUserId)
+          window.OneSignal?.push(function () {
+            window.OneSignal?.setExternalUserId?.(externalUserId)
           })
         }
       } else if (currentPermission === 'denied' || currentPermission === 'default') {
@@ -70,7 +76,7 @@ function onDOMContentLoaded (): void {
           message: t('بعدم قبولك للإشعارات, لايمكننا ان نخبرك بمراحل امتلاكك للدوره التدريبيه اللتي تريدها, من فضلك اقبل الإشعارات'),
         })
       }
-    })
+    }) as (...args: unknown[]) => void)
   })
 }
 

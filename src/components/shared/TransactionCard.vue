@@ -134,8 +134,12 @@ import DsTag from 'src/design-system/components/DsTag.vue'
 
 type StatusKey = 'completed' | 'processing' | 'rejected' | 'hanged' | 'pending'
 
+type BadgeVariant = 'success' | 'accent' | 'info' | 'warning' | 'indigo' | 'ghost' | 'danger' | 'terracotta' | 'taupe' | 'neutral' | 'brand'
+type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'danger' | 'destructive'
+type ButtonSize = 'sm' | 'md' | 'lg'
+
 interface StatusMeta {
-  variant: string
+  variant: BadgeVariant
   labelAr: string
   iconSvg: string
 }
@@ -177,8 +181,8 @@ const paperclipSvg = PAPERCLIP_SVG
 interface TransactionAction {
   key?: string
   label?: string
-  variant?: string
-  size?: string
+  variant?: ButtonVariant
+  size?: ButtonSize
   loading?: boolean
   disabled?: boolean
   handler?: (event: Event, transaction: Record<string, unknown>) => void

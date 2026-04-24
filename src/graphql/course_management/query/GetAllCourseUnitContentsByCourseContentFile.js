@@ -6,6 +6,7 @@ query AllCourseUnitContentsByCourseContentFile($courseId: Int!){
     edges {
         node {
             pk
+            isFree
             modelName
             modelValue
         }

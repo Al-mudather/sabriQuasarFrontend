@@ -3,7 +3,7 @@
   <ds-skeleton
     v-if="loading"
     type="card"
-    :width="variant === 'detail' ? '100%' : null"
+    :width="variant === 'detail' ? '100%' : undefined"
   />
 
   <!-- Error / empty state -->
@@ -322,7 +322,7 @@ interface Props {
   variant?: 'public' | 'enrolled' | 'detail' | 'featured'
   course?: CourseCardCourse | null
   loading?: boolean
-  to?: string | object | null
+  to?: string | Record<string, unknown> | null
 }
 
 const props = withDefaults(defineProps<Props>(), {

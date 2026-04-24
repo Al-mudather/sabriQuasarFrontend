@@ -72,9 +72,12 @@ const customersTransactionsList = computed(
   () => result.value?.allMarketerAttachmentTransaction ?? null,
 )
 
+type TxEdgeRaw = NonNullable<NonNullable<AllMarketerAttachmentTransactionResult['allMarketerAttachmentTransaction']>['edges'][number]>
+type TxEdge = TxEdgeRaw & { node: NonNullable<TxEdgeRaw['node']> }
+
 const transactions = computed(() =>
   (customersTransactionsList.value?.edges ?? [])
-    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+    .filter((e): e is TxEdge => !!e && !!e.node),
 )
 
 const rejectedByTheManager = t('الطلب مرفوض من الإداره')

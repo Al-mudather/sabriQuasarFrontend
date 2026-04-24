@@ -172,8 +172,8 @@ interface NormalizedCourse {
   pk: number | null
   slug: number | null
   name: string
-  coverImage: string | null
-  price: { current: number; currency: string; original: null }
+  coverImage?: string
+  price: { current: number; currency: string; original?: number }
   category: string
   studentCount: number
 }
@@ -188,11 +188,10 @@ function normalize (node: CourseInSpeciality): NormalizedCourse {
     pk: node.pk,
     slug: node.pk,
     name: node.title,
-    coverImage: resolveImage(node),
+    coverImage: resolveImage(node) ?? undefined,
     price: {
       current,
       currency: selectedCur,
-      original: null,
     },
     category: props.speciality.speciality,
     studentCount: node.enrolled ? 1 : 0,

@@ -25,7 +25,7 @@
         :key="edge.node?.id ?? ''"
         :course="edge.node!"
         :name="edge.node?.title ?? ''"
-        :instructor="edge.node?.courseinstructorSet"
+        instructor="مركز دكتور صبري ابو قرون"
         :price="edge.node?.courseFee"
         unit="SD"
       />

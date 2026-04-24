@@ -16,7 +16,7 @@ import type {
 
 const { result } = useQuery<MyPyramidAffiliatesResult, MyPyramidAffiliatesVars>(
   MyPyramidAffiliates,
-  undefined,
+  {},
   { errorPolicy: 'all' },
 )
 const count = computed(() => result.value?.myPyramidAffiliates ?? 0)

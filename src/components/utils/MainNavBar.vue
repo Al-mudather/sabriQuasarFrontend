@@ -178,13 +178,13 @@ function showTheSearchingResult (event: Event): void {
 
       if (searchResult.length > 0) {
         $q.bottomSheet({
-          style: { textAlign: 'center', padding: '20px', 'border-bottom': '1px solid #000 !important' },
+          style: { textAlign: 'center', padding: '20px', borderBottom: '1px solid #000' },
           actions: searchResult
         })
           .onOk((action: { label: string; pk: string; id: string }) => {
             router.push({
               name: 'course-details',
-              params: { name: action.label.replaceAll(' ', '-'), pk: action.pk, id: action.id }
+              params: { name: action.label.split(' ').join('-'), pk: action.pk, id: action.id }
             })
           })
           .onDismiss(() => { search.value = '' })

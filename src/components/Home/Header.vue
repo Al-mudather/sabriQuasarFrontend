@@ -23,11 +23,15 @@ import type {
 
 const { result } = useQuery<AllHomePageSlidersResult, AllHomePageSlidersVars>(
   AllHomePageSliders,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 
-const data = computed(() => result.value?.allHomePageSliders?.edges ?? [])
+const data = computed(
+  () => (result.value?.allHomePageSliders?.edges ?? []).filter(
+    (e): e is NonNullable<typeof e> => e !== null && e !== undefined,
+  ),
+)
 const isEmpty = computed(() => !data.value.length)
 </script>
 

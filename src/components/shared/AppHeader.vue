@@ -42,7 +42,7 @@
               :to="link.to"
               class="app-header__nav-link"
               :class="{ 'is-active': isActive(link.to) }"
-              :aria-current="isActive(link.to) ? 'page' : null"
+              :aria-current="isActive(link.to) ? 'page' : undefined"
             >
               {{ link.label }}
             </router-link>
@@ -103,7 +103,7 @@
           :to="link.to"
           class="app-header__drawer-link"
           :class="{ 'is-active': isActive(link.to) }"
-          :aria-current="isActive(link.to) ? 'page' : null"
+          :aria-current="isActive(link.to) ? 'page' : undefined"
           @click="drawerOpen = false"
         >
           {{ link.label }}

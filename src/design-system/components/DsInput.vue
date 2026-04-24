@@ -36,11 +36,11 @@
         :placeholder="placeholder"
         :disabled="disabled"
         :required="required"
-        :aria-invalid="error ? 'true' : null"
-        :aria-describedby="describedBy"
+        :aria-invalid="error ? 'true' : undefined"
+        :aria-describedby="describedBy ?? undefined"
         v-bind="$attrs"
         @input="onInput"
-        @change="$emit('change', $event.target.value)"
+        @change="$emit('change', ($event.target as HTMLInputElement).value)"
         @focus="onFocus"
         @blur="onBlur"
         @keydown="$emit('keydown', $event)"
@@ -120,7 +120,7 @@ const input = ref<HTMLInputElement | null>(null)
 
 const inputId = computed(() => props.id || localUid)
 
-const describedBy = computed(() => {
+const describedBy = computed<string | null>(() => {
   if (props.error) return `${inputId.value}-error`
   if (slots.helper) return `${inputId.value}-helper`
   return null

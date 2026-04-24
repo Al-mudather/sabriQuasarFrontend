@@ -10,8 +10,8 @@
     role="progressbar"
     :aria-valuemin="0"
     :aria-valuemax="100"
-    :aria-valuenow="indeterminate ? null : clampedValue"
-    :aria-label="label || null"
+    :aria-valuenow="indeterminate ? undefined : clampedValue"
+    :aria-label="label || undefined"
   >
     <div v-if="label" class="ds-progress__caption">
       <span class="ds-progress__label-text">{{ label }}</span>

@@ -33,7 +33,7 @@ const { t } = useI18n()
 
 const { result } = useQuery<MyPyramidLedgerRewardResult, MyPyramidLedgerRewardVars>(
   MyPyramidLedgerReward,
-  undefined,
+  {},
   { errorPolicy: 'all' },
 )
 const myRewards = computed<number>(() => {

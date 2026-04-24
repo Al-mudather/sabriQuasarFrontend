@@ -70,7 +70,7 @@ async function loginAuthMutation (accessToken: string, provider: string, email =
     })
     const userData = authRes?.data?.socialAuth
     if (userData) {
-      await auth.login(userData)
+      await auth.login({ ...userData, token: userData.token ?? '' })
       try {
         const userCur = userData.social?.user?.userCurrency
         if (userCur) settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')

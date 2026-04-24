@@ -88,7 +88,7 @@
       <div v-else class="marketing-page__list">
         <transaction-card
           v-for="w in withdraws"
-          :key="w.pk"
+          :key="w.pk ?? ''"
           :transaction="mapWithdraw(w)"
           :status="w.isDone ? 'completed' : 'processing'"
         />
@@ -246,7 +246,7 @@ const totalEarnings = computed<number>(() => {
 })
 
 const withdraws = computed<PyramidWithdraw[]>(() =>
-  withdrawEdges.value.map(e => e.node),
+  withdrawEdges.value.map(e => e.node).filter((n): n is PyramidWithdraw => n !== null),
 )
 
 const pendingPayouts = computed<number>(
@@ -266,12 +266,12 @@ const withdrawLoading = ref(false)
 // ---------------------------------------------------------------------------
 function mapWithdraw(w: PyramidWithdraw) {
   return {
-    id: w.pk,
+    id: String(w.pk ?? ''),
     courseName: `${t('طلب سحب')} #${w.pk}`,
-    amount: w.amount,
+    amount: w.amount ?? null,
     currency: currency.value,
-    createdAt: w.created,
-    updatedAt: w.updated,
+    createdAt: w.created ?? undefined,
+    updatedAt: w.updated ?? undefined,
   }
 }
 
@@ -322,8 +322,8 @@ function cancelWithdraw(): void {
 }
 
 function errorHandler(errorsObj: Record<string, Array<{ message: string | { msg: string } }>>): void {
-  if (errorsObj && (errorsObj as { message?: string }).message) {
-    const msg = (errorsObj as { message: string }).message
+  if (errorsObj && (errorsObj as unknown as { message?: string }).message) {
+    const msg = (errorsObj as unknown as { message: string }).message
     if (typeof msg !== 'object') {
       $q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: msg })
       return

@@ -38,8 +38,8 @@ const root = ref<HTMLElement | null>(null)
 let drift: { kill?: () => void } | null = null
 
 onMounted(() => {
-  const contour = root.value?.querySelector('.final-cta__contour') ?? null
-  drift = contourDrift(contour) as { kill?: () => void } | null
+  const contour = root.value?.querySelector('.final-cta__contour')
+  if (contour) drift = contourDrift(contour) as { kill?: () => void } | null
 })
 
 onBeforeUnmount(() => {

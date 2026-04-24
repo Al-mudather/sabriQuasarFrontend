@@ -3,12 +3,22 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": false,
-    "types": ["node", "quasar"]
+    "types": ["node", "quasar"],
+    "paths": {
+      "src/*": ["src/*"],
+      "components/*": ["src/components/*"],
+      "layouts/*": ["src/layouts/*"],
+      "pages/*": ["src/pages/*"],
+      "assets/*": ["src/assets/*"],
+      "boot/*": ["src/boot/*"],
+      "stores/*": ["src/stores/*"]
+    }
   },
   "include": [
     "src/graphql/**/*.ts",
     "src/types/**/*.ts",
     "src/types/globals.d.ts",
+    "src/**/*.d.ts",
     "src/**/*.vue"
   ]
 }

@@ -26,7 +26,7 @@
             </tr>
           </thead>
           <tbody v-if="customerTrans.order.user">
-            <tr v-for="detail in customerTrans.order.orderdetailsSet?.edges" :key="detail?.node?.pk">
+            <tr v-for="detail in customerTrans.order.orderdetailsSet?.edges" :key="detail?.node?.pk ?? String(Math.random())">
               <td>{{ detail?.node?.course?.title }}</td>
               <td>{{ customerTrans.order.user.fullName }}</td>
               <td>{{ customerTrans.order.user.phoneNumber2 }}</td>

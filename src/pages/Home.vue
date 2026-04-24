@@ -64,7 +64,7 @@ const settings = useSettingsStore()
 
 const specialitiesQuery = useQuery<GetAllSpecialitiesResult, GetAllSpecialitiesVars>(
   GetSpecialities,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 specialitiesQuery.onError((err) => {
@@ -73,7 +73,7 @@ specialitiesQuery.onError((err) => {
 
 const countQuery = useQuery<GetAllCoursesCountResult, GetAllCoursesCountVars>(
   GetAllCoursesCountStatiscs,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 countQuery.onError((err) => {
@@ -87,8 +87,14 @@ const allCoursesCount = computed(
   () => countQuery.result.value?.allCoursesCount ?? null,
 )
 
+type SpecEdgeNN = NonNullable<NonNullable<typeof allCourseSpecialities['value']>['edges'][number]> & {
+  node: NonNullable<NonNullable<NonNullable<typeof allCourseSpecialities['value']>['edges'][number]>['node']>
+}
+
 const specialities = computed(
-  () => allCourseSpecialities.value?.edges || [],
+  () => (allCourseSpecialities.value?.edges ?? []).filter(
+    (e): e is SpecEdgeNN => !!e && !!e.node,
+  ),
 )
 const specialitiesLoading = specialitiesQuery.loading
 

@@ -55,7 +55,7 @@ const { t } = useI18n()
 
 const { result } = useQuery<MyPyramidBalanceResult, MyPyramidBalanceVars>(
   MyPyramidBalance,
-  undefined,
+  {},
   { errorPolicy: 'all' },
 )
 const myBalance = computed<number>(() => {
@@ -98,8 +98,8 @@ function cancelWithdraw(): void {
 }
 
 function errorHandler(errorsObj: Record<string, Array<{ message: string | { msg: string } }>>): void {
-  if (typeof errorsObj === 'object' && errorsObj && (errorsObj as { message?: string }).message) {
-    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: (errorsObj as { message: string }).message })
+  if (typeof errorsObj === 'object' && errorsObj && (errorsObj as unknown as { message?: string }).message) {
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: (errorsObj as unknown as { message: string }).message })
   } else {
     for (const key in errorsObj) {
       for (const val of errorsObj[key]) {

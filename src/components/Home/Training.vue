@@ -12,12 +12,12 @@
         >
           <swiper-slide
             class="nav-item"
-            v-for="spec in (allCourseSpecialities && allCourseSpecialities.edges) || []"
+            v-for="spec in specialityEdges"
             :key="spec.node.id"
           >
             <a
               :data-course="spec.node.pk"
-              @click="changeCourseData(spec.node.pk)"
+              @click="changeCourseData(spec.node.pk ?? 0)"
               class="nav-link"
               role="tab"
             >
@@ -40,14 +40,14 @@
         </p>
       </header>
 
-      <div v-if="courses && courses.edgeCount && courses.edgeCount > 0" class="home-training__grid">
+      <div v-if="courseEdges.length > 0" class="home-training__grid">
         <course-card
-          v-for="course in courses.edges"
-          :key="course && course.node ? course.node.id : String(Math.random())"
+          v-for="course in courseEdges"
+          :key="course.node.id"
           :course="course.node"
-          :name="course.node ? course.node.title : ''"
+          :name="course.node.title"
           instructor="مركز دكتور صبري ابو قرون"
-          :price="course.node ? course.node.courseFee : 0"
+          :price="course.node.courseFee"
         />
       </div>
 
@@ -61,7 +61,7 @@
         </template>
       </ds-empty-state>
 
-      <div v-if="courses && courses.edgeCount && courses.edgeCount > 0" class="home-training__cta">
+      <div v-if="courseEdges.length > 0" class="home-training__cta">
         <ds-button variant="primary" size="lg" @click="gotTocoursesPage">
           {{ $t('جمــــيع الدورات') }}
         </ds-button>
@@ -111,11 +111,28 @@ const mySwiper = ref<InstanceType<typeof Swiper> | null>(null)
 // ---------------------------------------------------------------------------
 const { result: specResult } = useQuery<GetAllSpecialitiesResult, GetAllSpecialitiesVars>(
   GetSpecialities,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 const allCourseSpecialities = computed(
   () => specResult.value?.allCourseSpecialities ?? { edges: [] },
+)
+
+type SpecEdgeNN = NonNullable<NonNullable<GetAllSpecialitiesResult['allCourseSpecialities']>['edges'][number]> & {
+  node: NonNullable<NonNullable<NonNullable<GetAllSpecialitiesResult['allCourseSpecialities']>['edges'][number]>['node']>
+}
+const specialityEdges = computed<SpecEdgeNN[]>(() => {
+  const rawEdges = specResult.value?.allCourseSpecialities?.edges ?? []
+  return rawEdges.filter((e): e is SpecEdgeNN => !!e && !!e.node)
+})
+
+type CourseEdgeNN = NonNullable<NonNullable<AllCoursesInSpecialityResult['allCoursesInSpeciality']>['edges'][number]> & {
+  node: NonNullable<NonNullable<NonNullable<AllCoursesInSpecialityResult['allCoursesInSpeciality']>['edges'][number]>['node']>
+}
+const courseEdges = computed<CourseEdgeNN[]>(
+  () => (courses.value?.edges ?? []).filter(
+    (e): e is CourseEdgeNN => !!e && !!e.node,
+  ),
 )
 
 // ---------------------------------------------------------------------------

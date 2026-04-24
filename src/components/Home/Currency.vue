@@ -32,7 +32,7 @@ import { ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from 'src/stores/settings'
-import type { CurrencyCode } from 'src/types/courses/types'
+import type { CurrencyCode } from 'src/types/settings/types'
 
 const $q = useQuasar()
 const { t } = useI18n()

@@ -14,7 +14,7 @@
         <input
           v-for="(d, i) in digits"
           :key="i"
-          :ref="el => { if (el) otpRefs[i] = el }"
+          :ref="(el) => { if (el) otpRefs[i] = el as HTMLInputElement }"
           class="otp__box"
           inputmode="numeric"
           pattern="[0-9]*"
@@ -23,7 +23,7 @@
           :value="digits[i]"
           @input="onInput($event, i)"
           @keydown="onKeydown($event, i)"
-          @focus="$event.target.select()"
+          @focus="($event.target as HTMLInputElement).select()"
         />
       </div>
 

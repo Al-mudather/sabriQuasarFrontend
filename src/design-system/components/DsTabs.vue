@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, provide, onMounted, onBeforeUnmount, onUpdated, nextTick } from 'vue'
+import { ref, computed, watch, provide, onMounted, onBeforeUnmount, onUpdated, nextTick, type ComponentPublicInstance } from 'vue'
 
 defineOptions({ name: 'DsTabs' })
 
@@ -94,7 +94,7 @@ const indicatorStyle = computed(() => ({
   width: `${indicator.value.width}px`,
 }))
 
-function setTabRef(el: Element | null): void {
+function setTabRef(el: Element | ComponentPublicInstance | null): void {
   if (el && !tabRefs.value.includes(el as HTMLElement)) tabRefs.value.push(el as HTMLElement)
 }
 

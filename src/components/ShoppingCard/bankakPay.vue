@@ -14,7 +14,7 @@
       </div>
     </div>
     <file-upload
-      imgeSize="4000000"
+      :imgeSize="4000000"
       :accept="'.png,.jpg, image/*'"
       :label="currency === 'SDG' ? bankakLabel : othersLabel"
       v-on:File_Handler="paymentImageHandler"
@@ -63,8 +63,8 @@ const bankakBill = ref<string>('')
 const bankakLabel = 'إشعار بنكك الأبيض'
 const othersLabel = t('اضغط للإرفاق فاتورة الدفع')
 
-function paymentImageHandler (val: string): void {
-  bankakBill.value = val
+function paymentImageHandler (val: File | null): void {
+  bankakBill.value = val ? (val as unknown as string) : ''
 }
 
 function errorHandler (errorsObj: unknown): void {
@@ -125,7 +125,7 @@ async function SEND_THE_PAYMENT (): Promise<void> {
       variables: {
         input: {
           order: orderResult.order.pk,
-          attachment: bankakBill.value
+          attachment: bankakBill.value as unknown as File
         }
       }
     })

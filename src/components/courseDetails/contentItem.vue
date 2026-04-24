@@ -4,7 +4,7 @@
       :is="content.isFree ? 'button' : 'div'"
       class="content-row"
       :class="{ 'content-row--locked': !content.isFree, 'content-row--free': content.isFree }"
-      :type="content.isFree ? 'button' : null"
+      :type="content.isFree ? 'button' : undefined"
       @click="content.isFree && openFreeVideoCourse($event)"
     >
       <span class="content-row__icon" aria-hidden="true">
@@ -17,7 +17,7 @@
 
     <q-dialog v-model="card" persistent>
       <q-card class="my-card">
-        <AlhasifVideoPlayer ref="alhasifPlayer" id="videoPlayer" v-if="video_type === 'TYPE_HASIF'" :videoUuid="videoUuid" />
+        <AlhasifVideoPlayer ref="alhasifPlayer" id="videoPlayer" v-if="video_type === 'TYPE_HASIF'" :videoUuid="videoUuid ?? undefined" />
         <div v-else>
           <div v-show="player" style="padding-top:56.25%;position:relative;">
             <div style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%; padding-bottom: 2rem;" id="videoPlayer" :data-id="content.pk"></div>
@@ -58,12 +58,25 @@ import type { CourseUnitContent } from 'src/types/courses/types'
 
 // modelValue is a JSONString scalar. Apollo's typePolicy only parses
 // CourseNode.currency — not CourseUnitContentNode.modelValue — so at runtime
-// the field still arrives as a JSON-encoded string. Cast accordingly.
-type RawContent = Omit<CourseUnitContent, 'modelValue'> & { modelValue: string | null }
+// the field can arrive either as a raw JSON-encoded string (no policy) or as
+// the parsed object that codegen advertises (`Record<string, number> | null`).
+// Accept both and narrow locally before JSON.parse.
+type RawContent = Omit<CourseUnitContent, 'modelValue'> & {
+  modelValue: string | Record<string, unknown> | null
+}
 
 const props = defineProps<{
   content: RawContent
 }>()
+
+function readModelValue (): Record<string, unknown> | null {
+  const raw = props.content.modelValue
+  if (!raw) return null
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw) as Record<string, unknown> } catch { return null }
+  }
+  return raw as Record<string, unknown>
+}
 
 const route = useRoute()
 const $q = useQuasar()
@@ -76,22 +89,17 @@ const video_type = ref<string | null>(null)
 const videoUuid = ref<string | null>(null)
 
 const formatTitle = computed<string>(() => {
-  try {
-    const raw = props.content.modelValue
-    if (!raw) return ''
-    const result = JSON.parse(raw) as Record<string, unknown>
-    if (props.content.modelName === 'ContentFile') {
-      return String(
-        (result.attachment as string | undefined)?.split('/attachment/')[1] ?? '',
-      )
-    }
-    if (props.content.modelName === 'ContentQuiz') {
-      return String(result.quiz_title ?? '')
-    }
-    return String(result.title ?? '')
-  } catch {
-    return ''
+  const result = readModelValue()
+  if (!result) return ''
+  if (props.content.modelName === 'ContentFile') {
+    return String(
+      (result.attachment as string | undefined)?.split('/attachment/')[1] ?? '',
+    )
   }
+  if (props.content.modelName === 'ContentQuiz') {
+    return String(result.quiz_title ?? '')
+  }
+  return String(result.title ?? '')
 })
 
 function uninitializeVideo (): void {
@@ -129,9 +137,8 @@ function openFreeVideoCourse (e: Event): void {
     video_type.value = null
     card.value = true
 
-    const raw = props.content.modelValue
-    if (!raw) return
-    const contentData = JSON.parse(raw) as Record<string, unknown>
+    const contentData = readModelValue()
+    if (!contentData) return
     const videoMeta = contentData.video_metadata as Record<string, unknown> | undefined
     video_type.value = (contentData.video_type as string | undefined) ?? null
 

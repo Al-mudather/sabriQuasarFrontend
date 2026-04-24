@@ -83,7 +83,7 @@ async function getStripeKeyFromTheBackend (): Promise<string> {
   })
   const raw = result.data?.stripePublishableKey
   if (raw && typeof raw === 'object') {
-    return (raw as Record<string, string>).publisableKey ?? ''
+    return (raw as unknown as Record<string, string>).publisableKey ?? ''
   }
   return ''
 }
@@ -112,7 +112,7 @@ async function buyTheCoursesUsingStripe (): Promise<void> {
   try {
     visible.value = true
 
-    const stripeGlobal = (window as Record<string, unknown>)['Stripe']
+    const stripeGlobal = (window as unknown as Record<string, unknown>)['Stripe']
     if (typeof stripeGlobal !== 'function') {
       throw new Error('Stripe not loaded')
     }

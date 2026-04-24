@@ -164,7 +164,9 @@ const { user, token } = storeToRefs(auth)
 const certQuery = useQuery<AllCertificatesResult, AllCertificatesVars>(
   AllCertificates,
   () => ({
-    filters: JSON.stringify({ user__id: user.value?.pk ?? null }),
+    // JSONString scalar: schema expects a JSON-encoded string at runtime,
+    // but codegen typed it as Record<string, number>. Cast to satisfy TS.
+    filters: JSON.stringify({ user__id: user.value?.pk ?? null }) as unknown as Record<string, number>,
   }),
 )
 const myCertificate = computed(() => certQuery.result.value?.allCertificates ?? null)
@@ -173,9 +175,12 @@ const queryLoading = certQuery.loading
 // -----------------------------------------------------------------------
 // Derived state
 // -----------------------------------------------------------------------
-type CertEdge = NonNullable<
+type CertEdgeRaw = NonNullable<
   NonNullable<AllCertificatesResult['allCertificates']>['edges'][number]
 >
+type CertEdge = CertEdgeRaw & {
+  node: NonNullable<CertEdgeRaw['node']>
+}
 
 const certificates = computed<CertEdge[]>(
   () =>

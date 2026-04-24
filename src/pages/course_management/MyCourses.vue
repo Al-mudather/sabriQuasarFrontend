@@ -235,8 +235,8 @@ interface CourseCardViewModel {
     id: string
     pk: number | null
     name: string
-    coverImage: string | null
-    category: null
+    coverImage?: string
+    category?: string
     progress: number
   }
 }
@@ -255,8 +255,8 @@ const items = computed<CourseCardViewModel[]>(() =>
         id: c.id,
         pk: c.pk,
         name: c.title,
-        coverImage: c.cover ? FORMAT_THE_IAMGE_URL(c.cover) : null,
-        category: null,
+        coverImage: c.cover ? FORMAT_THE_IAMGE_URL(c.cover) as string : undefined,
+        category: undefined,
         progress,
       },
     }

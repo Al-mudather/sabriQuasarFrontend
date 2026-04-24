@@ -120,7 +120,7 @@ async function buyTheCoursesUsingPaypal (): Promise<void> {
     if (!paypalPaymentUrl) { visible.value = false; return }
 
     // Runtime guard for the PayPal SDK injected by index.html.
-    const paypalSDK = (window as Record<string, unknown>)['paypal'] as PayPalSDK | undefined
+    const paypalSDK = (window as unknown as Record<string, unknown>)['paypal'] as PayPalSDK | undefined
     if (!paypalSDK?.Buttons) {
       throw new Error('paypal is not defined')
     }

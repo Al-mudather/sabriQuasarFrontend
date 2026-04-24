@@ -41,7 +41,7 @@ import type {
 // ---------------------------------------------------------------------------
 const { result } = useQuery<GetAllCourseInstructorsResult, GetAllCourseInstructorsVars>(
   GetAllCourseInstructors,
-  null,
+  {},
   { errorPolicy: 'all' },
 )
 

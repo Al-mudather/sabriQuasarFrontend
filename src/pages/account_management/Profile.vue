@@ -206,7 +206,7 @@
               <select
                 class="profile-select"
                 :value="currency"
-                @change="setCurrency($event.target.value)"
+                @change="setCurrency(($event.target as HTMLSelectElement).value)"
               >
                 <option v-for="c in currencies" :key="c" :value="c">{{ c }}</option>
               </select>
@@ -375,7 +375,7 @@ function setLang (flag: boolean): void {
 }
 
 function setCurrency (val: string): void {
-  settings.setCurrency(val)
+  settings.setCurrency(val as Parameters<typeof settings.setCurrency>[0])
   $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم تحديث العملة') })
 }
 

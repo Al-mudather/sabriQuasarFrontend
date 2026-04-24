@@ -213,15 +213,15 @@ async function registerNewUser (): Promise<void> {
     const register = signUpRes?.data?.register
     if (register?.success) {
       const tokenAuth = {
-        token: register.token,
-        refresh: register.refreshToken
+        token: register.token ?? '',
+        refresh: register.refreshToken ?? undefined
       }
       await auth.login(tokenAuth)
       try {
         const profile = await apolloClient.query<GetMyProfileResult, GetMyProfileVariables>({
           query: GetMyProfileData
         })
-        auth.setUser(profile.data?.me)
+        if (profile.data?.me) auth.setUser(profile.data.me)
       } catch { /* non-blocking */ }
       void router.push({ name: 'registeration-code' })
     } else if (register?.errors) {

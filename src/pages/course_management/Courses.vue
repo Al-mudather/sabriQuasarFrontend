@@ -369,12 +369,16 @@ const mobileFilterOpen = ref(false)
 // ---------------------------------------------------------------------------
 const specQuery = useQuery<GetAllSpecialitiesResult, GetAllSpecialitiesVars>(
   GetSpecialities,
-  { courseNumber: 20 },
 )
 const specialitiesLoading = specQuery.loading
+
+type SpecEdgeWithNode = {
+  node: NonNullable<NonNullable<NonNullable<GetAllSpecialitiesResult['allCourseSpecialities']>['edges'][number]>['node']>
+} & NonNullable<NonNullable<GetAllSpecialitiesResult['allCourseSpecialities']>['edges'][number]>
+
 const specialitiesEdges = computed(
   () => (specQuery.result.value?.allCourseSpecialities?.edges ?? [])
-    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+    .filter((e): e is SpecEdgeWithNode => !!e && !!e.node),
 )
 
 // ---------------------------------------------------------------------------
@@ -387,9 +391,13 @@ const coursesQuery = useQuery<GetAllCoursesResult, GetAllCoursesVars>(
 )
 const coursesData = computed(() => coursesQuery.result.value ?? null)
 const coursesLoading = coursesQuery.loading
+type CourseEdgeWithNode = {
+  node: NonNullable<NonNullable<NonNullable<GetAllCoursesResult['allCourses']>['edges'][number]>['node']>
+} & NonNullable<NonNullable<GetAllCoursesResult['allCourses']>['edges'][number]>
+
 const coursesEdges = computed(
   () => (coursesData.value?.allCourses?.edges ?? [])
-    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+    .filter((e): e is CourseEdgeWithNode => !!e && !!e.node),
 )
 const coursesEdgeCount = computed(
   () => coursesData.value?.allCourses?.edgeCount ?? 0,
@@ -424,7 +432,7 @@ const queryVariables = computed<GetAllCoursesVars>(() => {
   }
   const s = search.value.trim()
   if (s) vars.title_Icontains = s
-  if (activeSpecialityID.value) vars.courseSpeciality = activeSpecialityID.value
+  if (activeSpecialityID.value) vars.courseSpeciality = String(activeSpecialityID.value)
   return vars
 })
 
@@ -495,7 +503,6 @@ async function resolveSpecialityLabel (pk: number): Promise<void> {
   try {
     const { data } = await apolloClient.query<GetAllSpecialitiesResult, GetAllSpecialitiesVars>({
       query: GetSpecialities,
-      variables: { courseNumber: 50 },
     })
     const edges = data?.allCourseSpecialities?.edges ?? []
     const match = edges.find(e => e?.node?.pk === pk)

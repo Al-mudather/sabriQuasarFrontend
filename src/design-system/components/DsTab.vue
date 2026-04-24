@@ -3,7 +3,7 @@
     v-if="isActive"
     class="ds-tab"
     role="tabpanel"
-    :aria-labelledby="name"
+    :aria-labelledby="String(name)"
   >
     <slot />
   </div>

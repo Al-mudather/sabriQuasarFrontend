@@ -67,7 +67,7 @@ const visible = ref(false)
 
 const { result, onResult } = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(
   MyPyramidAccount,
-  null,
+  {},
   { errorPolicy: 'all' }
 )
 
