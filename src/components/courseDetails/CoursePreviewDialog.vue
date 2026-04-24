@@ -36,7 +36,7 @@
       </header>
 
       <!-- Scrollable body ---------------------------------------------- -->
-      <div class="preview-dialog__body">
+      <div ref="bodyEl" class="preview-dialog__body">
         <!-- Video region ---------------------------------------------- -->
         <div class="preview-dialog__stage">
           <template v-if="activeSample">
@@ -86,7 +86,7 @@
                 type="button"
                 class="preview-dialog__row"
                 :class="{ 'is-active': activeId === s.id }"
-                @click="emit('select', s.id)"
+                @click="onRowSelect(s.id)"
               >
                 <span
                   class="preview-dialog__row-thumb"
@@ -160,6 +160,18 @@ function onDialogUpdate(v: boolean): void {
   // we disabled them all). Still, forward it defensively.
   emit('update:modelValue', v)
   if (!v) emit('close')
+}
+
+const bodyEl = ref<HTMLElement | null>(null)
+
+function onRowSelect(id: string): void {
+  emit('select', id)
+  // Snap the dialog body back to the top so the video stage is in view —
+  // otherwise switching the active sample while scrolled halfway down the
+  // list leaves the just-started video off-screen.
+  if (bodyEl.value) {
+    bodyEl.value.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 }
 
 // Active sample --------------------------------------------------------------
