@@ -309,7 +309,7 @@ const coursesEdgeCount = computed(
   () => coursesData.value?.allCourses?.edgeCount ?? 0,
 )
 const coursesHasNext = computed(
-  () => coursesData.value?.allCourses?.pageInfo.hasNextPage ?? false,
+  () => coursesData.value?.allCourses?.pageInfo?.hasNextPage ?? false,
 )
 
 coursesQuery.onResult((res) => {
@@ -467,7 +467,7 @@ async function loadMore (): Promise<void> {
   await coursesQuery.fetchMore({
     variables: {
       ...queryVariables.value,
-      cursor: pageInfo.endCursor,
+      after: pageInfo.endCursor,
     },
     updateQuery: (prev: GetAllCoursesResult, { fetchMoreResult }): GetAllCoursesResult => {
       if (!fetchMoreResult?.allCourses || !prev.allCourses) return prev

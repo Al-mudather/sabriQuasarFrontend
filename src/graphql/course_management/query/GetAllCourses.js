@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 export const GetAllCourses = gql`
   query GetAllCourses(
     $first: Int
+    $after: String
     $orderBy: [String]
     $execludeIds: [Int]
     $title: String
@@ -14,6 +15,7 @@ export const GetAllCourses = gql`
   ) {
     allCourses(
       first: $first
+      after: $after
       orderBy: $orderBy
       execludeIds: $execludeIds
       title: $title
@@ -25,6 +27,10 @@ export const GetAllCourses = gql`
     ) {
       totalCount
       edgeCount
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
       edges {
         node {
           id
