@@ -59,6 +59,7 @@
                 <content-item
                   v-if="isRenderableContent(content?.node?.modelName)"
                   :content="content!.node!"
+                  @preview-content="(p) => emit('preview-content', { ...p, unitTitle: edge.node?.title ?? '' })"
                 />
               </div>
             </template>
@@ -70,6 +71,7 @@
                 <content-item
                   v-if="isRenderableContent(content?.node?.modelName)"
                   :content="content!.node!"
+                  @preview-content="(p) => emit('preview-content', { ...p, unitTitle: edge.node?.title ?? '' })"
                 />
               </div>
             </template>
@@ -102,6 +104,33 @@ const RENDERABLE = ['ContentVideo', 'ContentFile', 'ContentQuiz']
 
 const props = defineProps<{
   course_id: string
+  courseCover?: string | null
+}>()
+
+interface PreviewPayload {
+  id: string
+  pk: number | null
+  title: string
+  modelName: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  content: any
+  unitTitle?: string
+}
+
+interface FreeSample {
+  id: string
+  pk: number | null
+  title: string
+  modelName: string
+  duration?: string
+  thumbnail?: string
+  unitTitle?: string
+  modelValue: Record<string, unknown> | null
+}
+
+const emit = defineEmits<{
+  (e: 'preview-content', payload: PreviewPayload): void
+  (e: 'samples-changed', list: FreeSample[]): void
 }>()
 
 const { result, loading: qLoading } = useQuery<GetAllCourseUnitsByCourseIdResult, GetAllCourseUnitsByCourseIdVars>(
@@ -165,6 +194,66 @@ function toggleExpandAll (): void {
     openedUnits.value = units.value.map((e, i) => String(e.node?.pk ?? i))
   }
 }
+
+// Free samples — derived from the full units tree and emitted upward so the
+// parent CourseDetails page can feed the shared CoursePreviewDialog.
+const PLAYABLE_MODELS = new Set(['ContentVideo', 'ContentFile', 'ContentQuiz'])
+
+function parseMv (raw: unknown): Record<string, unknown> | null {
+  if (!raw) return null
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw) as Record<string, unknown> } catch { return null }
+  }
+  if (typeof raw === 'object') return raw as Record<string, unknown>
+  return null
+}
+
+function titleFor (modelName: string, mv: Record<string, unknown> | null): string {
+  if (!mv) return ''
+  if (modelName === 'ContentFile') {
+    return String((mv.attachment as string | undefined)?.split('/attachment/')[1] ?? '')
+  }
+  if (modelName === 'ContentQuiz') return String(mv.quiz_title ?? '')
+  return String(mv.title ?? '')
+}
+
+function durationFor (mv: Record<string, unknown> | null): string | undefined {
+  if (!mv) return undefined
+  const d = mv.duration ?? mv.video_duration ?? mv.minutes
+  return d ? String(d) : undefined
+}
+
+const freeSamples = computed<FreeSample[]>(() => {
+  const out: FreeSample[] = []
+  for (const u of units.value) {
+    const unitTitle = u.node?.title ?? ''
+    const items = u.node?.isExternal
+      ? (u.node.external?.courseunitcontentSet?.edges ?? [])
+      : (u.node?.courseunitcontentSet?.edges ?? [])
+    for (const c of items) {
+      const node = c?.node
+      if (!node) continue
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!(node as any).isFree) continue
+      const modelName = String(node.modelName ?? '')
+      if (!PLAYABLE_MODELS.has(modelName)) continue
+      const mv = parseMv(node.modelValue as unknown)
+      out.push({
+        id: String((node as unknown as { id?: string }).id ?? node.pk ?? ''),
+        pk: node.pk ?? null,
+        title: titleFor(modelName, mv),
+        modelName,
+        duration: durationFor(mv),
+        thumbnail: props.courseCover ?? undefined,
+        unitTitle,
+        modelValue: mv,
+      })
+    }
+  }
+  return out
+})
+
+watch(freeSamples, (list) => emit('samples-changed', list), { immediate: true })
 </script>
 
 <style lang="scss" scoped>

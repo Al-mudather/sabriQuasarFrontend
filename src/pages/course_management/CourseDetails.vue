@@ -55,7 +55,13 @@
           </section>
 
           <section class="course-details__section" data-section="content">
-            <course-units v-if="courseID" :course_id="courseID" />
+            <course-units
+              v-if="courseID"
+              :course_id="courseID"
+              :course-cover="courseData?.cover ?? null"
+              @preview-content="onPreviewContent"
+              @samples-changed="onSamplesChanged"
+            />
           </section>
 
           <section class="course-details__section" data-section="requirements">
@@ -81,12 +87,13 @@
           :selected-currency="selectedCurrency"
           :lesson-total="lessonTotal"
           :unit-total="unitTotal"
+          :can-preview="canPreview"
           @enrol="enrolNow"
           @add-to-cart="addToCart"
           @continue-to-classroom="continueToClassroom"
           @share="shareCourse"
           @gift="giftCourse"
-          @apply-coupon="onApplyCoupon"
+          @open-preview="openPreview()"
         />
       </div>
 
@@ -116,6 +123,16 @@
         :selected-currency="selectedCurrency"
         @enrol="enrolNow"
         @continue-to-classroom="continueToClassroom"
+      />
+
+      <!-- Preview dialog (free samples) -->
+      <course-preview-dialog
+        v-model="previewOpen"
+        :samples="freeSamples"
+        :active-id="previewActiveId"
+        :course-title="courseData?.title ?? ''"
+        @select="openPreview"
+        @close="closePreview"
       />
     </template>
   </main>
@@ -147,6 +164,8 @@ import CourseIncludes from 'src/components/courseDetails/CourseIncludes.vue'
 import CourseTopicsRail from 'src/components/courseDetails/CourseTopicsRail.vue'
 import CourseStickyBar from 'src/components/courseDetails/CourseStickyBar.vue'
 import CourseMobileBar from 'src/components/courseDetails/CourseMobileBar.vue'
+import CoursePreviewDialog from 'src/components/courseDetails/CoursePreviewDialog.vue'
+import type { FreeSample } from 'src/components/courseDetails/CoursePreviewDialog.vue'
 
 import aboutTheCourse from 'components/courseDetails/aboutTheCourse.vue'
 import whatIwillLearn from 'components/courseDetails/whatIwillLearn.vue'
@@ -253,6 +272,41 @@ const leadInstructor = computed<{ name: string; image: string; initial: string }
 })
 
 const isEnrolled = computed<boolean>(() => !!(courseData.value?.enrolled))
+
+// Free samples — populated by courseUnits via @samples-changed emit.
+// The rich unit tree (title + isExternal + external.courseunitcontentSet)
+// is only selected by GetAllCourseUnitsByCourseID, which lives inside
+// courseUnits.vue. We accept the derived list from the child and hold it
+// in parent state for the preview dialog.
+const freeSamples = ref<FreeSample[]>([])
+const canPreview = computed<boolean>(() => freeSamples.value.length > 0)
+
+function onSamplesChanged (list: FreeSample[]): void {
+  freeSamples.value = list
+}
+
+// Preview dialog state ------------------------------------------------------
+const previewOpen = ref(false)
+const previewActiveId = ref<string | null>(null)
+
+function openPreview (id?: string): void {
+  const list = freeSamples.value
+  if (!list.length) return
+  const target = id && list.some((s) => s.id === id)
+    ? id
+    : list[0]?.id ?? null
+  previewActiveId.value = target
+  previewOpen.value = true
+}
+
+function closePreview (): void {
+  previewOpen.value = false
+  previewActiveId.value = null
+}
+
+function onPreviewContent (p: { id: string }): void {
+  openPreview(p.id)
+}
 
 // Watch route params → reload ----------------------------------------------
 watch(
@@ -362,17 +416,6 @@ function giftCourse (): void {
     type: 'info',
     position: 'top',
     message: 'قريباً: إهداء الدورة',
-    timeout: 1800,
-  })
-}
-
-function onApplyCoupon (code: string): void {
-  if (!code) return
-  // UI-only for now — cart flow owns real redemption.
-  $q.notify({
-    type: 'positive',
-    position: 'top',
-    message: `تم حفظ كود الخصم (${code})`,
     timeout: 1800,
   })
 }

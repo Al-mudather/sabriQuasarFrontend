@@ -1,72 +1,148 @@
 <template>
-<div>
-    <component
-      :is="content.isFree ? 'button' : 'div'"
-      class="content-row"
-      :class="{ 'content-row--locked': !content.isFree, 'content-row--free': content.isFree }"
-      :type="content.isFree ? 'button' : undefined"
-      @click="content.isFree && openFreeVideoCourse($event)"
-    >
-      <span class="content-row__icon" aria-hidden="true">
-        <img v-if="content.isFree" src="~assets/img/unlock.png" alt="" />
-        <img v-else src="~assets/img/padlock.png" alt="" />
-      </span>
-      <span class="content-row__title">{{ formatTitle }}</span>
-      <ds-badge v-if="content.isFree" variant="success" size="sm">{{ $t('مجاني') }}</ds-badge>
-    </component>
+  <button
+    v-if="content.isFree"
+    type="button"
+    class="content-row content-row--free"
+    @click="onFreeClick"
+  >
+    <span class="content-row__icon content-row__icon--accent" aria-hidden="true">
+      <!-- video: circle-play -->
+      <svg
+        v-if="content.modelName === 'ContentVideo'"
+        viewBox="0 0 20 20"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="10" cy="10" r="7.5" />
+        <path d="M8.5 7.25 L13 10 L8.5 12.75 Z" fill="currentColor" stroke="none" />
+      </svg>
+      <!-- file: document with folded corner + down arrow -->
+      <svg
+        v-else-if="content.modelName === 'ContentFile'"
+        viewBox="0 0 20 20"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M5 2.75 H12 L15.25 6 V16.25 A1 1 0 0 1 14.25 17.25 H5 A1 1 0 0 1 4 16.25 V3.75 A1 1 0 0 1 5 2.75 Z" />
+        <path d="M12 2.75 V6 H15.25" />
+        <path d="M9.625 9 V13.25" />
+        <path d="M7.75 11.5 L9.625 13.5 L11.5 11.5" />
+      </svg>
+      <!-- quiz: checklist -->
+      <svg
+        v-else-if="content.modelName === 'ContentQuiz'"
+        viewBox="0 0 20 20"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="3.25" y="3.25" width="13.5" height="13.5" rx="2" />
+        <path d="M6.5 8 L8 9.5 L11 6.5" />
+        <path d="M6.5 13 H13.5" />
+      </svg>
+      <!-- fallback: generic free / unlock -->
+      <svg
+        v-else
+        viewBox="0 0 20 20"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="4.25" y="9" width="11.5" height="8" rx="1.75" />
+        <path d="M6.75 9 V6.25 A3.25 3.25 0 0 1 13.25 6 V6.75" />
+      </svg>
+    </span>
 
-    <q-dialog v-model="card" persistent>
-      <q-card class="my-card">
-        <AlhasifVideoPlayer ref="alhasifPlayer" id="videoPlayer" v-if="video_type === 'TYPE_HASIF'" :videoUuid="videoUuid ?? undefined" />
-        <div v-else>
-          <div v-show="player" style="padding-top:56.25%;position:relative;">
-            <div style="border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%; padding-bottom: 2rem;" id="videoPlayer" :data-id="content.pk"></div>
-          </div>
-          <div v-if="!player">
-            <div v-if="cipherVideo" v-html="cipherVideo"></div>
-            <q-video
-              v-else
-              :ratio="16/9"
-              :src="videoUrl"
-            />
-          </div>
-        </div>
+    <span class="content-row__title">{{ formatTitle }}</span>
 
-        <q-card-section>
-          <div class="row no-wrap items-center" style="margin-left: 0;">
-            <div class="col text-h6 ellipsis text-center">
-              {{ formatTitle }}
-            </div>
-          </div>
-        </q-card-section>
+    <ds-badge v-if="showFreeBadge" variant="success" size="sm">{{ $t('مجاني') }}</ds-badge>
 
-        <q-card-actions align="center" style="width: 100%;">
-          <q-btn label="Stop the video" @click="uninitializeVideo" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-</div>
+    <span v-if="duration" class="content-row__duration">{{ duration }}</span>
+
+    <span class="content-row__chevron" aria-hidden="true">
+      <svg
+        viewBox="0 0 20 20"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M10 6 L6 10 L10 14" />
+      </svg>
+    </span>
+  </button>
+
+  <div
+    v-else
+    class="content-row content-row--locked"
+    :aria-disabled="true"
+  >
+    <span class="content-row__icon" aria-hidden="true">
+      <!-- locked padlock -->
+      <svg
+        viewBox="0 0 20 20"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="4.25" y="9" width="11.5" height="8" rx="1.75" />
+        <path d="M6.75 9 V6.25 A3.25 3.25 0 0 1 13.25 6.25 V9" />
+      </svg>
+    </span>
+
+    <span class="content-row__title">{{ formatTitle }}</span>
+
+    <span v-if="duration" class="content-row__duration">{{ duration }}</span>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useQuasar } from 'quasar'
-import videoPlayer from 'src/utils/video-client.js'
-import AlhasifVideoPlayer from 'src/utils/AlhasifVideoPlayer.vue'
+import { computed } from 'vue'
 import type { CourseUnitContent } from 'src/types/courses/types'
 
 // modelValue is a JSONString scalar. Apollo's typePolicy only parses
 // CourseNode.currency — not CourseUnitContentNode.modelValue — so at runtime
 // the field can arrive either as a raw JSON-encoded string (no policy) or as
-// the parsed object that codegen advertises (`Record<string, number> | null`).
-// Accept both and narrow locally before JSON.parse.
+// the parsed object that codegen advertises. Accept both and narrow locally.
 type RawContent = Omit<CourseUnitContent, 'modelValue'> & {
   modelValue: string | Record<string, unknown> | null
 }
 
-const props = defineProps<{
-  content: RawContent
+const props = defineProps<{ content: RawContent }>()
+
+const emit = defineEmits<{
+  (e: 'preview-content', payload: {
+    id: string
+    pk: number | null
+    title: string
+    modelName: string
+    content: RawContent
+  }): void
 }>()
 
 function readModelValue (): Record<string, unknown> | null {
@@ -78,93 +154,39 @@ function readModelValue (): Record<string, unknown> | null {
   return raw as Record<string, unknown>
 }
 
-const route = useRoute()
-const $q = useQuasar()
-
-const card = ref(false)
-const player = ref<InstanceType<typeof videoPlayer> | null>(null)
-const cipherVideo = ref<string | null>(null)
-const videoUrl = ref('')
-const video_type = ref<string | null>(null)
-const videoUuid = ref<string | null>(null)
-
 const formatTitle = computed<string>(() => {
-  const result = readModelValue()
-  if (!result) return ''
+  const r = readModelValue()
+  if (!r) return ''
   if (props.content.modelName === 'ContentFile') {
-    return String(
-      (result.attachment as string | undefined)?.split('/attachment/')[1] ?? '',
-    )
+    return String((r.attachment as string | undefined)?.split('/attachment/')[1] ?? '')
   }
   if (props.content.modelName === 'ContentQuiz') {
-    return String(result.quiz_title ?? '')
+    return String(r.quiz_title ?? '')
   }
-  return String(result.title ?? '')
+  return String(r.title ?? '')
 })
 
-function uninitializeVideo (): void {
-  try {
-    player.value?.uninitializeTheVideo?.()
-  } catch { /* ignore */ }
-}
+const duration = computed<string>(() => {
+  const r = readModelValue()
+  if (!r) return ''
+  const d = r.duration ?? r.video_duration ?? r.minutes
+  return d ? String(d) : ''
+})
 
-function prepareSmartNodeVideo (videoMetadata: Record<string, unknown>): void {
-  setTimeout(() => {
-    uninitializeVideo()
-    const key = (videoMetadata.path as string | undefined) ?? (videoMetadata.id as string | undefined)
-    player.value = new videoPlayer('prod', `${location.origin}/api/course/video/auth`)
-    try {
-      const pk = props.content.pk
-      const routePk = (route.params.pk as string | undefined) ?? ''
-      player.value.play(`[data-id="${pk}"]`, key, 7, routePk)
-    } catch {
-      $q.notify({
-        type: 'warning',
-        multiLine: true,
-        progress: true,
-        message: 'هنالك ضعف في الشبكه, من فضلك اعد تحميل الصفحه و قم بشغيل الفيديو مجددا',
-      })
-    }
-  }, 1000)
-}
+const showFreeBadge = computed<boolean>(() => {
+  // Keep the "مجاني" pill only for non-video rows, where there isn't already
+  // a strong tap-to-play affordance from the circle-play icon.
+  return props.content.modelName !== 'ContentVideo'
+})
 
-function openFreeVideoCourse (e: Event): void {
-  try {
-    e.preventDefault()
-    cipherVideo.value = null
-    player.value = null
-    videoUuid.value = null
-    video_type.value = null
-    card.value = true
-
-    const contentData = readModelValue()
-    if (!contentData) return
-    const videoMeta = contentData.video_metadata as Record<string, unknown> | undefined
-    video_type.value = (contentData.video_type as string | undefined) ?? null
-
-    if (videoMeta) {
-      if (video_type.value === 'TYPE_HASIF') {
-        const vd = videoMeta.videoData as Record<string, unknown> | undefined
-        videoUuid.value = (vd?.videoUuid as string | undefined) ?? null
-      } else {
-        prepareSmartNodeVideo(videoMeta)
-      }
-    } else {
-      const cipher = contentData.cipher_iframe as string | undefined
-      if (cipher) {
-        cipherVideo.value = cipher
-      } else {
-        const video = contentData.video as string | undefined ?? ''
-        const i = video.indexOf('v')
-        const videoKey = video.slice(i + 2)
-        if (video.indexOf('youtube') > 0) {
-          videoUrl.value = 'https://www.youtube.com/embed?=' + videoKey
-        } else {
-          videoUrl.value = 'https://player.vimeo.com/video/' + String(video)
-        }
-      }
-    }
-  } catch { /* ignore */ }
+function onFreeClick (): void {
+  emit('preview-content', {
+    id: String((props.content as unknown as { id?: string }).id ?? ''),
+    pk: props.content.pk ?? null,
+    title: formatTitle.value,
+    modelName: String(props.content.modelName ?? ''),
+    content: props.content,
+  })
 }
 </script>
 
@@ -175,7 +197,7 @@ function openFreeVideoCourse (e: Event): void {
   gap: var(--ds-space-3);
   inline-size: 100%;
   text-align: inherit;
-  padding: var(--ds-space-2) var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-4);
   border: 0;
   border-radius: var(--ds-radius-md);
   background: transparent;
@@ -194,34 +216,60 @@ function openFreeVideoCourse (e: Event): void {
 
   &--free {
     cursor: pointer;
+
     &:hover {
-      background: var(--ds-brand-50);
+      background: var(--ds-brand-50, rgba(50, 40, 115, 0.06));
       color: var(--ds-brand-700);
     }
+
     &:focus-visible {
-      outline: 2px solid transparent;
-      box-shadow: var(--ds-shadow-focus);
+      outline: 2px solid var(--ds-brand-600);
+      outline-offset: 2px;
     }
   }
 
   &__icon {
-    flex-shrink: 0;
-    inline-size: 1.15rem;
-    block-size: 1.15rem;
+    flex: 0 0 auto;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    img { max-inline-size: 100%; max-block-size: 100%; opacity: 0.7; }
+    color: var(--ds-text-muted);
+
+    &--accent {
+      color: var(--ds-brand-600);
+    }
   }
 
-  &--free &__icon img { opacity: 1; }
-
   &__title {
-    flex: 1;
+    flex: 1 1 auto;
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  &__duration {
+    flex: 0 0 auto;
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__chevron {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ds-text-muted);
+  }
+}
+</style>
+
+<style lang="scss">
+[dir='rtl'] .content-row__chevron svg {
+  transform: scaleX(-1);
 }
 </style>

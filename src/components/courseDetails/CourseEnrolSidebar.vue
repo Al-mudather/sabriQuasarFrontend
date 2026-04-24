@@ -23,6 +23,24 @@
         <path d="M0 230 Q 100 200 200 220 T 400 210 L 400 300 L 0 300 Z" fill="rgba(246,241,234,0.08)"/>
         <path d="M0 250 Q 120 225 240 245 T 400 235 L 400 300 L 0 300 Z" fill="rgba(246,241,234,0.06)"/>
       </svg>
+
+      <button
+        v-if="canPreview"
+        type="button"
+        class="enrol-rail__preview-trigger"
+        :aria-label="$t('معاينة الدورة')"
+        @click="emit('open-preview')"
+      >
+        <span class="enrol-rail__preview-ring" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="24" height="24">
+            <path
+              d="M12 10 L22 16 L12 22 Z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
+        <span class="enrol-rail__preview-label">{{ $t('معاينة الدورة') }}</span>
+      </button>
     </figure>
 
     <!-- Card ------------------------------------------------------- -->
@@ -79,19 +97,8 @@
         </ds-button>
       </template>
 
-      <!-- Guarantees ---------------------------------------------- -->
-      <p class="enrol-rail__guarantee">{{ $t('وصول مدى الحياة') }}</p>
-
-      <!-- Actions trio -------------------------------------------- -->
+      <!-- Actions -------------------------------------------------- -->
       <div class="enrol-rail__actions">
-        <button
-          type="button"
-          class="enrol-rail__action"
-          @click="showCoupon = !showCoupon"
-        >
-          <span aria-hidden="true">🏷</span>
-          {{ $t('كود خصم') }}
-        </button>
         <button
           type="button"
           class="enrol-rail__action"
@@ -108,29 +115,6 @@
           <span aria-hidden="true">◈</span>
           {{ $t('أهدِ الدورة') }}
         </button>
-      </div>
-
-      <!-- Coupon drawer ------------------------------------------- -->
-      <div v-if="showCoupon" class="enrol-rail__coupon">
-        <div class="enrol-rail__coupon-row">
-          <ds-input
-            v-model="couponInput"
-            :placeholder="$t('أدخل كود الخصم')"
-            :disabled="couponApplied"
-          />
-          <ds-button
-            variant="ghost"
-            size="md"
-            :disabled="!couponInput || couponApplied"
-            @click="applyCoupon"
-          >
-            {{ couponApplied ? $t('مطبَّق') : $t('تطبيق') }}
-          </ds-button>
-        </div>
-        <p v-if="couponApplied" class="enrol-rail__coupon-hint">
-          <span aria-hidden="true">✓</span>
-          {{ $t('تم تطبيق الكود') }} ({{ couponInput }})
-        </p>
       </div>
 
       <!-- Includes micro-list ------------------------------------- -->
@@ -157,10 +141,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
-import DsInput from 'src/design-system/components/DsInput.vue'
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import type { CourseDetail } from 'src/types/courses/types'
@@ -173,6 +155,7 @@ interface Props {
   selectedCurrency: string
   lessonTotal: number
   unitTotal: number
+  canPreview: boolean
 }
 
 const props = defineProps<Props>()
@@ -184,27 +167,14 @@ const emit = defineEmits<{
   (e: 'continue-to-classroom'): void
   (e: 'share'): void
   (e: 'gift'): void
-  (e: 'apply-coupon', code: string): void
+  (e: 'open-preview'): void
 }>()
-
-const showCoupon = ref(false)
-const couponInput = ref('')
-const couponApplied = ref(false)
 
 function emitEnrol(): void { emit('enrol') }
 function emitAddToCart(): void { emit('add-to-cart') }
 function emitContinue(): void { emit('continue-to-classroom') }
 function emitShare(): void { emit('share') }
 function emitGift(): void { emit('gift') }
-
-function applyCoupon(): void {
-  if (!couponInput.value || couponApplied.value) return
-  couponApplied.value = true
-  emit('apply-coupon', couponInput.value)
-}
-
-// keep computed unused-import suppression happy
-void computed
 </script>
 
 <style lang="scss" scoped>
@@ -261,14 +231,6 @@ void computed
   &__cta { font-family: var(--ds-font-heading); }
   &__cta-secondary { margin-block-start: calc(-1 * var(--ds-space-1)); }
 
-  &__guarantee {
-    margin: var(--ds-space-1) 0 0;
-    text-align: center;
-    font-family: var(--ds-font-body);
-    font-size: var(--ds-text-xs);
-    color: var(--ds-text-muted);
-  }
-
   &__actions {
     display: flex;
     justify-content: space-between;
@@ -298,29 +260,55 @@ void computed
     span[aria-hidden] { font-size: 1em; }
   }
 
-  &__coupon {
+  // Preview trigger overlay on the cover image ------------------------------
+  &__preview-trigger {
+    position: absolute;
+    inset: 0;
+    appearance: none;
+    border: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(31, 24, 71, 0) 0%,
+      rgba(31, 24, 71, 0.55) 100%
+    );
+    color: var(--ds-text-on-indigo, #f6f1ea);
+    cursor: pointer;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: var(--ds-space-2);
-    padding: var(--ds-space-3);
-    background: var(--ds-surface-muted, rgba(50, 40, 115, 0.03));
-    border-radius: var(--ds-radius-md);
-    margin-block-start: calc(-1 * var(--ds-space-1));
+    transition: background-color var(--ds-duration-base) var(--ds-ease-out);
+
+    &:hover { background: rgba(31, 24, 71, 0.55); }
+    &:focus-visible {
+      outline: 2px solid var(--ds-accent-300);
+      outline-offset: -4px;
+    }
   }
 
-  &__coupon-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: var(--ds-space-2);
-  }
-
-  &__coupon-hint {
-    margin: 0;
+  &__preview-ring {
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    border-radius: 50%;
     display: inline-flex;
     align-items: center;
-    gap: 0.4em;
-    font-size: var(--ds-text-xs);
-    color: var(--ds-success, #5a8e3a);
+    justify-content: center;
+    background: rgba(246, 241, 234, 0.96);
+    color: var(--ds-brand-700);
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.45);
+    transition: transform var(--ds-duration-fast) var(--ds-ease-out);
+  }
+
+  &__preview-trigger:hover &__preview-ring {
+    transform: scale(1.06);
+  }
+
+  &__preview-label {
+    font-family: var(--ds-font-heading);
+    font-weight: 600;
+    font-size: var(--ds-text-sm);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 
   &__includes {
