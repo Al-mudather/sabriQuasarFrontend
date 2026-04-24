@@ -201,8 +201,8 @@ watch(isEnglish, (value) => { void applyLocale(value) })
 .user-layout {
   max-inline-size: 1200px;
   margin-inline: auto;
-  padding-inline: clamp(1rem, 4vw, 2rem);
-  padding-block: clamp(1.5rem, 4vw, 3rem);
+  padding-inline: clamp(0.75rem, 3vw, 2rem);
+  padding-block: clamp(0.75rem, 3vw, 3rem);
 }
 
 .user-layout__drawer-trigger {
@@ -253,13 +253,28 @@ watch(isEnglish, (value) => { void applyLocale(value) })
 }
 
 .user-layout__main {
-  max-inline-size: 960px;
-  padding: clamp(1.5rem, 4vw, 3rem);
-  background: var(--ds-ivory, var(--ds-cream));
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-lg);
-  box-shadow: var(--ds-shadow-xs);
   line-height: 1.85;
+
+  /* On small screens let the page content take the full container width —
+     no card chrome, no padding gutter. The layout's own inline padding
+     already gives a safe gutter. */
+  @media (max-width: 899px) {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Card chrome only at desktop widths where the sidebar is visible. */
+  @media (min-width: 900px) {
+    max-inline-size: 960px;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background: var(--ds-ivory, var(--ds-cream));
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    box-shadow: var(--ds-shadow-xs);
+  }
 }
 
 .user-layout__drawer-title {

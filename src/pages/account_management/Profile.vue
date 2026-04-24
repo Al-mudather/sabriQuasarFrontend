@@ -3,185 +3,163 @@
     <header class="profile-page__header">
       <h1 class="profile-page__title">{{ $t('الملف الشخصي') }}</h1>
       <p class="profile-page__subtitle">
-        {{ $t('إدارة بياناتك الشخصية وتفضيلاتك وأمان حسابك.') }}
+        {{ $t('إدارة بياناتك الشخصية وتفضيلاتك وأمان حسابك') }}
       </p>
     </header>
 
     <div class="profile-page__grid">
-      <!-- Personal info card -->
-      <ds-card class="profile-card" variant="default" elevation="xs">
-        <div class="profile-card__head">
-          <div class="profile-card__head-text">
-            <h2>{{ $t('البيانات الشخصية') }}</h2>
-            <p>{{ $t('حافظ على بياناتك محدّثة.') }}</p>
-          </div>
-          <ds-button
-            v-if="!editingInfo"
-            variant="ghost"
-            size="sm"
-            @click="startEditInfo"
-          >
-            {{ $t('تعديل') }}
-          </ds-button>
-        </div>
-
-        <div class="profile-card__identity">
+      <!-- Identity column ---------------------------------------------------->
+      <section class="profile-col profile-col--identity" aria-labelledby="identity-heading">
+        <div class="profile-identity">
           <div class="profile-avatar" aria-hidden="true">
             <span class="profile-avatar__initials">{{ initials }}</span>
           </div>
-          <div class="profile-identity">
-            <h3 class="profile-identity__name">{{ fullName || $t('بدون اسم') }}</h3>
-            <p class="profile-identity__email">{{ email }}</p>
-          </div>
-        </div>
-
-        <form class="profile-form" @submit.prevent="UpdateUserProfileData">
-          <div class="profile-form__grid">
-            <ds-input
-              v-model="fullName"
-              :label="$t('الاسم الكامل')"
-              :disabled="!editingInfo"
-              :readonly="!editingInfo"
-            />
-            <ds-input
-              v-model="email"
-              type="email"
-              :label="$t('البريد الإلكتروني')"
-              readonly
-              disabled
-            />
-            <ds-input
-              v-model="whatsAppNumber"
-              :label="$t('رقم الواتساب')"
-              :disabled="!editingInfo"
-              :readonly="!editingInfo"
-              placeholder="+249XXXXXXXXX"
-            />
-            <ds-input
-              v-model="telegramNumber"
-              :label="$t('رقم التلجرام')"
-              :disabled="!editingInfo"
-              :readonly="!editingInfo"
-              placeholder="+249XXXXXXXXX"
-            />
-          </div>
-
-          <fieldset class="profile-form__gender" :disabled="!editingInfo">
-            <legend>{{ $t('الجنس') }}</legend>
-            <div class="profile-form__chips">
-              <button
-                v-for="g in genders"
-                :key="g.value"
-                type="button"
-                class="gender-chip"
-                :class="{ 'gender-chip--active': gender === g.value, 'gender-chip--disabled': !editingInfo }"
-                :disabled="!editingInfo"
-                @click="gender = g.value"
-              >
-                <span>{{ g.label }}</span>
-              </button>
+          <h2 id="identity-heading" class="profile-identity__name">
+            {{ fullName || $t('بدون اسم') }}
+          </h2>
+          <p class="profile-identity__email" dir="ltr">{{ email || '—' }}</p>
+          <dl class="profile-identity__meta">
+            <div class="profile-identity__meta-row">
+              <dt>{{ $t('الجنس') }}</dt>
+              <dd>{{ genderLabel }}</dd>
             </div>
-          </fieldset>
+            <div class="profile-identity__meta-row">
+              <dt>{{ $t('الهاتف') }}</dt>
+              <dd dir="ltr">{{ phoneNumber || '—' }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
 
-          <div v-if="editingInfo" class="profile-form__actions">
+      <!-- Editable content column -------------------------------------------->
+      <section class="profile-col profile-col--content">
+        <article class="profile-section" aria-labelledby="personal-heading">
+          <header class="profile-section__head">
+            <div>
+              <h2 id="personal-heading">{{ $t('البيانات الشخصية') }}</h2>
+              <p>{{ $t('حافظ على بياناتك محدّثة.') }}</p>
+            </div>
             <ds-button
-              type="button"
+              v-if="!editingInfo"
               variant="ghost"
-              size="md"
-              :disabled="saving"
-              @click="cancelEditInfo"
+              size="sm"
+              @click="startEditInfo"
             >
-              {{ $t('إلغاء') }}
+              {{ $t('تعديل') }}
             </ds-button>
-            <ds-button
-              type="submit"
-              variant="accent"
-              size="md"
-              :loading="saving"
-            >
-              {{ $t('حفظ') }}
-            </ds-button>
-          </div>
-        </form>
-      </ds-card>
+          </header>
 
-      <!-- Security card -->
-      <ds-card class="profile-card" variant="default" elevation="xs">
-        <div class="profile-card__head">
-          <div class="profile-card__head-text">
-            <h2>{{ $t('الأمان') }}</h2>
-            <p>{{ $t('حدث كلمة المرور وتحقق من بريدك الإلكتروني.') }}</p>
-          </div>
-        </div>
+          <form class="profile-form" @submit.prevent="UpdateUserProfileData">
+            <div class="profile-form__grid">
+              <ds-input
+                v-model="fullName"
+                :label="$t('الاسم الكامل')"
+                :disabled="!editingInfo"
+                :readonly="!editingInfo"
+              />
+              <ds-input
+                v-model="email"
+                type="email"
+                :label="$t('البريد الإلكتروني')"
+                readonly
+                disabled
+                dir="ltr"
+              />
+              <ds-input
+                v-model="phoneNumber"
+                :label="$t('رقم الهاتف')"
+                :disabled="!editingInfo"
+                :readonly="!editingInfo"
+                placeholder="+249XXXXXXXXX"
+                dir="ltr"
+                inputmode="tel"
+              />
+              <ds-input
+                v-model="whatsAppNumber"
+                :label="$t('رقم الواتساب')"
+                :disabled="!editingInfo"
+                :readonly="!editingInfo"
+                placeholder="+249XXXXXXXXX"
+                dir="ltr"
+                inputmode="tel"
+              />
+              <ds-input
+                v-model="telegramNumber"
+                :label="$t('رقم التلجرام')"
+                :disabled="!editingInfo"
+                :readonly="!editingInfo"
+                placeholder="+249XXXXXXXXX"
+                dir="ltr"
+                inputmode="tel"
+              />
+            </div>
 
-        <div class="profile-card__row">
-          <div class="profile-card__row-label">
-            <span class="profile-card__row-title">{{ $t('حالة البريد الإلكتروني') }}</span>
-            <span class="profile-card__row-sub">{{ email }}</span>
-          </div>
-          <ds-badge :variant="emailVerified ? 'success' : 'warning'" size="md">
-            {{ emailVerified ? $t('مؤكَّد') : $t('غير مؤكَّد') }}
-          </ds-badge>
-        </div>
+            <fieldset class="profile-form__gender" :disabled="!editingInfo">
+              <legend>{{ $t('الجنس') }}</legend>
+              <div class="profile-form__chips">
+                <button
+                  v-for="g in genders"
+                  :key="g.value"
+                  type="button"
+                  class="gender-chip"
+                  :class="{
+                    'gender-chip--active': gender === g.value,
+                    'gender-chip--disabled': !editingInfo,
+                  }"
+                  :disabled="!editingInfo"
+                  @click="gender = g.value"
+                >
+                  <span>{{ g.label }}</span>
+                </button>
+              </div>
+            </fieldset>
 
-        <div v-if="!emailVerified" class="profile-card__verify">
-          <a href="#" class="profile-link" @click.prevent="resendVerification">
-            {{ $t('إعادة إرسال رابط التأكيد') }}
-          </a>
-        </div>
+            <div v-if="editingInfo" class="profile-form__actions">
+              <ds-button
+                type="button"
+                variant="ghost"
+                size="md"
+                :disabled="saving"
+                @click="cancelEditInfo"
+              >
+                {{ $t('إلغاء') }}
+              </ds-button>
+              <ds-button
+                type="submit"
+                variant="accent"
+                size="md"
+                :loading="saving"
+              >
+                {{ $t('حفظ') }}
+              </ds-button>
+            </div>
+          </form>
+        </article>
 
-        <div class="profile-form__grid">
-          <ds-input
-            v-model="currentPassword"
-            type="password"
-            :label="$t('كلمة المرور الحالية')"
-            autocomplete="current-password"
-          />
-          <ds-input
-            v-model="newPassword"
-            type="password"
-            :label="$t('كلمة المرور الجديدة')"
-            autocomplete="new-password"
-          />
-          <ds-input
-            v-model="confirmPassword"
-            type="password"
-            :label="$t('تأكيد كلمة المرور')"
-            autocomplete="new-password"
-          />
-        </div>
-        <div class="profile-form__actions">
-          <ds-button
-            variant="primary"
-            size="md"
-            :disabled="!canChangePassword"
-            @click="changePassword"
-          >
-            {{ $t('تغيير كلمة المرور') }}
-          </ds-button>
-        </div>
-      </ds-card>
+        <article class="profile-section" aria-labelledby="prefs-heading">
+          <header class="profile-section__head">
+            <div>
+              <h2 id="prefs-heading">{{ $t('التفضيلات') }}</h2>
+              <p>{{ $t('اختر لغة الواجهة.') }}</p>
+            </div>
+          </header>
 
-      <!-- Preferences card -->
-      <ds-card class="profile-card profile-card--full" variant="default" elevation="xs">
-        <div class="profile-card__head">
-          <div class="profile-card__head-text">
-            <h2>{{ $t('التفضيلات') }}</h2>
-            <p>{{ $t('اللغة والعملة وتنبيهاتك.') }}</p>
-          </div>
-        </div>
-
-        <div class="profile-prefs">
           <div class="profile-prefs__row">
             <div class="profile-prefs__label">
               <span>{{ $t('اللغة') }}</span>
-              <small>{{ $t('واجهة الموقع') }}</small>
+              <small>{{ $t('تُطبَّق على الواجهة فورًا.') }}</small>
             </div>
-            <div class="profile-prefs__control">
+            <div
+              class="profile-prefs__control"
+              role="radiogroup"
+              :aria-label="$t('اللغة')"
+            >
               <button
                 class="lang-chip"
                 :class="{ 'lang-chip--active': !isEnglish }"
                 type="button"
+                role="radio"
+                :aria-checked="!isEnglish"
                 @click="setLang(false)"
               >
                 العربية
@@ -190,51 +168,16 @@
                 class="lang-chip"
                 :class="{ 'lang-chip--active': isEnglish }"
                 type="button"
+                role="radio"
+                :aria-checked="isEnglish"
                 @click="setLang(true)"
               >
                 English
               </button>
             </div>
           </div>
-
-          <div class="profile-prefs__row">
-            <div class="profile-prefs__label">
-              <span>{{ $t('العملة') }}</span>
-              <small>{{ $t('عملة العرض الافتراضية') }}</small>
-            </div>
-            <div class="profile-prefs__control">
-              <select
-                class="profile-select"
-                :value="currency"
-                @change="setCurrency(($event.target as HTMLSelectElement).value)"
-              >
-                <option v-for="c in currencies" :key="c" :value="c">{{ c }}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="profile-prefs__row">
-            <div class="profile-prefs__label">
-              <span>{{ $t('الإشعارات') }}</span>
-              <small>{{ $t('اختر ما يصلك من تنبيهات.') }}</small>
-            </div>
-            <div class="profile-prefs__control profile-prefs__control--stack">
-              <label class="pref-check">
-                <input type="checkbox" v-model="prefs.courses" />
-                <span>{{ $t('تحديثات الدورات') }}</span>
-              </label>
-              <label class="pref-check">
-                <input type="checkbox" v-model="prefs.transactions" />
-                <span>{{ $t('المعاملات المالية') }}</span>
-              </label>
-              <label class="pref-check">
-                <input type="checkbox" v-model="prefs.marketing" />
-                <span>{{ $t('التسويق والعروض') }}</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </ds-card>
+        </article>
+      </section>
     </div>
   </main>
 </template>
@@ -259,7 +202,7 @@ import type {
 const { t } = useI18n()
 const $q = useQuasar()
 const settings = useSettingsStore()
-const { isEnglish, currency } = storeToRefs(settings)
+const { isEnglish } = storeToRefs(settings)
 
 // ---------------------------------------------------------------------------
 // Query
@@ -270,40 +213,31 @@ const me = computed(() => profileQuery.result.value?.me ?? null)
 // ---------------------------------------------------------------------------
 // Mutation
 // ---------------------------------------------------------------------------
-const { mutate: updateProfileMutate } = useMutation<UpdateProfileMutationResult, UpdateProfileVariables>(
-  UpdateUserProfile,
-  { refetchQueries: [{ query: GetMyProfileData }] },
-)
+const { mutate: updateProfileMutate } = useMutation<
+  UpdateProfileMutationResult,
+  UpdateProfileVariables
+>(UpdateUserProfile, { refetchQueries: [{ query: GetMyProfileData }] })
 
 // ---------------------------------------------------------------------------
-// Local state
+// Local form state
 // ---------------------------------------------------------------------------
 const saving = ref(false)
 const editingInfo = ref(false)
 const fullName = ref('')
+const email = ref('')
+const phoneNumber = ref('')
 const whatsAppNumber = ref('')
 const telegramNumber = ref('')
-const email = ref('')
 const gender = ref('')
-// emailVerified is not in the schema — kept as false default
-const emailVerified = ref(false)
 
 interface Snapshot {
   fullName: string
+  phoneNumber: string
   whatsAppNumber: string
   telegramNumber: string
   gender: string
 }
 const snapshot = ref<Snapshot | null>(null)
-
-// security
-const currentPassword = ref('')
-const newPassword = ref('')
-const confirmPassword = ref('')
-
-// preferences
-const currencies = ['SAR', 'SDG', 'EUR', 'GBP', 'USD']
-const prefs = ref({ courses: true, transactions: true, marketing: false })
 
 // ---------------------------------------------------------------------------
 // Computed
@@ -313,6 +247,12 @@ const genders = computed(() => [
   { value: 'female', label: t('أنثى') },
 ])
 
+const genderLabel = computed(() => {
+  if (gender.value === 'male')   return t('ذكر')
+  if (gender.value === 'female') return t('أنثى')
+  return '—'
+})
+
 const initials = computed(() => {
   const n = (fullName.value || email.value || '').trim()
   if (!n) return '؟'
@@ -321,22 +261,18 @@ const initials = computed(() => {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
 })
 
-const canChangePassword = computed(
-  () => currentPassword.value && newPassword.value && newPassword.value === confirmPassword.value,
-)
-
 // ---------------------------------------------------------------------------
-// Sync me → local fields
+// Sync me -> local fields
 // ---------------------------------------------------------------------------
 watch(me, (value) => {
   if (!value) return
   email.value          = value.email ?? ''
   fullName.value       = value.fullName ?? ''
+  phoneNumber.value    = value.phoneNumber ?? ''
   whatsAppNumber.value = value.phoneNumber2 ?? ''
   telegramNumber.value = value.phoneNumber3 ?? ''
   if (value.gender === 'MALE')   gender.value = 'male'
   if (value.gender === 'FEMALE') gender.value = 'female'
-  // emailVerified is not on the schema — stays false
 })
 
 // ---------------------------------------------------------------------------
@@ -352,6 +288,7 @@ onMounted(() => {
 function startEditInfo (): void {
   snapshot.value = {
     fullName: fullName.value,
+    phoneNumber: phoneNumber.value,
     whatsAppNumber: whatsAppNumber.value,
     telegramNumber: telegramNumber.value,
     gender: gender.value,
@@ -362,6 +299,7 @@ function startEditInfo (): void {
 function cancelEditInfo (): void {
   if (snapshot.value) {
     fullName.value       = snapshot.value.fullName
+    phoneNumber.value    = snapshot.value.phoneNumber
     whatsAppNumber.value = snapshot.value.whatsAppNumber
     telegramNumber.value = snapshot.value.telegramNumber
     gender.value         = snapshot.value.gender
@@ -370,32 +308,27 @@ function cancelEditInfo (): void {
 }
 
 function setLang (flag: boolean): void {
+  if (isEnglish.value === flag) return
   settings.setIsEnglish(flag)
-  $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم تحديث اللغة') })
-}
-
-function setCurrency (val: string): void {
-  settings.setCurrency(val as Parameters<typeof settings.setCurrency>[0])
-  $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم تحديث العملة') })
-}
-
-function resendVerification (): void {
-  $q.notify({ type: 'info', position: 'top', progress: true, message: t('تم إرسال رابط التأكيد إلى بريدك.') })
-}
-
-function changePassword (): void {
-  // Password mutation not wired on this schema — placeholder flow.
-  if (!canChangePassword.value) return
-  $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم طلب تغيير كلمة المرور.') })
-  currentPassword.value = ''
-  newPassword.value     = ''
-  confirmPassword.value = ''
+  // UserLayout watches `isEnglish` and updates vue-i18n locale + Quasar Lang + html[dir].
+  $q.notify({
+    type: 'positive',
+    position: 'top',
+    progress: true,
+    message: flag ? 'Language updated' : t('تم تحديث اللغة'),
+  })
 }
 
 function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
   for (const key in errorsObj) {
     for (const val of errorsObj[key]) {
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: val.message })
+      $q.notify({
+        type: 'warning',
+        progress: true,
+        multiLine: true,
+        position: 'top',
+        message: val.message,
+      })
     }
   }
 }
@@ -406,6 +339,7 @@ async function UpdateUserProfileData (): Promise<void> {
     const result = await updateProfileMutate({
       input: {
         fullName: fullName.value,
+        phoneNumber: phoneNumber.value,
         phoneNumber2: whatsAppNumber.value,
         phoneNumber3: telegramNumber.value,
         gender: gender.value,
@@ -413,7 +347,13 @@ async function UpdateUserProfileData (): Promise<void> {
     })
     const payload = result?.data?.updateUserProfile
     if (payload?.success) {
-      $q.notify({ type: 'positive', position: 'top', progress: true, multiLine: true, message: t('تم تحديث بياناتك بنجاح') })
+      $q.notify({
+        type: 'positive',
+        position: 'top',
+        progress: true,
+        multiLine: true,
+        message: t('تم تحديث بياناتك بنجاح'),
+      })
       editingInfo.value = false
     } else if (payload?.errors) {
       errorHandler(payload.errors as Record<string, Array<{ message: string }>>)
@@ -436,15 +376,16 @@ async function UpdateUserProfileData (): Promise<void> {
   &__header {
     max-inline-size: 1120px;
     margin-inline: auto;
-    margin-block-end: var(--ds-space-6);
+    margin-block-end: var(--ds-space-7);
   }
 
   &__title {
     font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-3xl);
+    font-size: clamp(1.75rem, 2.5vw + 1rem, var(--ds-text-3xl));
     font-weight: var(--ds-weight-bold);
     color: var(--ds-ink, var(--ds-text));
-    margin: 0 0 var(--ds-space-1);
+    margin: 0 0 var(--ds-space-2);
+    letter-spacing: -0.01em;
   }
 
   &__subtitle {
@@ -452,6 +393,7 @@ async function UpdateUserProfileData (): Promise<void> {
     color: var(--ds-taupe, var(--ds-text-muted));
     margin: 0;
     font-size: var(--ds-text-md);
+    max-inline-size: 56ch;
   }
 
   &__grid {
@@ -459,32 +401,126 @@ async function UpdateUserProfileData (): Promise<void> {
     margin-inline: auto;
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--ds-space-5);
+    gap: var(--ds-space-6);
 
-    @media (min-width: 1024px) {
-      grid-template-columns: 1fr 1fr;
+    @media (min-width: 960px) {
+      grid-template-columns: minmax(260px, 320px) 1fr;
+      gap: var(--ds-space-8);
+      align-items: start;
     }
   }
 }
 
-.profile-card {
-  :deep(.ds-card__body) {
-    padding: var(--ds-space-6);
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-space-5);
+// ---------------------------------------------------------------------------
+// Identity column (read-only editorial card-less block)
+// ---------------------------------------------------------------------------
+.profile-col--identity {
+  position: sticky;
+  inset-block-start: var(--ds-space-4);
+}
+
+.profile-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-5);
+  background: var(--ds-ivory, var(--ds-surface));
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-sm);
+
+  &__name {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-xl);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-ink, var(--ds-text));
+    margin: 0;
+    line-height: 1.25;
+    word-break: break-word;
   }
 
-  &--full { grid-column: 1 / -1; }
+  &__email {
+    margin: 0;
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-taupe, var(--ds-text-muted));
+    overflow-wrap: anywhere;
+  }
+
+  &__meta {
+    margin: var(--ds-space-2) 0 0;
+    padding: 0;
+    inline-size: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+  }
+
+  &__meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--ds-space-3);
+    padding-block: var(--ds-space-2);
+    border-block-start: 1px solid var(--ds-border);
+
+    dt {
+      font-family: var(--ds-font-heading);
+      font-size: var(--ds-text-xs);
+      color: var(--ds-taupe, var(--ds-text-muted));
+      font-weight: var(--ds-weight-medium);
+      margin: 0;
+    }
+    dd {
+      margin: 0;
+      font-family: var(--ds-font-body);
+      font-size: var(--ds-text-sm);
+      color: var(--ds-ink, var(--ds-text));
+    }
+  }
+}
+
+.profile-avatar {
+  inline-size: 72px;
+  block-size: 72px;
+  border-radius: 50%;
+  background: var(--ds-brand-600);
+  color: var(--ds-text-onBrand, #fff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &__initials {
+    font-family: var(--ds-font-heading);
+    font-weight: var(--ds-weight-bold);
+    font-size: 24px;
+    letter-spacing: 0.04em;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Content column — sections, not cards
+// ---------------------------------------------------------------------------
+.profile-col--content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
 
   &__head {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--ds-space-3);
-  }
+    padding-block-end: var(--ds-space-3);
+    border-block-end: 1px solid var(--ds-border);
 
-  &__head-text {
     h2 {
       font-family: var(--ds-font-heading);
       font-size: var(--ds-text-xl);
@@ -498,98 +534,21 @@ async function UpdateUserProfileData (): Promise<void> {
       font-size: var(--ds-text-sm);
     }
   }
-
-  &__identity {
-    display: flex;
-    align-items: center;
-    gap: var(--ds-space-4);
-  }
-
-  &__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ds-space-3);
-    padding: var(--ds-space-3) var(--ds-space-4);
-    border: 1px solid var(--ds-border);
-    border-radius: var(--ds-radius-md);
-    background: var(--ds-surface-sunken, var(--ds-surface));
-  }
-
-  &__row-label {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  &__row-title {
-    font-family: var(--ds-font-heading);
-    font-weight: var(--ds-weight-medium);
-    color: var(--ds-ink, var(--ds-text));
-    font-size: var(--ds-text-sm);
-  }
-
-  &__row-sub {
-    font-size: var(--ds-text-xs);
-    color: var(--ds-taupe, var(--ds-text-muted));
-  }
-
-  &__verify { margin-block-start: calc(var(--ds-space-2) * -1); }
-}
-
-.profile-avatar {
-  inline-size: 80px;
-  block-size: 80px;
-  border-radius: 50%;
-  background: var(--ds-brand-700, #322873);
-  color: var(--ds-text-onBrand, #fff);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: var(--ds-shadow-sm);
-
-  &__initials {
-    font-family: var(--ds-font-heading);
-    font-weight: var(--ds-weight-bold);
-    font-size: 28px;
-    letter-spacing: 0.04em;
-  }
-}
-
-.profile-identity {
-  min-inline-size: 0;
-
-  &__name {
-    font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-lg);
-    font-weight: var(--ds-weight-bold);
-    color: var(--ds-ink, var(--ds-text));
-    margin: 0 0 var(--ds-space-1);
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__email {
-    margin: 0;
-    font-family: var(--ds-font-mono);
-    font-size: var(--ds-text-sm);
-    color: var(--ds-taupe, var(--ds-text-muted));
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
 
 .profile-form {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-4);
+  gap: var(--ds-space-5);
 
   &__grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--ds-space-3);
-    @media (min-width: 700px) { grid-template-columns: 1fr 1fr; }
+
+    @media (min-width: 700px) {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   &__gender {
@@ -617,6 +576,7 @@ async function UpdateUserProfileData (): Promise<void> {
     display: flex;
     justify-content: flex-end;
     gap: var(--ds-space-2);
+    padding-block-start: var(--ds-space-2);
   }
 }
 
@@ -641,65 +601,47 @@ async function UpdateUserProfileData (): Promise<void> {
   &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
 }
 
-.profile-link {
-  color: var(--ds-brand-600);
-  font-family: var(--ds-font-body);
-  font-size: var(--ds-text-sm);
-  text-decoration: none;
-  border-block-end: 1px solid currentColor;
-  &:hover { color: var(--ds-brand-700); }
+// ---------------------------------------------------------------------------
+// Preferences
+// ---------------------------------------------------------------------------
+.profile-prefs__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  flex-wrap: wrap;
 }
 
-.profile-prefs {
+.profile-prefs__label {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-3);
+  gap: 2px;
 
-  &__row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--ds-space-4);
-    padding: var(--ds-space-4);
-    border: 1px solid var(--ds-border);
-    border-radius: var(--ds-radius-md);
-    background: var(--ds-surface);
-    flex-wrap: wrap;
+  span {
+    font-family: var(--ds-font-heading);
+    font-weight: var(--ds-weight-medium);
+    color: var(--ds-ink, var(--ds-text));
+    font-size: var(--ds-text-sm);
   }
-
-  &__label {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-
-    span {
-      font-family: var(--ds-font-heading);
-      font-weight: var(--ds-weight-medium);
-      color: var(--ds-ink, var(--ds-text));
-      font-size: var(--ds-text-sm);
-    }
-    small {
-      color: var(--ds-taupe, var(--ds-text-muted));
-      font-size: var(--ds-text-xs);
-    }
+  small {
+    color: var(--ds-taupe, var(--ds-text-muted));
+    font-size: var(--ds-text-xs);
   }
+}
 
-  &__control {
-    display: flex;
-    align-items: center;
-    gap: var(--ds-space-2);
-    flex-wrap: wrap;
-
-    &--stack {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  }
+.profile-prefs__control {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  padding: 4px;
+  background: var(--ds-surface-sunken, var(--ds-surface));
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill);
 }
 
 .lang-chip {
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
+  background: transparent;
+  border: 0;
   border-radius: var(--ds-radius-pill);
   padding: 0.4rem 1rem;
   font-family: var(--ds-font-heading);
@@ -709,35 +651,12 @@ async function UpdateUserProfileData (): Promise<void> {
   transition: all var(--ds-duration-fast) var(--ds-ease-out);
 
   &--active {
-    background: var(--ds-brand-700, #322873);
+    background: var(--ds-brand-600);
     color: var(--ds-text-onBrand, #fff);
-    border-color: var(--ds-brand-700, #322873);
   }
-  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
-}
-
-.profile-select {
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-md);
-  padding: 0.5rem 0.75rem;
-  font-family: var(--ds-font-body);
-  font-size: var(--ds-text-sm);
-  color: var(--ds-text);
-  min-inline-size: 10rem;
-
-  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
-}
-
-.pref-check {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ds-space-2);
-  font-family: var(--ds-font-body);
-  font-size: var(--ds-text-sm);
-  color: var(--ds-text);
-  cursor: pointer;
-
-  input { accent-color: var(--ds-brand-600); }
+  &:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--ds-shadow-focus);
+  }
 }
 </style>

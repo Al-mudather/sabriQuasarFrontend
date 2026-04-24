@@ -1,81 +1,173 @@
 <template>
   <main class="marketing-page">
+    <!-- Page header -->
     <header class="marketing-page__head">
-      <div>
-        <h1>{{ $t('التسويق الخاص بي') }}</h1>
-        <p>{{ $t('إحالاتك، أرباحك، وسجل السحوبات في لوحة واحدة.') }}</p>
-      </div>
+      <h1 class="marketing-page__title">{{ $t('التسويق الخاص بي') }}</h1>
+      <p class="marketing-page__subtitle">
+        {{ $t('إحالاتك، أرباحك، وسجل السحوبات في لوحة واحدة.') }}
+      </p>
     </header>
 
-    <!-- Stats row -->
-    <section class="marketing-page__stats">
-      <div class="marketing-stat">
-        <stat-card :value="affiliatesCount" :label="$t('إحالات')" size="sm" variant="indigo" />
+    <!-- Compact metrics strip (no donuts, no tile cards) -->
+    <section
+      class="metrics-strip"
+      role="group"
+      :aria-label="$t('ملخص الأداء')"
+    >
+      <div class="metrics-strip__item">
+        <span class="metrics-strip__value" dir="ltr">{{ formatNumber(activeBalance) }}</span>
+        <span class="metrics-strip__suffix" dir="ltr">{{ currency }}</span>
+        <span class="metrics-strip__label">{{ $t('الرصيد الحالي') }}</span>
       </div>
-      <div class="marketing-stat">
-        <stat-card :value="totalEarnings" :label="$t('إجمالي الأرباح')" size="sm" variant="terracotta" :suffix="currency" />
+
+      <span class="metrics-strip__divider" aria-hidden="true"></span>
+
+      <div class="metrics-strip__item">
+        <span class="metrics-strip__value metrics-strip__value--accent" dir="ltr">
+          {{ formatNumber(totalEarnings) }}
+        </span>
+        <span class="metrics-strip__suffix" dir="ltr">{{ currency }}</span>
+        <span class="metrics-strip__label">{{ $t('إجمالي الأرباح') }}</span>
       </div>
-      <div class="marketing-stat">
-        <stat-card :value="pendingPayouts" :label="$t('سحوبات قيد الانتظار')" size="sm" variant="indigo" />
+
+      <span class="metrics-strip__divider" aria-hidden="true"></span>
+
+      <div class="metrics-strip__item">
+        <span class="metrics-strip__value" dir="ltr">{{ formatNumber(pendingPayouts) }}</span>
+        <span class="metrics-strip__label">{{ $t('سحوبات قيد الانتظار') }}</span>
       </div>
-      <div class="marketing-stat">
-        <stat-card :value="activeBalance" :label="$t('الرصيد الحالي')" size="sm" variant="terracotta" :suffix="currency" />
+
+      <span class="metrics-strip__divider" aria-hidden="true"></span>
+
+      <div class="metrics-strip__item">
+        <span class="metrics-strip__value metrics-strip__value--accent" dir="ltr">
+          {{ formatNumber(affiliatesCount) }}
+        </span>
+        <span class="metrics-strip__label">{{ $t('إحالات') }}</span>
       </div>
     </section>
 
-    <!-- Referral code card -->
-    <ds-card class="referral-card" variant="default" elevation="sm">
-      <div class="referral-card__head">
-        <h2>{{ $t('رمز الدعوة الخاص بك') }}</h2>
-        <p>{{ $t('شارك رمزك مع أصدقائك واكسب عمولة عند كل تسجيل.') }}</p>
+    <!-- Referral code block (no ds-card wrapper) -->
+    <section class="referral" :aria-label="$t('رمز الدعوة الخاص بك')">
+      <div class="referral__head">
+        <h2 class="referral__title">{{ $t('رمز الدعوة الخاص بك') }}</h2>
+        <p class="referral__hint">
+          {{ $t('شارك رمزك مع أصدقائك واكسب عمولة عند كل تسجيل.') }}
+        </p>
       </div>
 
-      <div class="referral-card__code-row">
-        <code class="referral-card__code" :aria-label="$t('رمز الدعوة')">
-          {{ referralCode || '—' }}
-        </code>
-        <div class="referral-card__actions">
+      <div class="referral__code-row">
+        <div class="referral__code-field">
+          <span class="referral__code-label">{{ $t('رمز الدعوة') }}</span>
+          <code
+            class="referral__code"
+            dir="ltr"
+            :aria-label="$t('رمز الدعوة')"
+          >{{ referralCode || '—' }}</code>
+        </div>
+
+        <div class="referral__actions">
           <ds-button
             variant="ghost"
             size="sm"
             :disabled="!referralCode"
+            :aria-label="$t('نسخ رمز الدعوة')"
             @click="copyCode"
           >
-            {{ copied ? $t('تم النسخ') : $t('نسخ') }}
+            <span class="referral__btn-inner">
+              <svg
+                width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+              >
+                <template v-if="copied">
+                  <path d="M5 12l5 5L20 7" />
+                </template>
+                <template v-else>
+                  <rect x="9" y="9" width="11" height="11" rx="2" />
+                  <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                </template>
+              </svg>
+              <span>{{ copied ? $t('تم النسخ') : $t('نسخ') }}</span>
+            </span>
           </ds-button>
+
           <ds-button
             variant="accent"
             size="sm"
             :disabled="!referralCode"
             @click="shareCode"
           >
-            {{ $t('مشاركة') }}
+            <span class="referral__btn-inner">
+              <svg
+                width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+              >
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+              </svg>
+              <span>{{ $t('مشاركة') }}</span>
+            </span>
           </ds-button>
         </div>
       </div>
 
-      <div v-if="shareUrl" class="referral-card__url">
-        <span class="referral-card__url-label">{{ $t('رابط الدعوة') }}</span>
-        <span class="referral-card__url-value">{{ shareUrl }}</span>
+      <div v-if="shareUrl" class="referral__url">
+        <div class="referral__url-text">
+          <span class="referral__url-label">{{ $t('رابط الدعوة') }}</span>
+          <span class="referral__url-value" dir="ltr">{{ shareUrl }}</span>
+        </div>
+        <button
+          type="button"
+          class="referral__url-copy"
+          :aria-label="$t('نسخ رابط الدعوة')"
+          @click="copyUrl"
+        >
+          <svg
+            width="14" height="14" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+          >
+            <template v-if="urlCopied">
+              <path d="M5 12l5 5L20 7" />
+            </template>
+            <template v-else>
+              <rect x="9" y="9" width="11" height="11" rx="2" />
+              <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+            </template>
+          </svg>
+          <span>{{ urlCopied ? $t('تم النسخ') : $t('نسخ') }}</span>
+        </button>
       </div>
-    </ds-card>
+    </section>
 
-    <!-- Withdraws / earnings -->
-    <section class="marketing-page__section">
-      <header class="marketing-page__section-head">
-        <h2>{{ $t('سجل السحوبات') }}</h2>
+    <!-- Divider between sections -->
+    <hr class="marketing-page__rule" aria-hidden="true" />
+
+    <!-- Withdraws / sign-ups history -->
+    <section class="withdraws">
+      <header class="withdraws__head">
+        <div>
+          <h2 class="withdraws__title">{{ $t('سجل السحوبات') }}</h2>
+          <p class="withdraws__subtitle">
+            {{ $t('كل طلبات السحب السابقة وحالتها الحالية.') }}
+          </p>
+        </div>
         <ds-button
           variant="primary"
           size="sm"
-          :disabled="Number(activeBalance) <= 0"
+          :disabled="activeBalance <= 0"
           @click="withdrawOpen = true"
         >
           {{ $t('طلب سحب') }}
         </ds-button>
       </header>
 
-      <div v-if="loadingWithdraws && withdraws.length === 0" class="marketing-page__skeletons">
-        <ds-skeleton v-for="i in 3" :key="i" shape="rect" height="6rem" />
+      <div v-if="loadingWithdraws && withdraws.length === 0" class="withdraws__skeletons">
+        <ds-skeleton v-for="i in 3" :key="i" shape="rect" height="5.5rem" />
       </div>
 
       <ds-empty-state
@@ -85,27 +177,48 @@
         size="md"
       />
 
-      <div v-else class="marketing-page__list">
-        <transaction-card
+      <ul v-else class="withdraws__list" role="list">
+        <li
           v-for="w in withdraws"
           :key="w.pk ?? ''"
-          :transaction="mapWithdraw(w)"
-          :status="w.isDone ? 'completed' : 'processing'"
-        />
-      </div>
+          class="withdraws__row"
+        >
+          <div class="withdraws__row-main">
+            <span class="withdraws__row-id" dir="ltr">#{{ w.pk }}</span>
+            <span class="withdraws__row-date">{{ formatDate(w.created) }}</span>
+          </div>
+          <div class="withdraws__row-amount" dir="ltr">
+            <span class="withdraws__row-value">{{ formatNumber(Number(w.amount ?? 0)) }}</span>
+            <span class="withdraws__row-currency">{{ currency }}</span>
+          </div>
+          <span
+            class="withdraws__status"
+            :class="w.isDone ? 'withdraws__status--done' : 'withdraws__status--pending'"
+          >
+            {{ w.isDone ? $t('مكتمل') : $t('قيد المعالجة') }}
+          </span>
+        </li>
+      </ul>
     </section>
 
+    <!-- Withdraw dialog -->
     <q-dialog v-model="withdrawOpen" persistent>
       <q-card class="withdraw-dialog">
-        <h3>{{ $t('طلب سحب') }}</h3>
+        <h3 class="withdraw-dialog__title">{{ $t('طلب سحب') }}</h3>
         <p class="withdraw-dialog__hint">
-          {{ $t('الرصيد المتاح') }}: <strong>{{ activeBalance }} {{ currency }}</strong>
+          {{ $t('الرصيد المتاح') }}:
+          <strong dir="ltr">{{ formatNumber(activeBalance) }} {{ currency }}</strong>
         </p>
+        <label class="withdraw-dialog__label" for="withdraw-amount">
+          {{ $t('المبلغ') }}
+        </label>
         <input
+          id="withdraw-amount"
           class="withdraw-dialog__input"
           type="number"
           v-model.number="withdrawAmount"
           :placeholder="$t('المبلغ')"
+          dir="ltr"
         />
         <div class="withdraw-dialog__actions">
           <ds-button variant="ghost" @click="cancelWithdraw">
@@ -132,8 +245,6 @@ import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
-import StatCard from 'src/components/shared/StatCard.vue'
-import TransactionCard from 'src/components/shared/TransactionCard.vue'
 import { MyPyramidBalance } from 'src/graphql/pyramid_marketing_management/query/MyPyramidBalanceQuery'
 import { MyPyramidWithdraws } from 'src/graphql/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
 import { MyPyramidAffiliates } from 'src/graphql/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe'
@@ -163,13 +274,13 @@ const settings = useSettingsStore()
 const { currency } = storeToRefs(settings)
 
 // ---------------------------------------------------------------------------
-// Queries
+// Queries — all typed with explicit generics (CLAUDE.md rule #2).
 // ---------------------------------------------------------------------------
-const balanceQuery = useQuery<MyPyramidBalanceResult, MyPyramidBalanceVars>(MyPyramidBalance)
+const balanceQuery    = useQuery<MyPyramidBalanceResult, MyPyramidBalanceVars>(MyPyramidBalance)
 const affiliatesQuery = useQuery<MyPyramidAffiliatesResult, MyPyramidAffiliatesVars>(MyPyramidAffiliates)
-const accountQuery = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(MyPyramidAccount)
-const rewardQuery = useQuery<MyPyramidLedgerRewardResult, MyPyramidLedgerRewardVars>(MyPyramidLedgerReward)
-const withdrawsQuery = useQuery<MyPyramidWithdrawsResult, MyPyramidWithdrawsVars>(MyPyramidWithdraws)
+const accountQuery    = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(MyPyramidAccount)
+const rewardQuery     = useQuery<MyPyramidLedgerRewardResult, MyPyramidLedgerRewardVars>(MyPyramidLedgerReward)
+const withdrawsQuery  = useQuery<MyPyramidWithdrawsResult, MyPyramidWithdrawsVars>(MyPyramidWithdraws)
 
 const loadingWithdraws = withdrawsQuery.loading
 
@@ -194,13 +305,8 @@ const myPyramidAffiliates = computed(() => affiliatesQuery.result.value?.myPyram
 const myPyramidAccount = computed(() => accountQuery.result.value?.myPyramidAccount ?? null)
 
 /**
- * Ledger reward leak fix.
- * Schema: `myPyramidLedgerReward: Float` — codegen types it `number | null`.
- * No typePolicy in Apollo client parses this field (only CourseNode.currency
- * has a policy). The value arrives as a plain number from the server, so we
- * consume it directly as `number | null`. The old `JSON.parse` was defensive
- * code against an earlier string-encoded payload — the current schema (Float)
- * makes it unnecessary and the type wouldn't allow it.
+ * Ledger reward: schema types it as `Float` -> `number | null`.
+ * No typePolicy parses this scalar; consume directly.
  */
 const myPyramidLedgerReward = computed<number | null>(
   () => rewardQuery.result.value?.myPyramidLedgerReward ?? null,
@@ -232,12 +338,6 @@ const activeBalance = computed<number>(() => {
   return Number.isFinite(v) ? v : 0
 })
 
-/**
- * totalEarnings — consumes the typed Float directly.
- * The old code had: `JSON.parse(raw)` then currency-keyed lookup.
- * Since `myPyramidLedgerReward` is `Float | null` in the schema, no parsing
- * is needed; we read the number and return it (no currency keying).
- */
 const totalEarnings = computed<number>(() => {
   const v = myPyramidLedgerReward.value
   if (v == null) return 0
@@ -257,41 +357,54 @@ const pendingPayouts = computed<number>(
 // UI state
 // ---------------------------------------------------------------------------
 const copied = ref(false)
+const urlCopied = ref(false)
 const withdrawOpen = ref(false)
 const withdrawAmount = ref<number | null>(null)
 const withdrawLoading = ref(false)
 
 // ---------------------------------------------------------------------------
-// Methods
+// Formatters — English numerals (CLAUDE.md requirement).
 // ---------------------------------------------------------------------------
-function mapWithdraw(w: PyramidWithdraw) {
-  return {
-    id: String(w.pk ?? ''),
-    courseName: `${t('طلب سحب')} #${w.pk}`,
-    amount: w.amount ?? null,
-    currency: currency.value,
-    createdAt: w.created ?? undefined,
-    updatedAt: w.updated ?? undefined,
+const numberFmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
+function formatNumber(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(Number(n))) return '0'
+  return numberFmt.format(Number(n))
+}
+
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  try {
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return '—'
+    return new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(d)
+  } catch { return '—' }
+}
+
+// ---------------------------------------------------------------------------
+// Clipboard helpers
+// ---------------------------------------------------------------------------
+async function writeClipboard(text: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text)
+    return
   }
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.setAttribute('readonly', '')
+  ta.style.position = 'absolute'
+  ta.style.left = '-9999px'
+  document.body.appendChild(ta)
+  ta.select()
+  document.execCommand('copy')
+  document.body.removeChild(ta)
 }
 
 async function copyCode(): Promise<void> {
-  if (!auth.isAuthenticated) return
-  if (!referralCode.value) return
+  if (!auth.isAuthenticated || !referralCode.value) return
   try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(referralCode.value)
-    } else {
-      const ta = document.createElement('textarea')
-      ta.value = referralCode.value
-      ta.setAttribute('readonly', '')
-      ta.style.position = 'absolute'
-      ta.style.left = '-9999px'
-      document.body.appendChild(ta)
-      ta.select()
-      document.execCommand('copy')
-      document.body.removeChild(ta)
-    }
+    await writeClipboard(referralCode.value)
     copied.value = true
     setTimeout(() => { copied.value = false }, 1600)
     $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم نسخ رمز الدعوة') })
@@ -300,9 +413,20 @@ async function copyCode(): Promise<void> {
   }
 }
 
+async function copyUrl(): Promise<void> {
+  if (!shareUrl.value) return
+  try {
+    await writeClipboard(shareUrl.value)
+    urlCopied.value = true
+    setTimeout(() => { urlCopied.value = false }, 1600)
+    $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم نسخ رابط الدعوة') })
+  } catch {
+    $q.notify({ type: 'warning', position: 'top', progress: true, message: t('تعذر النسخ') })
+  }
+}
+
 async function shareCode(): Promise<void> {
-  if (!auth.isAuthenticated) return
-  if (!referralCode.value) return
+  if (!auth.isAuthenticated || !referralCode.value) return
   const text = `${t('انضم معي إلى مركز د. صبري أبوقرون للتدريب')}\n${shareUrl.value}`
   try {
     if (navigator.share) {
@@ -311,7 +435,7 @@ async function shareCode(): Promise<void> {
     }
   } catch { /* user cancelled */ }
   try {
-    await navigator.clipboard.writeText(shareUrl.value)
+    await writeClipboard(shareUrl.value)
     $q.notify({ type: 'info', position: 'top', progress: true, message: t('تم نسخ رابط الدعوة') })
   } catch { /* noop */ }
 }
@@ -341,10 +465,7 @@ async function submitWithdraw(): Promise<void> {
   const amt = Number(withdrawAmount.value)
   if (!Number.isFinite(amt) || amt <= 0 || amt > activeBalance.value) {
     $q.notify({
-      type: 'warning',
-      position: 'top',
-      progress: true,
-      multiLine: true,
+      type: 'warning', position: 'top', progress: true, multiLine: true,
       message: t('يرجى إدخال مبلغ صالح ضمن رصيدك المتاح.'),
     })
     return
@@ -355,10 +476,7 @@ async function submitWithdraw(): Promise<void> {
     const payload = res?.data?.makePyramidWithdraw
     if (payload?.success) {
       $q.notify({
-        type: 'positive',
-        position: 'top',
-        progress: true,
-        multiLine: true,
+        type: 'positive', position: 'top', progress: true, multiLine: true,
         message: t('تم إرسال طلب السحب'),
       })
       withdrawOpen.value = false
@@ -372,64 +490,282 @@ async function submitWithdraw(): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-.marketing-page {
-  background: var(--ds-cream, var(--ds-surface-muted));
-  min-block-size: 100vh;
-  max-inline-size: 1200px;
-  margin-inline: auto;
-  padding: var(--ds-space-6) var(--ds-space-3) var(--ds-space-12);
+// The page sits inside UserLayout's `.user-layout__main` surface, which
+// already provides a cream card chrome (background + border + radius +
+// shadow). We DO NOT add another card around the whole page; sections are
+// laid out flush to that surface with intentional spacing. The referral
+// block and stats strip are inline groups, not nested cards.
 
-  @media (min-width: 600px) {
-    padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
+.marketing-page {
+  inline-size: 100%;
+  font-family: var(--ds-font-body);
+  color: var(--ds-ink);
+}
+
+// ---------- Header -------------------------------------------------------
+.marketing-page__head {
+  margin-block-end: var(--ds-space-6);
+}
+
+.marketing-page__title {
+  font-family: var(--ds-font-heading);
+  font-size: clamp(1.5rem, 2vw + 1rem, 2rem);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-indigo);
+  margin: 0 0 var(--ds-space-1);
+  letter-spacing: -0.005em;
+}
+
+.marketing-page__subtitle {
+  margin: 0;
+  color: var(--ds-taupe);
+  font-size: var(--ds-text-sm);
+  line-height: 1.7;
+}
+
+.marketing-page__rule {
+  border: 0;
+  block-size: 1px;
+  background: var(--ds-border);
+  margin-block: var(--ds-space-7);
+}
+
+// ---------- Metrics strip (replaces 4 donut stat cards) ------------------
+.metrics-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--ds-space-3) var(--ds-space-5);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  background: var(--ds-surface-sunken);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  margin-block-end: var(--ds-space-7);
+
+  &__item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--ds-space-2);
+    flex: 1 1 auto;
+    min-inline-size: 140px;
   }
+
+  &__value {
+    font-family: var(--ds-font-mono);
+    font-size: clamp(1.5rem, 1.2vw + 1.1rem, 1.875rem);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-indigo);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+
+    &--accent {
+      color: var(--ds-terracotta);
+    }
+  }
+
+  &__suffix {
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__label {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-taupe);
+    margin-inline-start: auto;
+  }
+
+  &__divider {
+    inline-size: 1px;
+    align-self: stretch;
+    background: var(--ds-border);
+    display: none;
+  }
+
+  @media (min-width: 720px) {
+    flex-wrap: nowrap;
+
+    &__divider { display: block; }
+
+    &__item {
+      flex: 1 1 0;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--ds-space-1);
+    }
+
+    &__label {
+      margin-inline-start: 0;
+    }
+  }
+}
+
+// ---------- Referral block (no ds-card wrapper) --------------------------
+.referral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  padding-block-end: var(--ds-space-2);
 
   &__head {
-    margin-block-end: var(--ds-space-6);
-
-    h1 {
-      font-family: var(--ds-font-heading);
-      font-size: var(--ds-text-3xl);
-      font-weight: var(--ds-weight-bold);
-      color: var(--ds-ink, var(--ds-text));
-      margin: 0 0 var(--ds-space-1);
-    }
-    p {
-      margin: 0;
-      color: var(--ds-taupe, var(--ds-text-muted));
-      font-size: var(--ds-text-sm);
-    }
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-1);
   }
 
-  &__stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--ds-space-4);
-    margin-block-end: var(--ds-space-6);
+  &__title {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-xl);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-ink);
+    margin: 0;
+  }
 
-    @media (min-width: 900px) {
-      grid-template-columns: repeat(4, 1fr);
+  &__hint {
+    margin: 0;
+    color: var(--ds-taupe);
+    font-size: var(--ds-text-sm);
+    line-height: 1.7;
+  }
+
+  &__code-row {
+    display: flex;
+    align-items: stretch;
+    gap: var(--ds-space-3);
+    flex-wrap: wrap;
+  }
+
+  &__code-field {
+    flex: 1 1 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--ds-space-3) var(--ds-space-4);
+    background: var(--ds-ivory);
+    border: 1px dashed var(--ds-border-strong);
+    border-radius: var(--ds-radius-md);
+    min-inline-size: 0;
+  }
+
+  &__code-label {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__code {
+    font-family: var(--ds-font-mono);
+    font-size: clamp(1.25rem, 1.5vw + 0.75rem, 1.75rem);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-indigo);
+    letter-spacing: 0.06em;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__actions {
+    display: inline-flex;
+    gap: var(--ds-space-2);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  &__btn-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-1);
+
+    svg { flex: 0 0 auto; }
+  }
+
+  &__url {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-3);
+    padding: var(--ds-space-3) var(--ds-space-4);
+    background: var(--ds-surface-sunken);
+    border-radius: var(--ds-radius-md);
+    flex-wrap: wrap;
+  }
+
+  &__url-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-inline-size: 0;
+    flex: 1 1 220px;
+  }
+
+  &__url-label {
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__url-value {
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-ink);
+    overflow-wrap: anywhere;
+  }
+
+  &__url-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-1);
+    padding: var(--ds-space-1) var(--ds-space-3);
+    background: transparent;
+    border: 1px solid var(--ds-border-strong);
+    border-radius: var(--ds-radius-sm);
+    color: var(--ds-indigo);
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-weight-medium);
+    cursor: pointer;
+    transition: background-color var(--ds-duration-fast) var(--ds-ease-out),
+                color var(--ds-duration-fast) var(--ds-ease-out);
+
+    &:hover,
+    &:focus-visible {
+      background: var(--ds-brand-50);
+      outline: none;
     }
   }
+}
 
-  &__section {
-    margin-block-start: var(--ds-space-8);
-  }
+// ---------- Withdraws section -------------------------------------------
+.withdraws {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
 
-  &__section-head {
+  &__head {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     gap: var(--ds-space-3);
-    margin-block-end: var(--ds-space-4);
     flex-wrap: wrap;
+  }
 
-    h2 {
-      font-family: var(--ds-font-heading);
-      font-size: var(--ds-text-2xl);
-      font-weight: var(--ds-weight-bold);
-      color: var(--ds-ink, var(--ds-text));
-      margin: 0;
-    }
+  &__title {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-xl);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-ink);
+    margin: 0 0 2px;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: var(--ds-taupe);
+    font-size: var(--ds-text-sm);
   }
 
   &__skeletons {
@@ -439,119 +775,135 @@ async function submitWithdraw(): Promise<void> {
   }
 
   &__list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--ds-space-4);
-  }
-}
-
-.marketing-stat {
-  display: flex;
-  justify-content: center;
-  padding: var(--ds-space-4);
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-lg);
-  box-shadow: var(--ds-shadow-xs);
-}
-
-.referral-card {
-  margin-block-end: var(--ds-space-6);
-
-  :deep(.ds-card__body) {
-    padding: var(--ds-space-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-4);
-  }
-
-  &__head {
-    h2 {
-      font-family: var(--ds-font-heading);
-      font-size: var(--ds-text-xl);
-      font-weight: var(--ds-weight-bold);
-      color: var(--ds-ink, var(--ds-text));
-      margin: 0 0 var(--ds-space-1);
-    }
-    p {
-      margin: 0;
-      color: var(--ds-taupe, var(--ds-text-muted));
-      font-size: var(--ds-text-sm);
-    }
-  }
-
-  &__code-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ds-space-3);
-    flex-wrap: wrap;
-    padding: var(--ds-space-4);
-    background: var(--ds-cream, var(--ds-surface-muted));
-    border: 1px dashed var(--ds-border);
+    gap: 0;
+    border: 1px solid var(--ds-border);
     border-radius: var(--ds-radius-md);
+    background: var(--ds-ivory);
+    overflow: hidden;
   }
 
-  &__code {
-    font-family: var(--ds-font-mono);
-    font-size: var(--ds-text-2xl);
-    font-weight: var(--ds-weight-bold);
-    color: var(--ds-brand-700, #322873);
-    letter-spacing: 0.08em;
-    overflow-wrap: anywhere;
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: var(--ds-space-3);
+    padding: var(--ds-space-3) var(--ds-space-4);
+
+    & + & {
+      border-block-start: 1px solid var(--ds-border);
+    }
+
+    @media (max-width: 520px) {
+      grid-template-columns: 1fr auto;
+    }
   }
 
-  &__actions {
-    display: inline-flex;
-    gap: var(--ds-space-2);
-  }
-
-  &__url {
+  &__row-main {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: var(--ds-space-3);
-    background: var(--ds-surface-sunken, var(--ds-surface));
-    border-radius: var(--ds-radius-md);
+    min-inline-size: 0;
   }
 
-  &__url-label {
-    font-size: var(--ds-text-xs);
-    color: var(--ds-taupe, var(--ds-text-muted));
-  }
-
-  &__url-value {
+  &__row-id {
     font-family: var(--ds-font-mono);
     font-size: var(--ds-text-sm);
-    color: var(--ds-text);
-    overflow-wrap: anywhere;
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-ink);
+  }
+
+  &__row-date {
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe);
+  }
+
+  &__row-amount {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--ds-space-1);
+    font-family: var(--ds-font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__row-value {
+    font-size: var(--ds-text-md);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-indigo);
+  }
+
+  &__row-currency {
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__status {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-weight-medium);
+    padding: 2px var(--ds-space-2);
+    border-radius: 999px;
+    white-space: nowrap;
+
+    &--done {
+      color: var(--ds-success);
+      background: var(--ds-success-bg);
+    }
+
+    &--pending {
+      color: var(--ds-warning);
+      background: var(--ds-warning-bg);
+    }
+
+    @media (max-width: 520px) {
+      grid-column: 1 / -1;
+      justify-self: start;
+    }
   }
 }
 
+// ---------- Withdraw dialog ---------------------------------------------
 .withdraw-dialog {
   inline-size: 100%;
-  max-inline-size: 400px;
+  max-inline-size: 420px;
   padding: var(--ds-space-5);
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-3);
+  background: var(--ds-ivory);
 
-  h3 {
+  &__title {
     margin: 0;
     font-family: var(--ds-font-heading);
     font-size: var(--ds-text-lg);
     font-weight: var(--ds-weight-bold);
-    color: var(--ds-ink, var(--ds-text));
+    color: var(--ds-ink);
   }
 
   &__hint {
     margin: 0;
     font-size: var(--ds-text-sm);
-    color: var(--ds-taupe, var(--ds-text-muted));
+    color: var(--ds-taupe);
+
     strong {
-      color: var(--ds-ink, var(--ds-text));
+      color: var(--ds-indigo);
       font-family: var(--ds-font-mono);
+      font-variant-numeric: tabular-nums;
     }
+  }
+
+  &__label {
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   &__input {
@@ -560,17 +912,21 @@ async function submitWithdraw(): Promise<void> {
     font-family: var(--ds-font-mono);
     font-size: var(--ds-text-md);
     background: var(--ds-surface);
-    border: 1px solid var(--ds-border);
+    border: 1px solid var(--ds-border-strong);
     border-radius: var(--ds-radius-md);
-    color: var(--ds-text);
+    color: var(--ds-ink);
 
-    &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
+    &:focus-visible {
+      outline: 2px solid transparent;
+      box-shadow: var(--ds-shadow-focus);
+    }
   }
 
   &__actions {
     display: flex;
     justify-content: flex-end;
     gap: var(--ds-space-2);
+    margin-block-start: var(--ds-space-2);
   }
 }
 </style>

@@ -1,95 +1,161 @@
 <template>
   <main class="orders-page">
+    <!-- Head -->
     <header class="orders-page__head">
       <div>
-        <h1>{{ t('طلباتي') }}</h1>
-        <p>{{ t('تتبّع حالة جميع طلباتك وفواتيرك.') }}</p>
+        <h1 class="orders-page__title">طلباتي</h1>
+        <p class="orders-page__subtitle">تتبّع حالة جميع طلباتك وفواتيرك.</p>
       </div>
     </header>
 
-    <nav class="orders-page__filters" role="tablist" aria-label="orders filters">
+    <!-- Filter chips (MyCourses pattern) -->
+    <nav
+      class="orders-page__chips"
+      role="tablist"
+      aria-label="تصفية الطلبات حسب الحالة"
+    >
       <button
         v-for="f in filters"
         :key="f.key"
         type="button"
-        class="filter-chip"
-        :class="{ 'filter-chip--active': activeFilter === f.key }"
         role="tab"
-        :aria-selected="activeFilter === f.key ? 'true' : 'false'"
+        :aria-selected="activeFilter === f.key"
+        :aria-pressed="activeFilter === f.key"
+        :aria-label="`${f.label} (${f.count})`"
+        class="chip"
+        :class="{ 'chip--active': activeFilter === f.key }"
         @click="activeFilter = f.key"
       >
-        {{ f.label }}
-        <span class="filter-chip__count">{{ f.count }}</span>
+        <span class="chip__label">{{ f.label }}</span>
+        <span class="chip__count">{{ f.count }}</span>
       </button>
     </nav>
 
     <section class="orders-page__body">
+      <!-- Loading -->
       <div v-if="loading && orders.length === 0" class="orders-page__skeletons">
-        <ds-skeleton v-for="i in 4" :key="i" shape="rect" height="9rem" />
+        <ds-skeleton v-for="i in 4" :key="i" shape="rect" height="10rem" />
       </div>
 
+      <!-- Empty: filtered -->
       <ds-empty-state
         v-else-if="visibleOrders.length === 0 && activeFilter !== 'all'"
         variant="search"
-        :title="t('لا توجد طلبات في هذا التصنيف')"
-        :description="t('جرّب تصنيفاً آخر لعرض طلباتك.')"
+        title="لا توجد طلبات في هذا التصنيف"
+        description="جرّب تصنيفاً آخر لعرض طلباتك."
         size="md"
       />
 
+      <!-- Empty: no orders at all -->
       <ds-empty-state
         v-else-if="orders.length === 0"
-        :title="t('لا توجد طلبات بعد')"
-        :description="t('ابدأ بشراء كورس وستظهر جميع طلباتك هنا.')"
+        title="لا توجد طلبات بعد"
+        description="ابدأ بشراء كورس وستظهر جميع طلباتك هنا."
         size="md"
       >
         <template #actions>
           <ds-button variant="primary" @click="goToCoursesPage">
-            {{ t('تصفح الكورسات') }}
+            تصفح الكورسات
           </ds-button>
         </template>
       </ds-empty-state>
 
+      <!-- Grid -->
       <div v-else class="orders-page__grid">
-        <transaction-card
+        <article
           v-for="o in visibleOrders"
           :key="o.pk ?? o.order?.pk ?? ''"
-          :transaction="mapOrder(o)"
-          :status="mapStatus(o)"
-          :actions="buildActions(o)"
-          @action-click="onAction"
-        />
+          class="order-card"
+          :class="[`order-card--${mapStatus(o)}`]"
+          role="article"
+        >
+          <header class="order-card__head">
+            <span
+              class="order-card__status"
+              :class="[`order-card__status--${mapStatus(o)}`]"
+            >
+              <span class="order-card__status-dot" aria-hidden="true"></span>
+              {{ STATUS_LABEL[mapStatus(o)] }}
+            </span>
+
+            <div v-if="o.order?.totalAmount != null" class="order-card__amount">
+              <span class="order-card__amount-value">{{ formatAmount(o.order.totalAmount) }}</span>
+              <span class="order-card__amount-currency">{{ currencyLabel(o) }}</span>
+            </div>
+          </header>
+
+          <div class="order-card__body">
+            <h3 class="order-card__title">
+              {{ o.order?.invoiceNumber ? `طلب رقم ${o.order.invoiceNumber}` : 'طلب' }}
+            </h3>
+            <p class="order-card__date">
+              {{ formatDate(o.created ?? o.updated) }}
+            </p>
+          </div>
+
+          <footer class="order-card__actions">
+            <ds-button
+              v-if="canReupload(o)"
+              variant="secondary"
+              size="sm"
+              @click="openBill(o)"
+            >
+              إعادة إرفاق الفاتورة
+            </ds-button>
+            <ds-button
+              variant="ghost"
+              size="sm"
+              @click="viewDetails(o)"
+            >
+              عرض التفاصيل
+            </ds-button>
+          </footer>
+        </article>
       </div>
     </section>
 
-    <q-dialog v-model="billOpen" persistent>
-      <q-card class="order-bill">
-        <h3>{{ t('فاتورة الدفع') }}</h3>
+    <!-- Reupload dialog -->
+    <ds-modal v-model="billOpen" size="md" persistent close-label="إغلاق">
+      <template #header>
+        <div class="order-bill__header">
+          <h3 class="order-bill__title">فاتورة الدفع</h3>
+          <p class="order-bill__subtitle">
+            يمكنك مراجعة الفاتورة الحالية أو رفع نسخة محدّثة.
+          </p>
+        </div>
+      </template>
+
+      <div class="order-bill">
         <img
           v-if="activeOrder && activeOrder.attachment"
           class="order-bill__img"
           :src="formatImage(activeOrder.attachment)"
-          alt=""
+          alt="فاتورة الدفع الحالية"
         />
+        <div v-else class="order-bill__img order-bill__img--empty">
+          لا توجد فاتورة مرفقة حالياً
+        </div>
+
         <file-upload
           :imgeSize="4000000"
           :accept="'.png,.jpg, image/*'"
-          :label="t('إعادة إرفاق الفاتورة')"
-          v-on:File_Handler="reuploadImageHandler"
+          label="إعادة إرفاق الفاتورة"
+          @File_Handler="reuploadImageHandler"
         />
-        <div class="order-bill__actions">
-          <ds-button variant="ghost" @click="billOpen = false">
-            {{ t('إلغاء') }}
-          </ds-button>
-          <ds-button
-            variant="primary"
-            :loading="reuploadLoading"
-            @click="reUploadTheTransactionBill"
-          >
-            {{ t('إعادة إرفاق') }}
-          </ds-button>
-        </div>
-      </q-card>
-    </q-dialog>
+      </div>
+
+      <template #footer>
+        <ds-button variant="ghost" @click="billOpen = false">إلغاء</ds-button>
+        <ds-button
+          variant="primary"
+          :loading="reuploadLoading"
+          :disabled="!bankakBill"
+          @click="reUploadTheTransactionBill"
+        >
+          إعادة إرفاق
+        </ds-button>
+      </template>
+    </ds-modal>
   </main>
 </template>
 
@@ -98,12 +164,14 @@ import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuery, useMutation } from '@vue/apollo-composable'
 import { useQuasar } from 'quasar'
-import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from 'src/stores/settings'
 import { useAuthStore } from 'src/stores/auth'
 import { MyAttachmentTransactions } from 'src/graphql/attachment_transactions_management/query/TheUserAttachmentTransactionsQuery'
 import { ReUploadAttachmentTransaction } from 'src/graphql/attachment_transactions_management/mutation/ReUploadAttachmentTransaction'
-import TransactionCard from 'src/components/shared/TransactionCard.vue'
+import DsButton from 'src/design-system/components/DsButton.vue'
+import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
+import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
+import DsModal from 'src/design-system/components/DsModal.vue'
 import FileUpload from 'src/components/utils/FileUploader.vue'
 import type {
   TheUserAttachmentTransactionsResult,
@@ -118,7 +186,6 @@ import type {
 // ---------------------------------------------------------------------------
 const router = useRouter()
 const $q = useQuasar()
-const { t } = useI18n()
 const settings = useSettingsStore()
 const auth = useAuthStore()
 
@@ -127,33 +194,23 @@ const auth = useAuthStore()
 // ---------------------------------------------------------------------------
 type OrderStatus = 'completed' | 'processing' | 'rejected' | 'pending'
 
-interface TransactionDisplayItem {
-  id?: string
-  courseName?: string
-  amount?: number | null
-  currency?: string
-  createdAt?: string
-  updatedAt?: string
-}
-
-interface TransactionAction {
-  key?: string
-  label?: string
-  variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'danger' | 'destructive'
-  size?: 'sm' | 'md' | 'lg'
-  handler?: (event: Event, transaction: Record<string, unknown>) => void
-}
-
 interface FilterChip {
-  key: string
+  key: OrderStatus | 'all'
   label: string
   count: number
+}
+
+const STATUS_LABEL: Record<OrderStatus, string> = {
+  completed: 'مكتملة',
+  processing: 'قيد المعالجة',
+  rejected: 'مرفوضة',
+  pending: 'في الانتظار',
 }
 
 // ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
-const activeFilter = ref<string>('all')
+const activeFilter = ref<FilterChip['key']>('all')
 const billOpen = ref(false)
 const activeOrder = ref<UserAttachmentTransaction | null>(null)
 const reuploadLoading = ref(false)
@@ -192,49 +249,59 @@ function mapStatus (o: UserAttachmentTransaction): OrderStatus {
   return 'pending'
 }
 
-function mapOrder (o: UserAttachmentTransaction): TransactionDisplayItem {
-  const order = o.order ?? null
-  return {
-    id: order?.invoiceNumber ?? String(o.pk ?? ''),
-    courseName: order?.invoiceNumber
-      ? `${t('طلب رقم')} ${order.invoiceNumber}`
-      : t('طلب'),
-    amount: order?.totalAmount ?? null,
-    currency: order?.currency ?? undefined,
-    createdAt: o.created ?? undefined,
-    updatedAt: o.updated ?? undefined,
+function canReupload (o: UserAttachmentTransaction): boolean {
+  return !!(o.retryPlease || o.pyramidRetryPlease)
+}
+
+function formatAmount (value: number | null | undefined): string {
+  if (value == null) return ''
+  const n = Number(value)
+  if (!Number.isFinite(n)) return String(value)
+  // English digits for numerals (per brief).
+  try {
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n)
+  } catch {
+    return String(n)
   }
 }
 
-function buildActions (o: UserAttachmentTransaction): TransactionAction[] {
-  const actions: TransactionAction[] = []
-  if (o.retryPlease || o.pyramidRetryPlease) {
-    actions.push({
-      key: 'reupload',
-      label: t('رؤية الفاتورة'),
-      variant: 'secondary',
-      size: 'sm',
-      handler: (_e: Event) => openBill(o),
-    })
+function currencyLabel (o: UserAttachmentTransaction): string {
+  const raw = o.order?.currency as unknown
+  if (!raw) return ''
+  if (typeof raw === 'string') return raw
+  if (typeof raw === 'object') {
+    const rec = raw as Record<string, unknown>
+    if (typeof rec.name === 'string') return rec.name
+    if (typeof rec.code === 'string') return rec.code
   }
-  actions.push({
-    key: 'details',
-    label: t('عرض التفاصيل'),
-    variant: 'ghost',
-    size: 'sm',
-    handler: (_e: Event) => viewDetails(o),
-  })
-  return actions
+  return ''
+}
+
+function formatDate (iso?: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return String(iso)
+  try {
+    return new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(d)
+  } catch {
+    return d.toLocaleDateString('ar-EG')
+  }
 }
 
 // ---------------------------------------------------------------------------
 // Computed
 // ---------------------------------------------------------------------------
 const statusCounts = computed(() => {
-  const c: Record<string, number> = { all: orders.value.length, completed: 0, processing: 0, rejected: 0, pending: 0 }
+  const c: Record<FilterChip['key'], number> = {
+    all: orders.value.length,
+    completed: 0,
+    processing: 0,
+    rejected: 0,
+    pending: 0,
+  }
   for (const o of orders.value) {
     const s = mapStatus(o)
-    if (c[s] != null) c[s] += 1
+    c[s] += 1
   }
   return c
 })
@@ -242,10 +309,10 @@ const statusCounts = computed(() => {
 const filters = computed<FilterChip[]>(() => {
   const c = statusCounts.value
   return [
-    { key: 'all',        label: t('الكل'),         count: c.all ?? 0 },
-    { key: 'completed',  label: t('مكتملة'),       count: c.completed ?? 0 },
-    { key: 'processing', label: t('قيد المعالجة'), count: c.processing ?? 0 },
-    { key: 'rejected',   label: t('مرفوضة'),       count: c.rejected ?? 0 },
+    { key: 'all',        label: 'الكل',          count: c.all },
+    { key: 'completed',  label: 'مكتملة',        count: c.completed },
+    { key: 'processing', label: 'قيد المعالجة',  count: c.processing },
+    { key: 'rejected',   label: 'مرفوضة',        count: c.rejected },
   ]
 })
 
@@ -257,10 +324,9 @@ const visibleOrders = computed<UserAttachmentTransaction[]>(() => {
 // ---------------------------------------------------------------------------
 // Methods
 // ---------------------------------------------------------------------------
-function onAction (): void { /* handlers execute via action.handler */ }
-
 function openBill (o: UserAttachmentTransaction): void {
   activeOrder.value = o
+  bankakBill.value = null
   billOpen.value = true
 }
 
@@ -270,7 +336,7 @@ function viewDetails (o: UserAttachmentTransaction): void {
     type: 'info',
     position: 'top',
     progress: true,
-    message: `${t('رقم الطلب')}: ${invoiceNumber ?? o.pk}`,
+    message: `رقم الطلب: ${invoiceNumber ?? o.pk ?? ''}`,
   })
 }
 
@@ -324,7 +390,7 @@ async function reUploadTheTransactionBill (): Promise<void> {
         position: 'top',
         progress: true,
         multiLine: true,
-        message: t('تم إعادة إرفاق الفاتورة'),
+        message: 'تم إعادة إرفاق الفاتورة',
       })
       billOpen.value = false
       activeOrder.value = null
@@ -355,7 +421,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .orders-page {
-  background: var(--ds-cream, var(--ds-surface-muted));
+  background: var(--ds-surface, var(--ds-cream));
   min-block-size: 100vh;
   max-inline-size: 1200px;
   margin-inline: auto;
@@ -365,87 +431,277 @@ onMounted(() => {
     padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
   }
 
+  /* ---------- Head ---------- */
   &__head {
     margin-block-end: var(--ds-space-5);
-
-    h1 {
-      font-family: var(--ds-font-heading);
-      font-size: var(--ds-text-3xl);
-      font-weight: var(--ds-weight-bold);
-      color: var(--ds-ink, var(--ds-text));
-      margin: 0 0 var(--ds-space-1);
-    }
-    p {
-      margin: 0;
-      color: var(--ds-taupe, var(--ds-text-muted));
-      font-size: var(--ds-text-sm);
-    }
   }
 
-  &__filters {
+  &__title {
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-3xl);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-ink, var(--ds-text));
+    margin: 0 0 var(--ds-space-1);
+    line-height: var(--ds-leading-arabic);
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: var(--ds-taupe, var(--ds-text-muted));
+    font-size: var(--ds-text-sm);
+    font-family: var(--ds-font-body);
+    line-height: var(--ds-leading-arabic);
+  }
+
+  /* ---------- Chips ---------- */
+  &__chips {
     display: flex;
     gap: var(--ds-space-2);
     flex-wrap: wrap;
-    margin-block-end: var(--ds-space-5);
+    margin-block-end: var(--ds-space-6);
+  }
+
+  /* ---------- Grid ---------- */
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--ds-space-4);
+    align-items: stretch;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
   }
 
   &__skeletons {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-space-3);
-  }
-
-  &__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--ds-space-4);
-    align-items: stretch;
+    grid-template-columns: 1fr;
+    gap: var(--ds-space-3);
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
   }
 }
 
-.filter-chip {
+/* ---------- Chip (MyCourses pattern) ---------- */
+.chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--ds-space-1);
-  padding: 0.45rem 0.95rem;
-  background: var(--ds-surface);
+  gap: var(--ds-space-2);
+  padding-block: 6px;
+  padding-inline: var(--ds-space-3);
+  background: transparent;
   border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-pill);
-  font-family: var(--ds-font-heading);
+  border-radius: 999px;
+  font-family: var(--ds-font-body);
   font-size: var(--ds-text-sm);
-  color: var(--ds-text);
+  color: var(--ds-text-muted, var(--ds-taupe));
   cursor: pointer;
-  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+  transition:
+    background-color var(--ds-duration-fast, 150ms) ease,
+    color var(--ds-duration-fast, 150ms) ease,
+    border-color var(--ds-duration-fast, 150ms) ease,
+    box-shadow var(--ds-duration-fast, 150ms) ease;
 
-  &:hover { background: var(--ds-surface-sunken); }
-  &:focus-visible { outline: 2px solid transparent; box-shadow: var(--ds-shadow-focus); }
-  &--active {
-    background: var(--ds-brand-700, #322873);
-    color: var(--ds-text-onBrand, #fff);
-    border-color: var(--ds-brand-700, #322873);
+  &:hover,
+  &:focus-visible {
+    color: var(--ds-brand-600, #322873);
+    border-color: var(--ds-brand-300, #897dc3);
+    background: rgba(50, 40, 115, 0.04);
   }
 
+  &:focus-visible {
+    outline: 2px solid var(--ds-brand-300, #897dc3);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    background: var(--ds-surface-elevated, #fff);
+    color: var(--ds-brand-600, #322873);
+    border-color: var(--ds-brand-600, #322873);
+    box-shadow: var(--ds-shadow-xs);
+  }
+
+  &--active:hover,
+  &--active:focus-visible {
+    color: var(--ds-brand-600, #322873);
+    border-color: var(--ds-brand-600, #322873);
+    background: var(--ds-surface-elevated, #fff);
+  }
+
+  &__label { line-height: 1; }
+
   &__count {
-    font-family: var(--ds-font-mono);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 1.5rem;
+    padding-block: 2px;
+    padding-inline: 6px;
+    border-radius: 999px;
+    background: var(--ds-border);
+    font-family: var(--ds-font-mono, var(--ds-font-body));
     font-size: var(--ds-text-xs);
-    opacity: 0.85;
-    padding-inline-start: var(--ds-space-1);
+    font-variant-numeric: tabular-nums;
+    color: var(--ds-text-muted, var(--ds-taupe));
+    line-height: 1;
+  }
+
+  &:hover &__count,
+  &:focus-visible &__count {
+    color: var(--ds-brand-600, #322873);
+  }
+
+  &--active &__count {
+    background: var(--ds-brand-600, #322873);
+    color: var(--ds-ivory, #fbf6ee);
   }
 }
 
-.order-bill {
+/* ---------- Order card ---------- */
+.order-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
   padding: var(--ds-space-5);
-  max-inline-size: 480px;
+  background: var(--ds-surface-elevated, #fff);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg, 14px);
+  box-shadow: var(--ds-shadow-xs);
+  transition:
+    box-shadow var(--ds-duration-fast, 150ms) ease,
+    transform  var(--ds-duration-fast, 150ms) ease;
+
+  &:hover {
+    box-shadow: var(--ds-shadow-sm);
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-3);
+    flex-wrap: wrap;
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    padding-block: 4px;
+    padding-inline: var(--ds-space-3);
+    border-radius: 999px;
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-weight-semibold);
+    line-height: 1;
+  }
+
+  &__status-dot {
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  &__status--completed {
+    color: var(--ds-success, #5a8e3a);
+    background: var(--ds-success-bg, #e8efde);
+  }
+  &__status--processing {
+    color: var(--ds-brand-600, #322873);
+    background: var(--ds-brand-50, #ece9f5);
+  }
+  &__status--rejected {
+    color: var(--ds-danger, #9e3524);
+    background: var(--ds-danger-bg, #f2dad4);
+  }
+  &__status--pending {
+    color: var(--ds-warning, #b8862a);
+    background: var(--ds-warning-bg, #f5ead1);
+  }
+
+  &__amount {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--ds-space-1);
+    flex-shrink: 0;
+  }
+
+  &__amount-value {
+    font-family: var(--ds-font-mono, var(--ds-font-body));
+    font-size: var(--ds-text-xl, 20px);
+    font-weight: var(--ds-weight-semibold);
+    color: var(--ds-ink, var(--ds-text));
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__amount-currency {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-taupe, var(--ds-text-muted));
+    font-weight: var(--ds-weight-medium);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-1);
+    min-inline-size: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: var(--ds-font-heading);
+    font-size: var(--ds-text-lg, 17px);
+    font-weight: var(--ds-weight-semibold);
+    color: var(--ds-ink, var(--ds-text));
+    line-height: var(--ds-leading-arabic);
+    overflow-wrap: anywhere;
+  }
+
+  &__date {
+    margin: 0;
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-taupe, var(--ds-text-muted));
+    line-height: var(--ds-leading-arabic);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-2);
+    justify-content: flex-end;
+    padding-block-start: var(--ds-space-2);
+    border-block-start: 1px solid var(--ds-border);
+  }
+}
+
+/* ---------- Bill modal ---------- */
+.order-bill {
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-4);
 
-  h3 {
+  &__header { display: flex; flex-direction: column; gap: var(--ds-space-1); }
+
+  &__title {
     margin: 0;
     font-family: var(--ds-font-heading);
     font-size: var(--ds-text-lg);
     font-weight: var(--ds-weight-bold);
     color: var(--ds-ink, var(--ds-text));
+    line-height: var(--ds-leading-arabic);
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-taupe, var(--ds-text-muted));
+    line-height: var(--ds-leading-arabic);
   }
 
   &__img {
@@ -453,14 +709,19 @@ onMounted(() => {
     block-size: auto;
     max-block-size: 50vh;
     object-fit: contain;
-    border-radius: var(--ds-radius-md);
-    background: var(--ds-surface-muted);
-  }
+    border-radius: var(--ds-radius-md, 10px);
+    background: var(--ds-surface-sunken, #efe8dc);
+    border: 1px solid var(--ds-border);
 
-  &__actions {
-    display: flex;
-    gap: var(--ds-space-2);
-    justify-content: flex-end;
+    &--empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-block: var(--ds-space-6);
+      font-family: var(--ds-font-body);
+      font-size: var(--ds-text-sm);
+      color: var(--ds-taupe, var(--ds-text-muted));
+    }
   }
 }
 </style>
