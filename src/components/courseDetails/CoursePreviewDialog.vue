@@ -38,32 +38,51 @@
       <!-- Scrollable body ---------------------------------------------- -->
       <div ref="bodyEl" class="preview-dialog__body">
         <!-- Video region ---------------------------------------------- -->
+        <!--
+          The stage is a 16:9 ratio box (padding-block-end trick). Every
+          player variant is rendered as a direct absolutely-positioned
+          child that fills the box; the stage itself owns the black
+          letterbox background. Each variant enforces 100% × 100% on any
+          iframe / video descendant so third-party players with fixed
+          width/height attributes still fill the stage.
+        -->
         <div class="preview-dialog__stage">
           <template v-if="activeSample">
-            <AlhasifVideoPlayer
+            <div
               v-if="activeVideoType === 'TYPE_HASIF' && activeVideoUuid"
-              ref="alhasifRef"
-              :key="'alhasif-' + activeSample.id"
-              :videoUuid="activeVideoUuid"
               class="preview-dialog__player"
-            />
+            >
+              <AlhasifVideoPlayer
+                ref="alhasifRef"
+                :key="'alhasif-' + activeSample.id"
+                :videoUuid="activeVideoUuid"
+              />
+            </div>
+
             <div
               v-else-if="activeCipher"
               class="preview-dialog__cipher"
               v-html="activeCipher"
             />
-            <q-video
+
+            <iframe
               v-else-if="activeEmbedUrl"
-              :ratio="16/9"
-              :src="activeEmbedUrl"
+              :key="'embed-' + activeSample.id"
               class="preview-dialog__embed"
+              :src="activeEmbedUrl"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+              referrerpolicy="no-referrer"
             />
+
             <div
               v-else-if="activeVideoMeta"
               :key="'smart-' + activeSample.id"
               :data-id="activeSample.pk ?? ''"
               class="preview-dialog__smartnode"
             />
+
             <div v-else class="preview-dialog__stage-empty">
               <span>{{ $t('لا يمكن تشغيل هذا المحتوى') }}</span>
             </div>
@@ -393,14 +412,32 @@ onBeforeUnmount(uninitSmartPlayer)
     inset: 0;
     inline-size: 100%;
     block-size: 100%;
+    border: 0;
+    background: #000;
+    display: block;
   }
 
-  &__smartnode :deep(*),
+  // Force any nested iframe / video / div the third-party players inject to
+  // fill the stage. Covers: videojs (AlhasifVideoPlayer), SmartNode
+  // video-client's injected <video>, Vimeo/YouTube cipher iframes that
+  // ship with fixed width/height attrs.
+  &__player :deep(.video-js),
+  &__player :deep(video),
   &__cipher :deep(iframe),
-  &__cipher :deep(video) {
+  &__cipher :deep(video),
+  &__smartnode :deep(video),
+  &__smartnode :deep(iframe),
+  &__smartnode :deep(> *) {
+    position: absolute !important;
+    inset: 0 !important;
     inline-size: 100% !important;
     block-size: 100% !important;
-    border: 0;
+    max-inline-size: 100% !important;
+    max-block-size: 100% !important;
+    border: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: contain;
   }
 
   &__stage-empty {
@@ -410,6 +447,7 @@ onBeforeUnmount(uninitSmartPlayer)
     color: rgba(246, 241, 234, 0.64);
     font-family: var(--ds-font-body);
     font-size: var(--ds-text-sm);
+    background: transparent;
   }
 
   // Free samples ------------------------------------------------------------
