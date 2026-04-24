@@ -49,7 +49,7 @@
           </li>
         </ul>
 
-        <div v-if="showAuthCta" class="app-header__auth">
+        <div v-if="showAuthCtas" class="app-header__auth">
           <router-link
             to="/account/login"
             class="app-header__login"
@@ -109,7 +109,7 @@
           {{ link.label }}
         </router-link>
       </nav>
-      <template v-if="showAuthCta" #footer>
+      <template v-if="showAuthCtas" #footer>
         <div class="app-header__drawer-footer">
           <router-link
             to="/account/login"
@@ -134,11 +134,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsModal from 'src/design-system/components/DsModal.vue'
 import { LOGO, BRAND } from 'src/design-system/brand'
+import { useAuthStore } from 'src/stores/auth'
 
 interface Props {
   variant?: 'cream' | 'transparent'
@@ -153,6 +155,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const route = useRoute()
+const auth = useAuthStore()
+const { isAuthenticated } = storeToRefs(auth)
 
 const isScrolled = ref(false)
 const drawerOpen = ref(false)
@@ -160,11 +164,19 @@ const drawerOpen = ref(false)
 const logoSrc = LOGO.full
 const brandNameAr = BRAND.nameAr
 
-const navLinks = [
-  { to: '/',        label: 'الرئيسية' },
-  { to: '/courses', label: 'الدورات' },
-  { to: '/cart/',   label: 'السلة' }
-]
+const navLinks = computed<{ to: string; label: string }[]>(() => {
+  const links = [
+    { to: '/',        label: 'الرئيسية' },
+    { to: '/courses', label: 'الدورات' },
+    { to: '/cart/',   label: 'السلة' }
+  ]
+  if (isAuthenticated.value) {
+    links.push({ to: '/myCourses', label: 'دوراتي' })
+  }
+  return links
+})
+
+const showAuthCtas = computed<boolean>(() => props.showAuthCta && !isAuthenticated.value)
 
 function onScroll (): void {
   isScrolled.value = window.scrollY > 20

@@ -1,126 +1,171 @@
 <template>
   <main class="my-courses">
-    <!-- Page header -->
+    <!-- Page header: title + compact stats strip -->
     <header class="my-courses__header">
-      <h1 class="my-courses__title">{{ $t('دوراتي') }}</h1>
-      <p v-if="!isLoading" class="my-courses__subtitle">
-        {{ subheadingText }}
-      </p>
+      <div class="my-courses__heading">
+        <h1 class="my-courses__title">{{ $t('دوراتي') }}</h1>
+        <p v-if="!isLoading" class="my-courses__subtitle">
+          {{ subheadingText }}
+        </p>
+      </div>
+
+      <div
+        v-if="!isLoading && total > 0"
+        class="my-courses__stats"
+        aria-label="Learning statistics"
+      >
+        <div class="stat-pill stat-pill--indigo">
+          <span class="stat-pill__value">{{ total }}</span>
+          <span class="stat-pill__label">{{ $t('إجمالي الدورات') }}</span>
+        </div>
+        <div class="stat-pill stat-pill--terracotta">
+          <span class="stat-pill__value">{{ completedCount }}</span>
+          <span class="stat-pill__label">{{ $t('مكتملة') }}</span>
+        </div>
+        <div class="stat-pill stat-pill--muted">
+          <span class="stat-pill__value">{{ inProgressCount }}</span>
+          <span class="stat-pill__label">{{ $t('قيد التعلم') }}</span>
+        </div>
+      </div>
     </header>
 
-    <!-- Stats strip (hidden while loading or empty) -->
+    <!-- Filter bar: search + optional chip row -->
     <section
       v-if="!isLoading && total > 0"
-      class="my-courses__stats"
-      aria-label="Learning statistics"
+      class="my-courses__filterbar"
+      aria-label="Course filters"
     >
-      <div class="stat-tile">
-        <stat-card
-          :value="total"
-          :label="$t('إجمالي الدورات')"
-          size="sm"
-          variant="indigo"
+      <div class="my-courses__search">
+        <ds-input
+          v-model="searchQuery"
+          type="search"
+          size="md"
+          :placeholder="$t('ابحث في دوراتك...')"
+          :aria-label="$t('ابحث في دوراتك')"
         />
       </div>
-      <div class="stat-tile">
-        <stat-card
-          :value="completedCount"
-          :label="$t('دورات مكتملة')"
-          :max="total || 1"
-          size="sm"
-          variant="terracotta"
-        />
-      </div>
-      <div v-if="hoursWatched > 0" class="stat-tile">
-        <stat-card
-          :value="hoursWatched"
-          :label="$t('ساعات مشاهدة')"
-          size="sm"
-          variant="indigo"
-        />
+
+      <div
+        v-if="showStatusChips"
+        class="my-courses__chips"
+        role="tablist"
+        :aria-label="$t('تصفية حسب الحالة')"
+      >
+        <button
+          v-for="chip in statusChips"
+          :key="chip.value"
+          type="button"
+          role="tab"
+          :aria-selected="statusFilter === chip.value"
+          class="chip"
+          :class="{ 'chip--active': statusFilter === chip.value }"
+          @click="statusFilter = chip.value"
+        >
+          <span class="chip__label">{{ chip.label }}</span>
+          <span class="chip__count">{{ chip.count }}</span>
+        </button>
       </div>
     </section>
 
-    <!-- Tabs -->
-    <ds-tabs
-      v-if="!isLoading && total > 0"
-      v-model="activeTab"
-      align="start"
-      size="md"
-      class="my-courses__tabs"
+    <!-- Grid -->
+    <section
+      v-if="!isLoading && visibleItems.length"
+      class="my-courses__grid"
+      aria-label="Enrolled courses"
     >
-      <ds-tab
-        name="in-progress"
-        :label="`${$t('قيد التعلم')} (${inProgressCount})`"
+      <article
+        v-for="item in visibleItems"
+        :key="item.key"
+        class="mc-card"
+        :class="{ 'mc-card--completed': item.isCompleted }"
       >
-        <div v-if="inProgressList.length" class="my-courses__grid">
-          <course-card
-            v-for="item in inProgressList"
-            :key="item.key"
-            variant="enrolled"
-            :course="item.course"
-            class="my-courses__card"
-            @cta-click="goToClassroom(item.course)"
+        <div class="mc-card__media">
+          <img
+            v-if="item.course.coverImage"
+            :src="item.course.coverImage"
+            :alt="item.course.name"
+            class="mc-card__cover"
+            loading="lazy"
           />
-        </div>
-        <ds-empty-state
-          v-else
-          variant="search"
-          :title="$t('لا توجد دورات هنا بعد')"
-          :body="$t('ابدأ رحلتك التعليمية الآن')"
-          :cta-label="$t('تصفح الدورات')"
-          @cta-click="goToCoursesPage"
-        />
-      </ds-tab>
+          <div v-else class="mc-card__cover mc-card__cover--placeholder" aria-hidden="true">
+            <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient :id="`mc-grad-${item.key}`" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1B1E50"/>
+                  <stop offset="100%" stop-color="#322873"/>
+                </linearGradient>
+              </defs>
+              <rect width="400" height="300" :fill="`url(#mc-grad-${item.key})`"/>
+              <text
+                x="200" y="170"
+                text-anchor="middle"
+                font-family="Tajawal, system-ui, sans-serif"
+                font-weight="700"
+                font-size="86"
+                fill="#F6F1EA"
+                opacity="0.28"
+                letter-spacing="6"
+              >STC</text>
+            </svg>
+          </div>
 
-      <ds-tab
-        name="completed"
-        :label="`${$t('مكتملة')} (${completedCount})`"
-      >
-        <div v-if="completedList.length" class="my-courses__grid">
-          <course-card
-            v-for="item in completedList"
-            :key="item.key"
-            variant="enrolled"
-            :course="item.course"
-            class="my-courses__card"
-            @cta-click="goToClassroom(item.course)"
-          />
+          <!-- Status badge on media -->
+          <span
+            v-if="item.isCompleted"
+            class="mc-card__badge mc-card__badge--done"
+          >
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+              <path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ $t('مكتملة') }}
+          </span>
+          <span
+            v-else-if="item.progress > 0"
+            class="mc-card__badge mc-card__badge--progress"
+          >{{ $t('قيد التعلم') }}</span>
+          <span
+            v-else
+            class="mc-card__badge mc-card__badge--new"
+          >{{ $t('لم تبدأ بعد') }}</span>
         </div>
-        <ds-empty-state
-          v-else
-          variant="search"
-          :title="$t('لا توجد دورات هنا بعد')"
-          :body="$t('ابدأ رحلتك التعليمية الآن')"
-          :cta-label="$t('تصفح الدورات')"
-          @cta-click="goToCoursesPage"
-        />
-      </ds-tab>
 
-      <ds-tab
-        name="all"
-        :label="`${$t('جميع الدورات')} (${total})`"
-      >
-        <div v-if="allList.length" class="my-courses__grid">
-          <course-card
-            v-for="item in allList"
-            :key="item.key"
-            variant="enrolled"
-            :course="item.course"
-            class="my-courses__card"
-            @cta-click="goToClassroom(item.course)"
-          />
+        <div class="mc-card__body">
+          <h3 class="mc-card__title">{{ item.course.name }}</h3>
+
+          <div class="mc-card__progress">
+            <div class="mc-card__progress-head">
+              <span class="mc-card__progress-label">
+                {{ item.isCompleted ? $t('أكملت الدورة') : $t('التقدم') }}
+              </span>
+              <span class="mc-card__progress-value">{{ item.progress }}%</span>
+            </div>
+            <div
+              class="mc-card__progress-track"
+              role="progressbar"
+              :aria-valuenow="item.progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <div
+                class="mc-card__progress-fill"
+                :class="{ 'mc-card__progress-fill--done': item.isCompleted }"
+                :style="{ inlineSize: `${item.progress}%` }"
+              ></div>
+            </div>
+          </div>
+
+          <ds-button
+            :variant="item.isCompleted ? 'secondary' : 'primary'"
+            size="md"
+            full-width
+            class="mc-card__cta"
+            @click="goToClassroom(item.course)"
+          >
+            {{ item.isCompleted ? $t('إعادة المشاهدة') : $t('متابعة الدورة') }}
+          </ds-button>
         </div>
-        <ds-empty-state
-          v-else
-          variant="search"
-          :title="$t('لا توجد دورات هنا بعد')"
-          :body="$t('ابدأ رحلتك التعليمية الآن')"
-          :cta-label="$t('تصفح الدورات')"
-          @cta-click="goToCoursesPage"
-        />
-      </ds-tab>
-    </ds-tabs>
+      </article>
+    </section>
 
     <!-- Loading skeletons -->
     <section v-if="isLoading" class="my-courses__grid" aria-busy="true">
@@ -131,7 +176,7 @@
       />
     </section>
 
-    <!-- Global empty state: no enrollments at all -->
+    <!-- Empty state: no enrollments at all -->
     <ds-empty-state
       v-if="!isLoading && total === 0"
       variant="search"
@@ -140,6 +185,16 @@
       :cta-label="$t('تصفح الدورات')"
       size="lg"
       @cta-click="goToCoursesPage"
+    />
+
+    <!-- Empty state: filter produced no result -->
+    <ds-empty-state
+      v-else-if="!isLoading && total > 0 && visibleItems.length === 0"
+      variant="search"
+      :title="$t('لا توجد نتائج مطابقة')"
+      :body="$t('جرب تعديل البحث أو الفلتر')"
+      :cta-label="$t('إعادة ضبط')"
+      @cta-click="resetFilters"
     />
   </main>
 </template>
@@ -153,10 +208,10 @@ import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { useSettingsStore } from 'src/stores/settings'
 import { useAuthStore } from 'src/stores/auth'
-import CourseCard from 'src/components/shared/CourseCard.vue'
-import StatCard from 'src/components/shared/StatCard.vue'
-import DsTabs from 'src/design-system/components/DsTabs.vue'
-import DsTab from 'src/design-system/components/DsTab.vue'
+import DsButton from 'src/design-system/components/DsButton.vue'
+import DsInput from 'src/design-system/components/DsInput.vue'
+import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
+import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
 import type { AllEnrollmentsResult, AllEnrollmentsVars, Enrollment } from 'src/types/enrollments/types'
 
 // ---------------------------------------------------------------------------
@@ -178,9 +233,11 @@ onMounted(() => {
 })
 
 // ---------------------------------------------------------------------------
-// Local state
+// Local filter state
 // ---------------------------------------------------------------------------
-const activeTab = ref<string>('in-progress')
+type StatusFilter = 'all' | 'in-progress' | 'completed'
+const searchQuery = ref<string>('')
+const statusFilter = ref<StatusFilter>('all')
 
 // ---------------------------------------------------------------------------
 // Query
@@ -195,22 +252,11 @@ const allEnrollmentsData = computed(
   () => enrollQuery.result.value?.allEnrollmentsForCurrentUser ?? null,
 )
 
-// ---------------------------------------------------------------------------
-// Enrollment edges — null-stripped
-// ---------------------------------------------------------------------------
 const enrollmentEdges = computed(
   () => (allEnrollmentsData.value?.edges ?? [])
     .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
 )
 
-// ---------------------------------------------------------------------------
-// Progress derivation
-// The backend does not expose a precomputed `progress` field on an enrollment.
-// It exposes:
-//   enrollment.learningprogressSet.totalCount   (lessons done)
-//   course.courseunitSet.edges[].node.courseunitcontentSet.totalCount (lessons total)
-// We compute progress percent client-side from those two numbers.
-// ---------------------------------------------------------------------------
 function computeProgress(enrollmentNode: Enrollment): number {
   const course = enrollmentNode.course
   if (!course?.courseunitSet) return 0
@@ -223,20 +269,17 @@ function computeProgress(enrollmentNode: Enrollment): number {
   return Math.max(0, Math.min(100, Math.round((done / total) * 100)))
 }
 
-// ---------------------------------------------------------------------------
-// View-model items — flattened for CourseCard shared component
-// ---------------------------------------------------------------------------
 interface CourseCardViewModel {
   key: string
   pk: number | null
   enrollmentPk: number | null
   progress: number
+  isCompleted: boolean
   course: {
     id: string
     pk: number | null
     name: string
     coverImage?: string
-    category?: string
     progress: number
   }
 }
@@ -251,12 +294,12 @@ const items = computed<CourseCardViewModel[]>(() =>
       pk: c.pk,
       enrollmentPk: node.pk,
       progress,
+      isCompleted: progress >= 100,
       course: {
         id: c.id,
         pk: c.pk,
         name: c.title,
         coverImage: c.cover ? FORMAT_THE_IAMGE_URL(c.cover) as string : undefined,
-        category: undefined,
         progress,
       },
     }
@@ -264,29 +307,45 @@ const items = computed<CourseCardViewModel[]>(() =>
 )
 
 // ---------------------------------------------------------------------------
-// Derived counts / lists
+// Derived counts
 // ---------------------------------------------------------------------------
 const total = computed(() => items.value.length)
 const isLoading = computed(() => enrollQuery.loading.value && items.value.length === 0)
 
-const inProgressList = computed(() =>
-  items.value.filter((i) => i.progress > 0 && i.progress < 100),
+const inProgressCount = computed(
+  () => items.value.filter((i) => i.progress > 0 && i.progress < 100).length,
 )
-const completedList = computed(() =>
-  items.value.filter((i) => i.progress >= 100),
+const completedCount = computed(
+  () => items.value.filter((i) => i.isCompleted).length,
 )
-const allList = computed(() => items.value)
 
-const inProgressCount = computed(() => inProgressList.value.length)
-const completedCount = computed(() => completedList.value.length)
+// Chips are subtle and secondary: only show when there's enough content.
+const showStatusChips = computed(() => total.value > 6)
 
-// Only surfaced if we can derive an honest value. We do not fake.
-const hoursWatched = computed(() => 0)
+interface ChipDef { value: StatusFilter; label: string; count: number }
+const statusChips = computed<ChipDef[]>(() => [
+  { value: 'all', label: t('الكل'), count: total.value },
+  { value: 'in-progress', label: t('قيد التعلم'), count: inProgressCount.value },
+  { value: 'completed', label: t('مكتملة'), count: completedCount.value },
+])
+
+// ---------------------------------------------------------------------------
+// Filtered view
+// ---------------------------------------------------------------------------
+const visibleItems = computed<CourseCardViewModel[]>(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  const effectiveStatus = showStatusChips.value ? statusFilter.value : 'all'
+  return items.value.filter((i) => {
+    if (effectiveStatus === 'completed' && !i.isCompleted) return false
+    if (effectiveStatus === 'in-progress' && !(i.progress > 0 && i.progress < 100)) return false
+    if (q && !i.course.name.toLowerCase().includes(q)) return false
+    return true
+  })
+})
 
 const subheadingText = computed<string>(() => {
   if (total.value === 0) return t('ابدأ رحلتك التعليمية الآن')
   return t('تتابع الآن {n} دورات', { n: total.value })
-    // graceful fallback for plain $t without interpolation
     .replace('{n}', String(total.value))
 })
 
@@ -302,26 +361,47 @@ function goToClassroom(course: { pk: number | null }): void {
   if (!id) return
   window.location.href = `${location.origin}/classroom/#/class/${id}/`
 }
+
+function resetFilters(): void {
+  searchQuery.value = ''
+  statusFilter.value = 'all'
+}
 </script>
 
 <style lang="scss" scoped>
 .my-courses {
-  max-inline-size: 1200px;
+  max-inline-size: 1280px;
   margin-inline: auto;
   padding: var(--ds-space-5) var(--ds-space-3) var(--ds-space-12);
 
   @media (min-width: 600px) {
-    padding: var(--ds-space-8) var(--ds-space-4) var(--ds-space-16);
+    padding: var(--ds-space-8) var(--ds-space-5) var(--ds-space-16);
   }
 
+  /* ---------- Header ---------- */
   &__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-4);
     margin-block-end: var(--ds-space-6);
+
+    @media (min-width: 900px) {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--ds-space-6);
+    }
+  }
+
+  &__heading {
+    min-inline-size: 0;
+    flex: 1 1 auto;
   }
 
   &__title {
     font-family: var(--ds-font-heading, 'Tajawal', system-ui, sans-serif);
     font-weight: 700;
-    font-size: clamp(28px, 4vw, 44px);
+    font-size: clamp(26px, 3.6vw, 40px);
     color: var(--ds-ink, var(--ds-text));
     margin: 0 0 var(--ds-space-2);
     line-height: 1.2;
@@ -335,64 +415,306 @@ function goToClassroom(course: { pk: number | null }): void {
     line-height: var(--ds-leading-arabic, 1.7);
   }
 
+  /* ---------- Compact stats strip ---------- */
   &__stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: var(--ds-space-4);
-    margin-block-end: var(--ds-space-6);
-    justify-items: center;
-  }
-
-  .stat-tile {
-    background: var(--ds-surface, #fff);
-    border: 1px solid var(--ds-border);
-    border-radius: var(--ds-radius-lg);
-    padding: var(--ds-space-3);
-    box-shadow: var(--ds-shadow-xs);
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-2);
+  }
+
+  .stat-pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-2) var(--ds-space-4);
+    background: var(--ds-surface-elevated, var(--ds-ivory, #fbf6ee));
+    border: 1px solid var(--ds-border);
+    border-radius: 999px;
+    box-shadow: var(--ds-shadow-xs);
+    font-family: var(--ds-font-body);
+    white-space: nowrap;
+
+    &__value {
+      font-family: var(--ds-font-mono, var(--ds-font-heading));
+      font-weight: 700;
+      font-size: var(--ds-text-lg);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    &__label {
+      font-size: var(--ds-text-xs);
+      color: var(--ds-taupe, var(--ds-text-muted));
+    }
+
+    &--indigo .stat-pill__value { color: var(--ds-brand-600, #322873); }
+    &--terracotta .stat-pill__value { color: var(--ds-accent-300, #c1623c); }
+    &--muted .stat-pill__value { color: var(--ds-ink, var(--ds-text)); }
+  }
+
+  /* ---------- Filter bar ---------- */
+  &__filterbar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-3);
+    margin-block-end: var(--ds-space-5);
+
+    @media (min-width: 700px) {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--ds-space-4);
+    }
+  }
+
+  &__search {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    max-inline-size: 420px;
+  }
+
+  &__chips {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-1);
+    padding: 4px;
+    background: var(--ds-surface-muted, rgba(27, 20, 16, 0.04));
+    border-radius: 999px;
+    border: 1px solid var(--ds-border);
+  }
+
+  .chip {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    inline-size: 100%;
+    gap: var(--ds-space-2);
+    padding: 6px var(--ds-space-3);
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-taupe, var(--ds-text-muted));
+    cursor: pointer;
+    transition:
+      background-color var(--ds-duration-fast, 150ms) ease,
+      color var(--ds-duration-fast, 150ms) ease;
+
+    &:hover {
+      color: var(--ds-ink, var(--ds-text));
+    }
+
+    &--active {
+      background: var(--ds-surface-elevated, #fff);
+      color: var(--ds-brand-600, #322873);
+      box-shadow: var(--ds-shadow-xs);
+    }
+
+    &__count {
+      font-family: var(--ds-font-mono, var(--ds-font-body));
+      font-size: var(--ds-text-xs);
+      font-variant-numeric: tabular-nums;
+      color: var(--ds-taupe, var(--ds-text-muted));
+      opacity: 0.85;
+    }
+
+    &--active &__count {
+      color: var(--ds-brand-600, #322873);
+    }
   }
 
-  &__tabs {
-    margin-block-end: var(--ds-space-4);
-  }
-
+  /* ---------- Grid ---------- */
   &__grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: var(--ds-space-5);
     align-items: stretch;
-
-    @media (min-width: 640px) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    @media (min-width: 992px) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  &__card {
-    animation: my-courses-rise 420ms var(--ds-ease-out, ease-out) both;
-  }
-
-  // Gentle cascade — first paint only. No repeat on tab switch via
-  // using animation-fill-mode only; browser re-triggers per-element
-  // on initial v-for, subsequent renders just re-use existing DOM.
-  @for $i from 1 through 12 {
-    &__card:nth-child(#{$i}) {
-      animation-delay: #{($i - 1) * 40}ms;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    &__card { animation: none; }
   }
 }
 
-@keyframes my-courses-rise {
+/* =========================================================================
+   MyCourseCard (inline, scoped to this page)
+   ========================================================================= */
+.mc-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-surface-elevated, var(--ds-ivory, #fbf6ee));
+  border: 1px solid var(--ds-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-xs);
+  transition:
+    transform var(--ds-duration-base, 220ms) var(--ds-ease-out, ease-out),
+    box-shadow var(--ds-duration-base, 220ms) var(--ds-ease-out, ease-out);
+
+  animation: mc-rise 420ms var(--ds-ease-out, ease-out) both;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ds-shadow-md, 0 8px 24px rgba(27, 20, 16, 0.08));
+  }
+
+  &__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--ds-surface-muted, rgba(27, 20, 16, 0.04));
+  }
+
+  &__cover {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--ds-duration-slow, 400ms) var(--ds-ease-out, ease-out);
+  }
+
+  &:hover &__cover {
+    transform: scale(1.04);
+  }
+
+  &__cover--placeholder svg {
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+  }
+
+  &__badge {
+    position: absolute;
+    inset-block-start: var(--ds-space-3);
+    inset-inline-start: var(--ds-space-3);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px var(--ds-space-2);
+    border-radius: 999px;
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
+    font-weight: 600;
+    line-height: 1;
+    backdrop-filter: none;
+
+    &--done {
+      background: var(--ds-accent-300, #c1623c);
+      color: var(--ds-ivory, #fbf6ee);
+    }
+
+    &--progress {
+      background: var(--ds-brand-600, #322873);
+      color: var(--ds-ivory, #fbf6ee);
+    }
+
+    &--new {
+      background: var(--ds-ivory, #fbf6ee);
+      color: var(--ds-taupe, var(--ds-text-muted));
+      border: 1px solid var(--ds-border);
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-3);
+    padding: var(--ds-space-4) var(--ds-space-4) var(--ds-space-4);
+    flex: 1 1 auto;
+  }
+
+  &__title {
+    font-family: var(--ds-font-heading, 'Tajawal', system-ui, sans-serif);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    line-height: 1.4;
+    color: var(--ds-ink, var(--ds-text));
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-block-size: calc(2 * 1.4 * 1.0625rem);
+  }
+
+  /* ---------- Integrated progress bar ---------- */
+  &__progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__progress-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-2);
+  }
+
+  &__progress-label {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe, var(--ds-text-muted));
+  }
+
+  &__progress-value {
+    font-family: var(--ds-font-mono, var(--ds-font-body));
+    font-size: var(--ds-text-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ds-brand-600, #322873);
+    line-height: 1;
+  }
+
+  &__progress-track {
+    position: relative;
+    inline-size: 100%;
+    block-size: 8px;
+    background: rgba(27, 20, 16, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    block-size: 100%;
+    background: var(--ds-brand-600, #322873);
+    border-radius: 999px;
+    transition: inline-size 600ms var(--ds-ease-out, ease-out);
+
+    &--done {
+      background: var(--ds-accent-300, #c1623c);
+    }
+  }
+
+  &--completed &__progress-value {
+    color: var(--ds-accent-300, #c1623c);
+  }
+
+  &__cta {
+    margin-block-start: auto;
+  }
+
+  /* Cascade animation delay */
+  @for $i from 1 through 12 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{($i - 1) * 40}ms;
+    }
+  }
+}
+
+@keyframes mc-rise {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-card {
+    animation: none;
+    transition: none;
+  }
+  .mc-card:hover {
+    transform: none;
+  }
+  .mc-card:hover .mc-card__cover {
+    transform: none;
+  }
+  .mc-card__progress-fill {
+    transition: none;
+  }
 }
 </style>
