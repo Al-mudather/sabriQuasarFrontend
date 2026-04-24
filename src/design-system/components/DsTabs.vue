@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, provide, onMounted, onBeforeUnmount, onUpdated, nextTick, type ComponentPublicInstance } from 'vue'
+import { ref, computed, watch, provide, onMounted, onBeforeUnmount, nextTick, type ComponentPublicInstance } from 'vue'
 
 defineOptions({ name: 'DsTabs' })
 
@@ -115,16 +115,18 @@ function select(tab: TabEntry): void {
   emit('change', tab.name)
 }
 
+function setIndicator(offset: number, width: number): void {
+  if (indicator.value.offset === offset && indicator.value.width === width) return
+  indicator.value = { offset, width }
+}
+
 function updateIndicator(): void {
   if (!list.value) return
   const activeIdx = tabs.value.findIndex((t) => t.name === currentValue.value)
-  if (activeIdx < 0) {
-    indicator.value = { offset: 0, width: 0 }
-    return
-  }
+  if (activeIdx < 0) { setIndicator(0, 0); return }
   const btn = list.value.querySelectorAll('.ds-tabs__tab')[activeIdx] as HTMLElement | undefined
   if (!btn) return
-  indicator.value = { offset: btn.offsetLeft, width: btn.offsetWidth }
+  setIndicator(btn.offsetLeft, btn.offsetWidth)
 }
 
 watch(currentValue, () => { void nextTick(updateIndicator) })
@@ -138,8 +140,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateIndicator)
 })
-
-onUpdated(() => { void nextTick(updateIndicator) })
 
 function onKeydown(e: KeyboardEvent, idx: number): void {
   const key = e.key
