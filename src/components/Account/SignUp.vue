@@ -109,15 +109,15 @@
 /**
  * Auth feature types handled by this component.
  *
- * @typedef {import('src/features/auth/types').RegisterMutationResult} RegisterMutationResult
- * @typedef {import('src/features/auth/types').RegisterVariables} RegisterVariables
- * @typedef {import('src/features/auth/types').RegisterResult} RegisterResult
- * @typedef {import('src/features/auth/types').GetMyProfileResult} GetMyProfileResult
- * @typedef {import('src/features/auth/types').GetMyProfileVariables} GetMyProfileVariables
- * @typedef {import('src/features/auth/types').AuthUser} AuthUser
+ * @typedef {import('src/types/auth/types').RegisterMutationResult} RegisterMutationResult
+ * @typedef {import('src/types/auth/types').RegisterVariables} RegisterVariables
+ * @typedef {import('src/types/auth/types').RegisterResult} RegisterResult
+ * @typedef {import('src/types/auth/types').GetMyProfileResult} GetMyProfileResult
+ * @typedef {import('src/types/auth/types').GetMyProfileVariables} GetMyProfileVariables
+ * @typedef {import('src/types/auth/types').AuthUser} AuthUser
  */
-import { RegisterNewUser } from 'src/queries/account_management/mutation/RegisterNewUser'
-import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
+import { RegisterNewUser } from 'src/graphql/account_management/mutation/RegisterNewUser'
+import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'

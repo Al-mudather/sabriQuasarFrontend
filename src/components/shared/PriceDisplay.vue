@@ -33,8 +33,8 @@
 </template>
 
 <script>
-/** @typedef {import('src/features/courses/types').CoursePricing} CoursePricing */
-/** @typedef {import('src/features/courses/types').CurrencyCode} CurrencyCode */
+/** @typedef {import('src/types/courses/types').CoursePricing} CoursePricing */
+/** @typedef {import('src/types/courses/types').CurrencyCode} CurrencyCode */
 
 export default {
   name: 'PriceDisplay',

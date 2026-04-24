@@ -44,13 +44,13 @@ import { computed, onMounted } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { useSettingsStore } from 'src/stores/settings'
 
-import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites'
-import { GetAllCoursesCountStatiscs } from 'src/queries/course_management/query/GetAllCoursesStatiscs'
+import { GetSpecialities } from 'src/graphql/course_management/query/GetAllSpeciallites'
+import { GetAllCoursesCountStatiscs } from 'src/graphql/course_management/query/GetAllCoursesStatiscs'
 /**
- * @typedef {import('src/features/courses/types').GetAllSpecialitiesResult} GetAllSpecialitiesResult
- * @typedef {import('src/features/courses/types').GetAllSpecialitiesVars} GetAllSpecialitiesVars
+ * @typedef {import('src/types/courses/types').GetAllSpecialitiesResult} GetAllSpecialitiesResult
+ * @typedef {import('src/types/courses/types').GetAllSpecialitiesVars} GetAllSpecialitiesVars
  */
-// TODO: add to features/courses/types.ts — GetAllCoursesCountStatiscs not in generated.ts (schema drift)
+// TODO: add to types/courses/types.ts — GetAllCoursesCountStatiscs not in generated.ts (schema drift)
 
 import HeroIndigo from 'src/components/Home/HeroIndigo.vue'
 import StatsWedges from 'src/components/Home/StatsWedges.vue'

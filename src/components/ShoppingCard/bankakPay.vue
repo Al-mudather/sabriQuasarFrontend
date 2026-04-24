@@ -37,12 +37,12 @@
  * The provider is outside the Stripe/Braintree/SmartNode/Paypal/Syberpay set,
  * so only the generic cart aliases are referenced here.
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
- * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
  */
 import FileUpload from "src/components/utils/FileUploader.vue";
-import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
-import { UploadAttachmentTransaction } from "src/queries/checkout_management/mutation/UploadAttachmentTransaction";
+import { CreateNewOrderWithBulkOrderDetails } from "src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
+import { UploadAttachmentTransaction } from "src/graphql/checkout_management/mutation/UploadAttachmentTransaction";
 import { storeToRefs } from "pinia";
 import { useCartStore } from "src/stores/cart";
 import { useSettingsStore } from "src/stores/settings";

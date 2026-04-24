@@ -6,11 +6,11 @@
 
 import { defineStore } from 'pinia'
 import { apolloClient } from 'src/apollo/client.js'
-import { MyPyramidAccount } from 'src/queries/pyramid_marketing_management/query/MyPyramidAccount'
+import { MyPyramidAccount } from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
 
-/** @typedef {import('src/features/pyramid/types').MyPyramidAccountResult} MyPyramidAccountResult */
-/** @typedef {import('src/features/pyramid/types').MyPyramidAccountVars} MyPyramidAccountVars */
-/** @typedef {import('src/features/pyramid/types').PyramidAccount} PyramidAccount */
+/** @typedef {import('src/types/pyramid/types').MyPyramidAccountResult} MyPyramidAccountResult */
+/** @typedef {import('src/types/pyramid/types').MyPyramidAccountVars} MyPyramidAccountVars */
+/** @typedef {import('src/types/pyramid/types').PyramidAccount} PyramidAccount */
 
 /**
  * @typedef {Object} PyramidStoreState

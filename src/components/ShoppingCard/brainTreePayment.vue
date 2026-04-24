@@ -26,12 +26,12 @@
 /**
  * Cart/checkout feature types for the Braintree capture component.
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
- * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/features/cart/types').CaptureBraintreeCheckoutResult} CaptureBraintreeCheckoutResult
- * @typedef {import('src/features/cart/types').CaptureBraintreeCheckoutVars} CaptureBraintreeCheckoutVars
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/types/cart/types').CaptureBraintreeCheckoutResult} CaptureBraintreeCheckoutResult
+ * @typedef {import('src/types/cart/types').CaptureBraintreeCheckoutVars} CaptureBraintreeCheckoutVars
  */
-import { CaptureBraintreeCheckout } from 'src/queries/checkout_management/mutation/CaptureBraintreeCheckout.js'
+import { CaptureBraintreeCheckout } from 'src/graphql/checkout_management/mutation/CaptureBraintreeCheckout.js'
 import { storeToRefs } from "pinia";
 import { useCartStore } from "src/stores/cart";
 import { apolloClient } from "src/apollo/client";

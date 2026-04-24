@@ -98,16 +98,16 @@ import { useSettingsStore } from 'src/stores/settings'
 import { useQuery, useMutation } from '@vue/apollo-composable'
 import { computed } from 'vue'
 import _ from 'lodash'
-import { MyAttachmentTransactions } from 'src/queries/attachment_transactions_management/query/TheUserAttachmentTransactionsQuery'
-import { ReUploadAttachmentTransaction } from 'src/queries/attachment_transactions_management/mutation/ReUploadAttachmentTransaction'
+import { MyAttachmentTransactions } from 'src/graphql/attachment_transactions_management/query/TheUserAttachmentTransactionsQuery'
+import { ReUploadAttachmentTransaction } from 'src/graphql/attachment_transactions_management/mutation/ReUploadAttachmentTransaction'
 import TransactionCard from 'src/components/shared/TransactionCard.vue'
 import FileUpload from 'src/components/utils/FileUploader.vue'
 
-/** @typedef {import('src/features/attachments/types').UserAttachmentTransaction} UserAttachmentTransaction */
-/** @typedef {import('src/features/attachments/types').TheUserAttachmentTransactionsResult} TheUserAttachmentTransactionsResult */
-/** @typedef {import('src/features/attachments/types').TheUserAttachmentTransactionsVars} TheUserAttachmentTransactionsVars */
-/** @typedef {import('src/features/attachments/types').ReUploadAttachmentResult} ReUploadAttachmentResult */
-/** @typedef {import('src/features/attachments/types').ReUploadAttachmentVars} ReUploadAttachmentVars */
+/** @typedef {import('src/types/attachments/types').UserAttachmentTransaction} UserAttachmentTransaction */
+/** @typedef {import('src/types/attachments/types').TheUserAttachmentTransactionsResult} TheUserAttachmentTransactionsResult */
+/** @typedef {import('src/types/attachments/types').TheUserAttachmentTransactionsVars} TheUserAttachmentTransactionsVars */
+/** @typedef {import('src/types/attachments/types').ReUploadAttachmentResult} ReUploadAttachmentResult */
+/** @typedef {import('src/types/attachments/types').ReUploadAttachmentVars} ReUploadAttachmentVars */
 
 export default {
   name: 'MyOrders',

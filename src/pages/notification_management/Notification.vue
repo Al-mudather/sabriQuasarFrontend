@@ -75,15 +75,15 @@
 
 <script>
 import AppNotification from 'src/components/shared/Notification.vue'
-import { GetAllMyNotifications } from 'src/queries/notification_management/query/GetAllMyNotifications'
+import { GetAllMyNotifications } from 'src/graphql/notification_management/query/GetAllMyNotifications'
 import { useSettingsStore } from 'src/stores/settings'
 import { useQuery } from '@vue/apollo-composable'
 import { computed, ref } from 'vue'
 import _ from 'lodash'
 
-/** @typedef {import('src/features/notifications/types').Notification} Notification */
-/** @typedef {import('src/features/notifications/types').MyNotificationsResult} MyNotificationsResult */
-/** @typedef {import('src/features/notifications/types').MyNotificationsVars} MyNotificationsVars */
+/** @typedef {import('src/types/notifications/types').Notification} Notification */
+/** @typedef {import('src/types/notifications/types').MyNotificationsResult} MyNotificationsResult */
+/** @typedef {import('src/types/notifications/types').MyNotificationsVars} MyNotificationsVars */
 
 const TYPE_BUCKET = {
   CHECKOUT_DONE: 'transactions',

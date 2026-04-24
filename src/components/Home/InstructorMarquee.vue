@@ -30,11 +30,11 @@
 <script>
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
-import { GetAllCourseInstructors } from 'src/queries/course_management/query/GetAllCourseInstructors'
+import { GetAllCourseInstructors } from 'src/graphql/course_management/query/GetAllCourseInstructors'
 /**
- * @typedef {import('src/features/courses/types').GetAllCourseInstructorsResult} GetAllCourseInstructorsResult
- * @typedef {import('src/features/courses/types').GetAllCourseInstructorsVars} GetAllCourseInstructorsVars
- * @typedef {import('src/features/courses/types').CourseInstructor} CourseInstructor
+ * @typedef {import('src/types/courses/types').GetAllCourseInstructorsResult} GetAllCourseInstructorsResult
+ * @typedef {import('src/types/courses/types').GetAllCourseInstructorsVars} GetAllCourseInstructorsVars
+ * @typedef {import('src/types/courses/types').CourseInstructor} CourseInstructor
  */
 
 export default {

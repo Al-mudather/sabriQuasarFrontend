@@ -243,16 +243,16 @@
 /**
  * Auth feature types handled by this page.
  *
- * @typedef {import('src/features/auth/types').GetMyProfileResult} GetMyProfileResult
- * @typedef {import('src/features/auth/types').GetMyProfileVariables} GetMyProfileVariables
- * @typedef {import('src/features/auth/types').AuthUser} AuthUser
- * @typedef {import('src/features/auth/types').UpdateProfileMutationResult} UpdateProfileMutationResult
- * @typedef {import('src/features/auth/types').UpdateProfileVariables} UpdateProfileVariables
- * @typedef {import('src/features/auth/types').UpdateProfileResult} UpdateProfileResult
- * @typedef {import('src/features/auth/types').UserGender} UserGender
+ * @typedef {import('src/types/auth/types').GetMyProfileResult} GetMyProfileResult
+ * @typedef {import('src/types/auth/types').GetMyProfileVariables} GetMyProfileVariables
+ * @typedef {import('src/types/auth/types').AuthUser} AuthUser
+ * @typedef {import('src/types/auth/types').UpdateProfileMutationResult} UpdateProfileMutationResult
+ * @typedef {import('src/types/auth/types').UpdateProfileVariables} UpdateProfileVariables
+ * @typedef {import('src/types/auth/types').UpdateProfileResult} UpdateProfileResult
+ * @typedef {import('src/types/auth/types').UserGender} UserGender
  */
-import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
-import { UpdateUserProfile } from 'src/queries/account_management/mutation/UpdateUserProfile'
+import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
+import { UpdateUserProfile } from 'src/graphql/account_management/mutation/UpdateUserProfile'
 import { useSettingsStore } from 'src/stores/settings'
 import { storeToRefs } from 'pinia'
 import { useQuery, useMutation } from '@vue/apollo-composable'

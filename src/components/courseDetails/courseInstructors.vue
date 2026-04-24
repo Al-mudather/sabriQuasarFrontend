@@ -37,7 +37,7 @@
 <script>
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
-import { GetAllCourseInstructors } from 'src/queries/course_management/query/GetAllCourseInstructors'
+import { GetAllCourseInstructors } from 'src/graphql/course_management/query/GetAllCourseInstructors'
 
 export default {
   name: 'CourseInstructors',

@@ -68,7 +68,7 @@
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import contentItem from 'components/courseDetails/contentItem.vue'
-import { GetAllCourseUnitsByCourseID } from 'src/queries/course_management/query/GetAllCourseUnitsByCourseID'
+import { GetAllCourseUnitsByCourseID } from 'src/graphql/course_management/query/GetAllCourseUnitsByCourseID'
 
 const RENDERABLE = ['ContentVideo', 'ContentFile', 'ContentQuiz']
 

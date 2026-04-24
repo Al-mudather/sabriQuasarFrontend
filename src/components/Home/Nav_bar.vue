@@ -84,7 +84,7 @@ import { useSettingsStore } from "src/stores/settings";
 import { useCartStore } from "src/stores/cart";
 import { usePyramidStore } from "src/stores/pyramid";
 import { apolloClient } from "src/apollo/client";
-import { GetAllCourses } from "src/queries/course_management/query/GetAllCourses";
+import { GetAllCourses } from "src/graphql/course_management/query/GetAllCourses";
 import { Quasar } from "quasar";
 
 export default {

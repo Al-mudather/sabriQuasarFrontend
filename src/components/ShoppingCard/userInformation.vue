@@ -123,11 +123,11 @@
  * mutation — only account_management.UpdateUserProfile + GetMyProfileData.
  * The cart feature aliases are referenced for consistency with siblings.
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
- * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
  */
-import { UpdateUserProfile } from 'src/queries/account_management/mutation/UpdateUserProfile'
-import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
+import { UpdateUserProfile } from 'src/graphql/account_management/mutation/UpdateUserProfile'
+import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
 import { apolloClient } from 'src/apollo/client'
 
 import DsInput from 'src/design-system/components/DsInput.vue'

@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { ChangeUserPassword } from 'src/queries/account_management/mutation/ChangeUserPassword'
+import { ChangeUserPassword } from 'src/graphql/account_management/mutation/ChangeUserPassword'
 import { tokenStorage } from 'src/localStorageService'
 
 export default {

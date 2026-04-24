@@ -183,11 +183,11 @@
  * Cart/checkout feature types for the cart-listing page. Fires the
  * CreateBraintreeCheckout mutation via apolloClient.mutate directly.
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
- * @typedef {import('src/features/cart/types').CartItem} CartItem
- * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/features/cart/types').CreateBraintreeCheckoutResult} CreateBraintreeCheckoutResult
- * @typedef {import('src/features/cart/types').CreateBraintreeCheckoutVars} CreateBraintreeCheckoutVars
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').CartItem} CartItem
+ * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/types/cart/types').CreateBraintreeCheckoutResult} CreateBraintreeCheckoutResult
+ * @typedef {import('src/types/cart/types').CreateBraintreeCheckoutVars} CreateBraintreeCheckoutVars
  */
 import { storeToRefs } from 'pinia'
 import _ from 'lodash'
@@ -196,8 +196,8 @@ import { useSettingsStore } from 'src/stores/settings'
 import { apolloClient } from 'src/apollo/client'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 
-import { CreateNewOrderWithBulkOrderDetails } from 'src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
-import { CreateBraintreeCheckout } from 'src/queries/checkout_management/mutation/CreateBraintreeCheckout.js'
+import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
+import { CreateBraintreeCheckout } from 'src/graphql/checkout_management/mutation/CreateBraintreeCheckout.js'
 
 import DsInput from 'src/design-system/components/DsInput.vue'
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'

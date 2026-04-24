@@ -12,14 +12,14 @@
 /**
  * Auth feature types handled by this component.
  *
- * @typedef {import('src/features/auth/types').SocialAuthMutationResult} SocialAuthMutationResult
- * @typedef {import('src/features/auth/types').SocialAuthVariables} SocialAuthVariables
- * @typedef {import('src/features/auth/types').SocialAuthResult} SocialAuthResult
- * @typedef {import('src/features/auth/types').SocialAuthProfile} SocialAuthProfile
+ * @typedef {import('src/types/auth/types').SocialAuthMutationResult} SocialAuthMutationResult
+ * @typedef {import('src/types/auth/types').SocialAuthVariables} SocialAuthVariables
+ * @typedef {import('src/types/auth/types').SocialAuthResult} SocialAuthResult
+ * @typedef {import('src/types/auth/types').SocialAuthProfile} SocialAuthProfile
  */
-import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
-import { SocialAuth } from "src/queries/account_management/mutation/CreateSocailAuth";
+import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
+import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
+import { SocialAuth } from "src/graphql/account_management/mutation/CreateSocailAuth";
 import { useAuthStore } from "src/stores/auth";
 import { useSettingsStore } from "src/stores/settings";
 import { usePyramidStore } from "src/stores/pyramid";

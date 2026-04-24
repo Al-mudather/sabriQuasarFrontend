@@ -55,10 +55,10 @@
 /**
  * Auth feature types handled by this component.
  *
- * @typedef {import('src/features/auth/types').ResendActivationEmailResult} ResendActivationEmailResult
- * @typedef {import('src/features/auth/types').ResendActivationEmailVariables} ResendActivationEmailVariables
+ * @typedef {import('src/types/auth/types').ResendActivationEmailResult} ResendActivationEmailResult
+ * @typedef {import('src/types/auth/types').ResendActivationEmailVariables} ResendActivationEmailVariables
  */
-import { ResendActivationEmail } from 'src/queries/account_management/mutation/ResendActivationEmail'
+import { ResendActivationEmail } from 'src/graphql/account_management/mutation/ResendActivationEmail'
 import DsInput from 'src/design-system/components/DsInput.vue'
 
 export default {

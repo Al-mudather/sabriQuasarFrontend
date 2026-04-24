@@ -8,7 +8,7 @@
 // CurrencyCode is mirrored from the canonical set the backend emits
 // (schema: OrderCurrency — EUR/GBP/SAR/SDG/USD) plus the UI-only code
 // 'AED' that the legacy PriceDisplay/CategorySection components surface.
-// Keep this list in sync with src/features/settings/types.ts.
+// Keep this list in sync with src/types/settings/types.ts.
 
 import type {
   // Catalog / listing

@@ -49,8 +49,8 @@
 </template>
 
 <script>
-import { MarketerConfirmAttachmentTransaction } from 'src/queries/attachment_transactions_management/mutation/marketerConfirmAttachmentTransaction'
-import { AllMarketerAttachmentTransaction } from 'src/queries/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
+import { MarketerConfirmAttachmentTransaction } from 'src/graphql/attachment_transactions_management/mutation/marketerConfirmAttachmentTransaction'
+import { AllMarketerAttachmentTransaction } from 'src/graphql/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
 import TransactionDetails from 'src/components/attachment_transactions_management/Transaction_details.vue'
 
 const priceLookup = [

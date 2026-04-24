@@ -8,7 +8,7 @@
 <script>
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
-import { MyPyramidAffiliates } from 'src/queries/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe.js'
+import { MyPyramidAffiliates } from 'src/graphql/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe.js'
 
 export default {
   name: 'WhoJoindThePlatformThrowMe',

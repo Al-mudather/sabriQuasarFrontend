@@ -21,16 +21,16 @@
  * the CreateStripeCheckout mutation + StripePublishableKey query via
  * apolloClient.* (untyped runtime); aliases below document the expected shapes.
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
- * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/features/cart/types').CreateStripeCheckoutResult} CreateStripeCheckoutResult
- * @typedef {import('src/features/cart/types').CreateStripeCheckoutVars} CreateStripeCheckoutVars
- * @typedef {import('src/features/cart/types').StripePublishableKeyResult} StripePublishableKeyResult
- * @typedef {import('src/features/cart/types').StripePublishableKeyVars} StripePublishableKeyVars
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/types/cart/types').CreateStripeCheckoutResult} CreateStripeCheckoutResult
+ * @typedef {import('src/types/cart/types').CreateStripeCheckoutVars} CreateStripeCheckoutVars
+ * @typedef {import('src/types/cart/types').StripePublishableKeyResult} StripePublishableKeyResult
+ * @typedef {import('src/types/cart/types').StripePublishableKeyVars} StripePublishableKeyVars
  */
-import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
-import { CreateStripeCheckout } from "src/queries/checkout_management/mutation/CreateStripeCheckout";
-import { StripePublishableKey } from "src/queries/checkout_management/query/StripePublishableKey";
+import { CreateNewOrderWithBulkOrderDetails } from "src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
+import { CreateStripeCheckout } from "src/graphql/checkout_management/mutation/CreateStripeCheckout";
+import { StripePublishableKey } from "src/graphql/checkout_management/query/StripePublishableKey";
 import { storeToRefs } from "pinia";
 import { useCartStore } from "src/stores/cart";
 import { useSettingsStore } from "src/stores/settings";

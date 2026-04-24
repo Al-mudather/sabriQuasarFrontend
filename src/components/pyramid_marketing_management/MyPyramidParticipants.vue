@@ -22,7 +22,7 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
-import { MyPyramidMarketers } from 'src/queries/pyramid_marketing_management/query/MyPyramidMarketers'
+import { MyPyramidMarketers } from 'src/graphql/pyramid_marketing_management/query/MyPyramidMarketers'
 import { copyToClipboard } from 'quasar'
 import { usePyramidStore } from 'src/stores/pyramid'
 

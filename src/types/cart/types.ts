@@ -6,7 +6,7 @@
 //
 // This file is the type-safety source of truth for the cart store and the
 // per-provider checkout flows. Keep it type-only (no runtime imports) and
-// do not cross-import from other features/* modules.
+// do not cross-import from other types/* modules.
 
 import type {
   // Stripe
@@ -50,7 +50,7 @@ export interface CartItem {
   name: string
   /**
    * Currency/price payload. The backend ships this as a JSONString which the
-   * generated scalar types surface as `Record<string, number>`; features/courses
+   * generated scalar types surface as `Record<string, number>`; types/courses
    * will narrow it further. Keep it permissive here to avoid coupling.
    */
   currency: Record<string, number>
@@ -99,7 +99,7 @@ export type CreateStripeCheckoutVars = CreateStripeCheckoutMutationVariables
 // TODO: CreatePaypalCheckout mutation is defined on the schema
 // (see RootMutationCreatePaypalCheckoutArgs) but no named client operation is
 // exported from generated.ts. Add the operation document under
-// src/queries/checkout_management/ and re-run codegen to surface
+// src/graphql/checkout_management/ and re-run codegen to surface
 // `CreatePaypalCheckoutMutation{,Variables}` aliases here.
 export type CapturePaypalCheckoutResult = CapturePaypalCheckoutMutation
 export type CapturePaypalCheckoutVars = CapturePaypalCheckoutMutationVariables

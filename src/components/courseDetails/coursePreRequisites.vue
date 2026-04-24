@@ -23,7 +23,7 @@
 <script>
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
-import { GetAllPreRequisitesByCourse } from 'src/queries/course_management/query/GetAllPreRequisitesByCourse'
+import { GetAllPreRequisitesByCourse } from 'src/graphql/course_management/query/GetAllPreRequisitesByCourse'
 
 export default {
   name: 'CoursePreRequisites',

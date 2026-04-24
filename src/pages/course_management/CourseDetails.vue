@@ -224,9 +224,9 @@
 </template>
 
 <script>
-/** @typedef {import('src/features/courses/types').CourseDetail} CourseDetail */
-/** @typedef {import('src/features/courses/types').CoursePricing} CoursePricing */
-/** @typedef {import('src/features/courses/types').CurrencyCode} CurrencyCode */
+/** @typedef {import('src/types/courses/types').CourseDetail} CourseDetail */
+/** @typedef {import('src/types/courses/types').CoursePricing} CoursePricing */
+/** @typedef {import('src/types/courses/types').CurrencyCode} CurrencyCode */
 
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
@@ -237,7 +237,7 @@ import { apolloClient } from 'src/apollo/client'
 import { useHead } from '@unhead/vue'
 import { computed } from 'vue'
 import _ from 'lodash'
-import { GetCourseByID } from 'src/queries/course_management/query/GetCourseByID'
+import { GetCourseByID } from 'src/graphql/course_management/query/GetCourseByID'
 import { FORMAT_THE_IAMGE_URL, FORMAT_THE_WEB_SIT_URL } from 'src/utils/functions.js'
 
 import DsButton from 'src/design-system/components/DsButton.vue'

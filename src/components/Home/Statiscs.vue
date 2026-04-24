@@ -11,10 +11,10 @@
 
 <script>
 import StatistcsData from 'src/components/Home/statiscs/StatistcsData.vue'
-import { GetAllCoursesCountStatiscs } from 'src/queries/course_management/query/GetAllCoursesStatiscs'
-import { GetAllCoursesHoursStatistics } from 'src/queries/course_management/query/GetAllCoursesHours'
-import { GetAllInstructorsStatiscs } from 'src/queries/account_management/query/GetAllInstructorsStatiscs'
-import { GetTotalUsersStatistics } from 'src/queries/account_management/query/GetTotalUsers'
+import { GetAllCoursesCountStatiscs } from 'src/graphql/course_management/query/GetAllCoursesStatiscs'
+import { GetAllCoursesHoursStatistics } from 'src/graphql/course_management/query/GetAllCoursesHours'
+import { GetAllInstructorsStatiscs } from 'src/graphql/account_management/query/GetAllInstructorsStatiscs'
+import { GetTotalUsersStatistics } from 'src/graphql/account_management/query/GetTotalUsers'
 
 export default {
   name: 'Statiscs',

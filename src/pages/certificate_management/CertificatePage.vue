@@ -141,11 +141,11 @@ import { useAuthStore } from 'src/stores/auth'
 import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
 import { computed } from 'vue'
-import { AllCertificates } from 'src/queries/certificatesManagement/query/GetAllCertificates.js'
+import { AllCertificates } from 'src/graphql/certificatesManagement/query/GetAllCertificates.js'
 
-/** @typedef {import('src/features/certificates/types').Certificate} Certificate */
-/** @typedef {import('src/features/certificates/types').AllCertificatesResult} AllCertificatesResult */
-/** @typedef {import('src/features/certificates/types').AllCertificatesVars} AllCertificatesVars */
+/** @typedef {import('src/types/certificates/types').Certificate} Certificate */
+/** @typedef {import('src/types/certificates/types').AllCertificatesResult} AllCertificatesResult */
+/** @typedef {import('src/types/certificates/types').AllCertificatesVars} AllCertificatesVars */
 
 export default {
   name: 'CertificatePage',

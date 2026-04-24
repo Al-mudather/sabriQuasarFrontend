@@ -219,16 +219,16 @@
 </template>
 
 <script>
-/** @typedef {import('src/features/courses/types').Course} Course */
-/** @typedef {import('src/features/courses/types').Speciality} Speciality */
-/** @typedef {import('src/features/courses/types').GetAllCoursesResult} GetAllCoursesResult */
-/** @typedef {import('src/features/courses/types').GetAllCoursesVars} GetAllCoursesVars */
-/** @typedef {import('src/features/courses/types').GetAllSpecialitiesResult} GetAllSpecialitiesResult */
-/** @typedef {import('src/features/courses/types').GetAllSpecialitiesVars} GetAllSpecialitiesVars */
+/** @typedef {import('src/types/courses/types').Course} Course */
+/** @typedef {import('src/types/courses/types').Speciality} Speciality */
+/** @typedef {import('src/types/courses/types').GetAllCoursesResult} GetAllCoursesResult */
+/** @typedef {import('src/types/courses/types').GetAllCoursesVars} GetAllCoursesVars */
+/** @typedef {import('src/types/courses/types').GetAllSpecialitiesResult} GetAllSpecialitiesResult */
+/** @typedef {import('src/types/courses/types').GetAllSpecialitiesVars} GetAllSpecialitiesVars */
 
 import courseCard from 'components/utils/courseCard.vue'
-import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses.js'
-import { GetSpecialities } from 'src/queries/course_management/query/GetAllSpeciallites.js'
+import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses.js'
+import { GetSpecialities } from 'src/graphql/course_management/query/GetAllSpeciallites.js'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { useQuery } from '@vue/apollo-composable'

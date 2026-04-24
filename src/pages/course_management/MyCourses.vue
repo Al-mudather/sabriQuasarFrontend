@@ -145,13 +145,13 @@
 </template>
 
 <script>
-/** @typedef {import('src/features/courses/types').Course} Course */
+/** @typedef {import('src/types/courses/types').Course} Course */
 
 import CourseCard from 'src/components/shared/CourseCard.vue'
 import StatCard from 'src/components/shared/StatCard.vue'
 import DsTabs from 'src/design-system/components/DsTabs.vue'
 import DsTab from 'src/design-system/components/DsTab.vue'
-import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
+import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { useSettingsStore } from 'src/stores/settings'
 import { useQuery } from '@vue/apollo-composable'
@@ -186,7 +186,7 @@ export default {
   setup () {
     const settings = useSettingsStore()
     // TODO: AllEnrollmentsForCurrentUser belongs to the enrollment feature and
-    // has no matching Result/Vars alias in src/features/courses/types.ts.
+    // has no matching Result/Vars alias in src/types/courses/types.ts.
     // Wire up typed generics once the enrollments feature types land.
     const enrollQuery = useQuery(
       AllEnrollmentsForCurrentUser,

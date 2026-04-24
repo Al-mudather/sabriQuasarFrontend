@@ -83,19 +83,19 @@
 /**
  * Auth feature types handled by this component.
  *
- * @typedef {import('src/features/auth/types').LoginMutationResult} LoginMutationResult
- * @typedef {import('src/features/auth/types').LoginVariables} LoginVariables
- * @typedef {import('src/features/auth/types').LoginResult} LoginResult
- * @typedef {import('src/features/auth/types').LoginSessionUser} LoginSessionUser
+ * @typedef {import('src/types/auth/types').LoginMutationResult} LoginMutationResult
+ * @typedef {import('src/types/auth/types').LoginVariables} LoginVariables
+ * @typedef {import('src/types/auth/types').LoginResult} LoginResult
+ * @typedef {import('src/types/auth/types').LoginSessionUser} LoginSessionUser
  */
-import { LoginUserWithEmail } from 'src/queries/account_management/mutation/LoginUserWithEmail'
+import { LoginUserWithEmail } from 'src/graphql/account_management/mutation/LoginUserWithEmail'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { apolloClient } from 'src/apollo/client'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
-import { AllEnrollmentsForCurrentUser } from 'src/queries/enrollment_management/query/AllEnrollmentsForCurrentUser'
+import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
+import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue'
 import FacebookAuthentication from 'src/components/Account/FacebookAuthentication.vue'
 import DsInput from 'src/design-system/components/DsInput.vue'

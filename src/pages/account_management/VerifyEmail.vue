@@ -48,10 +48,10 @@
 /**
  * Auth feature types handled by this page.
  *
- * @typedef {import('src/features/auth/types').VerifyAccountResult} VerifyAccountResult
- * @typedef {import('src/features/auth/types').VerifyAccountVariables} VerifyAccountVariables
+ * @typedef {import('src/types/auth/types').VerifyAccountResult} VerifyAccountResult
+ * @typedef {import('src/types/auth/types').VerifyAccountVariables} VerifyAccountVariables
  */
-import { VerifyUserAccount } from 'src/queries/account_management/mutation/VerifyUserAccount'
+import { VerifyUserAccount } from 'src/graphql/account_management/mutation/VerifyUserAccount'
 
 export default {
   name: 'VerifyEmail',

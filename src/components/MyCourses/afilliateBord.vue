@@ -38,10 +38,10 @@ import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
 import { useAuthStore } from 'src/stores/auth'
 import { apolloClient } from 'src/apollo/client'
-import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
-import { JoinPyramidProgram } from 'src/queries/pyramid_marketing_management/mutation/JoinPyramidProgram'
-import { MyPyramidAccount } from 'src/queries/pyramid_marketing_management/query/MyPyramidAccount'
+import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
+import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
+import { JoinPyramidProgram } from 'src/graphql/pyramid_marketing_management/mutation/JoinPyramidProgram'
+import { MyPyramidAccount } from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
 
 export default {
   name: 'afilliateBord',

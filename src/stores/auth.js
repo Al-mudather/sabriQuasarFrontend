@@ -19,23 +19,23 @@ import { Notify, SessionStorage } from 'quasar'
 
 import { apolloClient } from 'src/apollo/client'
 import { tokenStorage, userProfileStorage } from 'src/localStorageService'
-import { RefreshLoginUserWithEmail } from 'src/queries/account_management/mutation/RefreshUserToken'
-import { RevokeUserRefreshToken } from 'src/queries/account_management/mutation/RevokeUserRefreshToken.js'
-import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData.js'
+import { RefreshLoginUserWithEmail } from 'src/graphql/account_management/mutation/RefreshUserToken'
+import { RevokeUserRefreshToken } from 'src/graphql/account_management/mutation/RevokeUserRefreshToken.js'
+import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData.js'
 
 /**
- * Shared auth feature types — see `src/features/auth/types.ts`.
+ * Shared auth feature types — see `src/types/auth/types.ts`.
  *
- * @typedef {import('src/features/auth/types').AuthSessionUser} AuthSessionUser
- * @typedef {import('src/features/auth/types').LoginResult} LoginResult
- * @typedef {import('src/features/auth/types').SocialAuthResult} SocialAuthResult
- * @typedef {import('src/features/auth/types').RegisterResult} RegisterResult
- * @typedef {import('src/features/auth/types').RefreshTokenMutationResult} RefreshTokenMutationResult
- * @typedef {import('src/features/auth/types').RefreshTokenVariables} RefreshTokenVariables
- * @typedef {import('src/features/auth/types').RevokeRefreshTokenMutationResult} RevokeRefreshTokenMutationResult
- * @typedef {import('src/features/auth/types').RevokeRefreshTokenVariables} RevokeRefreshTokenVariables
- * @typedef {import('src/features/auth/types').GetMyProfileResult} GetMyProfileResult
- * @typedef {import('src/features/auth/types').GetMyProfileVariables} GetMyProfileVariables
+ * @typedef {import('src/types/auth/types').AuthSessionUser} AuthSessionUser
+ * @typedef {import('src/types/auth/types').LoginResult} LoginResult
+ * @typedef {import('src/types/auth/types').SocialAuthResult} SocialAuthResult
+ * @typedef {import('src/types/auth/types').RegisterResult} RegisterResult
+ * @typedef {import('src/types/auth/types').RefreshTokenMutationResult} RefreshTokenMutationResult
+ * @typedef {import('src/types/auth/types').RefreshTokenVariables} RefreshTokenVariables
+ * @typedef {import('src/types/auth/types').RevokeRefreshTokenMutationResult} RevokeRefreshTokenMutationResult
+ * @typedef {import('src/types/auth/types').RevokeRefreshTokenVariables} RevokeRefreshTokenVariables
+ * @typedef {import('src/types/auth/types').GetMyProfileResult} GetMyProfileResult
+ * @typedef {import('src/types/auth/types').GetMyProfileVariables} GetMyProfileVariables
  */
 
 export const useAuthStore = defineStore('authentication', {

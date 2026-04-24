@@ -81,15 +81,15 @@
 // <script lang="ts"> (the project's Vue 2 loader doesn't run TS in .vue files).
 // When Track B flips to Vue 3 + Vite, this can be promoted to `import type`.
 /**
- * @typedef {import('src/features/courses/types').AllCoursesInSpecialityResult} AllCoursesInSpecialityResult
- * @typedef {import('src/features/courses/types').AllCoursesInSpecialityVars} AllCoursesInSpecialityVars
- * @typedef {import('src/features/courses/types').CourseInSpeciality} CourseInSpeciality
- * @typedef {import('src/features/courses/types').CoursePricing} CoursePricing
+ * @typedef {import('src/types/courses/types').AllCoursesInSpecialityResult} AllCoursesInSpecialityResult
+ * @typedef {import('src/types/courses/types').AllCoursesInSpecialityVars} AllCoursesInSpecialityVars
+ * @typedef {import('src/types/courses/types').CourseInSpeciality} CourseInSpeciality
+ * @typedef {import('src/types/courses/types').CoursePricing} CoursePricing
  */
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
-import { GetAllCoursesInSpeciality } from 'src/queries/course_management/query/GetAllCoursesInSpeciality'
+import { GetAllCoursesInSpeciality } from 'src/graphql/course_management/query/GetAllCoursesInSpeciality'
 import CourseCard from 'src/components/shared/CourseCard.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
@@ -187,7 +187,7 @@ export default {
     normalize (node) {
       // Map GraphQL course node -> CourseCard's expected shape.
       // node.currency is already parsed to an object at the network boundary
-      // by Apollo's typePolicy (see src/features/courses/types.ts). Fall back
+      // by Apollo's typePolicy (see src/types/courses/types.ts). Fall back
       // to JSON.parse for any legacy/cache-miss case where it's still a string.
       const selectedCur = this.currency || 'SAR'
       let current = 0

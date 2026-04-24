@@ -17,5 +17,5 @@
       "src/*": ["src/*"]
     }
   },
-  "include": ["src/graphql/**/*.ts", "src/features/**/*.ts"]
+  "include": ["src/graphql/**/*.ts", "src/types/**/*.ts"]
 }

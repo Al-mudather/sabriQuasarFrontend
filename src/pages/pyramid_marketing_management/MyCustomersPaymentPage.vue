@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { AllMarketerAttachmentTransaction } from 'src/queries/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
+import { AllMarketerAttachmentTransaction } from 'src/graphql/attachment_transactions_management/query/AllMarketerAttachmentTransactionQuery'
 import { useQuery } from '@vue/apollo-composable'
 import { computed } from 'vue'
 import _ from 'lodash'

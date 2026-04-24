@@ -57,7 +57,7 @@
  * (`JoinPlatform`) belongs to the pyramid feature, not auth. No auth
  * feature types are handled here — kept as a marker for the scope audit.
  */
-import { JoinPlatform } from 'src/queries/pyramid_marketing_management/mutation/JoinPlatform'
+import { JoinPlatform } from 'src/graphql/pyramid_marketing_management/mutation/JoinPlatform'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { storeToRefs } from 'pinia'
 import { useMutation } from '@vue/apollo-composable'

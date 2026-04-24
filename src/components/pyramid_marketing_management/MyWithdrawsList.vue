@@ -38,7 +38,7 @@
 <script>
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
-import { MyPyramidWithdraws } from 'src/queries/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
+import { MyPyramidWithdraws } from 'src/graphql/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
 import moment from 'moment'
 
 const priceLookup = [

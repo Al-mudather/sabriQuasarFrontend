@@ -34,17 +34,17 @@
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import StatCard from 'src/components/shared/StatCard.vue'
-import { GetTotalUsersStatistics } from 'src/queries/account_management/query/GetTotalUsers'
-import { GetAllInstructorsStatiscs } from 'src/queries/account_management/query/GetAllInstructorsStatiscs'
-import { GetAllCoursesHoursStatistics } from 'src/queries/course_management/query/GetAllCoursesHours'
-import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
+import { GetTotalUsersStatistics } from 'src/graphql/account_management/query/GetTotalUsers'
+import { GetAllInstructorsStatiscs } from 'src/graphql/account_management/query/GetAllInstructorsStatiscs'
+import { GetAllCoursesHoursStatistics } from 'src/graphql/course_management/query/GetAllCoursesHours'
+import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses'
 /**
- * @typedef {import('src/features/courses/types').GetAllCoursesResult} GetAllCoursesResult
- * @typedef {import('src/features/courses/types').GetAllCoursesVars} GetAllCoursesVars
- * @typedef {import('src/features/courses/types').AllCoursesHoursResult} AllCoursesHoursResult
- * @typedef {import('src/features/courses/types').AllCoursesHoursVars} AllCoursesHoursVars
+ * @typedef {import('src/types/courses/types').GetAllCoursesResult} GetAllCoursesResult
+ * @typedef {import('src/types/courses/types').GetAllCoursesVars} GetAllCoursesVars
+ * @typedef {import('src/types/courses/types').AllCoursesHoursResult} AllCoursesHoursResult
+ * @typedef {import('src/types/courses/types').AllCoursesHoursVars} AllCoursesHoursVars
  */
-// TODO: add to features/auth/types.ts — GetTotalUsersStatistics / GetAllInstructorsStatiscs missing from generated.ts (schema drift)
+// TODO: add to types/auth/types.ts — GetTotalUsersStatistics / GetAllInstructorsStatiscs missing from generated.ts (schema drift)
 
 export default {
   name: 'StatsWedges',

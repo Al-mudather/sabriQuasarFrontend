@@ -13,10 +13,10 @@ import { Notify, SessionStorage } from 'quasar'
 
 /**
  * Feature-level type aliases for the cart store. Pulled from the type-only
- * module at src/features/cart/types.ts so the Pinia state is annotated with
+ * module at src/types/cart/types.ts so the Pinia state is annotated with
  * the same shapes the checkout components import.
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
  */
 
 export const useCartStore = defineStore('shoppingCart', {
@@ -27,7 +27,7 @@ export const useCartStore = defineStore('shoppingCart', {
     braintreeClientToken: null,
     /**
      * Order payload returned by CreateNewOrderWithBulkOrderDetails. Kept
-     * permissive (unknown) because the shape is not aliased in features/cart/types.
+     * permissive (unknown) because the shape is not aliased in types/cart/types.
      * @type {unknown}
      */
     orderData: null,

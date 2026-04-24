@@ -30,7 +30,7 @@ import type {
 } from 'src/graphql/generated'
 
 // TODO: `WhoJoindThePlatformThrowMe` query is referenced in
-// src/queries/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe.js
+// src/graphql/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe.js
 // but has no codegen-generated type (not registered in codegen document set).
 // Skipped here — add when the op is wired into GraphQL codegen.
 

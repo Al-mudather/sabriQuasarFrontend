@@ -12,12 +12,12 @@
 /**
  * Cart/checkout feature types for the SmartNode component.
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
- * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/features/cart/types').CreateSmartNodeCheckoutResult} CreateSmartNodeCheckoutResult
- * @typedef {import('src/features/cart/types').CreateSmartNodeCheckoutVars} CreateSmartNodeCheckoutVars
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/types/cart/types').CreateSmartNodeCheckoutResult} CreateSmartNodeCheckoutResult
+ * @typedef {import('src/types/cart/types').CreateSmartNodeCheckoutVars} CreateSmartNodeCheckoutVars
  */
-import { CreateSmartNodeCheckout } from 'src/queries/checkout_management/mutation/CreateSmartNodeCheckout';
+import { CreateSmartNodeCheckout } from 'src/graphql/checkout_management/mutation/CreateSmartNodeCheckout';
 import { storeToRefs } from "pinia";
 import { useCartStore } from "src/stores/cart";
 import { apolloClient } from "src/apollo/client";

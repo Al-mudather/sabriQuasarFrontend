@@ -68,10 +68,10 @@
 /**
  * Auth feature types handled by this component.
  *
- * @typedef {import('src/features/auth/types').PasswordResetEmailResult} PasswordResetEmailResult
- * @typedef {import('src/features/auth/types').PasswordResetEmailVariables} PasswordResetEmailVariables
+ * @typedef {import('src/types/auth/types').PasswordResetEmailResult} PasswordResetEmailResult
+ * @typedef {import('src/types/auth/types').PasswordResetEmailVariables} PasswordResetEmailVariables
  */
-import { UserPasswordResetEmail } from 'src/queries/account_management/mutation/UserPasswordResetEmail'
+import { UserPasswordResetEmail } from 'src/graphql/account_management/mutation/UserPasswordResetEmail'
 import DsInput from 'src/design-system/components/DsInput.vue'
 
 export default {

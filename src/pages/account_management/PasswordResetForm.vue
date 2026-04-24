@@ -56,12 +56,12 @@
  * Auth feature types handled by this page.
  *
  * Note: `ResetUserPassword` maps to the `UserPasswordReset` operation in the
- * schema (see TODO in src/features/auth/types.ts).
+ * schema (see TODO in src/types/auth/types.ts).
  *
- * @typedef {import('src/features/auth/types').PasswordResetResult} PasswordResetResult
- * @typedef {import('src/features/auth/types').PasswordResetVariables} PasswordResetVariables
+ * @typedef {import('src/types/auth/types').PasswordResetResult} PasswordResetResult
+ * @typedef {import('src/types/auth/types').PasswordResetVariables} PasswordResetVariables
  */
-import { ResetUserPassword } from 'src/queries/account_management/mutation/ResetUserPassword'
+import { ResetUserPassword } from 'src/graphql/account_management/mutation/ResetUserPassword'
 import DsInput from 'src/design-system/components/DsInput.vue'
 
 export default {

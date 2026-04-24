@@ -132,30 +132,30 @@ import { computed } from 'vue'
 import _ from 'lodash'
 import StatCard from 'src/components/shared/StatCard.vue'
 import TransactionCard from 'src/components/shared/TransactionCard.vue'
-import { MyPyramidBalance }     from 'src/queries/pyramid_marketing_management/query/MyPyramidBalanceQuery'
-import { MyPyramidWithdraws }   from 'src/queries/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
-import { MyPyramidAffiliates }  from 'src/queries/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe'
-import { MyPyramidAccount }     from 'src/queries/pyramid_marketing_management/query/MyPyramidAccount'
-import { MyPyramidLedgerReward } from 'src/queries/pyramid_marketing_management/query/MyPyramidLedgerRewardQuery'
-import { WithdrawPyramidBalance } from 'src/queries/pyramid_marketing_management/mutation/MakePyramidWithdraw'
+import { MyPyramidBalance }     from 'src/graphql/pyramid_marketing_management/query/MyPyramidBalanceQuery'
+import { MyPyramidWithdraws }   from 'src/graphql/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
+import { MyPyramidAffiliates }  from 'src/graphql/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe'
+import { MyPyramidAccount }     from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
+import { MyPyramidLedgerReward } from 'src/graphql/pyramid_marketing_management/query/MyPyramidLedgerRewardQuery'
+import { WithdrawPyramidBalance } from 'src/graphql/pyramid_marketing_management/mutation/MakePyramidWithdraw'
 
-/** @typedef {import('src/features/pyramid/types').PyramidAccount} PyramidAccount */
-/** @typedef {import('src/features/pyramid/types').PyramidBalance} PyramidBalance */
-/** @typedef {import('src/features/pyramid/types').PyramidWithdraw} PyramidWithdraw */
-/** @typedef {import('src/features/pyramid/types').PyramidLedgerRewardValue} PyramidLedgerRewardValue */
-/** @typedef {import('src/features/pyramid/types').PyramidLedgerPayload} PyramidLedgerPayload */
-/** @typedef {import('src/features/pyramid/types').MyPyramidBalanceResult} MyPyramidBalanceResult */
-/** @typedef {import('src/features/pyramid/types').MyPyramidBalanceVars} MyPyramidBalanceVars */
-/** @typedef {import('src/features/pyramid/types').MyPyramidWithdrawsResult} MyPyramidWithdrawsResult */
-/** @typedef {import('src/features/pyramid/types').MyPyramidWithdrawsVars} MyPyramidWithdrawsVars */
-/** @typedef {import('src/features/pyramid/types').MyPyramidAccountResult} MyPyramidAccountResult */
-/** @typedef {import('src/features/pyramid/types').MyPyramidAccountVars} MyPyramidAccountVars */
-/** @typedef {import('src/features/pyramid/types').MyPyramidLedgerRewardResult} MyPyramidLedgerRewardResult */
-/** @typedef {import('src/features/pyramid/types').MyPyramidLedgerRewardVars} MyPyramidLedgerRewardVars */
-/** @typedef {import('src/features/pyramid/types').MyPyramidMarketersResult} MyPyramidMarketersResult */
-/** @typedef {import('src/features/pyramid/types').MyPyramidMarketersVars} MyPyramidMarketersVars */
-/** @typedef {import('src/features/pyramid/types').MakePyramidWithdrawResult} MakePyramidWithdrawResult */
-/** @typedef {import('src/features/pyramid/types').MakePyramidWithdrawVars} MakePyramidWithdrawVars */
+/** @typedef {import('src/types/pyramid/types').PyramidAccount} PyramidAccount */
+/** @typedef {import('src/types/pyramid/types').PyramidBalance} PyramidBalance */
+/** @typedef {import('src/types/pyramid/types').PyramidWithdraw} PyramidWithdraw */
+/** @typedef {import('src/types/pyramid/types').PyramidLedgerRewardValue} PyramidLedgerRewardValue */
+/** @typedef {import('src/types/pyramid/types').PyramidLedgerPayload} PyramidLedgerPayload */
+/** @typedef {import('src/types/pyramid/types').MyPyramidBalanceResult} MyPyramidBalanceResult */
+/** @typedef {import('src/types/pyramid/types').MyPyramidBalanceVars} MyPyramidBalanceVars */
+/** @typedef {import('src/types/pyramid/types').MyPyramidWithdrawsResult} MyPyramidWithdrawsResult */
+/** @typedef {import('src/types/pyramid/types').MyPyramidWithdrawsVars} MyPyramidWithdrawsVars */
+/** @typedef {import('src/types/pyramid/types').MyPyramidAccountResult} MyPyramidAccountResult */
+/** @typedef {import('src/types/pyramid/types').MyPyramidAccountVars} MyPyramidAccountVars */
+/** @typedef {import('src/types/pyramid/types').MyPyramidLedgerRewardResult} MyPyramidLedgerRewardResult */
+/** @typedef {import('src/types/pyramid/types').MyPyramidLedgerRewardVars} MyPyramidLedgerRewardVars */
+/** @typedef {import('src/types/pyramid/types').MyPyramidMarketersResult} MyPyramidMarketersResult */
+/** @typedef {import('src/types/pyramid/types').MyPyramidMarketersVars} MyPyramidMarketersVars */
+/** @typedef {import('src/types/pyramid/types').MakePyramidWithdrawResult} MakePyramidWithdrawResult */
+/** @typedef {import('src/types/pyramid/types').MakePyramidWithdrawVars} MakePyramidWithdrawVars */
 
 /**
  * Narrow the ledger-reward scalar safely. Backend may return number, a

@@ -135,11 +135,11 @@ import { useAuthStore } from "src/stores/auth";
 import { useSettingsStore } from "src/stores/settings";
 import { useCartStore } from "src/stores/cart";
 import { usePyramidStore } from "src/stores/pyramid";
-import { MyPyramidAccount } from "src/queries/pyramid_marketing_management/query/MyPyramidAccount";
+import { MyPyramidAccount } from "src/graphql/pyramid_marketing_management/query/MyPyramidAccount";
 /**
- * @typedef {import('src/features/pyramid/types').MyPyramidAccountResult} MyPyramidAccountResult
- * @typedef {import('src/features/pyramid/types').MyPyramidAccountVars} MyPyramidAccountVars
- * @typedef {import('src/features/pyramid/types').PyramidAccount} PyramidAccount
+ * @typedef {import('src/types/pyramid/types').MyPyramidAccountResult} MyPyramidAccountResult
+ * @typedef {import('src/types/pyramid/types').MyPyramidAccountVars} MyPyramidAccountVars
+ * @typedef {import('src/types/pyramid/types').PyramidAccount} PyramidAccount
  */
 import { LocalStorage } from "quasar";
 

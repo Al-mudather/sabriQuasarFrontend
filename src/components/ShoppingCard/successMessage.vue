@@ -78,15 +78,15 @@
  * Post-checkout success page. Reads `checkoutOrderID` from the cart store
  * and clears the cart when the CHECKOUT_SUCCESS notification arrives. The
  * notification query is not one of the per-provider checkout ops aliased in
- * src/features/cart/types.ts, so only the generic cart aliases apply.
+ * src/types/cart/types.ts, so only the generic cart aliases apply.
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
- * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
  */
 import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
-import { GetMyNotifications } from 'src/queries/notification_management/query/MyNotifications'
+import { GetMyNotifications } from 'src/graphql/notification_management/query/MyNotifications'
 import { useCartStore } from 'src/stores/cart'
 import { useAuthStore } from 'src/stores/auth'
 

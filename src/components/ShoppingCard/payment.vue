@@ -198,12 +198,12 @@
  * below document the expected shapes even though the calls are untyped at
  * runtime (no useMutation/useQuery composable here).
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
- * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
- * @typedef {import('src/features/cart/types').CreateStripeCheckoutResult} CreateStripeCheckoutResult
- * @typedef {import('src/features/cart/types').CreateStripeCheckoutVars} CreateStripeCheckoutVars
- * @typedef {import('src/features/cart/types').StripePublishableKeyResult} StripePublishableKeyResult
- * @typedef {import('src/features/cart/types').StripePublishableKeyVars} StripePublishableKeyVars
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/types/cart/types').CreateStripeCheckoutResult} CreateStripeCheckoutResult
+ * @typedef {import('src/types/cart/types').CreateStripeCheckoutVars} CreateStripeCheckoutVars
+ * @typedef {import('src/types/cart/types').StripePublishableKeyResult} StripePublishableKeyResult
+ * @typedef {import('src/types/cart/types').StripePublishableKeyVars} StripePublishableKeyVars
  */
 import { storeToRefs } from 'pinia'
 import _ from 'lodash'
@@ -211,11 +211,11 @@ import _ from 'lodash'
 import { useCartStore } from 'src/stores/cart'
 import { useSettingsStore } from 'src/stores/settings'
 import { apolloClient } from 'src/apollo/client'
-import { CreateNewOrderWithBulkOrderDetails } from 'src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
-import { CreateStripeCheckout } from 'src/queries/checkout_management/mutation/CreateStripeCheckout'
-import { StripePublishableKey } from 'src/queries/checkout_management/query/StripePublishableKey'
-import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/queries/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
+import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
+import { CreateStripeCheckout } from 'src/graphql/checkout_management/mutation/CreateStripeCheckout'
+import { StripePublishableKey } from 'src/graphql/checkout_management/query/StripePublishableKey'
+import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
+import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 
 import bankakPayment from 'src/components/ShoppingCard/bankakPay.vue'
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'

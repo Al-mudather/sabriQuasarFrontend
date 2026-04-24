@@ -51,7 +51,7 @@
 
 <script>
 import courseCard from 'src/components/utils/courseCard.vue'
-import { GetAllCourses } from 'src/queries/course_management/query/GetAllCourses'
+import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses'
 
 export default {
   name: 'RelatedCourses',

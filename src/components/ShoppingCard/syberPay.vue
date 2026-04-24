@@ -13,13 +13,13 @@
  * Cart/checkout feature types for the Syberpay component. The 'syberpay'
  * PaymentProvider variant is kept in the union for UI parity; no
  * CreateSyberpayCheckout / CaptureSyberpayCheckout Result/Vars aliases are
- * exported from src/features/cart/types.ts yet (see TODO there).
+ * exported from src/types/cart/types.ts yet (see TODO there).
  *
- * @typedef {import('src/features/cart/types').CartEntry} CartEntry
- * @typedef {import('src/features/cart/types').PaymentProvider} PaymentProvider
+ * @typedef {import('src/types/cart/types').CartEntry} CartEntry
+ * @typedef {import('src/types/cart/types').PaymentProvider} PaymentProvider
  */
-import { CreateNewOrderWithBulkOrderDetails } from "src/queries/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
-import { CreateSyberpayCheckout } from 'src/queries/checkout_management/mutation/CreateSyberpayCheckout';
+import { CreateNewOrderWithBulkOrderDetails } from "src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails";
+import { CreateSyberpayCheckout } from 'src/graphql/checkout_management/mutation/CreateSyberpayCheckout';
 import { storeToRefs } from "pinia";
 import { useCartStore } from "src/stores/cart";
 import { apolloClient } from "src/apollo/client";

@@ -1,25 +1,25 @@
 schema:
   - https://stc.training/api/graphql/
 documents:
-  - 'src/queries/**/*.js'
+  - 'src/graphql/**/*.js'
   # Excluded due to duplicate operation names (see PR notes). The kept file
   # for each pair is listed alongside.
   # LoginUser: keep LoginUserWithEmail.js, drop LoginUserWithUserName.js
-  - '!src/queries/account_management/mutation/LoginUserWithUserName.js'
+  - '!src/graphql/account_management/mutation/LoginUserWithUserName.js'
   # GetAllCourses: keep course_management/query/GetAllCourses.js, drop order_management/query/GetAllCourses.js
-  - '!src/queries/order_management/query/GetAllCourses.js'
+  - '!src/graphql/order_management/query/GetAllCourses.js'
   # GetAllMyNotifications: keep GetAllMyNotifications.js, drop GetAllMyNotificationsCount.js (operation name collides)
-  - '!src/queries/notification_management/query/GetAllMyNotificationsCount.js'
+  - '!src/graphql/notification_management/query/GetAllMyNotificationsCount.js'
   # --- Schema drift: the live endpoint no longer exposes these fields/args with the
   # shape the .js files expect. Excluded from codegen until the .js files are
   # fixed in a follow-up (out of scope for Track A). These queries still run at
   # runtime against the historical server behavior — this only removes them
   # from typed output.
-  - '!src/queries/account_management/mutation/SetUserPassword.js'
-  - '!src/queries/afilliate_management/mutation/JoinAffiliateProgram.js'
-  - '!src/queries/checkout_management/mutation/CreatePaypalCheckout.js'
-  - '!src/queries/checkout_management/mutation/CreateSyberpayCheckout.js'
-  - '!src/queries/enrollment_management/query/GetEnrollmentByID.js'
+  - '!src/graphql/account_management/mutation/SetUserPassword.js'
+  - '!src/graphql/afilliate_management/mutation/JoinAffiliateProgram.js'
+  - '!src/graphql/checkout_management/mutation/CreatePaypalCheckout.js'
+  - '!src/graphql/checkout_management/mutation/CreateSyberpayCheckout.js'
+  - '!src/graphql/enrollment_management/query/GetEnrollmentByID.js'
 generates:
   src/graphql/generated.ts:
     plugins:

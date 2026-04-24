@@ -38,8 +38,8 @@
 </template>
 
 <script>
-import { UpdateCertificateNameQuery } from 'src/queries/account_management/mutation/UpdateCertificateName'
-import { GetMyProfileData } from 'src/queries/account_management/query/GetMyProfileData'
+import { UpdateCertificateNameQuery } from 'src/graphql/account_management/mutation/UpdateCertificateName'
+import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
 import { useAuthStore } from 'src/stores/auth'
 import { apolloClient } from 'src/apollo/client'
 

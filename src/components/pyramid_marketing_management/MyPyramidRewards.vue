@@ -17,8 +17,8 @@
 <script>
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
-import { MyPyramidLedgerReward } from 'src/queries/pyramid_marketing_management/query/MyPyramidLedgerRewardQuery'
-import { ClaimPyramidLedgerBalance } from 'src/queries/pyramid_marketing_management/mutation/ClaimPyramidLedgerBalance'
+import { MyPyramidLedgerReward } from 'src/graphql/pyramid_marketing_management/query/MyPyramidLedgerRewardQuery'
+import { ClaimPyramidLedgerBalance } from 'src/graphql/pyramid_marketing_management/mutation/ClaimPyramidLedgerBalance'
 import { apolloClient } from 'src/apollo/client'
 
 const priceLookup = [
