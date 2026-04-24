@@ -1,114 +1,66 @@
-# vue-tsc Baseline — 208 errors to address incrementally
+# Typecheck Gates — Current State
 
-Run `npm run typecheck:vue` to reproduce. Main (non-Vue) `tsc` via
-`npm run typecheck` is green and is the hard CI gate. This document
-tracks the work needed to get `typecheck:vue` to zero.
+As of commit `cc4e4ea`, **all typecheck gates are green**:
 
-## Baseline snapshot
-
-- First baseline: **249 errors** (immediately after vue-tsc wiring).
-- After converting Pinia stores to TS: **208 errors** (−41).
-
-## Error-code distribution
-
-| TS code | Count | Category |
+| Gate | Command | Status |
 |---|---|---|
-| TS2322 | 48 | Type not assignable (often `null → T`) |
-| TS18047 | 47 | `foo is possibly 'null'` |
-| TS2345 | 38 | Argument not assignable |
-| TS2339 | 22 | Property does not exist |
-| TS2352 | 15 | Type conversion (invalid cast) |
-| TS2307 | 9  | Cannot find module |
-| TS18048 | 9  | `foo is possibly 'undefined'` |
-| TS2722 | 5  | Cannot invoke possibly undefined |
-| TS2741 | 3  | Property missing in type |
-| TS7016 | 2  | No declaration file |
+| Hard TS compile | `npm run typecheck` (tsc on `src/graphql/**` + `src/types/**`) | ✅ 0 errors |
+| Vue SFC typecheck | `npm run typecheck:vue` (vue-tsc on all `.vue`) | ✅ 0 errors |
+| Codegen drift | `npm run codegen:check` | ✅ green |
+| Quasar/Vite build | `npm run build` | ✅ green |
 
-**68% of errors** (TS18047 + TS18048 + TS2322 + TS2345) are nullability
-issues — GraphQL optional fields (`T | null`) read without `?.` or `??`.
-These are the bugs type-safety is meant to surface.
+## History
 
-## Top offenders (by file)
+- **249 errors** — immediately after vue-tsc was wired up.
+- **208 errors** — after converting Pinia stores (`auth`, `cart`, `settings`, `pyramid`) from `.js` to `.ts`.
+- **11 errors** — after a mechanical nullability sweep across ~45 `.vue` files (commit `cc4e4ea`).
+- **0 errors** — after `tsconfig.vue.json` path aliases + `videojs-hls-quality-selector.d.ts` shim.
 
-- `src/App.vue` — ~12 errors: `window.OneSignal` calls without `?.` guards,
-  plus a `setExternalUserId` arity mismatch against the narrow ambient shim
-  in `src/types/globals.d.ts`.
-- `src/components/Home/Training.vue` — ~9 errors: `courses.edgeCount` /
-  `courses.edges` accesses where `courses` is `AllCoursesInSpecialityResult |
-  null` without a null-guard.
-- `src/pages/Home.vue` — ~4 errors: `allCoursesCount` / `allCourseSpecialities`
-  reads without `?.`.
-- `src/pages/pyramid_marketing_management/MyMarketingPage.vue` — ~4 errors:
-  similar pattern.
-- Numerous per-file singles — one to three nullability accesses each.
+## How to keep it at zero
 
-## Fix patterns
+Run `npm run typecheck:vue` before committing any `.vue` edit. Every PR should
+keep this at 0. If you introduce a new Apollo op, a new leaf component, or a
+new prop shape, the rules in `.claude/skills/vue-type-safe-conversion/SKILL.md`
+still apply:
 
-Per category, the recipe is mechanical:
+1. Types come from `src/types/<feature>/types.ts` — never import from
+   `src/graphql/generated` directly.
+2. `useQuery` / `useMutation` / `apolloClient.query` / `apolloClient.mutate`
+   always take `<Result, Vars>` generics.
+3. Read Apollo results with typed optional chaining (`?.` + `??`) — no
+   `lodash.get` paths, no `as any`, no `@ts-expect-error`.
+4. If a GraphQL selection is missing a field the UI reads, edit the `.js`
+   file under `src/graphql/<domain>/{query,mutation}/` and re-run
+   `npm run codegen`. Don't paper over the consumer.
 
-**TS18047 (`foo is possibly 'null'`):**
-```ts
-// before
-const edges = myQuery.result.value.allX.edges
-// after
-const edges = myQuery.result.value?.allX?.edges ?? []
-```
+## Edge cases worth remembering
 
-**TS2345 / TS2322 (`null` not assignable to `string`):**
-```ts
-// before
-fn(props.course.title)    // title: string | null
-// after
-fn(props.course.title ?? '')
-```
+- **`CourseNode.currency`** is parsed at cache-read time by the Apollo
+  `typePolicy` in `src/apollo/client.js` — consume as `CoursePricing` directly,
+  never `JSON.parse(node.currency)`.
+- **`CourseUnitContentNode.modelValue`** is a `JSONString` scalar NOT covered
+  by a typePolicy — `contentItem.vue` accepts both the parsed-object shape and
+  the runtime JSON-string, via a `readModelValue()` helper. If a typePolicy is
+  ever added for this field, drop the helper and consume the object directly.
+- **Cart item shape** is narrower than the GraphQL Course node — cart call
+  sites build an explicit `{ id, pk, name, currency }` mapping rather than
+  passing the raw Course.
+- **Third-party window globals** (OneSignal, FB, google, Stripe, paypal,
+  videojs) are narrowly typed as optional in `src/types/globals.d.ts`. Every
+  call must guard with `if (!window.X) return` or `?.`. Do NOT widen the
+  shims to drop the optional.
+- **`CurrencyCode`** lives in `src/types/settings/types.ts` (the settings
+  feature owns the currency selection UI). `src/types/courses/types.ts`
+  re-exports it for course-shaped consumers.
 
-**TS18048 (`foo is possibly 'undefined'`):**
-Add a `if (!foo) return` early-return, or `foo?.` before the call.
+## Not covered by vue-tsc
 
-**TS2339 on window globals (`window.OneSignal.xxx`):**
-The ambient shim in `src/types/globals.d.ts` declares `OneSignal?: {...}`
-(optional). Guard every call:
-```ts
-// before
-window.OneSignal.push(...)
-// after
-if (window.OneSignal) window.OneSignal.push(...)
-```
-
-**TS2307 (cannot find module):**
-Usually a missing `.js` file or a path that the Vite resolver tolerates but
-TS doesn't. Add `allowJs: true` is already set in `tsconfig.vue.json`; if
-errors persist, the import specifier is likely misspelled.
-
-## Suggested fix order
-
-1. **App.vue** — single file, ~12 errors, all OneSignal null-guards. Easy win.
-2. **Training.vue** — consolidate `courses` null handling via an `edges`
-   computed that defaults to `[]`. Eliminates 9+ errors.
-3. **Home.vue** — 4 nullability adds.
-4. **MyMarketingPage.vue** + **MyCustomersPaymentPage.vue** — a pass over all
-   pyramid components for `?.` on optional fields.
-5. **Widespread sweep** — the remaining ~100 errors are singletons across
-   many files. An agent with a scope-contract listing the exact file/line
-   and the fix pattern can sweep these in one pass.
-
-## What NOT to do
-
-- Do **not** widen `src/types/globals.d.ts` shims to remove `?` on window
-  globals. The shim is narrow on purpose — the errors are telling you the
-  runtime call path is unsafe; fix the call site, not the shim.
-- Do **not** add `as any` or `@ts-expect-error`. The stated project policy
-  in `CLAUDE.md` is to either fix the query (if a field is missing from the
-  selection) or fix the consumer (if the field is legitimately nullable).
-- Do **not** turn off `strict` in the vue tsconfig — it's what surfaces the
-  nullability bugs in the first place.
-
-## Not counted in the 208
-
-- Schema-drift queries excluded in `codegen.yml` (CreatePaypalCheckout,
-  CreateSyberpayCheckout, SetUserPassword, etc.) — need backend coordination
-  before their operation types can be generated and consumed.
-- `src/components/courseDetails/contentItem.vue` — the `modelValue` JSONString
-  scalar is not covered by the Apollo `typePolicy`. Adding a field policy in
-  `src/apollo/client.js` would let consumers read it as a typed object and
-  drop the local `RawContent` shim.
+- Schema-drift ops excluded from codegen (`CreatePaypalCheckout`,
+  `CreateSyberpayCheckout`, `SetUserPassword`, etc.) — these still use inline
+  types in their consuming components. Follow-up: coordinate with backend to
+  get the ops back into the schema so codegen picks them up, then drop the
+  inline declarations.
+- Runtime behavior of template bindings that vue-tsc can check structurally
+  but not semantically — e.g. whether a `v-model` binding target exists on
+  the parent. vue-tsc does check `defineProps`/`defineEmits` contracts, but
+  template-to-script data-flow validation is limited.
