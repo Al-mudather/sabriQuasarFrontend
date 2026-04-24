@@ -55,7 +55,7 @@
       >
         <template #actions>
           <ds-button variant="primary" @click="goToCoursesPage">
-            تصفح الكورسات
+            تصفح الدورات
           </ds-button>
         </template>
       </ds-empty-state>
@@ -68,6 +68,7 @@
           class="order-card"
           :class="[`order-card--${mapStatus(o)}`]"
           role="article"
+          :aria-label="`طلب ${o.order?.invoiceNumber ?? ''} — ${STATUS_LABEL[mapStatus(o)]}`"
         >
           <header class="order-card__head">
             <span
@@ -75,7 +76,9 @@
               :class="[`order-card__status--${mapStatus(o)}`]"
             >
               <span class="order-card__status-dot" aria-hidden="true"></span>
-              {{ STATUS_LABEL[mapStatus(o)] }}
+              <span class="order-card__status-label">
+                {{ STATUS_LABEL[mapStatus(o)] }}
+              </span>
             </span>
 
             <div v-if="o.order?.totalAmount != null" class="order-card__amount">
@@ -85,99 +88,40 @@
           </header>
 
           <div class="order-card__body">
-            <h3 class="order-card__title">
-              {{ o.order?.invoiceNumber ? `طلب رقم ${o.order.invoiceNumber}` : 'طلب' }}
-            </h3>
-            <p class="order-card__date">
-              {{ formatDate(o.created ?? o.updated) }}
-            </p>
+            <dl class="order-card__meta">
+              <div class="order-card__meta-row">
+                <dt class="order-card__meta-label">رقم الفاتورة</dt>
+                <dd class="order-card__meta-value order-card__meta-value--mono">
+                  {{ o.order?.invoiceNumber ?? '—' }}
+                </dd>
+              </div>
+              <div class="order-card__meta-row">
+                <dt class="order-card__meta-label">تاريخ الطلب</dt>
+                <dd class="order-card__meta-value">
+                  {{ formatDate(o.created ?? o.updated) }}
+                </dd>
+              </div>
+            </dl>
           </div>
-
-          <footer class="order-card__actions">
-            <ds-button
-              v-if="canReupload(o)"
-              variant="secondary"
-              size="sm"
-              @click="openBill(o)"
-            >
-              إعادة إرفاق الفاتورة
-            </ds-button>
-            <ds-button
-              variant="ghost"
-              size="sm"
-              @click="viewDetails(o)"
-            >
-              عرض التفاصيل
-            </ds-button>
-          </footer>
         </article>
       </div>
     </section>
-
-    <!-- Reupload dialog -->
-    <ds-modal v-model="billOpen" size="md" persistent close-label="إغلاق">
-      <template #header>
-        <div class="order-bill__header">
-          <h3 class="order-bill__title">فاتورة الدفع</h3>
-          <p class="order-bill__subtitle">
-            يمكنك مراجعة الفاتورة الحالية أو رفع نسخة محدّثة.
-          </p>
-        </div>
-      </template>
-
-      <div class="order-bill">
-        <img
-          v-if="activeOrder && activeOrder.attachment"
-          class="order-bill__img"
-          :src="formatImage(activeOrder.attachment)"
-          alt="فاتورة الدفع الحالية"
-        />
-        <div v-else class="order-bill__img order-bill__img--empty">
-          لا توجد فاتورة مرفقة حالياً
-        </div>
-
-        <file-upload
-          :imgeSize="4000000"
-          :accept="'.png,.jpg, image/*'"
-          label="إعادة إرفاق الفاتورة"
-          @File_Handler="reuploadImageHandler"
-        />
-      </div>
-
-      <template #footer>
-        <ds-button variant="ghost" @click="billOpen = false">إلغاء</ds-button>
-        <ds-button
-          variant="primary"
-          :loading="reuploadLoading"
-          :disabled="!bankakBill"
-          @click="reUploadTheTransactionBill"
-        >
-          إعادة إرفاق
-        </ds-button>
-      </template>
-    </ds-modal>
   </main>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuery, useMutation } from '@vue/apollo-composable'
-import { useQuasar } from 'quasar'
+import { useQuery } from '@vue/apollo-composable'
 import { useSettingsStore } from 'src/stores/settings'
 import { useAuthStore } from 'src/stores/auth'
 import { MyAttachmentTransactions } from 'src/graphql/attachment_transactions_management/query/TheUserAttachmentTransactionsQuery'
-import { ReUploadAttachmentTransaction } from 'src/graphql/attachment_transactions_management/mutation/ReUploadAttachmentTransaction'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
-import DsModal from 'src/design-system/components/DsModal.vue'
-import FileUpload from 'src/components/utils/FileUploader.vue'
 import type {
   TheUserAttachmentTransactionsResult,
   TheUserAttachmentTransactionsVars,
-  ReUploadAttachmentResult,
-  ReUploadAttachmentVars,
   UserAttachmentTransaction,
 } from 'src/types/attachments/types'
 
@@ -185,7 +129,6 @@ import type {
 // Composables
 // ---------------------------------------------------------------------------
 const router = useRouter()
-const $q = useQuasar()
 const settings = useSettingsStore()
 const auth = useAuthStore()
 
@@ -211,10 +154,6 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
 // State
 // ---------------------------------------------------------------------------
 const activeFilter = ref<FilterChip['key']>('all')
-const billOpen = ref(false)
-const activeOrder = ref<UserAttachmentTransaction | null>(null)
-const reuploadLoading = ref(false)
-const bankakBill = ref<File | null>(null)
 
 // ---------------------------------------------------------------------------
 // Query
@@ -231,14 +170,6 @@ const orders = computed<UserAttachmentTransaction[]>(
 )
 
 // ---------------------------------------------------------------------------
-// Mutation
-// ---------------------------------------------------------------------------
-const reupload = useMutation<ReUploadAttachmentResult, ReUploadAttachmentVars>(
-  ReUploadAttachmentTransaction,
-  { refetchQueries: [{ query: MyAttachmentTransactions }] },
-)
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 function mapStatus (o: UserAttachmentTransaction): OrderStatus {
@@ -249,15 +180,10 @@ function mapStatus (o: UserAttachmentTransaction): OrderStatus {
   return 'pending'
 }
 
-function canReupload (o: UserAttachmentTransaction): boolean {
-  return !!(o.retryPlease || o.pyramidRetryPlease)
-}
-
 function formatAmount (value: number | null | undefined): string {
   if (value == null) return ''
   const n = Number(value)
   if (!Number.isFinite(n)) return String(value)
-  // English digits for numerals (per brief).
   try {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n)
   } catch {
@@ -282,7 +208,12 @@ function formatDate (iso?: string | null): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return String(iso)
   try {
-    return new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium' }).format(d)
+    // Arabic month names, English (Latin) numerals.
+    return new Intl.DateTimeFormat('ar-EG-u-nu-latn', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(d)
   } catch {
     return d.toLocaleDateString('ar-EG')
   }
@@ -324,85 +255,6 @@ const visibleOrders = computed<UserAttachmentTransaction[]>(() => {
 // ---------------------------------------------------------------------------
 // Methods
 // ---------------------------------------------------------------------------
-function openBill (o: UserAttachmentTransaction): void {
-  activeOrder.value = o
-  bankakBill.value = null
-  billOpen.value = true
-}
-
-function viewDetails (o: UserAttachmentTransaction): void {
-  const invoiceNumber = o.order?.invoiceNumber
-  $q.notify({
-    type: 'info',
-    position: 'top',
-    progress: true,
-    message: `رقم الطلب: ${invoiceNumber ?? o.pk ?? ''}`,
-  })
-}
-
-function reuploadImageHandler (val: File | null): void {
-  if (!val) return
-  bankakBill.value = val
-}
-
-function formatImage (imageUrl: string | null): string {
-  if (!imageUrl) return ''
-  if (process.env.NODE_ENV === 'development') return `http://localhost:8000/media/${imageUrl}`
-  return `https://api.stc.training/media/${imageUrl}`
-}
-
-function errorHandler (errorsObj: unknown): void {
-  if (errorsObj && typeof errorsObj === 'object' && 'message' in errorsObj) {
-    const msg = (errorsObj as { message: unknown }).message
-    if (typeof msg === 'string') {
-      $q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: msg })
-      return
-    }
-  }
-  const errMap = errorsObj as Record<string, Array<{ message: string }>>
-  for (const key in errMap) {
-    for (const val of errMap[key]) {
-      $q.notify({
-        type: 'warning',
-        progress: true,
-        multiLine: true,
-        position: 'top',
-        message: val.message,
-      })
-    }
-  }
-}
-
-async function reUploadTheTransactionBill (): Promise<void> {
-  if (!activeOrder.value) return
-  const orderId = activeOrder.value.pk
-  if (orderId == null) return
-  reuploadLoading.value = true
-  try {
-    const res = await reupload.mutate({
-      id: orderId,
-      input: { attachment: bankakBill.value },
-    })
-    const payload = res?.data?.reUploadAttachmentTransaction
-    if (payload?.success) {
-      $q.notify({
-        type: 'positive',
-        position: 'top',
-        progress: true,
-        multiLine: true,
-        message: 'تم إعادة إرفاق الفاتورة',
-      })
-      billOpen.value = false
-      activeOrder.value = null
-      bankakBill.value = null
-    } else if (payload?.errors) {
-      errorHandler(payload.errors)
-    }
-  } catch { /* apollo surfaces */ } finally {
-    reuploadLoading.value = false
-  }
-}
-
 function goToCoursesPage (): void {
   if (!auth.isAuthenticated) {
     router.push({ name: 'login' })
@@ -464,23 +316,15 @@ onMounted(() => {
   /* ---------- Grid ---------- */
   &__grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: var(--ds-space-4);
     align-items: stretch;
-
-    @media (min-width: 640px) {
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    }
   }
 
   &__skeletons {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: var(--ds-space-3);
-
-    @media (min-width: 640px) {
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    }
   }
 }
 
@@ -559,69 +403,63 @@ onMounted(() => {
   }
 }
 
-/* ---------- Order card ---------- */
+/* ---------- Order card (editorial) ---------- */
 .order-card {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-4);
-  padding: var(--ds-space-5);
+  gap: var(--ds-space-5);
+  padding: var(--ds-space-5) var(--ds-space-5) var(--ds-space-5);
   background: var(--ds-surface-elevated, #fff);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-lg, 14px);
   box-shadow: var(--ds-shadow-xs);
   transition:
     box-shadow var(--ds-duration-fast, 150ms) ease,
-    transform  var(--ds-duration-fast, 150ms) ease;
+    border-color var(--ds-duration-fast, 150ms) ease,
+    transform var(--ds-duration-fast, 150ms) ease;
 
   &:hover {
-    box-shadow: var(--ds-shadow-sm);
+    box-shadow: var(--ds-shadow-md, var(--ds-shadow-sm));
+    border-color: var(--ds-brand-600, #322873);
+    transform: translateY(-1px);
   }
 
   &__head {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: var(--ds-space-3);
     flex-wrap: wrap;
   }
 
+  /* Status as an inline dot + word (no pill), leading the card */
   &__status {
     display: inline-flex;
     align-items: center;
     gap: var(--ds-space-2);
-    padding-block: 4px;
-    padding-inline: var(--ds-space-3);
-    border-radius: 999px;
     font-family: var(--ds-font-body);
-    font-size: var(--ds-text-xs);
+    font-size: var(--ds-text-sm);
     font-weight: var(--ds-weight-semibold);
-    line-height: 1;
+    line-height: 1.2;
   }
 
   &__status-dot {
-    inline-size: 6px;
-    block-size: 6px;
+    inline-size: 8px;
+    block-size: 8px;
     border-radius: 999px;
     background: currentColor;
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
+    flex-shrink: 0;
   }
 
-  &__status--completed {
-    color: var(--ds-success, #5a8e3a);
-    background: var(--ds-success-bg, #e8efde);
-  }
-  &__status--processing {
-    color: var(--ds-brand-600, #322873);
-    background: var(--ds-brand-50, #ece9f5);
-  }
-  &__status--rejected {
-    color: var(--ds-danger, #9e3524);
-    background: var(--ds-danger-bg, #f2dad4);
-  }
-  &__status--pending {
-    color: var(--ds-warning, #b8862a);
-    background: var(--ds-warning-bg, #f5ead1);
-  }
+  &__status-label { line-height: 1; }
 
+  &__status--completed  { color: var(--ds-success, #5a8e3a); }
+  &__status--processing { color: var(--ds-warning, #b8862a); }
+  &__status--rejected   { color: var(--ds-danger,  #9e3524); }
+  &__status--pending    { color: var(--ds-brand-600, #322873); }
+
+  /* Hero amount: large, tabular, indigo */
   &__amount {
     display: inline-flex;
     align-items: baseline;
@@ -631,97 +469,68 @@ onMounted(() => {
 
   &__amount-value {
     font-family: var(--ds-font-mono, var(--ds-font-body));
-    font-size: var(--ds-text-xl, 20px);
-    font-weight: var(--ds-weight-semibold);
-    color: var(--ds-ink, var(--ds-text));
+    font-size: var(--ds-text-2xl, 24px);
+    font-weight: var(--ds-weight-bold);
+    color: var(--ds-brand-600, #322873);
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    line-height: 1;
   }
 
   &__amount-currency {
     font-family: var(--ds-font-body);
-    font-size: var(--ds-text-sm);
+    font-size: var(--ds-text-xs);
     color: var(--ds-taupe, var(--ds-text-muted));
     font-weight: var(--ds-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   &__body {
     display: flex;
     flex-direction: column;
-    gap: var(--ds-space-1);
     min-inline-size: 0;
   }
 
-  &__title {
-    margin: 0;
-    font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-lg, 17px);
-    font-weight: var(--ds-weight-semibold);
-    color: var(--ds-ink, var(--ds-text));
-    line-height: var(--ds-leading-arabic);
-    overflow-wrap: anywhere;
-  }
-
-  &__date {
-    margin: 0;
-    font-family: var(--ds-font-body);
-    font-size: var(--ds-text-sm);
-    color: var(--ds-taupe, var(--ds-text-muted));
-    line-height: var(--ds-leading-arabic);
-  }
-
-  &__actions {
-    display: flex;
-    flex-wrap: wrap;
+  /* Metadata block: label + value rows */
+  &__meta {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: var(--ds-space-2);
-    justify-content: flex-end;
-    padding-block-start: var(--ds-space-2);
+    margin: 0;
+    padding-block-start: var(--ds-space-3);
     border-block-start: 1px solid var(--ds-border);
   }
-}
 
-/* ---------- Bill modal ---------- */
-.order-bill {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-4);
-
-  &__header { display: flex; flex-direction: column; gap: var(--ds-space-1); }
-
-  &__title {
-    margin: 0;
-    font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-lg);
-    font-weight: var(--ds-weight-bold);
-    color: var(--ds-ink, var(--ds-text));
-    line-height: var(--ds-leading-arabic);
+  &__meta-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-3);
   }
 
-  &__subtitle {
+  &__meta-label {
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe, var(--ds-text-muted));
+    font-weight: var(--ds-weight-medium);
+    letter-spacing: 0.02em;
+  }
+
+  &__meta-value {
     margin: 0;
     font-family: var(--ds-font-body);
     font-size: var(--ds-text-sm);
-    color: var(--ds-taupe, var(--ds-text-muted));
-    line-height: var(--ds-leading-arabic);
+    color: var(--ds-ink, var(--ds-text));
+    font-weight: var(--ds-weight-medium);
+    text-align: end;
   }
 
-  &__img {
-    inline-size: 100%;
-    block-size: auto;
-    max-block-size: 50vh;
-    object-fit: contain;
-    border-radius: var(--ds-radius-md, 10px);
-    background: var(--ds-surface-sunken, #efe8dc);
-    border: 1px solid var(--ds-border);
-
-    &--empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-block: var(--ds-space-6);
-      font-family: var(--ds-font-body);
-      font-size: var(--ds-text-sm);
-      color: var(--ds-taupe, var(--ds-text-muted));
-    }
+  &__meta-value--mono {
+    font-family: var(--ds-font-mono, var(--ds-font-body));
+    font-variant-numeric: tabular-nums;
+    color: var(--ds-taupe, var(--ds-text-muted));
+    font-size: var(--ds-text-sm);
   }
 }
 </style>
