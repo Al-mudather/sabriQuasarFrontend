@@ -30,49 +30,96 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import StatCard from 'src/components/shared/StatCard.vue'
 import { GetTotalUsersStatistics } from 'src/graphql/account_management/query/GetTotalUsers'
 import { GetAllInstructorsStatiscs } from 'src/graphql/account_management/query/GetAllInstructorsStatiscs'
 import { GetAllCoursesHoursStatistics } from 'src/graphql/course_management/query/GetAllCoursesHours'
-import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses'
-/**
- * @typedef {import('src/types/courses/types').GetAllCoursesResult} GetAllCoursesResult
- * @typedef {import('src/types/courses/types').GetAllCoursesVars} GetAllCoursesVars
- * @typedef {import('src/types/courses/types').AllCoursesHoursResult} AllCoursesHoursResult
- * @typedef {import('src/types/courses/types').AllCoursesHoursVars} AllCoursesHoursVars
- */
-// TODO: add to types/auth/types.ts — GetTotalUsersStatistics / GetAllInstructorsStatiscs missing from generated.ts (schema drift)
+import { GetAllCoursesCountStatiscs } from 'src/graphql/course_management/query/GetAllCoursesStatiscs'
+import type {
+  TotalUsersResult,
+  TotalUsersVars,
+  AllInstructorCountResult,
+  AllInstructorCountVars,
+  AllCoursesHoursResult,
+  AllCoursesHoursVars,
+  GetAllCoursesCountResult,
+  GetAllCoursesCountVars,
+} from 'src/types/courses/types'
 
-export default {
-  name: 'StatsWedges',
-  components: { StatCard },
-  setup () {
-    const { result: totalUsersResult } = useQuery(GetTotalUsersStatistics, null, { errorPolicy: 'all' })
-    const { result: instructorsResult } = useQuery(GetAllInstructorsStatiscs, null, { errorPolicy: 'all' })
-    const { result: hoursResult } = useQuery(GetAllCoursesHoursStatistics, null, { errorPolicy: 'all' })
-    const { result: coursesResult } = useQuery(GetAllCourses, { first: 1, isDraft: false }, { errorPolicy: 'all' })
+// All four stat queries are present in generated.ts (AllCoursesHours, GetAllCoursesCount,
+// AllInstructorCount, TotalUsers). Previous TODO comments about schema drift were incorrect —
+// the operations exist with slightly different operation names than expected but map to
+// the correct root fields on the live schema.
 
-    const totalUsers = computed(() => Number(totalUsersResult.value?.totalUsers) || 0)
-    const allInstructorCount = computed(() => Number(instructorsResult.value?.allInstructorCount) || 0)
-    const allCoursesHours = computed(() => Number(hoursResult.value?.allCoursesHours) || 0)
-    const coursesTotal = computed(() => Number(coursesResult.value?.allCourses?.totalCount) || 0)
+const { result: totalUsersResult } = useQuery<TotalUsersResult, TotalUsersVars>(
+  GetTotalUsersStatistics,
+  null,
+  { errorPolicy: 'all' },
+)
 
-    return { totalUsers, allInstructorCount, allCoursesHours, coursesTotal }
-  },
-  computed: {
-    stats () {
-      return [
-        { value: this.coursesTotal,     label: 'دورة تدريبية', variant: 'indigo',     max: Math.max(10, Math.ceil(this.coursesTotal * 1.2)) },
-        { value: this.totalUsers,       label: 'متعلم',        variant: 'terracotta', max: Math.max(50, Math.ceil(this.totalUsers * 1.2)) },
-        { value: this.allInstructorCount, label: 'مدرب',       variant: 'indigo',     max: Math.max(5, Math.ceil(this.allInstructorCount * 1.2)) },
-        { value: this.allCoursesHours,  label: 'ساعة تدريبية', variant: 'terracotta', max: Math.max(10, Math.ceil(this.allCoursesHours * 1.2)) }
-      ]
-    }
-  }
+const { result: instructorsResult } = useQuery<AllInstructorCountResult, AllInstructorCountVars>(
+  GetAllInstructorsStatiscs,
+  null,
+  { errorPolicy: 'all' },
+)
+
+const { result: hoursResult } = useQuery<AllCoursesHoursResult, AllCoursesHoursVars>(
+  GetAllCoursesHoursStatistics,
+  null,
+  { errorPolicy: 'all' },
+)
+
+// Using dedicated allCoursesCount stat query instead of allCourses connection
+// (avoids fetching a full edge list just to read totalCount)
+const { result: coursesCountResult } = useQuery<GetAllCoursesCountResult, GetAllCoursesCountVars>(
+  GetAllCoursesCountStatiscs,
+  null,
+  { errorPolicy: 'all' },
+)
+
+// totalUsers / allCoursesHours / allCoursesCount are String scalars in the schema
+const totalUsers = computed<number>(() => Number(totalUsersResult.value?.totalUsers) || 0)
+const allInstructorCount = computed<number>(() => Number(instructorsResult.value?.allInstructorCount) || 0)
+const allCoursesHours = computed<number>(() => Number(hoursResult.value?.allCoursesHours) || 0)
+const coursesTotal = computed<number>(() => Number(coursesCountResult.value?.allCoursesCount) || 0)
+
+interface StatEntry {
+  value: number
+  label: string
+  suffix?: string
+  variant: string
+  max: number
 }
+
+const stats = computed<StatEntry[]>(() => [
+  {
+    value: coursesTotal.value,
+    label: 'دورة تدريبية',
+    variant: 'indigo',
+    max: Math.max(10, Math.ceil(coursesTotal.value * 1.2)),
+  },
+  {
+    value: totalUsers.value,
+    label: 'متعلم',
+    variant: 'terracotta',
+    max: Math.max(50, Math.ceil(totalUsers.value * 1.2)),
+  },
+  {
+    value: allInstructorCount.value,
+    label: 'مدرب',
+    variant: 'indigo',
+    max: Math.max(5, Math.ceil(allInstructorCount.value * 1.2)),
+  },
+  {
+    value: allCoursesHours.value,
+    label: 'ساعة تدريبية',
+    variant: 'terracotta',
+    max: Math.max(10, Math.ceil(allCoursesHours.value * 1.2)),
+  },
+])
 </script>
 
 <style lang="scss" scoped>

@@ -1,33 +1,85 @@
 <template>
   <section class="home-stats">
     <div class="home-stats__inner">
-      <statistcs-data :name="$t('طالب')" :query="GetTotalUsersStatistics"><span>K</span></statistcs-data>
-      <statistcs-data :name="$t('دكتور متخصص')" :query="GetAllInstructorsStatiscs" />
-      <statistcs-data :name="$t('دوره تدريبيه')" :query="GetAllCoursesCountStatiscs" />
-      <statistcs-data :name="$t('ساعه تدريبيه')" :query="GetAllCoursesHoursStatistics"><span>K</span></statistcs-data>
+      <statistcs-data :name="$t('طالب')" :value="totalUsers"><span>K</span></statistcs-data>
+      <statistcs-data :name="$t('دكتور متخصص')" :value="allInstructorCount" />
+      <statistcs-data :name="$t('دوره تدريبيه')" :value="allCoursesCount" />
+      <statistcs-data :name="$t('ساعه تدريبيه')" :value="allCoursesHours"><span>K</span></statistcs-data>
     </div>
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
 import StatistcsData from 'src/components/Home/statiscs/StatistcsData.vue'
+import { GetTotalUsersStatistics } from 'src/graphql/account_management/query/GetTotalUsers'
+import { GetAllInstructorsStatiscs } from 'src/graphql/account_management/query/GetAllInstructorsStatiscs'
 import { GetAllCoursesCountStatiscs } from 'src/graphql/course_management/query/GetAllCoursesStatiscs'
 import { GetAllCoursesHoursStatistics } from 'src/graphql/course_management/query/GetAllCoursesHours'
-import { GetAllInstructorsStatiscs } from 'src/graphql/account_management/query/GetAllInstructorsStatiscs'
-import { GetTotalUsersStatistics } from 'src/graphql/account_management/query/GetTotalUsers'
+import type {
+  TotalUsersResult,
+  TotalUsersVars,
+  AllInstructorCountResult,
+  AllInstructorCountVars,
+  GetAllCoursesCountResult,
+  GetAllCoursesCountVars,
+  AllCoursesHoursResult,
+  AllCoursesHoursVars,
+} from 'src/types/courses/types'
 
-export default {
-  name: 'Statiscs',
-  components: { 'statistcs-data': StatistcsData },
-  data () {
-    return {
-      GetAllCoursesCountStatiscs,
-      GetAllInstructorsStatiscs,
-      GetAllCoursesHoursStatistics,
-      GetTotalUsersStatistics
-    }
-  }
-}
+const { result: totalUsersResult } = useQuery<TotalUsersResult, TotalUsersVars>(
+  GetTotalUsersStatistics,
+  null,
+  { errorPolicy: 'all' },
+)
+
+const { result: instructorsResult } = useQuery<AllInstructorCountResult, AllInstructorCountVars>(
+  GetAllInstructorsStatiscs,
+  null,
+  { errorPolicy: 'all' },
+)
+
+const { result: coursesCountResult } = useQuery<GetAllCoursesCountResult, GetAllCoursesCountVars>(
+  GetAllCoursesCountStatiscs,
+  null,
+  { errorPolicy: 'all' },
+)
+
+const { result: hoursResult } = useQuery<AllCoursesHoursResult, AllCoursesHoursVars>(
+  GetAllCoursesHoursStatistics,
+  null,
+  { errorPolicy: 'all' },
+)
+
+// totalUsers comes back as a string from the schema (String scalar)
+const totalUsers = computed<number | null>(() => {
+  const v = totalUsersResult.value?.totalUsers
+  if (v == null) return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+})
+
+const allInstructorCount = computed<number | null>(() => {
+  const v = instructorsResult.value?.allInstructorCount
+  if (v == null) return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+})
+
+const allCoursesCount = computed<number | null>(() => {
+  const v = coursesCountResult.value?.allCoursesCount
+  if (v == null) return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+})
+
+const allCoursesHours = computed<number | null>(() => {
+  const v = hoursResult.value?.allCoursesHours
+  if (v == null) return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+})
 </script>
 
 <style lang="scss" scoped>

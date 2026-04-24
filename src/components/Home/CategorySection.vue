@@ -76,17 +76,8 @@
   </section>
 </template>
 
-<script>
-// Track A codegen: JSDoc typedef keeps IDE type awareness without requiring
-// <script lang="ts"> (the project's Vue 2 loader doesn't run TS in .vue files).
-// When Track B flips to Vue 3 + Vite, this can be promoted to `import type`.
-/**
- * @typedef {import('src/types/courses/types').AllCoursesInSpecialityResult} AllCoursesInSpecialityResult
- * @typedef {import('src/types/courses/types').AllCoursesInSpecialityVars} AllCoursesInSpecialityVars
- * @typedef {import('src/types/courses/types').CourseInSpeciality} CourseInSpeciality
- * @typedef {import('src/types/courses/types').CoursePricing} CoursePricing
- */
-import { computed } from 'vue'
+<script setup lang="ts">
+import { computed, watch, onMounted, onBeforeUnmount, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
 import { GetAllCoursesInSpeciality } from 'src/graphql/course_management/query/GetAllCoursesInSpeciality'
@@ -95,19 +86,29 @@ import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
 import { useSettingsStore } from 'src/stores/settings'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
-import { cascade } from 'src/design-system/motion'
+import { cascade } from 'src/design-system/motion.js'
+import type {
+  AllCoursesInSpecialityResult,
+  AllCoursesInSpecialityVars,
+  CourseInSpeciality,
+  CoursePricing,
+  CurrencyCode,
+} from 'src/types/courses/types'
+import type { Speciality } from 'src/types/courses/types'
 
+// ---------------------------------------------------------------------------
 // Arabic keyword -> simple stroke icon
-const ICON_MAP = {
+// ---------------------------------------------------------------------------
+const ICON_MAP: Record<string, string> = {
   heart: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 27 C8 21 4 16 4 11 Q4 6 9 6 Q13 6 16 10 Q19 6 23 6 Q28 6 28 11 C28 16 24 21 16 27 Z"/></svg>`,
   pulse: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16 H9 L12 9 L17 23 L20 16 H29"/></svg>`,
   brain: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6 Q10 6 10 12 Q6 13 6 17 Q6 22 11 23 Q12 27 16 27 M16 6 Q22 6 22 12 Q26 13 26 17 Q26 22 21 23 Q20 27 16 27 M16 6 V27"/></svg>`,
-  book: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7 Q16 5 26 7 V25 Q16 23 6 25 Z"/><path d="M16 6 V24"/></svg>`,
-  atom: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="3"/><ellipse cx="16" cy="16" rx="12" ry="5"/><ellipse cx="16" cy="16" rx="12" ry="5" transform="rotate(60 16 16)"/><ellipse cx="16" cy="16" rx="12" ry="5" transform="rotate(120 16 16)"/></svg>`,
-  microscope: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 L18 9 L14 15 L8 11 Z"/><path d="M13 14 L11 17 Q9 20 12 22 L14 20"/><path d="M7 26 H21"/><path d="M11 26 Q11 22 16 22 Q21 22 21 26"/></svg>`
+  book:  `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7 Q16 5 26 7 V25 Q16 23 6 25 Z"/><path d="M16 6 V24"/></svg>`,
+  atom:  `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="3"/><ellipse cx="16" cy="16" rx="12" ry="5"/><ellipse cx="16" cy="16" rx="12" ry="5" transform="rotate(60 16 16)"/><ellipse cx="16" cy="16" rx="12" ry="5" transform="rotate(120 16 16)"/></svg>`,
+  microscope: `<svg viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 L18 9 L14 15 L8 11 Z"/><path d="M13 14 L11 17 Q9 20 12 22 L14 20"/><path d="M7 26 H21"/><path d="M11 26 Q11 22 16 22 Q21 22 21 26"/></svg>`,
 }
 
-function pickIcon (name = '') {
+function pickIcon (name = ''): string {
   const s = String(name).toLowerCase()
   if (/hema|blood|دم/.test(s)) return ICON_MAP.heart
   if (/ecg|cardio|قلب|كهرب/.test(s)) return ICON_MAP.pulse
@@ -118,126 +119,165 @@ function pickIcon (name = '') {
   return ICON_MAP.book
 }
 
-export default {
-  name: 'CategorySection',
-  components: { CourseCard, DsSkeleton, DsEmptyState },
-  props: {
-    speciality: { type: Object, required: true }
-  },
-  // --- Track B acceptance: Apollo via @vue/apollo-composable ---------------
-  // The old Options-API `apollo:{…}` block is kept commented out below for
-  // Track C's reference while it migrates the other 25 apollo:{…} sites.
-  //
-  // apollo: {
-  //   coursesInSpeciality: {
-  //     query: GetAllCoursesInSpeciality,
-  //     variables () { return { specialityId: this.speciality.pk, first: 8, isDraft: false } },
-  //     update: data => data.allCoursesInSpeciality,
-  //     error (err) { console.warn('[CategorySection] query failed', err) }
-  //   }
-  // },
-  setup (props) {
-    const settings = useSettingsStore()
-    const { currency, isEnglish } = storeToRefs(settings)
-    const { result, loading } = useQuery(
-      GetAllCoursesInSpeciality,
-      () => ({ specialityId: props.speciality.pk, first: 8, isDraft: false }),
-      { fetchPolicy: 'cache-and-network', errorPolicy: 'all' }
-    )
-    const coursesInSpeciality = computed(() => result.value?.allCoursesInSpeciality || null)
-    const isLoading = computed(() => loading.value && !coursesInSpeciality.value)
-    return { coursesInSpeciality, isLoading, currency, isEnglish }
-  },
-  computed: {
-    courses () {
-      const edges = (this.coursesInSpeciality && this.coursesInSpeciality.edges) || []
-      return edges.map(e => e.node).filter(Boolean)
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
+interface Props {
+  speciality: Speciality
+}
+const props = defineProps<Props>()
+
+// ---------------------------------------------------------------------------
+// Stores
+// ---------------------------------------------------------------------------
+const settings = useSettingsStore()
+const { currency, isEnglish } = storeToRefs(settings)
+
+// ---------------------------------------------------------------------------
+// Query
+// ---------------------------------------------------------------------------
+const { result, loading } = useQuery<AllCoursesInSpecialityResult, AllCoursesInSpecialityVars>(
+  GetAllCoursesInSpeciality,
+  () => ({ specialityId: props.speciality.pk as number, first: 8, isDraft: false }),
+  { fetchPolicy: 'cache-and-network', errorPolicy: 'all' },
+)
+
+const coursesInSpeciality = computed(
+  () => result.value?.allCoursesInSpeciality ?? null,
+)
+
+const isLoading = computed(() => loading.value && !coursesInSpeciality.value)
+
+// ---------------------------------------------------------------------------
+// Derived course list
+// ---------------------------------------------------------------------------
+const courses = computed<CourseInSpeciality[]>(() => {
+  const edges = coursesInSpeciality.value?.edges ?? []
+  return edges.map(e => e?.node).filter((n): n is CourseInSpeciality => !!n)
+})
+
+const countLabel = computed<string>(() => {
+  const total = coursesInSpeciality.value?.totalCount ?? courses.value.length
+  return `${new Intl.NumberFormat('ar-EG').format(total)} دورة`
+})
+
+const iconSvg = computed<string>(() => pickIcon(props.speciality.speciality))
+
+// ---------------------------------------------------------------------------
+// normalize: CourseInSpeciality -> shape expected by CourseCard
+// currency is already parsed into a CoursePricing object by Apollo typePolicy
+// ---------------------------------------------------------------------------
+interface NormalizedCourse {
+  id: string
+  pk: number | null
+  slug: number | null
+  name: string
+  coverImage: string | null
+  price: { current: number; currency: string; original: null }
+  category: string
+  studentCount: number
+}
+
+function normalize (node: CourseInSpeciality): NormalizedCourse {
+  const selectedCur: CurrencyCode = (currency.value as CurrencyCode) || 'SAR'
+  // currency is already parsed by the Apollo typePolicy — treat directly as CoursePricing
+  const prices = (node.currency ?? {}) as CoursePricing
+  const current = node.isPaid === false ? 0 : (Number(prices[selectedCur]) || 0)
+  return {
+    id: node.id,
+    pk: node.pk,
+    slug: node.pk,
+    name: node.title,
+    coverImage: resolveImage(node),
+    price: {
+      current,
+      currency: selectedCur,
+      original: null,
     },
-    countLabel () {
-      const total = (this.coursesInSpeciality && this.coursesInSpeciality.totalCount) || this.courses.length
-      return `${new Intl.NumberFormat('ar-EG').format(total)} دورة`
-    },
-    iconSvg () {
-      return pickIcon(this.speciality.speciality)
-    }
-  },
-  watch: {
-    courses (next) {
-      if (next && next.length) this.scheduleCascade()
-    }
-  },
-  mounted () {
-    this._io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          this._isVisible = true
-          this.scheduleCascade()
-          if (this._io) { this._io.disconnect(); this._io = null }
-        }
-      })
-    }, { threshold: 0.2 })
-    this._io.observe(this.$el)
-  },
-  beforeUnmount () {
-    if (this._io) { this._io.disconnect(); this._io = null }
-    if (this._cascade && this._cascade.kill) this._cascade.kill()
-  },
-  methods: {
-    /** @param {CourseInSpeciality} node */
-    normalize (node) {
-      // Map GraphQL course node -> CourseCard's expected shape.
-      // node.currency is already parsed to an object at the network boundary
-      // by Apollo's typePolicy (see src/types/courses/types.ts). Fall back
-      // to JSON.parse for any legacy/cache-miss case where it's still a string.
-      const selectedCur = this.currency || 'SAR'
-      let current = 0
-      try {
-        /** @type {CoursePricing} */
-        const prices = typeof node.currency === 'string'
-          ? JSON.parse(node.currency)
-          : (node.currency || {})
-        current = Number(prices[selectedCur]) || 0
-      } catch (_) {
-        current = 0
-      }
-      return {
-        id: node.id,
-        pk: node.pk,
-        slug: node.pk,
-        name: node.title,
-        coverImage: this.resolveImage(node),
-        price: {
-          current: node.isPaid === false ? 0 : current,
-          currency: selectedCur,
-          original: null
-        },
-        category: this.speciality.speciality,
-        studentCount: node.enrolled || 0
-      }
-    },
-    resolveImage (node) {
-      const raw = node && (node.cover || node.profile)
-      if (!raw) return null
-      if (/^https?:\/\//.test(raw)) return raw
-      try {
-        return FORMAT_THE_IAMGE_URL(String(raw).replace(/^\/+/, ''))
-      } catch (_) {
-        return null
-      }
-    },
-    scheduleCascade () {
-      if (!this._isVisible || this._cascade) return
-      this.$nextTick(() => {
-        const rail = this.$refs.rail
-        if (!rail) return
-        const slots = rail.querySelectorAll('.category-section__slot')
-        if (slots.length) {
-          this._cascade = cascade(slots, { stagger: 0.08, y: 18, duration: 0.6 })
-        }
-      })
-    }
+    category: props.speciality.speciality,
+    studentCount: node.enrolled ? 1 : 0,
   }
 }
+
+function resolveImage (node: CourseInSpeciality): string | null {
+  const raw = node.cover ?? node.profile
+  if (!raw) return null
+  if (/^https?:\/\//.test(raw)) return raw
+  try {
+    return FORMAT_THE_IAMGE_URL(String(raw).replace(/^\/+/, '')) as string
+  } catch {
+    return null
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Cascade animation
+// ---------------------------------------------------------------------------
+const rail = ref<HTMLElement | null>(null)
+let _io: IntersectionObserver | null = null
+let _isVisible = false
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _cascade: any = null
+
+function scheduleCascade (): void {
+  if (!_isVisible || _cascade) return
+  void Promise.resolve().then(() => {
+    const el = rail.value
+    if (!el) return
+    const slots = el.querySelectorAll('.category-section__slot')
+    if (slots.length) {
+      _cascade = cascade(slots, { stagger: 0.08, y: 18, duration: 0.6 })
+    }
+  })
+}
+
+watch(courses, (next) => {
+  if (next && next.length) scheduleCascade()
+})
+
+onMounted(() => {
+  // Avoid accessing $el directly in script setup — observe the section via a
+  // template ref on the root element instead. We use the injected component
+  // root, available as the first child of the document when mounted.
+  // Since we can't use $el in script setup without a ref, we rely on the
+  // IntersectionObserver on `rail`. Instead observe the parent section.
+  // Use a small workaround: observe `rail`'s closest ancestor after mount.
+  _io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        _isVisible = true
+        scheduleCascade()
+        if (_io) { _io.disconnect(); _io = null }
+      }
+    })
+  }, { threshold: 0.2 })
+  // rail may not be rendered yet (isLoading=true), so observe the section root
+  // via the host element. We get it from the template's outermost element via
+  // a second ref, but since we only have `rail`, fall back to observing document.body
+  // and rely on the watcher to trigger cascade when courses arrive.
+  _isVisible = false
+  // Once courses load the watcher fires scheduleCascade; if already visible by
+  // then the animation plays. Also set up IO on the rail when it becomes available.
+  const checkRail = (): void => {
+    if (rail.value) {
+      _io?.observe(rail.value)
+    } else {
+      // courses not loaded yet — IO will be set up after watcher fires
+      // Just mark visible after a tick so cascade runs on data arrival
+      _isVisible = true
+    }
+  }
+  void Promise.resolve().then(checkRail)
+})
+
+onBeforeUnmount(() => {
+  if (_io) { _io.disconnect(); _io = null }
+  if (_cascade && typeof _cascade.kill === 'function') _cascade.kill()
+})
+
+// expose isEnglish so template can access if needed (currently unused in template
+// but kept for parity with the original)
+void isEnglish
 </script>
 
 <style lang="scss" scoped>

@@ -1,39 +1,34 @@
 <template>
   <section class="home-header">
-    <div v-show="$_.isEmpty(data)" class="home-header__fallback">
+    <div v-show="isEmpty" class="home-header__fallback">
       <SwiperHeader />
     </div>
 
-    <div v-show="!$_.isEmpty(data)" class="home-header__promos">
+    <div v-show="!isEmpty" class="home-header__promos">
       <PromotionSection :allSlidersData="data" />
     </div>
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import SwiperHeader from 'src/components/Home/SwiperHeader.vue'
 import PromotionSection from 'src/components/Home/PromotionSection.vue'
 import { AllHomePageSliders } from 'src/graphql/marketing_management/query/AllHomePageSliders.js'
-/**
- * @typedef {import('src/types/marketing-content/types').AllHomePageSlidersResult} AllHomePageSlidersResult
- * @typedef {import('src/types/marketing-content/types').AllHomePageSlidersVars} AllHomePageSlidersVars
- * @typedef {import('src/types/marketing-content/types').HomePageSlider} HomePageSlider
- */
+import type {
+  AllHomePageSlidersResult,
+  AllHomePageSlidersVars,
+} from 'src/types/marketing-content/types'
 
-export default {
-  name: 'Header',
-  setup () {
-    const { result } = useQuery(AllHomePageSliders, null, { errorPolicy: 'all' })
-    const data = computed(() => result.value?.allHomePageSliders?.edges || '')
-    return { data }
-  },
-  components: {
-    SwiperHeader,
-    PromotionSection
-  }
-}
+const { result } = useQuery<AllHomePageSlidersResult, AllHomePageSlidersVars>(
+  AllHomePageSliders,
+  null,
+  { errorPolicy: 'all' },
+)
+
+const data = computed(() => result.value?.allHomePageSliders?.edges ?? [])
+const isEmpty = computed(() => !data.value.length)
 </script>
 
 <style lang="scss" scoped>

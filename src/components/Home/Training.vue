@@ -40,14 +40,14 @@
         </p>
       </header>
 
-      <div v-if="courses.edgeCount > 0" class="home-training__grid">
+      <div v-if="courses && courses.edgeCount && courses.edgeCount > 0" class="home-training__grid">
         <course-card
           v-for="course in courses.edges"
-          :key="course.node.id"
+          :key="course && course.node ? course.node.id : String(Math.random())"
           :course="course.node"
-          :name="course.node.title"
+          :name="course.node ? course.node.title : ''"
           instructor="مركز دكتور صبري ابو قرون"
-          :price="course.node.courseFee"
+          :price="course.node ? course.node.courseFee : 0"
         />
       </div>
 
@@ -61,7 +61,7 @@
         </template>
       </ds-empty-state>
 
-      <div v-if="courses.edgeCount > 0" class="home-training__cta">
+      <div v-if="courses && courses.edgeCount && courses.edgeCount > 0" class="home-training__cta">
         <ds-button variant="primary" size="lg" @click="gotTocoursesPage">
           {{ $t('جمــــيع الدورات') }}
         </ds-button>
@@ -70,101 +70,130 @@
   </section>
 </template>
 
-<script>
-import { computed } from 'vue'
+<script setup lang="ts">
+import { computed, ref, onMounted, onUpdated } from 'vue'
+import { useRouter } from 'vue-router'
 import { useQuery } from '@vue/apollo-composable'
 import courseCard from 'components/utils/courseCard.vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import 'swiper/css'
 import { GetSpecialities } from 'src/graphql/course_management/query/GetAllSpeciallites'
 import { GetAllCoursesInSpeciality } from 'src/graphql/course_management/query/GetAllCoursesInSpeciality.js'
-/**
- * @typedef {import('src/types/courses/types').GetAllSpecialitiesResult} GetAllSpecialitiesResult
- * @typedef {import('src/types/courses/types').GetAllSpecialitiesVars} GetAllSpecialitiesVars
- * @typedef {import('src/types/courses/types').AllCoursesInSpecialityResult} AllCoursesInSpecialityResult
- * @typedef {import('src/types/courses/types').AllCoursesInSpecialityVars} AllCoursesInSpecialityVars
- * @typedef {import('src/types/courses/types').Speciality} Speciality
- * @typedef {import('src/types/courses/types').CourseInSpeciality} CourseInSpeciality
- */
-import { apolloClient } from 'src/apollo/client'
 import { useSettingsStore } from 'src/stores/settings'
+import type {
+  GetAllSpecialitiesResult,
+  GetAllSpecialitiesVars,
+  AllCoursesInSpecialityResult,
+  AllCoursesInSpecialityVars,
+} from 'src/types/courses/types'
 
-export default {
-  name: 'Training',
-  components: { courseCard, Swiper, SwiperSlide },
+// ---------------------------------------------------------------------------
+// Router + stores
+// ---------------------------------------------------------------------------
+const router = useRouter()
+const settings = useSettingsStore()
 
-  setup () {
-    const settings = useSettingsStore()
-    const { result } = useQuery(GetSpecialities, null, { errorPolicy: 'all' })
-    const allCourseSpecialities = computed(() => result.value?.allCourseSpecialities || { edges: [] })
-    return { settings, allCourseSpecialities }
-  },
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+const counter = ref(0)
+const isDraft = ref(false)
 
-  data () {
-    return {
-      counter: 0,
-      edgeCount: 0,
-      totalCount: 0,
-      isDraft: false,
-      courses: [],
-      swiperOptions: {
-        effect: 'coverflow',
-        grabCursor: true,
-        centeredSlides: true,
-        slidesPerView: 'auto',
-        coverflowEffect: { rotate: 500, stretch: 0, depth: 100, modifier: 1, slideShadows: false }
-      }
-    }
-  },
+/** The pk of whichever speciality tab is currently active. */
+const activeSpecialityPk = ref<number | null>(null)
 
-  mounted () {
-    if (this.$refs.mySwiper?.swiper) {
-      this.$refs.mySwiper.swiper.slideTo(4, 1000, false)
-    }
-  },
+// Template refs
+const cat = ref<HTMLElement | null>(null)
+const mySwiper = ref<InstanceType<typeof Swiper> | null>(null)
 
-  updated () {
-    if (this.counter !== 0 || !this.$refs.cat) return
-    const l1 = this.$refs.cat.firstChild
-    const l2 = l1 && l1.firstChild
-    const l3 = l2 && l2.firstChild
-    const firstTab = l3 && l3.firstChild
-    if (firstTab) {
-      firstTab.classList.add('active')
-      const specialityId = JSON.parse(firstTab.dataset.course)
-      this.changeCourseData(specialityId)
-      this.counter += 10
-    }
-  },
+// ---------------------------------------------------------------------------
+// Specialities query (tab list)
+// ---------------------------------------------------------------------------
+const { result: specResult } = useQuery<GetAllSpecialitiesResult, GetAllSpecialitiesVars>(
+  GetSpecialities,
+  null,
+  { errorPolicy: 'all' },
+)
+const allCourseSpecialities = computed(
+  () => specResult.value?.allCourseSpecialities ?? { edges: [] },
+)
 
-  methods: {
-    gotTocoursesPage () {
-      this.settings.setActiveNav('COURSES')
-      this.$router.push({ name: 'courses' })
-    },
+// ---------------------------------------------------------------------------
+// Courses query — variables are reactive: update activeSpecialityPk to re-fetch
+// ---------------------------------------------------------------------------
+const { result: coursesResult } = useQuery<AllCoursesInSpecialityResult, AllCoursesInSpecialityVars>(
+  GetAllCoursesInSpeciality,
+  () => ({
+    specialityId: activeSpecialityPk.value ?? 0,
+    first: 6,
+    isDraft: isDraft.value,
+    orderBy: ['id'],
+  }),
+  () => ({
+    enabled: activeSpecialityPk.value !== null && activeSpecialityPk.value !== 0,
+    errorPolicy: 'all',
+  }),
+)
 
-    async changeCourseData (specialityId) {
-      const res = await apolloClient.query({
-        query: GetAllCoursesInSpeciality,
-        variables: { specialityId, first: 4, isDraft: this.isDraft, orderBy: ['id'] }
-      })
-      this.courses = res.data.allCoursesInSpeciality
-      this.totalCount = res.data.allCoursesInSpeciality.totalCount
-      this.edgeCount = res.data.allCoursesInSpeciality.edgeCount
-    },
+/** The full allCoursesInSpeciality connection (or null while no tab selected). */
+const courses = computed<AllCoursesInSpecialityResult['allCoursesInSpeciality'] | null>(
+  () => coursesResult.value?.allCoursesInSpeciality ?? null,
+)
 
-    changeTab (e) {
-      e.preventDefault()
-      const clickedLiParent = e.target.closest('.nav-item')
-      if (!clickedLiParent) return
-      const ulParent = clickedLiParent.parentElement
-      for (const liParent of ulParent.childNodes) {
-        if (liParent.firstChild) liParent.firstChild.classList.remove('active')
-      }
-      clickedLiParent.firstChild.classList.add('active')
-    }
-  }
+const totalCount = computed<number>(() => courses.value?.totalCount ?? 0)
+const edgeCount = computed<number>(() => courses.value?.edgeCount ?? 0)
+
+// ---------------------------------------------------------------------------
+// Methods
+// ---------------------------------------------------------------------------
+function gotTocoursesPage (): void {
+  settings.setActiveNav('COURSES')
+  void router.push({ name: 'courses' })
 }
+
+function changeCourseData (specialityId: number): void {
+  activeSpecialityPk.value = specialityId
+}
+
+function changeTab (e: Event): void {
+  e.preventDefault()
+  const target = e.target as HTMLElement
+  const clickedLiParent = target.closest('.nav-item')
+  if (!clickedLiParent) return
+  const ulParent = clickedLiParent.parentElement
+  if (!ulParent) return
+  for (const liParent of ulParent.childNodes) {
+    const el = liParent as HTMLElement
+    if (el.firstChild) (el.firstChild as HTMLElement).classList.remove('active')
+  }
+  ;(clickedLiParent.firstChild as HTMLElement).classList.add('active')
+}
+
+// ---------------------------------------------------------------------------
+// Lifecycle
+// ---------------------------------------------------------------------------
+onMounted(() => {
+  const swiperEl = mySwiper.value as unknown as { swiper?: { slideTo: (idx: number, speed: number, runCallbacks: boolean) => void } } | null
+  if (swiperEl?.swiper) {
+    swiperEl.swiper.slideTo(4, 1000, false)
+  }
+})
+
+onUpdated(() => {
+  if (counter.value !== 0 || !cat.value) return
+  const l1 = cat.value.firstChild as HTMLElement | null
+  const l2 = l1?.firstChild as HTMLElement | null
+  const l3 = l2?.firstChild as HTMLElement | null
+  const firstTab = l3?.firstChild as HTMLElement | null
+  if (firstTab) {
+    firstTab.classList.add('active')
+    const specialityId = Number(firstTab.dataset.course)
+    if (Number.isFinite(specialityId) && specialityId !== 0) {
+      changeCourseData(specialityId)
+    }
+    counter.value += 10
+  }
+})
 </script>
 
 <style lang="scss" scoped>

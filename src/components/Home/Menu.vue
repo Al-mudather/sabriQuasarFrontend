@@ -18,10 +18,8 @@
 
         <div class="profile">
           <q-icon name="account_circle" size="72px" class="profile__icon" />
-          <h3 v-if="$_.get(user, '[fullName]')">
-            {{ $_.get(user, "[fullName]") }}
-          </h3>
-          <h3 v-else>{{ $_.get(user, "[email]") }}</h3>
+          <h3 v-if="user?.fullName">{{ user.fullName }}</h3>
+          <h3 v-else>{{ user?.email }}</h3>
         </div>
 
         <div class="account" v-if="!token">
@@ -79,7 +77,7 @@
         <a
           class="but side-nav__item"
           data-link="MYMARKETINGPAGE"
-          v-if="token && user.isPyramidMarketer"
+          v-if="token && user?.isPyramidMarketer"
           @click="GO_TO_MY_MARKETING_PAGE($event)"
         >
           <q-icon name="campaign" size="18px" class="side-nav__item-icon" />
@@ -127,151 +125,132 @@
   </section>
 </template>
 
-<script>
-import { computed } from "vue";
-import { storeToRefs } from "pinia";
-import { useQuery } from "@vue/apollo-composable";
-import { useAuthStore } from "src/stores/auth";
-import { useSettingsStore } from "src/stores/settings";
-import { useCartStore } from "src/stores/cart";
-import { usePyramidStore } from "src/stores/pyramid";
-import { MyPyramidAccount } from "src/graphql/pyramid_marketing_management/query/MyPyramidAccount";
-/**
- * @typedef {import('src/types/pyramid/types').MyPyramidAccountResult} MyPyramidAccountResult
- * @typedef {import('src/types/pyramid/types').MyPyramidAccountVars} MyPyramidAccountVars
- * @typedef {import('src/types/pyramid/types').PyramidAccount} PyramidAccount
- */
-import { LocalStorage } from "quasar";
+<script setup lang="ts">
+import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useQuery } from '@vue/apollo-composable'
+import { LocalStorage } from 'quasar'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { useCartStore } from 'src/stores/cart'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { MyPyramidAccount } from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
+import type {
+  MyPyramidAccountResult,
+  MyPyramidAccountVars,
+} from 'src/types/pyramid/types'
 
-export default {
-  name: "Menu",
+const router = useRouter()
 
-  setup () {
-    const auth = useAuthStore();
-    const settings = useSettingsStore();
-    const cart = useCartStore();
-    const pyramid = usePyramidStore();
-    const { token, user } = storeToRefs(auth);
-    const { isEnglish } = storeToRefs(settings);
-    const { result: pyramidResult } = useQuery(MyPyramidAccount, null, { errorPolicy: 'all' });
-    const myPyramidAccount = computed(() => pyramidResult.value?.myPyramidAccount || "");
-    return { auth, settings, cart, pyramid, token, user, isEnglish, myPyramidAccount };
-  },
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const cart = useCartStore()
+const pyramid = usePyramidStore()
 
-  computed: {
-    _isEnglish: {
-      get() {
-        return this.isEnglish;
-      },
-      set(newVlaue) {
-        return this.settings.setIsEnglish(newVlaue);
-      },
-    },
-  },
+const { token, user } = storeToRefs(auth)
+const { isEnglish } = storeToRefs(settings)
 
-  mounted() {
-    let nav_items = this.$jquery(".side-nav__item");
-    let link_attr = JSON.parse(LocalStorage.getItem("activeNav")) || "";
+const { result: pyramidResult } = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(
+  MyPyramidAccount,
+  null,
+  { errorPolicy: 'all' },
+)
+const myPyramidAccount = computed(() => pyramidResult.value?.myPyramidAccount ?? null)
 
-    if (link_attr) {
-      for (let nav of nav_items) {
-        nav = this.$jquery(nav);
-        nav.removeClass("side-nav__item--active");
-      }
-      let active_link = this.$jquery(`[data-link="${link_attr}"]`);
-      active_link.addClass("side-nav__item--active");
-    }
+const _isEnglish = computed({
+  get: () => isEnglish.value,
+  set: (newValue: boolean) => settings.setIsEnglish(newValue),
+})
 
-    nav_items.map((i) => {
-      let nav = this.$jquery(nav_items[i]);
-      nav.on("click", () => {
-        for (let n of nav_items) {
-          n = this.$jquery(n);
-          n.removeClass("side-nav__item--active");
-        }
+onMounted(() => {
+  const rawNav = LocalStorage.getItem('activeNav')
+  const link_attr: string = rawNav !== null ? JSON.parse(rawNav as string) : ''
 
-        nav.addClass("side-nav__item--active");
-      });
-    });
-  },
+  const nav_items = document.querySelectorAll<HTMLElement>('.side-nav__item')
 
-  watch: {
-    token(value) {},
+  if (link_attr) {
+    nav_items.forEach((nav) => {
+      nav.classList.remove('side-nav__item--active')
+    })
+    const active_link = document.querySelector<HTMLElement>(`[data-link="${link_attr}"]`)
+    if (active_link) active_link.classList.add('side-nav__item--active')
+  }
 
-    async _isEnglish(value) {
-      this.settings.setIsEnglish(value);
-    },
-  },
+  nav_items.forEach((nav) => {
+    nav.addEventListener('click', () => {
+      nav_items.forEach((n) => n.classList.remove('side-nav__item--active'))
+      nav.classList.add('side-nav__item--active')
+    })
+  })
+})
 
-  methods: {
-    MAKE_ACTIVE(e) {
-      let active_nav = this.$jquery(e.target).parent().closest("a");
-      if (active_nav.length == 0) {
-        active_nav = this.$jquery(e.target).closest("a");
-      }
-      this.settings.setActiveNav(active_nav.attr("data-link"));
-    },
+function MAKE_ACTIVE (e: Event): void {
+  const target = e.target as HTMLElement
+  const active_nav = target.parentElement?.closest('a') ?? target.closest('a')
+  if (active_nav) {
+    settings.setActiveNav(active_nav.getAttribute('data-link') ?? '')
+  }
+}
 
-    changeMenuState() {
-      this.settings.setOpenMenu(false);
-    },
+function changeMenuState (): void {
+  settings.setOpenMenu(false)
+}
 
-    logTheUserOut() {
-      this.pyramid.setMyMarketingCode("");
-      this.cart.deleteCart();
-      this.$router.push({ name: "Home" });
-      this.auth.logOut();
-    },
+function logTheUserOut (): void {
+  pyramid.setMyMarketingCode('')
+  cart.deleteCart()
+  void router.push({ name: 'Home' })
+  auth.logOut()
+}
 
-    GO_TO_MY_ORDERS_PAGE(e) {
-      this.MAKE_ACTIVE(e);
-      this.$router.push({ name: "my-orders" });
-    },
+function GO_TO_MY_ORDERS_PAGE (e: Event): void {
+  MAKE_ACTIVE(e)
+  void router.push({ name: 'my-orders' })
+}
 
-    GO_TO_MY_NOTIFICATIONS_PAGE(e) {
-      this.MAKE_ACTIVE(e);
-      this.$router.push({ name: "notification" });
-    },
+function GO_TO_MY_NOTIFICATIONS_PAGE (e: Event): void {
+  MAKE_ACTIVE(e)
+  void router.push({ name: 'notification' })
+}
 
-    GO_TO_MY_CERTIFICATE_PAGE(e) {
-      this.MAKE_ACTIVE(e);
-      this.$router.push({ name: "my-certificate" });
-    },
+function GO_TO_MY_CERTIFICATE_PAGE (e: Event): void {
+  MAKE_ACTIVE(e)
+  void router.push({ name: 'my-certificate' })
+}
 
-    GO_TO_MY_MARKETING_PAGE(e) {
-      this.MAKE_ACTIVE(e);
-      this.$router.push({ name: "my-marketing-page" });
-    },
+function GO_TO_MY_MARKETING_PAGE (e: Event): void {
+  MAKE_ACTIVE(e)
+  void router.push({ name: 'my-marketing-page' })
+}
 
-    GO_TO_MY_PROFILE_PAGE(e) {
-      this.MAKE_ACTIVE(e);
-      this.$router.push({ name: "user-profile" });
-    },
+function GO_TO_MY_PROFILE_PAGE (e: Event): void {
+  MAKE_ACTIVE(e)
+  void router.push({ name: 'user-profile' })
+}
 
-    GO_TO_MY_COURSES_PAGE(e) {
-      this.MAKE_ACTIVE(e);
-      this.$router.push({ name: "my-courses" });
-    },
+function GO_TO_MY_COURSES_PAGE (e: Event): void {
+  MAKE_ACTIVE(e)
+  void router.push({ name: 'my-courses' })
+}
 
-    GOT_TO_COURSES_PAGE(e) {
-      this.MAKE_ACTIVE(e);
-      this.$router.push({ name: "courses" });
-    },
+function GOT_TO_COURSES_PAGE (e: Event): void {
+  MAKE_ACTIVE(e)
+  void router.push({ name: 'courses' })
+}
 
-    GO_TO_HOME_PAGE(e) {
-      this.MAKE_ACTIVE(e);
-      this.$router.push({ name: "Home" });
-    },
+function GO_TO_HOME_PAGE (e: Event): void {
+  MAKE_ACTIVE(e)
+  void router.push({ name: 'Home' })
+}
 
-    GO_TO_SIGNUP_PAGE() {
-      this.$router.push({ name: "signUp" });
-    },
+function GO_TO_SIGNUP_PAGE (): void {
+  void router.push({ name: 'signUp' })
+}
 
-    GO_TO_LOGIN_PAGE() {
-      this.$router.push({ name: "login" });
-    },
-  },
-};
+function GO_TO_LOGIN_PAGE (): void {
+  void router.push({ name: 'login' })
+}
 </script>
 
 <style lang="scss" scoped>

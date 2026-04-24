@@ -27,68 +27,88 @@
   </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { GetAllCourseInstructors } from 'src/graphql/course_management/query/GetAllCourseInstructors'
-/**
- * @typedef {import('src/types/courses/types').GetAllCourseInstructorsResult} GetAllCourseInstructorsResult
- * @typedef {import('src/types/courses/types').GetAllCourseInstructorsVars} GetAllCourseInstructorsVars
- * @typedef {import('src/types/courses/types').CourseInstructor} CourseInstructor
- */
+import type {
+  GetAllCourseInstructorsResult,
+  GetAllCourseInstructorsVars,
+} from 'src/types/courses/types'
 
-export default {
-  name: 'InstructorMarquee',
-  setup () {
-    const { result } = useQuery(GetAllCourseInstructors, null, { errorPolicy: 'all' })
-    const allCourseInstructors = computed(() => result.value?.allCourseInstructors || null)
-    return { allCourseInstructors }
-  },
-  computed: {
-    people () {
-      const edges = (this.allCourseInstructors && this.allCourseInstructors.edges) || []
-      const mapped = edges
-        .map((e) => {
-          const inst = e && e.node && e.node.instructor
-          if (!inst) return null
-          const name = (inst.user && inst.user.fullName) ||
-            [inst.user && inst.user.firstName, inst.user && inst.user.lastName].filter(Boolean).join(' ') ||
-            ''
-          if (!name) return null
-          const qual = (inst.qualification || '').trim()
-          // Reject English/latin-heavy bios (they bleed unfiltered backend copy
-          // into the RTL marquee). Keep only short Arabic roles.
-          const arabicOnly = /^[\u0600-\u06FF0-9\s\-\u060C\u061B.]+$/
-          const role = qual && qual.length <= 40 && arabicOnly.test(qual)
-            ? qual
-            : 'مدرب معتمد'
-          // Only use instructor image if it's a real absolute/relative path.
-          const img = inst.image && typeof inst.image === 'string' &&
-            !/unsplash|picsum|placeholder|pexels|lorem/i.test(inst.image)
-            ? inst.image
-            : null
-          // Drop entries without a real image — avoids the ugly initial-avatar fallback.
-          if (!img) return null
-          return { name, role, image: img }
-        })
-        .filter(Boolean)
-      // Deduplicate by name so the API returning the same instructor per course
-      // doesn't spam the marquee.
-      const seen = new Set()
-      return mapped.filter(p => {
-        if (seen.has(p.name)) return false
-        seen.add(p.name)
-        return true
-      })
-    },
-    hasPeople () {
-      return this.people.length > 0
-    },
-    doubled () {
-      return [...this.people, ...this.people]
-    }
-  }
+// ---------------------------------------------------------------------------
+// Query
+// ---------------------------------------------------------------------------
+const { result } = useQuery<GetAllCourseInstructorsResult, GetAllCourseInstructorsVars>(
+  GetAllCourseInstructors,
+  null,
+  { errorPolicy: 'all' },
+)
+
+const allCourseInstructors = computed(
+  () => result.value?.allCourseInstructors ?? null,
+)
+
+// ---------------------------------------------------------------------------
+// people: typed chip list, free of undefined
+// ---------------------------------------------------------------------------
+interface InstructorChip {
+  image: string
+  name: string
+  role: string
 }
+
+const arabicOnly = /^[؀-ۿ0-9\s\-،؛.]+$/
+
+const people = computed<InstructorChip[]>(() => {
+  const edges = allCourseInstructors.value?.edges ?? []
+
+  const mapped: InstructorChip[] = []
+  for (const edge of edges) {
+    const inst = edge?.node?.instructor
+    if (!inst) continue
+
+    // Resolve display name
+    const name =
+      inst.user?.fullName ||
+      [inst.user?.firstName, inst.user?.lastName].filter(Boolean).join(' ') ||
+      ''
+    if (!name) continue
+
+    // Qualification: keep only short Arabic-only strings
+    const qual = (inst.qualification ?? '').trim()
+    const role =
+      qual && qual.length <= 40 && arabicOnly.test(qual)
+        ? qual
+        : 'مدرب معتمد'
+
+    // Only use real image paths — reject stock-photo placeholders
+    const img = inst.image &&
+      typeof inst.image === 'string' &&
+      !/unsplash|picsum|placeholder|pexels|lorem/i.test(inst.image)
+      ? inst.image
+      : null
+    // Drop entries without a real image
+    if (!img) continue
+
+    mapped.push({ name, role, image: img })
+  }
+
+  // Deduplicate by name (same instructor may appear per-course)
+  const seen = new Set<string>()
+  return mapped.filter(p => {
+    if (seen.has(p.name)) return false
+    seen.add(p.name)
+    return true
+  })
+})
+
+const hasPeople = computed<boolean>(() => people.value.length > 0)
+
+const doubled = computed<InstructorChip[]>(() => [
+  ...people.value,
+  ...people.value,
+])
 </script>
 
 <style lang="scss" scoped>

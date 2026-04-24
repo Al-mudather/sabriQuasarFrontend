@@ -39,19 +39,18 @@
   </main>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { useSettingsStore } from 'src/stores/settings'
-
 import { GetSpecialities } from 'src/graphql/course_management/query/GetAllSpeciallites'
 import { GetAllCoursesCountStatiscs } from 'src/graphql/course_management/query/GetAllCoursesStatiscs'
-/**
- * @typedef {import('src/types/courses/types').GetAllSpecialitiesResult} GetAllSpecialitiesResult
- * @typedef {import('src/types/courses/types').GetAllSpecialitiesVars} GetAllSpecialitiesVars
- */
-// TODO: add to types/courses/types.ts — GetAllCoursesCountStatiscs not in generated.ts (schema drift)
-
+import type {
+  GetAllSpecialitiesResult,
+  GetAllSpecialitiesVars,
+  GetAllCoursesCountResult,
+  GetAllCoursesCountVars,
+} from 'src/types/courses/types'
 import HeroIndigo from 'src/components/Home/HeroIndigo.vue'
 import StatsWedges from 'src/components/Home/StatsWedges.vue'
 import ValueProps from 'src/components/Home/ValueProps.vue'
@@ -61,66 +60,45 @@ import TestimonialSpread from 'src/components/Home/TestimonialSpread.vue'
 import FinalCta from 'src/components/Home/FinalCta.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 
-export default {
-  name: 'Home',
-  components: {
-    HeroIndigo,
-    StatsWedges,
-    ValueProps,
-    CategorySection,
-    InstructorMarquee,
-    TestimonialSpread,
-    FinalCta,
-    DsSkeleton
-  },
+const settings = useSettingsStore()
 
-  setup () {
-    const settings = useSettingsStore()
+const specialitiesQuery = useQuery<GetAllSpecialitiesResult, GetAllSpecialitiesVars>(
+  GetSpecialities,
+  null,
+  { errorPolicy: 'all' },
+)
+specialitiesQuery.onError((err) => {
+  console.warn('[Home] specialities query failed', err)
+})
 
-    const specialitiesQuery = useQuery(GetSpecialities, null, {
-      errorPolicy: 'all'
-    })
-    specialitiesQuery.onError((err) => {
-      // eslint-disable-next-line no-console
-      console.warn('[Home] specialities query failed', err)
-    })
+const countQuery = useQuery<GetAllCoursesCountResult, GetAllCoursesCountVars>(
+  GetAllCoursesCountStatiscs,
+  null,
+  { errorPolicy: 'all' },
+)
+countQuery.onError((err) => {
+  console.warn('[Home] count query failed', err)
+})
 
-    const countQuery = useQuery(GetAllCoursesCountStatiscs, null, {
-      errorPolicy: 'all'
-    })
-    countQuery.onError((err) => {
-      // eslint-disable-next-line no-console
-      console.warn('[Home] count query failed', err)
-    })
+const allCourseSpecialities = computed(
+  () => specialitiesQuery.result.value?.allCourseSpecialities || null,
+)
+const allCoursesCount = computed(
+  () => countQuery.result.value?.allCoursesCount ?? null,
+)
 
-    const allCourseSpecialities = computed(
-      () => specialitiesQuery.result.value?.allCourseSpecialities || null
-    )
-    const allCoursesCount = computed(
-      () => countQuery.result.value?.allCoursesCount ?? null
-    )
+const specialities = computed(
+  () => allCourseSpecialities.value?.edges || [],
+)
+const specialitiesLoading = specialitiesQuery.loading
 
-    const specialities = computed(
-      () => allCourseSpecialities.value?.edges || []
-    )
-    const specialitiesLoading = specialitiesQuery.loading
+const coursesCount = computed(() => {
+  const n = Number(allCoursesCount.value)
+  return Number.isFinite(n) && n > 0 ? n : null
+})
+const learnersCount = computed(() => null)
 
-    const coursesCount = computed(() => {
-      const n = Number(allCoursesCount.value)
-      return Number.isFinite(n) && n > 0 ? n : null
-    })
-    const learnersCount = computed(() => null)
-
-    onMounted(() => { settings.setActiveNav('HOME') })
-
-    return {
-      specialities,
-      specialitiesLoading,
-      coursesCount,
-      learnersCount
-    }
-  }
-}
+onMounted(() => { settings.setActiveNav('HOME') })
 </script>
 
 <style lang="scss" scoped>

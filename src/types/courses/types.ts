@@ -30,6 +30,8 @@ import type {
   GetAllCoursesCountQueryVariables,
   AllInstructorCountQuery,
   AllInstructorCountQueryVariables,
+  TotalUsersQuery,
+  TotalUsersQueryVariables,
 
   // Units + content
   GetAllCourseUnitsByCourseIdQuery,
@@ -46,9 +48,9 @@ import type {
   GetAllWhatYouWillLearnByCourseIdQueryVariables,
 } from 'src/graphql/generated'
 
-// TODO: AllCoursesStatiscs / AllCoursesCountStatiscs missing from generated.ts
-// (schema drift). GetAllCoursesCount is the closest match and is exported
-// below; revisit once the backend operation lands.
+// AllCoursesStatiscs / AllCoursesCountStatiscs: The live schema fields are
+// allCoursesCount (GetAllCoursesCountQuery) and allCoursesHours (AllCoursesHoursQuery).
+// These are exported below. No schema drift for the stat queries.
 
 // ---------------------------------------------------------------------------
 // Currency scalar narrowing (fixes the JSONString `currency` leak)
@@ -147,6 +149,9 @@ export type GetAllCoursesCountVars = GetAllCoursesCountQueryVariables
 
 export type AllInstructorCountResult = AllInstructorCountQuery
 export type AllInstructorCountVars = AllInstructorCountQueryVariables
+
+export type TotalUsersResult = TotalUsersQuery
+export type TotalUsersVars = TotalUsersQueryVariables
 
 // Units + content
 export type GetAllCourseUnitsByCourseIdResult = GetAllCourseUnitsByCourseIdQuery

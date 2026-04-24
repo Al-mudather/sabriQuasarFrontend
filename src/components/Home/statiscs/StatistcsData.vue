@@ -1,7 +1,7 @@
 <template>
   <div class="stat-tile">
     <div class="stat-tile__value">
-      <span v-if="query && totalCount !== ''" class="stat-tile__number">
+      <span v-if="value !== null" class="stat-tile__number">
         {{ formatted }}<slot />
       </span>
       <ds-skeleton v-else shape="line" width="3ch" style="height: 0.8em" />
@@ -10,27 +10,21 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'StatistcsData',
-  props: ['name', 'query'],
-  data () { return { totalCount: '' } },
-  computed: {
-    formatted () {
-      const n = Number(this.totalCount)
-      if (!Number.isFinite(n)) return this.totalCount
-      return n.toLocaleString('ar-EG')
-    }
-  },
-  mounted () {
-    if (this.query) {
-      this.$apollo.query({ query: this.query }).then(res => {
-        const key = Object.keys(res.data)[0]
-        this.totalCount = res.data[key]
-      })
-    }
-  }
+<script setup lang="ts">
+import { computed } from 'vue'
+
+interface Props {
+  name: string
+  value: number | null
 }
+
+const props = defineProps<Props>()
+
+const formatted = computed<string>(() => {
+  if (props.value === null) return ''
+  if (!Number.isFinite(props.value)) return String(props.value)
+  return props.value.toLocaleString('ar-EG')
+})
 </script>
 
 <style lang="scss" scoped>

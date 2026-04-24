@@ -77,205 +77,189 @@
   </section>
 </template>
 
-<script>
-import { storeToRefs } from "pinia";
-import { useAuthStore } from "src/stores/auth";
-import { useSettingsStore } from "src/stores/settings";
-import { useCartStore } from "src/stores/cart";
-import { usePyramidStore } from "src/stores/pyramid";
-import { apolloClient } from "src/apollo/client";
-import { GetAllCourses } from "src/graphql/course_management/query/GetAllCourses";
-import { Quasar } from "quasar";
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useQuasar } from 'quasar'
+import { Quasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { useCartStore } from 'src/stores/cart'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { apolloClient } from 'src/apollo/client'
+import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses'
+import type {
+  GetAllCoursesResult,
+  GetAllCoursesVars,
+} from 'src/types/courses/types'
 
-export default {
-  name: "NavBar",
-  setup () {
-    const auth = useAuthStore();
-    const settings = useSettingsStore();
-    const cart = useCartStore();
-    const pyramid = usePyramidStore();
-    const { token } = storeToRefs(auth);
-    const { isEnglish } = storeToRefs(settings);
-    return { auth, settings, cart, pyramid, token, isEnglish };
-  },
-  data() {
-    return {
-      search: "",
-      visible: false,
-      isDraft: false,
-      courses: [],
-    };
-  },
-  props: {},
-  computed: {
-    _isEnglish: {
-      get() {
-        return this.isEnglish;
-      },
-      set(newVlaue) {
-        return this.settings.setIsEnglish(newVlaue);
-      },
-    },
-  },
+const router = useRouter()
+const route = useRoute()
+const $q = useQuasar()
+const { t } = useI18n()
 
-  watch: {
-    async isEnglish(value) {
-      if (value) {
-        this.$i18n.locale = "en";
-        this.settings.setIsEnglish(value);
-        const langIso = "en-us";
+const auth = useAuthStore()
+const settings = useSettingsStore()
+const cart = useCartStore()
+const pyramid = usePyramidStore()
 
-        try {
-          await import(
-            "quasar/lang/" + langIso
-          ).then((lang) => {
-            Quasar.lang.set({
-              ...lang.default,
-              rtl: false,
-            });
-          });
+const { token } = storeToRefs(auth)
+const { isEnglish } = storeToRefs(settings)
 
-          // Adjust cart styling in outer layouts when switching locales
-          this.$jquery(".backgroun").css({
-            transform: "rotate(180deg)",
-          });
-          this.$jquery(".shoppgCart > .cart svg").css({
-            transform: "translate(-20%, -30%)",
-          });
-          this.$jquery(".shoppgCart > .cart h3").css({
-            transform: "translate(35%, -100%)",
-          });
-          this.$jquery(".shoppgCart > .cart > .notifc").css({
-            transform: "translate(-5%,-43%)",
-          });
-        } catch (err) {
-          // Requested Quasar Language Pack does not exist,
-          // let's not break the app, so catching
-        }
-      } else {
-        this.$i18n.locale = "ar";
-        this.settings.setIsEnglish(value);
+const search = ref('')
+const isDraft = ref(false)
 
-        try {
-          const lang = await import("quasar/lang/ar");
-          Quasar.lang.set({ ...lang.default, rtl: true });
+const isSearchEmpty = computed(() => !search.value.trim())
 
-          this.$jquery(".backgroun").css({
-            transform: "rotate(360deg)",
-          });
-          this.$jquery(".shoppgCart > .cart svg").css({
-            transform: "translate(0%, 0%)",
-          });
-          this.$jquery(".shoppgCart > .cart h3").css({
-            transform: "translate(0%, 0%)",
-          });
-          this.$jquery(".shoppgCart > .cart > .notifc").css({
-            transform: "translate(0%,0%)",
-          });
-        } catch (err) {}
+const _isEnglish = computed({
+  get: () => isEnglish.value,
+  set: (newValue: boolean) => settings.setIsEnglish(newValue),
+})
+
+watch(isEnglish, async (value) => {
+  if (value) {
+    settings.setIsEnglish(value)
+    const langIso = 'en-us'
+    try {
+      const lang = await import('quasar/lang/' + langIso)
+      Quasar.lang.set({ ...lang.default, rtl: false })
+      // Adjust cart styling in outer layouts when switching locales
+      const $ = (window as Record<string, unknown>).jQuery as ((sel: string) => { css: (props: Record<string, string>) => void }) | undefined
+      if ($) {
+        $('.backgroun').css({ transform: 'rotate(180deg)' })
+        $('.shoppgCart > .cart svg').css({ transform: 'translate(-20%, -30%)' })
+        $('.shoppgCart > .cart h3').css({ transform: 'translate(35%, -100%)' })
+        $('.shoppgCart > .cart > .notifc').css({ transform: 'translate(-5%,-43%)' })
       }
-    },
-  },
+    } catch (_err) {
+      // Requested Quasar Language Pack does not exist — keep app running
+    }
+  } else {
+    settings.setIsEnglish(value)
+    try {
+      const lang = await import('quasar/lang/ar')
+      Quasar.lang.set({ ...lang.default, rtl: true })
+      const $ = (window as Record<string, unknown>).jQuery as ((sel: string) => { css: (props: Record<string, string>) => void }) | undefined
+      if ($) {
+        $('.backgroun').css({ transform: 'rotate(360deg)' })
+        $('.shoppgCart > .cart svg').css({ transform: 'translate(0%, 0%)' })
+        $('.shoppgCart > .cart h3').css({ transform: 'translate(0%, 0%)' })
+        $('.shoppgCart > .cart > .notifc').css({ transform: 'translate(0%,0%)' })
+      }
+    } catch (_err) {
+      // ignore
+    }
+  }
+})
 
-  methods: {
-    changeMenuState() {
-      this.settings.setOpenMenu(true);
-    },
+function changeMenuState (): void {
+  settings.setOpenMenu(true)
+}
 
-    LOG_USER_OUT() {
-      this.pyramid.setMyMarketingCode("");
-      try {
-        this.removeCookie();
-      } catch (error) {}
-      this.cart.deleteCart();
-      this.auth.logOut();
-      this.$router.push({ name: "Home" });
-    },
+function removeCookie (): void {
+  const tokenName = 'csrftoken'
+  // $cookies is globally injected; access via window to avoid $-plugin typing
+  try {
+    ;(window as Record<string, unknown>).$cookies && (window as Record<string, { remove: (t: string) => void }>).$cookies.remove(tokenName)
+  } catch (_e) { /* ignore */ }
+}
 
-    removeCookie() {
-      const token = "csrftoken";
-      this.$cookies.remove(token);
-    },
+function LOG_USER_OUT (): void {
+  pyramid.setMyMarketingCode('')
+  try { removeCookie() } catch (_e) { /* ignore */ }
+  cart.deleteCart()
+  auth.logOut()
+  void router.push({ name: 'Home' })
+}
 
-    showTheSearchingResult(event) {
-      event.preventDefault();
+async function showTheSearchingResult (event: Event): Promise<void> {
+  event.preventDefault()
 
-      if (!this.$_.isEmpty(this.search)) {
-        apolloClient
-          .query({
-            query: GetAllCourses,
-            variables: {
-              title_Icontains: this.search,
-              isDraft: this.isDraft,
+  if (isSearchEmpty.value) {
+    $q.notify({
+      type: 'warning',
+      position: 'top',
+      progress: true,
+      multiLine: true,
+      message: t('ما الذي تبحث عنه'),
+    })
+    return
+  }
+
+  try {
+    const res = await apolloClient.query<GetAllCoursesResult, GetAllCoursesVars>({
+      query: GetAllCourses,
+      variables: {
+        title_Icontains: search.value,
+        isDraft: isDraft.value,
+      },
+    })
+    const edges = res.data?.allCourses?.edges ?? []
+    const searchResult = edges
+      .filter((e): e is NonNullable<typeof e> => !!e?.node)
+      .map((e) => ({
+        label: e.node!.title,
+        id: e.node!.id,
+        pk: e.node!.pk,
+      }))
+
+    if (searchResult.length) {
+      $q.bottomSheet({
+        style: {
+          textAlign: 'center',
+          padding: '20px',
+          'border-bottom': '1px solid #000 !important',
+        },
+        actions: searchResult,
+      })
+        .onOk((action: { label: string; id: string; pk: number | null }) => {
+          void router.push({
+            name: 'course-details',
+            params: {
+              name: action.label.replaceAll(' ', '-'),
+              pk: String(action.pk),
+              id: action.id,
             },
           })
-          .then((res) => {
-            const searchResult = res.data.allCourses.edges.map((course) => {
-              return {
-                label: course.node.title,
-                id: course.node.id,
-                pk: course.node.pk,
-              };
-            });
-            if (!this.$_.isEmpty(searchResult)) {
-              this.$q
-                .bottomSheet({
-                  style: {
-                    textAlign: "center",
-                    padding: "20px",
-                    "border-bottom": "1px solid #000 !important",
-                  },
-                  actions: searchResult,
-                })
-                .onOk((action) => {
-                  this.$router.push({
-                    name: "course-details",
-                    params: {
-                      name: action.label.replaceAll(" ", "-"),
-                      pk: action.pk,
-                      id: action.id,
-                    },
-                  });
-                })
-                .onDismiss(() => {
-                  this.search = "";
-                });
-            } else {
-              this.$q.notify({
-                color: "negative",
-                position: "top",
-                progress: true,
-                multiLine: true,
-                message: this.$t("لا توجد نتائج"),
-              });
-            }
-          });
-      } else {
-        this.$q.notify({
-          type: "warning",
-          position: "top",
-          progress: true,
-          multiLine: true,
-          message: this.$t("ما الذي تبحث عنه"),
-        });
-      }
-    },
+        })
+        .onDismiss(() => {
+          search.value = ''
+        })
+    } else {
+      $q.notify({
+        color: 'negative',
+        position: 'top',
+        progress: true,
+        multiLine: true,
+        message: t('لا توجد نتائج'),
+      })
+    }
+  } catch (_err) {
+    $q.notify({
+      color: 'negative',
+      position: 'top',
+      progress: true,
+      multiLine: true,
+      message: t('لا توجد نتائج'),
+    })
+  }
+}
 
-    GO_TO_SIGN_UP_PAGE() {
-      this.$router.push({
-        name: "signUp",
-        query: { redirect: this.$route.fullPath },
-      });
-    },
+function GO_TO_SIGN_UP_PAGE (): void {
+  void router.push({
+    name: 'signUp',
+    query: { redirect: route.fullPath },
+  })
+}
 
-    GO_TO_LOG_IN_PAGE() {
-      this.$router.push({
-        name: "login",
-        query: { redirect: this.$route.fullPath },
-      });
-    },
-  },
-};
+function GO_TO_LOG_IN_PAGE (): void {
+  void router.push({
+    name: 'login',
+    query: { redirect: route.fullPath },
+  })
+}
 </script>
 
 <style lang="scss" scoped>
