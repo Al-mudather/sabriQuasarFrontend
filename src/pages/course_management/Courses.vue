@@ -218,313 +218,286 @@
   </main>
 </template>
 
-<script>
-/** @typedef {import('src/types/courses/types').Course} Course */
-/** @typedef {import('src/types/courses/types').Speciality} Speciality */
-/** @typedef {import('src/types/courses/types').GetAllCoursesResult} GetAllCoursesResult */
-/** @typedef {import('src/types/courses/types').GetAllCoursesVars} GetAllCoursesVars */
-/** @typedef {import('src/types/courses/types').GetAllSpecialitiesResult} GetAllSpecialitiesResult */
-/** @typedef {import('src/types/courses/types').GetAllSpecialitiesVars} GetAllSpecialitiesVars */
-
-import courseCard from 'components/utils/courseCard.vue'
-import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses.js'
-import { GetSpecialities } from 'src/graphql/course_management/query/GetAllSpeciallites.js'
-import { useAuthStore } from 'src/stores/auth'
-import { useSettingsStore } from 'src/stores/settings'
+<script setup lang="ts">
+import { computed, reactive, ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useQuery } from '@vue/apollo-composable'
 import { apolloClient } from 'src/apollo/client'
-import { computed, ref, reactive } from 'vue'
-import _ from 'lodash'
-import { cascade } from 'src/design-system/motion.js'
+import { useAuthStore } from 'src/stores/auth'
+import { useSettingsStore } from 'src/stores/settings'
+import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses.js'
+import { GetSpecialities } from 'src/graphql/course_management/query/GetAllSpeciallites.js'
+import courseCard from 'components/utils/courseCard.vue'
 import DsBreadcrumb from 'src/design-system/components/DsBreadcrumb.vue'
 import DsBreadcrumbItem from 'src/design-system/components/DsBreadcrumbItem.vue'
-import DsInput from 'src/design-system/components/DsInput.vue'
 import DsTag from 'src/design-system/components/DsTag.vue'
+import type {
+  GetAllCoursesResult,
+  GetAllCoursesVars,
+  GetAllSpecialitiesResult,
+  GetAllSpecialitiesVars,
+} from 'src/types/courses/types'
 
-export default {
-  name: 'Courses',
+type PriceFilterId = 'all' | 'free' | 'paid'
+type SortValue = 'newest' | 'popular' | 'price_asc' | 'price_desc'
 
-  components: {
-    courseCard,
-    DsBreadcrumb,
-    DsBreadcrumbItem,
-    // eslint-disable-next-line vue/no-unused-components
-    DsInput,
-    DsTag
+interface Chip {
+  key: string
+  label: string
+  onClear: () => void
+}
+
+const route = useRoute()
+const auth = useAuthStore()
+const settings = useSettingsStore()
+
+// ---------------------------------------------------------------------------
+// Query vars + reactive state
+// ---------------------------------------------------------------------------
+// Schema-allowed orderBy fields for allCourses include `created`, `title`,
+// `course_fee`, etc. `createdAt` is NOT a valid key and triggers a
+// "Cannot resolve keyword 'created_at'" error — use `-created` instead.
+const queryVars = reactive<GetAllCoursesVars>({
+  first: 12,
+  orderBy: ['-created'],
+  isDraft: false,
+})
+
+const searchInput = ref('')
+const search = ref('')
+const searchTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const activeSpecialityID = ref<number | null>(null)
+const activeSpecialityLabel = ref('')
+const activePriceFilter = ref<PriceFilterId>('all')
+const sortValue = ref<SortValue>('newest')
+const totalCount = ref<number | null>(null)
+
+const priceFilters: ReadonlyArray<{ id: PriceFilterId; label: string }> = [
+  { id: 'all', label: 'الكل' },
+  { id: 'free', label: 'مجاناً' },
+  { id: 'paid', label: 'مدفوعة' },
+]
+
+// ---------------------------------------------------------------------------
+// Specialities — sidebar filter list
+// ---------------------------------------------------------------------------
+const specQuery = useQuery<GetAllSpecialitiesResult, GetAllSpecialitiesVars>(
+  GetSpecialities,
+  { courseNumber: 20 },
+)
+const specialitiesLoading = specQuery.loading
+const specialitiesEdges = computed(
+  () => (specQuery.result.value?.allCourseSpecialities?.edges ?? [])
+    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+)
+
+// ---------------------------------------------------------------------------
+// Courses — main listing
+// ---------------------------------------------------------------------------
+const coursesQuery = useQuery<GetAllCoursesResult, GetAllCoursesVars>(
+  GetAllCourses,
+  () => queryVars,
+  { fetchPolicy: 'cache-and-network' },
+)
+const coursesData = computed(() => coursesQuery.result.value ?? null)
+const coursesLoading = coursesQuery.loading
+const coursesEdges = computed(
+  () => (coursesData.value?.allCourses?.edges ?? [])
+    .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
+)
+const coursesEdgeCount = computed(
+  () => coursesData.value?.allCourses?.edgeCount ?? 0,
+)
+const coursesHasNext = computed(
+  () => coursesData.value?.allCourses?.pageInfo.hasNextPage ?? false,
+)
+
+coursesQuery.onResult((res) => {
+  const tc = res.data?.allCourses?.totalCount
+  if (Number.isFinite(Number(tc))) totalCount.value = Number(tc)
+})
+
+// ---------------------------------------------------------------------------
+// Computed filter state
+// ---------------------------------------------------------------------------
+const orderBy = computed<string[]>(() => {
+  switch (sortValue.value) {
+    case 'price_asc': return ['course_fee']
+    case 'price_desc': return ['-course_fee']
+    case 'popular': return ['-created']
+    case 'newest':
+    default: return ['-created']
+  }
+})
+
+const queryVariables = computed<GetAllCoursesVars>(() => {
+  const vars: GetAllCoursesVars = {
+    first: 12,
+    orderBy: orderBy.value,
+    isDraft: false,
+  }
+  const s = search.value.trim()
+  if (s) vars.title_Icontains = s
+  if (activeSpecialityID.value) vars.courseSpeciality = activeSpecialityID.value
+  if (activePriceFilter.value === 'free') vars.isPaid = false
+  if (activePriceFilter.value === 'paid') vars.isPaid = true
+  return vars
+})
+
+watch(
+  queryVariables,
+  (vars) => {
+    for (const k of Object.keys(queryVars) as Array<keyof GetAllCoursesVars>) {
+      if (!(k in vars)) delete (queryVars as Record<string, unknown>)[k]
+    }
+    Object.assign(queryVars, vars)
   },
+  { deep: true, immediate: true },
+)
 
-  setup () {
-    const auth = useAuthStore()
-    const settings = useSettingsStore()
+const hasActiveFilters = computed(
+  () =>
+    !!activeSpecialityID.value ||
+    activePriceFilter.value !== 'all' ||
+    !!search.value.trim(),
+)
 
-    // Specialities filter list
-    /** @type {import('@vue/apollo-composable').UseQueryReturn<GetAllSpecialitiesResult, GetAllSpecialitiesVars>} */
-    const specQuery = useQuery(GetSpecialities, { courseNumber: 20 })
-    const specialitiesLoading = specQuery.loading
-    const specialitiesEdges = computed(
-      () => _.get(specQuery.result.value, 'allCourseSpecialities.edges', []) || []
-    )
-
-    // Reactive query variables — shared ref so useQuery updates on filter change.
-    // Schema-allowed orderBy fields for allCourses include `created`, `title`,
-    // `course_fee`, etc. `createdAt` is NOT a valid key and triggers a
-    // "Cannot resolve keyword 'created_at'" error — use `-created` instead.
-    const queryVars = reactive({ first: 12, orderBy: ['-created'], isDraft: false })
-    /** @type {import('@vue/apollo-composable').UseQueryReturn<GetAllCoursesResult, GetAllCoursesVars>} */
-    const coursesQuery = useQuery(GetAllCourses, () => queryVars, {
-      fetchPolicy: 'cache-and-network'
+const activeChips = computed<Chip[]>(() => {
+  const chips: Chip[] = []
+  const s = search.value.trim()
+  if (s) {
+    chips.push({
+      key: 'search',
+      label: `بحث: "${s}"`,
+      onClear: () => { searchInput.value = ''; search.value = '' },
     })
-    const coursesData = computed(() => coursesQuery.result.value || null)
-    const coursesLoading = coursesQuery.loading
-    const coursesEdges = computed(
-      () => _.get(coursesData.value, 'allCourses.edges', []) || []
-    )
-    const coursesEdgeCount = computed(
-      () => _.get(coursesData.value, 'allCourses.edgeCount', 0) || 0
-    )
-    const coursesHasNext = computed(
-      () => _.get(coursesData.value, 'allCourses.pageInfo.hasNextPage', false) || false
-    )
-
-    const totalCount = ref(null)
-    coursesQuery.onResult((res) => {
-      const tc = res.data && res.data.allCourses && res.data.allCourses.totalCount
-      if (Number.isFinite(Number(tc))) totalCount.value = Number(tc)
+  }
+  if (activeSpecialityID.value) {
+    chips.push({
+      key: `spec-${activeSpecialityID.value}`,
+      label: activeSpecialityLabel.value || 'تخصص محدد',
+      onClear: () => setSpeciality(null),
     })
+  }
+  if (activePriceFilter.value !== 'all') {
+    const f = priceFilters.find(x => x.id === activePriceFilter.value)
+    chips.push({
+      key: `price-${activePriceFilter.value}`,
+      label: f ? f.label : '',
+      onClear: () => applyPriceFilter('all'),
+    })
+  }
+  return chips
+})
 
-    // Retained in setup closure (not returned) so fetchMore/refetch are still
-    // accessible to methods. We stash a non-reserved-prefix handle on `this`
-    // via the returned object below.
-    return {
-      auth,
-      settings,
-      coursesQueryRef: coursesQuery,
-      queryVars,
-      specialitiesLoading,
-      specialitiesEdges,
-      coursesData,
-      coursesLoading,
-      coursesEdges,
-      coursesEdgeCount,
-      coursesHasNext,
-      totalCount
-    }
-  },
+// ---------------------------------------------------------------------------
+// Watchers
+// ---------------------------------------------------------------------------
+watch(searchInput, (val) => {
+  if (searchTimer.value) clearTimeout(searchTimer.value)
+  searchTimer.value = setTimeout(() => { search.value = val }, 300)
+})
 
-  data () {
-    return {
-      // raw input — debounced into `search`
-      searchInput: '',
-      search: '',
-      searchTimer: null,
-      activeSpecialityID: null,
-      activeSpecialityLabel: '',
-      activePriceFilter: 'all',
-      sortValue: 'newest',
-      isDraft: false,
-      didInitialCascade: false
-    }
-  },
-
-  computed: {
-    priceFilters () {
-      return [
-        { id: 'all',  label: 'الكل' },
-        { id: 'free', label: 'مجاناً' },
-        { id: 'paid', label: 'مدفوعة' }
-      ]
-    },
-
-    orderBy () {
-      switch (this.sortValue) {
-        case 'price_asc':  return ['course_fee']
-        case 'price_desc': return ['-course_fee']
-        case 'popular':    return ['-created']
-        case 'newest':
-        default:           return ['-created']
-      }
-    },
-
-    queryVariables () {
-      const vars = {
-        first: 12,
-        orderBy: this.orderBy,
-        isDraft: this.isDraft
-      }
-      if (this.search && this.search.trim()) {
-        vars.title_Icontains = this.search.trim()
-      }
-      if (this.activeSpecialityID) {
-        vars.courseSpeciality = this.activeSpecialityID
-      }
-      if (this.activePriceFilter === 'free') vars.isPaid = false
-      if (this.activePriceFilter === 'paid') vars.isPaid = true
-      return vars
-    },
-
-    effectiveVars () {
-      // Syncs computed filters into the reactive object feeding useQuery.
-      const v = this.queryVariables
-      // Clear keys that are no longer set so useQuery sees removed filters.
-      Object.keys(this.queryVars).forEach(k => {
-        if (!(k in v)) delete this.queryVars[k]
-      })
-      Object.assign(this.queryVars, v)
-      return v
-    },
-
-    hasActiveFilters () {
-      return (
-        !!this.activeSpecialityID ||
-        this.activePriceFilter !== 'all' ||
-        !!(this.search && this.search.trim())
-      )
-    },
-
-    activeChips () {
-      const chips = []
-      if (this.search && this.search.trim()) {
-        chips.push({
-          key: 'search',
-          label: `بحث: "${this.search.trim()}"`,
-          onClear: () => { this.searchInput = ''; this.search = '' }
-        })
-      }
-      if (this.activeSpecialityID) {
-        chips.push({
-          key: `spec-${this.activeSpecialityID}`,
-          label: this.activeSpecialityLabel || 'تخصص محدد',
-          onClear: () => this.setSpeciality(null)
-        })
-      }
-      if (this.activePriceFilter !== 'all') {
-        const f = this.priceFilters.find(x => x.id === this.activePriceFilter)
-        chips.push({
-          key: `price-${this.activePriceFilter}`,
-          label: f ? f.label : '',
-          onClear: () => this.applyPriceFilter('all')
-        })
-      }
-      return chips
-    }
-  },
-
-  watch: {
-    searchInput (val) {
-      if (this.searchTimer) clearTimeout(this.searchTimer)
-      this.searchTimer = setTimeout(() => {
-        this.search = val
-      }, 300)
-    },
-    queryVariables: {
-      deep: true,
-      handler (v) {
-        Object.keys(this.queryVars).forEach(k => {
-          if (!(k in v)) delete this.queryVars[k]
-        })
-        Object.assign(this.queryVars, v)
-      }
-    }
-  },
-
-  mounted () {
-    this.settings.setActiveNav('COURSES')
-    this.auth.setNavbarSearch(false)
-    this.hydrateFromRoute()
-    // Prime queryVars on mount.
-    Object.assign(this.queryVars, this.queryVariables)
-  },
-
-  unmounted () {
-    this.auth.setNavbarSearch(true)
-    if (this.searchTimer) clearTimeout(this.searchTimer)
-  },
-
-  methods: {
-    formatNum (n) {
-      const v = Number(n)
-      if (!Number.isFinite(v)) return ''
-      try {
-        return new Intl.NumberFormat('ar-EG').format(v)
-      } catch (_) {
-        return String(v)
-      }
-    },
-
-    hydrateFromRoute () {
-      const q = this.$route.query || {}
-      const specRaw = q.speciality
-      if (specRaw !== undefined && specRaw !== null && specRaw !== '') {
-        const pk = Number(specRaw)
-        if (Number.isFinite(pk)) {
-          this.activeSpecialityID = pk
-          this.resolveSpecialityLabel(pk)
-        }
-      }
-      if (q.q && typeof q.q === 'string') {
-        this.searchInput = q.q
-        this.search = q.q
-      }
-    },
-
-    async resolveSpecialityLabel (pk) {
-      try {
-        const { data } = await apolloClient.query({
-          query: GetSpecialities,
-          variables: { courseNumber: 50 }
-        })
-        const edges = (data && data.allCourseSpecialities && data.allCourseSpecialities.edges) || []
-        const match = edges.find(e => e.node.pk === pk)
-        if (match) this.activeSpecialityLabel = match.node.speciality
-      } catch (_) { /* ignore */ }
-    },
-
-    setSpeciality (pk) {
-      this.activeSpecialityID = pk
-      if (pk) {
-        this.resolveSpecialityLabel(pk)
-      } else {
-        this.activeSpecialityLabel = ''
-      }
-    },
-
-    applyPriceFilter (id) {
-      this.activePriceFilter = id
-    },
-
-    clearAllFilters () {
-      this.searchInput = ''
-      this.search = ''
-      this.activeSpecialityID = null
-      this.activeSpecialityLabel = ''
-      this.activePriceFilter = 'all'
-    },
-
-    async loadMore () {
-      const data = this.coursesData
-      if (!data || !data.allCourses || !data.allCourses.pageInfo.hasNextPage) return
-      await this.coursesQueryRef.fetchMore({
-        variables: {
-          ...this.queryVariables,
-          cursor: data.allCourses.pageInfo.endCursor
-        },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return prev
-          const newEdges = fetchMoreResult.allCourses.edges
-          return {
-            allCourses: {
-              __typename: prev.allCourses.__typename,
-              totalCount: fetchMoreResult.allCourses.totalCount,
-              edgeCount: fetchMoreResult.allCourses.edgeCount,
-              edges: [...prev.allCourses.edges, ...newEdges],
-              pageInfo: fetchMoreResult.allCourses.pageInfo
-            }
-          }
-        }
-      })
-    }
+// ---------------------------------------------------------------------------
+// Methods
+// ---------------------------------------------------------------------------
+function formatNum (n: number | null): string {
+  const v = Number(n)
+  if (!Number.isFinite(v)) return ''
+  try {
+    return new Intl.NumberFormat('ar-EG').format(v)
+  } catch {
+    return String(v)
   }
 }
+
+async function resolveSpecialityLabel (pk: number): Promise<void> {
+  try {
+    const { data } = await apolloClient.query<GetAllSpecialitiesResult, GetAllSpecialitiesVars>({
+      query: GetSpecialities,
+      variables: { courseNumber: 50 },
+    })
+    const edges = data?.allCourseSpecialities?.edges ?? []
+    const match = edges.find(e => e?.node?.pk === pk)
+    if (match?.node) activeSpecialityLabel.value = match.node.speciality
+  } catch { /* ignore */ }
+}
+
+function hydrateFromRoute (): void {
+  const q = route.query ?? {}
+  const specRaw = q.speciality
+  if (specRaw !== undefined && specRaw !== null && specRaw !== '') {
+    const pk = Number(specRaw)
+    if (Number.isFinite(pk)) {
+      activeSpecialityID.value = pk
+      void resolveSpecialityLabel(pk)
+    }
+  }
+  if (typeof q.q === 'string') {
+    searchInput.value = q.q
+    search.value = q.q
+  }
+}
+
+function setSpeciality (pk: number | null): void {
+  activeSpecialityID.value = pk
+  if (pk) {
+    void resolveSpecialityLabel(pk)
+  } else {
+    activeSpecialityLabel.value = ''
+  }
+}
+
+function applyPriceFilter (id: PriceFilterId): void {
+  activePriceFilter.value = id
+}
+
+function clearAllFilters (): void {
+  searchInput.value = ''
+  search.value = ''
+  activeSpecialityID.value = null
+  activeSpecialityLabel.value = ''
+  activePriceFilter.value = 'all'
+}
+
+async function loadMore (): Promise<void> {
+  const data = coursesData.value
+  const pageInfo = data?.allCourses?.pageInfo
+  if (!data || !pageInfo?.hasNextPage) return
+  await coursesQuery.fetchMore({
+    variables: {
+      ...queryVariables.value,
+      cursor: pageInfo.endCursor,
+    },
+    updateQuery: (prev: GetAllCoursesResult, { fetchMoreResult }): GetAllCoursesResult => {
+      if (!fetchMoreResult?.allCourses || !prev.allCourses) return prev
+      const newEdges = fetchMoreResult.allCourses.edges
+      return {
+        allCourses: {
+          __typename: prev.allCourses.__typename,
+          totalCount: fetchMoreResult.allCourses.totalCount,
+          edgeCount: fetchMoreResult.allCourses.edgeCount,
+          edges: [...prev.allCourses.edges, ...newEdges],
+          pageInfo: fetchMoreResult.allCourses.pageInfo,
+        },
+      }
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Lifecycle
+// ---------------------------------------------------------------------------
+onMounted(() => {
+  settings.setActiveNav('COURSES')
+  auth.setNavbarSearch(false)
+  hydrateFromRoute()
+})
+
+onUnmounted(() => {
+  auth.setNavbarSearch(true)
+  if (searchTimer.value) clearTimeout(searchTimer.value)
+})
 </script>
 
 <style lang="scss" scoped>
