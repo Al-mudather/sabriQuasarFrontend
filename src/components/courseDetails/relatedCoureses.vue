@@ -13,12 +13,6 @@
       </ds-card>
     </div>
 
-    <ds-empty-state
-      v-else-if="error"
-      :title="$t('تعذر تحميل الدورات ذات الصلة')"
-      size="sm"
-    />
-
     <div v-else-if="relatedEdges.length" class="related-grid">
       <course-card
         v-for="edge in relatedEdges"
@@ -30,6 +24,12 @@
         unit="SD"
       />
     </div>
+
+    <ds-empty-state
+      v-else-if="error"
+      :title="$t('تعذر تحميل الدورات ذات الصلة')"
+      size="sm"
+    />
 
     <ds-empty-state
       v-else
@@ -69,7 +69,13 @@ const { result, loading, error } = useQuery<GetAllCoursesResult, GetAllCoursesVa
     execludeIds: props.courseData?.pk != null ? [props.courseData.pk] : [],
     first: 4,
   }),
-  () => ({ enabled: !!courseSpecialityID.value }),
+  () => ({
+    enabled: !!courseSpecialityID.value,
+    // Backend returns AUTHENTICATION_ERROR on deeply-nested `user.username`
+    // for anonymous viewers, even though the rest of the course payload is
+    // valid. Keep partial data instead of discarding the whole response.
+    errorPolicy: 'all',
+  }),
 )
 
 const relatedEdges = computed(
