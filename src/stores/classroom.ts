@@ -11,7 +11,7 @@ import { ref } from 'vue'
 // is accepted on setup-style stores. Mirrors the pattern in settings.ts.
 import 'pinia-plugin-persistedstate'
 
-export type ClassroomPanelTab = 'overview' | 'qa'
+export type ClassroomPanelTab = 'curriculum' | 'overview' | 'qa'
 
 export const useClassroomStore = defineStore(
   'classroom',

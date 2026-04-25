@@ -1,24 +1,41 @@
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref, nextTick, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-type TabKey = 'overview' | 'qa'
+type TabKey = 'curriculum' | 'overview' | 'qa'
 
 interface Props {
   activeTab: TabKey
+  /** When true, prepend a "Curriculum" tab. Used on mobile where the standalone
+   *  rail aside is hidden and the curriculum lives inside the side panel. */
+  showCurriculum?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { showCurriculum: false })
 const emit = defineEmits<{ 'update:activeTab': [value: TabKey] }>()
+const { t } = useI18n()
 
 interface TabDef {
   key: TabKey
   label: string
 }
 
-const tabs: TabDef[] = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'qa', label: 'Q&A' },
-]
+const tabs = computed<TabDef[]>(() => {
+  const out: TabDef[] = []
+  if (props.showCurriculum) out.push({ key: 'curriculum', label: t('classroom.panel.curriculum') })
+  out.push({ key: 'overview', label: t('classroom.panel.overview') })
+  out.push({ key: 'qa', label: t('classroom.panel.qa') })
+  return out
+})
+
+// If the curriculum tab disappears (resize to desktop) while it was active,
+// fall back to overview so the panel doesn't render an empty body.
+watch(
+  () => props.showCurriculum,
+  (show) => {
+    if (!show && props.activeTab === 'curriculum') emit('update:activeTab', 'overview')
+  },
+)
 
 const tabRefs = ref<Record<string, HTMLButtonElement | null>>({})
 
@@ -26,10 +43,10 @@ function setTabRef(key: TabKey, el: Element | null) {
   tabRefs.value[key] = el as HTMLButtonElement | null
 }
 
-const activeIndex = computed(() => tabs.findIndex((t) => t.key === props.activeTab))
+const activeIndex = computed(() => tabs.value.findIndex((t) => t.key === props.activeTab))
 
 function selectIndex(idx: number) {
-  const tab = tabs[idx]
+  const tab = tabs.value[idx]
   if (!tab) return
   emit('update:activeTab', tab.key)
   void nextTick(() => {
@@ -38,7 +55,7 @@ function selectIndex(idx: number) {
 }
 
 function onKeydown(e: KeyboardEvent) {
-  const count = tabs.length
+  const count = tabs.value.length
   const cur = activeIndex.value < 0 ? 0 : activeIndex.value
   switch (e.key) {
     case 'ArrowRight':
@@ -93,7 +110,8 @@ function onKeydown(e: KeyboardEvent) {
       :id="`cls-panel-panel-${activeTab}`"
       :aria-labelledby="`cls-panel-tab-${activeTab}`"
     >
-      <slot v-if="activeTab === 'overview'" name="overview" />
+      <slot v-if="activeTab === 'curriculum'" name="curriculum" />
+      <slot v-else-if="activeTab === 'overview'" name="overview" />
       <slot v-else-if="activeTab === 'qa'" name="qa" />
     </div>
   </aside>
@@ -103,12 +121,17 @@ function onKeydown(e: KeyboardEvent) {
 .cls-panel {
   display: flex;
   flex-direction: column;
-  width: var(--cls-panel-w);
+  width: 100%;
   height: 100%;
   background: var(--cls-surface-elevated);
   color: var(--cls-text-primary);
   border-inline-start: 1px solid var(--cls-divider);
   overflow: hidden;
+
+  @media (max-width: 1023px) {
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--cls-divider);
+  }
 
   &__tabs {
     display: flex;
@@ -170,6 +193,13 @@ function onKeydown(e: KeyboardEvent) {
     overflow-y: auto;
     overflow-x: hidden;
     padding: var(--ds-space-4);
+
+    // On mobile the panel hosts the full-bleed curriculum rail; any inline
+    // padding here would create the "centered with margins" look the user
+    // saw on iPhone XR.
+    @media (max-width: 1023px) {
+      padding: 0;
+    }
     scrollbar-width: thin;
     scrollbar-color: var(--cls-divider) transparent;
 

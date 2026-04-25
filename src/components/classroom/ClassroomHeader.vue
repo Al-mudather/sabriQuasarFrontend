@@ -135,4 +135,16 @@ function toggleLocale (): void {
     &:hover { background: rgba(245, 242, 234, 0.06); }
   }
 }
+
+@media (max-width: 600px) {
+  .cls-header {
+    gap: 8px;
+    padding-inline: 10px;
+
+    &__exit-label { display: none; }
+    &__exit { padding: 6px 8px; }
+    &__title { font-size: 13px; }
+    &__meta { gap: 6px; }
+  }
+}
 </style>

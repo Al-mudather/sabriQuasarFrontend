@@ -14,6 +14,7 @@ export default {
     locked: 'مقفل'
   },
   panel: {
+    curriculum: 'محتوى الدورة',
     overview: 'نظرة عامة',
     qa: 'الأسئلة والأجوبة',
     qaPlaceholder: 'ستظهر الأسئلة والأجوبة هنا.'

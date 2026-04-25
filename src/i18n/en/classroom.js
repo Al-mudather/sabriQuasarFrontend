@@ -14,6 +14,7 @@ export default {
     locked: 'Locked'
   },
   panel: {
+    curriculum: 'Curriculum',
     overview: 'Overview',
     qa: 'Q&A',
     qaPlaceholder: 'Q&A will appear here.'

@@ -184,6 +184,14 @@ function handleSelect(content: CurriculumContent) {
   transition: width var(--cls-dur-med) var(--cls-ease);
   overflow: hidden;
 
+  // On mobile the rail lives inside the side-panel as a tab and must fill
+  // the available width edge-to-edge. The 320px desktop column rule would
+  // leave a margin to one side of the panel.
+  @media (max-width: 1023px) {
+    width: 100%;
+    border-inline-end: 0;
+  }
+
   &--collapsed {
     width: var(--cls-rail-w-collapsed);
   }

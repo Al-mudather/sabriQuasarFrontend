@@ -1,6 +1,10 @@
 <template>
-  <div class="cls-cockpit">
-    <aside class="cls-cockpit__rail" :data-collapsed="store.railCollapsed || null">
+  <div class="cls-cockpit" :data-mobile="isMobileCockpit || null">
+    <aside
+      v-if="!isMobileCockpit"
+      class="cls-cockpit__rail"
+      :data-collapsed="store.railCollapsed || null"
+    >
       <CurriculumRail
         :bootstrap="ctx.bootstrap.value"
         :current-content-pk="currentContentPk"
@@ -10,7 +14,7 @@
       />
     </aside>
 
-    <section class="cls-cockpit__main">
+    <section class="cls-cockpit__main" ref="stageRef">
       <div v-if="ctx.loading.value && !current" class="cls-cockpit__loading">
         <q-spinner-dots color="secondary" size="48px" />
       </div>
@@ -20,34 +24,38 @@
         icon="videocam_off"
       />
       <div v-else class="cls-cockpit__stage">
-        <div class="cls-cockpit__kind-badge">{{ current.modelName }}</div>
-        <h2 class="cls-cockpit__title">{{ current.title }}</h2>
+        <div class="cls-cockpit__media">
+          <VideoPlayer
+            v-if="current.kind === 'video'"
+            :model-value-raw="current.modelValueRaw"
+            @begin="onBegin"
+            @complete="onComplete"
+            @error="onVideoError"
+          />
+          <QuizRunner
+            v-else-if="current.kind === 'quiz' && quizContentId != null"
+            :content-quiz-id="quizContentId"
+            :title="quizTitle"
+          />
+          <FileView
+            v-else-if="current.kind === 'file' && currentContentPk != null && coursePkRef != null"
+            :file-url="fileUrl"
+            :title="current.title"
+          />
+          <div
+            v-else
+            class="cls-cockpit__player-placeholder"
+            role="img"
+            :aria-label="current.title"
+          >
+            <q-icon name="play_circle" size="64px" />
+            <p>{{ $t('classroom.player.comingSoon') }}</p>
+          </div>
+        </div>
 
-        <VideoPlayer
-          v-if="current.kind === 'video'"
-          :model-value-raw="current.modelValueRaw"
-          @begin="onBegin"
-          @complete="onComplete"
-          @error="onVideoError"
-        />
-        <QuizRunner
-          v-else-if="current.kind === 'quiz' && quizContentId != null"
-          :content-quiz-id="quizContentId"
-          :title="quizTitle"
-        />
-        <FileView
-          v-else-if="current.kind === 'file' && currentContentPk != null && coursePkRef != null"
-          :file-url="fileUrl"
-          :title="current.title"
-        />
-        <div
-          v-else
-          class="cls-cockpit__player-placeholder"
-          role="img"
-          :aria-label="current.title"
-        >
-          <q-icon name="play_circle" size="64px" />
-          <p>{{ $t('classroom.player.comingSoon') }}</p>
+        <div class="cls-cockpit__meta">
+          <div class="cls-cockpit__kind-badge">{{ current.modelName }}</div>
+          <h2 class="cls-cockpit__title">{{ current.title }}</h2>
         </div>
 
         <div class="cls-cockpit__nav">
@@ -74,8 +82,18 @@
     <aside class="cls-cockpit__panel">
       <ClassroomSidePanel
         :active-tab="store.panelTab"
+        :show-curriculum="isMobileCockpit"
         @update:active-tab="store.setTab($event)"
       >
+        <template #curriculum>
+          <CurriculumRail
+            :bootstrap="ctx.bootstrap.value"
+            :current-content-pk="currentContentPk"
+            :collapsed="false"
+            @select="onSelect"
+          />
+        </template>
+
         <template #overview>
           <div class="cls-cockpit__panel-body">
             <h3>{{ $t('classroom.panel.overview') }}</h3>
@@ -104,8 +122,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { useClassroomStore } from 'src/stores/classroom'
 import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
 import { useCurriculumNavigation } from 'src/composables/classroom/useCurriculumNavigation'
@@ -129,7 +148,14 @@ defineOptions({ name: 'ClassroomContentView' })
 
 const route = useRoute()
 const router = useRouter()
+const $q = useQuasar()
 const store = useClassroomStore()
+
+// Anything below Quasar's `md` breakpoint (1024px) is treated as the mobile
+// cockpit: standalone curriculum rail aside is hidden and the curriculum is
+// rendered inside the side panel as its first tab.
+const isMobileCockpit = computed<boolean>(() => $q.screen.lt.md)
+const stageRef = ref<HTMLElement | null>(null)
 const injected = inject(ClassroomContextKey)
 if (!injected) throw new Error('ClassroomContentView must be used inside ClassroomLayout')
 const ctx = injected
@@ -255,10 +281,18 @@ async function onSelect(contentPk: number): Promise<void> {
   const cpk = coursePkRef.value
   if (cpk == null) return
   await end()
-  void router.push({
+  await router.push({
     name: 'classroom-content',
     params: { coursePk: String(cpk), contentPk: String(contentPk) },
   })
+  // On the mobile cockpit the curriculum lives in the side-panel BELOW the
+  // video. After picking a lesson, scroll the video back into view so the
+  // learner doesn't have to scroll up manually.
+  if (isMobileCockpit.value) {
+    requestAnimationFrame(() => {
+      stageRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 }
 
 async function goToNextAndEnd(): Promise<void> {
@@ -319,6 +353,16 @@ async function goToPrevAndEnd(): Promise<void> {
     inline-size: 100%;
     max-inline-size: 960px;
     color: var(--cls-text-primary, #F5F2EA);
+  }
+
+  &__media {
+    inline-size: 100%;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   &__kind-badge {
@@ -391,15 +435,72 @@ async function goToPrevAndEnd(): Promise<void> {
   padding: 20px;
 }
 
+// ---------------------------------------------------------------------------
+// Mobile cockpit (≤ Quasar md / 1024px).
+//
+// Layout shifts to a vertical stack: video first (full width), then the side
+// panel which now hosts the curriculum as its first tab. The standalone rail
+// aside is removed from the DOM entirely (v-if in the template) so it doesn't
+// dominate the viewport above the video.
+// ---------------------------------------------------------------------------
 @media (max-width: 1023px) {
   .cls-cockpit {
     flex-direction: column;
 
-    &__rail, &__panel {
-      flex: 0 0 auto;
+    // Main is edge-to-edge; only the meta + nav rows get inline padding.
+    &__main {
+      padding: 0;
+      inline-size: 100%;
+    }
+
+    &__panel {
+      flex: 1 1 auto;
       inline-size: 100%;
       block-size: auto;
+      // Give the curriculum tab enough room to breathe; the inner list scrolls.
+      min-block-size: 60vh;
     }
+
+    &__stage {
+      gap: 0;
+      max-inline-size: none;
+    }
+
+    // Pin the actual player (video / quiz / file) to the top of the viewport
+    // so the learner always sees the content while scrolling the curriculum
+    // tab in the panel below.
+    &__media {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 5;
+      background: var(--cls-surface, #0F0B1A);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    &__meta {
+      padding: 12px 12px 4px;
+    }
+
+    &__title {
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    &__nav {
+      gap: 8px;
+      padding: 8px 12px 12px;
+    }
+  }
+}
+
+// Fine-tune for very narrow devices (≤ ~430px / iPhone XR is 414px).
+@media (max-width: 480px) {
+  .cls-cockpit {
+    &__title { font-size: 15px; }
+    &__kind-badge { font-size: 10px; }
+    &__nav-btn { padding: 10px 12px; font-size: 13px; }
+    &__meta { padding: 10px 10px 4px; }
+    &__nav { padding: 8px 10px 10px; }
   }
 }
 </style>
