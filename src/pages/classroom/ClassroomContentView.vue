@@ -95,13 +95,7 @@
         </template>
 
         <template #overview>
-          <div class="cls-cockpit__panel-body">
-            <h3>{{ $t('classroom.panel.overview') }}</h3>
-            <p v-if="ctx.bootstrap.value">
-              {{ ctx.bootstrap.value.completedContents }} /
-              {{ ctx.bootstrap.value.totalContents }}
-            </p>
-          </div>
+          <ClassroomOverviewPanel :bootstrap="ctx.bootstrap.value" />
         </template>
         <template #qa>
           <div class="cls-cockpit__panel-body cls-cockpit__panel-body--scrollable">
@@ -137,6 +131,7 @@ import {
 } from 'src/types/classroom/types'
 import CurriculumRail from 'src/components/classroom/CurriculumRail.vue'
 import ClassroomSidePanel from 'src/components/classroom/ClassroomSidePanel.vue'
+import ClassroomOverviewPanel from 'src/components/classroom/ClassroomOverviewPanel.vue'
 import ClassroomEmptyState from 'src/components/classroom/ClassroomEmptyState.vue'
 import VideoPlayer from 'src/components/classroom/player/VideoPlayer.vue'
 import QuizRunner from 'src/components/classroom/quiz/QuizRunner.vue'

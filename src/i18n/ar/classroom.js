@@ -19,6 +19,13 @@ export default {
     qa: 'الأسئلة والأجوبة',
     qaPlaceholder: 'ستظهر الأسئلة والأجوبة هنا.'
   },
+  overview: {
+    joinTelegram: 'انضم لقروب التليجرام',
+    telegramMissing: 'لم يتم إنشاء المجموعة من قبل الدكتور بعد.',
+    requestCertificate: 'اطلب شهادتك',
+    certificateSuccess: 'تم تجهيز شهادتك بنجاح، يمكنك تحميلها الآن من صفحة شهاداتي.',
+    certificateError: 'تعذر تجهيز شهادتك. حاول مرة أخرى.'
+  },
   player: {
     comingSoon: 'نوع المحتوى هذا غير مدعوم حتى الآن.',
     providerPending: 'سيتم توصيل هذا المزود في مرحلة لاحقة.',

@@ -163,6 +163,8 @@ export type ClassroomBootstrap = {
   courseTitle: string
   courseCover: string | null
   hasCertificate: boolean
+  /** Course-owner-supplied Telegram group invite URL. Null when unset. */
+  telegramLink: string | null
   /** Count of visible (video + quiz + file) rows; excludes NoneType. */
   totalContents: number
   /** Completed *videos* (progress ring denominator is totalVideos). */

@@ -19,6 +19,13 @@ export default {
     qa: 'Q&A',
     qaPlaceholder: 'Q&A will appear here.'
   },
+  overview: {
+    joinTelegram: 'Join the Telegram group',
+    telegramMissing: 'The instructor has not created a group for this course yet.',
+    requestCertificate: 'Request your certificate',
+    certificateSuccess: 'Your certificate is ready. You can download it from the My Certificates page.',
+    certificateError: 'We could not prepare your certificate. Please try again.'
+  },
   player: {
     comingSoon: 'This content type is not yet supported.',
     providerPending: 'This provider will be wired in a later phase.',

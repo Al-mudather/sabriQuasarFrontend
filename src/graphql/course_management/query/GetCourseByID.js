@@ -14,7 +14,9 @@ query GetCourseByID($coursePk:Int) {
     currency,
     brief,
     isPaid,
-    enrollmentCount
+    enrollmentCount,
+    telegramLink,
+    hasCertificate,
     courseinstructorSet {
       edges {
         node {

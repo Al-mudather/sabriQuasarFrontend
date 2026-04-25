@@ -241,6 +241,7 @@ export function useCourseBootstrap(coursePk: PkLike): {
       courseTitle: course.title ?? '',
       courseCover: (course as { cover?: string | null }).cover ?? null,
       hasCertificate: Boolean((course as { hasCertificate?: boolean | null }).hasCertificate),
+      telegramLink: (course as { telegramLink?: string | null }).telegramLink ?? null,
       totalContents,
       totalVideos,
       completedContents,
