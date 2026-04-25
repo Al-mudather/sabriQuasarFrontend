@@ -8,6 +8,7 @@
       <router-view />
     </main>
     <ClassroomFooter />
+    <BackToTopFab />
   </div>
 </template>
 
@@ -21,6 +22,7 @@ import { useLearningProgress } from 'src/composables/classroom/useLearningProgre
 import { ClassroomContextKey, type ClassroomContext } from 'src/composables/classroom/classroomContext'
 import ClassroomHeader from 'src/components/classroom/ClassroomHeader.vue'
 import ClassroomFooter from 'src/components/classroom/ClassroomFooter.vue'
+import BackToTopFab from 'src/components/classroom/BackToTopFab.vue'
 import type { ClassroomBootstrap, CurriculumContent, CurriculumUnit } from 'src/types/classroom/types'
 
 defineOptions({ name: 'ClassroomLayout' })

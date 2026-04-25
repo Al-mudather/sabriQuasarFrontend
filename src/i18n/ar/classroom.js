@@ -55,6 +55,7 @@ export default {
   footer: {
     help: 'المساعدة'
   },
+  backToTop: 'العودة إلى الأعلى',
   certificate: {
     pageTitle: 'الشهادة',
     issuedOn: 'تاريخ الإصدار',
@@ -70,7 +71,8 @@ export default {
   },
   qa: {
     composerPlaceholder: 'اطرح سؤالاً حول هذه الدورة…',
-    askBtn: 'إرسال',
+    askBtn: 'اطرح سؤالاً',
+    cancel: 'إلغاء',
     noQuestions: 'لا توجد أسئلة بعد. كن أول من يسأل!',
     loadMore: 'تحميل المزيد',
     replies: 'الردود',

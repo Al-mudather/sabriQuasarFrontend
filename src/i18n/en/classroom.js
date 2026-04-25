@@ -55,6 +55,7 @@ export default {
   footer: {
     help: 'Help'
   },
+  backToTop: 'Back to top',
   certificate: {
     pageTitle: 'Certificate',
     issuedOn: 'Issued on',
@@ -70,7 +71,8 @@ export default {
   },
   qa: {
     composerPlaceholder: 'Ask a question about this course…',
-    askBtn: 'Ask',
+    askBtn: 'Ask a question',
+    cancel: 'Cancel',
     noQuestions: 'No questions yet. Be the first to ask!',
     loadMore: 'Load more',
     replies: 'Replies',

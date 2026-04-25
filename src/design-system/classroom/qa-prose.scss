@@ -1,0 +1,83 @@
+// Typography for v-html-rendered Q&A markdown content. Loaded once globally
+// (not scoped) so the rules apply to children injected via v-html.
+
+.qa-prose {
+  color: var(--cls-text-primary);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-normal);
+  word-break: break-word;
+
+  > * + * { margin-block-start: 8px; }
+
+  p { margin: 0; }
+
+  strong, b { font-weight: 700; color: var(--cls-text-primary); }
+  em, i { font-style: italic; }
+  s, del { text-decoration: line-through; opacity: 0.7; }
+
+  a {
+    color: var(--cls-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    &:hover { text-decoration-thickness: 2px; }
+  }
+
+  ul, ol { padding-inline-start: 1.5em; margin: 0; }
+  li + li { margin-block-start: 4px; }
+
+  blockquote {
+    margin: 0;
+    padding: 6px 12px;
+    border-inline-start: 3px solid var(--cls-accent);
+    background: rgba(193, 98, 60, 0.08);
+    border-radius: 4px;
+    color: var(--cls-text-muted);
+    font-style: italic;
+  }
+
+  code {
+    font-family: var(--ds-font-mono, ui-monospace, SFMono-Regular, monospace);
+    font-size: 0.9em;
+    background: rgba(245, 242, 234, 0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    margin: 0;
+    padding: 10px 12px;
+    background: rgba(245, 242, 234, 0.06);
+    border-radius: 6px;
+    overflow-x: auto;
+    code {
+      background: transparent;
+      padding: 0;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--ds-font-heading, inherit);
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0;
+  }
+  h1 { font-size: 1.25em; }
+  h2 { font-size: 1.15em; }
+  h3 { font-size: 1.05em; }
+
+  hr {
+    border: 0;
+    border-block-start: 1px solid var(--cls-divider);
+    margin: 8px 0;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.95em;
+    th, td { padding: 6px 10px; border: 1px solid var(--cls-divider); }
+    th { background: rgba(245, 242, 234, 0.04); text-align: start; }
+  }
+}

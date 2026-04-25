@@ -7,7 +7,7 @@
  * the subscription is authoritative for list membership, and a double-insert
  * (optimistic + subscription) is a worse failure mode than a ~200ms delay.
  */
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { useMutation } from '@vue/apollo-composable'
 import { useI18n } from 'vue-i18n'
 import { CreateCourseQuestion } from 'src/graphql/question_management/mutation/CreateCourseQuestion'
@@ -23,6 +23,20 @@ const { t } = useI18n()
 const text = ref('')
 const submitting = ref(false)
 const errorMsg = ref<string | null>(null)
+const open = ref(false)
+const inputRef = ref<HTMLTextAreaElement | null>(null)
+
+async function expand(): Promise<void> {
+  open.value = true
+  await nextTick()
+  inputRef.value?.focus()
+}
+
+function collapse(): void {
+  open.value = false
+  text.value = ''
+  errorMsg.value = null
+}
 
 const { mutate } = useMutation<CreateCourseQuestionResult, CreateCourseQuestionVars>(
   CreateCourseQuestion,
@@ -39,6 +53,7 @@ async function submit(): Promise<void> {
     const ok = res?.data?.createCourseQuestion?.success
     if (ok) {
       text.value = ''
+      open.value = false
       if (pk != null) emit('created', pk)
     } else {
       errorMsg.value = t('classroom.qa.errorTitle')
@@ -61,11 +76,24 @@ function onKeydown(e: KeyboardEvent): void {
 </script>
 
 <template>
-  <form class="qa-composer" @submit.prevent="submit">
+  <!-- Collapsed: a single, clearly-tappable trigger so the panel doesn't
+       waste vertical space when the learner isn't writing a question. -->
+  <button
+    v-if="!open"
+    type="button"
+    class="qa-composer-trigger"
+    @click="expand"
+  >
+    <q-icon name="add_comment" size="20px" class="qa-composer-trigger__icon" />
+    <span>{{ t('classroom.qa.askBtn') }}</span>
+  </button>
+
+  <form v-else class="qa-composer" @submit.prevent="submit">
     <textarea
+      ref="inputRef"
       v-model="text"
       class="qa-composer__input"
-      rows="3"
+      rows="4"
       :placeholder="t('classroom.qa.composerPlaceholder')"
       :disabled="submitting"
       :aria-label="t('classroom.qa.composerPlaceholder')"
@@ -74,6 +102,15 @@ function onKeydown(e: KeyboardEvent): void {
     <div class="qa-composer__row">
       <span v-if="errorMsg" class="qa-composer__error" role="alert">{{ errorMsg }}</span>
       <span v-else class="qa-composer__spacer" />
+      <q-btn
+        type="button"
+        flat
+        no-caps
+        class="qa-composer__cancel"
+        :disable="submitting"
+        :label="t('classroom.qa.cancel')"
+        @click="collapse"
+      />
       <q-btn
         type="submit"
         unelevated
@@ -88,6 +125,41 @@ function onKeydown(e: KeyboardEvent): void {
 </template>
 
 <style lang="scss" scoped>
+.qa-composer-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--cls-accent);
+  color: var(--cls-text-primary, #F5F2EA);
+  border: 0;
+  border-radius: var(--cls-radius-md, 12px);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold, 600);
+  cursor: pointer;
+  transition:
+    transform var(--cls-dur-fast, 180ms) var(--cls-ease, ease),
+    box-shadow var(--cls-dur-fast, 180ms) var(--cls-ease, ease),
+    opacity var(--cls-dur-fast, 180ms) var(--cls-ease, ease);
+  box-shadow: 0 4px 14px rgba(193, 98, 60, 0.25);
+
+  &:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(193, 98, 60, 0.35);
+  }
+
+  &:focus-visible {
+    outline: var(--cls-focus-ring);
+    outline-offset: 2px;
+  }
+
+  &__icon { color: inherit; }
+}
+
 .qa-composer {
   display: flex;
   flex-direction: column;
@@ -138,6 +210,18 @@ function onKeydown(e: KeyboardEvent): void {
     font-weight: var(--ds-weight-semibold);
     padding: 0 var(--ds-space-4);
 
+    &:focus-visible {
+      outline: var(--cls-focus-ring);
+      outline-offset: 2px;
+    }
+  }
+
+  &__cancel {
+    color: var(--cls-text-muted);
+    border-radius: var(--cls-radius-sm);
+    padding: 0 var(--ds-space-3);
+
+    &:hover { color: var(--cls-text-primary); }
     &:focus-visible {
       outline: var(--cls-focus-ring);
       outline-offset: 2px;

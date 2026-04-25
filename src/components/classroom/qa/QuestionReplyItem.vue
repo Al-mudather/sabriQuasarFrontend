@@ -8,6 +8,7 @@ import { useMutation } from '@vue/apollo-composable'
 import { useI18n } from 'vue-i18n'
 import { ArchiveQuestionReply } from 'src/graphql/question_management/mutation/ArchiveQuestionReply'
 import { useAuthStore } from 'src/stores/auth'
+import { renderQaContent } from 'src/utils/renderQaContent'
 import type {
   ArchiveQuestionReplyResult,
   ArchiveQuestionReplyVars,
@@ -27,6 +28,8 @@ const authorName = computed(() => {
   const full = [u.firstName, u.lastName].filter(Boolean).join(' ').trim()
   return full || u.email || ''
 })
+
+const renderedAnswer = computed(() => renderQaContent(props.reply.answer))
 
 const isOwn = computed(() => {
   const me = (auth.user as { pk?: number | null } | null)?.pk ?? null
@@ -73,7 +76,7 @@ async function onArchive(): Promise<void> {
         {{ t('classroom.qa.archived') }}
       </span>
     </header>
-    <p class="qa-reply__body">{{ reply.answer }}</p>
+    <div class="qa-reply__body qa-prose" v-html="renderedAnswer" />
   </li>
 </template>
 

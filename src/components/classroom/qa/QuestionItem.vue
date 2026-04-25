@@ -12,6 +12,7 @@ import { useI18n } from 'vue-i18n'
 import { ArchiveCourseQuestion } from 'src/graphql/question_management/mutation/ArchiveCourseQuestion'
 import { useAuthStore } from 'src/stores/auth'
 import QuestionReplyList from './QuestionReplyList.vue'
+import { renderQaContent } from 'src/utils/renderQaContent'
 import type {
   ArchiveCourseQuestionResult,
   ArchiveCourseQuestionVars,
@@ -73,6 +74,8 @@ function toggle(): void {
 const repliesLabel = computed(() =>
   t('classroom.qa.nReplies', { n: replyCount.value }, replyCount.value),
 )
+
+const renderedQuestion = computed(() => renderQaContent(props.question.question))
 </script>
 
 <template>
@@ -97,7 +100,7 @@ const repliesLabel = computed(() =>
       </span>
     </header>
 
-    <p class="qa-item__body">{{ question.question }}</p>
+    <div class="qa-item__body qa-prose" v-html="renderedQuestion" />
 
     <button
       type="button"
