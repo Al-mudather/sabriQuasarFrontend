@@ -66,6 +66,15 @@ const { mutate: runCreate } = useMutation<
   CreateQuestionReplyVars
 >(CreateQuestionReply)
 
+function onReplyKeydown(e: KeyboardEvent): void {
+  // Cmd/Ctrl+Enter submits — power-user shortcut, plain Enter still inserts a
+  // newline so multi-line replies stay easy to write.
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault()
+    void submitReply()
+  }
+}
+
 async function submitReply(): Promise<void> {
   const body = replyText.value.trim()
   if (!body || sending.value || props.questionPk <= 0) return
@@ -117,24 +126,26 @@ watch(
       class="qa-replies__composer"
       @submit.prevent="submitReply"
     >
-      <input
+      <textarea
         v-model="replyText"
-        type="text"
+        rows="4"
         class="qa-replies__input"
         :placeholder="t('classroom.qa.replyPlaceholder')"
         :disabled="sending"
         :aria-label="t('classroom.qa.replyPlaceholder')"
+        @keydown="onReplyKeydown"
       />
-      <q-btn
-        type="submit"
-        unelevated
-        no-caps
-        dense
-        class="qa-replies__btn"
-        :disable="!replyText.trim() || sending"
-        :loading="sending"
-        :label="t('classroom.qa.replyBtn')"
-      />
+      <div class="qa-replies__actions">
+        <q-btn
+          type="submit"
+          unelevated
+          no-caps
+          class="qa-replies__btn"
+          :disable="!replyText.trim() || sending"
+          :loading="sending"
+          :label="t('classroom.qa.replyBtn')"
+        />
+      </div>
     </form>
   </div>
 </template>
@@ -166,27 +177,35 @@ watch(
 
   &__composer {
     display: flex;
+    flex-direction: column;
     gap: var(--ds-space-2);
-    align-items: center;
     margin-top: var(--ds-space-2);
     padding-top: var(--ds-space-2);
     border-top: 1px solid var(--cls-divider);
   }
 
   &__input {
-    flex: 1;
+    width: 100%;
+    min-height: 110px;
+    resize: vertical;
     background: var(--cls-surface);
     color: var(--cls-text-primary);
     border: 1px solid var(--cls-divider);
     border-radius: var(--cls-radius-sm);
-    padding: 6px var(--ds-space-2);
+    padding: var(--ds-space-2) var(--ds-space-3);
     font-family: var(--ds-font-body);
     font-size: var(--ds-text-sm);
+    line-height: var(--ds-leading-normal);
     outline: none;
     transition: border-color var(--cls-dur-fast) var(--cls-ease);
 
     &::placeholder { color: var(--cls-text-dim); }
     &:focus { border-color: var(--cls-accent); }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
   }
 
   &__btn {

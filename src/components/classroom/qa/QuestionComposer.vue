@@ -93,7 +93,7 @@ function onKeydown(e: KeyboardEvent): void {
       ref="inputRef"
       v-model="text"
       class="qa-composer__input"
-      rows="4"
+      rows="6"
       :placeholder="t('classroom.qa.composerPlaceholder')"
       :disabled="submitting"
       :aria-label="t('classroom.qa.composerPlaceholder')"
@@ -172,7 +172,7 @@ function onKeydown(e: KeyboardEvent): void {
   &__input {
     width: 100%;
     resize: vertical;
-    min-height: 72px;
+    min-height: 160px;
     background: transparent;
     color: var(--cls-text-primary);
     border: 1px solid var(--cls-divider);
