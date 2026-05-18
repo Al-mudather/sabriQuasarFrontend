@@ -26,12 +26,12 @@
     </header>
 
     <section class="notifications-page__body">
-      <div v-if="loading && notifications.length === 0" class="notifications-page__skeletons">
+      <div v-if="loading && filtered.length === 0" class="notifications-page__skeletons">
         <ds-skeleton v-for="i in 5" :key="i" shape="rect" height="5rem" />
       </div>
 
       <ds-empty-state
-        v-else-if="notifications.length === 0"
+        v-else-if="filtered.length === 0"
         variant="search"
         :title="$t('لا توجد إشعارات')"
         :description="$t('ستصلك هنا أي تنبيهات عن كورساتك ومدفوعاتك وشهاداتك.')"
@@ -102,12 +102,12 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { GetAllMyNotifications } from 'src/graphql/notification_management/query/GetAllMyNotifications'
 import { useSettingsStore } from 'src/stores/settings'
 import { useQuery } from '@vue/apollo-composable'
-import { dlog, dwarn } from 'src/composables/classroom/devLog'
 import type {
   MyNotificationsResult,
   MyNotificationsVars,
@@ -117,6 +117,7 @@ import type {
 // -----------------------------------------------------------------------
 // Stores / composables
 // -----------------------------------------------------------------------
+const router = useRouter()
 const $q = useQuasar()
 const { t } = useI18n()
 const settings = useSettingsStore()
@@ -124,8 +125,23 @@ const settings = useSettingsStore()
 // -----------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------
+type NotificationTypeBucket = 'transactions' | 'courses' | 'marketing'
+type FilterKey = 'all' | 'unread' | NotificationTypeBucket
 type IconKey = 'orders' | 'courses' | 'marketing' | 'announcement' | 'system'
 type Tone = 'brand' | 'accent' | 'success' | 'warning' | 'info'
+
+const TYPE_BUCKET: Record<string, NotificationTypeBucket> = {
+  CHECKOUT_DONE: 'transactions',
+  PAYMENT:       'transactions',
+  WITHDRAW:      'transactions',
+  QUESTION_ASK:  'courses',
+  QUESTION_ANS:  'courses',
+  COURSE:        'courses',
+  CERTIFICATE:   'courses',
+  REFERRAL:      'marketing',
+  AFFILIATE:     'marketing',
+  PYRAMID:       'marketing',
+}
 
 const ICON_KEY: Record<string, IconKey> = {
   CHECKOUT_DONE: 'orders',
@@ -170,31 +186,10 @@ const ICONS: Record<IconKey, string> = {
 // -----------------------------------------------------------------------
 // Query
 // -----------------------------------------------------------------------
-dlog('[notifications] mount — firing GetAllMyNotifications', { orderBy: ['-id'], limit: 15 })
-
 const notifQuery = useQuery<MyNotificationsResult, MyNotificationsVars>(
   GetAllMyNotifications,
   { orderBy: ['-id'], limit: 15 },
-  { errorPolicy: 'all' },
 )
-
-notifQuery.onError((err) => {
-  dwarn('[notifications] query FAILED', {
-    message: err.message,
-    graphQLErrors: err.graphQLErrors?.map((e) => e.message) ?? [],
-    networkError: err.networkError ? String(err.networkError) : null,
-  })
-})
-
-notifQuery.onResult((res) => {
-  dlog('[notifications] query result', {
-    loading: res.loading,
-    hasData: !!res.data,
-    edgeCount: res.data?.myNotifications?.edges?.length ?? 0,
-    totalCount: res.data?.myNotifications?.totalCount ?? null,
-    hasNextPage: res.data?.myNotifications?.pageInfo?.hasNextPage ?? null,
-  })
-})
 
 const myNotifications = computed(() => notifQuery.result.value?.myNotifications ?? null)
 const loading = notifQuery.loading
@@ -202,6 +197,7 @@ const loading = notifQuery.loading
 // -----------------------------------------------------------------------
 // Local state
 // -----------------------------------------------------------------------
+const activeFilter = ref<FilterKey>('all')
 const readLocal = ref<Record<number, boolean>>({})
 
 // -----------------------------------------------------------------------
@@ -222,6 +218,46 @@ const hasMore = computed(
 const unreadCount = computed(
   () => notifications.value.filter(n => n.pk != null && !readLocal.value[n.pk]).length,
 )
+
+const bucketCounts = computed(() => {
+  const counts: Record<string, number> = {
+    all: notifications.value.length,
+    unread: unreadCount.value,
+    courses: 0,
+    transactions: 0,
+    marketing: 0,
+  }
+  for (const n of notifications.value) {
+    const b = TYPE_BUCKET[n.type]
+    if (b && counts[b] != null) counts[b] += 1
+  }
+  return counts
+})
+
+interface FilterItem {
+  key: FilterKey
+  label: string
+  count: number | null
+}
+
+const filters = computed<FilterItem[]>(() => {
+  const c = bucketCounts.value
+  return [
+    { key: 'all',          label: t('الكل'),          count: c.all ?? null },
+    { key: 'unread',       label: t('غير مقروءة'),    count: c.unread ?? null },
+    { key: 'courses',      label: t('الدورات'),       count: c.courses ?? null },
+    { key: 'transactions', label: t('المعاملات'),     count: c.transactions ?? null },
+    { key: 'marketing',    label: t('التسويق'),       count: c.marketing ?? null },
+  ]
+})
+
+const filtered = computed<NotifNode[]>(() => {
+  if (activeFilter.value === 'all') return notifications.value
+  if (activeFilter.value === 'unread') {
+    return notifications.value.filter(n => n.pk != null && !readLocal.value[n.pk])
+  }
+  return notifications.value.filter(n => TYPE_BUCKET[n.type] === activeFilter.value)
+})
 
 // -----------------------------------------------------------------------
 // HTML / text sanitizer (inline allowlist — DOMPurify not in deps)
@@ -452,17 +488,29 @@ function mapRow (n: NotifNode): MappedRow {
   }
 }
 
-const mappedList = computed<MappedRow[]>(() => notifications.value.map(mapRow))
+const mappedList = computed<MappedRow[]>(() => filtered.value.map(mapRow))
 
 // -----------------------------------------------------------------------
 // Actions
 // -----------------------------------------------------------------------
 function onRowClick (item: MappedRow): void {
-  // Read-only interaction: clicking a row marks it read in local state.
-  // No redirects — notifications are an inbox, not a router. Per product
-  // decision, deep-links into courses / orders / classroom were removed.
   if (item.pk != null && !item.read) {
     readLocal.value[item.pk] = true
+  }
+  const n = item.raw
+  const type = n.type
+  if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
+    let courseID: number | null = null
+    try {
+      courseID = parseInt(
+        String(n.extraData ?? '').split('::')[0].split(' ')[1].replace('>', ''),
+      )
+    } catch {
+      /* malformed — ignore */
+    }
+    if (courseID) window.location.href = `${location.origin}/classroom/#/class/${courseID}/`
+  } else if (type === 'CHECKOUT_DONE' || type === 'PAYMENT') {
+    void router.push({ name: 'my-courses' })
   }
 }
 
@@ -553,6 +601,14 @@ onMounted(() => {
     font-variant-numeric: tabular-nums;
   }
 
+  &__filters {
+    display: flex;
+    gap: var(--ds-space-2);
+    flex-wrap: wrap;
+    margin-block-end: var(--ds-space-5);
+    overflow-x: visible;
+  }
+
   &__body { min-block-size: 16rem; }
 
   &__skeletons {
@@ -574,6 +630,81 @@ onMounted(() => {
     margin-block-start: var(--ds-space-5);
     display: flex;
     justify-content: center;
+  }
+}
+
+/* --------------------------------------------------------------------
+   Tab / filter chip — matches MyCourses `.chip` pattern
+   -------------------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding-block: 6px;
+  padding-inline: var(--ds-space-3);
+  background: transparent;
+  border: 1px solid var(--ds-border);
+  border-radius: 999px;
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-muted, var(--ds-taupe));
+  cursor: pointer;
+  transition:
+    background-color var(--ds-duration-fast, 150ms) ease,
+    color            var(--ds-duration-fast, 150ms) ease,
+    border-color     var(--ds-duration-fast, 150ms) ease,
+    box-shadow       var(--ds-duration-fast, 150ms) ease;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--ds-brand-600, #322873);
+    border-color: var(--ds-brand-300, #897dc3);
+    background: rgba(50, 40, 115, 0.04);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ds-brand-300, #897dc3);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    background: var(--ds-surface-elevated, #fff);
+    color: var(--ds-brand-600, #322873);
+    border-color: var(--ds-brand-600, #322873);
+    box-shadow: var(--ds-shadow-xs);
+  }
+
+  &--active:hover,
+  &--active:focus-visible {
+    color: var(--ds-brand-600, #322873);
+    border-color: var(--ds-brand-600, #322873);
+    background: var(--ds-surface-elevated, #fff);
+  }
+
+  &__label { line-height: 1; }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 1.5rem;
+    padding-block: 2px;
+    padding-inline: 6px;
+    border-radius: 999px;
+    background: var(--ds-border);
+    font-family: var(--ds-font-mono, var(--ds-font-body));
+    font-size: var(--ds-text-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--ds-text-muted, var(--ds-taupe));
+    line-height: 1;
+  }
+
+  &:hover &__count,
+  &:focus-visible &__count { color: var(--ds-brand-600, #322873); }
+
+  &--active &__count {
+    background: var(--ds-brand-600, #322873);
+    color: var(--ds-ivory, #fbf6ee);
   }
 }
 
