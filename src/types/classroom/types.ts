@@ -14,6 +14,8 @@ import type {
   LearningProgressNode,
   GetCourseByIdQuery,
   GetCourseByIdQueryVariables,
+  GetCourseClassroomBootstrapQuery,
+  GetCourseClassroomBootstrapQueryVariables,
   GetEnrollmentByCourseForCurrentUserQuery,
   GetEnrollmentByCourseForCurrentUserQueryVariables,
   GetAllCourseUnitsByCourseIdQuery,
@@ -196,6 +198,9 @@ export type ProgressMap = Record<number, ProgressEntry>
 
 export type GetCourseByIdResult = GetCourseByIdQuery
 export type GetCourseByIdVars = GetCourseByIdQueryVariables
+
+export type GetCourseClassroomBootstrapResult = GetCourseClassroomBootstrapQuery
+export type GetCourseClassroomBootstrapVars = GetCourseClassroomBootstrapQueryVariables
 
 export type GetEnrollmentByCourseForCurrentUserResult = GetEnrollmentByCourseForCurrentUserQuery
 export type GetEnrollmentByCourseForCurrentUserVars = GetEnrollmentByCourseForCurrentUserQueryVariables

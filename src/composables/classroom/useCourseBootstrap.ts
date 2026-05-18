@@ -1,7 +1,9 @@
 // Classroom bootstrap — mirrors CourseClassRoom2 class.vue:141-192.
 //
 // Two sequential queries:
-//   1. GetCourseByID(coursePk)            → course + units + contents (modelName/modelValue inline)
+//   1. GetCourseClassroomBootstrap(coursePk) → course + units + contents
+//      (slim variant of the public GetCourseByID — drops instructor /
+//      language / pricing / etc. the classroom UI never renders)
 //   2. GetEnrollmentByCourseForCurrentUser(courseId: course.pk) → enrollment.pk
 //
 // Result: a single `ClassroomBootstrap` object that the rest of the classroom
@@ -10,7 +12,7 @@
 
 import { computed, isRef, ref, unref, watch, type ComputedRef, type Ref } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
-import { GetCourseByID } from 'src/graphql/course_management/query/GetCourseByID'
+import { GetCourseClassroomBootstrap } from 'src/graphql/course_management/query/GetCourseClassroomBootstrap'
 import { GetEnrollmentByCourseForCurrentUser } from 'src/graphql/enrollment_management/query/GetEnrollmentByCourseForCurrentUser'
 import { dlog, dwarn } from 'src/composables/classroom/devLog'
 import {
@@ -18,8 +20,8 @@ import {
   type ClassroomBootstrap,
   type CurriculumContent,
   type CurriculumUnit,
-  type GetCourseByIdResult,
-  type GetCourseByIdVars,
+  type GetCourseClassroomBootstrapResult,
+  type GetCourseClassroomBootstrapVars,
   type GetEnrollmentByCourseForCurrentUserResult,
   type GetEnrollmentByCourseForCurrentUserVars,
 } from 'src/types/classroom/types'
@@ -56,7 +58,7 @@ export function useCourseBootstrap(coursePk: PkLike): {
   error: Ref<Error | null>
   refetch: () => void
 } {
-  const courseVars = computed<GetCourseByIdVars>(() => {
+  const courseVars = computed<GetCourseClassroomBootstrapVars>(() => {
     const pk = toNum(coursePk) ?? 0
     dlog('[classroom][step 1/4] useCourseBootstrap.courseVars', { coursePk: pk })
     return { coursePk: pk, unitContentsLimit: 50 }
@@ -76,14 +78,14 @@ export function useCourseBootstrap(coursePk: PkLike): {
     error: courseError,
     refetch: refetchCourse,
     onError: onCourseError,
-  } = useQuery<GetCourseByIdResult, GetCourseByIdVars>(GetCourseByID, courseVars, () => ({
+  } = useQuery<GetCourseClassroomBootstrapResult, GetCourseClassroomBootstrapVars>(GetCourseClassroomBootstrap, courseVars, () => ({
     enabled: enabled.value,
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   }))
 
   onCourseError((err) => {
-    dwarn('[classroom][step 2/4] GetCourseByID FAILED', {
+    dwarn('[classroom][step 2/4] GetCourseClassroomBootstrap FAILED', {
       message: err.message,
       graphQLErrors: err.graphQLErrors,
       networkError: err.networkError,
@@ -95,7 +97,7 @@ export function useCourseBootstrap(coursePk: PkLike): {
     (c) => {
       if (!c) return
       const unitEdges = c.courseunitSet?.edges ?? []
-      dlog('[classroom][step 2/4] GetCourseByID OK', {
+      dlog('[classroom][step 2/4] GetCourseClassroomBootstrap OK', {
         coursePk: c.pk,
         title: c.title,
         units: unitEdges.length,
