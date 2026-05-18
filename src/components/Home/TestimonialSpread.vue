@@ -39,7 +39,7 @@
 
 .testimonial-spread {
   background: var(--ds-cream);
-  padding-block: clamp(5rem, 10vw, 8rem);
+  padding-block: var(--ds-section-y);
   position: relative;
   overflow: hidden;
 }

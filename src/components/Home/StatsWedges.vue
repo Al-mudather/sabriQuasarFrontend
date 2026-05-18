@@ -16,7 +16,7 @@
               :variant="s.variant"
               :max="s.max"
               :animated="true"
-              size="md"
+              size="sm"
             />
           </div>
           <span
@@ -127,8 +127,7 @@ const stats = computed<StatEntry[]>(() => [
 
 .stats-wedges {
   background: var(--ds-cream);
-  padding-block: clamp(5rem, 10vw, 7rem);
-  padding-block-start: clamp(6rem, 12vw, 9rem);
+  padding-block: var(--ds-section-y);
 }
 
 .stats-wedges__container {
@@ -170,11 +169,8 @@ const stats = computed<StatEntry[]>(() => [
 
   @media (max-width: $ds-bp-md) {
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-
-  @media (max-width: $ds-bp-sm) {
-    grid-template-columns: 1fr;
+    gap: clamp(0.75rem, 3vw, 1.5rem);
+    justify-items: center;
   }
 }
 
@@ -182,6 +178,20 @@ const stats = computed<StatEntry[]>(() => [
   display: flex;
   align-items: center;
   justify-content: center;
+
+  // Shrink the donut tile on narrow viewports so two fit comfortably side-by-side
+  @media (max-width: $ds-bp-md) {
+    :deep(.stat-card--sm) {
+      inline-size: clamp(120px, 38vw, 160px);
+      block-size:  clamp(120px, 38vw, 160px);
+    }
+    :deep(.stat-card--sm .stat-card__value) {
+      font-size: clamp(28px, 6.5vw, 36px);
+    }
+    :deep(.stat-card--sm .stat-card__label) {
+      font-size: 12px;
+    }
+  }
 }
 
 .stats-wedges__hair {

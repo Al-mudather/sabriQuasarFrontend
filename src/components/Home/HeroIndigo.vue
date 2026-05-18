@@ -43,18 +43,9 @@
           </p>
 
           <div class="hero-indigo__actions">
-            <ds-button variant="accent" size="lg" pill to="/courses">
-              ابدأ مجاناً
+            <ds-button variant="accent" size="lg" pill to="/account/login">
+              ابدأ الآن
             </ds-button>
-            <a class="hero-indigo__video" href="#intro-video">
-              <span class="hero-indigo__play" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M10 8 L16 12 L10 16 Z" fill="currentColor" stroke="none" />
-                </svg>
-              </span>
-              شاهد الفيديو التعريفي
-            </a>
           </div>
 
           <ul ref="trust" class="hero-indigo__trust">
@@ -310,32 +301,6 @@ onBeforeUnmount(() => {
   gap: var(--ds-space-6);
   flex-wrap: wrap;
   margin-block-end: var(--ds-space-8);
-}
-
-.hero-indigo__video {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.625rem;
-  font-family: var(--ds-font-body);
-  font-weight: 500;
-  color: var(--ds-ivory);
-  text-decoration: none;
-  padding-block: 0.6rem;
-  padding-inline: 1.1rem;
-  border: 1px solid rgba(251, 247, 240, 0.35);
-  border-radius: 999px;
-  transition: background-color var(--ds-duration-base) var(--ds-ease-out),
-              border-color var(--ds-duration-base) var(--ds-ease-out);
-
-  &:hover {
-    background-color: rgba(251, 247, 240, 0.08);
-    border-color: rgba(251, 247, 240, 0.6);
-  }
-}
-
-.hero-indigo__play {
-  display: inline-flex;
-  color: var(--ds-ivory);
 }
 
 .hero-indigo__trust {

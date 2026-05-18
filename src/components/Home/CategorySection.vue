@@ -284,7 +284,7 @@ void isEnglish
 
 .category-section {
   background: var(--ds-cream);
-  padding-block: clamp(3.5rem, 7vw, 5.5rem);
+  padding-block: var(--ds-section-y-tight);
 }
 
 .category-section__container {

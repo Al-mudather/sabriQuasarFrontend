@@ -33,8 +33,6 @@
 
     <InstructorMarquee />
 
-    <TestimonialSpread />
-
     <FinalCta />
   </main>
 </template>
@@ -56,7 +54,6 @@ import StatsWedges from 'src/components/Home/StatsWedges.vue'
 import ValueProps from 'src/components/Home/ValueProps.vue'
 import CategorySection from 'src/components/Home/CategorySection.vue'
 import InstructorMarquee from 'src/components/Home/InstructorMarquee.vue'
-import TestimonialSpread from 'src/components/Home/TestimonialSpread.vue'
 import FinalCta from 'src/components/Home/FinalCta.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 

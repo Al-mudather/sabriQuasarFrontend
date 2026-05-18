@@ -116,7 +116,7 @@ const doubled = computed<InstructorChip[]>(() => [
 
 .instructor-marquee {
   background: var(--ds-cream);
-  padding-block: 6rem;
+  padding-block: var(--ds-section-y-tight);
   border-block-start: 1px solid var(--ds-border);
   border-block-end: 1px solid var(--ds-border);
   position: relative;

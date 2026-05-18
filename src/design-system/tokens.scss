@@ -164,6 +164,7 @@
 
   // Section rhythm — clamp for responsive vertical breathing
   --ds-section-y: clamp(3rem, 8vw, 6rem);
+  --ds-section-y-tight: clamp(2rem, 5vw, 3.5rem);
 
   // -----------------------------------------------------------
   // Radius — nothing over 2xl (24px). No pill on cards.

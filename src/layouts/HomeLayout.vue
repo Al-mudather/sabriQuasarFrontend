@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf" :dir="$q.lang.rtl ? 'rtl' : 'rtl'">
-    <AppHeader variant="transparent" :sticky="true" />
+    <AppHeader variant="cream" :sticky="true" />
     <q-page-container>
       <router-view v-slot="{ Component }">
         <transition
