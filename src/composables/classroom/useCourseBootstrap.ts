@@ -1,27 +1,34 @@
-// Classroom bootstrap — mirrors CourseClassRoom2 class.vue:141-192.
+// Classroom bootstrap — slim variant.
 //
 // Two sequential queries:
-//   1. GetCourseClassroomBootstrap(coursePk) → course + units + contents
-//      (slim variant of the public GetCourseByID — drops instructor /
-//      language / pricing / etc. the classroom UI never renders)
-//   2. GetEnrollmentByCourseForCurrentUser(courseId: course.pk) → enrollment.pk
+//   1. GetCourseByIDSlim(coursePk)          → course meta + unit titles
+//                                              (NO eager unit contents)
+//   2. GetEnrollmentByCourseForCurrentUser  → enrollment.pk
 //
-// Result: a single `ClassroomBootstrap` object that the rest of the classroom
-// (rail, content view, progress mutations, quiz submit) reads from via the
-// ClassroomContext injection.
+// Per-unit lesson lists are NOT in this bootstrap. The rail calls
+// `useUnitContents().loadUnit(unitPk)` on accordion expand to hydrate one
+// unit at a time. Bootstrap-level `totalContents` / `totalVideos` are
+// computed from per-unit `courseunitcontentSet.totalCount` — slightly less
+// accurate than the old per-lesson sum (NoneType placeholders inflate the
+// count by 1-2 per unit at most) but stable from first paint and good
+// enough for the progress denominator.
+//
+// Cache policy:
+//   - fetchPolicy: 'cache-first' so revisits paint from the Apollo cache
+//     instantly.
+//   - useStaleAfterTtl forces a network-only refetch when the cache is
+//     older than 10 minutes, or when the tab transitions hidden → visible.
 
 import { computed, isRef, ref, unref, watch, type ComputedRef, type Ref } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
-import { GetCourseClassroomBootstrap } from 'src/graphql/course_management/query/GetCourseClassroomBootstrap'
+import { GetCourseByIDSlim } from 'src/graphql/course_management/query/GetCourseByIDSlim'
 import { GetEnrollmentByCourseForCurrentUser } from 'src/graphql/enrollment_management/query/GetEnrollmentByCourseForCurrentUser'
-import { dlog, dwarn } from 'src/composables/classroom/devLog'
+import { useStaleAfterTtl } from 'src/composables/classroom/useStaleAfterTtl'
 import {
-  kindFromModelName,
   type ClassroomBootstrap,
-  type CurriculumContent,
   type CurriculumUnit,
-  type GetCourseClassroomBootstrapResult,
-  type GetCourseClassroomBootstrapVars,
+  type GetCourseByIDSlimResult,
+  type GetCourseByIDSlimVars,
   type GetEnrollmentByCourseForCurrentUserResult,
   type GetEnrollmentByCourseForCurrentUserVars,
 } from 'src/types/classroom/types'
@@ -33,44 +40,14 @@ function toNum(v: PkLike): number | null {
   return typeof raw === 'number' && Number.isFinite(raw) && raw > 0 ? raw : null
 }
 
-function titleFromModelValue(modelName: string, raw: string | null | undefined): string {
-  if (!raw) return kindFromModelName(modelName)
-  try {
-    const parsed = JSON.parse(raw) as Record<string, unknown>
-    const candidates = ['title', 'quiz_title', 'name', 'label']
-    for (const key of candidates) {
-      const v = parsed[key]
-      if (typeof v === 'string' && v.trim()) return v
-    }
-  } catch {
-    /* fall through */
-  }
-  const k = kindFromModelName(modelName)
-  if (k === 'video') return 'Video lesson'
-  if (k === 'quiz') return 'Quiz'
-  if (k === 'file') return 'Resource'
-  return 'Lesson'
-}
-
 export function useCourseBootstrap(coursePk: PkLike): {
   bootstrap: ComputedRef<ClassroomBootstrap | null>
   loading: Ref<boolean>
   error: Ref<Error | null>
   refetch: () => void
 } {
-  const courseVars = computed<GetCourseClassroomBootstrapVars>(() => {
-    const pk = toNum(coursePk) ?? 0
-    dlog('[classroom][step 1/4] useCourseBootstrap.courseVars', { coursePk: pk })
-    return { coursePk: pk, unitContentsLimit: 50 }
-  })
-  const enabled = computed(() => {
-    const ok = toNum(coursePk) !== null
-    dlog('[classroom][step 1/4] useCourseBootstrap.enabled', {
-      coursePk: isRef(coursePk) ? unref(coursePk) : coursePk,
-      enabled: ok,
-    })
-    return ok
-  })
+  const courseVars = computed<GetCourseByIDSlimVars>(() => ({ coursePk: toNum(coursePk) ?? 0 }))
+  const enabled = computed(() => toNum(coursePk) !== null)
 
   const {
     result: courseResult,
@@ -78,40 +55,36 @@ export function useCourseBootstrap(coursePk: PkLike): {
     error: courseError,
     refetch: refetchCourse,
     onError: onCourseError,
-  } = useQuery<GetCourseClassroomBootstrapResult, GetCourseClassroomBootstrapVars>(GetCourseClassroomBootstrap, courseVars, () => ({
+    onResult: onCourseResult,
+  } = useQuery<GetCourseByIDSlimResult, GetCourseByIDSlimVars>(GetCourseByIDSlim, courseVars, () => ({
     enabled: enabled.value,
     errorPolicy: 'all',
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-first',
   }))
 
   onCourseError((err) => {
-    dwarn('[classroom][step 2/4] GetCourseClassroomBootstrap FAILED', {
+    console.error('[classroom][bootstrap] GetCourseByIDSlim FAILED', {
       message: err.message,
       graphQLErrors: err.graphQLErrors,
       networkError: err.networkError,
     })
   })
 
-  watch(
-    () => courseResult.value?.course,
-    (c) => {
-      if (!c) return
-      const unitEdges = c.courseunitSet?.edges ?? []
-      dlog('[classroom][step 2/4] GetCourseClassroomBootstrap OK', {
-        coursePk: c.pk,
-        title: c.title,
-        units: unitEdges.length,
-        firstUnit: unitEdges[0]?.node ? {
-          pk: unitEdges[0].node.pk,
-          title: unitEdges[0].node.title,
-          totalCount: unitEdges[0].node.courseunitcontentSet?.totalCount ?? null,
-          rawEdges: unitEdges[0].node.courseunitcontentSet?.edges?.length ?? 0,
-        } : null,
-      })
+  // Cache freshness — refetch on mount + on tab focus when older than TTL.
+  const { markFresh: markCourseFresh } = useStaleAfterTtl({
+    key: () => {
+      const pk = toNum(coursePk)
+      return pk ? `course:${pk}` : null
     },
-  )
+    refetch: () => refetchCourse({ ...courseVars.value }),
+    disabled: () => !enabled.value,
+  })
 
-  // Enrollment query keyed on course.pk (which we get from the first query).
+  onCourseResult((res) => {
+    if (res.data?.course) markCourseFresh()
+  })
+
+  // Enrollment query keyed on course.pk (filled by the first query).
   const enrollmentVars = computed<GetEnrollmentByCourseForCurrentUserVars>(() => ({
     courseId: courseResult.value?.course?.pk ?? 0,
   }))
@@ -126,35 +99,38 @@ export function useCourseBootstrap(coursePk: PkLike): {
     error: enrollmentError,
     refetch: refetchEnrollment,
     onError: onEnrollmentError,
+    onResult: onEnrollmentResult,
   } = useQuery<
     GetEnrollmentByCourseForCurrentUserResult,
     GetEnrollmentByCourseForCurrentUserVars
   >(GetEnrollmentByCourseForCurrentUser, enrollmentVars, () => ({
     enabled: enrollmentEnabled.value,
     errorPolicy: 'all',
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-first',
   }))
 
   onEnrollmentError((err) => {
-    dwarn('[classroom][step 3/4] GetEnrollmentByCourseForCurrentUser FAILED', {
+    console.error('[classroom][bootstrap] GetEnrollmentByCourseForCurrentUser FAILED', {
       message: err.message,
       graphQLErrors: err.graphQLErrors,
       networkError: err.networkError,
     })
   })
 
-  watch(
-    () => enrollmentResult.value?.enrollmentByCourseForCurrentUser,
-    (e) => {
-      if (!e) return
-      dlog('[classroom][step 3/4] GetEnrollmentByCourseForCurrentUser OK', {
-        enrollmentPk: e.pk,
-        completedFromServer: e.learningprogressSet?.edgeCount ?? 0,
-      })
+  const { markFresh: markEnrollmentFresh } = useStaleAfterTtl({
+    key: () => {
+      const pk = courseResult.value?.course?.pk
+      return pk ? `enrollment:${pk}` : null
     },
-  )
+    refetch: () => refetchEnrollment({ ...enrollmentVars.value }),
+    disabled: () => !enrollmentEnabled.value,
+  })
 
-  // Refetch the enrollment query whenever a new course pk lands so we don't
+  onEnrollmentResult((res) => {
+    if (res.data?.enrollmentByCourseForCurrentUser) markEnrollmentFresh()
+  })
+
+  // Refetch the enrollment query whenever the course pk lands so we don't
   // reuse a stale enrollment from a previous course.
   watch(
     () => courseResult.value?.course?.pk,
@@ -185,66 +161,34 @@ export function useCourseBootstrap(coursePk: PkLike): {
     const enrollment = enrollmentResult.value?.enrollmentByCourseForCurrentUser
     if (!course || course.pk == null || !enrollment || enrollment.pk == null) return null
 
-    // Flatten units + contents. We skip:
-    //   - rows missing pk (can't route)
-    //   - rows whose backend modelName is "NoneType" (placeholders with no
-    //     real content attached — they appear in several courses and the
-    //     user doesn't want them surfaced).
     const unitEdges = course.courseunitSet?.edges ?? []
     const units: CurriculumUnit[] = []
     let totalContents = 0
-    let totalVideos = 0
 
     unitEdges.forEach((uEdge, uIdx) => {
       const u = uEdge?.node
       if (!u) return
-      const cEdges = u.courseunitcontentSet?.edges ?? []
-      const contents: CurriculumContent[] = []
-      cEdges.forEach((cEdge, cIdx) => {
-        const c = cEdge?.node
-        if (!c) return
-        const pk = (c as { pk?: number | null }).pk ?? null
-        if (pk == null) return
-        const modelName = c.modelName ?? ''
-        if (modelName === 'NoneType' || !modelName) return
-        const kind = kindFromModelName(modelName)
-        if (kind === 'unknown') return
-        const raw = (c.modelValue ?? null) as string | null
-        contents.push({
-          pk,
-          id: c.id,
-          isFree: Boolean((c as { isFree?: boolean | null }).isFree),
-          isMandatory: Boolean((c as { isMandatory?: boolean | null }).isMandatory),
-          modelName,
-          kind,
-          modelValueRaw: raw,
-          title: titleFromModelValue(modelName, raw),
-          order: (c as { order?: number | null }).order ?? cIdx,
-          completed: false,
-          inProgress: false,
-        })
-        totalContents += 1
-        if (kind === 'video') totalVideos += 1
-      })
-      // Order contents by their backend `order` when available, then pk.
-      contents.sort((a, b) => a.order - b.order || a.pk - b.pk)
+      const unitPk = (u as { pk?: number | null }).pk ?? null
+      if (unitPk == null) return
+      const contentsCount = u.courseunitcontentSet?.totalCount ?? 0
+      totalContents += contentsCount
       units.push({
-        pk: (u as { pk?: number | null }).pk ?? uIdx,
+        pk: unitPk,
         id: u.id,
         title: (u as { title?: string | null }).title ?? '',
         order: (u as { order?: number | null }).order ?? uIdx,
-        contents,
+        contentsCount,
+        contents: [],
+        hydrated: false,
       })
     })
     units.sort((a, b) => a.order - b.order || a.pk - b.pk)
 
-    // Progress percent is video-only per product decision: NoneType rows are
-    // filtered out entirely (above); quizzes and file downloads aren't counted
-    // toward the headline progress ring. totalContents still reflects the
-    // total number of *visible* rows for generic counters.
-    const progressPercent = 0 // computed in the layout merger once the progress map is available
-    const completedContents = 0
-
+    // Without per-content modelName, we can't distinguish video from non-video
+    // at bootstrap time. Use totalContents as the progress denominator until
+    // the user expands a unit and lessons hydrate — the merger in
+    // ClassroomLayout will recompute the precise video-only percent once
+    // contents arrive.
     const out: ClassroomBootstrap = {
       enrollmentPk: enrollment.pk,
       coursePk: course.pk,
@@ -253,20 +197,11 @@ export function useCourseBootstrap(coursePk: PkLike): {
       hasCertificate: Boolean((course as { hasCertificate?: boolean | null }).hasCertificate),
       telegramLink: (course as { telegramLink?: string | null }).telegramLink ?? null,
       totalContents,
-      totalVideos,
-      completedContents,
-      progressPercent,
+      totalVideos: totalContents,
+      completedContents: 0,
+      progressPercent: 0,
       units,
     }
-    dlog('[classroom][step 4/4] bootstrap assembled', {
-      enrollmentPk: out.enrollmentPk,
-      coursePk: out.coursePk,
-      title: out.courseTitle,
-      totalContents: out.totalContents,
-      totalVideos,
-      units: out.units.length,
-      sampleUnits: out.units.slice(0, 3).map((u) => ({ pk: u.pk, title: u.title, lessons: u.contents.length })),
-    })
     return out
   })
 
