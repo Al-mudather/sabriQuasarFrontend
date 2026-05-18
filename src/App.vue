@@ -124,13 +124,10 @@ onMounted(() => {
           void router.push({ name: 'login' })
           return
         }
-        $q.notify({
-          type: 'positive',
-          progress: true,
-          multiLine: true,
-          position: 'bottom',
-          message: t('تم تسجيل الدخول'),
-        })
+        // No success toast — this is a silent session restore, not a fresh
+        // login. The four real login entry points (Login, SignUp, Google,
+        // Facebook auth) each emit their own "تم تسجيل الدخول بنجاح"
+        // notification, so toasting here on every page-load would be noise.
       })
       .catch(() => {
         void router.push({ name: 'login' })
