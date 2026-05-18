@@ -107,6 +107,7 @@ import { useI18n } from 'vue-i18n'
 import { GetAllMyNotifications } from 'src/graphql/notification_management/query/GetAllMyNotifications'
 import { useSettingsStore } from 'src/stores/settings'
 import { useQuery } from '@vue/apollo-composable'
+import { dlog, dwarn } from 'src/composables/classroom/devLog'
 import type {
   MyNotificationsResult,
   MyNotificationsVars,
@@ -169,10 +170,31 @@ const ICONS: Record<IconKey, string> = {
 // -----------------------------------------------------------------------
 // Query
 // -----------------------------------------------------------------------
+dlog('[notifications] mount — firing GetAllMyNotifications', { orderBy: ['-id'], limit: 15 })
+
 const notifQuery = useQuery<MyNotificationsResult, MyNotificationsVars>(
   GetAllMyNotifications,
   { orderBy: ['-id'], limit: 15 },
+  { errorPolicy: 'all' },
 )
+
+notifQuery.onError((err) => {
+  dwarn('[notifications] query FAILED', {
+    message: err.message,
+    graphQLErrors: err.graphQLErrors?.map((e) => e.message) ?? [],
+    networkError: err.networkError ? String(err.networkError) : null,
+  })
+})
+
+notifQuery.onResult((res) => {
+  dlog('[notifications] query result', {
+    loading: res.loading,
+    hasData: !!res.data,
+    edgeCount: res.data?.myNotifications?.edges?.length ?? 0,
+    totalCount: res.data?.myNotifications?.totalCount ?? null,
+    hasNextPage: res.data?.myNotifications?.pageInfo?.hasNextPage ?? null,
+  })
+})
 
 const myNotifications = computed(() => notifQuery.result.value?.myNotifications ?? null)
 const loading = notifQuery.loading
