@@ -134,6 +134,13 @@
           >
             {{ $t('تحميل الشهادة') }}
           </ds-button>
+          <p
+            v-if="downloadBlockedReason(cert)"
+            class="cert-card__blocked-reason"
+            role="note"
+          >
+            {{ downloadBlockedReason(cert) }}
+          </p>
         </div>
       </article>
     </section>
@@ -151,6 +158,7 @@ import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
 import { AllCertificates } from 'src/graphql/certificatesManagement/query/GetAllCertificates.js'
 import { API_URI } from 'src/utils/hostConfig'
+import { dlog, dwarn } from 'src/composables/classroom/devLog'
 import type {
   AllCertificatesResult,
   AllCertificatesVars,
@@ -241,6 +249,14 @@ function isDownloadable (cert: CertEdge): boolean {
   return cert.node?.isPrintable !== false
 }
 
+// Why the download is gated for a given cert — for inline display + telemetry.
+function downloadBlockedReason (cert: CertEdge): string | null {
+  if (cert.node?.isPrintable === false) {
+    return t('الشهادة قيد المراجعة من الإدارة، لا يمكن تحميلها حالياً')
+  }
+  return null
+}
+
 function formatGregorianDate (d: string | null): string {
   if (!d) return '—'
   try {
@@ -259,11 +275,27 @@ function formatGregorianDate (d: string | null): string {
 // Actions
 // -----------------------------------------------------------------------
 async function downloadCertificate (cert: CertEdge): Promise<void> {
-  if (!user.value || !('certificateName' in user.value && user.value.certificateName)) {
+  const pk = cert.node?.pk
+  const u = user.value as Record<string, unknown> | null
+  const hasCertName = !!(u && typeof u.certificateName === 'string' && (u.certificateName as string).trim())
+  dlog('[certificates] download click', {
+    pk,
+    isPrintable: cert.node?.isPrintable,
+    isReady: cert.node?.isReady,
+    isManual: cert.node?.isManual,
+    isPrinted: cert.node?.isPrinted,
+    userPk: u?.pk,
+    hasCertificateName: hasCertName,
+    certificateName: u?.certificateName ?? null,
+  })
+
+  if (!hasCertName) {
+    dwarn('[certificates] gated by missing certificateName', { userPk: u?.pk })
     $q.notify({
       type: 'warning',
       progress: true,
       multiLine: true,
+      timeout: 6000,
       position: 'top',
       message: t('يجب تعيين اسم شهادة التدريب من ملفك الشخصي'),
     })
@@ -271,23 +303,29 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
     return
   }
 
-  const pk = cert.node?.pk
-  if (!pk) return
+  if (!pk) {
+    dwarn('[certificates] download aborted — no cert pk', { cert })
+    return
+  }
+
   downloadingPk.value = pk
+  const downloadUrl = `${API_URI}/api/enrollment/certificate/download/${pk}`
+  dlog('[certificates] axios →', { url: downloadUrl, hasToken: !!token.value })
   try {
-    // Root-cause fix: the previous code used `location.origin` which in dev
-    // resolves to `http://localhost:9000` (no proxy), and even in prod the
-    // download endpoint lives behind `API_URI`. Use the canonical base URL.
-    // Also: drop the bogus `Content-Type: application/json` (this is a GET
-    // with no body, and the wrong content-type can trip server-side asserts).
     const res = await axios({
       method: 'GET',
-      url: `${API_URI}/api/enrollment/certificate/download/${pk}`,
+      url: downloadUrl,
       responseType: 'blob',
       headers: {
         Authorization: `JWT ${token.value ?? ''}`,
         Accept: 'application/pdf',
       },
+    })
+    dlog('[certificates] axios ←', {
+      pk,
+      status: res.status,
+      bytes: (res.data as Blob)?.size ?? null,
+      contentType: res.headers?.['content-type'] ?? null,
     })
 
     // `exportFile(name, ArrayBuffer, { encoding: 'windows-1252' })` re-encodes
@@ -303,13 +341,22 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
     const fileName = `${safeCourse}-${safeName}.pdf`
 
     const ok = exportFile(fileName, pdfBlob, { mimeType: 'application/pdf' })
+    dlog('[certificates] exportFile', { pk, fileName, ok })
     if (ok !== true) {
       $q.notify({ type: 'negative', position: 'top', message: t('تعذّر حفظ الملف') })
     }
-  } catch {
+  } catch (err: unknown) {
+    const e = err as { response?: { status?: number; statusText?: string }; message?: string }
+    dwarn('[certificates] download failed', {
+      pk,
+      status: e?.response?.status ?? null,
+      statusText: e?.response?.statusText ?? null,
+      message: e?.message ?? String(err),
+    })
     $q.notify({
       type: 'negative',
       position: 'top',
+      timeout: 6000,
       message: t('تعذّر تحميل الشهادة، حاول مرة أخرى'),
     })
   } finally {
@@ -496,11 +543,22 @@ function goToMyCourses (): void {
   &__cta {
     margin-block-start: auto;
     display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
 
     :deep(.ds-btn) {
       inline-size: 100%;
       justify-content: center;
     }
+  }
+
+  &__blocked-reason {
+    margin: 0;
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe);
+    line-height: 1.5;
+    text-align: center;
   }
 }
 
