@@ -12,6 +12,7 @@ import { computed, isRef, ref, unref, watch, type ComputedRef, type Ref } from '
 import { useQuery } from '@vue/apollo-composable'
 import { GetCourseByID } from 'src/graphql/course_management/query/GetCourseByID'
 import { GetEnrollmentByCourseForCurrentUser } from 'src/graphql/enrollment_management/query/GetEnrollmentByCourseForCurrentUser'
+import { dlog, dwarn } from 'src/composables/classroom/devLog'
 import {
   kindFromModelName,
   type ClassroomBootstrap,
@@ -57,12 +58,12 @@ export function useCourseBootstrap(coursePk: PkLike): {
 } {
   const courseVars = computed<GetCourseByIdVars>(() => {
     const pk = toNum(coursePk) ?? 0
-    console.log('[classroom][step 1/4] useCourseBootstrap.courseVars', { coursePk: pk })
-    return { coursePk: pk }
+    dlog('[classroom][step 1/4] useCourseBootstrap.courseVars', { coursePk: pk })
+    return { coursePk: pk, unitContentsLimit: 50 }
   })
   const enabled = computed(() => {
     const ok = toNum(coursePk) !== null
-    console.log('[classroom][step 1/4] useCourseBootstrap.enabled', {
+    dlog('[classroom][step 1/4] useCourseBootstrap.enabled', {
       coursePk: isRef(coursePk) ? unref(coursePk) : coursePk,
       enabled: ok,
     })
@@ -82,7 +83,7 @@ export function useCourseBootstrap(coursePk: PkLike): {
   }))
 
   onCourseError((err) => {
-    console.error('[classroom][step 2/4] GetCourseByID FAILED', {
+    dwarn('[classroom][step 2/4] GetCourseByID FAILED', {
       message: err.message,
       graphQLErrors: err.graphQLErrors,
       networkError: err.networkError,
@@ -93,10 +94,17 @@ export function useCourseBootstrap(coursePk: PkLike): {
     () => courseResult.value?.course,
     (c) => {
       if (!c) return
-      console.log('[classroom][step 2/4] GetCourseByID OK', {
+      const unitEdges = c.courseunitSet?.edges ?? []
+      dlog('[classroom][step 2/4] GetCourseByID OK', {
         coursePk: c.pk,
         title: c.title,
-        units: c.courseunitSet?.edges?.length ?? 0,
+        units: unitEdges.length,
+        firstUnit: unitEdges[0]?.node ? {
+          pk: unitEdges[0].node.pk,
+          title: unitEdges[0].node.title,
+          totalCount: unitEdges[0].node.courseunitcontentSet?.totalCount ?? null,
+          rawEdges: unitEdges[0].node.courseunitcontentSet?.edges?.length ?? 0,
+        } : null,
       })
     },
   )
@@ -126,7 +134,7 @@ export function useCourseBootstrap(coursePk: PkLike): {
   }))
 
   onEnrollmentError((err) => {
-    console.error('[classroom][step 3/4] GetEnrollmentByCourseForCurrentUser FAILED', {
+    dwarn('[classroom][step 3/4] GetEnrollmentByCourseForCurrentUser FAILED', {
       message: err.message,
       graphQLErrors: err.graphQLErrors,
       networkError: err.networkError,
@@ -137,7 +145,7 @@ export function useCourseBootstrap(coursePk: PkLike): {
     () => enrollmentResult.value?.enrollmentByCourseForCurrentUser,
     (e) => {
       if (!e) return
-      console.log('[classroom][step 3/4] GetEnrollmentByCourseForCurrentUser OK', {
+      dlog('[classroom][step 3/4] GetEnrollmentByCourseForCurrentUser OK', {
         enrollmentPk: e.pk,
         completedFromServer: e.learningprogressSet?.edgeCount ?? 0,
       })
@@ -248,14 +256,14 @@ export function useCourseBootstrap(coursePk: PkLike): {
       progressPercent,
       units,
     }
-    console.log('[classroom][step 4/4] bootstrap assembled', {
+    dlog('[classroom][step 4/4] bootstrap assembled', {
       enrollmentPk: out.enrollmentPk,
       coursePk: out.coursePk,
       title: out.courseTitle,
       totalContents: out.totalContents,
       totalVideos,
       units: out.units.length,
-      firstUnitFirstContent: out.units[0]?.contents?.[0],
+      sampleUnits: out.units.slice(0, 3).map((u) => ({ pk: u.pk, title: u.title, lessons: u.contents.length })),
     })
     return out
   })

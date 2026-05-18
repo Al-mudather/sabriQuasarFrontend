@@ -1,7 +1,13 @@
 import gql from 'graphql-tag'
 
+// $unitContentsLimit caps the inner `courseunitcontentSet` per unit so a
+// course with several 50+ lesson units doesn't ship the whole tree in a
+// single payload. The classroom is the heavy consumer; CourseDetails
+// only reads each unit's `totalCount` (not the inner edges), so it stays
+// correct even when the inner connection is capped. Default of 50 mirrors
+// the backend page-size cap we hit empirically.
 export const GetCourseByID = gql`
-query GetCourseByID($coursePk:Int) {
+query GetCourseByID($coursePk:Int, $unitContentsLimit: Int = 50) {
   course(id:$coursePk) {
     id,
     pk,
@@ -43,7 +49,7 @@ query GetCourseByID($coursePk:Int) {
           pk,
           title,
           order,
-          courseunitcontentSet {
+          courseunitcontentSet(first: $unitContentsLimit) {
             totalCount,
             edges {
               node {
