@@ -5,30 +5,33 @@ import gql from 'graphql-tag'
 // omits the courseunitcontentSet edges so the initial classroom payload
 // stays small; this query backfills a single unit's lessons on demand.
 //
-// `first: 200` is the practical "all" — the heaviest course unit in the
-// catalogue today has 97 lessons, so pagination is plumbed but rarely
-// exercised. We still expose cursor + hasNextPage so a future page can fetch
-// more without a schema change.
+// We go through `courseUnit(id: $unitPk).courseunitcontentSet` (the same
+// path the old monolithic GetCourseByID used to traverse) instead of the
+// root-level `allCourseUnitContentsByCourseUnit(courseUnitId:)`. The
+// connection-level filter is brand-new to this codebase and was returning
+// empty results in practice — the unit-node-rooted query has been working
+// for as long as the classroom has existed and is the safe choice.
 export const GetCourseUnitContents = gql`
 query GetCourseUnitContents($unitPk: Int!, $cursor: String, $limit: Int) {
-  allCourseUnitContentsByCourseUnit(courseUnitId: $unitPk, after: $cursor, first: $limit) {
-    totalCount,
-    pageInfo {
-      endCursor,
-      hasNextPage
-    },
-    edges {
-      node {
-        id,
-        pk,
-        order,
-        isFree,
-        isMandatory,
-        modelName,
-        modelValue,
-        courseUnit {
+  courseUnit(id: $unitPk) {
+    id,
+    pk,
+    title,
+    courseunitcontentSet(after: $cursor, first: $limit) {
+      totalCount,
+      pageInfo {
+        endCursor,
+        hasNextPage
+      },
+      edges {
+        node {
           id,
-          pk
+          pk,
+          order,
+          isFree,
+          isMandatory,
+          modelName,
+          modelValue
         }
       }
     }

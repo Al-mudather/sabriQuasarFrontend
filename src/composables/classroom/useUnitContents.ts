@@ -85,6 +85,7 @@ export function useUnitContents(): UseUnitContentsApi {
 
   async function fetchOnce(unitPk: number, fresh: boolean): Promise<CurriculumContent[]> {
     const fetchPolicy = fresh ? 'network-only' : 'cache-first'
+    console.log('[classroom][unit-contents] fetch →', { unitPk, fetchPolicy, limit: UNIT_CONTENTS_PAGE_SIZE })
     const { data } = await client.query<GetCourseUnitContentsResult, GetCourseUnitContentsVars>({
       query: GetCourseUnitContents,
       variables: { unitPk, cursor: null, limit: UNIT_CONTENTS_PAGE_SIZE },
@@ -92,18 +93,32 @@ export function useUnitContents(): UseUnitContentsApi {
       errorPolicy: 'all',
     })
 
-    const edges = data?.allCourseUnitContentsByCourseUnit?.edges ?? []
+    const edges = data?.courseUnit?.courseunitcontentSet?.edges ?? []
+    const totalCount = data?.courseUnit?.courseunitcontentSet?.totalCount ?? null
+    console.log('[classroom][unit-contents] fetch ←', {
+      unitPk,
+      unitFound: !!data?.courseUnit,
+      totalCount,
+      rawEdgeCount: edges.length,
+    })
+
     const out: CurriculumContent[] = []
+    let skipped = { noNode: 0, noPk: 0, noModelName: 0, unknownKind: 0 }
     edges.forEach((edge, idx) => {
       const node = edge?.node
-      if (!node) return
+      if (!node) { skipped.noNode += 1; return }
       const pk = (node as { pk?: number | null }).pk ?? null
-      if (pk == null) return
+      if (pk == null) { skipped.noPk += 1; return }
       const modelName = node.modelName ?? ''
-      if (!modelName || modelName === 'NoneType') return
+      if (!modelName || modelName === 'NoneType') { skipped.noModelName += 1; return }
       const kind = kindFromModelName(modelName)
-      if (kind === 'unknown') return
-      const raw = (node.modelValue ?? null) as string | null
+      if (kind === 'unknown') { skipped.unknownKind += 1; return }
+      // CourseUnitContentNode.modelValue is typed in the codegen output as
+      // Record<string, number> because the codegen treats every JSONString
+      // identically, but the apollo client's parse-on-read typePolicy only
+      // covers CourseNode.currency (see src/apollo/client.js:113-119). At
+      // runtime modelValue is still a JSON string. The cast reflects that.
+      const raw = (node.modelValue as unknown as string | null) ?? null
       out.push({
         pk,
         id: node.id,
@@ -119,6 +134,7 @@ export function useUnitContents(): UseUnitContentsApi {
       })
     })
     out.sort((a, b) => a.order - b.order || a.pk - b.pk)
+    console.log('[classroom][unit-contents] materialised', { unitPk, kept: out.length, skipped })
 
     contentsByUnitPk.set(unitPk, out)
     cache.markFresh(keyFor(unitPk))
@@ -131,14 +147,18 @@ export function useUnitContents(): UseUnitContentsApi {
     const inflightP = inflight.value.get(unitPk)
     if (inflightP) return inflightP
 
+    // Empty-array cache hits are NOT a hit — they're a previous failure. We
+    // require at least one materialised lesson to count a unit as cached.
+    // Without this, a single bad fetch (empty edges / auth blip / wrong
+    // arg) pins the unit to "0 lessons" forever inside the TTL window.
     const cached = contentsByUnitPk.get(unitPk)
     const stale = cache.isStale(keyFor(unitPk), UNIT_TTL_MS)
-    if (cached && !stale) return cached
+    if (cached && cached.length > 0 && !stale) return cached
 
     loadingPks.add(unitPk)
     const p = fetchOnce(unitPk, false)
       .catch((err: unknown) => {
-        console.warn('[classroom] useUnitContents.loadUnit failed', { unitPk, err })
+        console.warn('[classroom][unit-contents] loadUnit failed', { unitPk, err })
         return contentsByUnitPk.get(unitPk) ?? []
       })
       .finally(() => {
