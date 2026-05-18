@@ -20,7 +20,7 @@
 
     <hr class="user-sidebar__divider" aria-hidden="true" />
 
-    <nav class="user-sidebar__nav" aria-label="تنقل الحساب">
+    <nav class="user-sidebar__nav" :aria-label="$t('تنقل الحساب')">
       <router-link
         v-for="link in navLinks"
         :key="link.to"

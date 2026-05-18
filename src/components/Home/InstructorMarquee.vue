@@ -1,7 +1,7 @@
 <template>
-  <section v-if="hasPeople" class="instructor-marquee" aria-label="طاقم التدريب">
+  <section v-if="hasPeople" class="instructor-marquee" :aria-label="$t('طاقم التدريب')">
     <div class="instructor-marquee__container">
-      <span class="instructor-marquee__kicker">طاقم التدريب</span>
+      <span class="instructor-marquee__kicker">{{ $t('طاقم التدريب') }}</span>
     </div>
 
     <div class="instructor-marquee__viewport">

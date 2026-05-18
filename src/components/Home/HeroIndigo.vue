@@ -17,14 +17,14 @@
         <div class="hero-indigo__copy">
           <span class="hero-indigo__kicker">
             <span class="hero-indigo__kicker-dash" aria-hidden="true">—</span>
-            مركز د. صبري للتدريب الطبي والتطوير الذاتي
+            {{ $t('مركز د. صبري للتدريب الطبي والتطوير الذاتي') }}
           </span>
 
           <h1 class="hero-indigo__headline">
-            <span ref="line1" class="hero-indigo__line">ابدأ رحلتك نحو</span>
+            <span ref="line1" class="hero-indigo__line">{{ $t('ابدأ رحلتك نحو') }}</span>
             <span ref="line2" class="hero-indigo__line hero-indigo__line--inline">
               <span class="hero-indigo__word hero-indigo__word--underline">
-                نسخة
+                {{ $t('نسخة') }}
                 <svg class="hero-indigo__brush" viewBox="0 0 120 18" preserveAspectRatio="none" aria-hidden="true">
                   <path d="M2,11 C22,4 48,16 78,8 C98,3 112,10 118,6" />
                 </svg>
@@ -32,28 +32,27 @@
               <span class="hero-indigo__inline-photo" aria-hidden="true">
                 <span class="hero-indigo__inline-photo-inner"></span>
               </span>
-              <span class="hero-indigo__word">أقوى</span>
+              <span class="hero-indigo__word">{{ $t('أقوى') }}</span>
             </span>
-            <span ref="line3" class="hero-indigo__line">من نفسك</span>
+            <span ref="line3" class="hero-indigo__line">{{ $t('من نفسك') }}</span>
           </h1>
 
           <p class="hero-indigo__deck">
-            برامج تدريبية معتمدة في التطوير الذاتي والمهارات الطبية،
-            يقودها خبراء متمرسون بخبرة تمتد لعقود.
+            {{ $t('برامج تدريبية معتمدة في التطوير الذاتي والمهارات الطبية، يقودها خبراء متمرسون بخبرة تمتد لعقود.') }}
           </p>
 
           <div class="hero-indigo__actions">
             <ds-button variant="accent" size="lg" pill to="/account/login">
-              ابدأ الآن
+              {{ $t('ابدأ الآن') }}
             </ds-button>
           </div>
 
           <ul ref="trust" class="hero-indigo__trust">
-            <li><bdi>{{ learnersLabel }}</bdi> متعلم</li>
+            <li><bdi>{{ learnersLabel }}</bdi> {{ $t('متعلم') }}</li>
             <li aria-hidden="true" class="hero-indigo__trust-dot">·</li>
-            <li><bdi>{{ coursesLabel }}</bdi> دورة معتمدة</li>
+            <li><bdi>{{ coursesLabel }}</bdi> {{ $t('دورة معتمدة') }}</li>
             <li aria-hidden="true" class="hero-indigo__trust-dot">·</li>
-            <li>20+ سنة خبرة</li>
+            <li>{{ $t('20+ سنة خبرة') }}</li>
           </ul>
         </div>
 
@@ -64,7 +63,7 @@
             <div class="hero-indigo__portrait-overlay" aria-hidden="true"></div>
             <div class="hero-indigo__badge">
               <span class="hero-indigo__badge-num">20+</span>
-              <span class="hero-indigo__badge-label">سنة خبرة</span>
+              <span class="hero-indigo__badge-label">{{ $t('سنة خبرة') }}</span>
             </div>
           </div>
         </div>

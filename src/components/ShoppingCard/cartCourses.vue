@@ -1,5 +1,5 @@
 <template>
-  <section class="cart-courses" aria-label="سلة التسوق">
+  <section class="cart-courses" :aria-label="$t('سلة التسوق')">
     <!-- Empty state -->
     <DsEmptyState
       v-if="!hasItems"
@@ -80,7 +80,7 @@
       </div>
 
       <!-- Right: summary -->
-      <aside class="cart-courses__summary-col" aria-label="ملخص الطلب">
+      <aside class="cart-courses__summary-col" :aria-label="$t('ملخص الطلب')">
         <DsCard padding="md" class="cart-courses__summary">
           <h2 class="cart-courses__summary-title">
             {{ $t('ملخص الطلب') }}

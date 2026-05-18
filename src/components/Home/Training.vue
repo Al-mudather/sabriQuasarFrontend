@@ -46,7 +46,7 @@
           :key="course.node.id"
           :course="course.node"
           :name="course.node.title"
-          instructor="مركز دكتور صبري ابو قرون"
+          :instructor="$t('مركز دكتور صبري ابو قرون')"
           :price="course.node.courseFee"
         />
       </div>

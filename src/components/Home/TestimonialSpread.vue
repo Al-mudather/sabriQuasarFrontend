@@ -1,14 +1,12 @@
 <template>
-  <section class="testimonial-spread" aria-label="قصص المتعلمين">
+  <section class="testimonial-spread" :aria-label="$t('قصص المتعلمين')">
     <div class="testimonial-spread__container">
       <span class="testimonial-spread__glyph" aria-hidden="true">”</span>
 
       <div class="testimonial-spread__body">
         <p class="testimonial-spread__quote">
-          <span class="testimonial-spread__drop">ك</span><!--
-       -->ان التدريب في مركز د. صبري نقطة تحوّل حقيقية في مسيرتي المهنية. المنهج عميق،
-          والمدرب حاضر بكل كفاءته وإنسانيته، وأخرجت من الدورة بمهارات سريرية صلبة
-          وإحساس جديد بقدراتي على تقديم رعاية أفضل لمرضاي.
+          <span class="testimonial-spread__drop">{{ $t('ك') }}</span><!--
+       -->{{ $t('ان التدريب في مركز د. صبري نقطة تحوّل حقيقية في مسيرتي المهنية. المنهج عميق، والمدرب حاضر بكل كفاءته وإنسانيته، وأخرجت من الدورة بمهارات سريرية صلبة وإحساس جديد بقدراتي على تقديم رعاية أفضل لمرضاي.') }}
         </p>
 
         <div class="testimonial-spread__attribution">
@@ -16,13 +14,13 @@
             <span class="testimonial-spread__avatar-inner"></span>
           </span>
           <span class="testimonial-spread__meta">
-            <span class="testimonial-spread__name">د. هدى الفهد</span>
-            <span class="testimonial-spread__role">أكملت دورة علوم الدم · 2026</span>
+            <span class="testimonial-spread__name">{{ $t('د. هدى الفهد') }}</span>
+            <span class="testimonial-spread__role">{{ $t('أكملت دورة علوم الدم · 2026') }}</span>
           </span>
         </div>
 
         <router-link class="testimonial-spread__more" to="/stories">
-          اقرأ المزيد من القصص
+          {{ $t('اقرأ المزيد من القصص') }}
           <span aria-hidden="true">←</span>
         </router-link>
       </div>

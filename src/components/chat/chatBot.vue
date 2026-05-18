@@ -85,7 +85,7 @@
             <q-input
               v-model="userInput"
               @keypress.enter.prevent="sendMessage"
-              placeholder="اكتب رسالتك..."
+              :placeholder="$t('اكتب رسالتك...')"
               :disabled="isTyping"
               class="text-input"
               type="textarea"

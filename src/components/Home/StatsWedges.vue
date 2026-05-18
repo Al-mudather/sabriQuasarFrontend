@@ -2,8 +2,8 @@
   <section class="stats-wedges">
     <div class="stats-wedges__container">
       <div class="stats-wedges__intro">
-        <span class="stats-wedges__kicker">أثر المركز</span>
-        <h2 class="stats-wedges__heading">بالأرقام</h2>
+        <span class="stats-wedges__kicker">{{ $t('أثر المركز') }}</span>
+        <h2 class="stats-wedges__heading">{{ $t('بالأرقام') }}</h2>
       </div>
 
       <div class="stats-wedges__row">

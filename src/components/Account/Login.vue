@@ -72,9 +72,7 @@
     </div>
 
     <p class="auth-card__fineprint" @click="goToTermsPage">
-      {{ isEnglish
-        ? 'By continuing you agree to the platform terms and conditions.'
-        : 'بمتابعتك فإنك توافق على شروط وأحكام المنصة.' }}
+      {{ $t('بمتابعتك فإنك توافق على شروط وأحكام المنصة.') }}
     </p>
   </div>
 </template>

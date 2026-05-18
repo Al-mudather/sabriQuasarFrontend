@@ -3,29 +3,25 @@
     <div class="site-footer__inner">
       <nav class="site-footer__links">
         <a class="site-footer__link" @click="router.push({ name: 'terms-and-conditions' })">
-          {{ isEnglish ? 'Terms and Conditions' : 'الأحكام والشروط' }}
+          {{ $t('الأحكام والشروط') }}
         </a>
         <a class="site-footer__link" @click="router.push({ name: 'privacy-policy' })">
-          {{ isEnglish ? 'Privacy Policy' : 'سياسة الخصوصيه' }}
+          {{ $t('سياسة الخصوصيه') }}
         </a>
       </nav>
 
       <div class="site-footer__brand">
         <img src="~assets/img/suppo.png" alt="" />
-        <p>{{ isEnglish ? 'All rights reserved 2024–2021' : 'جميع الحقوق محفوظة 2024-2021' }}</p>
+        <p>{{ $t('جميع الحقوق محفوظة 2024-2021') }}</p>
       </div>
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
-import { useSettingsStore } from 'src/stores/settings'
 
 const router = useRouter()
-const settings = useSettingsStore()
-const { isEnglish } = storeToRefs(settings)
 </script>
 
 <style lang="scss" scoped>

@@ -2,9 +2,9 @@
   <section class="value-props">
     <div class="value-props__container">
       <div class="value-props__intro">
-        <span class="value-props__kicker">لماذا STC؟</span>
+        <span class="value-props__kicker">{{ $t('لماذا STC؟') }}</span>
         <h2 class="value-props__heading">
-          تدريب يُحدث <span class="value-props__heading-accent">فرقاً حقيقياً</span>
+          {{ $t('تدريب يُحدث') }} <span class="value-props__heading-accent">{{ $t('فرقاً حقيقياً') }}</span>
         </h2>
       </div>
 

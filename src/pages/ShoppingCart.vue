@@ -7,7 +7,7 @@
       <section
         class="cart-steps"
         role="navigation"
-        aria-label="خطوات الدفع"
+        :aria-label="$t('خطوات الدفع')"
       >
         <div class="cart-steps__inner">
           <ol class="cart-steps__list">
@@ -49,7 +49,7 @@
         class="cart-shell"
         :class="{ 'cart-shell--wide': isWideStep }"
         role="main"
-        aria-label="محتوى السلة"
+        :aria-label="$t('محتوى السلة')"
       >
         <router-view v-slot="{ Component }">
           <transition

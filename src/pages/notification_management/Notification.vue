@@ -3,7 +3,7 @@
     <header class="notifications-page__head">
       <div class="notifications-page__head-text">
         <h1>
-          التنبيهات
+          {{ $t('التنبيهات') }}
           <ds-badge
             v-if="unreadCount > 0"
             variant="terracotta"
@@ -13,7 +13,7 @@
             {{ unreadCount }}
           </ds-badge>
         </h1>
-        <p>تنبيهات دوراتك ومعاملاتك وتسويقك في مكان واحد.</p>
+        <p>{{ $t('تنبيهات دوراتك ومعاملاتك وتسويقك في مكان واحد.') }}</p>
       </div>
       <ds-button
         v-if="unreadCount > 0"
@@ -61,7 +61,7 @@
           <div class="notif-row__body">
             <div class="notif-row__titleline">
               <h3 class="notif-row__title">{{ item.title }}</h3>
-              <span v-if="!item.read" class="notif-row__dot" aria-label="غير مقروء" />
+              <span v-if="!item.read" class="notif-row__dot" :aria-label="$t('غير مقروء')" />
             </div>
 
             <!-- sanitized rich body -->

@@ -10,13 +10,13 @@
           class="user-layout__drawer-trigger"
           :aria-expanded="drawerOpen ? 'true' : 'false'"
           aria-controls="user-layout-drawer"
-          aria-label="فتح قائمة الحساب"
+          :aria-label="$t('فتح قائمة الحساب')"
           @click="drawerOpen = true"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-          <span>حسابي</span>
+          <span>{{ $t('حسابي') }}</span>
         </button>
 
         <div class="user-layout__grid">
@@ -24,7 +24,7 @@
           <aside
             class="user-layout__sidebar"
             role="complementary"
-            aria-label="قائمة الحساب"
+            :aria-label="$t('قائمة الحساب')"
           >
             <UserSidebar
               :user-name="userDisplayName"
@@ -40,7 +40,7 @@
           <main
             class="user-layout__main"
             role="main"
-            aria-label="محتوى الحساب"
+            :aria-label="$t('محتوى الحساب')"
           >
             <router-view v-slot="{ Component }">
               <transition
@@ -59,10 +59,10 @@
           id="user-layout-drawer"
           v-model="drawerOpen"
           size="sm"
-          :close-label="'إغلاق'"
+          :close-label="$t('إغلاق')"
         >
           <template #header>
-            <span class="user-layout__drawer-title">حسابي</span>
+            <span class="user-layout__drawer-title">{{ $t('حسابي') }}</span>
           </template>
           <UserSidebar
             :user-name="userDisplayName"

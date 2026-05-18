@@ -9,7 +9,7 @@
         />
         <img v-else src="~assets/img/moza.png" :alt="displayTitle" />
         <ds-badge v-if="isEnrolled" variant="success" class="public-course-card__badge">
-          مشترك
+          {{ $t('مشترك') }}
         </ds-badge>
       </div>
     </template>
@@ -18,14 +18,14 @@
 
     <div class="public-course-card__price">
       <template v-if="isFree">
-        <span class="amount amount--free">مجاناً</span>
+        <span class="amount amount--free">{{ $t('مجاناً') }}</span>
       </template>
       <template v-else-if="displayAmount !== null">
         <span class="amount">{{ formatAmount(displayAmount) }}</span>
         <span class="currency">{{ displayCurrency }}</span>
       </template>
       <template v-else>
-        <span class="amount amount--muted">السعر عند الطلب</span>
+        <span class="amount amount--muted">{{ $t('السعر عند الطلب') }}</span>
       </template>
     </div>
 
@@ -37,7 +37,7 @@
           full-width
           @click.stop="goToClassroom"
         >
-          الى الدرس
+          {{ $t('الى الدرس') }}
         </ds-button>
         <ds-button
           v-else
@@ -45,7 +45,7 @@
           full-width
           @click.stop="addToCart"
         >
-          إضافة للسلة
+          {{ $t('إضافة للسلة') }}
         </ds-button>
         <ds-button
           variant="ghost"
@@ -53,7 +53,7 @@
           full-width
           @click.stop="goToDetails"
         >
-          التفاصيل
+          {{ $t('التفاصيل') }}
         </ds-button>
       </div>
     </template>

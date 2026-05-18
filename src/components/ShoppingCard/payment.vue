@@ -1,5 +1,5 @@
 <template>
-  <section class="cart-payment" aria-label="الدفع">
+  <section class="cart-payment" :aria-label="$t('الدفع')">
     <!-- Sub-view: Bankak (bank transfer attach) -->
     <div v-if="showBankakPayment" class="cart-payment__subview">
       <header class="cart-payment__subview-head">
@@ -134,7 +134,7 @@
         </div>
       </div>
 
-      <aside class="cart-payment__summary-col" aria-label="ملخص الطلب">
+      <aside class="cart-payment__summary-col" :aria-label="$t('ملخص الطلب')">
         <DsCard padding="md" class="cart-payment__summary">
           <h3 class="cart-payment__summary-title">
             {{ $t('ملخص الطلب') }}

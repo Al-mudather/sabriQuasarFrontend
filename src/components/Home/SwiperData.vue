@@ -25,8 +25,8 @@
                             >
                                 <swiper-slide v-for="i in 3" :key="i">
                                     <review-card
-                                        courseName="تأثير الجهاز العصبي علي السلوك والانساني"
-                                        reviewDetail="كورس قيم جدا لاول مره احب الطب بهذة الطريقة"
+                                        :courseName="$t('تأثير الجهاز العصبي علي السلوك والانساني')"
+                                        :reviewDetail="$t('كورس قيم جدا لاول مره احب الطب بهذة الطريقة')"
                                     />
                                 </swiper-slide>
                             </swiper>

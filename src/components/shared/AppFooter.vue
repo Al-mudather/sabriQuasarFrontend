@@ -43,10 +43,9 @@
           <h2 class="app-footer__wordmark">{{ brandNameAr }}</h2>
           <p class="app-footer__tagline">{{ brandNameEn }}</p>
           <p class="app-footer__mission">
-            مركز متخصص في التطوير الذاتي والتدريب المهني، يقدم تجربة تعليمية
-            عربية متكاملة عبر برامج معتمدة يقودها خبراء متمرسون.
+            {{ $t('مركز متخصص في التطوير الذاتي والتدريب المهني، يقدم تجربة تعليمية عربية متكاملة عبر برامج معتمدة يقودها خبراء متمرسون.') }}
           </p>
-          <ul class="app-footer__social" aria-label="روابط التواصل الاجتماعي">
+          <ul class="app-footer__social" :aria-label="$t('روابط التواصل الاجتماعي')">
             <li
               v-for="social in socials"
               :key="social.name"
@@ -97,7 +96,7 @@
 
         <!-- 2) Courses -->
         <div class="app-footer__col">
-          <h3 class="app-footer__heading">الدورات</h3>
+          <h3 class="app-footer__heading">{{ $t('الدورات') }}</h3>
           <ul class="app-footer__links">
             <li v-for="item in coursesLinks" :key="item.to">
               <router-link :to="item.to" class="app-footer__link">
@@ -109,7 +108,7 @@
 
         <!-- 3) Center -->
         <div class="app-footer__col">
-          <h3 class="app-footer__heading">المركز</h3>
+          <h3 class="app-footer__heading">{{ $t('المركز') }}</h3>
           <ul class="app-footer__links">
             <li v-for="item in centerLinks" :key="item.to">
               <router-link :to="item.to" class="app-footer__link">
@@ -121,7 +120,7 @@
 
         <!-- 4) Support & Legal -->
         <div class="app-footer__col">
-          <h3 class="app-footer__heading">الدعم والقانون</h3>
+          <h3 class="app-footer__heading">{{ $t('الدعم والقانون') }}</h3>
           <ul class="app-footer__links">
             <li v-for="item in supportLinks" :key="item.to">
               <router-link :to="item.to" class="app-footer__link">
@@ -135,10 +134,10 @@
       <!-- Bottom bar -->
       <div class="app-footer__bottom">
         <p class="app-footer__copyright">
-          © 2026 مركز د. صبري أبوقرون للتدريب — جميع الحقوق محفوظة
+          © 2026 {{ $t('مركز د. صبري أبوقرون للتدريب — جميع الحقوق محفوظة') }}
         </p>
         <p class="app-footer__tagline-end">
-          صُنع بعناية لطلاب الطب الناطقين بالعربية
+          {{ $t('صُنع بعناية لطلاب الطب الناطقين بالعربية') }}
         </p>
       </div>
     </div>

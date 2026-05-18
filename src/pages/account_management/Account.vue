@@ -2,7 +2,7 @@
   <main class="account-shell" dir="rtl">
     <section class="account-shell__form-side">
       <header class="account-shell__brand">
-        <router-link :to="{ name: 'Home' }" class="account-shell__brand-link" aria-label="الصفحة الرئيسية">
+        <router-link :to="{ name: 'Home' }" class="account-shell__brand-link" :aria-label="$t('الصفحة الرئيسية')">
           <img :src="logo" alt="" class="account-shell__brand-logo" />
           <span class="account-shell__brand-name">{{ brandName }}</span>
         </router-link>

@@ -1,7 +1,7 @@
 <template>
   <main class="profile-page">
     <header class="profile-page__header">
-      <h1 class="profile-page__title">الملف الشخصي</h1>
+      <h1 class="profile-page__title">{{ $t('الملف الشخصي') }}</h1>
       <p class="profile-page__subtitle">
         {{ $t('إدارة بياناتك الشخصية وتفضيلاتك وأمان حسابك') }}
       </p>
@@ -20,11 +20,11 @@
           <p class="profile-identity__email" dir="ltr">{{ email || '—' }}</p>
           <dl class="profile-identity__meta">
             <div class="profile-identity__meta-row">
-              <dt>الجنس</dt>
+              <dt>{{ $t('الجنس') }}</dt>
               <dd>{{ genderLabel }}</dd>
             </div>
             <div class="profile-identity__meta-row">
-              <dt>الهاتف</dt>
+              <dt>{{ $t('الهاتف') }}</dt>
               <dd class="profile-identity__num" dir="ltr">{{ phoneNumber || '—' }}</dd>
             </div>
           </dl>
@@ -35,8 +35,8 @@
       <section class="profile-section" aria-labelledby="personal-heading">
         <header class="profile-section__head">
           <div class="profile-section__head-text">
-            <h2 id="personal-heading">البيانات الشخصية</h2>
-            <p>حافظ على بياناتك محدّثة.</p>
+            <h2 id="personal-heading">{{ $t('البيانات الشخصية') }}</h2>
+            <p>{{ $t('حافظ على بياناتك محدّثة.') }}</p>
           </div>
           <div v-if="!editingInfo" class="profile-section__head-action">
             <button
@@ -48,7 +48,7 @@
                 <path d="M4 20h4l10.5-10.5a2.121 2.121 0 0 0-3-3L5 17v3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                 <path d="m13.5 6.5 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
-              <span>تعديل</span>
+              <span>{{ $t('تعديل') }}</span>
             </button>
           </div>
         </header>
@@ -104,7 +104,7 @@
           </div>
 
           <fieldset class="profile-form__gender" :disabled="!editingInfo">
-            <legend>الجنس</legend>
+            <legend>{{ $t('الجنس') }}</legend>
             <div class="profile-form__chips">
               <button
                 v-for="g in genders"
@@ -131,7 +131,7 @@
               :disabled="saving"
               @click="cancelEditInfo"
             >
-              إلغاء
+              {{ $t('إلغاء') }}
             </ds-button>
             <ds-button
               type="submit"
@@ -139,7 +139,7 @@
               size="md"
               :loading="saving"
             >
-              حفظ التغييرات
+              {{ $t('حفظ التغييرات') }}
             </ds-button>
           </div>
         </form>
@@ -149,20 +149,20 @@
       <section class="profile-section" aria-labelledby="prefs-heading">
         <header class="profile-section__head">
           <div class="profile-section__head-text">
-            <h2 id="prefs-heading">التفضيلات</h2>
-            <p>اختر لغة الواجهة.</p>
+            <h2 id="prefs-heading">{{ $t('التفضيلات') }}</h2>
+            <p>{{ $t('اختر لغة الواجهة.') }}</p>
           </div>
         </header>
 
         <div class="profile-prefs__row">
           <div class="profile-prefs__label">
-            <span>اللغة</span>
-            <small>تُطبَّق على الواجهة فورًا.</small>
+            <span>{{ $t('اللغة') }}</span>
+            <small>{{ $t('تُطبَّق على الواجهة فورًا.') }}</small>
           </div>
           <div
             class="profile-prefs__control"
             role="radiogroup"
-            aria-label="اللغة"
+            :aria-label="$t('اللغة')"
           >
             <button
               class="lang-chip"
@@ -172,7 +172,7 @@
               :aria-checked="!isEnglish"
               @click="setLang(false)"
             >
-              العربية
+              {{ $t('العربية') }}
             </button>
             <button
               class="lang-chip"

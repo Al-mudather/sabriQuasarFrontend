@@ -5,21 +5,21 @@
       <div class="catalog__head-inner">
         <ds-breadcrumb class="catalog__crumbs">
           <ds-breadcrumb-item :to="{ name: 'Home' }">
-            الرئيسية
+            {{ $t('الرئيسية') }}
           </ds-breadcrumb-item>
           <ds-breadcrumb-item>
-            الدورات
+            {{ $t('الدورات') }}
           </ds-breadcrumb-item>
         </ds-breadcrumb>
 
-        <h1 class="catalog__title">جميع الدورات</h1>
+        <h1 class="catalog__title">{{ $t('جميع الدورات') }}</h1>
 
         <p class="catalog__subtitle">
           <template v-if="totalCount !== null">
-            {{ formatNum(totalCount) }} دورة متاحة
+            {{ $t('{n} دورة متاحة', { n: formatNum(totalCount) }) }}
           </template>
           <template v-else>
-            استكشف مكتبة الدورات التدريبية
+            {{ $t('استكشف مكتبة الدورات التدريبية') }}
           </template>
         </p>
       </div>
@@ -30,20 +30,20 @@
       <aside class="catalog__sidebar" aria-label="filters">
         <div class="filter-panel">
           <div class="filter-panel__head">
-            <h2 class="filter-panel__heading">الفلاتر</h2>
+            <h2 class="filter-panel__heading">{{ $t('الفلاتر') }}</h2>
             <button
               v-if="hasActiveFilters"
               type="button"
               class="filter-panel__clear"
               @click="clearAllFilters"
             >
-              مسح الفلاتر
+              {{ $t('مسح الفلاتر') }}
             </button>
           </div>
 
           <!-- Speciality group -->
           <section class="filter-panel__group">
-            <h3 class="filter-panel__group-title">التخصص</h3>
+            <h3 class="filter-panel__group-title">{{ $t('التخصص') }}</h3>
             <div v-if="specialitiesLoading" class="filter-panel__skeletons">
               <ds-skeleton v-for="i in 5" :key="i" shape="line" width="80%" />
             </div>
@@ -58,7 +58,7 @@
                     @change="setSpeciality(null)"
                   />
                   <span class="check__mark" aria-hidden="true"></span>
-                  <span class="check__label">كل التخصصات</span>
+                  <span class="check__label">{{ $t('كل التخصصات') }}</span>
                 </label>
               </li>
               <li
@@ -90,13 +90,13 @@
           <button
             type="button"
             class="catalog__filter-trigger"
-            aria-label="الفلاتر"
+            :aria-label="$t('الفلاتر')"
             @click="mobileFilterOpen = true"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3 6h18M6 12h12M10 18h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            <span>الفلاتر</span>
+            <span>{{ $t('الفلاتر') }}</span>
             <span v-if="activeFilterCount" class="catalog__filter-badge">{{ activeFilterCount }}</span>
           </button>
 
@@ -113,24 +113,24 @@
               v-model="searchInput"
               type="search"
               class="catalog__search-input"
-              placeholder="ابحث عن دورة..."
-              aria-label="البحث في الدورات"
+              :placeholder="$t('ابحث عن دورة...')"
+              :aria-label="$t('البحث في الدورات')"
             />
           </div>
 
           <div class="catalog__sort">
             <label for="sort-select" class="catalog__sort-label">
-              ترتيب:
+              {{ $t('ترتيب:') }}
             </label>
             <select
               id="sort-select"
               v-model="sortValue"
               class="catalog__sort-select"
             >
-              <option value="newest">الأحدث</option>
-              <option value="popular">الأكثر طلباً</option>
-              <option value="price_asc">السعر: من الأقل</option>
-              <option value="price_desc">السعر: من الأعلى</option>
+              <option value="newest">{{ $t('الأحدث') }}</option>
+              <option value="popular">{{ $t('الأكثر طلباً') }}</option>
+              <option value="price_asc">{{ $t('السعر: من الأقل') }}</option>
+              <option value="price_desc">{{ $t('السعر: من الأعلى') }}</option>
             </select>
           </div>
         </div>
@@ -171,8 +171,8 @@
           v-else-if="!coursesLoading && coursesEdgeCount <= 0"
           variant="search"
           size="md"
-          title="لا توجد دورات تطابق البحث"
-          body="جرّب إزالة بعض الفلاتر أو تعديل كلمات البحث"
+          :title="$t('لا توجد دورات تطابق البحث')"
+          :body="$t('جرّب إزالة بعض الفلاتر أو تعديل كلمات البحث')"
         />
 
         <div v-else>
@@ -183,7 +183,7 @@
               class="catalog__grid-item"
               :course="course.node"
               :name="course.node.title"
-              instructor="مركز دكتور صبري ابو قرون"
+              :instructor="$t('مركز دكتور صبري ابو قرون')"
               :price="course.node.courseFee"
               unit="SDG"
             />
@@ -198,7 +198,7 @@
               :loading="coursesLoading"
               @click="loadMore()"
             >
-              تحميل المزيد
+              {{ $t('تحميل المزيد') }}
             </ds-button>
           </div>
         </div>
@@ -212,11 +212,11 @@
         <header class="filter-sheet__head">
           <div class="filter-sheet__grabber" aria-hidden="true"></div>
           <div class="filter-sheet__head-row">
-            <h2 class="filter-sheet__heading">الفلاتر</h2>
+            <h2 class="filter-sheet__heading">{{ $t('الفلاتر') }}</h2>
             <button
               type="button"
               class="filter-sheet__close"
-              aria-label="إغلاق"
+              :aria-label="$t('إغلاق')"
               @click="mobileFilterOpen = false"
             >
               ✕
@@ -227,7 +227,7 @@
         <!-- Scrollable body -->
         <div class="filter-sheet__body">
           <section class="filter-sheet__section">
-            <label for="sheet-search" class="filter-sheet__label">البحث</label>
+            <label for="sheet-search" class="filter-sheet__label">{{ $t('البحث') }}</label>
             <div class="sheet-search">
               <svg viewBox="0 0 24 24" class="sheet-search__icon" aria-hidden="true">
                 <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -239,30 +239,30 @@
                 type="text"
                 inputmode="search"
                 class="sheet-search__input"
-                placeholder="ابحث عن دورة..."
-                aria-label="البحث في الدورات"
+                :placeholder="$t('ابحث عن دورة...')"
+                :aria-label="$t('البحث في الدورات')"
                 dir="rtl"
               />
             </div>
           </section>
 
           <section class="filter-sheet__section">
-            <label for="sheet-sort" class="filter-sheet__label">الترتيب</label>
+            <label for="sheet-sort" class="filter-sheet__label">{{ $t('الترتيب') }}</label>
             <select
               id="sheet-sort"
               v-model="sortValue"
               class="sheet-select"
               dir="rtl"
             >
-              <option value="newest">الأحدث</option>
-              <option value="popular">الأكثر طلباً</option>
-              <option value="price_asc">السعر: من الأقل</option>
-              <option value="price_desc">السعر: من الأعلى</option>
+              <option value="newest">{{ $t('الأحدث') }}</option>
+              <option value="popular">{{ $t('الأكثر طلباً') }}</option>
+              <option value="price_asc">{{ $t('السعر: من الأقل') }}</option>
+              <option value="price_desc">{{ $t('السعر: من الأعلى') }}</option>
             </select>
           </section>
 
           <section class="filter-sheet__section">
-            <label class="filter-sheet__label">التخصص</label>
+            <label class="filter-sheet__label">{{ $t('التخصص') }}</label>
             <div v-if="specialitiesLoading" class="filter-panel__skeletons">
               <ds-skeleton v-for="i in 6" :key="i" shape="pill" width="30%" />
             </div>
@@ -273,7 +273,7 @@
                 :class="{ 'pill--active': activeSpecialityID === null }"
                 @click="setSpeciality(null)"
               >
-                كل التخصصات
+                {{ $t('كل التخصصات') }}
               </button>
               <button
                 v-for="spec in specialitiesEdges"
@@ -296,14 +296,14 @@
             variant="ghost"
             @click="clearAllFilters"
           >
-            مسح الفلاتر
+            {{ $t('مسح الفلاتر') }}
           </ds-button>
           <ds-button
             variant="primary"
             full-width
             @click="mobileFilterOpen = false"
           >
-            عرض النتائج
+            {{ $t('عرض النتائج') }}
           </ds-button>
         </footer>
       </div>

@@ -1,5 +1,5 @@
 <template>
-  <section class="cart-success" aria-label="تم استلام الطلب">
+  <section class="cart-success" :aria-label="$t('تم استلام الطلب')">
     <div class="cart-success__crest" aria-hidden="true">
       <svg
         viewBox="0 0 64 64"

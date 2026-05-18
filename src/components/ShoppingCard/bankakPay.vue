@@ -4,13 +4,12 @@
       {{ $t("ارفق فاتورة الدفع") }}
     </div>
     <div v-else>
-      <div class="text-h4 text-center q-ma-sm">إشعار بنكك</div>
+      <div class="text-h4 text-center q-ma-sm">{{ $t('إشعار بنكك') }}</div>
       <div
         class="text-h6 text-center text-danger"
         style="font-family: 'cairoR'"
       >
-        ملاحظه: في حالة إشعار بنكك, يقبل فقط الإشعار الأبيض من المعاملات السابقه
-        في تطبيق بنكك. اي إشعار اخر سوف يتم رفضه.
+        {{ $t('ملاحظه: في حالة إشعار بنكك, يقبل فقط الإشعار الأبيض من المعاملات السابقه في تطبيق بنكك. اي إشعار اخر سوف يتم رفضه.') }}
       </div>
     </div>
     <file-upload
@@ -23,7 +22,7 @@
       color="red"
       @click="SEND_THE_PAYMENT"
       icon-right="send"
-      label="إرسال"
+      :label="$t('إرسال')"
     />
     <q-inner-loading :showing="visible">
       <q-spinner-hourglass color="primary" size="70px" />

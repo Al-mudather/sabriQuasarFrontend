@@ -19,7 +19,7 @@
         :key="edge.node?.id ?? ''"
         :course="edge.node!"
         :name="edge.node?.title ?? ''"
-        instructor="مركز دكتور صبري ابو قرون"
+        :instructor="$t('مركز دكتور صبري ابو قرون')"
         :price="edge.node?.courseFee"
         unit="SD"
       />

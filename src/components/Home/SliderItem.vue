@@ -17,19 +17,19 @@
       <div v-if="remaining > 0" class="slide__countdown">
         <div class="unit">
           <h3 class="unit__value">{{ countdown.days }}</h3>
-          <span class="unit__label">يـوم</span>
+          <span class="unit__label">{{ $t('يـوم') }}</span>
         </div>
         <div class="unit">
           <h3 class="unit__value">{{ countdown.hours }}</h3>
-          <span class="unit__label">ساعة</span>
+          <span class="unit__label">{{ $t('ساعة') }}</span>
         </div>
         <div class="unit">
           <h3 class="unit__value">{{ countdown.minutes }}</h3>
-          <span class="unit__label">دقيقة</span>
+          <span class="unit__label">{{ $t('دقيقة') }}</span>
         </div>
         <div class="unit">
           <h3 class="unit__value">{{ countdown.seconds }}</h3>
-          <span class="unit__label">ثانيه</span>
+          <span class="unit__label">{{ $t('ثانيه') }}</span>
         </div>
       </div>
 

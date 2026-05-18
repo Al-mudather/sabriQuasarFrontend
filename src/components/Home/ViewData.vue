@@ -26,7 +26,7 @@
                         </svg>
                         <div class="perr">
                             <h3>1,000,500</h3>
-                        <span>م</span>
+                        <span>{{ $t('م') }}</span>
                         <p>{{$t('مشــــاهده')}}</p>
                         </div>
                     </div>

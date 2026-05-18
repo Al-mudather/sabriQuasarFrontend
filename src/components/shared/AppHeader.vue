@@ -22,15 +22,15 @@
           />
         </span>
         <span class="app-header__wordmark">
-          <span class="app-header__wordmark-line1">مركز د. صبري</span>
-          <span class="app-header__wordmark-line2">أبوقرون للتدريب</span>
+          <span class="app-header__wordmark-line1">{{ $t('مركز د. صبري') }}</span>
+          <span class="app-header__wordmark-line2">{{ $t('أبوقرون للتدريب') }}</span>
         </span>
       </router-link>
 
       <!-- Desktop navigation (logical end / left in RTL) -->
       <nav
         class="app-header__nav"
-        aria-label="التنقل الرئيسي"
+        :aria-label="$t('التنقل الرئيسي')"
       >
         <ul class="app-header__nav-list">
           <li
@@ -58,7 +58,7 @@
             to="/account/login"
             class="app-header__login"
           >
-            تسجيل الدخول
+            {{ $t('تسجيل الدخول') }}
           </router-link>
           <DsButton
             variant="primary"
@@ -67,7 +67,7 @@
             href="/account/signUp"
             :magnetic-enabled="true"
           >
-            ابدأ الآن
+            {{ $t('ابدأ الآن') }}
           </DsButton>
         </div>
       </nav>
@@ -78,7 +78,7 @@
         class="app-header__hamburger"
         :aria-expanded="drawerOpen ? 'true' : 'false'"
         aria-controls="app-header-drawer"
-        aria-label="فتح القائمة"
+        :aria-label="$t('فتح القائمة')"
         @click="drawerOpen = true"
       >
         <span class="app-header__hamburger-bar"></span>
@@ -92,10 +92,10 @@
       id="app-header-drawer"
       v-model="drawerOpen"
       size="sm"
-      :close-label="'إغلاق القائمة'"
+      :close-label="$t('إغلاق القائمة')"
     >
       <template #header>
-        <span class="app-header__drawer-title">القائمة</span>
+        <span class="app-header__drawer-title">{{ $t('القائمة') }}</span>
       </template>
 
       <!-- Identity strip (authenticated) -->
@@ -108,14 +108,14 @@
           </svg>
         </span>
         <span class="app-header__drawer-identity-text">
-          <span class="app-header__account-name">{{ userDisplayName || 'مرحباً' }}</span>
+          <span class="app-header__account-name">{{ userDisplayName || $t('مرحباً') }}</span>
           <span class="app-header__account-role">{{ userRoleLabel }}</span>
         </span>
       </div>
 
       <nav
         class="app-header__drawer-nav"
-        aria-label="التنقل الرئيسي"
+        :aria-label="$t('التنقل الرئيسي')"
       >
         <router-link
           v-for="link in navLinks"
@@ -137,7 +137,7 @@
             class="app-header__login"
             @click="drawerOpen = false"
           >
-            تسجيل الدخول
+            {{ $t('تسجيل الدخول') }}
           </router-link>
           <DsButton
             variant="primary"
@@ -146,7 +146,7 @@
             tag="a"
             href="/account/signUp"
           >
-            ابدأ الآن
+            {{ $t('ابدأ الآن') }}
           </DsButton>
         </div>
       </template>

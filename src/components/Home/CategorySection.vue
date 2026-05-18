@@ -11,7 +11,7 @@
           class="category-section__all"
           :to="`/courses?speciality=${speciality.pk}`"
         >
-          عرض كل دورات {{ speciality.speciality }}
+          {{ $t('عرض كل دورات {speciality}', { speciality: speciality.speciality }) }}
           <span aria-hidden="true" class="category-section__arrow">←</span>
         </router-link>
       </header>
@@ -40,8 +40,8 @@
         v-else-if="!courses.length"
         variant="search"
         size="sm"
-        title="لا توجد دورات حالياً"
-        body="سنضيف دورات جديدة في هذا التخصص قريباً"
+        :title="$t('لا توجد دورات حالياً')"
+        :body="$t('سنضيف دورات جديدة في هذا التخصص قريباً')"
       />
 
       <!-- Rail -->
@@ -69,7 +69,7 @@
               <path d="M28 16 L20 24 L28 32" />
             </svg>
           </span>
-          <span class="category-section__see-all-label">عرض الكل</span>
+          <span class="category-section__see-all-label">{{ $t('عرض الكل') }}</span>
         </router-link>
       </div>
     </div>

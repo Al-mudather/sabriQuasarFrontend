@@ -3,8 +3,8 @@
     <!-- Head -->
     <header class="orders-page__head">
       <div>
-        <h1 class="orders-page__title">طلباتي</h1>
-        <p class="orders-page__subtitle">تتبّع حالة جميع طلباتك وفواتيرك.</p>
+        <h1 class="orders-page__title">{{ $t('طلباتي') }}</h1>
+        <p class="orders-page__subtitle">{{ $t('تتبّع حالة جميع طلباتك وفواتيرك.') }}</p>
       </div>
     </header>
 
@@ -12,7 +12,7 @@
     <nav
       class="orders-page__chips"
       role="tablist"
-      aria-label="تصفية الطلبات حسب الحالة"
+      :aria-label="$t('تصفية الطلبات حسب الحالة')"
     >
       <button
         v-for="f in filters"
@@ -41,21 +41,21 @@
       <ds-empty-state
         v-else-if="visibleOrders.length === 0 && activeFilter !== 'all'"
         variant="search"
-        title="لا توجد طلبات في هذا التصنيف"
-        description="جرّب تصنيفاً آخر لعرض طلباتك."
+        :title="$t('لا توجد طلبات في هذا التصنيف')"
+        :description="$t('جرّب تصنيفاً آخر لعرض طلباتك.')"
         size="md"
       />
 
       <!-- Empty: no orders at all -->
       <ds-empty-state
         v-else-if="orders.length === 0"
-        title="لا توجد طلبات بعد"
-        description="ابدأ بشراء كورس وستظهر جميع طلباتك هنا."
+        :title="$t('لا توجد طلبات بعد')"
+        :description="$t('ابدأ بشراء كورس وستظهر جميع طلباتك هنا.')"
         size="md"
       >
         <template #actions>
           <ds-button variant="primary" @click="goToCoursesPage">
-            تصفح الدورات
+            {{ $t('تصفح الدورات') }}
           </ds-button>
         </template>
       </ds-empty-state>
@@ -68,7 +68,7 @@
           class="order-card"
           :class="[`order-card--${mapStatus(o)}`]"
           role="article"
-          :aria-label="`طلب ${o.order?.invoiceNumber ?? ''} — ${STATUS_LABEL[mapStatus(o)]}`"
+          :aria-label="$t('طلب {n} — {s}', { n: o.order?.invoiceNumber ?? '', s: STATUS_LABEL[mapStatus(o)] })"
         >
           <header class="order-card__head">
             <span
@@ -90,13 +90,13 @@
           <div class="order-card__body">
             <dl class="order-card__meta">
               <div class="order-card__meta-row">
-                <dt class="order-card__meta-label">رقم الفاتورة</dt>
+                <dt class="order-card__meta-label">{{ $t('رقم الفاتورة') }}</dt>
                 <dd class="order-card__meta-value order-card__meta-value--mono">
                   {{ o.order?.invoiceNumber ?? '—' }}
                 </dd>
               </div>
               <div class="order-card__meta-row">
-                <dt class="order-card__meta-label">تاريخ الطلب</dt>
+                <dt class="order-card__meta-label">{{ $t('تاريخ الطلب') }}</dt>
                 <dd class="order-card__meta-value">
                   {{ formatDate(o.created ?? o.updated) }}
                 </dd>

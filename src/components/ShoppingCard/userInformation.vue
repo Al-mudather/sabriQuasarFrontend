@@ -1,5 +1,5 @@
 <template>
-  <section class="user-info" aria-label="معلومات الفوترة">
+  <section class="user-info" :aria-label="$t('معلومات الفوترة')">
     <header class="user-info__header">
       <h2 class="user-info__title">{{ $t('معلوماتك الشخصية') }}</h2>
       <p class="user-info__subtitle">

@@ -1,5 +1,5 @@
 <template>
-  <section class="login-cart" aria-label="تسجيل الدخول للمتابعة">
+  <section class="login-cart" :aria-label="$t('تسجيل الدخول للمتابعة')">
     <DsCard v-if="!token" class="login-cart__card" padding="lg">
       <div class="login-cart__content">
         <div class="login-cart__crest" aria-hidden="true">

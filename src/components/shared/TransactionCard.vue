@@ -58,7 +58,7 @@
         class="tx-card__message tx-card__message--danger"
         role="note"
       >
-        <strong class="tx-card__message-label">{{ 'سبب الرفض' }}:</strong>
+        <strong class="tx-card__message-label">{{ $t('سبب الرفض') }}:</strong>
         <span>{{ transaction.rejectionReason }}</span>
       </div>
 
@@ -67,7 +67,7 @@
         class="tx-card__message tx-card__message--taupe"
         role="note"
       >
-        <strong class="tx-card__message-label">{{ 'ملاحظات' }}:</strong>
+        <strong class="tx-card__message-label">{{ $t('ملاحظات') }}:</strong>
         <span>{{ transaction.notes }}</span>
       </div>
 
@@ -80,7 +80,7 @@
         >
           <ds-tag variant="indigo" size="sm">
             <span slot="icon" class="tx-card__attach-icon" v-html="paperclipSvg"></span>
-            عرض المرفق
+            {{ $t('عرض المرفق') }}
           </ds-tag>
         </a>
       </div>
@@ -89,19 +89,19 @@
       <div v-if="detailed" class="tx-card__details">
         <dl class="tx-card__details-list">
           <template v-if="transaction.courseId">
-            <dt>{{ 'رقم الكورس' }}</dt>
+            <dt>{{ $t('رقم الكورس') }}</dt>
             <dd class="tx-card__mono">{{ transaction.courseId }}</dd>
           </template>
           <template v-if="transaction.createdAt">
-            <dt>{{ 'تاريخ الإنشاء' }}</dt>
+            <dt>{{ $t('تاريخ الإنشاء') }}</dt>
             <dd>{{ formatDate(transaction.createdAt) }}</dd>
           </template>
           <template v-if="transaction.updatedAt">
-            <dt>{{ 'آخر تحديث' }}</dt>
+            <dt>{{ $t('آخر تحديث') }}</dt>
             <dd>{{ formatDate(transaction.updatedAt) }}</dd>
           </template>
           <template v-if="transaction.paymentMethod">
-            <dt>{{ 'طريقة الدفع' }}</dt>
+            <dt>{{ $t('طريقة الدفع') }}</dt>
             <dd>{{ transaction.paymentMethod }}</dd>
           </template>
         </dl>

@@ -1,5 +1,5 @@
 <template>
-  <section ref="root" class="final-cta" aria-label="ابدأ رحلتك">
+  <section ref="root" class="final-cta" :aria-label="$t('ابدأ رحلتك')">
     <svg
       class="final-cta__contour"
       viewBox="0 0 1600 600"
@@ -12,18 +12,17 @@
     </svg>
 
     <div class="final-cta__container">
-      <h2 class="final-cta__heading">جاهز لتبدأ؟</h2>
+      <h2 class="final-cta__heading">{{ $t('جاهز لتبدأ؟') }}</h2>
       <p class="final-cta__deck">
-        انضمّ إلى آلاف المتعلمين الذين اختاروا الاستثمار في أنفسهم.
-        رحلتك نحو نسخة أقوى تبدأ بخطوة واحدة.
+        {{ $t('انضمّ إلى آلاف المتعلمين الذين اختاروا الاستثمار في أنفسهم. رحلتك نحو نسخة أقوى تبدأ بخطوة واحدة.') }}
       </p>
       <div class="final-cta__actions">
         <ds-button variant="accent" size="lg" pill to="/courses">
-          ابدأ الدورة المجانية
+          {{ $t('ابدأ الدورة المجانية') }}
         </ds-button>
       </div>
       <p class="final-cta__fineprint">
-        لا تحتاج بطاقة ائتمان · إلغاء في أي وقت
+        {{ $t('لا تحتاج بطاقة ائتمان · إلغاء في أي وقت') }}
       </p>
     </div>
   </section>

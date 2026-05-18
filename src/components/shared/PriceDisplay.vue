@@ -13,7 +13,7 @@
       <span
         v-if="hasOriginal"
         class="price-display__original"
-        aria-label="السعر قبل الخصم"
+        :aria-label="$t('السعر قبل الخصم')"
       >
         <span class="price-display__original-amount">{{ formattedOriginal }}</span>
         <span class="price-display__original-currency">{{ currencySymbol }}</span>
@@ -22,7 +22,7 @@
       <span
         v-if="showDiscount && discountPercent > 0"
         class="price-display__discount"
-        :aria-label="`خصم ${discountPercent}٪`"
+        :aria-label="$t('خصم {pct}٪', { pct: discountPercent })"
       >
         -{{ formattedDiscount }}%
       </span>

@@ -32,7 +32,7 @@
         <div v-for="t in typeSamples" :key="t.label">
           <small>{{ t.label }}</small>
           <p :style="{ fontSize: `var(${t.token})`, lineHeight: 1.25 }">
-            التدريب الطبي · Medical training platform
+            {{ $t('التدريب الطبي · Medical training platform') }}
           </p>
         </div>
       </div>
@@ -100,7 +100,7 @@
           </template>
           <h3>Course title goes here</h3>
           <ds-progress-bar :value="42" show-label />
-          <ds-button variant="accent" full-width>اذهب إلى الدرس</ds-button>
+          <ds-button variant="accent" full-width>{{ $t('اذهب إلى الدرس') }}</ds-button>
         </ds-card>
         <ds-card elevation="lg" interactive>
           <template #media>
@@ -119,12 +119,12 @@
     <section class="ds-showcase__section">
       <h2>Empty state</h2>
       <ds-empty-state
-        title="لا توجد كورسات بعد"
-        description="ابدأ رحلتك التعليمية بتصفح الكورسات المتاحة والاشتراك في الأنسب لك."
+        :title="$t('لا توجد كورسات بعد')"
+        :description="$t('ابدأ رحلتك التعليمية بتصفح الكورسات المتاحة والاشتراك في الأنسب لك.')"
       >
         <template #actions>
-          <ds-button variant="primary">تصفح الكورسات</ds-button>
-          <ds-button variant="ghost">تعرف على المنصة</ds-button>
+          <ds-button variant="primary">{{ $t('تصفح الكورسات') }}</ds-button>
+          <ds-button variant="ghost">{{ $t('تعرف على المنصة') }}</ds-button>
         </template>
       </ds-empty-state>
     </section>
