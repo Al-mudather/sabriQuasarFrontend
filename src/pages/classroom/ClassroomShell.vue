@@ -47,42 +47,13 @@ watch(
 )
 
 const currentContentPk = computed<number | null>(() => null)
-const { goToFirstUnwatched } = useCurriculumNavigation({
-  bootstrap: ctx.bootstrap,
-  currentContentPk,
-  unitContents: ctx.unitContents,
-})
+const { goToFirstUnwatched } = useCurriculumNavigation(ctx.bootstrap, currentContentPk)
 
-// On entry the slim bootstrap arrives without per-unit lessons. To pick a
-// "first unwatched" target we need the first unit's lessons hydrated.
-// loadUnit() is idempotent + cache-aware, so calling it here is cheap.
-let routedOnce = false
 watch(
   () => ctx.bootstrap.value,
   (b) => {
-    if (!b || b.totalContents === 0 || b.units.length === 0) return
-    const first = b.units[0]
-    if (first) void ctx.loadUnit(first.pk)
-  },
-  { immediate: true },
-)
-
-// Once the first unit's lessons land, route to its first unwatched lesson.
-// Guarded with `routedOnce` so a later background refetch doesn't yank the
-// user out of the lesson they've since navigated to.
-watch(
-  [() => ctx.bootstrap.value, () => ctx.unitContents.size, () => Array.from(ctx.unitContents.values()).flat().length],
-  () => {
-    if (routedOnce) return
     const cpk = coursePk.value
-    const b = ctx.bootstrap.value
-    if (!b || !cpk || b.totalContents === 0) return
-    const firstUnit = b.units[0]
-    if (!firstUnit) return
-    const firstHydrated = ctx.unitContents.get(firstUnit.pk)
-    if (!firstHydrated || firstHydrated.length === 0) return
-    routedOnce = true
-    goToFirstUnwatched(cpk)
+    if (b && b.totalContents > 0 && cpk != null) goToFirstUnwatched(cpk)
   },
   { immediate: true },
 )

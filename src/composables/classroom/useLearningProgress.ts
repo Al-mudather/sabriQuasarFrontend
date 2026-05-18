@@ -18,7 +18,6 @@ import { useMutation, useQuery } from '@vue/apollo-composable'
 import { GetAllLearningProgressByCourse } from 'src/graphql/classroom/query/GetAllLearningProgressByCourse'
 import { StartLearningUnit } from 'src/graphql/classroom/mutation/StartLearningUnit'
 import { EndLearningUnit } from 'src/graphql/classroom/mutation/EndLearningUnit'
-import { useStaleAfterTtl } from 'src/composables/classroom/useStaleAfterTtl'
 import type {
   EndLearningUnitResult,
   EndLearningUnitVars,
@@ -55,13 +54,13 @@ export function useLearningProgress(
     () => toNum(coursePk) !== null && toNum(enrollmentPk) !== null,
   )
 
-  const { result, refetch, onError, onResult } = useQuery<
+  const { result, refetch, onError } = useQuery<
     GetAllLearningProgressByCourseResult,
     GetAllLearningProgressByCourseVars
   >(GetAllLearningProgressByCourse, vars, () => ({
     enabled: enabled.value,
     errorPolicy: 'all',
-    fetchPolicy: 'cache-first',
+    fetchPolicy: 'cache-and-network',
   }))
 
   onError((err) => {
@@ -70,20 +69,6 @@ export function useLearningProgress(
       graphQLErrors: err.graphQLErrors,
       networkError: err.networkError,
     })
-  })
-
-  // 10-minute staleness window + refetch on tab refocus.
-  const { markFresh: markProgressFresh } = useStaleAfterTtl({
-    key: () => {
-      const eid = toNum(enrollmentPk)
-      return eid ? `progress:${eid}` : null
-    },
-    refetch: () => refetch({ ...vars.value }),
-    disabled: () => !enabled.value,
-  })
-
-  onResult((res) => {
-    if (res.data?.learningProgressByCourse) markProgressFresh()
   })
 
   watch(
