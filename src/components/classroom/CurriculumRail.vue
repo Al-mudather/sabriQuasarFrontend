@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import type {
   ClassroomBootstrap,
   CurriculumUnit,
   CurriculumContent,
+  ProgressMap,
 } from 'src/types/classroom/types'
+import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
 import CurriculumItem from './CurriculumItem.vue'
 
 interface Props {
-  /** Renamed from `enrollment` — now the full classroom bootstrap object. */
+  /** Slim bootstrap with unit headers + contentsCount. Per-unit lessons
+   *  are pulled from the injected ClassroomContext on demand. */
   bootstrap: ClassroomBootstrap | null
   currentContentPk: number | null
   collapsed?: boolean
@@ -23,17 +26,52 @@ const emit = defineEmits<{
   toggleCollapse: []
 }>()
 
+// The rail reads the lazy lesson map (and the loadUnit trigger) from the
+// classroom context. Layout provides it; rail consumes it.
+const ctx = inject(ClassroomContextKey)
+if (!ctx) throw new Error('CurriculumRail must be used inside ClassroomLayout')
+
+const unitContents = ctx.unitContents
+const unitLoadingPks = ctx.unitLoadingPks
+const progress = ctx.progress
+
+function contentsFor(unit: CurriculumUnit): CurriculumContent[] {
+  // Layout has eagerly hydrated the unit owning the current lesson; other
+  // units fill in lazily when their accordion expands. Until that happens
+  // we return an empty list and render skeletons inline.
+  return unitContents.get(unit.pk) ?? []
+}
+
+function isHydrated(unit: CurriculumUnit): boolean {
+  return unitContents.has(unit.pk)
+}
+
+function isUnitLoading(unit: CurriculumUnit): boolean {
+  return unitLoadingPks.has(unit.pk)
+}
+
+// Decorate the raw lesson list with progress flags at render time so the
+// rail's tick + status-dot logic stays per-content.
+function decoratedContentsFor(unit: CurriculumUnit): CurriculumContent[] {
+  const base = contentsFor(unit)
+  if (base.length === 0) return base
+  const pm: ProgressMap = progress.value
+  return base.map((c) => {
+    const p = pm[c.pk]
+    if (!p) return c
+    return {
+      ...c,
+      completed: Boolean(p.complete),
+      inProgress: Boolean(p.begin) && !p.complete,
+    }
+  })
+}
+
 // Track which units are expanded. Default: expand the unit that contains
-// the current content, fall back to the first unit.
+// the current content (known from ctx.currentUnitPk), fall back to first.
 const expandedByPk = ref<Record<number, boolean>>({})
 
-const activeUnitPk = computed<number | null>(() => {
-  if (!props.bootstrap || props.currentContentPk == null) return null
-  for (const unit of props.bootstrap.units) {
-    if (unit.contents.some((c) => c.pk === props.currentContentPk)) return unit.pk
-  }
-  return null
-})
+const activeUnitPk = computed<number | null>(() => ctx.currentUnitPk.value)
 
 watch(
   () => [props.bootstrap, activeUnitPk.value] as const,
@@ -51,6 +89,21 @@ watch(
   { immediate: true },
 )
 
+// Whenever a unit becomes expanded for the first time, fire its content
+// fetch. Idempotent via useUnitContents — same unit doesn't re-fetch within
+// the 10-minute cache TTL.
+watch(
+  expandedByPk,
+  (next) => {
+    for (const [pkStr, open] of Object.entries(next)) {
+      if (!open) continue
+      const pk = Number(pkStr)
+      if (Number.isFinite(pk) && pk > 0) void ctx.loadUnit(pk)
+    }
+  },
+  { deep: true, immediate: true },
+)
+
 function isExpanded(unit: CurriculumUnit): boolean {
   return !!expandedByPk.value[unit.pk]
 }
@@ -60,7 +113,14 @@ function onUpdateExpanded(unit: CurriculumUnit, value: boolean) {
 }
 
 function completedCount(unit: CurriculumUnit): number {
-  return unit.contents.filter((c) => c.completed).length
+  return decoratedContentsFor(unit).filter((c) => c.completed).length
+}
+
+function unitLessonTotal(unit: CurriculumUnit): number {
+  // Once hydrated, contents.length is the authoritative figure (NoneType
+  // placeholders are stripped); until then the server-reported totalCount
+  // is the best we have.
+  return isHydrated(unit) ? contentsFor(unit).length : unit.contentsCount
 }
 
 // TODO: when the plan defines gating (e.g. sequential unlock), wire locked
@@ -116,7 +176,7 @@ function handleSelect(content: CurriculumContent) {
         </div>
       </div>
 
-      <!-- Collapsed: status dots only -->
+      <!-- Collapsed: status dots only (only for hydrated units) -->
       <div v-else-if="collapsed" class="cls-rail__collapsed">
         <div
           v-for="unit in bootstrap.units"
@@ -125,7 +185,7 @@ function handleSelect(content: CurriculumContent) {
           :aria-label="unit.title"
         >
           <span
-            v-for="content in unit.contents"
+            v-for="content in decoratedContentsFor(unit)"
             :key="content.pk"
             class="cls-rail__dot"
             :class="{ 'cls-rail__dot--active': content.pk === currentContentPk }"
@@ -151,20 +211,37 @@ function handleSelect(content: CurriculumContent) {
             <div class="cls-rail__unit-header-inner">
               <span class="cls-rail__unit-title">{{ unit.title }}</span>
               <span class="cls-rail__unit-count">
-                {{ completedCount(unit) }}/{{ unit.contents.length }}
+                {{ completedCount(unit) }}/{{ unitLessonTotal(unit) }}
               </span>
             </div>
           </template>
 
           <div class="cls-rail__unit-body">
-            <CurriculumItem
-              v-for="content in unit.contents"
-              :key="content.pk"
-              :content="content"
-              :active="content.pk === currentContentPk"
-              :locked="isLocked(content)"
-              @click="handleSelect(content)"
-            />
+            <!-- Lessons hydrated: render real list -->
+            <template v-if="isHydrated(unit)">
+              <CurriculumItem
+                v-for="content in decoratedContentsFor(unit)"
+                :key="content.pk"
+                :content="content"
+                :active="content.pk === currentContentPk"
+                :locked="isLocked(content)"
+                @click="handleSelect(content)"
+              />
+            </template>
+
+            <!-- Still fetching: placeholder rows matching the lesson count -->
+            <div
+              v-else
+              class="cls-rail__unit-loading"
+              :aria-busy="isUnitLoading(unit) ? 'true' : 'false'"
+              aria-live="polite"
+            >
+              <div
+                v-for="i in Math.min(unit.contentsCount || 3, 6)"
+                :key="`sk-${unit.pk}-${i}`"
+                class="cls-rail__skeleton-bar"
+              />
+            </div>
           </div>
         </q-expansion-item>
       </div>
@@ -293,6 +370,14 @@ function handleSelect(content: CurriculumContent) {
     &--short {
       width: 45%;
     }
+  }
+
+  // ---- Lazy-load placeholder inside an expanded unit ----
+  &__unit-loading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-3) var(--ds-space-4);
   }
 
   // ---- Collapsed state ----

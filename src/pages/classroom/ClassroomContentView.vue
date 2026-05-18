@@ -125,7 +125,6 @@ import { useCurriculumNavigation } from 'src/composables/classroom/useCurriculum
 import { useLearningProgress } from 'src/composables/classroom/useLearningProgress'
 import {
   parseModelValue,
-  type CurriculumContent,
   type ParsedFileValue,
   type ParsedQuizValue,
 } from 'src/types/classroom/types'
@@ -171,31 +170,17 @@ const coursePkRef = computed<number | null>(() => {
 
 const enrollmentPkRef = computed<number | null>(() => ctx.bootstrap.value?.enrollmentPk ?? null)
 
-const current = computed<CurriculumContent | null>(() => {
-  const b = ctx.bootstrap.value
-  const pk = currentContentPk.value
-  if (!b || pk == null) return null
-  for (const u of b.units) {
-    for (const c of u.contents) if (c.pk === pk) return c
-  }
-  return null
-})
+// Current lesson + its parent unit pk come from the context, which the
+// layout populated via useCurrentContent (single-content query) — no need
+// to iterate bootstrap.units anymore.
+const current = ctx.currentContent
+const currentUnitPk = ctx.currentUnitPk
 
-/** Find the unit pk that contains the current content (needed for StartLearningUnit). */
-const currentUnitPk = computed<number | null>(() => {
-  const b = ctx.bootstrap.value
-  const pk = currentContentPk.value
-  if (!b || pk == null) return null
-  for (const u of b.units) {
-    for (const c of u.contents) if (c.pk === pk) return u.pk
-  }
-  return null
-})
-
-const { nextContent, prevContent, goToNext, goToPrev } = useCurriculumNavigation(
-  ctx.bootstrap,
+const { nextContent, prevContent, goToNext, goToPrev } = useCurriculumNavigation({
+  bootstrap: ctx.bootstrap,
   currentContentPk,
-)
+  unitContents: ctx.unitContents,
+})
 
 const { start, end } = useLearningProgress(coursePkRef, enrollmentPkRef)
 

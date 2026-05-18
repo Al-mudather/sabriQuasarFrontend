@@ -14,6 +14,12 @@ import type {
   LearningProgressNode,
   GetCourseByIdQuery,
   GetCourseByIdQueryVariables,
+  GetCourseByIdSlimQuery,
+  GetCourseByIdSlimQueryVariables,
+  GetCourseUnitContentsQuery,
+  GetCourseUnitContentsQueryVariables,
+  GetCourseUnitContentQuery,
+  GetCourseUnitContentQueryVariables,
   GetEnrollmentByCourseForCurrentUserQuery,
   GetEnrollmentByCourseForCurrentUserQueryVariables,
   GetAllCourseUnitsByCourseIdQuery,
@@ -152,7 +158,22 @@ export type CurriculumUnit = {
   id: string
   title: string
   order: number
+  /**
+   * Server-reported total lesson count for this unit. Populated by the slim
+   * bootstrap before any per-unit content arrives, so the rail can show
+   * "N lessons" chips and accurate skeleton counts. May overcount NoneType
+   * placeholder rows; reconciled to `contents.length` once the unit has
+   * lazy-loaded.
+   */
+  contentsCount: number
+  /**
+   * Empty array while the unit is unloaded — populated by `useUnitContents`
+   * when the rail expands the unit (or when the unit owns the current
+   * route's contentPk and is eagerly hydrated on first paint).
+   */
   contents: CurriculumContent[]
+  /** True once useUnitContents has resolved this unit's lessons at least once. */
+  hydrated: boolean
 }
 
 export type ClassroomBootstrap = {
@@ -196,6 +217,15 @@ export type ProgressMap = Record<number, ProgressEntry>
 
 export type GetCourseByIdResult = GetCourseByIdQuery
 export type GetCourseByIdVars = GetCourseByIdQueryVariables
+
+export type GetCourseByIDSlimResult = GetCourseByIdSlimQuery
+export type GetCourseByIDSlimVars = GetCourseByIdSlimQueryVariables
+
+export type GetCourseUnitContentsResult = GetCourseUnitContentsQuery
+export type GetCourseUnitContentsVars = GetCourseUnitContentsQueryVariables
+
+export type GetCourseUnitContentResult = GetCourseUnitContentQuery
+export type GetCourseUnitContentVars = GetCourseUnitContentQueryVariables
 
 export type GetEnrollmentByCourseForCurrentUserResult = GetEnrollmentByCourseForCurrentUserQuery
 export type GetEnrollmentByCourseForCurrentUserVars = GetEnrollmentByCourseForCurrentUserQueryVariables
