@@ -23,14 +23,7 @@
         :aria-label="t('classroom.header.progressLabel')"
       />
 
-      <button
-        type="button"
-        class="cls-header__lang"
-        :aria-label="locale === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'"
-        @click="toggleLocale"
-      >
-        {{ locale === 'ar' ? 'EN' : 'ع' }}
-      </button>
+      <LanguageSwitcher variant="dark" />
     </div>
   </header>
 </template>
@@ -40,6 +33,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import ClassroomProgressRing from 'src/components/classroom/ClassroomProgressRing.vue'
+import LanguageSwitcher from 'src/components/shared/LanguageSwitcher.vue'
 
 interface Props {
   title?: string
@@ -52,7 +46,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const router = useRouter()
-const { t, locale } = useI18n()
+const { t } = useI18n()
 
 const safePercent = computed<number>(() => {
   const raw = Number(props.percent)
@@ -62,10 +56,6 @@ const safePercent = computed<number>(() => {
 
 function onExit (): void {
   void router.push({ name: 'my-courses' })
-}
-
-function toggleLocale (): void {
-  locale.value = locale.value === 'ar' ? 'en' : 'ar'
 }
 </script>
 
@@ -122,18 +112,6 @@ function toggleLocale (): void {
     opacity: 0.9;
   }
 
-  &__lang {
-    inline-size: 36px;
-    block-size: 32px;
-    background: transparent;
-    border: 1px solid rgba(245, 242, 234, 0.18);
-    border-radius: 8px;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-
-    &:hover { background: rgba(245, 242, 234, 0.06); }
-  }
 }
 
 @media (max-width: 600px) {

@@ -63,26 +63,17 @@
 
       <!-- Language -->
       <div class="home-nav__lang">
-        <div class="lang">
-          <q-toggle
-            v-model="_isEnglish"
-            icon="language"
-            unchecked-icon="clear"
-            class="text-white"
-            label="Eng"
-          />
-        </div>
+        <LanguageSwitcher variant="light" />
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
-import { Quasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
@@ -94,6 +85,7 @@ import type {
   GetAllCoursesResult,
   GetAllCoursesVars,
 } from 'src/types/courses/types'
+import LanguageSwitcher from 'src/components/shared/LanguageSwitcher.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -106,53 +98,11 @@ const cart = useCartStore()
 const pyramid = usePyramidStore()
 
 const { token } = storeToRefs(auth)
-const { isEnglish } = storeToRefs(settings)
 
 const search = ref('')
 const isDraft = ref(false)
 
 const isSearchEmpty = computed(() => !search.value.trim())
-
-const _isEnglish = computed({
-  get: () => isEnglish.value,
-  set: (newValue: boolean) => settings.setIsEnglish(newValue),
-})
-
-watch(isEnglish, async (value) => {
-  if (value) {
-    settings.setIsEnglish(value)
-    const langIso = 'en-us'
-    try {
-      const lang = await import('quasar/lang/' + langIso)
-      Quasar.lang.set({ ...lang.default, rtl: false })
-      // Adjust cart styling in outer layouts when switching locales
-      const $ = (window as unknown as Record<string, unknown>).jQuery as ((sel: string) => { css: (props: Record<string, string>) => void }) | undefined
-      if ($) {
-        $('.backgroun').css({ transform: 'rotate(180deg)' })
-        $('.shoppgCart > .cart svg').css({ transform: 'translate(-20%, -30%)' })
-        $('.shoppgCart > .cart h3').css({ transform: 'translate(35%, -100%)' })
-        $('.shoppgCart > .cart > .notifc').css({ transform: 'translate(-5%,-43%)' })
-      }
-    } catch (_err) {
-      // Requested Quasar Language Pack does not exist — keep app running
-    }
-  } else {
-    settings.setIsEnglish(value)
-    try {
-      const lang = await import('quasar/lang/ar')
-      Quasar.lang.set({ ...lang.default, rtl: true })
-      const $ = (window as unknown as Record<string, unknown>).jQuery as ((sel: string) => { css: (props: Record<string, string>) => void }) | undefined
-      if ($) {
-        $('.backgroun').css({ transform: 'rotate(360deg)' })
-        $('.shoppgCart > .cart svg').css({ transform: 'translate(0%, 0%)' })
-        $('.shoppgCart > .cart h3').css({ transform: 'translate(0%, 0%)' })
-        $('.shoppgCart > .cart > .notifc').css({ transform: 'translate(0%,0%)' })
-      }
-    } catch (_err) {
-      // ignore
-    }
-  }
-})
 
 function changeMenuState (): void {
   settings.setOpenMenu(true)

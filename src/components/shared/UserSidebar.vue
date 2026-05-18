@@ -41,6 +41,12 @@
 
     <hr class="user-sidebar__divider" aria-hidden="true" />
 
+    <div class="user-sidebar__lang">
+      <LanguageSwitcher variant="light" />
+    </div>
+
+    <hr class="user-sidebar__divider" aria-hidden="true" />
+
     <button
       type="button"
       class="user-sidebar__logout"
@@ -57,6 +63,8 @@
 </template>
 
 <script setup lang="ts">
+import LanguageSwitcher from 'src/components/shared/LanguageSwitcher.vue'
+
 interface NavLink { to: string; label: string; icon: string }
 
 defineProps<{
@@ -159,6 +167,12 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.user-sidebar__lang {
+  display: flex;
+  justify-content: center;
+  padding-block: 4px;
 }
 
 .user-sidebar__link {

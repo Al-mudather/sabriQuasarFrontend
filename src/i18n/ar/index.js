@@ -9,6 +9,17 @@ import classroom from './classroom.js'
 export default {
   classroom,
 
+  common: {
+    arabic: 'العربية',
+    english: 'الإنجليزية',
+  },
+
+  settings: {
+    language: {
+      label: 'اللغة',
+    },
+  },
+
   "_comment_src_App.vue": "src_App.vue",
 
   "لقد قمت بحجب اللإشعارات , الرجاء السماح لها بالظهور لتتمتع باخر التحديثات على المنصه":

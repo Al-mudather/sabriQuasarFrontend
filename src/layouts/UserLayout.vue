@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf" :dir="$q.lang.rtl ? 'rtl' : 'rtl'">
+  <q-layout view="hHh lpR fFf" :dir="$q.lang.rtl ? 'rtl' : 'ltr'">
     <AppHeader variant="cream" :sticky="true" />
 
     <q-page-container>
@@ -82,9 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
-import { LocalStorage, Quasar } from 'quasar'
-import { useI18n } from 'vue-i18n'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import AppHeader from 'src/components/shared/AppHeader.vue'
@@ -92,17 +90,13 @@ import AppFooter from 'src/components/shared/AppFooter.vue'
 import UserSidebar from 'src/components/shared/UserSidebar.vue'
 import DsModal from 'src/design-system/components/DsModal.vue'
 import { useAuthStore } from 'src/stores/auth'
-import { useSettingsStore } from 'src/stores/settings'
 
 defineOptions({ name: 'UserLayout' })
 
-const { locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
-const settings = useSettingsStore()
 const { user } = storeToRefs(auth)
-const { isEnglish } = storeToRefs(settings)
 
 // ---------------------------------------------------------------------------
 // Nav link definitions (icons as inline SVG HTML strings; consumed via v-html
@@ -175,26 +169,6 @@ async function logOut (): Promise<void> {
   void router.push({ name: 'Home' }).catch(() => {})
 }
 
-async function applyLocale (val: boolean | null): Promise<void> {
-  locale.value = val ? 'en' : 'ar'
-  settings.setIsEnglish(val ?? false)
-
-  try {
-    if (val) {
-      const lang = await import('quasar/lang/en-us')
-      Quasar.lang.set({ ...lang.default, rtl: false })
-    } else {
-      const lang = await import('quasar/lang/ar')
-      Quasar.lang.set({ ...lang.default, rtl: true })
-    }
-  } catch { /* lang pack missing; no-op */ }
-}
-
-onMounted(() => {
-  void applyLocale(LocalStorage.getItem<boolean>('isEnglish'))
-})
-
-watch(isEnglish, (value) => { void applyLocale(value) })
 </script>
 
 <style lang="scss" scoped>

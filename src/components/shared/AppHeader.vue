@@ -49,6 +49,10 @@
           </li>
         </ul>
 
+        <div class="app-header__lang">
+          <LanguageSwitcher variant="light" />
+        </div>
+
         <div v-if="showAuthCtas" class="app-header__auth">
           <router-link
             to="/account/login"
@@ -156,6 +160,7 @@ import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsModal from 'src/design-system/components/DsModal.vue'
+import LanguageSwitcher from 'src/components/shared/LanguageSwitcher.vue'
 import { LOGO, BRAND } from 'src/design-system/brand'
 import { useAuthStore } from 'src/stores/auth'
 

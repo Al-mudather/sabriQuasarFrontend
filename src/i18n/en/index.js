@@ -12,8 +12,17 @@ import classroom from './classroom.js'
 export default {
   classroom,
 
- 
-        
+  common: {
+    arabic: 'Arabic',
+    english: 'English',
+  },
+
+  settings: {
+    language: {
+      label: 'Language',
+    },
+  },
+
   "_comment_src_App.vue": "src_App.vue",
         
  

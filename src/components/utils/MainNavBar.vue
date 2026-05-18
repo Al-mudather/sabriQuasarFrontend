@@ -67,25 +67,17 @@
 
       <!-- Language -->
       <div class="main-nav__lang">
-        <div class="lang">
-          <q-toggle
-            v-model="_isEnglish"
-            icon="language"
-            unchecked-icon="clear"
-            class="text-black"
-            label="Eng"
-          />
-        </div>
+        <LanguageSwitcher variant="light" />
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useQuasar, Quasar } from 'quasar'
+import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
@@ -94,6 +86,7 @@ import { usePyramidStore } from 'src/stores/pyramid'
 import { apolloClient } from 'src/apollo/client'
 import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses'
 import type { GetAllCoursesResult, GetAllCoursesVars } from 'src/types/courses/types'
+import LanguageSwitcher from 'src/components/shared/LanguageSwitcher.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -105,16 +98,9 @@ const settings = useSettingsStore()
 const cart = useCartStore()
 const pyramid = usePyramidStore()
 const { token } = storeToRefs(auth)
-const { isEnglish } = storeToRefs(settings)
 
 const hideFields = ref(false)
 const search = ref('')
-
-// Computed writable for the language toggle
-const _isEnglish = computed({
-  get: () => isEnglish.value,
-  set: (val: boolean) => settings.setIsEnglish(val)
-})
 
 // Watch route to hide fields on terms page
 watch(
@@ -124,23 +110,6 @@ watch(
   },
   { immediate: true }
 )
-
-// Watch language toggle and update Quasar locale
-watch(isEnglish, async (value) => {
-  if (value) {
-    settings.setIsEnglish(true)
-    try {
-      const lang = await import('quasar/lang/en-us')
-      Quasar.lang.set({ ...lang.default, rtl: false })
-    } catch (_) { /* lang pack may not exist */ }
-  } else {
-    settings.setIsEnglish(false)
-    try {
-      const lang = await import('quasar/lang/ar')
-      Quasar.lang.set({ ...lang.default, rtl: true })
-    } catch (_) { /* lang pack may not exist */ }
-  }
-})
 
 function changeMenuState (): void {
   settings.setOpenMenu(true)

@@ -1,25 +1,40 @@
-// Repurposed during Track B: the original file was a dangling DOM listener
-// that assumed elements existed at boot time. It now installs @unhead/vue
-// (the vue-meta replacement) so <Head> blocks and title management keep
-// working in the Options API, and locks Arabic RTL at runtime.
+// Boot tasks that run BEFORE i18n / Pinia are registered:
+//   1. install @unhead/vue (vue-meta replacement) so <Head> blocks and
+//      programmatic title management keep working in the Options API.
+//   2. pre-paint the document's lang/dir attributes and the Quasar lang
+//      pack from the persisted `isEnglish` flag, so first paint renders
+//      in the user's last-used language (no FOUC, no jarring RTL flip).
+//
+// Runtime locale switching happens via `src/composables/useAppLocale.ts`,
+// which is the single canonical entry point for all later toggles.
 
 import { boot } from 'quasar/wrappers'
 import { createHead } from '@unhead/vue'
-import { Quasar } from 'quasar'
+import { Quasar, LocalStorage } from 'quasar'
 import qLangAr from 'quasar/lang/ar'
 
 export default boot(({ app }) => {
   const head = createHead()
   app.use(head)
 
-  // index.html ships with dir="rtl" lang="ar", but Quasar's framework.lang
-  // init can overwrite document.documentElement.dir based on the lang pack's
-  // rtl flag. Setting the Arabic pack explicitly + re-pinning the attrs keeps
-  // html.dir locked so Arabic glyph shaping doesn't break on pages that
-  // don't sit under an explicit dir="rtl" container.
-  Quasar.lang.set(qLangAr)
+  // Read the persisted preference directly — at this boot stage Pinia is
+  // not yet registered (i18n boot runs after this one). The settings
+  // store uses the same LocalStorage key, so the two stay aligned.
+  const isEnglish = LocalStorage.getItem('isEnglish') === true
+  const locale = isEnglish ? 'en' : 'ar'
+
   if (typeof document !== 'undefined') {
-    document.documentElement.dir = 'rtl'
-    document.documentElement.lang = 'ar'
+    document.documentElement.dir = isEnglish ? 'ltr' : 'rtl'
+    document.documentElement.lang = locale
+  }
+
+  if (isEnglish) {
+    // English pack is async-imported so Arabic stays the synchronous default.
+    // The composable will re-apply the pack on user toggle either way.
+    void import('quasar/lang/en-US')
+      .then((pack) => { Quasar.lang.set({ ...pack.default, rtl: false }) })
+      .catch(() => { /* lang pack missing — leave default */ })
+  } else {
+    Quasar.lang.set({ ...qLangAr, rtl: true })
   }
 })

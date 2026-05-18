@@ -141,8 +141,3 @@ onUnmounted(() => {
   localStorage.clear()
 })
 </script>
-<style>
-#q-app {
-  direction: rtl !important;
-}
-</style>

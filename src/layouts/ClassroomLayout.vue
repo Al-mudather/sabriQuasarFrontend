@@ -1,5 +1,5 @@
 <template>
-  <div class="cls-layout classroom-scope" dir="rtl">
+  <div class="cls-layout classroom-scope" :dir="$q.lang.rtl ? 'rtl' : 'ltr'">
     <ClassroomHeader
       :title="headerTitle"
       :percent="headerPercent"
