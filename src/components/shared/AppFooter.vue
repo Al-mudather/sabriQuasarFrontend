@@ -145,7 +145,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { LOGO, BRAND } from 'src/design-system/brand'
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'locale-change', val: string): void
@@ -155,29 +159,30 @@ const logoSrc = LOGO.full
 const brandNameAr = BRAND.nameAr
 const brandNameEn = BRAND.nameEn
 
-const coursesLinks = [
-  { to: '/courses',   label: 'كل الدورات' },
-  { to: '/myCourses', label: 'دوراتي' },
-  { to: '/cart/',     label: 'سلة المشتريات' }
-]
+// Labels go through t() so they react to locale flips.
+const coursesLinks = computed(() => [
+  { to: '/courses',   label: t('كل الدورات') },
+  { to: '/myCourses', label: t('دوراتي') },
+  { to: '/cart/',     label: t('سلة المشتريات') }
+])
 
-const centerLinks = [
-  { to: '/',         label: 'الرئيسية' },
-  { to: '/courses',  label: 'الدورات' },
-  { to: '/profile',  label: 'حسابي' }
-]
+const centerLinks = computed(() => [
+  { to: '/',         label: t('الرئيسية') },
+  { to: '/courses',  label: t('الدورات') },
+  { to: '/profile',  label: t('حسابي') }
+])
 
-const supportLinks = [
-  { to: '/termsandConditions', label: 'الشروط والأحكام' },
-  { to: '/privacyPolicy',      label: 'سياسة الخصوصية' }
-]
+const supportLinks = computed(() => [
+  { to: '/termsandConditions', label: t('الشروط والأحكام') },
+  { to: '/privacyPolicy',      label: t('سياسة الخصوصية') }
+])
 
-const socials = [
-  { name: 'instagram', href: '#', label: 'إنستغرام' },
-  { name: 'youtube',   href: '#', label: 'يوتيوب' },
-  { name: 'twitter',   href: '#', label: 'إكس / تويتر' },
-  { name: 'linkedin',  href: '#', label: 'لينكد إن' }
-]
+const socials = computed(() => [
+  { name: 'instagram', href: '#', label: t('إنستغرام') },
+  { name: 'youtube',   href: '#', label: t('يوتيوب') },
+  { name: 'twitter',   href: '#', label: t('إكس / تويتر') },
+  { name: 'linkedin',  href: '#', label: t('لينكد إن') }
+])
 </script>
 
 <style lang="scss" scoped>

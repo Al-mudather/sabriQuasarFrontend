@@ -84,6 +84,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
@@ -97,6 +98,7 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const { user } = storeToRefs(auth)
+const { t } = useI18n()
 
 // ---------------------------------------------------------------------------
 // Nav link definitions (icons as inline SVG HTML strings; consumed via v-html
@@ -118,14 +120,15 @@ const ICON = {
 // ---------------------------------------------------------------------------
 const drawerOpen = ref(false)
 
-const navLinks: NavLink[] = [
-  { to: '/profile',         label: 'الملف الشخصي',   icon: ICON.profile },
-  { to: '/myCourses',       label: 'دوراتي',          icon: ICON.courses },
-  { to: '/Certificates',    label: 'الشهادات',        icon: ICON.cert },
-  { to: '/notification',    label: 'الإشعارات',       icon: ICON.bell },
-  { to: '/myOrders',        label: 'طلباتي',          icon: ICON.orders },
-  { to: '/myMarketingPage', label: 'صفحتي التسويقية', icon: ICON.marketing }
-]
+// Labels are computed via t() so they react to locale flips.
+const navLinks = computed<NavLink[]>(() => [
+  { to: '/profile',         label: t('الملف الشخصي'),   icon: ICON.profile },
+  { to: '/myCourses',       label: t('دوراتي'),          icon: ICON.courses },
+  { to: '/Certificates',    label: t('الشهادات'),        icon: ICON.cert },
+  { to: '/notification',    label: t('الإشعارات'),       icon: ICON.bell },
+  { to: '/myOrders',        label: t('طلباتي'),          icon: ICON.orders },
+  { to: '/myMarketingPage', label: t('صفحتي التسويقية'), icon: ICON.marketing }
+])
 
 const userDisplayName = computed<string>(() => {
   const u = user.value
@@ -138,11 +141,11 @@ const userDisplayName = computed<string>(() => {
 
 const userRoleLabel = computed<string>(() => {
   const u = user.value
-  if (!u) return 'متعلم'
+  if (!u) return t('متعلم')
   const role = (u as Record<string, unknown>).role ?? (u as Record<string, unknown>).userType
-  if (role === 'trainer' || role === 'TRAINER') return 'مدرب'
-  if (role === 'admin'   || role === 'ADMIN')   return 'مشرف'
-  return 'متعلم'
+  if (role === 'trainer' || role === 'TRAINER') return t('مدرب')
+  if (role === 'admin'   || role === 'ADMIN')   return t('مشرف')
+  return t('متعلم')
 })
 
 const userAvatar = computed<string>(() => {

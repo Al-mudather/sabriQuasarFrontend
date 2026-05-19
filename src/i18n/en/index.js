@@ -60,7 +60,7 @@ export default {
   "_comment_src_components_Account_Login.vue": "src_components_Account_Login.vue",
         
  
-      "تسجيل الدخول" : "sign in",
+      "تسجيل الدخول" : "Sign in",
  
       "الإيميل" : "Email",
  
@@ -222,11 +222,11 @@ export default {
  
       "دخول" : "Login",
  
-      "الرئيسية" : "Main",
+      "الرئيسية" : "Home",
  
       "الــدورات" : "courses",
  
-      "طلباتي" : "My requests",
+      "طلباتي" : "My orders",
  
       "لوحتي التعليمية" : "My educational board",
  
@@ -256,7 +256,7 @@ export default {
   "_comment_src_components_Home_Shopping_cart.vue": "src_components_Home_Shopping_cart.vue",
         
  
-      "السلة" : "The basket",
+      "السلة" : "Cart",
  
         
   "_comment_src_components_Home_Statiscs.vue": "src_components_Home_Statiscs.vue",
@@ -628,7 +628,7 @@ export default {
   "_comment_src_pages_notification_management_Notification.vue": "src_pages_notification_management_Notification.vue",
         
  
-      "الإشعارات" : "Notices",
+      "الإشعارات" : "Notifications",
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .notifi{        margin: 10px auto;        max-width: 600px;        .notf{            background-color: #fff;            padding: 18px;            border-radius: 15px;            margin: 20px 0 20px 0;            box-shadow: 0px 3px 20px #eae8e878;            .user{            //maxMobile            @mediamax-width:767px" : "extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; }} .notifi {margin: 10px auto; max-width: 600px; .notf {background-color: #fff; padding: 18px; border-radius: 15px; margin: 20px 0 20px 0; box-shadow: 0px 3px 20px # eae8e878; .user {// maxMobile @ mediamax-width: 767px",
  
@@ -1053,4 +1053,74 @@ export default {
   "مركز د. صبري أبوقرون للتدريب — جميع الحقوق محفوظة": "Dr. Sabri Abu Garoun Training Center — All rights reserved",
   "صُنع بعناية لطلاب الطب الناطقين بالعربية": "Crafted with care for Arabic-speaking medical students",
   "اكتب رسالتك...": "Type your message...",
+
+  // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.
+  "الشهادات": "Certificates",
+  "صفحتي التسويقية": "My marketing page",
+  "متعلم": "Learner",
+  "مدرب": "Trainer",
+  "مشرف": "Admin",
+  "مرحباً": "Welcome",
+  "ابدأ الآن": "Start now",
+  "مركز د. صبري": "Dr. Sabri Center",
+  "أبوقرون للتدريب": "Abu Garoun Training",
+  "التنقل الرئيسي": "Main navigation",
+  "فتح القائمة": "Open menu",
+  "إغلاق القائمة": "Close menu",
+
+  // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.
+  "كل الدورات": "All courses",
+  "سلة المشتريات": "Shopping cart",
+  "إنستغرام": "Instagram",
+  "يوتيوب": "YouTube",
+  "إكس / تويتر": "X / Twitter",
+  "لينكد إن": "LinkedIn",
+
+  // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.
+  "آخر تحديث": "Last updated",
+  "أثر المركز": "The Center's impact",
+  "أقوى": "stronger",
+  "أكملت دورة علوم الدم · 2026": "Completed the Hematology course · 2026",
+  "ابدأ الدورة المجانية": "Start the free course",
+  "ابدأ رحلتك": "Start your journey",
+  "ابدأ رحلتك نحو": "Begin your journey toward",
+  "اقرأ المزيد من القصص": "Read more stories",
+  "السعر قبل الخصم": "Price before discount",
+  "ان التدريب في مركز د. صبري نقطة تحوّل حقيقية في مسيرتي المهنية. المنهج عميق، والمدرب حاضر بكل كفاءته وإنسانيته، وأخرجت من الدورة بمهارات سريرية صلبة وإحساس جديد بقدراتي على تقديم رعاية أفضل لمرضاي.": "The training at Dr. Sabri's Center has been a real turning point in my career. The curriculum is deep, the instructor is present with full competence and humanity, and I came out of the course with solid clinical skills and a renewed sense of my ability to deliver better care to my patients.",
+  "انضمّ إلى آلاف المتعلمين الذين اختاروا الاستثمار في أنفسهم. رحلتك نحو نسخة أقوى تبدأ بخطوة واحدة.": "Join thousands of learners who chose to invest in themselves. Your journey toward a stronger version of yourself begins with one step.",
+  "بالأرقام": "By the numbers",
+  "برامج تدريبية معتمدة في التطوير الذاتي والمهارات الطبية، يقودها خبراء متمرسون بخبرة تمتد لعقود.": "Accredited training programs in personal development and medical skills, led by seasoned experts with decades of experience.",
+  "تأثير الجهاز العصبي علي السلوك والانساني": "Effect of the nervous system on behavior and humanity",
+  "تاريخ الإنشاء": "Date created",
+  "تدريب يُحدث": "Training that makes",
+  "ثانيه": "second",
+  "جاهز لتبدأ؟": "Ready to start?",
+  "خصم {pct}٪": "{pct}% off",
+  "د. هدى الفهد": "Dr. Huda Al-Fahad",
+  "دقيقة": "minute",
+  "دورة معتمدة": "accredited course",
+  "رقم الكورس": "Course number",
+  "روابط التواصل الاجتماعي": "Social media links",
+  "سبب الرفض": "Reason for rejection",
+  "سنة خبرة": "years of experience",
+  "سنضيف دورات جديدة في هذا التخصص قريباً": "We'll be adding new courses in this specialty soon",
+  "طاقم التدريب": "Training staff",
+  "عرض الكل": "View all",
+  "عرض المرفق": "View attachment",
+  "عرض كل دورات {speciality}": "View all {speciality} courses",
+  "فرقاً حقيقياً": "a real difference",
+  "قصص المتعلمين": "Learner stories",
+  "كورس قيم جدا لاول مره احب الطب بهذة الطريقة": "A very valuable course — for the first time I've loved medicine this way",
+  "لا تحتاج بطاقة ائتمان · إلغاء في أي وقت": "No credit card needed · cancel anytime",
+  "لا توجد دورات حالياً": "No courses available right now",
+  "لماذا STC؟": "Why STC?",
+  "مركز د. صبري للتدريب الطبي والتطوير الذاتي": "Dr. Sabri Medical Training & Self-Development Center",
+  "مركز متخصص في التطوير الذاتي والتدريب المهني، يقدم تجربة تعليمية عربية متكاملة عبر برامج معتمدة يقودها خبراء متمرسون.": "A center specialized in self-development and professional training, offering a complete Arabic learning experience through accredited programs led by seasoned experts.",
+  "ملاحظات": "Notes",
+  "من نفسك": "of yourself",
+  "نسخة": "version",
+  "يـوم": "day",
+
+  // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.
+  "20+ سنة خبرة": "20+ years of experience",
 }

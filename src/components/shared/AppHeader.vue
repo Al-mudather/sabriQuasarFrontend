@@ -157,6 +157,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsModal from 'src/design-system/components/DsModal.vue'
@@ -186,23 +187,26 @@ const drawerOpen = ref(false)
 const logoSrc = LOGO.full
 const brandNameAr = BRAND.nameAr
 
-const BASE_LINKS: { to: string; label: string }[] = [
-  { to: '/',        label: 'الرئيسية' },
-  { to: '/courses', label: 'الدورات' },
-  { to: '/cart/',   label: 'السلة' },
-]
-
-const AUTH_LINKS: { to: string; label: string }[] = [
-  { to: '/myCourses',       label: 'دوراتي' },
-  { to: '/Certificates',    label: 'الشهادات' },
-  { to: '/notification',    label: 'الإشعارات' },
-  { to: '/myOrders',        label: 'طلباتي' },
-  { to: '/myMarketingPage', label: 'صفحتي التسويقية' },
-  { to: '/profile',         label: 'الملف الشخصي' },
-]
+// Labels are computed via $t() so they re-render reactively on locale flip.
+// The Arabic literal is the i18n key (matches the existing key pattern).
+const { t } = useI18n()
 
 const navLinks = computed<{ to: string; label: string }[]>(() => {
-  return isAuthenticated.value ? [...BASE_LINKS, ...AUTH_LINKS] : BASE_LINKS
+  const base = [
+    { to: '/',        label: t('الرئيسية') },
+    { to: '/courses', label: t('الدورات') },
+    { to: '/cart/',   label: t('السلة') },
+  ]
+  if (!isAuthenticated.value) return base
+  return [
+    ...base,
+    { to: '/myCourses',       label: t('دوراتي') },
+    { to: '/Certificates',    label: t('الشهادات') },
+    { to: '/notification',    label: t('الإشعارات') },
+    { to: '/myOrders',        label: t('طلباتي') },
+    { to: '/myMarketingPage', label: t('صفحتي التسويقية') },
+    { to: '/profile',         label: t('الملف الشخصي') },
+  ]
 })
 
 const showAuthCtas = computed<boolean>(() => props.showAuthCta && !isAuthenticated.value)
