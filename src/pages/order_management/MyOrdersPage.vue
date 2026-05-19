@@ -115,6 +115,7 @@ import { useRouter } from 'vue-router'
 import { useQuery } from '@vue/apollo-composable'
 import { useSettingsStore } from 'src/stores/settings'
 import { useAuthStore } from 'src/stores/auth'
+import { useIntl } from 'src/composables/useIntl'
 import { MyAttachmentTransactions } from 'src/graphql/attachment_transactions_management/query/TheUserAttachmentTransactionsQuery'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
@@ -180,15 +181,13 @@ function mapStatus (o: UserAttachmentTransaction): OrderStatus {
   return 'pending'
 }
 
+const { formatNumber, formatDate: fmtDateLocale } = useIntl()
+
 function formatAmount (value: number | null | undefined): string {
   if (value == null) return ''
   const n = Number(value)
   if (!Number.isFinite(n)) return String(value)
-  try {
-    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n)
-  } catch {
-    return String(n)
-  }
+  return formatNumber(n, { maximumFractionDigits: 2 })
 }
 
 function currencyLabel (o: UserAttachmentTransaction): string {
@@ -205,18 +204,7 @@ function currencyLabel (o: UserAttachmentTransaction): string {
 
 function formatDate (iso?: string | null): string {
   if (!iso) return ''
-  const d = new Date(iso)
-  if (isNaN(d.getTime())) return String(iso)
-  try {
-    // Arabic month names, English (Latin) numerals.
-    return new Intl.DateTimeFormat('ar-EG-u-nu-latn', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }).format(d)
-  } catch {
-    return d.toLocaleDateString('ar-EG')
-  }
+  return fmtDateLocale(iso, { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 // ---------------------------------------------------------------------------

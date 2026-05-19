@@ -318,6 +318,7 @@ import { useQuery } from '@vue/apollo-composable'
 import { apolloClient } from 'src/apollo/client'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
+import { useIntl } from 'src/composables/useIntl'
 import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses.js'
 import { GetSpecialities } from 'src/graphql/course_management/query/GetAllSpeciallites.js'
 import courseCard from 'components/utils/courseCard.vue'
@@ -489,14 +490,11 @@ watch(searchInput, (val) => {
 // ---------------------------------------------------------------------------
 // Methods
 // ---------------------------------------------------------------------------
+const { formatNumber: fmtNumLocale } = useIntl()
 function formatNum (n: number | null): string {
   const v = Number(n)
   if (!Number.isFinite(v)) return ''
-  try {
-    return new Intl.NumberFormat('ar-EG').format(v)
-  } catch {
-    return String(v)
-  }
+  return fmtNumLocale(v)
 }
 
 async function resolveSpecialityLabel (pk: number): Promise<void> {

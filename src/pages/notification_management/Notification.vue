@@ -108,6 +108,7 @@ import { useI18n } from 'vue-i18n'
 import { GetAllMyNotifications } from 'src/graphql/notification_management/query/GetAllMyNotifications'
 import { useSettingsStore } from 'src/stores/settings'
 import { useQuery } from '@vue/apollo-composable'
+import { useIntl } from 'src/composables/useIntl'
 import type {
   MyNotificationsResult,
   MyNotificationsVars,
@@ -359,41 +360,11 @@ function plaintextToHtml (raw: string): string {
 }
 
 // -----------------------------------------------------------------------
-// Relative-time formatter (ar-locale aware)
+// Relative-time formatter (locale-aware via useIntl)
 // -----------------------------------------------------------------------
-interface TimeUnit {
-  sec: number
-  unit: Intl.RelativeTimeFormatUnit
-  div?: number
-}
-const UNITS: TimeUnit[] = [
-  { sec: 60,       unit: 'second' },
-  { sec: 3600,     unit: 'minute', div: 60 },
-  { sec: 86400,    unit: 'hour',   div: 3600 },
-  { sec: 604800,   unit: 'day',    div: 86400 },
-  { sec: 2629800,  unit: 'week',   div: 604800 },
-  { sec: 31557600, unit: 'month',  div: 2629800 },
-  { sec: Infinity, unit: 'year',   div: 31557600 },
-]
-
+const { formatRelativeTime } = useIntl()
 function relativeTime (ts: string | null | undefined): string {
-  if (!ts) return ''
-  const d = new Date(ts)
-  if (Number.isNaN(d.getTime())) return ''
-  const diffSec = Math.round((d.getTime() - Date.now()) / 1000)
-  try {
-    const rtf = new Intl.RelativeTimeFormat('ar', { numeric: 'auto' })
-    const abs = Math.abs(diffSec)
-    for (const u of UNITS) {
-      if (abs < u.sec) {
-        const div = u.div ?? 1
-        return rtf.format(Math.round(diffSec / div), u.unit)
-      }
-    }
-    return rtf.format(Math.round(diffSec / 31557600), 'year')
-  } catch {
-    return ''
-  }
+  return ts ? formatRelativeTime(ts) : ''
 }
 
 // -----------------------------------------------------------------------

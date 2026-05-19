@@ -131,6 +131,9 @@ import DsCard from 'src/design-system/components/DsCard.vue'
 import DsBadge from 'src/design-system/components/DsBadge.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsTag from 'src/design-system/components/DsTag.vue'
+import { useIntl } from 'src/composables/useIntl'
+
+const { numberLocale, formatNumber, formatCurrency, formatDate: fmtDateLocale } = useIntl()
 
 type StatusKey = 'completed' | 'processing' | 'rejected' | 'hanged' | 'pending'
 
@@ -245,7 +248,7 @@ const isFormattedCurrency = computed(() => {
   const { amount, currency } = props.transaction ?? {}
   if (amount == null || !currency) return false
   try {
-    new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(amount)
+    new Intl.NumberFormat(numberLocale.value, { style: 'currency', currency }).format(amount)
     return true
   } catch (e) {
     return false
@@ -256,24 +259,16 @@ function formatAmount (value: number, currency?: string): string {
   const n = Number(value)
   if (!Number.isFinite(n)) return String(value)
   try {
-    if (currency) {
-      return new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(n)
-    }
-    return new Intl.NumberFormat('ar-SA').format(n)
+    if (currency) return formatCurrency(n, currency)
+    return formatNumber(n)
   } catch (e) {
-    return new Intl.NumberFormat('ar-SA').format(n)
+    return formatNumber(n)
   }
 }
 
 function formatDate (iso?: string): string {
   if (!iso) return ''
-  const d = new Date(iso)
-  if (isNaN(d.getTime())) return String(iso)
-  try {
-    return new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }).format(d)
-  } catch (e) {
-    return d.toLocaleString('ar-EG')
-  }
+  return fmtDateLocale(iso, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 function shortId (id?: string): string {

@@ -77,6 +77,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import { LOGO } from 'src/design-system/brand'
 import { slowBreath, cascade, contourDrift } from 'src/design-system/motion'
+import { useIntl } from 'src/composables/useIntl'
 
 interface Props {
   learnersCount?: number | null
@@ -106,15 +107,17 @@ let trustTimer: ReturnType<typeof setTimeout> | null = null
 
 const portraitSrc = computed(() => LOGO.full)
 
+const { formatNumber } = useIntl()
+
 const learnersLabel = computed(() =>
   Number.isFinite(props.learnersCount) && (props.learnersCount ?? 0) > 0
-    ? new Intl.NumberFormat('ar-EG').format(props.learnersCount as number)
+    ? formatNumber(props.learnersCount as number)
     : '[metric]'
 )
 
 const coursesLabel = computed(() =>
   Number.isFinite(props.coursesCount) && (props.coursesCount ?? 0) > 0
-    ? new Intl.NumberFormat('ar-EG').format(props.coursesCount as number)
+    ? formatNumber(props.coursesCount as number)
     : '[metric]'
 )
 

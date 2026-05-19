@@ -85,6 +85,8 @@ import CourseCard from 'src/components/shared/CourseCard.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
 import { useSettingsStore } from 'src/stores/settings'
+import { useIntl } from 'src/composables/useIntl'
+import { useI18n } from 'vue-i18n'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { cascade } from 'src/design-system/motion.js'
 import type {
@@ -156,9 +158,12 @@ const courses = computed<CourseInSpeciality[]>(() => {
   return edges.map(e => e?.node).filter((n): n is CourseInSpeciality => !!n)
 })
 
+const { formatNumber } = useIntl()
+const { t } = useI18n()
+
 const countLabel = computed<string>(() => {
   const total = coursesInSpeciality.value?.totalCount ?? courses.value.length
-  return `${new Intl.NumberFormat('ar-EG').format(total)} دورة`
+  return `${formatNumber(total)} ${t('دورة')}`
 })
 
 const iconSvg = computed<string>(() => pickIcon(props.speciality.speciality))
