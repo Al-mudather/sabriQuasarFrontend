@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type {
   ClassroomBootstrap,
   CurriculumUnit,
@@ -33,7 +33,12 @@ if (!ctx) throw new Error('CurriculumRail must be used inside ClassroomLayout')
 
 const unitContents = ctx.unitContents
 const unitLoadingPks = ctx.unitLoadingPks
+const unitPagination = ctx.unitPagination
 const progress = ctx.progress
+
+function hasMore(unit: CurriculumUnit): boolean {
+  return Boolean(unitPagination.get(unit.pk)?.hasNextPage)
+}
 
 function contentsFor(unit: CurriculumUnit): CurriculumContent[] {
   // Layout has eagerly hydrated the unit owning the current lesson; other
@@ -67,49 +72,42 @@ function decoratedContentsFor(unit: CurriculumUnit): CurriculumContent[] {
   })
 }
 
-// Track which units are expanded. Default: expand the unit that contains
-// the current content (known from ctx.currentUnitPk), fall back to first.
-const expandedByPk = ref<Record<number, boolean>>({})
+// Single-accordion mode: at most one unit open at any time. The currently
+// open unit is tracked as a single pk (null when none).
+// - On mount / route change, if currentUnitPk (URL-driven) is known, that
+//   unit is opened automatically.
+// - User clicking a closed unit opens it (closing any previously open one).
+// - User clicking an open unit closes it.
+// No fallback to "first unit" — clicking unit X opens only X.
+const openUnitPk = ref<number | null>(null)
 
 const activeUnitPk = computed<number | null>(() => ctx.currentUnitPk.value)
 
+// When the URL-driven active unit resolves (or changes), open it.
 watch(
-  () => [props.bootstrap, activeUnitPk.value] as const,
-  ([b, activePk]) => {
-    if (!b) return
-    const next: Record<number, boolean> = { ...expandedByPk.value }
-    if (activePk != null) {
-      next[activePk] = true
-    } else if (b.units.length && Object.keys(next).length === 0) {
-      const first = b.units[0]
-      if (first) next[first.pk] = true
-    }
-    expandedByPk.value = next
+  () => activeUnitPk.value,
+  (pk) => {
+    if (pk != null) openUnitPk.value = pk
   },
   { immediate: true },
 )
 
-// Whenever a unit becomes expanded for the first time, fire its content
-// fetch. Idempotent via useUnitContents — same unit doesn't re-fetch within
-// the 10-minute cache TTL.
+// Whenever a unit becomes the open one, fire its content fetch. Idempotent
+// via useUnitContents — same unit doesn't re-fetch within the 10-minute TTL.
 watch(
-  expandedByPk,
-  (next) => {
-    for (const [pkStr, open] of Object.entries(next)) {
-      if (!open) continue
-      const pk = Number(pkStr)
-      if (Number.isFinite(pk) && pk > 0) void ctx.loadUnit(pk)
-    }
+  openUnitPk,
+  (pk) => {
+    if (pk != null) void ctx.loadUnit(pk)
   },
-  { deep: true, immediate: true },
+  { immediate: true },
 )
 
 function isExpanded(unit: CurriculumUnit): boolean {
-  return !!expandedByPk.value[unit.pk]
+  return openUnitPk.value === unit.pk
 }
 
 function onUpdateExpanded(unit: CurriculumUnit, value: boolean) {
-  expandedByPk.value = { ...expandedByPk.value, [unit.pk]: value }
+  openUnitPk.value = value ? unit.pk : (openUnitPk.value === unit.pk ? null : openUnitPk.value)
 }
 
 function completedCount(unit: CurriculumUnit): number {
@@ -139,6 +137,54 @@ function handleSelect(content: CurriculumContent) {
   if (isLocked(content)) return
   emit('select', content.pk)
 }
+
+// ---------------------------------------------------------------------------
+// Auto-load: a sentinel <div> after each unit's last lesson row. When the
+// rail scrolls and a sentinel intersects the visible area, we call
+// ctx.loadMore(unitPk) — the composable no-ops when there's no next page,
+// so the rail can fire freely without guarding here.
+// ---------------------------------------------------------------------------
+
+const railBodyRef = ref<HTMLElement | null>(null)
+let sentinelObserver: IntersectionObserver | null = null
+
+function onSentinelRef(el: Element | null, unitPk: number) {
+  if (!sentinelObserver) return
+  // Refs flicker on re-render: unobserve any previous element first.
+  // Track via dataset so unobserve targets the right node.
+  if (el instanceof HTMLElement) {
+    el.dataset.unitPk = String(unitPk)
+    sentinelObserver.observe(el)
+  }
+}
+
+onMounted(() => {
+  sentinelObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        const target = entry.target as HTMLElement
+        const raw = target.dataset.unitPk
+        const pk = raw ? Number(raw) : NaN
+        if (Number.isFinite(pk) && pk > 0) void ctx.loadMore(pk)
+      }
+    },
+    {
+      root: railBodyRef.value,
+      // Pre-fetch a screen-and-a-half before the sentinel actually enters the
+      // viewport so the next page lands before the user hits the bottom.
+      rootMargin: '300px 0px',
+      threshold: 0,
+    },
+  )
+})
+
+onBeforeUnmount(() => {
+  if (sentinelObserver) {
+    sentinelObserver.disconnect()
+    sentinelObserver = null
+  }
+})
 </script>
 
 <template>
@@ -165,7 +211,7 @@ function handleSelect(content: CurriculumContent) {
       </button>
     </div>
 
-    <div class="cls-rail__body">
+    <div ref="railBodyRef" class="cls-rail__body">
       <!-- Loading skeleton -->
       <div v-if="bootstrap === null" class="cls-rail__skeleton" aria-hidden="true">
         <div v-for="n in 4" :key="n" class="cls-rail__skeleton-unit">
@@ -201,7 +247,11 @@ function handleSelect(content: CurriculumContent) {
         <q-expansion-item
           v-for="unit in bootstrap.units"
           :key="unit.pk"
-          class="cls-rail__unit"
+          :class="[
+            'cls-rail__unit',
+            { 'cls-rail__unit--active': unit.pk === activeUnitPk },
+            { 'cls-rail__unit--open': isExpanded(unit) },
+          ]"
           :model-value="isExpanded(unit)"
           header-class="cls-rail__unit-header"
           expand-icon-class="cls-rail__unit-chevron"
@@ -227,6 +277,18 @@ function handleSelect(content: CurriculumContent) {
                 :locked="isLocked(content)"
                 @click="handleSelect(content)"
               />
+
+              <!-- Auto-load sentinel + in-flight indicator for additional pages -->
+              <div
+                v-if="hasMore(unit)"
+                :ref="(el) => onSentinelRef(el as Element | null, unit.pk)"
+                class="cls-rail__unit-sentinel"
+                :aria-busy="isUnitLoading(unit) ? 'true' : 'false'"
+                aria-live="polite"
+              >
+                <div class="cls-rail__skeleton-bar" />
+                <div class="cls-rail__skeleton-bar cls-rail__skeleton-bar--short" />
+              </div>
             </template>
 
             <!-- Still fetching: placeholder rows matching the lesson count -->
@@ -380,6 +442,15 @@ function handleSelect(content: CurriculumContent) {
     padding: var(--ds-space-3) var(--ds-space-4);
   }
 
+  // ---- Auto-load sentinel rendered after the last hydrated lesson ----
+  &__unit-sentinel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-3) var(--ds-space-4);
+    min-height: 32px;
+  }
+
   // ---- Collapsed state ----
   &__collapsed {
     padding: var(--ds-space-3) 0;
@@ -422,7 +493,40 @@ function handleSelect(content: CurriculumContent) {
   }
 
   &__unit {
+    position: relative;
     border-block-end: 1px solid var(--cls-divider);
+    transition: background-color var(--cls-dur-fast) var(--cls-ease);
+  }
+
+  // When the currently-watched lesson lives in this unit, render a vertical
+  // accent stripe on the leading edge of the header so the user can find
+  // the active section at a glance.
+  &__unit--active {
+    background: rgba(193, 98, 60, 0.06);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: 0;
+      width: 3px;
+      background: var(--cls-accent);
+      border-radius: 0 var(--cls-radius-sm) var(--cls-radius-sm) 0;
+    }
+
+    .cls-rail__unit-title {
+      color: var(--cls-accent);
+    }
+
+    .cls-rail__unit-count {
+      color: var(--cls-accent);
+    }
+  }
+
+  // The currently-expanded unit gets a slightly lifted background so the
+  // chevron-open + chevron-closed states are visually distinguishable.
+  &__unit--open :deep(.cls-rail__unit-header) {
+    background: var(--cls-rail-hover);
   }
 
   :deep(.cls-rail__unit-header) {
@@ -461,6 +565,7 @@ function handleSelect(content: CurriculumContent) {
     text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
+    transition: color var(--cls-dur-fast) var(--cls-ease);
   }
 
   &__unit-count {

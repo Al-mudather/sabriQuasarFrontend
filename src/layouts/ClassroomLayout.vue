@@ -72,7 +72,9 @@ const { progressMap, refetch: refetchProgress } = useLearningProgress(coursePk, 
 const {
   contentsByUnitPk,
   loadingPks: unitLoadingPks,
+  paginationByUnitPk,
   loadUnit,
+  loadMore,
 } = useUnitContents()
 
 const { currentContent, currentUnitPk } = useCurrentContent(currentContentPkFromRoute)
@@ -127,7 +129,9 @@ const classroomContext: ClassroomContext = {
   bootstrap,
   unitContents: contentsByUnitPk,
   unitLoadingPks,
+  unitPagination: paginationByUnitPk,
   loadUnit,
+  loadMore,
   currentContent,
   currentUnitPk,
   progress: progressMap,
@@ -157,7 +161,12 @@ const headerPercent = computed<number>(() => bootstrap.value?.progressPercent ??
 .cls-layout {
   display: flex;
   flex-direction: column;
-  min-block-size: 100vh;
+  // Pin to viewport so the document itself never scrolls. Each of the
+  // three internal columns (rail / main / panel) owns its own scroll
+  // container, which keeps the video player anchored in the center
+  // when the user expands a unit accordion in the rail.
+  block-size: 100vh;
+  overflow: hidden;
   background: var(--cls-surface, #0F0B1A);
   color: var(--cls-text-primary, #F5F2EA);
 
@@ -165,6 +174,7 @@ const headerPercent = computed<number>(() => bootstrap.value?.progressPercent ??
     flex: 1 1 auto;
     display: flex;
     min-block-size: 0;
+    overflow: hidden;
   }
 }
 </style>

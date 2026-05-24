@@ -99,10 +99,11 @@ function handleKeydown(e: KeyboardEvent) {
   cursor: pointer;
   user-select: none;
   border: 0;
-  border-inline-start: 3px solid transparent;
+  border-inline-start: 4px solid transparent;
   transition:
     background-color var(--cls-dur-fast) var(--cls-ease),
-    border-color var(--cls-dur-fast) var(--cls-ease);
+    border-color var(--cls-dur-fast) var(--cls-ease),
+    box-shadow var(--cls-dur-fast) var(--cls-ease);
 
   &:hover {
     background: var(--cls-rail-hover);
@@ -113,9 +114,26 @@ function handleKeydown(e: KeyboardEvent) {
     outline-offset: -2px;
   }
 
+  // Active = the lesson currently on screen. Visually loud on a dark
+  // surface: saturated terracotta tint, accent-colored title, persistent
+  // left rail, and an inset glow so it never blends into hover states.
   &--active {
-    background: var(--cls-accent-soft);
+    background: rgba(193, 98, 60, 0.22);
     border-inline-start-color: var(--cls-accent);
+    box-shadow: inset 0 0 0 1px rgba(193, 98, 60, 0.32);
+
+    &:hover {
+      background: rgba(193, 98, 60, 0.28);
+    }
+
+    .cls-curriculum-item__title {
+      color: var(--cls-accent);
+      font-weight: var(--ds-weight-semibold);
+    }
+
+    .cls-curriculum-item__kind {
+      color: var(--cls-accent);
+    }
   }
 
   &--locked {

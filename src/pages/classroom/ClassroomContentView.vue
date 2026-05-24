@@ -312,8 +312,16 @@ async function goToPrevAndEnd(): Promise<void> {
     align-items: stretch;
     justify-content: center;
     min-inline-size: 0;
+    min-block-size: 0;
+    // The layout pins the page to 100vh; if the player + meta + nav
+    // exceed the available height, scroll inside this column instead
+    // of growing the document.
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 24px;
     background: var(--cls-surface, #0F0B1A);
+    scrollbar-width: thin;
+    scrollbar-color: var(--cls-divider, rgba(245, 242, 234, 0.08)) transparent;
   }
 
   &__panel {

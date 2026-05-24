@@ -212,6 +212,18 @@ export type ProgressEntry = {
 export type ProgressMap = Record<number, ProgressEntry>
 
 // ---------------------------------------------------------------------------
+// Per-unit pagination state, exposed to the rail so it can render an
+// auto-loading sentinel when there are more lessons to fetch.
+// ---------------------------------------------------------------------------
+
+export type UnitPagination = {
+  endCursor: string | null
+  hasNextPage: boolean
+  /** Server-reported total. May be null until the first page lands. */
+  totalCount: number | null
+}
+
+// ---------------------------------------------------------------------------
 // Per-operation Result / Vars aliases (from codegen).
 // ---------------------------------------------------------------------------
 

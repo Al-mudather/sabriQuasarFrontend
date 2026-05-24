@@ -3,6 +3,7 @@ import type {
   ClassroomBootstrap,
   CurriculumContent,
   ProgressMap,
+  UnitPagination,
 } from 'src/types/classroom/types'
 
 export type ClassroomContext = {
@@ -12,8 +13,12 @@ export type ClassroomContext = {
   unitContents: ReadonlyMap<number, CurriculumContent[]>
   /** Set of unit pks currently fetching. Drives rail skeletons. */
   unitLoadingPks: ReadonlySet<number>
-  /** Idempotently load a unit's lessons. Safe to call multiple times. */
+  /** Per-unit pagination state — drives the rail's auto-load sentinel. */
+  unitPagination: ReadonlyMap<number, UnitPagination>
+  /** Idempotently load a unit's first page. Safe to call multiple times. */
   loadUnit: (unitPk: number) => Promise<CurriculumContent[]>
+  /** Fetch and append the next page of a unit. No-op when hasNextPage is false. */
+  loadMore: (unitPk: number) => Promise<CurriculumContent[]>
   /**
    * The lesson currently on screen (resolved via GetCourseUnitContent at the
    * layout). Available before its parent unit's lesson list has hydrated.
