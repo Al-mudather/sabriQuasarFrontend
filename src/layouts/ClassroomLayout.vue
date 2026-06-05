@@ -69,6 +69,20 @@ const enrollmentPk = computed<number | null>(() => rawBootstrap.value?.enrollmen
 
 const { progressMap, refetch: refetchProgress } = useLearningProgress(coursePk, enrollmentPk)
 
+// Live-ring update: when the user navigates away from a content (contentPk changes),
+// refetch the enrollment so the header ring reflects the new backend percentage.
+// This fires after the route-level navigation that typically follows end() → next().
+// Tradeoff: one extra enrollment fetch per content switch. This is the simplest
+// correct wiring without touching useLearningProgress internals.
+watch(
+  () => currentContentPkFromRoute.value,
+  (next, prev) => {
+    if (prev != null && next !== prev) {
+      void refetch()
+    }
+  },
+)
+
 const {
   contentsByUnitPk,
   loadingPks: unitLoadingPks,
@@ -79,36 +93,11 @@ const {
 
 const { currentContent, currentUnitPk } = useCurrentContent(currentContentPkFromRoute)
 
-// Wrap the slim raw bootstrap with progress-aware aggregates so downstream
-// readers (ClassroomOverviewPanel, ClassroomHeader) see accurate
-// completedContents / totalVideos / progressPercent values that update as
-// units lazy-hydrate.
-const bootstrap = computed<ClassroomBootstrap | null>(() => {
-  const b = rawBootstrap.value
-  if (!b) return null
-  const pm = progressMap.value
-  let totalVideos = 0
-  let completedVideos = 0
-  for (const contents of contentsByUnitPk.values()) {
-    for (const c of contents) {
-      if (c.kind !== 'video') continue
-      totalVideos += 1
-      if (pm[c.pk]?.complete) completedVideos += 1
-    }
-  }
-  // Denominator priority: hydrated video count when available (precise),
-  // otherwise the slim bootstrap's totalContents (estimate). This keeps
-  // the percent stable from first paint and only sharpens upward as the
-  // user opens more units.
-  const denom = totalVideos > 0 ? totalVideos : b.totalContents
-  const progressPercent = denom === 0 ? 0 : Math.min(100, Math.round((completedVideos / denom) * 100))
-  return {
-    ...b,
-    totalVideos: totalVideos > 0 ? totalVideos : b.totalVideos,
-    completedContents: completedVideos,
-    progressPercent,
-  }
-})
+// The backend progress fields (completedContents, totalVideos, progressPercent)
+// are already populated by useCourseBootstrap from the canonical enrollment.progress
+// field — pass them through unchanged. progressMap remains wired for per-lesson
+// rail ticks; it does NOT override the header ring percentage.
+const bootstrap = computed<ClassroomBootstrap | null>(() => rawBootstrap.value)
 
 // Eagerly hydrate the unit that owns the current lesson, so the rail can
 // show its surrounding lessons + the player has prev/next data within the

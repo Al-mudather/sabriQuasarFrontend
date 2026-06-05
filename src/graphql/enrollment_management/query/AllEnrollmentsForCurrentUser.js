@@ -17,31 +17,12 @@ query AllEnrollmentsForCurrentUser($cursor: String, $limit: Int){
           id,
           pk,
           title,
-          cover,
-          courseunitSet{
-            totalCount,
-            edgeCount,
-            edges{
-              node {
-                id,
-                pk,
-                courseunitcontentSet {
-                  totalCount,
-                  edgeCount
-                }
-              }
-            }
-          }
+          cover
         },
-        learningprogressSet {
-          totalCount,
-          edgeCount,
-          edges {
-            node{
-              id,
-              pk
-            }
-          }
+        progress {
+          completed,
+          total,
+          percentage
         }
       }
     }

@@ -139,7 +139,10 @@
               <span class="mc-card__progress-label">
                 {{ item.isCompleted ? $t('أكملت الدورة') : $t('التقدم') }}
               </span>
-              <span class="mc-card__progress-value">{{ item.progress }}%</span>
+              <span class="mc-card__progress-value">
+                {{ item.progress }}%
+                <span class="mc-card__progress-count">{{ item.completed }} / {{ item.total }}</span>
+              </span>
             </div>
             <div
               class="mc-card__progress-track"
@@ -259,53 +262,50 @@ const enrollmentEdges = computed(
     .filter((e): e is NonNullable<typeof e> => !!e && !!e.node),
 )
 
-function computeProgress(enrollmentNode: Enrollment): number {
-  const course = enrollmentNode.course
-  if (!course?.courseunitSet) return 0
-  const done = enrollmentNode.learningprogressSet?.totalCount ?? 0
-  const total = (course.courseunitSet.edges ?? []).reduce(
-    (acc, u) => acc + (u?.node?.courseunitcontentSet?.totalCount ?? 0),
-    0,
-  )
-  if (total <= 0) return 0
-  return Math.max(0, Math.min(100, Math.round((done / total) * 100)))
-}
-
 interface CourseCardViewModel {
   key: string
   pk: number | null
   enrollmentPk: number | null
+  /** Rounded percentage 0–100 from the backend canonical field. */
   progress: number
+  /** Backend-reported completed content items. */
+  completed: number
+  /** Backend-reported total content items. */
+  total: number
   isCompleted: boolean
   course: {
     id: string
     pk: number | null
     name: string
     coverImage?: string
-    progress: number
+  }
+}
+
+function nodeToViewModel(node: NonNullable<Enrollment>): CourseCardViewModel {
+  const c = node.course
+  const percentage = Math.round(node.progress?.percentage ?? 0)
+  const completed = node.progress?.completed ?? 0
+  const total = node.progress?.total ?? 0
+  const isCompleted = (node.progress?.percentage ?? 0) >= 100
+  return {
+    key: node.id ?? c.id ?? String(c.pk),
+    pk: c.pk,
+    enrollmentPk: node.pk,
+    progress: percentage,
+    completed,
+    total,
+    isCompleted,
+    course: {
+      id: c.id,
+      pk: c.pk,
+      name: c.title,
+      coverImage: c.cover ? FORMAT_THE_IAMGE_URL(c.cover) as string : undefined,
+    },
   }
 }
 
 const items = computed<CourseCardViewModel[]>(() =>
-  enrollmentEdges.value.map((edge) => {
-    const node = edge.node!
-    const c = node.course
-    const progress = computeProgress(node)
-    return {
-      key: node.id ?? c.id ?? String(c.pk),
-      pk: c.pk,
-      enrollmentPk: node.pk,
-      progress,
-      isCompleted: progress >= 100,
-      course: {
-        id: c.id,
-        pk: c.pk,
-        name: c.title,
-        coverImage: c.cover ? FORMAT_THE_IAMGE_URL(c.cover) as string : undefined,
-        progress,
-      },
-    }
-  }),
+  enrollmentEdges.value.map((edge) => nodeToViewModel(edge.node!)),
 )
 
 // ---------------------------------------------------------------------------
@@ -315,7 +315,7 @@ const total = computed(() => items.value.length)
 const isLoading = computed(() => enrollQuery.loading.value && items.value.length === 0)
 
 const inProgressCount = computed(
-  () => items.value.filter((i) => i.progress > 0 && i.progress < 100).length,
+  () => items.value.filter((i) => i.progress > 0 && !i.isCompleted).length,
 )
 const completedCount = computed(
   () => items.value.filter((i) => i.isCompleted).length,
@@ -339,7 +339,7 @@ const visibleItems = computed<CourseCardViewModel[]>(() => {
   const effectiveStatus = showStatusChips.value ? statusFilter.value : 'all'
   return items.value.filter((i) => {
     if (effectiveStatus === 'completed' && !i.isCompleted) return false
-    if (effectiveStatus === 'in-progress' && !(i.progress > 0 && i.progress < 100)) return false
+    if (effectiveStatus === 'in-progress' && !(i.progress > 0 && !i.isCompleted)) return false
     if (q && !i.course.name.toLowerCase().includes(q)) return false
     return true
   })
@@ -694,12 +694,21 @@ function resetFilters(): void {
   }
 
   &__progress-value {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--ds-space-2);
     font-family: var(--ds-font-mono, var(--ds-font-body));
     font-size: var(--ds-text-sm);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--ds-brand-600, #322873);
     line-height: 1;
+  }
+
+  &__progress-count {
+    font-weight: 400;
+    font-size: var(--ds-text-xs);
+    color: var(--ds-taupe, var(--ds-text-muted));
   }
 
   &__progress-track {

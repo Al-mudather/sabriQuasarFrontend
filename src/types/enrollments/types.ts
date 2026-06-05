@@ -8,7 +8,7 @@ import type {
 
 /**
  * Entity extracted from the list query's edge.node.
- * Represents a single enrollment item (course + learning progress refs).
+ * Represents a single enrollment item (course + canonical backend progress).
  */
 export type Enrollment = NonNullable<
   NonNullable<
@@ -19,6 +19,12 @@ export type Enrollment = NonNullable<
     >['node']
   >
 >
+
+/**
+ * The backend-computed progress object on an enrollment.
+ * completed / total are Ints, percentage is a Float (e.g. 43.28).
+ */
+export type EnrollmentProgress = NonNullable<Enrollment['progress']>
 
 // List query: AllEnrollmentsForCurrentUser
 export type AllEnrollmentsResult = AllEnrollmentsForCurrentUserQuery

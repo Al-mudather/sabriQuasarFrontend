@@ -184,11 +184,15 @@ export function useCourseBootstrap(coursePk: PkLike): {
     })
     units.sort((a, b) => a.order - b.order || a.pk - b.pk)
 
-    // Without per-content modelName, we can't distinguish video from non-video
-    // at bootstrap time. Use totalContents as the progress denominator until
-    // the user expands a unit and lessons hydrate — the merger in
-    // ClassroomLayout will recompute the precise video-only percent once
-    // contents arrive.
+    // Use the backend's canonical progress field as the single source of truth.
+    // `enrollment.progress.total` may differ from our summed `totalContents`
+    // (the backend counts exactly; our slim bootstrap sum may overcount
+    // NoneType placeholder rows). Prefer the backend value when available.
+    const backendTotal = enrollment.progress?.total ?? null
+    const completedContents = enrollment.progress?.completed ?? 0
+    const progressPercent = Math.round(enrollment.progress?.percentage ?? 0)
+    const denominator = backendTotal !== null ? backendTotal : totalContents
+
     const out: ClassroomBootstrap = {
       enrollmentPk: enrollment.pk,
       coursePk: course.pk,
@@ -196,10 +200,10 @@ export function useCourseBootstrap(coursePk: PkLike): {
       courseCover: (course as { cover?: string | null }).cover ?? null,
       hasCertificate: Boolean((course as { hasCertificate?: boolean | null }).hasCertificate),
       telegramLink: (course as { telegramLink?: string | null }).telegramLink ?? null,
-      totalContents,
-      totalVideos: totalContents,
-      completedContents: 0,
-      progressPercent: 0,
+      totalContents: denominator,
+      totalVideos: denominator,
+      completedContents,
+      progressPercent,
       units,
     }
     return out
