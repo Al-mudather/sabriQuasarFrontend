@@ -42,9 +42,10 @@ defineEmits<{
 .cls-vdo {
   position: relative;
   inline-size: 100%;
-  aspect-ratio: 16 / 9;
+  // Fill the parent box — `.cls-cockpit__media` owns the dimensions.
+  block-size: 100%;
   background: #000;
-  border-radius: var(--cls-radius-lg, 16px);
+  border-radius: inherit;
   overflow: hidden;
 
   &__mount {

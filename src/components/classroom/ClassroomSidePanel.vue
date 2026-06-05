@@ -136,16 +136,25 @@ function onKeydown(e: KeyboardEvent) {
   &__tabs {
     display: flex;
     align-items: stretch;
+    justify-content: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     min-height: var(--cls-header-h);
     border-block-end: 1px solid var(--cls-divider);
     flex-shrink: 0;
     padding: 0 var(--ds-space-2);
     gap: var(--ds-space-1);
+    // Hide scrollbar visually while keeping horizontal scroll accessible
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__tab {
     position: relative;
-    flex: 1;
+    flex: 0 0 auto;
     min-width: 0;
     background: transparent;
     border: 0;
@@ -153,19 +162,30 @@ function onKeydown(e: KeyboardEvent) {
     font-family: var(--ds-font-body);
     font-size: var(--ds-text-sm);
     font-weight: var(--ds-weight-medium);
-    padding: 0 var(--ds-space-2);
+    padding-block: 0;
+    padding-inline: var(--ds-space-4);
+    text-align: center;
     cursor: pointer;
     transition: color var(--cls-dur-fast) var(--cls-ease);
+
+    @media (max-width: 480px) {
+      font-size: var(--ds-text-xs);
+      padding-inline: var(--ds-space-3);
+    }
 
     &::after {
       content: '';
       position: absolute;
-      inset-inline: var(--ds-space-2);
+      inset-inline: var(--ds-space-4);
       bottom: 0;
       height: 2px;
       background: transparent;
       border-radius: 2px 2px 0 0;
       transition: background-color var(--cls-dur-med) var(--cls-ease);
+
+      @media (max-width: 480px) {
+        inset-inline: var(--ds-space-3);
+      }
     }
 
     &:hover {

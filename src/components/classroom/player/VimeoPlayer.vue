@@ -69,8 +69,9 @@ watch(() => [props.videoId, props.hash], mountPlayer)
 <style lang="scss" scoped>
 .cls-vimeo {
   inline-size: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: var(--cls-radius-lg, 16px);
+  // Fill the parent box — `.cls-cockpit__media` owns the dimensions.
+  block-size: 100%;
+  border-radius: inherit;
   overflow: hidden;
   background: #000;
 

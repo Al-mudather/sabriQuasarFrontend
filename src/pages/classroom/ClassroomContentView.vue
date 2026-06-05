@@ -1,5 +1,9 @@
 <template>
-  <div class="cls-cockpit" :data-mobile="isMobileCockpit || null">
+  <div
+    class="cls-cockpit"
+    :data-mobile="isMobileCockpit || null"
+    :data-kind="current?.kind || null"
+  >
     <aside
       v-if="!isMobileCockpit"
       class="cls-cockpit__rail"
@@ -24,62 +28,59 @@
         icon="videocam_off"
       />
       <div v-else class="cls-cockpit__stage">
-        <div class="cls-cockpit__media">
-          <VideoPlayer
-            v-if="current.kind === 'video'"
-            :model-value-raw="current.modelValueRaw"
-            @begin="onBegin"
-            @complete="onComplete"
-            @error="onVideoError"
-          />
-          <QuizRunner
-            v-else-if="current.kind === 'quiz' && quizContentId != null"
-            :content-quiz-id="quizContentId"
-            :title="quizTitle"
-          />
-          <FileView
-            v-else-if="current.kind === 'file' && currentContentPk != null && coursePkRef != null"
-            :file-url="fileUrl"
-            :title="current.title"
-          />
-          <div
-            v-else
-            class="cls-cockpit__player-placeholder"
-            role="img"
-            :aria-label="current.title"
-          >
-            <q-icon name="play_circle" size="64px" />
-            <p>{{ $t('classroom.player.comingSoon') }}</p>
-          </div>
-        </div>
-
-        <div class="cls-cockpit__meta">
-          <div class="cls-cockpit__kind-badge">{{ current.modelName }}</div>
+        <div class="cls-cockpit__top">
           <h2 class="cls-cockpit__title">{{ current.title }}</h2>
-        </div>
 
-        <div class="cls-cockpit__nav">
-          <button
-            type="button"
-            class="cls-cockpit__nav-btn"
-            :disabled="!prevContent"
-            @click="goToPrevAndEnd"
-          >
-            {{ $t('classroom.player.prev') }}
-          </button>
-          <button
-            type="button"
-            class="cls-cockpit__nav-btn"
-            :disabled="!nextContent"
-            @click="goToNextAndEnd"
-          >
-            {{ $t('classroom.player.next') }}
-          </button>
+          <div class="cls-cockpit__media">
+            <VideoPlayer
+              v-if="current.kind === 'video'"
+              :model-value-raw="current.modelValueRaw"
+              @begin="onBegin"
+              @complete="onComplete"
+              @error="onVideoError"
+            />
+            <QuizRunner
+              v-else-if="current.kind === 'quiz' && quizContentId != null"
+              :content-quiz-id="quizContentId"
+              :title="quizTitle"
+            />
+            <FileView
+              v-else-if="current.kind === 'file' && currentContentPk != null && coursePkRef != null"
+              :file-url="fileUrl"
+              :title="current.title"
+            />
+            <div
+              v-else
+              class="cls-cockpit__player-placeholder"
+              role="img"
+              :aria-label="current.title"
+            >
+              <q-icon name="play_circle" size="64px" />
+              <p>{{ $t('classroom.player.comingSoon') }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <aside class="cls-cockpit__panel">
+    <!-- Side panel. Desktop: static right column. Mobile: a full-height drawer
+         that slides in over the video, opened by the floating button below. -->
+    <aside
+      class="cls-cockpit__panel"
+      :data-drawer="isMobileCockpit || null"
+      :data-open="(isMobileCockpit && drawerOpen) || null"
+      :aria-hidden="isMobileCockpit && !drawerOpen ? 'true' : undefined"
+    >
+      <button
+        v-if="isMobileCockpit"
+        type="button"
+        class="cls-cockpit__drawer-close"
+        aria-label="إغلاق"
+        @click="drawerOpen = false"
+      >
+        <q-icon name="close" size="22px" />
+      </button>
+
       <ClassroomSidePanel
         :active-tab="store.panelTab"
         :show-curriculum="isMobileCockpit"
@@ -112,6 +113,28 @@
         </template>
       </ClassroomSidePanel>
     </aside>
+
+    <!-- Mobile: dimmed scrim behind the open drawer. -->
+    <transition name="cls-fade">
+      <div
+        v-if="isMobileCockpit && drawerOpen"
+        class="cls-cockpit__scrim"
+        @click="drawerOpen = false"
+      />
+    </transition>
+
+    <!-- Mobile: floating button that opens the lesson drawer. -->
+    <q-btn
+      v-if="isMobileCockpit"
+      v-show="!drawerOpen"
+      round
+      unelevated
+      size="lg"
+      icon="format_list_bulleted"
+      class="cls-cockpit__fab"
+      :aria-label="$t('classroom.panel.curriculum')"
+      @click="drawerOpen = true"
+    />
   </div>
 </template>
 
@@ -121,7 +144,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useClassroomStore } from 'src/stores/classroom'
 import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
-import { useCurriculumNavigation } from 'src/composables/classroom/useCurriculumNavigation'
 import { useLearningProgress } from 'src/composables/classroom/useLearningProgress'
 import {
   parseModelValue,
@@ -150,6 +172,10 @@ const store = useClassroomStore()
 // rendered inside the side panel as its first tab.
 const isMobileCockpit = computed<boolean>(() => $q.screen.lt.md)
 const stageRef = ref<HTMLElement | null>(null)
+
+// Mobile only: the lesson list (curriculum / overview / Q&A) lives in a
+// full-height drawer so it never crowds the video. The FAB toggles it.
+const drawerOpen = ref<boolean>(false)
 const injected = inject(ClassroomContextKey)
 if (!injected) throw new Error('ClassroomContentView must be used inside ClassroomLayout')
 const ctx = injected
@@ -175,12 +201,6 @@ const enrollmentPkRef = computed<number | null>(() => ctx.bootstrap.value?.enrol
 // to iterate bootstrap.units anymore.
 const current = ctx.currentContent
 const currentUnitPk = ctx.currentUnitPk
-
-const { nextContent, prevContent, goToNext, goToPrev } = useCurriculumNavigation({
-  bootstrap: ctx.bootstrap,
-  currentContentPk,
-  unitContents: ctx.unitContents,
-})
 
 const { start, end } = useLearningProgress(coursePkRef, enrollmentPkRef)
 
@@ -265,25 +285,13 @@ async function onSelect(contentPk: number): Promise<void> {
     name: 'classroom-content',
     params: { coursePk: String(cpk), contentPk: String(contentPk) },
   })
-  // On the mobile cockpit the curriculum lives in the side-panel BELOW the
-  // video. After picking a lesson, scroll the video back into view so the
-  // learner doesn't have to scroll up manually.
+  // On mobile the curriculum lives in a drawer; close it after a pick so the
+  // learner returns to the clean video.
   if (isMobileCockpit.value) {
-    requestAnimationFrame(() => {
-      stageRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
+    drawerOpen.value = false
   }
 }
 
-async function goToNextAndEnd(): Promise<void> {
-  await end()
-  goToNext()
-}
-
-async function goToPrevAndEnd(): Promise<void> {
-  await end()
-  goToPrev()
-}
 </script>
 
 <style lang="scss" scoped>
@@ -343,31 +351,22 @@ async function goToPrevAndEnd(): Promise<void> {
     color: var(--cls-text-primary, #F5F2EA);
   }
 
+  &__top {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
   &__media {
     inline-size: 100%;
   }
 
-  &__meta {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  &__kind-badge {
-    align-self: flex-start;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: var(--cls-accent-soft, rgba(193, 98, 60, 0.16));
-    color: var(--cls-accent, #C1623C);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
   &__title {
     margin: 0;
+    padding: 0 0 12px;
     font-size: 22px;
     font-weight: 600;
+    line-height: 1.3;
   }
 
   &__player-placeholder {
@@ -384,26 +383,16 @@ async function goToPrevAndEnd(): Promise<void> {
     font-size: 13px;
   }
 
-  &__nav {
-    display: flex;
-    gap: 12px;
-    justify-content: space-between;
-  }
+}
 
-  &__nav-btn {
-    flex: 1 1 auto;
-    padding: 10px 16px;
-    background: var(--cls-surface-elevated, #1A1430);
-    color: var(--cls-text-primary, #F5F2EA);
-    border: 1px solid var(--cls-divider, rgba(245, 242, 234, 0.08));
-    border-radius: var(--cls-radius-md, 12px);
-    font: inherit;
-    cursor: pointer;
-    transition: background var(--cls-dur-fast, 180ms) var(--cls-ease, ease);
-
-    &:hover:not(:disabled) { background: var(--cls-rail-hover, #1E1834); }
-    &:disabled { opacity: 0.4; cursor: not-allowed; }
-  }
+// The media box OWNS the player dimensions for video content; the player
+// component fills it 100%. Quiz/file content is left untouched so it keeps its
+// natural, scrollable height.
+.cls-cockpit[data-kind='video'] .cls-cockpit__media {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--cls-radius-lg, 16px);
+  background: #000;
 }
 
 .cls-cockpit__panel-body {
@@ -423,6 +412,62 @@ async function goToPrevAndEnd(): Promise<void> {
   padding: 20px;
 }
 
+// Mobile drawer chrome -------------------------------------------------------
+// Close button floats in the drawer's top corner; the FAB opens the drawer; a
+// scrim dims the video behind it. All three are mobile-only (v-if).
+.cls-cockpit__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.cls-cockpit__drawer-close {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 10px;
+  inset-inline-end: 10px;
+  inline-size: 34px;
+  block-size: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--cls-radius-sm, 8px);
+  cursor: pointer;
+  background: var(--cls-surface-elevated, #1A1430);
+  color: var(--cls-text-muted, #9890A8);
+
+  &:hover {
+    background: var(--cls-rail-hover, #1E1834);
+    color: var(--cls-text-primary, #F5F2EA);
+  }
+
+  &:focus-visible {
+    outline: var(--cls-focus-ring, 2px solid #C1623C);
+    outline-offset: 2px;
+  }
+}
+
+.cls-cockpit__fab {
+  position: fixed;
+  inset-block-end: calc(var(--cls-footer-h, 48px) + 16px);
+  inset-inline-end: 16px;
+  z-index: 50;
+  background: var(--cls-accent, #C1623C) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px rgba(193, 98, 60, 0.45);
+}
+
+.cls-fade-enter-active,
+.cls-fade-leave-active {
+  transition: opacity var(--cls-dur-med, 220ms) var(--cls-ease, ease);
+}
+.cls-fade-enter-from,
+.cls-fade-leave-to {
+  opacity: 0;
+}
+
 // ---------------------------------------------------------------------------
 // Mobile cockpit (≤ Quasar md / 1024px).
 //
@@ -435,18 +480,13 @@ async function goToPrevAndEnd(): Promise<void> {
   .cls-cockpit {
     flex-direction: column;
 
-    // Main is edge-to-edge; only the meta + nav rows get inline padding.
+    // The video stage takes the full width and sits at the top. The lesson
+    // list now lives in a slide-in drawer, so nothing crowds the player — the
+    // video keeps its clean, natural 16:9 shape.
     &__main {
       padding: 0;
       inline-size: 100%;
-    }
-
-    &__panel {
-      flex: 1 1 auto;
-      inline-size: 100%;
-      block-size: auto;
-      // Give the curriculum tab enough room to breathe; the inner list scrolls.
-      min-block-size: 60vh;
+      align-items: flex-start;   // video hugs the top; quiz/file still scroll
     }
 
     &__stage {
@@ -454,29 +494,48 @@ async function goToPrevAndEnd(): Promise<void> {
       max-inline-size: none;
     }
 
-    // Pin the actual player (video / quiz / file) to the top of the viewport
-    // so the learner always sees the content while scrolling the curriculum
-    // tab in the panel below.
     &__media {
-      position: sticky;
-      inset-block-start: 0;
-      z-index: 5;
-      background: var(--cls-surface, #0F0B1A);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-    }
-
-    &__meta {
-      padding: 12px 12px 4px;
+      inline-size: 100%;
     }
 
     &__title {
+      padding: 10px 12px 8px;
       font-size: 17px;
       line-height: 1.3;
+      // Clamp title to 2 lines so the header height stays bounded on mobile.
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
+  }
 
-    &__nav {
-      gap: 8px;
-      padding: 8px 12px 12px;
+  // Full-bleed edge-to-edge video on mobile (no rounded corners).
+  .cls-cockpit[data-kind='video'] .cls-cockpit__media {
+    border-radius: 0;
+  }
+
+  // ----- Lesson drawer -------------------------------------------------------
+  // On mobile the side panel (curriculum / overview / Q&A) becomes a full-height
+  // drawer docked to the screen edge, parked off-canvas until the floating
+  // button opens it. This keeps the video clean and uncrowded.
+  // Physical anchoring (right edge) + physical translate keeps the slide
+  // predictable under both RTL and LTR — a docked drawer hides off the same
+  // edge it docks to. Logical inset + transform would fight in RTL.
+  .cls-cockpit__panel[data-drawer] {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 60;
+    inline-size: min(88vw, 420px);
+    block-size: 100%;
+    transform: translateX(100%);
+    transition: transform var(--cls-dur-med, 220ms) var(--cls-ease, ease);
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.5);
+
+    &[data-open] {
+      transform: translateX(0);
     }
   }
 }
@@ -484,11 +543,7 @@ async function goToPrevAndEnd(): Promise<void> {
 // Fine-tune for very narrow devices (≤ ~430px / iPhone XR is 414px).
 @media (max-width: 480px) {
   .cls-cockpit {
-    &__title { font-size: 15px; }
-    &__kind-badge { font-size: 10px; }
-    &__nav-btn { padding: 10px 12px; font-size: 13px; }
-    &__meta { padding: 10px 10px 4px; }
-    &__nav { padding: 8px 10px 10px; }
+    &__title { padding: 8px 10px 6px; font-size: 15px; }
   }
 }
 </style>

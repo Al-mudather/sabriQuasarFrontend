@@ -22,6 +22,11 @@
   legacy videojs-contrib-hls dependency is gone. We still rely on
   videojs-contrib-eme to surface ClearKey key negotiation to the browser,
   and videojs-hls-quality-selector v2 for the quality menu.
+
+  Sizing: the player fills its parent box 100% × 100%. The parent
+  (`.cls-cockpit__media`) owns the dimensions — a 16:9 frame on desktop and a
+  fixed ~42vh region on mobile. The native <video> uses object-fit: contain so
+  all content stays visible (no crop) and the controls remain reachable.
 */
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import videojs from 'video.js'
@@ -143,14 +148,34 @@ onBeforeUnmount(() => {
 .cls-hasif {
   position: relative;
   inline-size: 100%;
-  aspect-ratio: 16 / 9;
+  // Fill the parent box — `.cls-cockpit__media` owns the dimensions.
+  block-size: 100%;
   background: #000;
+  border-radius: inherit;
+  overflow: hidden;
 
   &__mount {
     position: absolute;
     inset: 0;
     inline-size: 100%;
     block-size: 100%;
+
+    // video.js wraps the <video> in a generated .video-js div at runtime.
+    // Both it and the inner <video> must fill the container so no internal
+    // letterboxing is added by the player chrome.
+    :deep(.video-js) {
+      inline-size: 100% !important;
+      block-size: 100% !important;
+    }
+
+    :deep(.video-js video) {
+      inline-size: 100%;
+      block-size: 100%;
+      // contain keeps all content visible (no crop). With the root container
+      // now matching the source aspect-ratio exactly, contain == cover for
+      // correctly-sized sources: zero bars.
+      object-fit: contain;
+    }
   }
 }
 </style>

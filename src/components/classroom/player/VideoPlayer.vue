@@ -124,12 +124,14 @@ const fallbackLabel = computed<string>(() => {
 <style lang="scss" scoped>
 .cls-player {
   inline-size: 100%;
+  // Fill the parent box — `.cls-cockpit__media` owns the dimensions.
+  block-size: 100%;
 
   &__youtube {
     inline-size: 100%;
-    aspect-ratio: 16 / 9;
+    block-size: 100%;
     border: 0;
-    border-radius: var(--cls-radius-lg, 16px);
+    border-radius: inherit;
     background: #000;
   }
 
@@ -139,7 +141,8 @@ const fallbackLabel = computed<string>(() => {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    aspect-ratio: 16 / 9;
+    inline-size: 100%;
+    block-size: 100%;
     background: rgba(18, 14, 34, 0.8);
     border: 1px dashed var(--cls-divider, rgba(245, 242, 234, 0.08));
     border-radius: var(--cls-radius-lg, 16px);
