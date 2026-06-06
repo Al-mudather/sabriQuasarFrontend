@@ -289,7 +289,10 @@ void isEnglish
 
 .category-section {
   background: var(--ds-cream);
-  padding-block: var(--ds-section-y-tight);
+  /* Adjacent category sections stack, so the visible gap is 2x this padding.
+     Kept tighter than --ds-section-y-tight to avoid a huge run between
+     category rails on the landing page. */
+  padding-block: clamp(1rem, 3vw, 2rem);
 }
 
 .category-section__container {
