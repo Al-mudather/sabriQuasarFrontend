@@ -1,9 +1,10 @@
 <template>
   <component
-    :is="tag"
+    :is="to ? RouterLink : tag"
     ref="root"
-    :type="tag === 'button' ? nativeType : null"
-    :href="tag === 'a' ? href : null"
+    :to="to || null"
+    :type="!to && tag === 'button' ? nativeType : null"
+    :href="!to && tag === 'a' ? href : null"
     class="ds-btn"
     :class="[
       `ds-btn--${resolvedVariant}`,
@@ -15,7 +16,7 @@
         'ds-btn--disabled': disabled || loading
       }
     ]"
-    :disabled="(tag === 'button') ? (disabled || loading) : null"
+    :disabled="(!to && tag === 'button') ? (disabled || loading) : null"
     :aria-disabled="(disabled || loading) ? 'true' : null"
     :aria-busy="loading ? 'true' : null"
     @click="onClick"
@@ -39,6 +40,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { RouterLink } from 'vue-router'
 import { magnetic } from 'src/design-system/motion'
 
 defineOptions({ name: 'DsButton' })
@@ -47,6 +49,10 @@ interface Props {
   tag?: string
   nativeType?: string
   href?: string | null
+  // When set, the button renders as a <router-link> for in-app SPA navigation
+  // (correct under hash history — generates `#/...` hrefs and pushes without a
+  // full reload). Takes precedence over `tag`/`href`.
+  to?: string | Record<string, unknown> | null
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'destructive' | 'accent'
   size?: 'sm' | 'md' | 'lg'
   fullWidth?: boolean
@@ -61,6 +67,7 @@ const props = withDefaults(defineProps<Props>(), {
   tag: 'button',
   nativeType: 'button',
   href: null,
+  to: null,
   variant: 'primary',
   size: 'md',
   fullWidth: false,

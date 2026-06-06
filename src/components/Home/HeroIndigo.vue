@@ -42,16 +42,14 @@
           </p>
 
           <div class="hero-indigo__actions">
-            <ds-button variant="accent" size="lg" pill to="/account/login">
+            <ds-button variant="accent" size="lg" pill to="/account/signUp">
               {{ $t('ابدأ الآن') }}
             </ds-button>
           </div>
 
           <ul ref="trust" class="hero-indigo__trust">
-            <li><bdi>{{ learnersLabel }}</bdi> {{ $t('متعلم') }}</li>
-            <li aria-hidden="true" class="hero-indigo__trust-dot">·</li>
-            <li><bdi>{{ coursesLabel }}</bdi> {{ $t('دورة معتمدة') }}</li>
-            <li aria-hidden="true" class="hero-indigo__trust-dot">·</li>
+            <li v-if="coursesLabel"><bdi>{{ coursesLabel }}</bdi> {{ $t('دورة معتمدة') }}</li>
+            <li v-if="coursesLabel" aria-hidden="true" class="hero-indigo__trust-dot">·</li>
             <li>{{ $t('20+ سنة خبرة') }}</li>
           </ul>
         </div>
@@ -80,12 +78,10 @@ import { slowBreath, cascade, contourDrift } from 'src/design-system/motion'
 import { useIntl } from 'src/composables/useIntl'
 
 interface Props {
-  learnersCount?: number | null
   coursesCount?: number | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  learnersCount: null,
   coursesCount: null,
 })
 
@@ -109,16 +105,12 @@ const portraitSrc = computed(() => LOGO.full)
 
 const { formatNumber } = useIntl()
 
-const learnersLabel = computed(() =>
-  Number.isFinite(props.learnersCount) && (props.learnersCount ?? 0) > 0
-    ? formatNumber(props.learnersCount as number)
-    : '[metric]'
-)
-
+// Real number when available, else empty string so the trust line is hidden
+// (no "[metric]" placeholder ever shown).
 const coursesLabel = computed(() =>
   Number.isFinite(props.coursesCount) && (props.coursesCount ?? 0) > 0
     ? formatNumber(props.coursesCount as number)
-    : '[metric]'
+    : ''
 )
 
 onMounted(() => {

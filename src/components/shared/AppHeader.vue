@@ -63,11 +63,20 @@
           <DsButton
             variant="primary"
             size="sm"
-            tag="a"
-            href="/account/signUp"
+            to="/account/signUp"
             :magnetic-enabled="true"
           >
             {{ $t('ابدأ الآن') }}
+          </DsButton>
+        </div>
+
+        <div v-else-if="showLogout" class="app-header__auth">
+          <DsButton
+            variant="secondary"
+            size="sm"
+            @click="logout"
+          >
+            {{ $t('خروج') }}
           </DsButton>
         </div>
       </nav>
@@ -130,23 +139,34 @@
         </router-link>
       </nav>
 
-      <template v-if="showAuthCtas" #footer>
+      <template v-if="showAuthCtas || showLogout" #footer>
         <div class="app-header__drawer-footer">
-          <router-link
-            to="/account/login"
-            class="app-header__login"
-            @click="drawerOpen = false"
-          >
-            {{ $t('تسجيل الدخول') }}
-          </router-link>
+          <template v-if="showAuthCtas">
+            <router-link
+              to="/account/login"
+              class="app-header__login"
+              @click="drawerOpen = false"
+            >
+              {{ $t('تسجيل الدخول') }}
+            </router-link>
+            <DsButton
+              variant="primary"
+              size="md"
+              full-width
+              to="/account/signUp"
+              @click="drawerOpen = false"
+            >
+              {{ $t('ابدأ الآن') }}
+            </DsButton>
+          </template>
           <DsButton
-            variant="primary"
+            v-else
+            variant="secondary"
             size="md"
             full-width
-            tag="a"
-            href="/account/signUp"
+            @click="drawerOpen = false; logout()"
           >
-            {{ $t('ابدأ الآن') }}
+            {{ $t('خروج') }}
           </DsButton>
         </div>
       </template>
@@ -164,6 +184,7 @@ import DsModal from 'src/design-system/components/DsModal.vue'
 import LanguageSwitcher from 'src/components/shared/LanguageSwitcher.vue'
 import { LOGO, BRAND } from 'src/design-system/brand'
 import { useAuthStore } from 'src/stores/auth'
+import { useLogout } from 'src/composables/useLogout'
 
 interface Props {
   variant?: 'cream' | 'transparent'
@@ -180,6 +201,7 @@ const props = withDefaults(defineProps<Props>(), {
 const route = useRoute()
 const auth = useAuthStore()
 const { isAuthenticated, user } = storeToRefs(auth)
+const { logout } = useLogout()
 
 const isScrolled = ref(false)
 const drawerOpen = ref(false)
@@ -210,6 +232,7 @@ const navLinks = computed<{ to: string; label: string }[]>(() => {
 })
 
 const showAuthCtas = computed<boolean>(() => props.showAuthCta && !isAuthenticated.value)
+const showLogout = computed<boolean>(() => props.showAuthCta && isAuthenticated.value)
 
 const userDisplayName = computed<string>(() => {
   const u = user.value as Record<string, unknown> | null

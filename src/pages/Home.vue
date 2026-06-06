@@ -1,9 +1,6 @@
 <template>
   <main class="stc-home">
-    <HeroIndigo
-      :learners-count="learnersCount"
-      :courses-count="coursesCount"
-    />
+    <HeroIndigo :courses-count="coursesCount" />
 
     <StatsWedges :courses-count="coursesCount" />
 
@@ -99,7 +96,6 @@ const coursesCount = computed(() => {
   const n = Number(allCoursesCount.value)
   return Number.isFinite(n) && n > 0 ? n : null
 })
-const learnersCount = computed(() => null)
 
 onMounted(() => { settings.setActiveNav('HOME') })
 </script>
