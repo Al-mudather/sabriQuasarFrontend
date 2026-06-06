@@ -66,7 +66,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   variant: 'indigo',
   animated: true,
-  locale: 'ar-EG'
+  locale: 'en-US'
 })
 
 // Refs for DOM elements

@@ -107,7 +107,7 @@ export function counterUp(
     from = 0,
     to,
     duration = 1.2,
-    format = (v) => Math.round(v).toLocaleString('ar-EG'),
+    format = (v) => Math.round(v).toLocaleString('en-US'),
   } = {}
 ) {
   const el = typeof target === 'string' ? document.querySelector(target) : target;
