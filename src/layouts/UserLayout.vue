@@ -83,7 +83,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import AppHeader from 'src/components/shared/AppHeader.vue'
@@ -91,14 +91,15 @@ import AppFooter from 'src/components/shared/AppFooter.vue'
 import UserSidebar from 'src/components/shared/UserSidebar.vue'
 import DsModal from 'src/design-system/components/DsModal.vue'
 import { useAuthStore } from 'src/stores/auth'
+import { useLogout } from 'src/composables/useLogout'
 
 defineOptions({ name: 'UserLayout' })
 
 const route = useRoute()
-const router = useRouter()
 const auth = useAuthStore()
 const { user } = storeToRefs(auth)
 const { t } = useI18n()
+const { logout } = useLogout()
 
 // ---------------------------------------------------------------------------
 // Nav link definitions (icons as inline SVG HTML strings; consumed via v-html
@@ -160,16 +161,13 @@ function isActive (to: string): boolean {
   return route.path === to || route.path.startsWith(to + '/')
 }
 
-function handleDrawerLogout (): void {
-  drawerOpen.value = false
-  void logOut()
+function logOut (): void {
+  void logout()
 }
 
-async function logOut (): Promise<void> {
-  try {
-    await auth.logOut()
-  } catch { /* graceful */ }
-  void router.push({ name: 'Home' }).catch(() => {})
+function handleDrawerLogout (): void {
+  drawerOpen.value = false
+  void logout()
 }
 
 </script>

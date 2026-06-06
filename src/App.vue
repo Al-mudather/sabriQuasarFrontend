@@ -137,7 +137,9 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('DOMContentLoaded', onDOMContentLoaded)
-  auth.logOutAction()
-  localStorage.clear()
+  // NOTE: do not log out or wipe storage here. Logout is an explicit user
+  // action handled by useLogout(); running the heavy logout routine (network
+  // revoke + Apollo teardown) on root unmount is wrong and would also blow
+  // away the language/currency prefs we intentionally keep.
 })
 </script>

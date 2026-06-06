@@ -59,17 +59,20 @@ const uploadLink = createUploadLink({
 
 // ---------- WebSocket link --------------------------------------------------
 const wsProtocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'wss' : 'ws'
-const wsLink = new GraphQLWsLink(
-  createWsClient({
-    url: `${wsProtocol}://${WS_HOST}/ws/graphql/`,
-    connectionParams: () => {
-      const token = tokenStorage.getAccessToken()
-      return token ? { Authorization: 'JWT ' + token } : {}
-    },
-    lazy: true,
-    retryAttempts: 5
-  })
-)
+// Keep a handle on the underlying graphql-ws client so logout can dispose the
+// socket. `connectionParams` reads the token lazily at (re)connect time, so a
+// fresh subscription after a new login picks up the new token — but an already
+// open socket keeps the old user's token until disposed.
+const wsClient = createWsClient({
+  url: `${wsProtocol}://${WS_HOST}/ws/graphql/`,
+  connectionParams: () => {
+    const token = tokenStorage.getAccessToken()
+    return token ? { Authorization: 'JWT ' + token } : {}
+  },
+  lazy: true,
+  retryAttempts: 5
+})
+const wsLink = new GraphQLWsLink(wsClient)
 
 // ---------- Split: subscriptions -> ws, everything else -> http ------------
 const transportLink = split(
@@ -124,5 +127,25 @@ export const apolloClient = new ApolloClient({
   defaultOptions,
   connectToDevTools: true
 })
+
+// ---------- Logout: full Apollo teardown -----------------------------------
+// Called by the auth store on logout so no previous user's data survives.
+//  - clearStore(): wipe the InMemoryCache WITHOUT refetching active queries
+//    (resetStore() would immediately refetch with a now-absent token and throw
+//    auth errors — wrong for logout).
+//  - stop(): cancel in-flight queries / polling.
+//  - wsClient.dispose(): close the subscription socket so the next login
+//    reconnects with the new token instead of reusing the old connection.
+export async function resetApolloSession () {
+  try {
+    await apolloClient.clearStore()
+  } catch (_e) { /* ignore */ }
+  try {
+    apolloClient.stop()
+  } catch (_e) { /* ignore */ }
+  try {
+    wsClient.dispose()
+  } catch (_e) { /* ignore */ }
+}
 
 export default apolloClient

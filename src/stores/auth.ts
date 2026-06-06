@@ -15,10 +15,10 @@
 
 import { defineStore } from 'pinia'
 import _ from 'lodash'
-import { Notify, SessionStorage } from 'quasar'
+import { Notify } from 'quasar'
 
-import { apolloClient } from 'src/apollo/client'
-import { tokenStorage, userProfileStorage } from 'src/localStorageService'
+import { apolloClient, resetApolloSession } from 'src/apollo/client'
+import { tokenStorage, userProfileStorage, purgeClientStorage } from 'src/localStorageService'
 import { RefreshLoginUserWithEmail } from 'src/graphql/account_management/mutation/RefreshUserToken'
 import { RevokeUserRefreshToken } from 'src/graphql/account_management/mutation/RevokeUserRefreshToken.js'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData.js'
@@ -162,20 +162,41 @@ export const useAuthStore = defineStore('authentication', {
       })
     },
 
-    logOutAction (): Promise<void> {
-      return new Promise<void>((resolve) => {
-        tokenStorage.clearToken()
-        userProfileStorage.clearUserProfileStorage()
-        SessionStorage.set('shoppingCartList', [])
-        this.deleteData()
-        Notify.create({
-          type: 'positive',
-          progress: true,
-          multiLine: true,
-          position: 'top',
-          message: 'Logged Out Successfully',
-        })
-        resolve()
+    // The single, complete "fresh session" logout. Every step is wrapped so a
+    // failure in one (e.g. a slow backend revoke) can never block the rest of
+    // the wipe. Order matters: revoke must run BEFORE tokens are wiped (it
+    // needs the refresh token) and before the Apollo cache is cleared.
+    async logOutAction (): Promise<void> {
+      // 1. Best-effort server-side revoke — time-boxed so a slow/failed call
+      //    never holds up logout. Fire only if we actually have a refresh token.
+      if (tokenStorage.getRefreshToken()) {
+        try {
+          await Promise.race([
+            this.DESTROY_THE_USER_REFRESH_TOKEN(),
+            new Promise((resolve) => setTimeout(resolve, 2500)),
+          ])
+        } catch (_e) { /* ignore — logout proceeds regardless */ }
+      }
+
+      // 2. Tear down Apollo: clear cache (no refetch), stop queries, drop the
+      //    subscription socket so nothing of the old user survives.
+      try {
+        await resetApolloSession()
+      } catch (_e) { /* ignore */ }
+
+      // 3. Wipe all client storage + cookies, keeping only language/currency
+      //    display prefs so the UI doesn't flip language on logout.
+      purgeClientStorage({ keepLocalStorageKeys: ['isEnglish', 'pinia_settings'] })
+
+      // 4. Reset in-memory auth state.
+      this.deleteData()
+
+      Notify.create({
+        type: 'positive',
+        progress: true,
+        multiLine: true,
+        position: 'top',
+        message: 'Logged Out Successfully',
       })
     },
 

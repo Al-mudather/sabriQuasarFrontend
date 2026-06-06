@@ -81,8 +81,7 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
-import { useCartStore } from 'src/stores/cart'
-import { usePyramidStore } from 'src/stores/pyramid'
+import { useLogout } from 'src/composables/useLogout'
 import { apolloClient } from 'src/apollo/client'
 import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses'
 import type { GetAllCoursesResult, GetAllCoursesVars } from 'src/types/courses/types'
@@ -95,8 +94,7 @@ const { t } = useI18n()
 
 const auth = useAuthStore()
 const settings = useSettingsStore()
-const cart = useCartStore()
-const pyramid = usePyramidStore()
+const { logout } = useLogout()
 const { token } = storeToRefs(auth)
 
 const hideFields = ref(false)
@@ -116,10 +114,7 @@ function changeMenuState (): void {
 }
 
 function LOG_USER_OUT (): void {
-  pyramid.setMyMarketingCode('')
-  cart.deleteCart()
-  auth.logOut()
-  router.push({ name: 'Home' })
+  void logout()
 }
 
 function showTheSearchingResult (event: Event): void {

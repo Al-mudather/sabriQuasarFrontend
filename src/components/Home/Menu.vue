@@ -133,8 +133,7 @@ import { useQuery } from '@vue/apollo-composable'
 import { LocalStorage } from 'quasar'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
-import { useCartStore } from 'src/stores/cart'
-import { usePyramidStore } from 'src/stores/pyramid'
+import { useLogout } from 'src/composables/useLogout'
 import { MyPyramidAccount } from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
 import type {
   MyPyramidAccountResult,
@@ -145,8 +144,7 @@ const router = useRouter()
 
 const auth = useAuthStore()
 const settings = useSettingsStore()
-const cart = useCartStore()
-const pyramid = usePyramidStore()
+const { logout } = useLogout()
 
 const { token, user } = storeToRefs(auth)
 const { isEnglish } = storeToRefs(settings)
@@ -198,10 +196,7 @@ function changeMenuState (): void {
 }
 
 function logTheUserOut (): void {
-  pyramid.setMyMarketingCode('')
-  cart.deleteCart()
-  void router.push({ name: 'Home' })
-  auth.logOut()
+  void logout()
 }
 
 function GO_TO_MY_ORDERS_PAGE (e: Event): void {

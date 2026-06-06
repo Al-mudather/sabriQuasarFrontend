@@ -77,8 +77,7 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
-import { useCartStore } from 'src/stores/cart'
-import { usePyramidStore } from 'src/stores/pyramid'
+import { useLogout } from 'src/composables/useLogout'
 import { apolloClient } from 'src/apollo/client'
 import { GetAllCourses } from 'src/graphql/course_management/query/GetAllCourses'
 import type {
@@ -94,8 +93,7 @@ const { t } = useI18n()
 
 const auth = useAuthStore()
 const settings = useSettingsStore()
-const cart = useCartStore()
-const pyramid = usePyramidStore()
+const { logout } = useLogout()
 
 const { token } = storeToRefs(auth)
 
@@ -108,20 +106,8 @@ function changeMenuState (): void {
   settings.setOpenMenu(true)
 }
 
-function removeCookie (): void {
-  const tokenName = 'csrftoken'
-  // $cookies is globally injected; access via window to avoid $-plugin typing
-  try {
-    ;(window as unknown as Record<string, unknown>).$cookies && (window as unknown as Record<string, { remove: (t: string) => void }>).$cookies.remove(tokenName)
-  } catch (_e) { /* ignore */ }
-}
-
 function LOG_USER_OUT (): void {
-  pyramid.setMyMarketingCode('')
-  try { removeCookie() } catch (_e) { /* ignore */ }
-  cart.deleteCart()
-  auth.logOut()
-  void router.push({ name: 'Home' })
+  void logout()
 }
 
 async function showTheSearchingResult (event: Event): Promise<void> {
