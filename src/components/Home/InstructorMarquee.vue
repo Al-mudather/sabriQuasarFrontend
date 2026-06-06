@@ -15,7 +15,12 @@
           class="instructor-marquee__chip"
         >
           <span class="instructor-marquee__avatar" aria-hidden="true">
-            <img :src="p.image" :alt="p.name" />
+            <img
+              :src="p.image || stcLogo"
+              :alt="p.name"
+              :class="{ 'instructor-marquee__logo-img': !p.image }"
+              @error="onImageError"
+            />
           </span>
           <span class="instructor-marquee__meta">
             <span class="instructor-marquee__name">{{ p.name }}</span>
@@ -31,10 +36,23 @@
 import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { GetAllCourseInstructors } from 'src/graphql/course_management/query/GetAllCourseInstructors'
+import { LOGO } from 'src/design-system/brand'
 import type {
   GetAllCourseInstructorsResult,
   GetAllCourseInstructorsVars,
 } from 'src/types/courses/types'
+
+// Fallback avatar when an instructor has no image, a stock-photo placeholder,
+// or a URL that fails to load — show the STC logo instead.
+const stcLogo = LOGO.mark
+
+function onImageError (e: Event): void {
+  const el = e.target as HTMLImageElement
+  if (el.dataset.fallback === 'true') return
+  el.dataset.fallback = 'true'
+  el.src = stcLogo
+  el.classList.add('instructor-marquee__logo-img')
+}
 
 // ---------------------------------------------------------------------------
 // Query
@@ -53,7 +71,7 @@ const allCourseInstructors = computed(
 // people: typed chip list, free of undefined
 // ---------------------------------------------------------------------------
 interface InstructorChip {
-  image: string
+  image: string | null
   name: string
   role: string
 }
@@ -82,14 +100,14 @@ const people = computed<InstructorChip[]>(() => {
         ? qual
         : 'مدرب معتمد'
 
-    // Only use real image paths — reject stock-photo placeholders
+    // Only use real image paths — reject stock-photo placeholders. When there
+    // is no usable image we keep the instructor and fall back to the STC logo
+    // (rendered in the template), rather than dropping them.
     const img = inst.image &&
       typeof inst.image === 'string' &&
       !/unsplash|picsum|placeholder|pexels|lorem/i.test(inst.image)
       ? inst.image
       : null
-    // Drop entries without a real image
-    if (!img) continue
 
     mapped.push({ name, role, image: img })
   }
@@ -196,6 +214,14 @@ const doubled = computed<InstructorChip[]>(() => [
     inline-size: 100%;
     block-size: 100%;
     object-fit: cover;
+  }
+
+  /* STC logo fallback — contain (not crop) on a light field so the lockup
+     reads clearly inside the circular avatar. */
+  img.instructor-marquee__logo-img {
+    object-fit: contain;
+    padding: 8px;
+    background: var(--ds-ivory);
   }
 }
 

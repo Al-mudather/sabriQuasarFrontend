@@ -11,7 +11,7 @@
       <div class="value-props__grid">
         <ds-card
           v-for="(v, i) in values"
-          :key="v.title"
+          :key="i"
           :interactive="false"
           elevation="sm"
           class="value-props__card"
@@ -31,7 +31,9 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import DsCard from 'src/design-system/components/DsCard.vue'
+import { useAppLocale } from 'src/composables/useAppLocale'
 
 const ICONS = {
   medical: `
@@ -56,29 +58,58 @@ const ICONS = {
     </svg>`
 }
 
+// Bilingual copy kept in-component so both the Arabic and English versions
+// always exist and switch with the app locale (the cards were previously
+// hard-coded Arabic and stayed Arabic in English mode).
+interface LocalizedText { ar: string; en: string }
+interface RawValueItem {
+  icon: string
+  title: LocalizedText
+  body: LocalizedText
+}
+
+const RAW_VALUES: RawValueItem[] = [
+  {
+    icon: ICONS.medical,
+    title: { ar: 'تدريب طبي معتمد', en: 'Accredited Medical Training' },
+    body: {
+      ar: 'مناهج طبية متخصصة مبنية على أحدث المراجع والإرشادات الإكلينيكية، يقدّمها نخبة من الخبراء.',
+      en: 'Specialized medical programs grounded in the latest clinical references and guidelines, delivered by a select panel of experts.'
+    }
+  },
+  {
+    icon: ICONS.growth,
+    title: { ar: 'تطوير ذاتي عميق', en: 'Deep Personal Growth' },
+    body: {
+      ar: 'رحلات تحوّلية تُعيد تشكيل علاقتك بالعمل والحياة، بإشراف مدرّبين بخبرة تتجاوز العقدين.',
+      en: 'Transformative journeys that reshape your relationship with work and life, guided by mentors with over two decades of experience.'
+    }
+  },
+  {
+    icon: ICONS.community,
+    title: { ar: 'مجتمع من المتعلمين', en: 'A Community of Learners' },
+    body: {
+      ar: 'تنضمّ إلى شبكة من الأطباء والمهنيين يشاركونك الرحلة ويدعمون نموّك بعد كل دورة.',
+      en: 'Join a network of physicians and professionals who share your journey and support your growth after every course.'
+    }
+  }
+]
+
 interface ValueItem {
   icon: string
   title: string
   body: string
 }
 
-const values: ValueItem[] = [
-  {
-    icon: ICONS.medical,
-    title: 'تدريب طبي معتمد',
-    body: 'مناهج متخصصة في علوم الدم، التخطيط الكهربائي، وعلم الأمراض — مبنية على أحدث المراجع الإكلينيكية.'
-  },
-  {
-    icon: ICONS.growth,
-    title: 'تطوير ذاتي عميق',
-    body: 'رحلات تحوّلية تُعيد تشكيل علاقتك بالعمل والحياة، بإشراف مدرب معتمد بخبرة تتجاوز العقدين.'
-  },
-  {
-    icon: ICONS.community,
-    title: 'مجتمع من المتعلمين',
-    body: 'تنضم لشبكة من الأطباء والمهنيين الذين يشاركونك الرحلة، ويدعمون نموك بعد انتهاء كل دورة.'
-  }
-]
+const { locale } = useAppLocale()
+
+const values = computed<ValueItem[]>(() =>
+  RAW_VALUES.map((v) => ({
+    icon: v.icon,
+    title: locale.value === 'en' ? v.title.en : v.title.ar,
+    body: locale.value === 'en' ? v.body.en : v.body.ar
+  }))
+)
 </script>
 
 <style lang="scss" scoped>
