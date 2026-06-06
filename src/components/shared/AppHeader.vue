@@ -76,7 +76,7 @@
             size="sm"
             @click="logout"
           >
-            {{ $t('خروج') }}
+            {{ $t('تسجيل الخروج') }}
           </DsButton>
         </div>
       </nav>
@@ -166,7 +166,7 @@
             full-width
             @click="drawerOpen = false; logout()"
           >
-            {{ $t('خروج') }}
+            {{ $t('تسجيل الخروج') }}
           </DsButton>
         </div>
       </template>
@@ -792,5 +792,6 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: var(--ds-space-3);
   align-items: stretch;
+  inline-size: 100%;
 }
 </style>

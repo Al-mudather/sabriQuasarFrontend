@@ -7,51 +7,9 @@
       </p>
     </header>
 
-    <div v-if="apiError" class="auth-card__banner" role="alert">
-      <span>{{ apiError }}</span>
-    </div>
-
-    <form @submit.prevent="loginUser" class="auth-card__form" novalidate>
-      <ds-input
-        v-model="email"
-        type="email"
-        :label="t('البريد الإلكتروني')"
-        :error="fieldErrors.email"
-        autocomplete="email"
-        required
-        name="email"
-      />
-
-      <ds-input
-        v-model="password"
-        type="password"
-        :label="t('كلمة المرور')"
-        :error="fieldErrors.password"
-        autocomplete="current-password"
-        required
-        name="password"
-      />
-
-      <div class="auth-card__row">
-        <label class="auth-card__remember">
-          <input type="checkbox" v-model="remember" />
-          <span>{{ t('تذكرني') }}</span>
-        </label>
-        <a class="auth-card__link" @click="goToPasswordResetPage">
-          {{ t('نسيت كلمة المرور؟') }}
-        </a>
-      </div>
-
-      <ds-button
-        type="submit"
-        native-type="submit"
-        variant="accent"
-        size="lg"
-        full-width
-        :loading="visible"
-      >
-        {{ t('تسجيل الدخول') }}
-      </ds-button>
+    <!-- Primary sign-in — available to all users -->
+    <div class="auth-card__social">
+      <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" />
 
       <ds-button
         type="button"
@@ -63,13 +21,74 @@
       >
         {{ t('إنشاء حساب جديد') }}
       </ds-button>
-    </form>
-
-    <div class="auth-card__social">
-      <div class="auth-card__divider"><span>{{ t('أو') }}</span></div>
-      <GoogleAuthentication :label="googleLabel" :prevRoute="prevRoute" />
-      <FacebookAuthentication :label="facebookLabel" :prevRoute="prevRoute" />
     </div>
+
+    <!-- "or" divider doubles as the toggle that reveals credential login
+         (email/password — reserved for specific users, hidden by default). -->
+    <button
+      type="button"
+      class="auth-card__divider auth-card__divider--toggle"
+      :class="{ 'is-open': showCredentials }"
+      :aria-expanded="showCredentials ? 'true' : 'false'"
+      aria-controls="auth-credentials"
+      @click="showCredentials = !showCredentials"
+    >
+      <span class="auth-card__divider-label">
+        {{ t('أو') }}
+        <svg class="auth-card__divider-caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </button>
+
+    <transition name="auth-reveal">
+      <div v-show="showCredentials" id="auth-credentials" class="auth-card__credentials">
+        <div v-if="apiError" class="auth-card__banner" role="alert">
+          <span>{{ apiError }}</span>
+        </div>
+
+        <form @submit.prevent="loginUser" class="auth-card__form" novalidate>
+          <ds-input
+            v-model="email"
+            type="email"
+            :label="t('البريد الإلكتروني')"
+            :error="fieldErrors.email"
+            autocomplete="email"
+            name="email"
+          />
+
+          <ds-input
+            v-model="password"
+            type="password"
+            :label="t('كلمة المرور')"
+            :error="fieldErrors.password"
+            autocomplete="current-password"
+            name="password"
+          />
+
+          <div class="auth-card__row">
+            <label class="auth-card__remember">
+              <input type="checkbox" v-model="remember" />
+              <span>{{ t('تذكرني') }}</span>
+            </label>
+            <a class="auth-card__link" @click="goToPasswordResetPage">
+              {{ t('نسيت كلمة المرور؟') }}
+            </a>
+          </div>
+
+          <ds-button
+            type="submit"
+            native-type="submit"
+            variant="accent"
+            size="lg"
+            full-width
+            :loading="visible"
+          >
+            {{ t('تسجيل الدخول') }}
+          </ds-button>
+        </form>
+      </div>
+    </transition>
 
     <p class="auth-card__fineprint" @click="goToTermsPage">
       {{ $t('بمتابعتك فإنك توافق على شروط وأحكام المنصة.') }}
@@ -90,7 +109,6 @@ import { LoginUserWithEmail } from 'src/graphql/account_management/mutation/Logi
 import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue'
-import FacebookAuthentication from 'src/components/Account/FacebookAuthentication.vue'
 import DsInput from 'src/design-system/components/DsInput.vue'
 import type { LoginMutationResult, LoginVariables } from 'src/types/auth/types'
 
@@ -102,7 +120,6 @@ const settings = useSettingsStore()
 const pyramid = usePyramidStore()
 const { isEnglish } = storeToRefs(settings)
 
-const facebookLabel = ref('تسجيل الدخول عن طريق Facebook')
 const googleLabel = ref('تسجيل الدخول عن طريق Google')
 const email = ref('')
 const password = ref('')
@@ -111,10 +128,12 @@ const prevRoute = ref<string | null>(null)
 const visible = ref(false)
 const apiError = ref('')
 const fieldErrors = ref({ email: '', password: '' })
+// Credential (email/password) login is reserved for specific users and stays
+// collapsed behind the "or" divider until the user opts in.
+const showCredentials = ref(false)
 
 onMounted(() => {
   if (isEnglish.value) {
-    facebookLabel.value = 'Login using Facebook'
     googleLabel.value = 'Login using Google'
   }
 })
@@ -322,6 +341,44 @@ async function loginUser (): Promise<void> {
     }
   }
 
+  &__divider--toggle {
+    inline-size: 100%;
+    padding: 0;
+    appearance: none;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    margin-block: var(--ds-space-1);
+    transition: color var(--ds-duration-fast) var(--ds-ease-out);
+
+    &:hover { color: var(--ds-brand-600); }
+    &:focus-visible {
+      outline: 2px solid var(--ds-brand-600);
+      outline-offset: 4px;
+      border-radius: var(--ds-radius-sm);
+    }
+  }
+
+  &__divider-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-1);
+  }
+
+  &__divider-caret {
+    transition: transform var(--ds-duration-fast) var(--ds-ease-out);
+  }
+
+  &__divider--toggle.is-open &__divider-caret {
+    transform: rotate(180deg);
+  }
+
+  &__credentials {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-4);
+  }
+
   &__fineprint {
     font-size: var(--ds-text-xs);
     color: var(--ds-text-muted);
@@ -330,5 +387,19 @@ async function loginUser (): Promise<void> {
     cursor: pointer;
     &:hover { color: var(--ds-brand-600); text-decoration: underline; }
   }
+}
+
+/* Reveal animation for the collapsible credential block */
+.auth-reveal-enter-active,
+.auth-reveal-leave-active {
+  transition:
+    opacity var(--ds-duration-fast) var(--ds-ease-out),
+    transform var(--ds-duration-fast) var(--ds-ease-out);
+}
+
+.auth-reveal-enter-from,
+.auth-reveal-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 </style>
