@@ -34,7 +34,7 @@ This is the real gate. `tsconfig.json` currently covers `src/graphql/**/*.ts` an
 
 ## Dev server
 
-Always start the dev server in the background — `npx quasar dev -m spa -p 9000 > /tmp/qc.log 2>&1 &`. Headless Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless --disable-gpu --enable-logging=stderr --v=0 --virtual-time-budget=<ms> --dump-dom <url>` is the fastest way to confirm a page mounts and reads render output / console errors without puppeteer.
+Always start the dev server in the background — `npx quasar dev -m spa -p 8080 > /tmp/qc.log 2>&1 &`. Headless Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless --disable-gpu --enable-logging=stderr --v=0 --virtual-time-budget=<ms> --dump-dom <url>` is the fastest way to confirm a page mounts and reads render output / console errors without puppeteer.
 
 ## RTL is default
 

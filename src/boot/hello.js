@@ -1,18 +1,15 @@
-// Minimal `hello()` shim replacing `vue-hellojs`.
+// `window.hello` shim used by the social-auth components.
 //
-// Legacy call sites (components/Account/GoogleAuthentication.vue, etc.) do:
-//   this.hello("google").login({ scope: "email", force: true }).then(...)
-//   this.hello("google").getAuthResponse()
+// Call sites (components/Account/GoogleAuthentication.vue, FacebookAuthentication.vue) do:
+//   window.hello('google').login({ scope: 'email', force: true })
+//     .then(() => window.hello('google').getAuthResponse())   // { access_token }
 //
-// Until C2 rewrites those call sites onto the new `$socialAuth` API, this
-// shim preserves the shape by delegating `.login()` to the authorization-code
-// redirect and reading the returned `access_token` out of the URL hash on
-// the callback route. `getAuthResponse()` returns whatever the last callback
-// parsed (scoped to this session in sessionStorage).
+// `.login()` triggers the provider flow (Google => GIS popup) via
+// `$socialAuth.authenticate`, stashes the returned access token in
+// sessionStorage, and resolves. `.getAuthResponse()` reads it back.
 //
-// This is intentionally tiny — ~40 LOC. The real OAuth surface lives in
-// boot/socail_auth.js; this file only exists to avoid ripping up the two
-// social auth components during Track C.
+// The real OAuth surface lives in boot/socail_auth.js; this file only adapts
+// it to the `window.hello(...)` shape the components were written against.
 
 import { boot } from 'quasar/wrappers'
 
@@ -29,15 +26,23 @@ function readStoredResponse (provider) {
   }
 }
 
+function socialApi () {
+  return (typeof window !== 'undefined' && window.__appGlobals && window.__appGlobals.$socialAuth) || null
+}
+
 function hello (provider) {
   return {
     login (/* opts */) {
-      // Deferred import: boot files run in a fixed order and this function
-      // is only called after user interaction, so the globalProperties are
-      // populated by then.
-      const api = (typeof window !== 'undefined' && window.__appGlobals && window.__appGlobals.$socialAuth) || null
+      const api = socialApi()
       if (!api) return Promise.reject(new Error('$socialAuth not installed'))
-      return api.authenticate(provider)
+      return api.authenticate(provider).then((res) => {
+        const accessToken = res && res.accessToken
+        if (!accessToken) throw new Error('No access token returned')
+        try {
+          window.sessionStorage.setItem(SESSION_KEY, JSON.stringify({ provider, accessToken }))
+        } catch { /* sessionStorage unavailable */ }
+        return { access_token: accessToken }
+      })
     },
     getAuthResponse () {
       if (typeof window === 'undefined') return {}
@@ -49,11 +54,12 @@ function hello (provider) {
 
 export default boot(({ app }) => {
   app.config.globalProperties.$hello = hello
-  // Expose globalProperties reference so the shim can reach the socialAuth
-  // API without circular imports between boot files.
+  // The components read the SDK off `window.hello` (the original vue-hellojs
+  // global). Without this assignment the Google/Facebook buttons are silent
+  // no-ops: `const helloFn = window.hello` is undefined and the handler returns
+  // early.
   if (typeof window !== 'undefined') {
-    window.__appGlobals = window.__appGlobals || {}
-    window.__appGlobals.$socialAuth = app.config.globalProperties.$socialAuth
+    window.hello = hello
   }
 })
 
