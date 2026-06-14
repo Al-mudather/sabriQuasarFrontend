@@ -73,7 +73,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
-import { LOGO } from 'src/design-system/brand'
+import doctorsImg from 'src/assets/hero/doctors.jpg'
 import { slowBreath, cascade, contourDrift } from 'src/design-system/motion'
 import { useIntl } from 'src/composables/useIntl'
 
@@ -101,7 +101,7 @@ let cascade_: Motion = null
 let trustCascade: Motion = null
 let trustTimer: ReturnType<typeof setTimeout> | null = null
 
-const portraitSrc = computed(() => LOGO.full)
+const portraitSrc = doctorsImg
 
 const { formatNumber } = useIntl()
 
@@ -326,10 +326,9 @@ onBeforeUnmount(() => {
   position: relative;
   min-block-size: 100%;
 
-  /* Hide the hero portrait on small screens — the "15+ years" stat still
-     shows in the trust line, so no information is lost. */
+  /* Show the doctors below the copy on small screens (stacked layout). */
   @media (max-width: $ds-bp-md) {
-    display: none;
+    margin-block-end: var(--ds-space-6);
   }
 }
 
@@ -376,7 +375,7 @@ onBeforeUnmount(() => {
 
 .hero-indigo__badge {
   position: absolute;
-  inset-block-start: 16px;
+  inset-block-end: 16px;
   inset-inline-start: 16px;
   inline-size: 64px;
   block-size: 64px;
