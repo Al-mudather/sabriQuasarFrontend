@@ -21,10 +21,10 @@
           </span>
 
           <h1 class="hero-indigo__headline">
-            <span ref="line1" class="hero-indigo__line">{{ $t('ابدأ رحلتك نحو') }}</span>
+            <span ref="line1" class="hero-indigo__line">{{ $t('بوابتك إلى') }}</span>
             <span ref="line2" class="hero-indigo__line hero-indigo__line--inline">
               <span class="hero-indigo__word hero-indigo__word--underline">
-                {{ $t('نسخة') }}
+                {{ $t('التميّز') }}
                 <svg class="hero-indigo__brush" viewBox="0 0 120 18" preserveAspectRatio="none" aria-hidden="true">
                   <path d="M2,11 C22,4 48,16 78,8 C98,3 112,10 118,6" />
                 </svg>
@@ -32,9 +32,9 @@
               <span class="hero-indigo__inline-photo" aria-hidden="true">
                 <span class="hero-indigo__inline-photo-inner"></span>
               </span>
-              <span class="hero-indigo__word">{{ $t('أقوى') }}</span>
+              <span class="hero-indigo__word">{{ $t('الطبي') }}</span>
             </span>
-            <span ref="line3" class="hero-indigo__line">{{ $t('من نفسك') }}</span>
+            <span ref="line3" class="hero-indigo__line">{{ $t('العالمي') }}</span>
           </h1>
 
           <p class="hero-indigo__deck">

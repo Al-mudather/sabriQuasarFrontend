@@ -1085,11 +1085,11 @@ export default {
   // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.
   "آخر تحديث": "Last updated",
   "أثر المركز": "The Center's impact",
-  "أقوى": "stronger",
+  "الطبي": "medical",
   "أكملت دورة علوم الدم · 2026": "Completed the Hematology course · 2026",
   "ابدأ الدورة المجانية": "Start the free course",
   "ابدأ رحلتك": "Start your journey",
-  "ابدأ رحلتك نحو": "Begin your journey toward",
+  "بوابتك إلى": "Your gateway to",
   "اقرأ المزيد من القصص": "Read more stories",
   "السعر قبل الخصم": "Price before discount",
   "ان التدريب في مركز د. صبري نقطة تحوّل حقيقية في مسيرتي المهنية. المنهج عميق، والمدرب حاضر بكل كفاءته وإنسانيته، وأخرجت من الدورة بمهارات سريرية صلبة وإحساس جديد بقدراتي على تقديم رعاية أفضل لمرضاي.": "The training at Dr. Sabri's Center has been a real turning point in my career. The curriculum is deep, the instructor is present with full competence and humanity, and I came out of the course with solid clinical skills and a renewed sense of my ability to deliver better care to my patients.",
@@ -1123,8 +1123,8 @@ export default {
   "مركز د. صبري للتدريب الطبي والتأهيل المهني": "Dr. Sabri Center for Medical Training & Professional Development",
   "مركز متخصص في التطوير الذاتي والتدريب المهني، يقدم تجربة تعليمية عربية متكاملة عبر برامج معتمدة يقودها خبراء متمرسون.": "A center specialized in self-development and professional training, offering a complete Arabic learning experience through accredited programs led by seasoned experts.",
   "ملاحظات": "Notes",
-  "من نفسك": "of yourself",
-  "نسخة": "version",
+  "العالمي": "excellence",
+  "التميّز": "global",
   "يـوم": "day",
 
   // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.
