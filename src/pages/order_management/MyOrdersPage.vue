@@ -159,15 +159,27 @@ const activeFilter = ref<FilterChip['key']>('all')
 // ---------------------------------------------------------------------------
 // Query
 // ---------------------------------------------------------------------------
+// cache-and-network: show cached orders instantly, but always refetch the
+// latest from the server so a just-placed order appears without a hard reload.
 const txQuery = useQuery<TheUserAttachmentTransactionsResult, TheUserAttachmentTransactionsVars>(
   MyAttachmentTransactions,
+  {},
+  { fetchPolicy: 'cache-and-network' },
 )
 const loading = txQuery.loading
 
 const orders = computed<UserAttachmentTransaction[]>(
   () => (txQuery.result.value?.myAttachmentTransactions?.edges ?? [])
     .filter((e): e is NonNullable<typeof e> => !!e && !!e.node)
-    .map(e => e.node as UserAttachmentTransaction),
+    .map(e => e.node as UserAttachmentTransaction)
+    // Newest first — the backend returns oldest-first, so a new order would
+    // otherwise land at the bottom of the list.
+    .slice()
+    .sort((a, b) => {
+      const ta = a.created ? new Date(a.created).getTime() : 0
+      const tb = b.created ? new Date(b.created).getTime() : 0
+      return tb - ta
+    }),
 )
 
 // ---------------------------------------------------------------------------
