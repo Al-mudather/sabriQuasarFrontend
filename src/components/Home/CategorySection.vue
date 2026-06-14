@@ -1,5 +1,5 @@
 <template>
-  <section class="category-section" :aria-label="speciality.speciality">
+  <section :id="anchorId" class="category-section" :aria-label="speciality.speciality">
     <div class="category-section__container">
       <header class="category-section__header">
         <div class="category-section__title-block">
@@ -129,6 +129,8 @@ function pickIcon (name = ''): string {
 // ---------------------------------------------------------------------------
 interface Props {
   speciality: Speciality
+  /** DOM id used as the scroll anchor target by the category quick-nav. */
+  anchorId?: string
 }
 const props = defineProps<Props>()
 
@@ -325,6 +327,9 @@ void isEnglish
      Kept tighter than --ds-section-y-tight to avoid a huge run between
      category rails on the landing page. */
   padding-block: clamp(1rem, 3vw, 2rem);
+  /* Land below the sticky app header + sticky category quick-nav when an
+     anchor jump targets this section. */
+  scroll-margin-block-start: calc(var(--header-height, 72px) + 64px);
 }
 
 .category-section__container {

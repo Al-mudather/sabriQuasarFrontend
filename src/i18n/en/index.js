@@ -1077,6 +1077,8 @@ export default {
   "فيسبوك": "Facebook",
   "تيك توك": "TikTok",
   "تيليجرام": "Telegram",
+  "أقسام الدورات": "Course categories",
+  "العودة إلى الأعلى": "Back to top",
   "إكس / تويتر": "X / Twitter",
   "لينكد إن": "LinkedIn",
 
