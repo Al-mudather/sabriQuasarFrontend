@@ -1,5 +1,5 @@
-# Get nodejs 14 container
-FROM node:14
+# Get nodejs 22.18.0 container (matches local dev: v22.18.0)
+FROM node:22.18.0
 
 # Create workdir app directory
 WORKDIR /frontend
