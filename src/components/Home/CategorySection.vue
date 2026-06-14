@@ -52,7 +52,7 @@
           class="category-section__slot"
           :data-idx="i"
         >
-          <course-card :course="normalize(c)" variant="public" />
+          <course-card :course="normalize(c)" variant="public" @cta-click="onAddToCart(c)" />
         </div>
 
         <!-- See-all tile -->
@@ -79,12 +79,15 @@
 <script setup lang="ts">
 import { computed, watch, onMounted, onBeforeUnmount, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 import { useQuery } from '@vue/apollo-composable'
 import { GetAllCoursesInSpeciality } from 'src/graphql/course_management/query/GetAllCoursesInSpeciality'
 import CourseCard from 'src/components/shared/CourseCard.vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 import DsEmptyState from 'src/design-system/components/DsEmptyState.vue'
 import { useSettingsStore } from 'src/stores/settings'
+import { useAuthStore } from 'src/stores/auth'
+import { useCartStore } from 'src/stores/cart'
 import { useIntl } from 'src/composables/useIntl'
 import { useI18n } from 'vue-i18n'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
@@ -132,6 +135,10 @@ const props = defineProps<Props>()
 // ---------------------------------------------------------------------------
 // Stores
 // ---------------------------------------------------------------------------
+const router = useRouter()
+const auth = useAuthStore()
+const cart = useCartStore()
+const { user } = storeToRefs(auth)
 const settings = useSettingsStore()
 const { currency, isEnglish } = storeToRefs(settings)
 
@@ -167,6 +174,27 @@ const countLabel = computed<string>(() => {
 })
 
 const iconSvg = computed<string>(() => pickIcon(props.speciality.speciality))
+
+// ---------------------------------------------------------------------------
+// Cart CTA handler — uses the RAW node so the full currency price map is
+// preserved. normalize() is for display only and must not be used here.
+// ---------------------------------------------------------------------------
+function onAddToCart (node: CourseInSpeciality): void {
+  if (!auth.isAuthenticated) {
+    router.push({ name: 'login', query: { redirect: '/cart' } })
+    return
+  }
+  cart.addCourseToCart({
+    user: user.value,
+    course: {
+      id: node.id,
+      pk: node.pk,
+      name: node.title,
+      currency: (node.currency ?? {}) as Record<string, number>,
+    },
+  })
+  router.push({ name: 'cart' })
+}
 
 // ---------------------------------------------------------------------------
 // normalize: CourseInSpeciality -> shape expected by CourseCard

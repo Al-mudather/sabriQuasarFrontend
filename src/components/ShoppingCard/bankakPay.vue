@@ -58,12 +58,12 @@ const { shoppingCartDataList } = storeToRefs(cart)
 const { currency } = storeToRefs(settings)
 
 const visible = ref<boolean>(false)
-const bankakBill = ref<string>('')
+const bankakBill = ref<File | null>(null)
 const bankakLabel = 'إشعار بنكك الأبيض'
 const othersLabel = t('اضغط للإرفاق فاتورة الدفع')
 
 function paymentImageHandler (val: File | null): void {
-  bankakBill.value = val ? (val as unknown as string) : ''
+  bankakBill.value = val
 }
 
 function errorHandler (errorsObj: unknown): void {
@@ -118,13 +118,14 @@ async function SEND_THE_PAYMENT (): Promise<void> {
     const courseIds = getOrdersIds()
     const orderResult = await getOrderResult(courseIds)
     if (!orderResult?.order?.pk) { visible.value = false; return }
+    cart.setSaveCheckoutOrderID(orderResult.order.pk)
 
     const bankakPaymentResult = await apolloClient.mutate<UploadAttachmentResult, UploadAttachmentVars>({
       mutation: UploadAttachmentTransaction,
       variables: {
         input: {
           order: orderResult.order.pk,
-          attachment: bankakBill.value as unknown as File
+          attachment: bankakBill.value
         }
       }
     })
