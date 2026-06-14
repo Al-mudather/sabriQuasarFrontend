@@ -75,18 +75,16 @@
                     <circle cx="12" cy="12" r="4" />
                     <circle cx="17.5" cy="6.5" r="0.75" fill="currentColor" />
                   </template>
-                  <template v-else-if="social.name === 'youtube'">
-                    <path d="M22 8.5a3 3 0 0 0-2.1-2.1C18 6 12 6 12 6s-6 0-7.9.4A3 3 0 0 0 2 8.5 31 31 0 0 0 1.5 12 31 31 0 0 0 2 15.5a3 3 0 0 0 2.1 2.1C6 18 12 18 12 18s6 0 7.9-.4a3 3 0 0 0 2.1-2.1A31 31 0 0 0 22.5 12 31 31 0 0 0 22 8.5Z" />
-                    <path d="m10 9.5 5 2.5-5 2.5Z" fill="currentColor" />
+                  <template v-else-if="social.name === 'facebook'">
+                    <path d="M16.5 3H14.5A4 4 0 0 0 10.5 7v2.5H8v3.5h2.5V21h3.5v-8h2.6l.4-3.5h-3V7a1 1 0 0 1 1-1h1.5Z" />
                   </template>
-                  <template v-else-if="social.name === 'twitter'">
-                    <path d="M4 4h3.5l4.2 5.8L16.5 4H20l-6.4 8.2L20.5 20H17l-4.7-6.3L7 20H4l6.9-8.7Z" />
+                  <template v-else-if="social.name === 'tiktok'">
+                    <path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5c.34 0 .68.05 1 .15" />
+                    <path d="M14 3c.4 2.6 2.2 4.3 4.8 4.5" />
                   </template>
-                  <template v-else-if="social.name === 'linkedin'">
-                    <rect x="3" y="3" width="18" height="18" rx="3" />
-                    <path d="M7.5 10v7" />
-                    <circle cx="7.5" cy="7" r="0.9" fill="currentColor" />
-                    <path d="M11.5 17v-4.2a2.3 2.3 0 1 1 4.5 0V17" />
+                  <template v-else-if="social.name === 'telegram'">
+                    <path d="M21 4.5 2.9 11.6c-.6.24-.56 1.1.06 1.27l4.3 1.27 1.66 5.02c.18.55.9.66 1.24.2l2.27-2.96 4.5 3.3c.45.33 1.09.09 1.21-.45L21.97 5.2c.12-.6-.43-1.1-.97-.7Z" />
+                    <path d="m7.25 14.15 9.5-6" />
                   </template>
                 </svg>
               </a>
@@ -134,7 +132,7 @@
       <!-- Bottom bar -->
       <div class="app-footer__bottom">
         <p class="app-footer__copyright">
-          © 2026 {{ $t('مركز د. صبري أبوقرون للتدريب — جميع الحقوق محفوظة') }}
+          {{ $t('© 2021–2026 Al-Hasif & STC — جميع الحقوق محفوظة') }}
         </p>
         <p class="app-footer__tagline-end">
           {{ $t('صُنع بعناية لطلاب الطب الناطقين بالعربية') }}
@@ -178,10 +176,10 @@ const supportLinks = computed(() => [
 ])
 
 const socials = computed(() => [
-  { name: 'instagram', href: '#', label: t('إنستغرام') },
-  { name: 'youtube',   href: '#', label: t('يوتيوب') },
-  { name: 'twitter',   href: '#', label: t('إكس / تويتر') },
-  { name: 'linkedin',  href: '#', label: t('لينكد إن') }
+  { name: 'instagram', href: 'https://www.instagram.com/dr.sabri_training_center/', label: t('إنستغرام') },
+  { name: 'facebook',  href: 'https://www.facebook.com/SabriABUGROONTC/',           label: t('فيسبوك') },
+  { name: 'tiktok',    href: 'https://www.tiktok.com/@stc_center1',                  label: t('تيك توك') },
+  { name: 'telegram',  href: 'https://t.me/Drsabriabogroon',                         label: t('تيليجرام') }
 ])
 </script>
 
@@ -409,6 +407,32 @@ const socials = computed(() => [
   font-size: 12px;
   color: rgba(246, 241, 234, 0.6);
 }
+
+/* ---------- Mobile: center the stacked columns ---------- */
+@media (max-width: 767px) {
+  .app-footer__col {
+    align-items: center;
+    text-align: center;
+  }
+
+  .app-footer__mission {
+    max-width: 46ch;
+  }
+
+  .app-footer__social {
+    justify-content: center;
+  }
+
+  .app-footer__links {
+    align-items: center;
+  }
+
+  .app-footer__bottom {
+    align-items: center;
+    text-align: center;
+  }
+}
+
 /* ---------- Locale toggle (removed) ---------- */
 .app-footer__locale {
   display: inline-flex;

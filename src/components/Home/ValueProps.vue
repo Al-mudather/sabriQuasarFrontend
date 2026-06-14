@@ -81,8 +81,8 @@ const RAW_VALUES: RawValueItem[] = [
     icon: ICONS.growth,
     title: { ar: 'تطوير ذاتي عميق', en: 'Deep Personal Growth' },
     body: {
-      ar: 'رحلات تحوّلية تُعيد تشكيل علاقتك بالعمل والحياة، بإشراف مدرّبين بخبرة تتجاوز العقدين.',
-      en: 'Transformative journeys that reshape your relationship with work and life, guided by mentors with over two decades of experience.'
+      ar: 'رحلات تحوّلية تُعيد تشكيل علاقتك بالعمل والحياة، بإشراف مدرّبين بخبرة تتجاوز 15 عاماً.',
+      en: 'Transformative journeys that reshape your relationship with work and life, guided by mentors with over 15 years of experience.'
     }
   },
   {

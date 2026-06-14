@@ -38,7 +38,7 @@
           </h1>
 
           <p class="hero-indigo__deck">
-            {{ $t('برامج تدريبية معتمدة في التطوير الذاتي والمهارات الطبية، يقودها خبراء متمرسون بخبرة تمتد لعقود.') }}
+            {{ $t('برامج تدريبية معتمدة في التطوير الذاتي والمهارات الطبية، يقودها خبراء متمرسون بخبرة تتجاوز 15 عاماً.') }}
           </p>
 
           <div class="hero-indigo__actions">
@@ -50,7 +50,7 @@
           <ul ref="trust" class="hero-indigo__trust">
             <li v-if="coursesLabel"><bdi>{{ coursesLabel }}</bdi> {{ $t('دورة معتمدة') }}</li>
             <li v-if="coursesLabel" aria-hidden="true" class="hero-indigo__trust-dot">·</li>
-            <li>{{ $t('20+ سنة خبرة') }}</li>
+            <li>{{ $t('15+ سنة خبرة') }}</li>
           </ul>
         </div>
 
@@ -60,7 +60,7 @@
             <img :src="portraitSrc" alt="" />
             <div class="hero-indigo__portrait-overlay" aria-hidden="true"></div>
             <div class="hero-indigo__badge">
-              <span class="hero-indigo__badge-num">20+</span>
+              <span class="hero-indigo__badge-num">15+</span>
               <span class="hero-indigo__badge-label">{{ $t('سنة خبرة') }}</span>
             </div>
           </div>
@@ -326,8 +326,10 @@ onBeforeUnmount(() => {
   position: relative;
   min-block-size: 100%;
 
+  /* Hide the hero portrait on small screens — the "15+ years" stat still
+     shows in the trust line, so no information is lost. */
   @media (max-width: $ds-bp-md) {
-    margin-block-start: var(--ds-space-8);
+    display: none;
   }
 }
 

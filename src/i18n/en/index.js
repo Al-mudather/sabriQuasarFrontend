@@ -1051,6 +1051,7 @@ export default {
   "المركز": "The Center",
   "الدعم والقانون": "Support & Legal",
   "مركز د. صبري أبوقرون للتدريب — جميع الحقوق محفوظة": "Dr. Sabri Abu Garoun Training Center — All rights reserved",
+  "© 2021–2026 Al-Hasif & STC — جميع الحقوق محفوظة": "© 2021–2026 Al-Hasif & STC — All rights reserved",
   "صُنع بعناية لطلاب الطب الناطقين بالعربية": "Crafted with care for Arabic-speaking medical students",
   "اكتب رسالتك...": "Type your message...",
 
@@ -1073,6 +1074,9 @@ export default {
   "سلة المشتريات": "Shopping cart",
   "إنستغرام": "Instagram",
   "يوتيوب": "YouTube",
+  "فيسبوك": "Facebook",
+  "تيك توك": "TikTok",
+  "تيليجرام": "Telegram",
   "إكس / تويتر": "X / Twitter",
   "لينكد إن": "LinkedIn",
 
@@ -1089,7 +1093,7 @@ export default {
   "ان التدريب في مركز د. صبري نقطة تحوّل حقيقية في مسيرتي المهنية. المنهج عميق، والمدرب حاضر بكل كفاءته وإنسانيته، وأخرجت من الدورة بمهارات سريرية صلبة وإحساس جديد بقدراتي على تقديم رعاية أفضل لمرضاي.": "The training at Dr. Sabri's Center has been a real turning point in my career. The curriculum is deep, the instructor is present with full competence and humanity, and I came out of the course with solid clinical skills and a renewed sense of my ability to deliver better care to my patients.",
   "انضمّ إلى آلاف المتعلمين الذين اختاروا الاستثمار في أنفسهم. رحلتك نحو نسخة أقوى تبدأ بخطوة واحدة.": "Join thousands of learners who chose to invest in themselves. Your journey toward a stronger version of yourself begins with one step.",
   "بالأرقام": "By the numbers",
-  "برامج تدريبية معتمدة في التطوير الذاتي والمهارات الطبية، يقودها خبراء متمرسون بخبرة تمتد لعقود.": "Accredited training programs in personal development and medical skills, led by seasoned experts with decades of experience.",
+  "برامج تدريبية معتمدة في التطوير الذاتي والمهارات الطبية، يقودها خبراء متمرسون بخبرة تتجاوز 15 عاماً.": "Accredited training programs in personal development and medical skills, led by seasoned experts with over 15 years of experience.",
   "تأثير الجهاز العصبي علي السلوك والانساني": "Effect of the Nervous System on Human Behavior",
   "تاريخ الإنشاء": "Date created",
   "تدريب يُحدث": "Training that makes",
@@ -1122,5 +1126,5 @@ export default {
   "يـوم": "day",
 
   // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.
-  "20+ سنة خبرة": "20+ years of experience",
+  "15+ سنة خبرة": "15+ years of experience",
 }
