@@ -18,12 +18,9 @@
       </p>
       <div class="final-cta__actions">
         <ds-button variant="accent" size="lg" pill to="/courses">
-          {{ $t('ابدأ الدورة المجانية') }}
+          {{ $t('ابدأ الآن') }}
         </ds-button>
       </div>
-      <p class="final-cta__fineprint">
-        {{ $t('لا تحتاج بطاقة ائتمان · إلغاء في أي وقت') }}
-      </p>
     </div>
   </section>
 </template>
@@ -102,14 +99,5 @@ onBeforeUnmount(() => {
 .final-cta__actions {
   display: flex;
   justify-content: center;
-  margin-block-end: var(--ds-space-4);
-}
-
-.final-cta__fineprint {
-  font-family: var(--ds-font-body);
-  font-weight: 400;
-  font-size: var(--ds-text-xs);
-  color: rgba(251, 247, 240, 0.6);
-  margin: 0;
 }
 </style>
