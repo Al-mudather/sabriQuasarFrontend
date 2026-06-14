@@ -190,6 +190,10 @@ function onAddToCart (node: CourseInSpeciality): void {
       id: node.id,
       pk: node.pk,
       name: node.title,
+      // title + cover are real fields on the course node — carry them so the
+      // cart renders the course name and thumbnail (do not invent fields).
+      title: node.title,
+      cover: node.cover ?? null,
       currency: (node.currency ?? {}) as Record<string, number>,
     },
   })

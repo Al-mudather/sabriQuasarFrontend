@@ -37,43 +37,39 @@
             v-for="item in shoppingCartDataList"
             :key="item.course.id"
           >
-            <DsCard tag="article" padding="sm" class="cart-courses__row">
-              <div class="cart-courses__media">
-                <img
-                  v-if="(item.course as unknown as Record<string, unknown>).cover"
-                  :src="FORMAT_THE_IAMGE_URL((item.course as unknown as Record<string, unknown>).cover as string)"
-                  :alt="(item.course as unknown as Record<string, unknown>).title as string"
-                  loading="lazy"
-                />
-                <div v-else class="cart-courses__media-fallback" aria-hidden="true">
-                  <q-icon name="menu_book" size="1.5rem" />
+            <DsCard tag="article" elevation="sm">
+              <div class="cart-courses__row">
+                <div class="cart-courses__media">
+                  <img
+                    v-if="item.course.cover"
+                    :src="FORMAT_THE_IAMGE_URL(item.course.cover)"
+                    :alt="item.course.title ?? item.course.name"
+                    loading="lazy"
+                  />
+                  <div v-else class="cart-courses__media-fallback" aria-hidden="true">
+                    <q-icon name="menu_book" size="1.5rem" />
+                  </div>
                 </div>
-              </div>
 
-              <div class="cart-courses__info">
-                <h3 class="cart-courses__title">{{ (item.course as unknown as Record<string, unknown>).title ?? item.course.name }}</h3>
-                <p
-                  v-if="instructorName(item)"
-                  class="cart-courses__instructor"
+                <div class="cart-courses__info">
+                  <h3 class="cart-courses__title">{{ item.course.title ?? item.course.name }}</h3>
+                  <PriceDisplay
+                    :amount="itemAmount(item)"
+                    :currency="currency"
+                    size="sm"
+                    variant="ink"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  class="cart-courses__remove"
+                  :aria-label="$t('إزالة من السلة')"
+                  @click="removeCourseFromCart(item)"
                 >
-                  {{ instructorName(item) }}
-                </p>
-                <PriceDisplay
-                  :amount="itemAmount(item)"
-                  :currency="currency"
-                  size="sm"
-                  variant="ink"
-                />
+                  <q-icon name="delete_outline" size="1.25rem" />
+                </button>
               </div>
-
-              <button
-                type="button"
-                class="cart-courses__remove"
-                :aria-label="$t('إزالة من السلة')"
-                @click="removeCourseFromCart(item)"
-              >
-                <q-icon name="delete_outline" size="1.25rem" />
-              </button>
             </DsCard>
           </li>
         </ul>
@@ -99,22 +95,6 @@
               </dd>
             </div>
 
-            <div
-              v-if="discountAmount > 0"
-              class="cart-courses__summary-row cart-courses__summary-row--discount"
-            >
-              <dt>{{ $t('الخصم') }}</dt>
-              <dd>
-                −
-                <PriceDisplay
-                  :amount="discountAmount"
-                  :currency="currency"
-                  size="sm"
-                  variant="ink"
-                />
-              </dd>
-            </div>
-
             <div class="cart-courses__summary-row cart-courses__summary-row--total">
               <dt>{{ $t('المجمــوع') }}</dt>
               <dd>
@@ -127,36 +107,6 @@
               </dd>
             </div>
           </dl>
-
-          <!-- Promo -->
-          <div class="cart-courses__promo">
-            <label class="cart-courses__promo-label" for="promo-input">
-              {{ $t('كود الخصم') }}
-            </label>
-            <div class="cart-courses__promo-row">
-              <DsInput
-                id="promo-input"
-                v-model="promoCode"
-                :placeholder="$t('أدخل كود الخصم')"
-                :disabled="promoApplied"
-              />
-              <DsButton
-                variant="ghost"
-                size="md"
-                :disabled="!promoCode || promoApplied"
-                @click="applyPromo"
-              >
-                {{ promoApplied ? $t('تمت الإضافة') : $t('تطبيق') }}
-              </DsButton>
-            </div>
-            <p
-              v-if="promoApplied"
-              class="cart-courses__promo-hint cart-courses__promo-hint--ok"
-            >
-              <q-icon name="check_circle" size="1rem" />
-              {{ $t('تم تطبيق الكود') }} ({{ promoCode }})
-            </p>
-          </div>
 
           <DsButton
             variant="accent"
@@ -179,7 +129,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { computed, watch, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -198,7 +148,6 @@ import type {
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
 import { CreateBraintreeCheckout } from 'src/graphql/checkout_management/mutation/CreateBraintreeCheckout.js'
 
-import DsInput from 'src/design-system/components/DsInput.vue'
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
 
 const router = useRouter()
@@ -207,10 +156,6 @@ const cart = useCartStore()
 const settings = useSettingsStore()
 const { shoppingCartDataList } = storeToRefs(cart)
 const { currency } = storeToRefs(settings)
-
-const promoCode = ref<string>('')
-const promoApplied = ref<boolean>(false)
-const discountAmount = ref<number>(0)
 
 const hasItems = computed(() => shoppingCartDataList.value && shoppingCartDataList.value.length > 0)
 
@@ -235,37 +180,11 @@ const subtotal = computed((): number => {
   return sum
 })
 
-const totalDue = computed((): number => {
-  const t = subtotal.value - discountAmount.value
-  return t > 0 ? t : 0
-})
+const totalDue = computed((): number => subtotal.value)
 
 watch(subtotal, (v) => {
   cart.setTotalPaymentFees(v)
 }, { immediate: true })
-
-function instructorName (item: CartEntry): string {
-  const c = item.course as unknown as Record<string, unknown>
-  if (c.instructorName && typeof c.instructorName === 'string') return c.instructorName
-  if (c.instructor) {
-    if (typeof c.instructor === 'string') return c.instructor
-    const inst = c.instructor as Record<string, unknown>
-    return (inst.fullName as string) || (inst.name as string) || ''
-  }
-  return ''
-}
-
-function applyPromo (): void {
-  if (!promoCode.value) return
-  promoApplied.value = true
-  discountAmount.value = 0
-  $q.notify({
-    type: 'info',
-    progress: true,
-    position: 'top',
-    message: 'سيتم التحقق من كود الخصم في خطوة الدفع'
-  })
-}
 
 async function getBraintreeClientToken (orderId: number): Promise<string | null | undefined> {
   const result = await apolloClient.mutate<CreateBraintreeCheckoutResult, CreateBraintreeCheckoutVars>({

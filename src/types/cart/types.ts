@@ -69,6 +69,13 @@ export interface CartItem {
    * will narrow it further. Keep it permissive here to avoid coupling.
    */
   currency: Record<string, number>
+  /**
+   * Optional display fields carried from the course node at add-to-cart time
+   * (both are real fields on the course node — `title` and `cover`). They let
+   * the cart render the course name + thumbnail without re-fetching.
+   */
+  title?: string
+  cover?: string | null
   /** Optional affiliate/referral code attached at add-to-cart time. */
   affiliateCode?: string | null
 }
