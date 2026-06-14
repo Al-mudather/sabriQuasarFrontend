@@ -11,7 +11,7 @@
             {{ $t('الدفع عن طريق ارفاق فاتورة البنك') }}
           </h2>
           <p class="cart-payment__subview-desc">
-            {{ $t('ارفق صورة الإشعار البنكي وسيتم تفعيل الدورة خلال 24 ساعة') }}
+            {{ $t('ارفق صورة الإشعار البنكي وسيتم تفعيل الدورة خلال 48 ساعة') }}
           </p>
         </div>
       </header>
@@ -237,7 +237,9 @@ const { currency } = storeToRefs(settings)
 const showBankakPayment = ref<boolean>(false)
 const showStripePayment = ref<boolean>(false)
 const stripeLoading = ref<boolean>(false)
-const selectedMethod = ref<string | null>(null)
+// Pre-selected: Bankak is the only active method, so the user can confirm
+// directly without picking one.
+const selectedMethod = ref<string | null>('bankak')
 
 interface PaymentMethod {
   id: string
@@ -247,20 +249,16 @@ interface PaymentMethod {
   badge: string
 }
 
+// Credit-card (Stripe) is not activated yet — only Bankak is offered for now.
+// The Stripe handlers below are kept intact so it can be re-enabled by adding
+// its entry back here.
 const availableMethods = computed((): PaymentMethod[] => [
   {
     id: 'bankak',
     title: t('إرفاق إشعار بنكي'),
-    subtitle: t('البنوك السودانية — تفعيل خلال 24 ساعة'),
+    subtitle: t('البنوك السودانية — تفعيل خلال 48 ساعة'),
     icon: 'account_balance',
     badge: t('الأكثر استخداماً')
-  },
-  {
-    id: 'stripe',
-    title: t('بطاقة ائتمانية (Visa / Mastercard)'),
-    subtitle: t('تفعيل فوري — دفع مشفر عبر Stripe'),
-    icon: 'credit_card',
-    badge: t('فوري')
   }
 ])
 
