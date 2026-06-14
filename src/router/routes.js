@@ -1,10 +1,12 @@
 import { Notify } from 'quasar'
+import { tokenStorage } from 'src/localStorageService'
 
 // Route guard: redirect unauthenticated visitors to /account/login while
 // preserving the intended destination as a ?redirect= query param so
-// login can restore them afterwards.
+// login can restore them afterwards. Reads the token via tokenStorage so the
+// storage key lives in exactly one place (no hardcoded key string here).
 const requireAuthentication = (to, from, next) => {
-  if (sessionStorage.getItem('userAccessToken')) {
+  if (tokenStorage.getAccessToken()) {
     next()
   } else {
     Notify.create({

@@ -12,8 +12,11 @@
 // it to the `window.hello(...)` shape the components were written against.
 
 import { boot } from 'quasar/wrappers'
+import { SOCIAL_AUTH_KEY } from 'src/localStorageService'
 
-const SESSION_KEY = 'helloShim.lastAuthResponse'
+// Single source of truth for the social-token key — the logout purge clears
+// this exact key (see src/localStorageService/index.js).
+const SESSION_KEY = SOCIAL_AUTH_KEY
 
 function readStoredResponse (provider) {
   try {
