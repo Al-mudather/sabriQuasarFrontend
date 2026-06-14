@@ -30,7 +30,7 @@ export default {
  
       "تهانينا, الان يمكنك ان تكون مطلعا على كل ماهو جديد في المنصه التعليميه" : "Congratulations, now you can be aware of everything new in the educational platform",
  
-      "بعدم قبولك للإشعارات, لايمكننا ان نخبرك بمراحل امتلاكك للدوره التدريبيه اللتي تريدها, من فضلك اقبل الإشعارات" : "By not accepting the notices, we cannot tell you the stages of taking the course you want, please accept the notices",
+      "بعدم قبولك للإشعارات, لايمكننا ان نخبرك بمراحل امتلاكك للدوره التدريبيه اللتي تريدها, من فضلك اقبل الإشعارات" : "By declining notifications, we cannot keep you updated on your course enrollment progress. Please enable notifications.",
  
       "تم تسجيل الدخول" : "Logged in",
  
@@ -38,7 +38,7 @@ export default {
   "_comment_src_components_Account_Confirm.vue": "src_components_Account_Confirm.vue",
         
  
-      "تأكيد" : "emphasis",
+      "تأكيد" : "Confirm",
  
       "تم إرسال رابط تفعيل حسابك علي بريدك الالكتروني" : "A link to activate your account has been sent to your email",
  
@@ -66,9 +66,9 @@ export default {
  
       "كلمة المرور" : "password",
  
-      "هل نسيت كلمة" : "Did you forget a word",
+      "هل نسيت كلمة" : "Forgot your",
  
-      "السر ؟" : "the secret ?",
+      "السر ؟" : "password?",
  
       "أو" : "or",
  
@@ -78,7 +78,7 @@ export default {
   "_comment_src_components_Account_ResetPassword.vue": "src_components_Account_ResetPassword.vue",
         
  
-      "إستعادة كلمة المرور" : "Restore password",
+      "إستعادة كلمة المرور" : "Reset Password",
  
         
   "_comment_src_components_Account_SignUp.vue": "src_components_Account_SignUp.vue",
@@ -86,11 +86,11 @@ export default {
  
       "إنشاء حساب جديد" : "Create a new account",
  
-      "الاسم الحقيقي" : "real name",
+      "الاسم الحقيقي" : "Full Name",
  
-      "إعادة كلمة المرور" : "Password reset",
+      "إعادة كلمة المرور" : "Confirm Password",
  
-      "يجب ان تقوم بتفعيل حسابك الإلكتروني" : "You must activate your online account",
+      "يجب ان تقوم بتفعيل حسابك الإلكتروني" : "You must verify your email account",
  
         
   "_comment_src_components_courseClass_classUnits copy.vue": "src_components_courseClass_classUnits copy.vue",
@@ -142,7 +142,7 @@ export default {
   "_comment_src_components_courseDetails_courseInstructors.vue": "src_components_courseDetails_courseInstructors.vue",
         
  
-      "المحاضرون" : "The Lecturers",
+      "المحاضرون" : "Instructors",
  
         
   "_comment_src_components_courseDetails_courseMainCard.vue": "src_components_courseDetails_courseMainCard.vue",
@@ -152,7 +152,7 @@ export default {
  
       "عدد الساعات" : "The number of hours",
  
-      "أمتلك الأن" : "I own it now",
+      "أمتلك الأن" : "Enroll Now",
  
         
   "_comment_src_components_courseDetails_coursePreRequisites.vue": "src_components_courseDetails_coursePreRequisites.vue",
@@ -228,17 +228,17 @@ export default {
  
       "طلباتي" : "My orders",
  
-      "لوحتي التعليمية" : "My educational board",
+      "لوحتي التعليمية" : "My Learning Dashboard",
  
       "صفحتي التسويقيه" : "My marketing page",
  
       "ادارة دفعيات العملاء" : "Customer payment management",
  
-      "الإشعارت" : "Notice",
+      "الإشعارت" : "Notifications",
  
       "الملف الشخصي" : "Personal profile",
  
-      "خــروج" : "exit",
+      "خــروج" : "Logout",
  
         
   "_comment_src_components_Home_Nav_bar.vue": "src_components_Home_Nav_bar.vue",
@@ -248,7 +248,7 @@ export default {
  
       "تسجيل حساب" : "Register an account",
  
-      "خروج" : "Exit",
+      "خروج" : "Logout",
  
       "ما الذي تبحث عنه" : "what are you looking for",
  
@@ -306,7 +306,7 @@ export default {
   "_comment_src_components_Home_ViewData.vue": "src_components_Home_ViewData.vue",
         
  
-      "مشــــاهده" : "Watch it",
+      "مشــــاهده" : "Views",
  
         
   "_comment_src_components_MyCourses_afilliateBord.vue": "src_components_MyCourses_afilliateBord.vue",
@@ -314,7 +314,7 @@ export default {
  
       "انت الان ضمن عائلة مسوقي المنصه التعليميه. الرجاء الذهاب الى صفحتك التسويقيه" : "You are now part of the educational platform marketers family. Please go to your marketing page",
  
-      "الذهاب" : "going",
+      "الذهاب" : "Go",
  
       "هيـا لنقم بإنشاء رابطك الخاص ومشاركتة مع الاصدقاء لتربح مع كل إنضمام مبلغ مالي" : "Let's create your own link and share it with friends to earn money with each joining",
  
@@ -330,7 +330,7 @@ export default {
   "_comment_src_components_notification_management_NotificationCard.vue": "src_components_notification_management_NotificationCard.vue",
         
  
-      "السؤال :" : "the question :",
+      "السؤال :" : "Question:",
  
       "جواب سؤال :" : "Answer to question:",
  
@@ -346,13 +346,13 @@ export default {
  
       "معالجة" : "Processing",
  
-      "المدفوع" : "paid up",
+      "المدفوع" : "Amount Paid",
  
       "رؤية فاتورة الدفع" : "See the payment invoice",
  
       "إعادة ارفاق الفاتوره" : "Re-attach the invoice",
  
-      "فاتورة بنكك" : "your bank bill",
+      "فاتورة بنكك" : "Your bank receipt",
  
         
   "_comment_src_components_Profile_managements_PasswordResetProfile.vue": "src_components_Profile_managements_PasswordResetProfile.vue",
@@ -370,9 +370,9 @@ export default {
   "_comment_src_components_pyramid_marketing_management_MyBalance.vue": "src_components_pyramid_marketing_management_MyBalance.vue",
         
  
-      "حسابــي" : "arithmetic",
+      "حسابــي" : "My Account",
  
-      "الكميه" : "Quantity",
+      "الكميه" : "Amount",
  
         
   "_comment_src_components_pyramid_marketing_management_MyPyramidParticipants.vue": "src_components_pyramid_marketing_management_MyPyramidParticipants.vue",
@@ -388,9 +388,9 @@ export default {
   "_comment_src_components_pyramid_marketing_management_MyPyramidRewards.vue": "src_components_pyramid_marketing_management_MyPyramidRewards.vue",
         
  
-      "الأرباح المستحقة" : "accrued profits",
+      "الأرباح المستحقة" : "Pending Earnings",
  
-      "تحصيل ارباحي" : "profit collection",
+      "تحصيل ارباحي" : "Withdraw Earnings",
  
       "تم تحصيل الارباح" : "Profits collected",
  
@@ -398,27 +398,27 @@ export default {
   "_comment_src_components_pyramid_marketing_management_MyWithdrawsList.vue": "src_components_pyramid_marketing_management_MyWithdrawsList.vue",
         
  
-      "تم الدفع" : "The payment was made",
+      "تم الدفع" : "Paid",
  
-      "في إنتظار المعالجة" : "Waiting for processing",
+      "في إنتظار المعالجة" : "Pending",
  
       "عن طريق" : "by",
  
       "ليس لديك سجل سحب في الوقت الحالي" : "You do not have a withdrawal history at the moment",
  
-      "ماهي الكميه اللتي تريد سحبها" : "What quantity do you want to withdraw?",
+      "ماهي الكميه اللتي تريد سحبها" : "What amount do you want to withdraw?",
  
         
   "_comment_src_components_ShoppingCard_cartCourses.vue": "src_components_ShoppingCard_cartCourses.vue",
         
  
-      "المجمــوع" : "The total",
+      "المجمــوع" : "Total",
  
         
   "_comment_src_components_ShoppingCard_loginCart.vue": "src_components_ShoppingCard_loginCart.vue",
         
  
-      "أنا أوافق علي" : "I agree with me",
+      "أنا أوافق علي" : "I agree to the",
  
       "شروط الخدمة" : "Terms of service",
  
@@ -432,7 +432,7 @@ export default {
  
       "شكرا لك !" : "Thank you !",
  
-      "تهانينا لك" : "Congratulation",
+      "تهانينا لك" : "Congratulations!",
  
       "الأن الكورسات التي قمت بإمتلاكها أصبحت متاحة يمكنك الإطلاع عليها من خلال" : "Now the courses that you have are available, you can view them through",
  
@@ -442,7 +442,7 @@ export default {
   "_comment_src_components_utils_courseCard.vue": "src_components_utils_courseCard.vue",
         
  
-      "التفاصيل" : "the details",
+      "التفاصيل" : "Details",
  
         
   "_comment_src_components_utils_MainNavBar.vue": "src_components_utils_MainNavBar.vue",
@@ -508,13 +508,13 @@ export default {
   "_comment_src_pages_account_management_Profile.vue": "src_pages_account_management_Profile.vue",
         
  
-      "بياناتــي" : "My data",
+      "بياناتــي" : "My Profile",
  
       "البريد الالكتروني" : "E-mail",
  
-      "رقم الهاتف" : "Telephone number",
+      "رقم الهاتف" : "Phone number",
  
-      "ذكــر" : "Stated",
+      "ذكــر" : "Male",
  
       "أنثـــي" : "Female",
  
@@ -542,7 +542,7 @@ export default {
   "_comment_src_pages_course_management_classAnswers.vue": "src_pages_course_management_classAnswers.vue",
         
  
-      "ما هي إجابتك" : "whats your answer",
+      "ما هي إجابتك" : "What is your answer?",
  
       "extColor;      }      span {        font-size: 13px;        font-family: cairoR;        display: block;        color: #a1a1a1;      }    }    .titel {      display: inline-block;      position: relative;      top: -6px;      img {        display: inline-block;        margin: -9px 0 0 0;      }      h3 {        color: extColor;        font-size: 22px;        font-family: cairoB;        line-height: 1.7;        margin: 0 11px 0 0;        display: inline-block;      }    }  }  /*progress*/  .progress {    margin: 17px 0 0 0;    height: 7px;    .progress-bar {      background: linear-gradient        90deg,        rgba123, 134, 250, 1" : "extColor; } span {font-size: 13px; font-family: cairoR; display: block; color: # a1a1a1; }} .titel {display: inline-block; position: relative; top: -6px; img {display: inline-block; margin: -9px 0 0 0; } h3 {color: extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; }}} / * progress * / .progress {margin: 17px 0 0 0; height: 7px; .progress-bar {background: linear-gradient 90deg, rgba123, 134, 250, 1",
  
@@ -592,7 +592,7 @@ export default {
  
       "الـــدورات" : "Courses",
  
-      "ما الذي تبحث عنة في التخصص المختار ادناه؟" : "What are you looking for in the below-selected major?",
+      "ما الذي تبحث عنة في التخصص المختار ادناه؟" : "What are you looking for in the selected specialty below?",
  
       "فلتر" : "filter",
  
@@ -618,7 +618,7 @@ export default {
   "_comment_src_pages_course_management_MyCourses.vue": "src_pages_course_management_MyCourses.vue",
         
  
-      "كورساتـي" : "Courses",
+      "كورساتـي" : "My Courses",
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    /* لوحتي التعليمية */    .move{        margin: 30px 0 30px 0;        padding: 0 1% 0 1%;        .col-lg-7{            //maxMobile            @mediamax-width:767px" : "extColor; font-size: 22px; font-family: cairoB; line-height: 1.7; margin: 0 11px 0 0; display: inline-block; }} / * My Learning Board * / .move {margin: 30px 0 30px 0; padding: 0 1% 0 1%; .col-lg-7 {// maxMobile @ mediamax-width: 767px",
  
@@ -638,7 +638,7 @@ export default {
   "_comment_src_pages_order_management_MyOrdersPage.vue": "src_pages_order_management_MyOrdersPage.vue",
         
  
-      "طلبـاتي" : "my request",
+      "طلبـاتي" : "My Orders",
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .search {        padding: 0 18% 0 0;        width: 74%;        margin: -9px auto;        //maxMobile        @mediamax-width:767px" : "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .search {        padding: 0 18% 0 0;        width: 74%;        margin: -9px auto;        //maxMobile        @mediamax-width:767px",
  
@@ -662,7 +662,7 @@ export default {
  
       "حسابي التسويقي" : "My Marketing Account",
  
-      "سجل السحب" : "raffle log",
+      "سجل السحب" : "Withdrawal history",
  
       "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .details{        margin: 30px 0 30px 0;        .user{            //maxMobile            @mediamax-width:767px" : "extColor;            font-size: 22px;            font-family: cairoB;            line-height: 1.7;            margin: 0 11px 0 0;            display: inline-block;        }    }    .details{        margin: 30px 0 30px 0;        .user{            //maxMobile            @mediamax-width:767px",
  
@@ -788,7 +788,7 @@ export default {
   "تأكيد الدفع": "Confirm payment",
   "تأكيد كلمة المرور": "Confirm password",
   "تاريخ الإصدار": "Issue date",
-  "تتابع الآن {n} دورات": "You're currently following {n} courses",
+  "تتابع الآن {n} دورات": "You are currently enrolled in {n} courses",
   "تتضمن هذه الدورة": "This course includes",
   "تحديث تسويقي": "Marketing update",
   "تحديث على دورتك": "Update on your course",
@@ -838,7 +838,7 @@ export default {
   "تمت عملية الدفع": "Payment completed",
   "توسيع الكل": "Expand all",
   "ثانية": "second",
-  "جارٍ التحويل...": "Processing...",
+  "جارٍ التحويل...": "Redirecting...",
   "جرب تعديل البحث أو الفلتر": "Try adjusting your search or filter",
   "جميع المعاملات مشفرة ومحمية.": "All transactions are encrypted and protected.",
   "جواب السؤال :": "Answer:",
@@ -872,7 +872,7 @@ export default {
   "سيتم التحويل تلقائياً حسب سعر الصرف": "The conversion will be applied automatically at the current exchange rate",
   "شارك رمزك مع أصدقائك واكسب عمولة عند كل تسجيل.": "Share your code with friends and earn commission on every enrollment.",
   "شاهد الفيديوهات المجانية": "Watch the free videos",
-  "شخص إنضم من خلالي": "person joined through me",
+  "شخص إنضم من خلالي": "person referred by me",
   "شكراً لك": "Thank you",
   "شهاداتي": "My certificates",
   "شهادة إتمام": "Certificate of completion",
@@ -1004,7 +1004,7 @@ export default {
   "فتح قائمة الحساب": "Open account menu",
   "حسابي": "My account",
   "قائمة الحساب": "Account menu",
-  "محتوى الحساب": "Account content",
+  "محتوى الحساب": "Account details",
   "الصفحة الرئيسية": "Home page",
   "الجنس": "Gender",
   "الهاتف": "Phone",
@@ -1090,7 +1090,7 @@ export default {
   "انضمّ إلى آلاف المتعلمين الذين اختاروا الاستثمار في أنفسهم. رحلتك نحو نسخة أقوى تبدأ بخطوة واحدة.": "Join thousands of learners who chose to invest in themselves. Your journey toward a stronger version of yourself begins with one step.",
   "بالأرقام": "By the numbers",
   "برامج تدريبية معتمدة في التطوير الذاتي والمهارات الطبية، يقودها خبراء متمرسون بخبرة تمتد لعقود.": "Accredited training programs in personal development and medical skills, led by seasoned experts with decades of experience.",
-  "تأثير الجهاز العصبي علي السلوك والانساني": "Effect of the nervous system on behavior and humanity",
+  "تأثير الجهاز العصبي علي السلوك والانساني": "Effect of the Nervous System on Human Behavior",
   "تاريخ الإنشاء": "Date created",
   "تدريب يُحدث": "Training that makes",
   "ثانيه": "second",
