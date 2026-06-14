@@ -6,7 +6,7 @@
 
     <section class="legal-page__content">
       <div class="legal-card legal-card--warning">
-        <h2>{{ isEnglish ? 'Important note' : 'ملاحظه مهمة' }}</h2>
+        <h2>{{ isEnglish ? 'Important note' : 'ملاحظة مهمة' }}</h2>
         <p>{{ isEnglish ? notice.en : notice.ar }}</p>
       </div>
 
@@ -35,40 +35,40 @@ interface Clause { en: string; ar: string }
 
 const notice: Clause = {
   en: 'Please read the following conditions carefully before using the educational platform. By using the platform you are agree to all the terms and conditions and committed to be bound by them. If you do not agree to any of the terms, please do not use the platform.',
-  ar: 'يرجى قراءة الشروط التاليه جيدا قبل إستخدامك للمنصه التعليميه. حيث إستخدامك لها يعني قبولك لهذه الشروط و موافقتك على الإلتزام بها. في حالة عدم موافقتك يرجى عدم إستخدام المنصه.'
+  ar: 'يُرجى قراءة الأحكام والشروط التالية بعناية قبل استخدام المنصة التعليمية. يُعدّ استخدامك للمنصة إقراراً منك بقبول هذه الأحكام والالتزام بها. إن كنت لا توافق على أي من هذه الشروط، فيُرجى الامتناع عن استخدام المنصة.'
 }
 
 const clauses: Clause[] = [
   { en: 'All rights of courses and advertisements on the platform are reserved to Dr. Sabri Abu Qarun Training Center.',
-    ar: 'جميع حقوق الكورسات و الاعلانات بالمنصة محفوظة لمركز د.صبري أبوقرون للتدريب.' },
+    ar: 'جميع حقوق الدورات والمحتوى الإعلاني المنشور على المنصة محفوظة لمركز د. صبري أبوقرون للتدريب.' },
   { en: 'It is forbidden to circulate any lecture or part of a lecture by downloading from the platform and sending it to another person.',
-    ar: 'يمنع تداول أي محاضرة أو جزء من محاضرة بالتحميل من المنصه و ارسالها لشخص آخر.' },
+    ar: 'يُحظر تداول أي محاضرة أو أي جزء منها عن طريق تنزيلها من المنصة وإرسالها إلى أي طرف آخر.' },
   { en: 'It is prohibited to circulate any questions or part of the exams within the platform to any other person.',
-    ar: 'يمنع تداول أي اسئلة أو جزء منها من الامتحانات الموجودة داخل المنصة لأي شخص آخر.' },
+    ar: 'يُحظر تداول أسئلة الاختبارات أو أي جزء منها المتاحة داخل المنصة، أو إفشاؤها لأي طرف آخر.' },
   { en: 'Fees are not refunded after completing the registration process and attaching payment invoice on the platform.',
-    ar: 'لا تسترد الرسوم بعد اتمام عملية التسجيل وارفاق اشعار التوريد في المنصة.' },
+    ar: 'لا تُردّ الرسوم المدفوعة بعد استكمال إجراءات التسجيل وإرفاق إشعار الدفع على المنصة.' },
   { en: 'In the case of attaching the payment invoice, you must be ensured that the date of the transaction is clear in addition to the name of the recipient, the amount paid and the invoice number.',
-    ar: 'في حالة إرفاق فاتورة الدفع يجب التأكد من أن يكون تاريخ العمليه واضحا بإضافه إلى إسم المرسل إليه, المبلغ المدفوع و رقم الفاتوره.' },
+    ar: 'عند إرفاق إشعار الدفع، يجب التحقق من وضوح جميع البيانات الآتية: تاريخ العملية، واسم المستفيد، والمبلغ المدفوع، ورقم الفاتورة.' },
   { en: 'Do not share the account "e-mail" registered on the platform with anyone else.',
-    ar: 'عدم مشاركه الحساب "الايميل" المسجل بالمنصة مع أي شخص آخر.' },
+    ar: 'يُمنع مشاركة بيانات الحساب المسجَّل على المنصة، بما في ذلك عنوان البريد الإلكتروني، مع أي شخص آخر.' },
   { en: 'Lectures are available for the duration of the course plus half the course period (if the duration of a course is one month as an example, the material is available for a month and a half).',
-    ar: 'المحاضرات تكون متاحة طيلة فترة الكورس زائدا نصف فتره الكورس (اذا كان الكورس مدته شهر تكون المادة متاحة شهر و نصف) على سبيل المثال.' },
+    ar: 'تظل المحاضرات متاحة طوال مدة الدورة مضافاً إليها نصف تلك المدة؛ فإذا كانت مدة الدورة شهراً واحداً مثلاً، أصبحت المادة متاحة لمدة شهر ونصف.' },
   { en: 'The course certificate is granted after attending more than 80% of the course content.',
-    ar: 'تمنح شهادة الكورسات بعد حضور اكثر من 80% من محتوي الكورس.' },
+    ar: 'تُمنح شهادة إتمام الدورة للمتدرب الذي أتم حضور ما يزيد على 80% من محتوى الدورة.' },
   { en: 'The course registration request is accepted within 72 hours from the time of submitting the application.',
-    ar: 'يقبل طلب التسجيل في الكورس خلال 72 ساعه من زمن رفع الطلب.' },
+    ar: 'يُعالَج طلب الالتحاق بالدورة ويُقبل خلال 72 ساعة من تاريخ تقديمه.' },
   { en: 'The course content is available on the date specified for the start of the course.',
-    ar: 'يتوفر محتوي الكورس في التاريخ المحدد لبداية الكورس.' },
+    ar: 'يصبح محتوى الدورة متاحاً للمتدربين اعتباراً من التاريخ المحدد لانطلاقها.' },
   { en: 'The participant in a particular course is not entitled to change the account after completing the registration process for any reason, and the password for his account is not available anywhere within the platform.',
-    ar: 'لا يحق للمشترك في الكورس المعين تغيير البريد الالكتروني بعد اتمام عملية التسجيل لأي سبب و كلمة المرور الخاصه بالبريد الالكتروني للدخول خاصة بصاحب الحساب لا تتوفر في أي مكان داخل المنصة.' },
+    ar: 'لا يحق للمشترك في أي دورة تغيير بيانات حسابه بعد استكمال التسجيل لأي سبب كان، كما أن كلمة المرور الخاصة بالدخول إلى الحساب لا تُخزَّن في أي موضع داخل المنصة.' },
   { en: 'No payment invoice is accepted, except on the approved accounts number for the education platform. The approved account numbers (1952614 - 2571033).',
-    ar: 'لا يقبل أي اشعار توريد الا على الحسابات المعتمدة للمركز ارقام الحساب المعتمدة (1952614 - 2571033).' },
+    ar: 'لا تُقبل إشعارات الدفع إلا إذا كانت موجَّهة إلى الحسابات البنكية المعتمدة لدى المركز، وأرقامها: (1952614 - 2571033).' },
   { en: 'The payment invoice for the registration process of a course is not accepted, unless the invoice contains all its details (operation number + date + amount + account number from which the amount was issued + account number to which the amount was supplied + writing the name in quadrant in the comment box inside the invoice).',
-    ar: 'لا يقبل اشعار توريد لاتمام عملية التسجيل للكورس إلا إذا كان الاشعار يحتوي على كل تفاصيله (رقم العمليه + التاريخ + المبلغ + رقم الحساب الصادر منه المبلغ + رقم الحساب المورد إليه المبلغ + كتابه الاسم رباعي في خانة التعليق داخل الاشعار).' },
+    ar: 'لا يُقبل إشعار الدفع لإتمام التسجيل في أي دورة ما لم يتضمن كافة البيانات الآتية: رقم العملية، والتاريخ، والمبلغ، ورقم الحساب المُحوَّل منه، ورقم الحساب المُحوَّل إليه، والاسم الرباعي مكتوباً في خانة التعليقات داخل الإشعار.' },
   { en: 'The certificate is issued for the courses with the name entered by the user, and any attempt to amend the certificate name after the certificate is issued by the platform entails additional procedures and fees.',
-    ar: 'تصدر الشهادة للدورات بالاسم المدخل من قبل الطالب وأي تعديل بعد صدور الشهادة من قبل المنصه تترتب عليه اجراءات و رسوم إضافية.' },
+    ar: 'تُصدر شهادة الدورة باسم المتدرب المُدخَّل عند التسجيل، وأي طلب تعديل في الاسم بعد إصدار الشهادة يستلزم اتباع إجراءات إضافية ويترتب عليه رسوم.' },
   { en: 'Violation of any of the aforementioned terms, exposes the account holder on the platform to legal accountability.',
-    ar: 'مخالفة أي من البنود المذكورة تعرض صاحب الحساب في المنصه للمساءلة القانونية.' }
+    ar: 'يُعرِّض انتهاك أي من الأحكام الواردة أعلاه صاحب الحساب للمساءلة القانونية.' }
 ]
 </script>
 
