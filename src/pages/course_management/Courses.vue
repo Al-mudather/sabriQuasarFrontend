@@ -382,6 +382,17 @@ const specialitiesEdges = computed(
     .filter((e): e is SpecEdgeWithNode => !!e && !!e.node),
 )
 
+// The `allCourses(courseSpeciality:)` arg is a relay global ID, not a pk
+// (see relatedCoureses.vue). We keep `activeSpecialityID` as the pk for the
+// radios / mobile pills / URL hydration, and resolve pk -> global id here.
+const specialityGidByPk = computed<Record<number, string>>(() => {
+  const map: Record<number, string> = {}
+  for (const e of specialitiesEdges.value) {
+    if (e.node.pk != null) map[e.node.pk] = e.node.id
+  }
+  return map
+})
+
 // ---------------------------------------------------------------------------
 // Courses — main listing
 // ---------------------------------------------------------------------------
@@ -433,7 +444,10 @@ const queryVariables = computed<GetAllCoursesVars>(() => {
   }
   const s = search.value.trim()
   if (s) vars.title_Icontains = s
-  if (activeSpecialityID.value) vars.courseSpeciality = String(activeSpecialityID.value)
+  if (activeSpecialityID.value) {
+    const gid = specialityGidByPk.value[activeSpecialityID.value]
+    if (gid) vars.courseSpeciality = gid
+  }
   return vars
 })
 
@@ -805,7 +819,9 @@ onUnmounted(() => {
 
 .catalog__search-input {
   inline-size: 100%;
-  padding: 0.75rem var(--ds-space-3) 0.75rem calc(var(--ds-space-10));
+  padding-block: 0.75rem;
+  padding-inline-start: var(--ds-space-3);
+  padding-inline-end: var(--ds-space-10);
   background: var(--ds-surface-elevated, #ffffff);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-pill, 9999px);
@@ -827,7 +843,7 @@ onUnmounted(() => {
 
 .catalog__search-icon {
   position: absolute;
-  inset-inline-start: var(--ds-space-3);
+  inset-inline-end: var(--ds-space-3);
   inset-block-start: 50%;
   transform: translateY(-50%);
   inline-size: 1.125rem;
