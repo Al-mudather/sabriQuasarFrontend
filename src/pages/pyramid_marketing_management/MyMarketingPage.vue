@@ -30,6 +30,17 @@
           <span class="metrics-strip__suffix">{{ payoutCurrency }}</span>
         </span>
         <span class="metrics-strip__label">{{ $t('إجمالي الأرباح') }}</span>
+        <ds-button
+          class="metrics-strip__action"
+          variant="accent"
+          size="sm"
+          :loading="claiming"
+          :disabled="totalEarnings <= 0"
+          :aria-label="$t('تحصيل الأرباح إلى رصيدي')"
+          @click="redeemEarnings"
+        >
+          {{ $t('تحصيل الأرباح') }}
+        </ds-button>
       </div>
 
       <span class="metrics-strip__divider" aria-hidden="true"></span>
@@ -253,6 +264,7 @@ import { MyPyramidAffiliates } from 'src/graphql/pyramid_marketing_management/qu
 import { MyPyramidAccount } from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
 import { MyPyramidLedgerReward } from 'src/graphql/pyramid_marketing_management/query/MyPyramidLedgerRewardQuery'
 import { WithdrawPyramidBalance } from 'src/graphql/pyramid_marketing_management/mutation/MakePyramidWithdraw'
+import { ClaimPyramidLedgerBalance } from 'src/graphql/pyramid_marketing_management/mutation/ClaimPyramidLedgerBalance'
 import type {
   MyPyramidBalanceResult,
   MyPyramidBalanceVars,
@@ -264,6 +276,8 @@ import type {
   MyPyramidLedgerRewardVars,
   MakePyramidWithdrawResult,
   MakePyramidWithdrawVars,
+  ClaimPyramidLedgerBalanceResult,
+  ClaimPyramidLedgerBalanceVars,
   PyramidWithdraw,
   MyPyramidAffiliatesResult,
   MyPyramidAffiliatesVars,
@@ -299,6 +313,19 @@ const withdrawMutation = useMutation<MakePyramidWithdrawResult, MakePyramidWithd
     refetchQueries: [
       { query: MyPyramidBalance },
       { query: MyPyramidWithdraws },
+    ],
+  },
+)
+
+// Redeem accrued ledger rewards (total earnings) into the spendable balance.
+// After it succeeds both the ledger reward (resets toward 0) and the balance
+// (increases) change, so refetch both.
+const claimMutation = useMutation<ClaimPyramidLedgerBalanceResult, ClaimPyramidLedgerBalanceVars>(
+  ClaimPyramidLedgerBalance,
+  {
+    refetchQueries: [
+      { query: MyPyramidLedgerReward },
+      { query: MyPyramidBalance },
     ],
   },
 )
@@ -377,6 +404,7 @@ const urlCopied = ref(false)
 const withdrawOpen = ref(false)
 const withdrawAmount = ref<number | null>(null)
 const withdrawLoading = ref(false)
+const claiming = ref(false)
 
 // ---------------------------------------------------------------------------
 // Formatters — English numerals (CLAUDE.md requirement).
@@ -475,6 +503,24 @@ function errorHandler(errorsObj: Record<string, Array<{ message: string | { msg:
       $q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: msg })
     }
   }
+}
+
+async function redeemEarnings(): Promise<void> {
+  if (claiming.value || totalEarnings.value <= 0) return
+  claiming.value = true
+  try {
+    const res = await claimMutation.mutate({ input: {} })
+    const payload = res?.data?.claimPyramidLedgerBalance
+    if (payload?.success) {
+      $q.notify({
+        type: 'positive', position: 'top', progress: true, multiLine: true,
+        message: t('تم تحصيل الأرباح إلى رصيدك'),
+      })
+    } else if (payload?.errors) {
+      errorHandler(payload.errors as Record<string, Array<{ message: string | { msg: string } }>>)
+    }
+  } catch { /* apollo surfaces */ }
+  finally { claiming.value = false }
 }
 
 async function submitWithdraw(): Promise<void> {
@@ -602,6 +648,12 @@ async function submitWithdraw(): Promise<void> {
     font-family: var(--ds-font-body);
     font-size: var(--ds-text-sm);
     color: var(--ds-taupe);
+  }
+
+  // Redeem-earnings action sits under the "Total earnings" figure: it claims
+  // the accrued ledger reward into the spendable balance.
+  &__action {
+    margin-block-start: var(--ds-space-2);
   }
 
   &__divider {
