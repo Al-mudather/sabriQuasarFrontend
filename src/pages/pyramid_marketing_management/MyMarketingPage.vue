@@ -15,33 +15,37 @@
       :aria-label="$t('ملخص الأداء')"
     >
       <div class="metrics-strip__item">
-        <span class="metrics-strip__value" dir="ltr">{{ formatNumber(activeBalance) }}</span>
-        <span class="metrics-strip__suffix" dir="ltr">{{ currency }}</span>
+        <span class="metrics-strip__figure" dir="ltr">
+          <span class="metrics-strip__value">{{ formatNumber(activeBalance) }}</span>
+          <span class="metrics-strip__suffix">{{ payoutCurrency }}</span>
+        </span>
         <span class="metrics-strip__label">{{ $t('الرصيد الحالي') }}</span>
       </div>
 
       <span class="metrics-strip__divider" aria-hidden="true"></span>
 
       <div class="metrics-strip__item">
-        <span class="metrics-strip__value metrics-strip__value--accent" dir="ltr">
-          {{ formatNumber(totalEarnings) }}
+        <span class="metrics-strip__figure" dir="ltr">
+          <span class="metrics-strip__value metrics-strip__value--accent">{{ formatNumber(totalEarnings) }}</span>
+          <span class="metrics-strip__suffix">{{ payoutCurrency }}</span>
         </span>
-        <span class="metrics-strip__suffix" dir="ltr">{{ currency }}</span>
         <span class="metrics-strip__label">{{ $t('إجمالي الأرباح') }}</span>
       </div>
 
       <span class="metrics-strip__divider" aria-hidden="true"></span>
 
       <div class="metrics-strip__item">
-        <span class="metrics-strip__value" dir="ltr">{{ formatNumber(pendingPayouts) }}</span>
+        <span class="metrics-strip__figure" dir="ltr">
+          <span class="metrics-strip__value">{{ formatNumber(pendingPayouts) }}</span>
+        </span>
         <span class="metrics-strip__label">{{ $t('سحوبات قيد الانتظار') }}</span>
       </div>
 
       <span class="metrics-strip__divider" aria-hidden="true"></span>
 
       <div class="metrics-strip__item">
-        <span class="metrics-strip__value metrics-strip__value--accent" dir="ltr">
-          {{ formatNumber(affiliatesCount) }}
+        <span class="metrics-strip__figure" dir="ltr">
+          <span class="metrics-strip__value metrics-strip__value--accent">{{ formatNumber(affiliatesCount) }}</span>
         </span>
         <span class="metrics-strip__label">{{ $t('إحالات') }}</span>
       </div>
@@ -189,7 +193,7 @@
           </div>
           <div class="withdraws__row-amount" dir="ltr">
             <span class="withdraws__row-value">{{ formatNumber(Number(w.amount ?? 0)) }}</span>
-            <span class="withdraws__row-currency">{{ currency }}</span>
+            <span class="withdraws__row-currency">{{ payoutCurrency }}</span>
           </div>
           <span
             class="withdraws__status"
@@ -207,7 +211,7 @@
         <h3 class="withdraw-dialog__title">{{ $t('طلب سحب') }}</h3>
         <p class="withdraw-dialog__hint">
           {{ $t('الرصيد المتاح') }}:
-          <strong dir="ltr">{{ formatNumber(activeBalance) }} {{ currency }}</strong>
+          <strong dir="ltr">{{ formatNumber(activeBalance) }} {{ payoutCurrency }}</strong>
         </p>
         <label class="withdraw-dialog__label" for="withdraw-amount">
           {{ $t('المبلغ') }}
@@ -242,9 +246,7 @@ import { computed, ref } from 'vue'
 import { useQuery, useMutation } from '@vue/apollo-composable'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
-import { useSettingsStore } from 'src/stores/settings'
 import { MyPyramidBalance } from 'src/graphql/pyramid_marketing_management/query/MyPyramidBalanceQuery'
 import { MyPyramidWithdraws } from 'src/graphql/pyramid_marketing_management/query/MyPyramidWithdrawsQuery'
 import { MyPyramidAffiliates } from 'src/graphql/pyramid_marketing_management/query/WhoJoindThePlatformThrowMe'
@@ -270,8 +272,12 @@ import type {
 const $q = useQuasar()
 const { t } = useI18n()
 const auth = useAuthStore()
-const settings = useSettingsStore()
-const { currency } = storeToRefs(settings)
+
+// Pyramid balances, earnings and withdrawals are denominated in the platform's
+// fixed payout currency (Sudanese pound, SDG) — NOT the visitor's display
+// currency preference (USD/SAR) used for course prices. The balance/withdraw
+// GraphQL payloads carry no currency field, so this label is constant.
+const payoutCurrency = 'SDG'
 
 // ---------------------------------------------------------------------------
 // Queries — all typed with explicit generics (CLAUDE.md rule #2).
@@ -345,9 +351,19 @@ const totalEarnings = computed<number>(() => {
   return Number.isFinite(n) ? n : 0
 })
 
-const withdraws = computed<PyramidWithdraw[]>(() =>
-  withdrawEdges.value.map(e => e.node).filter((n): n is PyramidWithdraw => n !== null),
-)
+const withdraws = computed<PyramidWithdraw[]>(() => {
+  const list = withdrawEdges.value
+    .map(e => e.node)
+    .filter((n): n is PyramidWithdraw => n !== null)
+  // Most recent first: sort by created desc, falling back to pk desc when a
+  // timestamp is missing/equal (pk is monotonic, so newer requests rank higher).
+  return [...list].sort((a, b) => {
+    const ta = a.created ? new Date(a.created).getTime() : 0
+    const tb = b.created ? new Date(b.created).getTime() : 0
+    if (tb !== ta) return tb - ta
+    return Number(b.pk ?? 0) - Number(a.pk ?? 0)
+  })
+})
 
 const pendingPayouts = computed<number>(
   () => withdraws.value.filter(w => !w.isDone).length,
@@ -542,12 +558,23 @@ async function submitWithdraw(): Promise<void> {
   border-radius: var(--ds-radius-md);
   margin-block-end: var(--ds-space-7);
 
+  // Each item is a consistent two-line block: the figure (value + currency
+  // suffix on ONE baseline-aligned row) on top, the label below. Keeping the
+  // suffix inline with the value means money items (with SDG) and count items
+  // (no suffix) are the same height, so all four labels align on one row.
   &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ds-space-1);
+    flex: 1 1 auto;
+    min-inline-size: 120px;
+  }
+
+  &__figure {
     display: inline-flex;
     align-items: baseline;
-    gap: var(--ds-space-2);
-    flex: 1 1 auto;
-    min-inline-size: 140px;
+    gap: var(--ds-space-1);
   }
 
   &__value {
@@ -575,7 +602,6 @@ async function submitWithdraw(): Promise<void> {
     font-family: var(--ds-font-body);
     font-size: var(--ds-text-sm);
     color: var(--ds-taupe);
-    margin-inline-start: auto;
   }
 
   &__divider {
@@ -592,13 +618,6 @@ async function submitWithdraw(): Promise<void> {
 
     &__item {
       flex: 1 1 0;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--ds-space-1);
-    }
-
-    &__label {
-      margin-inline-start: 0;
     }
   }
 }
