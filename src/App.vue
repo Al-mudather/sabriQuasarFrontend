@@ -5,7 +5,6 @@
 </template>
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
-import LogRocket from 'logrocket'
 import { LocalStorage } from 'quasar'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -84,14 +83,6 @@ function onDOMContentLoaded (): void {
 // Lifecycle
 // ---------------------------------------------------------------------------
 onMounted(() => {
-  // LogRocket init
-  LogRocket.init('3bybms/stc')
-  LogRocket.identify('THE_USER_ID_IN_YOUR_APP', {
-    name: 'STC User',
-    email: '1@stc.com',
-    subscriptionType: 'customer',
-  })
-
   // Blocked notifications warning
   if (Notification.permission === 'denied') {
     $q.notify({

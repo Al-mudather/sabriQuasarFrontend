@@ -46,7 +46,6 @@
     "js-cookie": "^3.0.5",
     "js-file-download": "^0.4.12",
     "lodash": "^4.17.21",
-    "logrocket": "^2.1.2",
     "marked": "^18.0.2",
     "moment": "^2.29.1",
     "mux.js": "^5.11.1",

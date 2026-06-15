@@ -9,7 +9,7 @@
 //   logger.error('payment failed')   // always logs
 //
 // warn / error are always forwarded because they represent real signals
-// an on-call engineer or LogRocket should see in production.
+// an on-call engineer should see in production.
 
 const isDev = process.env.NODE_ENV !== 'production'
 

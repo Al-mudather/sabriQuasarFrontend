@@ -33,22 +33,34 @@
     <link rel="icon" type="image/png" sizes="32x32"  href="icons/STC_logo_hight_quality.jpg" />
     <link rel="icon" type="image/png" sizes="16x16"  href="icons/STC_logo_hight_quality.jpg" />
 
-    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
-    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
-
-    <script src="https://js.stripe.com/v3/"></script>
-
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PRWLZK8VKV"></script>
 
-    <!-- Video player -->
-    <link href="https://unpkg.com/video.js@7/dist/video-js.min.css" rel="stylesheet" />
-    <link href="https://unpkg.com/@videojs/themes@1/dist/fantasy/index.css" rel="stylesheet" />
-    <script src="https://unpkg.com/video.js@7.7.6/dist/video.js" charset="utf-8"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-eme@4.0.0/dist/videojs-contrib-eme.min.js"></script>
-    <script src="https://unpkg.com/videojs-contrib-quality-levels@2.1.0/dist/videojs-contrib-quality-levels.js" charset="utf-8"></script>
-    <script src="https://unpkg.com/videojs-http-source-selector@1.1.6/dist/videojs-http-source-selector.js" charset="utf-8"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@videojs/http-streaming@2.12.0/dist/videojs-http-streaming.min.js"></script>
+    <!--
+      Video player (video.js) globals.
+
+      ONLY the legacy SmartNode course-preview (src/utils/video-client.js, used by
+      CoursePreviewDialog.vue) reads the global `videojs`. The classroom / course
+      video players (TypeHasifHlsPlayer, VideoPlayer, AlhasifVideoPlayer) import
+      video.js via npm and bundle it into their own route chunks — they do NOT
+      need these tags.
+
+      So these are loaded NON-render-blocking (defer JS + print-swap CSS): the
+      global is ready well before a user can open a preview, but it no longer
+      delays first paint on every page.
+
+      Removed (were render-blocking, ~2.9 MB off the critical path):
+        - https://js.stripe.com/v3/                 (~1 MB)  — unused, no Stripe in the app
+        - https://unpkg.com/video.js@7.7.6/.../video.js (1.85 MB, UNMINIFIED) — duplicate of video.min.js below
+        - https://unpkg.com/video.js@7/.../video-js.min.css — duplicate of the zencdn CSS below
+    -->
+    <link rel="stylesheet" href="https://vjs.zencdn.net/7.11.4/video-js.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="https://unpkg.com/@videojs/themes@1/dist/fantasy/index.css" media="print" onload="this.media='all'" />
+    <script defer src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/videojs-contrib-eme@4.0.0/dist/videojs-contrib-eme.min.js"></script>
+    <script defer src="https://unpkg.com/videojs-contrib-quality-levels@2.1.0/dist/videojs-contrib-quality-levels.js" charset="utf-8"></script>
+    <script defer src="https://unpkg.com/videojs-http-source-selector@1.1.6/dist/videojs-http-source-selector.js" charset="utf-8"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@videojs/http-streaming@2.12.0/dist/videojs-http-streaming.min.js"></script>
   </head>
   <body>
     <!-- quasar:entry-point -->
