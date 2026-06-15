@@ -139,16 +139,24 @@
         </router-link>
       </nav>
 
+      <!-- Language selector — always available; switch between Arabic & English -->
+      <div class="app-header__drawer-lang">
+        <span class="app-header__drawer-section-label">{{ $t('اللغة') }}</span>
+        <LanguageSwitcher variant="light" />
+      </div>
+
       <template v-if="showAuthCtas || showLogout" #footer>
         <div class="app-header__drawer-footer">
           <template v-if="showAuthCtas">
-            <router-link
+            <DsButton
+              variant="secondary"
+              size="md"
+              full-width
               to="/account/login"
-              class="app-header__login"
               @click="drawerOpen = false"
             >
               {{ $t('تسجيل الدخول') }}
-            </router-link>
+            </DsButton>
             <DsButton
               variant="primary"
               size="md"
@@ -793,5 +801,22 @@ onBeforeUnmount(() => {
   gap: var(--ds-space-3);
   align-items: stretch;
   inline-size: 100%;
+}
+
+.app-header__drawer-lang {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  margin-block-start: var(--ds-space-3);
+  padding-block-start: var(--ds-space-3);
+  border-block-start: 1px solid rgba(50, 40, 115, 0.08);
+
+  // Reset the shared section-label's stacking margins so it sits centered
+  // on the row opposite the switcher.
+  .app-header__drawer-section-label {
+    margin-block-start: 0;
+    padding: 0;
+  }
 }
 </style>
