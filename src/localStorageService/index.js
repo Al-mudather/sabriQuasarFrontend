@@ -77,24 +77,50 @@ const userProfileStorage = {
 //   - ALL JS-readable cookies (e.g. csrftoken). httpOnly cookies cannot be
 //     touched from JS — those are a backend/expiry concern.
 // ---------------------------------------------------------------------------
+// NOTE: JavaScript can only delete cookies that are readable from
+// `document.cookie` — i.e. NOT `HttpOnly`. The backend session cookies
+// (e.g. Django `sessionid` / `csrftoken` on stc.training) are HttpOnly and can
+// only be expired by the server's logout response (Set-Cookie / Clear-Site-Data).
+// This wipes every JS-readable cookie as aggressively as the spec allows.
 function clearAllCookies() {
-  if (typeof document === "undefined" || !document.cookie) return;
+  if (typeof document === "undefined") return;
   const host = typeof window !== "undefined" ? window.location.hostname : "";
-  // Build the candidate domains: exact host, ".host", and the dot-parent
-  // (e.g. "stc.training" → ".stc.training") so domain-scoped cookies die too.
-  const domains = ["", host, "." + host];
-  const parts = host.split(".");
-  if (parts.length > 2) domains.push("." + parts.slice(-2).join("."));
 
-  const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
-  document.cookie.split(";").forEach((raw) => {
-    const name = raw.split("=")[0].trim();
-    if (!name) return;
-    // Expire across path "/" for every candidate domain (and no-domain).
-    domains.forEach((domain) => {
-      let cookie = `${name}=; expires=${pastDate}; path=/`;
-      if (domain) cookie += `; domain=${domain}`;
-      document.cookie = cookie;
+  // Domains: no-domain (host-only), exact host, ".host", and every parent
+  // domain up the chain (".sub.example.com", ".example.com") so domain-scoped
+  // cookies die regardless of how they were set.
+  const domains = new Set(["", host, "." + host]);
+  const parts = host.split(".");
+  for (let i = 1; i < parts.length - 1; i++) {
+    domains.add("." + parts.slice(i).join("."));
+  }
+
+  // Paths: root, plus every ancestor of the current path (e.g. "/", "/api",
+  // "/api/v2") so cookies scoped to a sub-path are also expired.
+  const paths = new Set(["/", ""]);
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "/";
+  let acc = "";
+  pathname.split("/").filter(Boolean).forEach((seg) => {
+    acc += "/" + seg;
+    paths.add(acc);
+  });
+
+  const past = "Thu, 01 Jan 1970 00:00:00 GMT";
+  const names = (document.cookie || "")
+    .split(";")
+    .map((c) => c.split("=")[0].trim())
+    .filter(Boolean);
+
+  names.forEach((name) => {
+    paths.forEach((path) => {
+      domains.forEach((domain) => {
+        let base = `${name}=; expires=${past}; max-age=0`;
+        if (path) base += `; path=${path}`;
+        if (domain) base += `; domain=${domain}`;
+        document.cookie = base;
+        // Secure cookies set on https require the Secure attribute to overwrite.
+        document.cookie = base + "; secure; samesite=lax";
+      });
     });
   });
 }

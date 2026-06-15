@@ -184,6 +184,15 @@ export const useAuthStore = defineStore('authentication', {
         await resetApolloSession()
       } catch (_e) { /* ignore */ }
 
+      // 2b. Revoke the Google grant (best-effort) so a cached Google session
+      //     can't silently re-log the previous user on the next sign-in.
+      try {
+        const globals = (window as unknown as {
+          __appGlobals?: { $socialAuth?: { revokeGoogle?: () => void } }
+        }).__appGlobals
+        globals?.$socialAuth?.revokeGoogle?.()
+      } catch (_e) { /* ignore */ }
+
       // 3. Wipe all client storage + cookies, keeping only language/currency
       //    display prefs so the UI doesn't flip language on logout.
       purgeClientStorage({ keepLocalStorageKeys: ['isEnglish', 'pinia_settings'] })

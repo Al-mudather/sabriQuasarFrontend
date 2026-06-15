@@ -18,6 +18,7 @@
 //   process.env.SOCIAL_AUTH_FACEBOOK_CLIENT_ID
 
 import { boot } from 'quasar/wrappers'
+import { SOCIAL_AUTH_KEY } from 'src/localStorageService'
 
 const GIS_SRC = 'https://accounts.google.com/gsi/client'
 const GOOGLE_SCOPE = 'openid email profile'
@@ -58,6 +59,10 @@ function authenticateGoogle () {
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: GOOGLE_SCOPE,
+      // Force the account chooser every time so Google can NEVER silently
+      // reuse the previously signed-in account / a cached token (which made
+      // logout-then-login come back as the old user).
+      prompt: 'select_account',
       callback: (resp) => {
         if (resp && resp.access_token) resolve({ accessToken: resp.access_token })
         else reject(new Error((resp && (resp.error_description || resp.error)) || 'Google authentication failed'))
@@ -92,6 +97,24 @@ function authenticateFacebook () {
   return new Promise(() => {})
 }
 
+// Revoke the stored Google access token (if any) so Google drops the grant on
+// its side. Combined with `prompt: 'select_account'`, this guarantees the next
+// sign-in starts fresh and can't re-log the previous user from a cached token.
+// Best-effort: never throws, no-op if GIS isn't loaded or no token is stored.
+function revokeGoogle () {
+  try {
+    if (typeof window === 'undefined') return
+    const raw = window.sessionStorage.getItem(SOCIAL_AUTH_KEY)
+    if (!raw) return
+    const stored = JSON.parse(raw)
+    const token = stored && stored.provider === 'google' && stored.accessToken
+    const oauth2 = window.google && window.google.accounts && window.google.accounts.oauth2
+    if (token && oauth2 && typeof oauth2.revoke === 'function') {
+      oauth2.revoke(token, () => { /* revoked */ })
+    }
+  } catch { /* best-effort — logout proceeds regardless */ }
+}
+
 // `authenticate(provider)` keeps the vue-authenticate signature so legacy call
 // sites (and the `window.hello` shim) continue to work. Google resolves with
 // `{ accessToken }`; Facebook redirects.
@@ -102,7 +125,7 @@ function authenticate (provider) {
 }
 
 export default boot(({ app }) => {
-  const api = { authenticate }
+  const api = { authenticate, revokeGoogle }
   app.config.globalProperties.$socialAuth = api
   app.config.globalProperties.$auth = api
   if (typeof window !== 'undefined') {
