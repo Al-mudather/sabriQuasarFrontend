@@ -88,6 +88,7 @@
       <div class="app-footer__bottom">
         <p class="app-footer__copyright">
           {{ $t('© 2021–2026 Al-Hasif & STC — جميع الحقوق محفوظة') }}
+          <span v-if="appVersion" class="app-footer__version" dir="ltr">v{{ appVersion }}</span>
         </p>
         <p class="app-footer__tagline-end">
           {{ $t('نحو مستقبلٍ طبيٍّ عالميّ') }}
@@ -111,6 +112,10 @@ const emit = defineEmits<{
 const logoSrc = LOGO.full
 const brandNameAr = BRAND.nameAr
 const brandNameEn = BRAND.nameEn
+
+// Build version — injected from package.json via build.env (quasar.config.js).
+// Vite replaces process.env.APP_VERSION with a string literal at build time.
+const appVersion = process.env.APP_VERSION ?? ''
 
 // Labels go through t() so they react to locale flips.
 const coursesLinks = computed(() => [
@@ -309,6 +314,19 @@ const supportLinks = computed(() => [
   font-size: 11px;
   line-height: 1.6;
   color: rgba(246, 241, 234, 0.6);
+}
+
+.app-footer__version {
+  display: inline-block;
+  margin-inline-start: var(--ds-space-2);
+  padding: 1px 6px;
+  border: 1px solid rgba(246, 241, 234, 0.24);
+  border-radius: var(--ds-radius-pill);
+  font-family: var(--ds-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: rgba(246, 241, 234, 0.72);
+  vertical-align: middle;
 }
 
 

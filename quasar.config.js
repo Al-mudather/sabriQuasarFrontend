@@ -10,6 +10,7 @@
 
 const { configure } = require('quasar/wrappers')
 const envparser = require('./src/boot/envparser.js')
+const { version: APP_VERSION } = require('./package.json')
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -52,7 +53,10 @@ module.exports = configure(function (/* ctx */) {
 
       vueRouterMode: 'hash', // preserve existing hash URLs
 
-      env: envparser(),
+      // Spread the .env vars, then expose the package.json version as
+      // process.env.APP_VERSION so the footer can show the deployed build.
+      // Vite statically replaces this at build time.
+      env: { ...envparser(), APP_VERSION },
 
       // https://v2.quasar.dev/quasar-cli-vite/handling-vite
       // extendViteConf (viteConf) {}
