@@ -52,7 +52,12 @@
           class="category-section__slot"
           :data-idx="i"
         >
-          <course-card :course="normalize(c)" variant="public" @cta-click="onAddToCart(c)" />
+          <course-card
+            :course="normalize(c)"
+            variant="public"
+            :cta-loading="loadingCartPk === c.pk"
+            @cta-click="onAddToCart(c)"
+          />
         </div>
 
         <!-- See-all tile -->
@@ -91,6 +96,7 @@ import { useCartStore } from 'src/stores/cart'
 import { useIntl } from 'src/composables/useIntl'
 import { useI18n } from 'vue-i18n'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import { withMinDuration } from 'src/utils/withMinDuration'
 import { cascade } from 'src/design-system/motion.js'
 import type {
   AllCoursesInSpecialityResult,
@@ -181,25 +187,41 @@ const iconSvg = computed<string>(() => pickIcon(props.speciality.speciality))
 // Cart CTA handler — uses the RAW node so the full currency price map is
 // preserved. normalize() is for display only and must not be used here.
 // ---------------------------------------------------------------------------
-function onAddToCart (node: CourseInSpeciality): void {
-  if (!auth.isAuthenticated) {
-    router.push({ name: 'login', query: { redirect: '/cart' } })
-    return
+// pk of the card whose add-to-cart is mid-navigation — drives its inline
+// spinner so the click registers on a slow network. Only one CTA is in flight
+// before the route changes, so a single ref suffices.
+const loadingCartPk = ref<number | null>(null)
+
+async function onAddToCart (node: CourseInSpeciality): Promise<void> {
+  if (loadingCartPk.value !== null) return
+  loadingCartPk.value = node.pk ?? null
+  try {
+    if (!auth.isAuthenticated) {
+      await withMinDuration(
+        Promise.resolve(router.push({ name: 'login', query: { redirect: '/cart' } })),
+        300,
+      )
+      return
+    }
+    cart.addCourseToCart({
+      user: user.value,
+      course: {
+        id: node.id,
+        pk: node.pk,
+        name: node.title,
+        // title + cover are real fields on the course node — carry them so the
+        // cart renders the course name and thumbnail (do not invent fields).
+        title: node.title,
+        cover: node.cover ?? null,
+        currency: (node.currency ?? {}) as Record<string, number>,
+      },
+    })
+    await withMinDuration(Promise.resolve(router.push({ name: 'cart' })), 300)
+  } catch {
+    /* navigation aborted/duplicated — nothing to do */
+  } finally {
+    loadingCartPk.value = null
   }
-  cart.addCourseToCart({
-    user: user.value,
-    course: {
-      id: node.id,
-      pk: node.pk,
-      name: node.title,
-      // title + cover are real fields on the course node — carry them so the
-      // cart renders the course name and thumbnail (do not invent fields).
-      title: node.title,
-      cover: node.cover ?? null,
-      currency: (node.currency ?? {}) as Record<string, number>,
-    },
-  })
-  router.push({ name: 'cart' })
 }
 
 // ---------------------------------------------------------------------------

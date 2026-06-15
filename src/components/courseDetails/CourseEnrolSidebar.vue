@@ -69,6 +69,7 @@
         size="lg"
         full-width
         class="enrol-rail__cta"
+        :loading="continueLoading"
         @click="emitContinue"
       >
         {{ $t('متابعة الدورة') }}
@@ -81,6 +82,7 @@
           full-width
           class="enrol-rail__cta"
           :disabled="!courseData"
+          :loading="enrolLoading"
           @click="emitEnrol"
         >
           {{ $t('سجل في الدورة') }}
@@ -91,6 +93,7 @@
           full-width
           class="enrol-rail__cta-secondary"
           :disabled="!courseData"
+          :loading="cartLoading"
           @click="emitAddToCart"
         >
           {{ $t('أضف إلى السلة') }}
@@ -156,9 +159,18 @@ interface Props {
   lessonTotal: number
   unitTotal: number
   canPreview: boolean
+  // Inline CTA spinners. The CTAs emit and the parent owns the async work
+  // (enrol, add-to-cart, continue), so the parent drives these flags.
+  enrolLoading?: boolean
+  cartLoading?: boolean
+  continueLoading?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  enrolLoading: false,
+  cartLoading: false,
+  continueLoading: false,
+})
 void props
 
 const emit = defineEmits<{

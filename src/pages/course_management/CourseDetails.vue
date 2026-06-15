@@ -89,6 +89,9 @@
           :lesson-total="lessonTotal"
           :unit-total="unitTotal"
           :can-preview="canPreview"
+          :enrol-loading="enrolLoading"
+          :cart-loading="cartLoading"
+          :continue-loading="continueLoading"
           @enrol="enrolNow"
           @add-to-cart="addToCart"
           @continue-to-classroom="continueToClassroom"
@@ -153,6 +156,7 @@ import { usePyramidStore } from 'src/stores/pyramid'
 import { GetCourseByID } from 'src/graphql/course_management/query/GetCourseByID'
 import { useQuery } from '@vue/apollo-composable'
 import { FORMAT_THE_WEB_SIT_URL, FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import { withMinDuration } from 'src/utils/withMinDuration'
 import type { CourseDetail, CoursePricing } from 'src/types/courses/types'
 import type { GetCourseByIdResult, GetCourseByIdVars } from 'src/types/courses/types'
 
@@ -371,34 +375,68 @@ function buildCartItem () {
   }
 }
 
-function addToCart (): void {
+// Inline CTA loading — one flag per sidebar action so the click registers on a
+// slow network. enrol/continue floor the spinner across their navigation;
+// add-to-cart has no navigation (local cart write + toast) so the floor just
+// gives the press a brief, visible acknowledgement before the toast.
+const cartLoading = ref(false)
+const enrolLoading = ref(false)
+const continueLoading = ref(false)
+
+async function addToCart (): Promise<void> {
+  if (cartLoading.value) return
   const item = buildCartItem()
   if (!item) return
   if (!auth.isAuthenticated) { redirectToLogin(); return }
-  cart.addCourseToCart({ user: user.value, course: item })
-  $q.notify({
-    type: 'positive',
-    position: 'top',
-    message: 'تمت الإضافة إلى السلة',
-    progress: true,
-    timeout: 2200,
-  })
+  cartLoading.value = true
+  try {
+    cart.addCourseToCart({ user: user.value, course: item })
+    $q.notify({
+      type: 'positive',
+      position: 'top',
+      message: 'تمت الإضافة إلى السلة',
+      progress: true,
+      timeout: 2200,
+    })
+    await withMinDuration(Promise.resolve(), 300)
+  } finally {
+    cartLoading.value = false
+  }
 }
 
-function enrolNow (): void {
+async function enrolNow (): Promise<void> {
+  if (enrolLoading.value) return
   const item = buildCartItem()
   if (!item) return
   if (!auth.isAuthenticated) { redirectToLogin(); return }
-  cart.addCourseToCart({ user: user.value, course: item })
-  void router.push({ name: 'cart' })
+  enrolLoading.value = true
+  try {
+    cart.addCourseToCart({ user: user.value, course: item })
+    await withMinDuration(Promise.resolve(router.push({ name: 'cart' })), 300)
+  } catch {
+    /* navigation aborted/duplicated — nothing to do */
+  } finally {
+    enrolLoading.value = false
+  }
 }
 
-function continueToClassroom (): void {
+async function continueToClassroom (): Promise<void> {
+  if (continueLoading.value) return
   // Classroom cockpit is keyed by *course* pk; the enrollment resolves
   // server-side via `enrollmentByCourseForCurrentUser`.
   const cpk = parseInt(coursePK.value, 10)
   if (!cpk || Number.isNaN(cpk)) return
-  void router.push({ name: 'classroom-shell', params: { coursePk: String(cpk) } })
+  continueLoading.value = true
+  try {
+    await withMinDuration(
+      Promise.resolve(router.push({ name: 'classroom-shell', params: { coursePk: String(cpk) } })),
+      300,
+    )
+  } catch {
+    /* navigation aborted/duplicated — nothing to do */
+  } finally {
+    continueLoading.value = false
+  }
 }
 
 // Pretty title slot for the share URL: encode for safety (so a '/', '&', '#'

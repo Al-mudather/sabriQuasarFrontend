@@ -214,6 +214,7 @@
           size="sm"
           full-width
           class="course-card__cta"
+          :loading="ctaLoading"
           @click.stop="onCta"
         >
           {{ $t ? $t('متابعة الدورة') : 'متابعة الدورة' }}
@@ -236,6 +237,7 @@
             size="lg"
             full-width
             class="course-card__cta"
+            :loading="ctaLoading"
             @click.stop="onCta"
           >
             {{ $t ? $t('سجل في الدورة') : 'سجل في الدورة' }}
@@ -263,6 +265,7 @@
             variant="primary"
             size="sm"
             class="course-card__cta"
+            :loading="ctaLoading"
             @click.stop="onCta"
           >
             {{ $t ? $t('سجل الآن') : 'سجل الآن' }}
@@ -274,6 +277,7 @@
           size="sm"
           full-width
           class="course-card__details-cta"
+          :loading="loadingDetails"
           @click.stop="onDetails"
         >
           {{ $t ? $t('التفاصيل') : 'التفاصيل' }}
@@ -290,9 +294,10 @@
 // Phase 4 note: real API images only; inline SVG placeholder is used when
 // course.coverImage is absent. No external stock photo services.
 
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { withMinDuration } from 'src/utils/withMinDuration'
 import DsCard from 'src/design-system/components/DsCard.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsBadge from 'src/design-system/components/DsBadge.vue'
@@ -333,6 +338,10 @@ interface Props {
   variant?: 'public' | 'enrolled' | 'detail' | 'featured'
   course?: CourseCardCourse | null
   loading?: boolean
+  // Inline spinner for the CTA button. The CTA emits `cta-click` and the parent
+  // owns the async work (add-to-cart, enrol, continue), so the parent drives
+  // this flag — typically a per-card boolean keyed by course pk.
+  ctaLoading?: boolean
   to?: string | Record<string, unknown> | null
 }
 
@@ -340,6 +349,7 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'public',
   course: null,
   loading: false,
+  ctaLoading: false,
   to: null
 })
 
@@ -438,8 +448,21 @@ function onCta (e: Event): void {
 }
 
 const router = useRouter()
-function onDetails (): void {
-  if (resolvedTo.value) void router.push(resolvedTo.value as Parameters<typeof router.push>[0])
+const loadingDetails = ref(false)
+
+async function onDetails (): Promise<void> {
+  if (loadingDetails.value || !resolvedTo.value) return
+  loadingDetails.value = true
+  try {
+    await withMinDuration(
+      Promise.resolve(router.push(resolvedTo.value as Parameters<typeof router.push>[0])),
+      300,
+    )
+  } catch {
+    /* navigation aborted/duplicated — nothing to do */
+  } finally {
+    loadingDetails.value = false
+  }
 }
 </script>
 

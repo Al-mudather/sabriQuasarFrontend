@@ -36,6 +36,7 @@
       <DsButton
         variant="primary"
         size="md"
+        :loading="loadingDetails"
         @click="goToCourseDetails"
       >
         {{ $t('التفاصيل') }}
@@ -48,6 +49,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import { withMinDuration } from 'src/utils/withMinDuration'
 import type { HomePageSlider } from 'src/types/marketing-content/types'
 
 interface Props {
@@ -84,15 +86,30 @@ onBeforeUnmount(() => {
   if (timer !== null) clearInterval(timer)
 })
 
-function goToCourseDetails (): void {
-  router.push({
-    name: 'course-details',
-    params: {
-      name: props.slider.slide?.title ?? '',
-      pk: String(props.slider.slide?.pk ?? ''),
-      id: props.slider.slide?.id ?? ''
-    }
-  })
+const loadingDetails = ref(false)
+
+async function goToCourseDetails (): Promise<void> {
+  if (loadingDetails.value) return
+  loadingDetails.value = true
+  try {
+    await withMinDuration(
+      Promise.resolve(
+        router.push({
+          name: 'course-details',
+          params: {
+            name: props.slider.slide?.title ?? '',
+            pk: String(props.slider.slide?.pk ?? ''),
+            id: props.slider.slide?.id ?? ''
+          }
+        }),
+      ),
+      300,
+    )
+  } catch {
+    /* navigation aborted/duplicated — nothing to do */
+  } finally {
+    loadingDetails.value = false
+  }
 }
 </script>
 
