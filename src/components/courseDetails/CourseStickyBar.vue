@@ -26,6 +26,7 @@
             v-if="isEnrolled"
             variant="primary"
             size="md"
+            :loading="continueLoading"
             @click="emit('continue-to-classroom')"
           >
             {{ $t('متابعة الدورة') }}
@@ -34,6 +35,7 @@
             v-else
             variant="accent"
             size="md"
+            :loading="enrolLoading"
             @click="emit('enrol')"
           >
             {{ $t('سجل في الدورة') }}
@@ -56,9 +58,15 @@ interface Props {
   hasPrice: boolean
   currentPrice: number | null
   selectedCurrency: string
+  // Inline CTA spinners — parent (CourseDetails) owns the async handlers.
+  enrolLoading?: boolean
+  continueLoading?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  enrolLoading: false,
+  continueLoading: false,
+})
 
 const emit = defineEmits<{
   (e: 'enrol'): void

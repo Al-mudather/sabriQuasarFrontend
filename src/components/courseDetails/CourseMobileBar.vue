@@ -20,6 +20,7 @@
         variant="primary"
         size="lg"
         class="mobile-bar__cta"
+        :loading="continueLoading"
         @click="emit('continue-to-classroom')"
       >
         {{ $t('متابعة الدورة') }}
@@ -29,6 +30,7 @@
         variant="accent"
         size="lg"
         class="mobile-bar__cta"
+        :loading="enrolLoading"
         @click="emit('enrol')"
       >
         {{ $t('سجل في الدورة') }}
@@ -48,9 +50,15 @@ interface Props {
   hasPrice: boolean
   currentPrice: number | null
   selectedCurrency: string
+  // Inline CTA spinners — parent (CourseDetails) owns the async handlers.
+  enrolLoading?: boolean
+  continueLoading?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  enrolLoading: false,
+  continueLoading: false,
+})
 void props
 
 const emit = defineEmits<{

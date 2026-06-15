@@ -116,6 +116,8 @@
         :has-price="hasPrice"
         :current-price="currentPrice"
         :selected-currency="selectedCurrency"
+        :enrol-loading="enrolLoading"
+        :continue-loading="continueLoading"
         @enrol="enrolNow"
         @continue-to-classroom="continueToClassroom"
       />
@@ -125,6 +127,8 @@
         :has-price="hasPrice"
         :current-price="currentPrice"
         :selected-currency="selectedCurrency"
+        :enrol-loading="enrolLoading"
+        :continue-loading="continueLoading"
         @enrol="enrolNow"
         @continue-to-classroom="continueToClassroom"
       />
