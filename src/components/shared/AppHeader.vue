@@ -67,7 +67,8 @@
           </DsButton>
         </div>
 
-        <div v-else-if="showLogout" class="app-header__account">
+        <div v-else-if="showLogout" class="app-header__auth">
+          <div class="app-header__account">
           <button
             type="button"
             class="app-header__account-trigger"
@@ -119,21 +120,17 @@
                   {{ link.label }}
                 </q-item>
               </q-list>
-
-              <hr class="app-header__account-divider" />
-
-              <q-list class="app-header__account-pop-list">
-                <q-item
-                  v-close-popup
-                  clickable
-                  class="app-header__account-pop-item app-header__account-pop-item--logout"
-                  @click="logout"
-                >
-                  {{ $t('تسجيل الخروج') }}
-                </q-item>
-              </q-list>
             </q-menu>
           </button>
+          </div>
+
+          <DsButton
+            variant="secondary"
+            size="sm"
+            @click="logout"
+          >
+            {{ $t('تسجيل الخروج') }}
+          </DsButton>
         </div>
       </nav>
 
@@ -277,21 +274,26 @@ const brandNameAr = BRAND.nameAr
 // The Arabic literal is the i18n key (matches the existing key pattern).
 const { t } = useI18n()
 
-// Primary links shown directly in the desktop top bar (kept short so the bar
-// fits on one line in BOTH languages — English labels are wider than Arabic).
-const primaryLinks = computed<{ to: string; label: string }[]>(() => [
-  { to: '/',        label: t('الرئيسية') },
-  { to: '/courses', label: t('الدورات') },
-  { to: '/cart/',   label: t('السلة') },
-])
+// Essential links shown directly in the desktop top bar. Kept to the core few
+// so the bar fits on one line in BOTH languages (English labels are wider than
+// Arabic) — "My courses" is promoted here as a primary destination once
+// authenticated; the rest live behind the avatar dropdown.
+const primaryLinks = computed<{ to: string; label: string }[]>(() => {
+  const base = [
+    { to: '/',        label: t('الرئيسية') },
+    { to: '/courses', label: t('الدورات') },
+    { to: '/cart/',   label: t('السلة') },
+  ]
+  if (!isAuthenticated.value) return base
+  return [...base, { to: '/myCourses', label: t('دوراتي') }]
+})
 
-// Account links live behind the avatar dropdown on desktop (and are appended
-// to the drawer on mobile). They were previously crammed into the top bar,
-// which overflowed to a second line once authenticated.
+// Secondary account links live behind the avatar dropdown on desktop (and are
+// appended to the drawer on mobile). Promoting all of them to the top bar
+// overflowed it to a second line once authenticated.
 const accountLinks = computed<{ to: string; label: string }[]>(() => {
   if (!isAuthenticated.value) return []
   return [
-    { to: '/myCourses',       label: t('دوراتي') },
     { to: '/Certificates',    label: t('الشهادات') },
     { to: '/notification',    label: t('الإشعارات') },
     { to: '/myOrders',        label: t('طلباتي') },

@@ -13,7 +13,7 @@
         </span>
       </div>
       <div class="user-sidebar__identity">
-        <span class="user-sidebar__name">{{ userName || 'مرحباً' }}</span>
+        <span class="user-sidebar__name">{{ userName || $t('مرحباً') }}</span>
         <span class="user-sidebar__role">{{ userRole }}</span>
       </div>
     </div>
@@ -57,7 +57,7 @@
           <path d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7" />
         </svg>
       </span>
-      <span>تسجيل الخروج</span>
+      <span>{{ $t('تسجيل الخروج') }}</span>
     </button>
   </div>
 </template>
