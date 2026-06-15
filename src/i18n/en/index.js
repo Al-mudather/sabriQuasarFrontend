@@ -1052,7 +1052,7 @@ export default {
   "الدعم والقانون": "Support & Legal",
   "مركز د. صبري أبوقرون للتدريب — جميع الحقوق محفوظة": "Dr. Sabri Abu Garoun Training Center — All rights reserved",
   "© 2021–2026 Al-Hasif & STC — جميع الحقوق محفوظة": "© 2021–2026 Al-Hasif & STC — All rights reserved",
-  "صُنع بعناية لطلاب الطب الناطقين بالعربية": "Crafted with care for Arabic-speaking medical students",
+  "نحو مستقبلٍ طبيٍّ عالميّ": "Toward a global medical future",
   "اكتب رسالتك...": "Type your message...",
 
   // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.

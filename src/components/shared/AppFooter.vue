@@ -45,51 +45,6 @@
           <p class="app-footer__mission">
             {{ $t('مركز متخصص في التطوير الذاتي والتدريب المهني، يقدم تجربة تعليمية عربية متكاملة عبر برامج معتمدة يقودها خبراء متمرسون.') }}
           </p>
-          <ul class="app-footer__social" :aria-label="$t('روابط التواصل الاجتماعي')">
-            <li
-              v-for="social in socials"
-              :key="social.name"
-              class="app-footer__social-item"
-            >
-              <a
-                :href="social.href"
-                :aria-label="social.label"
-                class="app-footer__social-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <svg
-                  class="app-footer__social-icon"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <template v-if="social.name === 'instagram'">
-                    <rect x="3" y="3" width="18" height="18" rx="5" />
-                    <circle cx="12" cy="12" r="4" />
-                    <circle cx="17.5" cy="6.5" r="0.75" fill="currentColor" />
-                  </template>
-                  <template v-else-if="social.name === 'facebook'">
-                    <path d="M16.5 3H14.5A4 4 0 0 0 10.5 7v2.5H8v3.5h2.5V21h3.5v-8h2.6l.4-3.5h-3V7a1 1 0 0 1 1-1h1.5Z" />
-                  </template>
-                  <template v-else-if="social.name === 'tiktok'">
-                    <path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5c.34 0 .68.05 1 .15" />
-                    <path d="M14 3c.4 2.6 2.2 4.3 4.8 4.5" />
-                  </template>
-                  <template v-else-if="social.name === 'telegram'">
-                    <path d="M21 4.5 2.9 11.6c-.6.24-.56 1.1.06 1.27l4.3 1.27 1.66 5.02c.18.55.9.66 1.24.2l2.27-2.96 4.5 3.3c.45.33 1.09.09 1.21-.45L21.97 5.2c.12-.6-.43-1.1-.97-.7Z" />
-                    <path d="m7.25 14.15 9.5-6" />
-                  </template>
-                </svg>
-              </a>
-            </li>
-          </ul>
         </div>
 
         <!-- 2) Courses -->
@@ -135,7 +90,7 @@
           {{ $t('© 2021–2026 Al-Hasif & STC — جميع الحقوق محفوظة') }}
         </p>
         <p class="app-footer__tagline-end">
-          {{ $t('صُنع بعناية لطلاب الطب الناطقين بالعربية') }}
+          {{ $t('نحو مستقبلٍ طبيٍّ عالميّ') }}
         </p>
       </div>
     </div>
@@ -173,13 +128,6 @@ const centerLinks = computed(() => [
 const supportLinks = computed(() => [
   { to: '/termsandConditions', label: t('الشروط والأحكام') },
   { to: '/privacyPolicy',      label: t('سياسة الخصوصية') }
-])
-
-const socials = computed(() => [
-  { name: 'instagram', href: 'https://www.instagram.com/dr.sabri_training_center/', label: t('إنستغرام') },
-  { name: 'facebook',  href: 'https://www.facebook.com/SabriABUGROONTC/',           label: t('فيسبوك') },
-  { name: 'tiktok',    href: 'https://www.tiktok.com/@stc_center1',                  label: t('تيك توك') },
-  { name: 'telegram',  href: 'https://t.me/Drsabriabogroon',                         label: t('تيليجرام') }
 ])
 </script>
 
@@ -277,43 +225,6 @@ const socials = computed(() => [
   line-height: 1.85;
   color: var(--ds-cream);
   max-width: 32ch;
-}
-
-/* ---------- Social ---------- */
-.app-footer__social {
-  list-style: none;
-  margin: var(--ds-space-3) 0 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-3);
-}
-
-.app-footer__social-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--ds-radius-md);
-  color: var(--ds-cream);
-  background: transparent;
-  border: 1px solid rgba(251, 247, 240, 0.16);
-  transition:
-    background-color var(--ds-duration-fast) var(--ds-ease-out),
-    border-color     var(--ds-duration-fast) var(--ds-ease-out),
-    transform        var(--ds-duration-fast) var(--ds-ease-out);
-
-  &:hover,
-  &:focus-visible {
-    background: rgba(251, 247, 240, 0.1);
-    border-color: rgba(251, 247, 240, 0.32);
-    transform: translateY(-1px);
-  }
-}
-
-.app-footer__social-icon {
-  display: block;
 }
 
 /* ---------- Link columns ---------- */
@@ -417,10 +328,6 @@ const socials = computed(() => [
 
   .app-footer__mission {
     max-width: 46ch;
-  }
-
-  .app-footer__social {
-    justify-content: center;
   }
 
   .app-footer__links {
