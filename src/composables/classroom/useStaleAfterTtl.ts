@@ -46,6 +46,12 @@ export function useStaleAfterTtl(options: UseStaleAfterTtlOptions): {
     if (options.disabled?.()) return false
     const k = options.key()
     if (!k) return false
+    // First fetch of this key this session: the query's OWN initial fetch
+    // (useQuery on mount) already covers it, so refetching here would just
+    // duplicate the request — the "single retry" the cache store's in-memory
+    // reset caused on every page load. Only refetch when there's a prior
+    // result that is now stale (in-session revisit past the TTL, or refocus).
+    if (!cache.hasRecord(k)) return false
     return cache.isStale(k, ttl)
   }
 

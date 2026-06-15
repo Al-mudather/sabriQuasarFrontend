@@ -34,6 +34,16 @@ export const useClassroomCacheStore = defineStore('classroomCache', {
       return Date.now() - at > ttlMs
     },
 
+    /**
+     * True once a query for this key has landed at least once this session.
+     * Distinguishes "never fetched" (let the query's own initial fetch handle
+     * it) from "fetched but now stale" (worth a refresh). Used by
+     * useStaleAfterTtl to avoid duplicating the cold fetch with a mount refetch.
+     */
+    hasRecord(key: string): boolean {
+      return typeof this.lastFetchedAt[key] === 'number'
+    },
+
     /** Drop the freshness mark — useful when the user logs out or switches courses. */
     forget(prefix: string): void {
       for (const key of Object.keys(this.lastFetchedAt)) {
