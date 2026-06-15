@@ -18,9 +18,29 @@
 import { computed, type ComputedRef } from 'vue'
 import { Quasar } from 'quasar'
 import { i18n } from 'src/boot/i18n'
+import { loadLocaleMessages } from 'src/i18n'
 import { useSettingsStore } from 'src/stores/settings'
 
 export type AppLocale = 'ar' | 'en'
+
+// Minimal view of the legacy vue-i18n global (typed as `Composer | VueI18n`
+// depending on version; we only touch these three members).
+type LegacyI18nGlobal = {
+  locale: AppLocale
+  availableLocales: readonly string[]
+  setLocaleMessage: (locale: string, message: Record<string, unknown>) => void
+}
+
+const i18nGlobal = i18n.global as unknown as LegacyI18nGlobal
+
+// The app boots with only the active locale's messages (see boot/i18n.js).
+// Before switching TO a locale, make sure its bundle is loaded — fetched once,
+// then cached by vue-i18n for the rest of the session.
+async function ensureLocaleMessages (next: AppLocale): Promise<void> {
+  if (i18nGlobal.availableLocales.includes(next)) return
+  const msgs = await loadLocaleMessages(next)
+  i18nGlobal.setLocaleMessage(next, msgs)
+}
 
 async function loadQuasarLang (next: AppLocale): Promise<void> {
   try {
@@ -43,17 +63,19 @@ function applyI18nLocale (next: AppLocale): void {
   // i18n was created with `legacy: true`, so `i18n.global.locale` is a
   // plain string (not a Ref). Setting it triggers reactivity throughout
   // the app for both Options-API `$t()` and Composition-API `t()` calls.
-  // The cast keeps the file vue-i18n-v10-compatible — legacy mode types
-  // `locale` as `Composer | VueI18n['locale']` depending on the version.
-  ;(i18n.global as unknown as { locale: AppLocale }).locale = next
+  i18nGlobal.locale = next
 }
 
 /**
  * Runtime locale setter. Use from `<script setup>` or any code that runs
  * after Pinia is registered. Idempotent: calling with the current locale
  * is a no-op for the store but still re-syncs DOM + Quasar (cheap).
+ *
+ * Awaits the target locale's message bundle first (lazy-loaded on first
+ * switch — see boot/i18n.js) so the flip never renders a half-translated UI.
  */
 export async function setAppLocale (next: AppLocale): Promise<void> {
+  await ensureLocaleMessages(next)
   const settings = useSettingsStore()
   settings.setIsEnglish(next === 'en')
   applyI18nLocale(next)

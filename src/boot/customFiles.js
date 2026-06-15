@@ -8,9 +8,9 @@
 //
 // Track C audit: the previously-registered `$jquery` / `$_` globals had zero
 // call sites in `src/**` (verified via grep for `this.$jquery` and `this.$_`).
-// `$_` is still registered in `boot/lodash.js` for any future consumer; this
-// file no longer touches globals and only keeps the surviving hover-min
-// stylesheet import.
+// The `boot/lodash.js` global `$_` registration was removed in the first-load
+// perf pass (lodash dropped entirely); this file no longer touches globals and
+// only keeps the surviving hover-min stylesheet import.
 
 import { boot } from 'quasar/wrappers'
 import '../assets/css/hover-min.css'

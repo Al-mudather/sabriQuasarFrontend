@@ -14,7 +14,6 @@
 // We therefore do NOT double-persist with the Pinia persist plugin.
 
 import { defineStore } from 'pinia'
-import _ from 'lodash'
 import { Notify } from 'quasar'
 
 import { apolloClient, resetApolloSession } from 'src/apollo/client'
@@ -107,7 +106,7 @@ export const useAuthStore = defineStore('authentication', {
 
     async GET_MY_PROFILE_DATA_ACTION (): Promise<unknown> {
       const res = await apolloClient.query({ query: GetMyProfileData })
-      this.updateUser(_.get(res, '[data][me]') as AuthSessionUser)
+      this.updateUser(res?.data?.me as AuthSessionUser)
       return res
     },
 
