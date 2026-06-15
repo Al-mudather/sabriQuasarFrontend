@@ -144,7 +144,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useClassroomStore } from 'src/stores/classroom'
 import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
-import { useLearningProgress } from 'src/composables/classroom/useLearningProgress'
 import {
   parseModelValue,
   type ParsedFileValue,
@@ -202,7 +201,10 @@ const enrollmentPkRef = computed<number | null>(() => ctx.bootstrap.value?.enrol
 const current = ctx.currentContent
 const currentUnitPk = ctx.currentUnitPk
 
-const { start, end } = useLearningProgress(coursePkRef, enrollmentPkRef)
+// start/end come from the SINGLE useLearningProgress instance in the layout
+// (via context) — instantiating our own here re-ran the whole progress query.
+const startProgress = ctx.startProgress
+const endProgress = ctx.endProgress
 
 // Parse modelValue on-demand for the current content type.
 const parsedQuiz = computed<ParsedQuizValue | null>(() => {
@@ -240,7 +242,7 @@ watch(
     const [prevCpk] = prev ?? []
     if (prevCpk && prevCpk !== cpk) {
       // Flush end for the previous content before starting new.
-      await end()
+      await endProgress()
     }
     if (startTimer) {
       clearTimeout(startTimer)
@@ -248,7 +250,7 @@ watch(
     }
     if (cpk != null && upk != null && epk != null && kpk != null) {
       startTimer = setTimeout(() => {
-        void start(cpk, upk)
+        void startProgress(cpk, upk)
       }, 5000)
     }
   },
@@ -260,7 +262,7 @@ onBeforeUnmount(() => {
     clearTimeout(startTimer)
     startTimer = null
   }
-  void end()
+  void endProgress()
 })
 
 function onBegin(): void {
@@ -270,7 +272,7 @@ function onBegin(): void {
 
 async function onComplete(): Promise<void> {
   // A natural video-end event is a strong signal to end the unit immediately.
-  await end()
+  await endProgress()
 }
 
 function onVideoError(message: string): void {
@@ -280,7 +282,7 @@ function onVideoError(message: string): void {
 async function onSelect(contentPk: number): Promise<void> {
   const cpk = coursePkRef.value
   if (cpk == null) return
-  await end()
+  await endProgress()
   await router.push({
     name: 'classroom-content',
     params: { coursePk: String(cpk), contentPk: String(contentPk) },

@@ -28,6 +28,14 @@ export type ClassroomContext = {
   currentUnitPk: ComputedRef<number | null>
   /** Progress map keyed by courseUnitContent.pk. */
   progress: ComputedRef<ProgressMap>
+  /**
+   * Start / end the learning-progress record for the active lesson. Owned by
+   * the SINGLE useLearningProgress instance in the layout — ContentView calls
+   * these instead of spawning its own instance (which re-ran the whole
+   * GetAllLearningProgressByCourse query, a duplicate fetch).
+   */
+  startProgress: (contentPk: number, unitPk: number) => Promise<void>
+  endProgress: () => Promise<void>
   loading: Ref<boolean>
   error: Ref<Error | null>
   refetch: () => void

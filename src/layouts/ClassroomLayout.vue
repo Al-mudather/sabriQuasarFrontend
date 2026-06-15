@@ -67,7 +67,12 @@ const { bootstrap: rawBootstrap, loading, error, refetch } = useCourseBootstrap(
 
 const enrollmentPk = computed<number | null>(() => rawBootstrap.value?.enrollmentPk ?? null)
 
-const { progressMap, refetch: refetchProgress } = useLearningProgress(coursePk, enrollmentPk)
+const {
+  progressMap,
+  refetch: refetchProgress,
+  start: startProgress,
+  end: endProgress,
+} = useLearningProgress(coursePk, enrollmentPk)
 
 // Live-ring update: when the user navigates away from a content (contentPk changes),
 // refetch the enrollment so the header ring reflects the new backend percentage.
@@ -124,6 +129,8 @@ const classroomContext: ClassroomContext = {
   currentContent,
   currentUnitPk,
   progress: progressMap,
+  startProgress,
+  endProgress,
   loading,
   error,
   refetch,
