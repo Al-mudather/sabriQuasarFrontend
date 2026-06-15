@@ -401,10 +401,38 @@ function continueToClassroom (): void {
   void router.push({ name: 'classroom-shell', params: { coursePk: String(cpk) } })
 }
 
-function shareCourse (): void {
-  const url = location.href
+// Pretty title slot for the share URL: encode for safety (so a '/', '&', '#'
+// in a title can't break the path), then turn the encoded spaces (%20) back
+// into '+' so "MRCS PART A COURSE" reads as "MRCS+PART+A+COURSE" instead of
+// the ugly "MRCS%20PART%20A%20COURSE". The :name segment is cosmetic — the
+// page resolves off :code/:pk/:id — so any clean rendering is safe here.
+function titleSlug (title: string): string {
+  return encodeURIComponent(title.trim()).replace(/%20/g, '+')
+}
+
+async function shareCourse (): Promise<void> {
+  const c = courseData.value
+  if (!c) return
+
+  // Embed the caller's affiliate marketing code so the referral attributes when
+  // the link is opened. Reuse the cached code; only hit the network if we don't
+  // have one yet. A valid pyramid code is always longer than 4 chars.
+  let code = pyramid.myMarketingCode
+  if (!code || code.length <= 4) {
+    code = (await pyramid.fetchMyMarketingCode()) ?? ''
+  }
+  const hasCode = !!code && code.length > 4
+
+  // With a code → 4-segment affiliate route (course/:name/:code/:pk/:id) which
+  // loadCourse reads via params.code → setRegisterationCode(). Without one →
+  // the plain course link.
+  const path = hasCode
+    ? `#/course/${titleSlug(c.title ?? '')}/${code}/${c.pk}/${c.id}`
+    : `#/course/${titleSlug(c.title ?? '')}/${c.pk}/${c.id}`
+  const url = `${location.origin}/${path}`
+
   if (navigator.share) {
-    void navigator.share({ title: courseData.value?.title ?? '', url })
+    void navigator.share({ title: c.title ?? '', url })
     return
   }
   try {
