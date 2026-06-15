@@ -2,6 +2,7 @@ import type { ComputedRef, InjectionKey, Ref } from 'vue'
 import type {
   ClassroomBootstrap,
   CurriculumContent,
+  CurriculumUnit,
   ProgressMap,
   UnitPagination,
 } from 'src/types/classroom/types'
@@ -9,6 +10,12 @@ import type {
 export type ClassroomContext = {
   /** Slim bootstrap: course meta + unit titles + per-unit contentsCount. */
   bootstrap: ComputedRef<ClassroomBootstrap | null>
+  /**
+   * Curriculum units from the course query ALONE (no enrollment dependency).
+   * Available before `bootstrap` (which also needs enrollment), so the shell
+   * can hydrate the first unit's lessons as soon as the course lands.
+   */
+  courseUnits: ComputedRef<CurriculumUnit[]>
   /** Per-unit hydrated lessons. Empty until the rail expands a unit. */
   unitContents: ReadonlyMap<number, CurriculumContent[]>
   /** Set of unit pks currently fetching. Drives rail skeletons. */

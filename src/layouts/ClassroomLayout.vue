@@ -63,7 +63,7 @@ const currentContentPkFromRoute = computed<number | null>(() => {
 // Data layer (slim bootstrap + lazy unit lessons + current-lesson resolver)
 // ---------------------------------------------------------------------------
 
-const { bootstrap: rawBootstrap, loading, error, refetch } = useCourseBootstrap(coursePk)
+const { bootstrap: rawBootstrap, courseUnits, loading, error, refetch } = useCourseBootstrap(coursePk)
 
 const enrollmentPk = computed<number | null>(() => rawBootstrap.value?.enrollmentPk ?? null)
 
@@ -116,6 +116,7 @@ watch(
 
 const classroomContext: ClassroomContext = {
   bootstrap,
+  courseUnits,
   unitContents: contentsByUnitPk,
   unitLoadingPks,
   unitPagination: paginationByUnitPk,

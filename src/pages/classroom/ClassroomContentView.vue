@@ -19,9 +19,7 @@
     </aside>
 
     <section class="cls-cockpit__main" ref="stageRef">
-      <div v-if="ctx.loading.value && !current" class="cls-cockpit__loading">
-        <q-spinner-dots color="secondary" size="48px" />
-      </div>
+      <ClassroomCockpitSkeleton v-if="ctx.loading.value && !current" variant="stage" />
       <ClassroomEmptyState
         v-else-if="!current"
         :title="$t('classroom.empty.contentMissing')"
@@ -154,6 +152,7 @@ import CurriculumRail from 'src/components/classroom/CurriculumRail.vue'
 import ClassroomSidePanel from 'src/components/classroom/ClassroomSidePanel.vue'
 import ClassroomOverviewPanel from 'src/components/classroom/ClassroomOverviewPanel.vue'
 import ClassroomEmptyState from 'src/components/classroom/ClassroomEmptyState.vue'
+import ClassroomCockpitSkeleton from 'src/components/classroom/ClassroomCockpitSkeleton.vue'
 import VideoPlayer from 'src/components/classroom/player/VideoPlayer.vue'
 import QuizRunner from 'src/components/classroom/quiz/QuizRunner.vue'
 import FileView from 'src/components/classroom/content/FileView.vue'

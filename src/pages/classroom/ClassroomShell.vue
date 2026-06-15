@@ -11,9 +11,7 @@
       :title="$t('classroom.empty.noCurriculum')"
       icon="inbox"
     />
-    <div v-else class="cls-shell__loading" role="status" :aria-label="$t('classroom.header.loading')">
-      <q-spinner-dots color="secondary" size="48px" />
-    </div>
+    <ClassroomCockpitSkeleton v-else variant="full" />
   </div>
 </template>
 
@@ -24,6 +22,7 @@ import { useClassroomStore } from 'src/stores/classroom'
 import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
 import { useCurriculumNavigation } from 'src/composables/classroom/useCurriculumNavigation'
 import ClassroomEmptyState from 'src/components/classroom/ClassroomEmptyState.vue'
+import ClassroomCockpitSkeleton from 'src/components/classroom/ClassroomCockpitSkeleton.vue'
 
 defineOptions({ name: 'ClassroomShell' })
 
@@ -56,12 +55,15 @@ const { goToFirstUnwatched } = useCurriculumNavigation({
 // On entry the slim bootstrap arrives without per-unit lessons. To pick a
 // "first unwatched" target we need the first unit's lessons hydrated.
 // loadUnit() is idempotent + cache-aware, so calling it here is cheap.
+//
+// Trigger off `courseUnits` (course query alone) rather than `bootstrap`
+// (course + enrollment) so the first unit's lessons start loading in parallel
+// with the enrollment query instead of waiting for both.
 let routedOnce = false
 watch(
-  () => ctx.bootstrap.value,
-  (b) => {
-    if (!b || b.totalContents === 0 || b.units.length === 0) return
-    const first = b.units[0]
+  () => ctx.courseUnits.value,
+  (units) => {
+    const first = units[0]
     if (first) void ctx.loadUnit(first.pk)
   },
   { immediate: true },
@@ -92,12 +94,10 @@ watch(
 .cls-shell {
   flex: 1 1 auto;
   display: flex;
+  // Empty/error states center; the loading skeleton fills via its own
+  // `align-self: stretch` + flex-grow.
   align-items: center;
   justify-content: center;
   min-block-size: 0;
-
-  &__loading {
-    display: inline-flex;
-  }
 }
 </style>
