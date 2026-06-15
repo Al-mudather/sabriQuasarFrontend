@@ -1,9 +1,11 @@
 // Classroom bootstrap — slim variant.
 //
-// Two sequential queries:
+// Two PARALLEL queries (both fire on mount):
 //   1. GetCourseByIDSlim(coursePk)          → course meta + unit titles
 //                                              (NO eager unit contents)
 //   2. GetEnrollmentByCourseForCurrentUser  → enrollment.pk
+//      keyed on the route `coursePk` (== course.pk), so it no longer waits on
+//      query #1 — removing a serial round-trip from classroom cold start.
 //
 // Per-unit lesson lists are NOT in this bootstrap. The rail calls
 // `useUnitContents().loadUnit(unitPk)` on accordion expand to hydrate one
@@ -84,14 +86,15 @@ export function useCourseBootstrap(coursePk: PkLike): {
     if (res.data?.course) markCourseFresh()
   })
 
-  // Enrollment query keyed on course.pk (filled by the first query).
+  // Enrollment query — PARALLELIZED with the course query. The route `coursePk`
+  // IS the course pk (GetCourseByIDSlim queries `course(id: $coursePk)` and
+  // returns that same pk), so enrollment fires on mount in parallel with the
+  // course query instead of waiting for it to resolve — removing a serial
+  // round-trip from classroom cold start.
   const enrollmentVars = computed<GetEnrollmentByCourseForCurrentUserVars>(() => ({
-    courseId: courseResult.value?.course?.pk ?? 0,
+    courseId: toNum(coursePk) ?? 0,
   }))
-  const enrollmentEnabled = computed<boolean>(() => {
-    const pk = courseResult.value?.course?.pk
-    return typeof pk === 'number' && pk > 0
-  })
+  const enrollmentEnabled = computed<boolean>(() => enabled.value)
 
   const {
     result: enrollmentResult,
@@ -119,7 +122,7 @@ export function useCourseBootstrap(coursePk: PkLike): {
 
   const { markFresh: markEnrollmentFresh } = useStaleAfterTtl({
     key: () => {
-      const pk = courseResult.value?.course?.pk
+      const pk = toNum(coursePk)
       return pk ? `enrollment:${pk}` : null
     },
     refetch: () => refetchEnrollment({ ...enrollmentVars.value }),
@@ -129,15 +132,6 @@ export function useCourseBootstrap(coursePk: PkLike): {
   onEnrollmentResult((res) => {
     if (res.data?.enrollmentByCourseForCurrentUser) markEnrollmentFresh()
   })
-
-  // Refetch the enrollment query whenever the course pk lands so we don't
-  // reuse a stale enrollment from a previous course.
-  watch(
-    () => courseResult.value?.course?.pk,
-    (next, prev) => {
-      if (next && next !== prev) void refetchEnrollment()
-    },
-  )
 
   const loading = computed<boolean>(() => courseLoading.value || enrollmentLoading.value)
   const aggregatedError = ref<Error | null>(null)
