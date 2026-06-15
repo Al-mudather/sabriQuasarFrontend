@@ -677,6 +677,9 @@ export default {
   // a future PR can migrate to proper namespaced keys.
   // ---------------------------------------------------------------------
   "أدخل الكود المكوّن من 6 خانات المرسل إليك.": "Enter the 6-digit code we sent you.",
+  "أدخل كود التسجيل المرسل إليك.": "Enter the registration code sent to you.",
+  "مثال: P068252021": "Example: P068252021",
+  "يرجى إدخال الكود": "Please enter the code",
   "أدخل بريدك الإلكتروني وسنرسل إليك رابطاً لإعادة تعيين كلمة المرور.": "Enter your email and we'll send you a link to reset your password.",
   "أدخل كود الخصم": "Enter discount code",
   "أرسلنا لك رابط تفعيل على بريدك الإلكتروني. افتح الرابط لإكمال التحقق من الحساب.": "We've sent an activation link to your email. Open it to verify your account.",

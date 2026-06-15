@@ -3,29 +3,26 @@
     <header class="auth-card__head">
       <h1 class="auth-card__title">{{ $t('كود التسجيل') }}</h1>
       <p class="auth-card__subtitle">
-        {{ $t('أدخل الكود المكوّن من 6 خانات المرسل إليك.') }}
+        {{ $t('أدخل كود التسجيل المرسل إليك.') }}
       </p>
     </header>
 
     <div v-if="apiError" class="auth-card__banner" role="alert">{{ apiError }}</div>
 
     <form @submit.prevent="REGISTER_THE_USER_WITH_REGISTERATION_CODE" class="auth-card__form" novalidate>
-      <div class="otp" dir="ltr" @paste="onPaste">
-        <input
-          v-for="(d, i) in digits"
-          :key="i"
-          :ref="(el) => { if (el) otpRefs[i] = el as HTMLInputElement }"
-          class="otp__box"
-          inputmode="numeric"
-          pattern="[0-9]*"
-          maxlength="1"
-          autocomplete="one-time-code"
-          :value="digits[i]"
-          @input="onInput($event, i)"
-          @keydown="onKeydown($event, i)"
-          @focus="($event.target as HTMLInputElement).select()"
-        />
-      </div>
+      <input
+        ref="codeInput"
+        v-model="code"
+        class="code-field"
+        type="text"
+        dir="ltr"
+        autocomplete="one-time-code"
+        autocapitalize="characters"
+        autocorrect="off"
+        spellcheck="false"
+        :placeholder="$t('مثال: P068252021')"
+        @keydown.enter.prevent="REGISTER_THE_USER_WITH_REGISTERATION_CODE"
+      />
 
       <ds-button
         type="submit"
@@ -38,15 +35,6 @@
       >
         {{ $t('تأكيد') }}
       </ds-button>
-
-      <div class="auth-card__resend">
-        <span v-if="cooldown > 0" class="auth-card__resend-lock">
-          {{ $t('يمكنك الإرسال مجدداً خلال') }} {{ cooldown }} {{ $t('ثانية') }}
-        </span>
-        <a v-else class="auth-card__resend-link" @click="resend">
-          {{ $t('إعادة الإرسال') }}
-        </a>
-      </div>
     </form>
   </div>
 </template>
@@ -77,80 +65,33 @@ const { mutate: joinPlatformMutate } = useMutation<JoinPlatformResult, JoinPlatf
 // ---------------------------------------------------------------------------
 // Local state
 // ---------------------------------------------------------------------------
-const digits = ref<string[]>(['', '', '', '', '', ''])
+// The registration code is an alphanumeric affiliate/marketing code (e.g.
+// "P068252021"), NOT a fixed-length numeric OTP. It must be submitted EXACTLY
+// as the user enters it — no digit-stripping, no length cap. We only trim
+// surrounding whitespace (stray spaces from copy/paste) on submit.
+const code = ref('')
 const visible = ref(false)
-const cooldown = ref(60)
-const timer = ref<ReturnType<typeof setInterval> | null>(null)
 const apiError = ref('')
-const otpRefs = ref<HTMLInputElement[]>([])
+const codeInput = ref<HTMLInputElement | null>(null)
 
 // ---------------------------------------------------------------------------
 // Computed
 // ---------------------------------------------------------------------------
-const r_code = computed(() => digits.value.join(''))
-const isComplete = computed(() => digits.value.every(d => d !== ''))
+const isComplete = computed(() => code.value.trim().length > 0)
 
 // ---------------------------------------------------------------------------
 // Methods
 // ---------------------------------------------------------------------------
-function focusBox (i: number): void {
-  otpRefs.value[i]?.focus()
-}
-
-function onInput (e: Event, i: number): void {
-  const input = e.target as HTMLInputElement
-  const v = input.value.replace(/\D/g, '')
-  const char = v.slice(-1) || ''
-  digits.value[i] = char
-  if (char && i < 5) focusBox(i + 1)
-}
-
-function onKeydown (e: KeyboardEvent, i: number): void {
-  if (e.key === 'Backspace' && !digits.value[i] && i > 0) {
-    focusBox(i - 1)
-  } else if (e.key === 'ArrowLeft' && i < 5) {
-    focusBox(i + 1)
-  } else if (e.key === 'ArrowRight' && i > 0) {
-    focusBox(i - 1)
-  } else if (e.key === 'Enter' && isComplete.value) {
-    void REGISTER_THE_USER_WITH_REGISTERATION_CODE()
-  }
-}
-
-function onPaste (e: ClipboardEvent): void {
-  const text = (e.clipboardData ?? (window as Window & { clipboardData?: DataTransfer }).clipboardData)
-    ?.getData('text')
-    .replace(/\D/g, '')
-    .slice(0, 6) ?? ''
-  if (!text) return
-  e.preventDefault()
-  for (let i = 0; i < 6; i++) digits.value[i] = text[i] ?? ''
-  focusBox(Math.min(text.length, 5))
-}
-
-function startCooldown (): void {
-  cooldown.value = 60
-  if (timer.value) clearInterval(timer.value)
-  timer.value = setInterval(() => {
-    cooldown.value = Math.max(0, cooldown.value - 1)
-    if (cooldown.value === 0 && timer.value) clearInterval(timer.value)
-  }, 1000)
-}
-
-function resend (): void {
-  $q.notify({ type: 'info', progress: true, multiLine: true, position: 'top', message: t('تم إعادة إرسال الكود') })
-  startCooldown()
-}
-
 async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
-  if (!isComplete.value) {
-    apiError.value = t('يرجى إدخال الكود كاملاً')
+  const value = code.value.trim()
+  if (!value) {
+    apiError.value = t('يرجى إدخال الكود')
     return
   }
   apiError.value = ''
   visible.value = true
   try {
-    const res = await joinPlatformMutate({ marketingCode: r_code.value, input: {} })
+    const res = await joinPlatformMutate({ marketingCode: value, input: {} })
     if (res?.data?.joinPlatform?.success) {
       $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: t('مرحباً بك') })
       pyramid.setRegisterationCode('')
@@ -172,19 +113,19 @@ async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
 // Lifecycle
 // ---------------------------------------------------------------------------
 onMounted(() => {
-  if (registerationCode.value && registerationCode.value.length > 4) {
-    const clean = String(registerationCode.value).replace(/\D/g, '').slice(0, 6).padEnd(6, '')
-    digits.value = clean.split('').map(c => c.trim())
-    if (isComplete.value) void REGISTER_THE_USER_WITH_REGISTERATION_CODE()
+  // Prefill from a code carried in via the affiliate share link (loadCourse →
+  // setRegisterationCode). Use it verbatim — it's an alphanumeric code — and
+  // auto-submit so a referred user sails straight through.
+  if (registerationCode.value && registerationCode.value.trim().length > 4) {
+    code.value = String(registerationCode.value).trim()
+    void REGISTER_THE_USER_WITH_REGISTERATION_CODE()
   } else {
-    void nextTick(() => { focusBox(0) })
+    void nextTick(() => { codeInput.value?.focus() })
   }
-  startCooldown()
 })
 
 onBeforeUnmount(() => {
   pyramid.setRegisterationCode('')
-  if (timer.value) clearInterval(timer.value)
 })
 </script>
 
@@ -225,44 +166,34 @@ onBeforeUnmount(() => {
     flex-direction: column;
     gap: var(--ds-space-4);
   }
-
-  &__resend {
-    text-align: center;
-    font-size: var(--ds-text-sm);
-    color: var(--ds-text-muted);
-  }
-
-  &__resend-link {
-    color: var(--ds-brand-600);
-    font-weight: var(--ds-weight-medium);
-    cursor: pointer;
-    &:hover { text-decoration: underline; }
-  }
 }
 
-.otp {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: var(--ds-space-2);
+.code-field {
+  inline-size: 100%;
+  block-size: 56px;
+  padding-inline: var(--ds-space-4);
+  text-align: center;
+  letter-spacing: 0.18em;
+  font-family: var(--ds-font-heading);
+  font-size: var(--ds-text-xl);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-text);
+  background: var(--ds-surface-ivory);
+  border: 1px solid var(--ds-taupe);
+  border-radius: var(--ds-radius-sm);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 
-  &__box {
-    inline-size: 100%;
-    aspect-ratio: 1 / 1;
-    text-align: center;
-    font-family: var(--ds-font-heading);
-    font-size: var(--ds-text-xl);
-    font-weight: var(--ds-weight-bold);
-    color: var(--ds-text);
-    background: var(--ds-surface-ivory);
-    border: 1px solid var(--ds-taupe);
-    border-radius: var(--ds-radius-sm);
-    outline: none;
-    transition: border-color 150ms ease, box-shadow 150ms ease;
+  &::placeholder {
+    font-weight: var(--ds-weight-regular);
+    letter-spacing: normal;
+    color: var(--ds-text-muted);
+    opacity: 0.7;
+  }
 
-    &:focus {
-      border-color: var(--ds-brand-600);
-      box-shadow: 0 0 0 3px rgba(50, 40, 115, 0.22);
-    }
+  &:focus {
+    border-color: var(--ds-brand-600);
+    box-shadow: 0 0 0 3px rgba(50, 40, 115, 0.22);
   }
 }
 </style>
