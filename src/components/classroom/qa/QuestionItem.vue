@@ -58,8 +58,8 @@ async function onArchive(): Promise<void> {
     if (res?.data?.archiveCourseQuestion?.success) {
       archivedLocally.value = true
     }
-  } catch (err) {
-    console.warn('[qa/QuestionItem] archive failed', err)
+  } catch {
+    /* archive failed — keep the question visible */
   } finally {
     archiving.value = false
   }

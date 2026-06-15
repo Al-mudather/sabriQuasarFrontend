@@ -57,7 +57,7 @@ export function useCurrentContent(contentPk: PkLike): {
   const vars = computed<GetCourseUnitContentVars>(() => ({ contentPk: toNum(contentPk) ?? 0 }))
   const enabled = computed(() => toNum(contentPk) !== null)
 
-  const { result, loading, onResult, onError, refetch } = useQuery<
+  const { result, loading, onResult, refetch } = useQuery<
     GetCourseUnitContentResult,
     GetCourseUnitContentVars
   >(GetCourseUnitContent, vars, () => ({
@@ -65,14 +65,6 @@ export function useCurrentContent(contentPk: PkLike): {
     errorPolicy: 'all',
     fetchPolicy: 'cache-first',
   }))
-
-  onError((err) => {
-    console.error('[classroom][current-content] GetCourseUnitContent FAILED', {
-      message: err.message,
-      graphQLErrors: err.graphQLErrors,
-      networkError: err.networkError,
-    })
-  })
 
   onResult((res) => {
     const pk = res.data?.courseUnitContent?.pk

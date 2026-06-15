@@ -103,8 +103,8 @@ export function useCourseQuestions(courseId: CourseIdLike): {
           } as QuestionsByCourseResult
         },
       })
-    } catch (err) {
-      console.warn('[qa/useCourseQuestions] fetchMore failed', err)
+    } catch {
+      /* fetchMore failed — keep existing page */
     }
   }
 

@@ -129,8 +129,8 @@ export function useQaSubscription(courseId: CourseIdLike): {
           },
         },
       })
-    } catch (err) {
-      console.warn('[qa/useQaSubscription] merge failed', err)
+    } catch {
+      /* merge failed — subscription will reconcile on next event */
     }
   }
 

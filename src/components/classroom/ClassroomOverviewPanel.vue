@@ -86,8 +86,7 @@ async function onRequestCertificate(): Promise<void> {
         message: msg,
       })
     }
-  } catch (err) {
-    console.warn('[classroom/overview] createCertificate failed', err)
+  } catch {
     $q.notify({
       type: 'negative',
       position: 'top',

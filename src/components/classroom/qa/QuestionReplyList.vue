@@ -88,8 +88,8 @@ async function submitReply(): Promise<void> {
       // has its own cache entry and needs a refetch to show the new row.
       void refetch()
     }
-  } catch (err) {
-    console.warn('[qa/QuestionReplyList] createReply failed', err)
+  } catch {
+    /* createReply failed — leave the composer state untouched */
   } finally {
     sending.value = false
   }

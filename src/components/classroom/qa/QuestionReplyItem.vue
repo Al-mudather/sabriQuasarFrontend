@@ -50,8 +50,8 @@ async function onArchive(): Promise<void> {
     if (res?.data?.archiveQuestionReply?.success) {
       archivedLocally.value = true
     }
-  } catch (err) {
-    console.warn('[qa/QuestionReplyItem] archive failed', err)
+  } catch {
+    /* archive failed — keep the reply visible */
   } finally {
     archiving.value = false
   }

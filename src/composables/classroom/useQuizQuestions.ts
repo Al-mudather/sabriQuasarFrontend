@@ -47,7 +47,7 @@ export function useQuizQuestions(contentQuizId: NumLike): {
   }))
   const enabled = computed(() => toNum(contentQuizId) !== null)
 
-  const { result, loading, error, refetch, onError } = useQuery<
+  const { result, loading, error, refetch } = useQuery<
     AllContentQuizQuestionByContentQuizIdResult,
     AllContentQuizQuestionByContentQuizIdVars
   >(AllContentQuizQuestionByContentQuizIdQuery, vars, () => ({
@@ -55,25 +55,6 @@ export function useQuizQuestions(contentQuizId: NumLike): {
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   }))
-
-  onError((err) => {
-    console.error('[classroom][quiz] AllContentQuizQuestionByContentQuiz FAILED', {
-      message: err.message,
-      graphQLErrors: err.graphQLErrors,
-      networkError: err.networkError,
-    })
-  })
-
-  watch(
-    () => result.value?.allContentQuizQuestionByContentQuiz?.edges?.length,
-    (n) => {
-      if (n == null) return
-      console.log('[classroom][quiz] AllContentQuizQuestionByContentQuiz OK', {
-        contentQuizId: toNum(contentQuizId),
-        questions: n,
-      })
-    },
-  )
 
   const questions = computed<QuizEdge[]>(() => {
     const edges = result.value?.allContentQuizQuestionByContentQuiz?.edges ?? []
@@ -86,20 +67,14 @@ export function useQuizQuestions(contentQuizId: NumLike): {
   >(CreateCourseQuizSolution)
 
   async function submit(questionPk: number, answerPk: number): Promise<boolean> {
-    console.log('[classroom][quiz] CreateCourseQuizSolution →', { questionPk, answerPk })
     try {
       const res = await runSubmit({
         input: { question: questionPk, userAnswer: answerPk },
       })
       const ok = Boolean(res?.data?.createCourseQuizSolution?.success)
-      console.log('[classroom][quiz] CreateCourseQuizSolution ←', {
-        success: ok,
-        errors: res?.data?.createCourseQuizSolution?.errors,
-      })
       if (ok) void refetch()
       return ok
-    } catch (err) {
-      console.warn('[classroom][quiz] CreateCourseQuizSolution threw', err)
+    } catch {
       return false
     }
   }

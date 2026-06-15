@@ -58,8 +58,7 @@ async function submit(): Promise<void> {
     } else {
       errorMsg.value = t('classroom.qa.errorTitle')
     }
-  } catch (err) {
-    console.warn('[qa/QuestionComposer] createCourseQuestion failed', err)
+  } catch {
     errorMsg.value = t('classroom.qa.errorTitle')
   } finally {
     submitting.value = false

@@ -37,7 +37,6 @@
               :model-value-raw="current.modelValueRaw"
               @begin="onBegin"
               @complete="onComplete"
-              @error="onVideoError"
             />
             <QuizRunner
               v-else-if="current.kind === 'quiz' && quizContentId != null"
@@ -273,10 +272,6 @@ function onBegin(): void {
 async function onComplete(): Promise<void> {
   // A natural video-end event is a strong signal to end the unit immediately.
   await endProgress()
-}
-
-function onVideoError(message: string): void {
-  console.warn('[classroom/player] video error', message)
 }
 
 async function onSelect(contentPk: number): Promise<void> {

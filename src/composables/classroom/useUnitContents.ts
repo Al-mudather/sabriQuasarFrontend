@@ -176,8 +176,7 @@ export function useUnitContents(): UseUnitContentsApi {
         cache.markFresh(keyFor(unitPk))
         return items
       })
-      .catch((err: unknown) => {
-        console.warn('[classroom] useUnitContents.loadUnit failed', { unitPk, err })
+      .catch(() => {
         return contentsByUnitPk.get(unitPk) ?? []
       })
       .finally(() => {
@@ -209,8 +208,7 @@ export function useUnitContents(): UseUnitContentsApi {
         paginationByUnitPk.set(unitPk, pagination)
         return merged
       })
-      .catch((err: unknown) => {
-        console.warn('[classroom] useUnitContents.loadMore failed', { unitPk, err })
+      .catch(() => {
         return contentsByUnitPk.get(unitPk) ?? []
       })
       .finally(() => {
@@ -230,8 +228,7 @@ export function useUnitContents(): UseUnitContentsApi {
       paginationByUnitPk.set(unitPk, pagination)
       cache.markFresh(keyFor(unitPk))
       return items
-    } catch (err) {
-      console.warn('[classroom] useUnitContents.refetchUnit failed', { unitPk, err })
+    } catch {
       return contentsByUnitPk.get(unitPk) ?? []
     } finally {
       loadingPks.delete(unitPk)

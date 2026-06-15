@@ -54,21 +54,12 @@ export function useCourseBootstrap(coursePk: PkLike): {
     loading: courseLoading,
     error: courseError,
     refetch: refetchCourse,
-    onError: onCourseError,
     onResult: onCourseResult,
   } = useQuery<GetCourseByIDSlimResult, GetCourseByIDSlimVars>(GetCourseByIDSlim, courseVars, () => ({
     enabled: enabled.value,
     errorPolicy: 'all',
     fetchPolicy: 'cache-first',
   }))
-
-  onCourseError((err) => {
-    console.error('[classroom][bootstrap] GetCourseByIDSlim FAILED', {
-      message: err.message,
-      graphQLErrors: err.graphQLErrors,
-      networkError: err.networkError,
-    })
-  })
 
   // Cache freshness — refetch on mount + on tab focus when older than TTL.
   const { markFresh: markCourseFresh } = useStaleAfterTtl({
@@ -98,7 +89,6 @@ export function useCourseBootstrap(coursePk: PkLike): {
     loading: enrollmentLoading,
     error: enrollmentError,
     refetch: refetchEnrollment,
-    onError: onEnrollmentError,
     onResult: onEnrollmentResult,
   } = useQuery<
     GetEnrollmentByCourseForCurrentUserResult,
@@ -108,14 +98,6 @@ export function useCourseBootstrap(coursePk: PkLike): {
     errorPolicy: 'all',
     fetchPolicy: 'cache-first',
   }))
-
-  onEnrollmentError((err) => {
-    console.error('[classroom][bootstrap] GetEnrollmentByCourseForCurrentUser FAILED', {
-      message: err.message,
-      graphQLErrors: err.graphQLErrors,
-      networkError: err.networkError,
-    })
-  })
 
   const { markFresh: markEnrollmentFresh } = useStaleAfterTtl({
     key: () => {

@@ -55,7 +55,7 @@ export function useLearningProgress(
     () => toNum(coursePk) !== null && toNum(enrollmentPk) !== null,
   )
 
-  const { result, refetch, onError, onResult } = useQuery<
+  const { result, refetch, onResult } = useQuery<
     GetAllLearningProgressByCourseResult,
     GetAllLearningProgressByCourseVars
   >(GetAllLearningProgressByCourse, vars, () => ({
@@ -63,14 +63,6 @@ export function useLearningProgress(
     errorPolicy: 'all',
     fetchPolicy: 'cache-first',
   }))
-
-  onError((err) => {
-    console.error('[classroom][progress] GetAllLearningProgressByCourse FAILED', {
-      message: err.message,
-      graphQLErrors: err.graphQLErrors,
-      networkError: err.networkError,
-    })
-  })
 
   // 10-minute staleness window + refetch on tab refocus.
   const { markFresh: markProgressFresh } = useStaleAfterTtl({
@@ -85,17 +77,6 @@ export function useLearningProgress(
   onResult((res) => {
     if (res.data?.learningProgressByCourse) markProgressFresh()
   })
-
-  watch(
-    () => result.value?.learningProgressByCourse?.edges,
-    (edges) => {
-      if (!edges) return
-      console.log('[classroom][progress] GetAllLearningProgressByCourse OK', {
-        rows: edges.length,
-        completed: edges.filter((e) => e?.node?.complete).length,
-      })
-    },
-  )
 
   const progressMap = computed<ProgressMap>(() => {
     const edges = result.value?.learningProgressByCourse?.edges ?? []
@@ -130,26 +111,17 @@ export function useLearningProgress(
   async function start(contentPk: number, unitPk: number): Promise<void> {
     const cid = toNum(coursePk)
     const eid = toNum(enrollmentPk)
-    if (cid == null || eid == null) {
-      console.warn('[classroom][progress] start skipped — missing ids', { cid, eid, contentPk, unitPk })
-      return
-    }
+    if (cid == null || eid == null) return
     currentContentPk.value = contentPk
     currentUnitPk.value = unitPk
     const input = { courseId: cid, enrollmentId: eid, courseUnitId: unitPk, courseUnitContentId: contentPk }
-    console.log('[classroom][progress] StartLearningUnit →', input)
     try {
       const res = await runStart({ progressData: input })
       const success = res?.data?.startLearningUnit?.success
       const pk = res?.data?.startLearningUnit?.learning?.pk
-      console.log('[classroom][progress] StartLearningUnit ←', {
-        success,
-        progressPk: pk,
-        errors: res?.data?.startLearningUnit?.errors,
-      })
       if (success && typeof pk === 'number') currentProgressId.value = pk
-    } catch (err) {
-      console.warn('[classroom][progress] StartLearningUnit threw', err)
+    } catch {
+      /* start failed — leave progress id unset */
     }
   }
 
@@ -159,25 +131,17 @@ export function useLearningProgress(
     const pid = currentProgressId.value
     const ccid = currentContentPk.value
     const cuid = currentUnitPk.value
-    if (cid == null || eid == null || pid == null || ccid == null || cuid == null) {
-      console.log('[classroom][progress] end skipped — nothing to finalize', { cid, eid, pid, ccid, cuid })
-      return
-    }
+    if (cid == null || eid == null || pid == null || ccid == null || cuid == null) return
     const input = { courseId: cid, enrollmentId: eid, courseUnitId: cuid, courseUnitContentId: ccid }
-    console.log('[classroom][progress] EndLearningUnit →', { ...input, progressId: pid })
     try {
       const res = await runEnd({ progressData: input, progressId: pid })
       const success = res?.data?.endLearningUnit?.success
-      console.log('[classroom][progress] EndLearningUnit ←', {
-        success,
-        errors: res?.data?.endLearningUnit?.errors,
-      })
       if (success) {
         currentProgressId.value = null
         void refetch()
       }
-    } catch (err) {
-      console.warn('[classroom][progress] EndLearningUnit threw', err)
+    } catch {
+      /* end failed — progress will be reconciled on next refetch */
     }
   }
 
