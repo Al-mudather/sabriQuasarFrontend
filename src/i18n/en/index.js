@@ -909,6 +909,7 @@ export default {
   "كلمة المرور مطلوبة": "Password is required",
   "كلمتا المرور غير متطابقتين": "Passwords don't match",
   "كود التسجيل": "Sign-up code",
+  "تسجيل الخروج": "Sign out",
   "كود الخصم": "Discount code",
   "كورساتي": "My courses",
   "لا توجد إشعارات": "No notifications",

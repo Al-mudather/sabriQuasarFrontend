@@ -21,10 +21,7 @@
             class="app-header__mark-img"
           />
         </span>
-        <span class="app-header__wordmark">
-          <span class="app-header__wordmark-line1">{{ $t('مركز د. صبري') }}</span>
-          <span class="app-header__wordmark-line2">{{ $t('أبوقرون للتدريب') }}</span>
-        </span>
+        <span class="app-header__wordmark">DSTC</span>
       </router-link>
 
       <!-- Desktop navigation (logical end / left in RTL) -->
@@ -34,7 +31,7 @@
       >
         <ul class="app-header__nav-list">
           <li
-            v-for="link in navLinks"
+            v-for="link in primaryLinks"
             :key="link.to"
             class="app-header__nav-item"
           >
@@ -50,7 +47,7 @@
         </ul>
 
         <div class="app-header__lang">
-          <LanguageSwitcher variant="light" />
+          <LanguageSwitcher variant="light" mode="menu" />
         </div>
 
         <div v-if="showAuthCtas" class="app-header__auth">
@@ -70,14 +67,73 @@
           </DsButton>
         </div>
 
-        <div v-else-if="showLogout" class="app-header__auth">
-          <DsButton
-            variant="secondary"
-            size="sm"
-            @click="logout"
+        <div v-else-if="showLogout" class="app-header__account">
+          <button
+            type="button"
+            class="app-header__account-trigger"
+            :aria-label="$t('حسابي')"
           >
-            {{ $t('تسجيل الخروج') }}
-          </DsButton>
+            <span class="app-header__account-avatar">
+              <span v-if="avatarInitial" class="app-header__account-avatar-initial">{{ avatarInitial }}</span>
+              <svg v-else viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+              </svg>
+            </span>
+            <svg class="app-header__account-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+
+            <q-menu
+              anchor="bottom end"
+              self="top end"
+              :offset="[0, 10]"
+              class="app-header__account-pop"
+            >
+              <div class="app-header__account-pop-identity">
+                <span class="app-header__account-avatar app-header__account-avatar--lg">
+                  <span v-if="avatarInitial" class="app-header__account-avatar-initial">{{ avatarInitial }}</span>
+                  <svg v-else viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+                  </svg>
+                </span>
+                <span class="app-header__account-pop-text">
+                  <span class="app-header__account-name">{{ userDisplayName || $t('مرحباً') }}</span>
+                  <span class="app-header__account-role">{{ userRoleLabel }}</span>
+                </span>
+              </div>
+
+              <hr class="app-header__account-divider" />
+
+              <q-list class="app-header__account-pop-list">
+                <q-item
+                  v-for="link in accountLinks"
+                  :key="link.to"
+                  v-close-popup
+                  clickable
+                  :to="link.to"
+                  :active="isActive(link.to)"
+                  class="app-header__account-pop-item"
+                >
+                  {{ link.label }}
+                </q-item>
+              </q-list>
+
+              <hr class="app-header__account-divider" />
+
+              <q-list class="app-header__account-pop-list">
+                <q-item
+                  v-close-popup
+                  clickable
+                  class="app-header__account-pop-item app-header__account-pop-item--logout"
+                  @click="logout"
+                >
+                  {{ $t('تسجيل الخروج') }}
+                </q-item>
+              </q-list>
+            </q-menu>
+          </button>
         </div>
       </nav>
 
@@ -221,15 +277,20 @@ const brandNameAr = BRAND.nameAr
 // The Arabic literal is the i18n key (matches the existing key pattern).
 const { t } = useI18n()
 
-const navLinks = computed<{ to: string; label: string }[]>(() => {
-  const base = [
-    { to: '/',        label: t('الرئيسية') },
-    { to: '/courses', label: t('الدورات') },
-    { to: '/cart/',   label: t('السلة') },
-  ]
-  if (!isAuthenticated.value) return base
+// Primary links shown directly in the desktop top bar (kept short so the bar
+// fits on one line in BOTH languages — English labels are wider than Arabic).
+const primaryLinks = computed<{ to: string; label: string }[]>(() => [
+  { to: '/',        label: t('الرئيسية') },
+  { to: '/courses', label: t('الدورات') },
+  { to: '/cart/',   label: t('السلة') },
+])
+
+// Account links live behind the avatar dropdown on desktop (and are appended
+// to the drawer on mobile). They were previously crammed into the top bar,
+// which overflowed to a second line once authenticated.
+const accountLinks = computed<{ to: string; label: string }[]>(() => {
+  if (!isAuthenticated.value) return []
   return [
-    ...base,
     { to: '/myCourses',       label: t('دوراتي') },
     { to: '/Certificates',    label: t('الشهادات') },
     { to: '/notification',    label: t('الإشعارات') },
@@ -238,6 +299,11 @@ const navLinks = computed<{ to: string; label: string }[]>(() => {
     { to: '/profile',         label: t('الملف الشخصي') },
   ]
 })
+
+// Drawer (mobile) keeps the full list in one column — it has the vertical room.
+const navLinks = computed<{ to: string; label: string }[]>(
+  () => [...primaryLinks.value, ...accountLinks.value],
+)
 
 const showAuthCtas = computed<boolean>(() => props.showAuthCta && !isAuthenticated.value)
 const showLogout = computed<boolean>(() => props.showAuthCta && isAuthenticated.value)
@@ -250,11 +316,11 @@ const userDisplayName = computed<string>(() => {
 
 const userRoleLabel = computed<string>(() => {
   const u = user.value as Record<string, unknown> | null
-  if (!u) return 'متعلم'
+  if (!u) return t('متعلم')
   const role = u.role ?? u.userType
-  if (role === 'trainer' || role === 'TRAINER') return 'مدرب'
-  if (role === 'admin'   || role === 'ADMIN')   return 'مشرف'
-  return 'متعلم'
+  if (role === 'trainer' || role === 'TRAINER') return t('مدرب')
+  if (role === 'admin'   || role === 'ADMIN')   return t('مشرف')
+  return t('متعلم')
 })
 
 const avatarInitial = computed<string>(() => {
@@ -364,15 +430,15 @@ onBeforeUnmount(() => {
 
 .app-header__wordmark {
   display: none;
-  flex-direction: column;
   font-family: var(--ds-font-heading);
-  font-weight: var(--ds-weight-semibold);
-  font-size: 14px;
-  line-height: 1.15;
+  font-weight: var(--ds-weight-bold);
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.12em;
   color: var(--ds-indigo);
 
   @media (min-width: 600px) {
-    display: flex;
+    display: inline-block;
   }
 }
 
@@ -817,6 +883,102 @@ onBeforeUnmount(() => {
   .app-header__drawer-section-label {
     margin-block-start: 0;
     padding: 0;
+  }
+}
+</style>
+
+<style lang="scss">
+/* Account dropdown content teleports to <body> via q-menu, so it can't be
+   scoped. Everything is namespaced under .app-header__account-pop. */
+.app-header__account-pop {
+  min-width: 240px;
+  padding: var(--ds-space-2);
+  background: var(--ds-cream);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-md);
+}
+
+.app-header__account-pop-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-2);
+}
+
+.app-header__account-pop .app-header__account-avatar {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--ds-cream-sunken);
+  color: var(--ds-indigo);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ds-font-heading);
+  font-weight: var(--ds-weight-semibold);
+  font-size: 16px;
+  overflow: hidden;
+}
+
+.app-header__account-pop .app-header__account-avatar-initial {
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.app-header__account-pop-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app-header__account-pop .app-header__account-name {
+  font-family: var(--ds-font-heading);
+  font-weight: var(--ds-weight-semibold);
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--ds-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-header__account-pop .app-header__account-role {
+  font-family: var(--ds-font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ds-taupe);
+}
+
+.app-header__account-pop .app-header__account-divider {
+  border: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--ds-cream-sunken);
+  margin: var(--ds-space-1) 0;
+}
+
+.app-header__account-pop-list {
+  padding: 0;
+}
+
+.app-header__account-pop-item {
+  border-radius: var(--ds-radius-sm);
+  font-family: var(--ds-font-body);
+  font-weight: var(--ds-weight-medium);
+  font-size: 14px;
+  min-height: 40px;
+  color: var(--ds-ink);
+
+  &.q-item--active {
+    color: var(--ds-indigo);
+    background: var(--ds-cream-sunken);
+  }
+
+  &--logout {
+    color: var(--ds-terracotta);
   }
 }
 </style>
