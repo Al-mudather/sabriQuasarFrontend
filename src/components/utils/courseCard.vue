@@ -35,6 +35,7 @@
           v-if="isEnrolled"
           variant="accent"
           full-width
+          :loading="loadingClass"
           @click.stop="goToClassroom"
         >
           {{ $t('الى الدرس') }}
@@ -43,6 +44,7 @@
           v-else
           variant="primary"
           full-width
+          :loading="loadingCart"
           @click.stop="addToCart"
         >
           {{ $t('إضافة للسلة') }}
@@ -51,6 +53,7 @@
           variant="ghost"
           size="sm"
           full-width
+          :loading="loadingDetails"
           @click.stop="goToDetails"
         >
           {{ $t('التفاصيل') }}
@@ -61,13 +64,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import { withMinDuration } from 'src/utils/withMinDuration'
 import type {
   Course,
   CourseInSpeciality,
@@ -146,33 +150,70 @@ function formatAmount (n: number): string {
   }
 }
 
-function goToDetails (): void {
-  router.push({
-    name: 'course-details',
-    params: { pk: String(props.course.pk), name: props.course.title, id: props.course.id },
-  })
+// Inline loading state — one flag per action so only the clicked button spins.
+// The slow part on a cold network is the destination route's chunk download,
+// which `router.push` resolves after; withMinDuration floors the spinner so a
+// warm (cached) navigation still registers the click instead of flashing.
+const LOADING_FLOOR_MS = 300
+const loadingDetails = ref(false)
+const loadingCart = ref(false)
+const loadingClass = ref(false)
+
+async function goToDetails (): Promise<void> {
+  if (loadingDetails.value) return
+  loadingDetails.value = true
+  try {
+    await withMinDuration(
+      Promise.resolve(
+        router.push({
+          name: 'course-details',
+          params: { pk: String(props.course.pk), name: props.course.title, id: props.course.id },
+        }),
+      ),
+      LOADING_FLOOR_MS,
+    )
+  } catch {
+    /* navigation aborted/duplicated — nothing to do */
+  } finally {
+    loadingDetails.value = false
+  }
 }
 
 function goToClassroom (): void {
+  if (loadingClass.value) return
+  // Hard reload into the classroom hash app — keep the spinner up; the browser
+  // unloads this page, so there is no need to clear the flag.
+  loadingClass.value = true
   window.location.href = `${location.origin}/classroom/#/class/${props.course.pk}/`
 }
 
-function addToCart (): void {
-  if (!auth.isAuthenticated) {
-    router.push({ name: 'login', query: { redirect: '/courses' } })
-    return
+async function addToCart (): Promise<void> {
+  if (loadingCart.value) return
+  loadingCart.value = true
+  try {
+    if (!auth.isAuthenticated) {
+      await withMinDuration(
+        Promise.resolve(router.push({ name: 'login', query: { redirect: '/courses' } })),
+        LOADING_FLOOR_MS,
+      )
+      return
+    }
+    const c = props.course
+    cart.addCourseToCart({
+      user: user.value,
+      course: {
+        id: c.id,
+        pk: c.pk,
+        name: c.title,
+        currency: (c.currency as Record<string, number> | null) ?? {},
+      },
+    })
+    await withMinDuration(Promise.resolve(router.push({ name: 'cart' })), LOADING_FLOOR_MS)
+  } catch {
+    /* navigation aborted/duplicated — nothing to do */
+  } finally {
+    loadingCart.value = false
   }
-  const c = props.course
-  cart.addCourseToCart({
-    user: user.value,
-    course: {
-      id: c.id,
-      pk: c.pk,
-      name: c.title,
-      currency: (c.currency as Record<string, number> | null) ?? {},
-    },
-  })
-  router.push({ name: 'cart' })
 }
 </script>
 
