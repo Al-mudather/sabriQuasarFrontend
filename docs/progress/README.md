@@ -37,6 +37,8 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 | 1.1.5 | [Cart: RTL/i18n + receipt error handling](1.1.5-cart-rtl-i18n-error-handling.md) | 🟡 | `1c5ea4c` |
 | 1.1.6 | [Notifications: bottom toast redesign](1.1.6-notifications-bottom-toast-redesign.md) | ✅ | `16a5323` |
 | 1.1.7 | [Login: toast feedback](1.1.7-login-toast-feedback.md) | ✅ | `bca0932` |
+| 1.1.8 | [Course: post-login redirect + clean `+`-slug URLs](1.1.8-course-redirect-and-clean-urls.md) | 🟡 | `ee21b42` |
+| 1.1.9 | [Course: collapsible instructor bios](1.1.9-instructor-bio-show-more.md) | ✅ | `93b6241` |
 
 ---
 
@@ -51,6 +53,8 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
   and `MyPyramidRewards.vue` are unrouted/unimported dead code (found during 1.1.1).
 - 🔭 **Live-verify cart error toasts** — the receipt-upload failure paths (1.1.5) are
   build/logic-verified but only fire on a real backend rejection; confirm in-app.
+- 🔭 **Live-verify enrol → Google-login → course redirect** — the [1.1.8](1.1.8-course-redirect-and-clean-urls.md)
+  fix is code-traced but the OAuth loop can't run headless; confirm with a real login.
 - 🔭 **Dependabot** — the repo reports 28 dependency vulnerabilities (1 critical, 5 high)
   on every push. Triage the critical/high ones.
 
@@ -65,3 +69,9 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 - Notifications: one system, bottom-positioned — see [1.1.6](1.1.6-notifications-bottom-toast-redesign.md).
 - Classroom video players follow a shared pattern: a `useXPlayer` reactive
   composable + the shared `ClassroomVideoControls.vue` bar — see [1.1.3](1.1.3-classroom-hls-player-controls.md).
+- **`.vue` changes need a headless mount smoke test** — green `tsc`/`build` does
+  NOT check template bindings. A dropped template method passes both and only
+  crashes at runtime (caught this way in [1.1.9](1.1.9-instructor-bio-show-more.md)).
+  Headless check: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+  --headless --disable-gpu --enable-logging=stderr --virtual-time-budget=9000
+  --dump-dom <url> 2>err.log` then grep the log for `is not a function` / `Vue warn`.
