@@ -50,6 +50,11 @@ const jsonStringFieldPolicy = { read: parseJsonStringRead }
 // ---------- HTTP (upload) link ---------------------------------------------
 const uploadLink = createUploadLink({
   uri: API_URI + '/api/graphql/',
+  // Send cookies on same-origin requests. REQUIRED for `logoutUser`: the server
+  // clears the HttpOnly `sessionid` cookie via Set-Cookie, which only works if
+  // the browser includes that cookie on the request. In production the app and
+  // /api/graphql/ share the same host (stc.training), so 'same-origin' applies.
+  credentials: 'same-origin',
   // Native fetch is sufficient here; the old axios-fetch wrapper existed for
   // upload progress, which can be restored in Track C when the upload UI is
   // reviewed. Leaving native fetch keeps the client simple and avoids the

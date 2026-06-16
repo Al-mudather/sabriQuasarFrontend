@@ -20,12 +20,15 @@ import { apolloClient, resetApolloSession } from 'src/apollo/client'
 import { tokenStorage, userProfileStorage, purgeClientStorage } from 'src/localStorageService'
 import { RefreshLoginUserWithEmail } from 'src/graphql/account_management/mutation/RefreshUserToken'
 import { RevokeUserRefreshToken } from 'src/graphql/account_management/mutation/RevokeUserRefreshToken.js'
+import { LogoutUser } from 'src/graphql/account_management/mutation/LogoutUser'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData.js'
 
 import type {
   AuthSessionUser,
   LoginResult,
   SocialAuthResult,
+  LogoutUserResult,
+  LogoutUserVariables,
 } from 'src/types/auth/types'
 
 // Load the pinia-plugin-persistedstate module augmentation so `persist: false`
@@ -161,13 +164,35 @@ export const useAuthStore = defineStore('authentication', {
       })
     },
 
+    // Server-side session logout: clears the Django session and expires the
+    // HttpOnly `sessionid` cookie (left behind by social-login sessions). The
+    // request must carry cookies — the Apollo upload link sets
+    // `credentials: 'same-origin'`. Safe to call when already logged out (no-op).
+    LOGOUT_SERVER_SESSION (): Promise<unknown> {
+      return apolloClient.mutate<LogoutUserResult, LogoutUserVariables>({
+        mutation: LogoutUser,
+      })
+    },
+
     // The single, complete "fresh session" logout. Every step is wrapped so a
     // failure in one (e.g. a slow backend revoke) can never block the rest of
     // the wipe. Order matters: revoke must run BEFORE tokens are wiped (it
     // needs the refresh token) and before the Apollo cache is cleared.
     async logOutAction (): Promise<void> {
-      // 1. Best-effort server-side revoke — time-boxed so a slow/failed call
-      //    never holds up logout. Fire only if we actually have a refresh token.
+      // 1. Server-side session logout — clears the Django session + HttpOnly
+      //    `sessionid` cookie. Best-effort + time-boxed so a slow/failed call
+      //    never holds up logout. Runs BEFORE storage is wiped (it relies on the
+      //    cookie, sent by the browser) and is a safe no-op when already logged
+      //    out, so we call it unconditionally.
+      try {
+        await Promise.race([
+          this.LOGOUT_SERVER_SESSION(),
+          new Promise((resolve) => setTimeout(resolve, 2500)),
+        ])
+      } catch (_e) { /* ignore — logout proceeds regardless */ }
+
+      // 2. Best-effort refresh-token revoke — time-boxed too. Fire only if we
+      //    actually have a refresh token.
       if (tokenStorage.getRefreshToken()) {
         try {
           await Promise.race([
@@ -177,13 +202,13 @@ export const useAuthStore = defineStore('authentication', {
         } catch (_e) { /* ignore — logout proceeds regardless */ }
       }
 
-      // 2. Tear down Apollo: clear cache (no refetch), stop queries, drop the
+      // 3. Tear down Apollo: clear cache (no refetch), stop queries, drop the
       //    subscription socket so nothing of the old user survives.
       try {
         await resetApolloSession()
       } catch (_e) { /* ignore */ }
 
-      // 2b. Revoke the Google grant (best-effort) so a cached Google session
+      // 3b. Revoke the Google grant (best-effort) so a cached Google session
       //     can't silently re-log the previous user on the next sign-in.
       try {
         const globals = (window as unknown as {
@@ -192,11 +217,11 @@ export const useAuthStore = defineStore('authentication', {
         globals?.$socialAuth?.revokeGoogle?.()
       } catch (_e) { /* ignore */ }
 
-      // 3. Wipe all client storage + cookies, keeping only language/currency
+      // 4. Wipe all client storage + cookies, keeping only language/currency
       //    display prefs so the UI doesn't flip language on logout.
       purgeClientStorage({ keepLocalStorageKeys: ['isEnglish', 'pinia_settings'] })
 
-      // 4. Reset in-memory auth state.
+      // 5. Reset in-memory auth state.
       this.deleteData()
 
       Notify.create({

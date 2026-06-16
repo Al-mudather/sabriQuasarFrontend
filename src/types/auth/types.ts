@@ -18,6 +18,8 @@ import type {
   RefreshUserTokenMutationVariables,
   RevokeUserRefreshTokenMutation,
   RevokeUserRefreshTokenMutationVariables,
+  LogoutUserMutation,
+  LogoutUserMutationVariables,
   VerifyUserTokenMutation,
   VerifyUserTokenMutationVariables,
 
@@ -118,6 +120,9 @@ export type RefreshTokenMutationResult = RefreshUserTokenMutation
 
 export type RevokeRefreshTokenVariables = RevokeUserRefreshTokenMutationVariables
 export type RevokeRefreshTokenResult = RevokeUserRefreshTokenMutation
+
+export type LogoutUserVariables = LogoutUserMutationVariables
+export type LogoutUserResult = LogoutUserMutation
 
 export type VerifyTokenVariables = VerifyUserTokenMutationVariables
 export type VerifyTokenResult = VerifyUserTokenMutation
