@@ -50,6 +50,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { withMinDuration } from 'src/utils/withMinDuration'
+import { courseSlug } from 'src/utils/courseSlug'
 import type { HomePageSlider } from 'src/types/marketing-content/types'
 
 interface Props {
@@ -97,7 +98,7 @@ async function goToCourseDetails (): Promise<void> {
         router.push({
           name: 'course-details',
           params: {
-            name: props.slider.slide?.title ?? '',
+            name: courseSlug(props.slider.slide?.title ?? ''),
             pk: String(props.slider.slide?.pk ?? ''),
             id: props.slider.slide?.id ?? ''
           }

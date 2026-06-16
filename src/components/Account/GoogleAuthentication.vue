@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { apolloClient } from 'src/apollo/client'
@@ -29,6 +29,7 @@ interface Props {
 defineProps<Props>()
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
 const auth = useAuthStore()
@@ -47,6 +48,14 @@ async function isUserEnrolled (): Promise<boolean> {
 }
 
 async function checkRegistrationCode (): Promise<void> {
+  // If the user arrived at login via a redirect (e.g. unauthenticated enrol),
+  // honor that redirect first — mirrors Login.vue's redirectAfterLogin().
+  const redirectTarget = route.query?.redirect
+  if (redirectTarget) {
+    void router.push(redirectTarget as string).catch(() => {})
+    return
+  }
+
   try {
     await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
     pyramid.fetchMyMarketingCode()

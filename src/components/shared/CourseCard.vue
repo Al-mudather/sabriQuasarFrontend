@@ -298,6 +298,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { withMinDuration } from 'src/utils/withMinDuration'
+import { courseSlug } from 'src/utils/courseSlug'
 import DsCard from 'src/design-system/components/DsCard.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsBadge from 'src/design-system/components/DsBadge.vue'
@@ -370,7 +371,7 @@ const resolvedTo = computed(() => {
     return {
       name: 'course-details',
       params: {
-        name: String(props.course.name),
+        name: courseSlug(props.course.name ?? ''),
         pk: props.course.pk,
         id: props.course.id || props.course.pk
       }
