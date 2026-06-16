@@ -233,7 +233,7 @@ const { t } = useI18n()
 onMounted(() => {
   settings.setActiveNav('BORD')
   if (!auth.isAuthenticated) {
-    void router.push({ name: 'login', query: { redirect: '/my-courses' } })
+    void router.push({ name: 'login', query: { redirect: '/myCourses' } })
   }
 })
 
