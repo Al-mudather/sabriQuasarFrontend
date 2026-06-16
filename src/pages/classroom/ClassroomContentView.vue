@@ -31,7 +31,7 @@
         <div class="cls-cockpit__top">
           <h2 class="cls-cockpit__title">{{ current.title }}</h2>
 
-          <div class="cls-cockpit__media">
+          <div class="cls-cockpit__media" :data-provider="videoProvider || null">
             <VideoPlayer
               v-if="current.kind === 'video'"
               :model-value-raw="current.modelValueRaw"
@@ -145,8 +145,11 @@ import { useClassroomStore } from 'src/stores/classroom'
 import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
 import {
   parseModelValue,
+  resolveVideoProvider,
   type ParsedFileValue,
   type ParsedQuizValue,
+  type ParsedVideoValue,
+  type VideoProvider,
 } from 'src/types/classroom/types'
 import CurriculumRail from 'src/components/classroom/CurriculumRail.vue'
 import ClassroomSidePanel from 'src/components/classroom/ClassroomSidePanel.vue'
@@ -217,6 +220,14 @@ const quizContentId = computed<number | null>(() => {
   return Number.isFinite(n) && n > 0 ? n : null
 })
 const quizTitle = computed<string | null>(() => parsedQuiz.value?.quiz_title ?? null)
+
+// Which playback engine the current video uses. The self-hosted HLS player now
+// renders its own control bar BELOW the 16:9 stage, so its media box must not
+// clip/aspect-lock like the embed providers — see the [data-provider] CSS below.
+const videoProvider = computed<VideoProvider | null>(() => {
+  if (!current.value || current.value.kind !== 'video') return null
+  return resolveVideoProvider(parseModelValue<ParsedVideoValue>(current.value.modelValueRaw))
+})
 
 const parsedFile = computed<ParsedFileValue | null>(() => {
   if (!current.value || current.value.kind !== 'file') return null
@@ -390,6 +401,16 @@ async function onSelect(contentPk: number): Promise<void> {
   overflow: hidden;
   border-radius: var(--cls-radius-lg, 16px);
   background: #000;
+}
+
+// Self-hosted HLS owns its own layout (16:9 stage + control bar BELOW it), so
+// the media box must not impose a 16:9 clip — that would crop the controls.
+// Other providers (vimeo / youtube / vdocipher) keep the clipped 16:9 box above.
+.cls-cockpit[data-kind='video'] .cls-cockpit__media[data-provider='type_hasif'] {
+  aspect-ratio: auto;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
 }
 
 .cls-cockpit__panel-body {

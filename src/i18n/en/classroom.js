@@ -40,6 +40,22 @@ export default {
     },
     vdocipher: {
       missingCredentials: 'Secure video credentials are missing. Please refresh to try again.'
+    },
+    controls: {
+      seek: 'Seek',
+      watched: 'Watched',
+      play: 'Play',
+      pause: 'Pause',
+      back10: 'Back 10 seconds',
+      forward10: 'Forward 10 seconds',
+      mute: 'Mute',
+      unmute: 'Unmute',
+      volume: 'Volume',
+      speed: 'Speed',
+      quality: 'Quality',
+      more: 'More options',
+      fullscreen: 'Fullscreen',
+      exitFullscreen: 'Exit fullscreen'
     }
   },
   quiz: {

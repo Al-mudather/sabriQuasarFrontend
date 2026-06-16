@@ -40,6 +40,22 @@ export default {
     },
     vdocipher: {
       missingCredentials: 'بيانات اعتماد الفيديو الآمن غير متوفرة. يرجى التحديث للمحاولة مرة أخرى.'
+    },
+    controls: {
+      seek: 'تمرير',
+      watched: 'تمت مشاهدته',
+      play: 'تشغيل',
+      pause: 'إيقاف مؤقت',
+      back10: 'إرجاع 10 ثوانٍ',
+      forward10: 'تقديم 10 ثوانٍ',
+      mute: 'كتم الصوت',
+      unmute: 'إلغاء الكتم',
+      volume: 'مستوى الصوت',
+      speed: 'السرعة',
+      quality: 'الجودة',
+      more: 'خيارات أخرى',
+      fullscreen: 'ملء الشاشة',
+      exitFullscreen: 'إنهاء ملء الشاشة'
     }
   },
   quiz: {
