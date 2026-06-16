@@ -55,7 +55,7 @@ function errorHandler (errorsObj: unknown): void {
     if (!Array.isArray(entries)) continue
     for (const val of entries) {
       const v = val as Record<string, unknown>
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: String(v.message ?? '') })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: String(v.message ?? '') })
     }
   }
 }
@@ -102,7 +102,7 @@ async function getStripePaymentUrl (orderResult: NonNullable<CreateOrderResult['
   const details = result.data?.createStripeCheckout
   if (details?.errors) {
     visible.value = false
-    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
   }
   if (details?.success) return details.paymentUrl
   return null
@@ -134,9 +134,9 @@ async function buyTheCoursesUsingStripe (): Promise<void> {
     visible.value = false
     const msg = error instanceof Error ? error.message : ''
     if (msg === 'Stripe not loaded') {
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'Stripe غير محمل، يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى' })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: 'Stripe غير محمل، يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى' })
     } else {
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'حدث خطأ في عملية الدفع، يرجى المحاولة مرة أخرى' })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: 'حدث خطأ في عملية الدفع، يرجى المحاولة مرة أخرى' })
     }
   }
 }

@@ -68,7 +68,7 @@ function errorHandler(errorsObj: Record<string, Array<{ message: string | { msg:
   for (const key in errorsObj) {
     for (const val of errorsObj[key]) {
       const msg = typeof val.message === 'object' && val.message ? val.message.msg : val.message
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: msg })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: msg })
     }
   }
 }
@@ -81,7 +81,7 @@ async function collectMyRewards(): Promise<void> {
     if (payload?.success) {
       $q.notify({
         type: 'positive',
-        position: 'top',
+        position: 'bottom',
         progress: true,
         multiLine: true,
         message: t('تم تحصيل الارباح'),

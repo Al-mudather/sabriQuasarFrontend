@@ -47,7 +47,7 @@ function onJoinTelegram(): void {
   if (!link) {
     $q.notify({
       type: 'warning',
-      position: 'top',
+      position: 'bottom',
       multiLine: true,
       progress: true,
       message: t('classroom.overview.telegramMissing'),
@@ -67,7 +67,7 @@ async function onRequestCertificate(): Promise<void> {
     if (ok) {
       $q.notify({
         type: 'positive',
-        position: 'top',
+        position: 'bottom',
         multiLine: true,
         progress: true,
         message: t('classroom.overview.certificateSuccess'),
@@ -80,7 +80,7 @@ async function onRequestCertificate(): Promise<void> {
           : '') || t('classroom.overview.certificateError')
       $q.notify({
         type: 'negative',
-        position: 'top',
+        position: 'bottom',
         multiLine: true,
         progress: true,
         message: msg,
@@ -89,7 +89,7 @@ async function onRequestCertificate(): Promise<void> {
   } catch {
     $q.notify({
       type: 'negative',
-      position: 'top',
+      position: 'bottom',
       multiLine: true,
       progress: true,
       message: t('classroom.overview.certificateError'),

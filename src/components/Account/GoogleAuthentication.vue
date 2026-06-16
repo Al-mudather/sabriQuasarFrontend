@@ -86,14 +86,14 @@ async function loginAuthMutation (accessToken: string, provider: string, email =
       } catch { /* OneSignal optional */ }
 
       if (userData.token) {
-        $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: t('تم تسجيل الدخول بنجاح') })
+        $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'bottom', message: t('تم تسجيل الدخول بنجاح') })
         await checkRegistrationCode()
       }
     }
   } catch (error: unknown) {
     const err = error as { message?: string }
     if (err.message === 'GraphQL error: UNIQUE constraint failed: account_manager_user.email') {
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: t('هذا الحساب مسجل مسبقا') })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: t('هذا الحساب مسجل مسبقا') })
     }
   } finally {
     visible.value = false

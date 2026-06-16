@@ -219,7 +219,7 @@ function errorHandler (errorsObj: unknown): void {
       const msg = typeof v.message === 'object'
         ? ((v.message as Record<string, unknown>).msg as string ?? JSON.stringify(v.message))
         : `${v.message} : ${key}`
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: msg })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: msg })
     }
   }
 }
@@ -252,7 +252,7 @@ async function UPDATE_THE_USER_PROFILE (e?: Event): Promise<void> {
       return
     }
 
-    $q.notify({ type: 'positive', multiLine: true, progress: true, position: 'top', message: 'تم حفظ بياناتك' })
+    $q.notify({ type: 'positive', multiLine: true, progress: true, position: 'bottom', message: 'تم حفظ بياناتك' })
     router.push({ name: 'payment' })
   } catch {
     submitting.value = false

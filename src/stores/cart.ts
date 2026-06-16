@@ -86,7 +86,7 @@ export const useCartStore = defineStore('shoppingCart', {
             type: 'warning',
             progress: true,
             multiLine: true,
-            position: 'top',
+            position: 'bottom',
             message: 'لديك طلب مسبق في السله, قم باكماله او افراغ السله من اجل طلب جديد',
           })
         }

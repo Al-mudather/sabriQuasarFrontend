@@ -121,7 +121,7 @@ function showTheSearchingResult (event: Event): void {
   event.preventDefault()
 
   if (!search.value.trim()) {
-    $q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: t('ما الذي تبحث عنه') })
+    $q.notify({ type: 'warning', position: 'bottom', progress: true, multiLine: true, message: t('ما الذي تبحث عنه') })
     return
   }
 
@@ -153,7 +153,7 @@ function showTheSearchingResult (event: Event): void {
           })
           .onDismiss(() => { search.value = '' })
       } else {
-        $q.notify({ color: 'negative', position: 'top', progress: true, multiLine: true, message: t('لا توجد نتائج') })
+        $q.notify({ color: 'negative', position: 'bottom', progress: true, multiLine: true, message: t('لا توجد نتائج') })
       }
     })
 }

@@ -32,7 +32,8 @@ module.exports = configure(function (/* ctx */) {
       'apollo',
       'cookies',
       'socail_auth',
-      'hello'
+      'hello',
+      'notify'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#property-css

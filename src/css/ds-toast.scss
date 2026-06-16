@@ -1,0 +1,88 @@
+// =============================================================
+// DS Toast — global styling for Quasar Notify notifications.
+//
+// Direction "ivory + accent": cream card, ink text, a tinted round
+// icon chip, hairline border, soft shadow, and a per-type colored
+// progress line along the bottom edge. Bottom-positioned (set via
+// the notify boot defaults). Applied through the `ds-toast` +
+// `ds-toast--<type>` classes that both the DS `toast()` helper and
+// the registered Quasar types (positive/negative/warning/info) add.
+//
+// Must be global (not scoped): Quasar renders notifications in a
+// detached overlay outside any component's scope.
+// =============================================================
+
+.q-notification.ds-toast {
+  background: var(--ds-surface-elevated, #fbf7f0) !important;
+  color: var(--ds-ink, #1b1410) !important;
+  border: 1px solid var(--ds-border, rgba(27, 20, 16, 0.08));
+  border-radius: var(--ds-radius-md, 10px);
+  box-shadow: var(--ds-shadow-lg, 0 12px 28px rgba(27, 20, 16, 0.12));
+  font-family: var(--ds-font-body, inherit);
+  min-height: 0;
+  overflow: hidden;
+
+  .q-notification__wrapper {
+    padding: 12px 14px;
+  }
+
+  .q-notification__message {
+    padding: 0;
+    color: var(--ds-ink, #1b1410);
+    font-size: var(--ds-text-md, 0.95rem);
+    line-height: var(--ds-leading-arabic, 1.7);
+  }
+
+  // Icon rendered as a tinted round chip; color + tint come per-type below.
+  .q-notification__icon {
+    font-size: 18px !important;
+    inline-size: 30px;
+    block-size: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline-end: 10px;
+    margin-inline-start: 0;
+  }
+
+  // Dismiss-timer line along the bottom edge (color per-type below).
+  .q-notification__progress {
+    height: 3px;
+    opacity: 1;
+    border-radius: 0;
+    background: var(--ds-border-strong, rgba(27, 20, 16, 0.16));
+  }
+
+  // Action buttons (e.g. retry) inherit the accent ink, not white.
+  .q-notification__actions .q-btn {
+    color: var(--ds-brand-600, #322873);
+    font-weight: var(--ds-weight-semibold, 600);
+  }
+}
+
+@mixin ds-toast-type($accent, $tint) {
+  .q-notification__icon {
+    color: #{$accent};
+    background: #{$tint};
+  }
+  .q-notification__progress {
+    background: #{$accent};
+  }
+}
+
+.q-notification.ds-toast--success {
+  @include ds-toast-type(var(--ds-success, #5a8e3a), var(--ds-success-bg, #e8efde));
+}
+.q-notification.ds-toast--danger {
+  @include ds-toast-type(var(--ds-danger, #9e3524), var(--ds-danger-bg, #f2dad4));
+}
+.q-notification.ds-toast--warning {
+  @include ds-toast-type(var(--ds-warning, #b8862a), var(--ds-warning-bg, #f5ead1));
+}
+.q-notification.ds-toast--info {
+  @include ds-toast-type(var(--ds-brand-600, #322873), rgba(50, 40, 115, 0.10));
+}
+.q-notification.ds-toast--neutral {
+  @include ds-toast-type(var(--ds-taupe, #8a7a6a), var(--ds-surface-sunken, #efe8dc));
+}

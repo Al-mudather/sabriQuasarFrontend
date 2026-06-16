@@ -451,9 +451,9 @@ async function copyCode(): Promise<void> {
     await writeClipboard(referralCode.value)
     copied.value = true
     setTimeout(() => { copied.value = false }, 1600)
-    $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم نسخ رمز الدعوة') })
+    $q.notify({ type: 'positive', position: 'bottom', progress: true, message: t('تم نسخ رمز الدعوة') })
   } catch {
-    $q.notify({ type: 'warning', position: 'top', progress: true, message: t('تعذر النسخ') })
+    $q.notify({ type: 'warning', position: 'bottom', progress: true, message: t('تعذر النسخ') })
   }
 }
 
@@ -463,9 +463,9 @@ async function copyUrl(): Promise<void> {
     await writeClipboard(shareUrl.value)
     urlCopied.value = true
     setTimeout(() => { urlCopied.value = false }, 1600)
-    $q.notify({ type: 'positive', position: 'top', progress: true, message: t('تم نسخ رابط الدعوة') })
+    $q.notify({ type: 'positive', position: 'bottom', progress: true, message: t('تم نسخ رابط الدعوة') })
   } catch {
-    $q.notify({ type: 'warning', position: 'top', progress: true, message: t('تعذر النسخ') })
+    $q.notify({ type: 'warning', position: 'bottom', progress: true, message: t('تعذر النسخ') })
   }
 }
 
@@ -480,7 +480,7 @@ async function shareCode(): Promise<void> {
   } catch { /* user cancelled */ }
   try {
     await writeClipboard(shareUrl.value)
-    $q.notify({ type: 'info', position: 'top', progress: true, message: t('تم نسخ رابط الدعوة') })
+    $q.notify({ type: 'info', position: 'bottom', progress: true, message: t('تم نسخ رابط الدعوة') })
   } catch { /* noop */ }
 }
 
@@ -493,14 +493,14 @@ function errorHandler(errorsObj: Record<string, Array<{ message: string | { msg:
   if (errorsObj && (errorsObj as unknown as { message?: string }).message) {
     const msg = (errorsObj as unknown as { message: string }).message
     if (typeof msg !== 'object') {
-      $q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: msg })
+      $q.notify({ type: 'warning', position: 'bottom', progress: true, multiLine: true, message: msg })
       return
     }
   }
   for (const key in errorsObj) {
     for (const val of errorsObj[key]) {
       const msg = typeof val.message === 'object' && val.message ? val.message.msg : val.message
-      $q.notify({ type: 'warning', position: 'top', progress: true, multiLine: true, message: msg })
+      $q.notify({ type: 'warning', position: 'bottom', progress: true, multiLine: true, message: msg })
     }
   }
 }
@@ -513,7 +513,7 @@ async function redeemEarnings(): Promise<void> {
     const payload = res?.data?.claimPyramidLedgerBalance
     if (payload?.success) {
       $q.notify({
-        type: 'positive', position: 'top', progress: true, multiLine: true,
+        type: 'positive', position: 'bottom', progress: true, multiLine: true,
         message: t('تم تحصيل الأرباح إلى رصيدك'),
       })
     } else if (payload?.errors) {
@@ -527,7 +527,7 @@ async function submitWithdraw(): Promise<void> {
   const amt = Number(withdrawAmount.value)
   if (!Number.isFinite(amt) || amt <= 0 || amt > activeBalance.value) {
     $q.notify({
-      type: 'warning', position: 'top', progress: true, multiLine: true,
+      type: 'warning', position: 'bottom', progress: true, multiLine: true,
       message: t('يرجى إدخال مبلغ صالح ضمن رصيدك المتاح.'),
     })
     return
@@ -538,7 +538,7 @@ async function submitWithdraw(): Promise<void> {
     const payload = res?.data?.makePyramidWithdraw
     if (payload?.success) {
       $q.notify({
-        type: 'positive', position: 'top', progress: true, multiLine: true,
+        type: 'positive', position: 'bottom', progress: true, multiLine: true,
         message: t('تم إرسال طلب السحب'),
       })
       withdrawOpen.value = false

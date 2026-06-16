@@ -72,7 +72,7 @@ async function buyTheCoursesUsingSmartNode (): Promise<void> {
     visible.value = false
   } catch {
     visible.value = false
-    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
   }
 }
 </script>

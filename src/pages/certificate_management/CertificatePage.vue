@@ -296,7 +296,7 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
       progress: true,
       multiLine: true,
       timeout: 6000,
-      position: 'top',
+      position: 'bottom',
       message: t('يجب تعيين اسم شهادة التدريب من ملفك الشخصي'),
     })
     void router.push({ name: 'user-profile' })
@@ -343,7 +343,7 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
     const ok = exportFile(fileName, pdfBlob, { mimeType: 'application/pdf' })
     dlog('[certificates] exportFile', { pk, fileName, ok })
     if (ok !== true) {
-      $q.notify({ type: 'negative', position: 'top', message: t('تعذّر حفظ الملف') })
+      $q.notify({ type: 'negative', position: 'bottom', message: t('تعذّر حفظ الملف') })
     }
   } catch (err: unknown) {
     const e = err as { response?: { status?: number; statusText?: string }; message?: string }
@@ -355,7 +355,7 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
     })
     $q.notify({
       type: 'negative',
-      position: 'top',
+      position: 'bottom',
       timeout: 6000,
       message: t('تعذّر تحميل الشهادة، حاول مرة أخرى'),
     })

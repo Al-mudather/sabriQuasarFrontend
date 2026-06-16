@@ -169,7 +169,7 @@ function copyTheSharingLink (e: Event): void {
         type: 'positive',
         progress: true,
         multiLine: true,
-        position: 'top',
+        position: 'bottom',
         message: t('تم النسخ'),
       })
     })

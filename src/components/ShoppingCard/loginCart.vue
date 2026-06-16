@@ -101,7 +101,7 @@ function GoToPaymentCartPage (): void {
       type: 'warning',
       progress: true,
       multiLine: true,
-      position: 'top',
+      position: 'bottom',
       message: 'يجب تسجيل الدخول اولا'
     })
   }

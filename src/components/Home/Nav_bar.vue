@@ -116,7 +116,7 @@ async function showTheSearchingResult (event: Event): Promise<void> {
   if (isSearchEmpty.value) {
     $q.notify({
       type: 'warning',
-      position: 'top',
+      position: 'bottom',
       progress: true,
       multiLine: true,
       message: t('ما الذي تبحث عنه'),
@@ -166,7 +166,7 @@ async function showTheSearchingResult (event: Event): Promise<void> {
     } else {
       $q.notify({
         color: 'negative',
-        position: 'top',
+        position: 'bottom',
         progress: true,
         multiLine: true,
         message: t('لا توجد نتائج'),
@@ -175,7 +175,7 @@ async function showTheSearchingResult (event: Event): Promise<void> {
   } catch (_err) {
     $q.notify({
       color: 'negative',
-      position: 'top',
+      position: 'bottom',
       progress: true,
       multiLine: true,
       message: t('لا توجد نتائج'),

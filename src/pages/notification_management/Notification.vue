@@ -491,7 +491,7 @@ function markAllRead (): void {
   }
   $q.notify({
     type: 'positive',
-    position: 'top',
+    position: 'bottom',
     progress: true,
     message: t('تم تعيين جميع الإشعارات كمقروءة'),
   })

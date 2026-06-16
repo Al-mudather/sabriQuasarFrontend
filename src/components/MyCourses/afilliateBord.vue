@@ -92,7 +92,7 @@ async function CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE (): Promise<void> {
         type: 'negative',
         progress: true,
         multiLine: true,
-        position: 'top',
+        position: 'bottom',
         message: 'You must inter the registeration code'
       })
       router.push({ name: 'registeration-code' })
@@ -117,7 +117,7 @@ async function JOIN_THE_PYRAMID_PROGRAM (): Promise<void> {
         type: 'positive',
         progress: true,
         multiLine: true,
-        position: 'top',
+        position: 'bottom',
         message: 'You are now a marketer'
       })
       amIAMarketer.value = true

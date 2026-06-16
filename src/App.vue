@@ -89,7 +89,7 @@ onMounted(() => {
       type: 'negative',
       progress: true,
       multiLine: true,
-      position: 'top',
+      position: 'bottom',
       message: t('لقد قمت بحجب اللإشعارات , الرجاء السماح لها بالظهور لتتمتع باخر التحديثات على المنصه'),
     })
   }
@@ -108,7 +108,7 @@ onMounted(() => {
             type: 'warning',
             progress: true,
             multiLine: true,
-            position: 'top',
+            position: 'bottom',
             message: 'لقد انتهت صلاحية دخولك للموقع... الرجاء الدخول مره اخرى لتتمكن من تطوير مهاراتك',
           })
           auth.logOutAction()

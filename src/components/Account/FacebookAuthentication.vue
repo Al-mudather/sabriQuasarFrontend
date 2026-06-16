@@ -56,7 +56,7 @@ async function checkRegistrationCode (): Promise<void> {
   } catch (e: unknown) {
     const err = e as { message?: string }
     if (err.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: 'You must inter the registeration code' })
+      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'bottom', message: 'You must inter the registeration code' })
       void router.push({ name: 'registeration-code' })
     }
   }
@@ -87,7 +87,7 @@ async function loginAuthMutation (accessToken: string, provider: string, email =
       } catch { /* OneSignal optional */ }
 
       if (userData.token) {
-        $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: t('تم تسجيل الدخول بنجاح') })
+        $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'bottom', message: t('تم تسجيل الدخول بنجاح') })
         await checkRegistrationCode()
       }
     }

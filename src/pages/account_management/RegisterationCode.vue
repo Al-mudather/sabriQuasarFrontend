@@ -93,7 +93,7 @@ async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
   try {
     const res = await joinPlatformMutate({ marketingCode: value, input: {} })
     if (res?.data?.joinPlatform?.success) {
-      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: t('مرحباً بك') })
+      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'bottom', message: t('مرحباً بك') })
       pyramid.setRegisterationCode('')
       void router.push({ name: 'Home' })
     }

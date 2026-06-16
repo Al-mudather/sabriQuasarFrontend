@@ -113,7 +113,7 @@ async function confirmOrRejectTransaction (data: { marketerEndorse: boolean; ret
     if (res?.data?.marketerAttachmentTransactionConfirmation?.success) {
       $q.notify({
         type: 'positive',
-        position: 'top',
+        position: 'bottom',
         progress: true,
         multiLine: true,
         message: 'The transaction has been confirmed by you',

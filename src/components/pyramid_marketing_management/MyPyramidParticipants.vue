@@ -62,7 +62,7 @@ async function copyTheLinkHandler(): Promise<void> {
       type: 'positive',
       progress: true,
       multiLine: true,
-      position: 'top',
+      position: 'bottom',
       message: t('تم النسخ'),
     })
   } catch { /* no-op */ }

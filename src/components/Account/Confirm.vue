@@ -84,7 +84,7 @@ function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): v
         type: 'warning',
         progress: true,
         multiLine: true,
-        position: 'top',
+        position: 'bottom',
         message: val.message
       })
     }
@@ -97,7 +97,7 @@ async function resendUserEmail (): Promise<void> {
       type: 'warning',
       progress: true,
       multiLine: true,
-      position: 'top',
+      position: 'bottom',
       message: t('بريدك الإلكتروني مطلوب')
     })
     return
@@ -111,7 +111,7 @@ async function resendUserEmail (): Promise<void> {
         type: 'positive',
         progress: true,
         multiLine: true,
-        position: 'top',
+        position: 'bottom',
         message: t('تم إرسال البريد بنجاح')
       })
       showResend.value = false

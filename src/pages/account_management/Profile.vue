@@ -321,7 +321,7 @@ function setLang (flag: boolean): void {
   settings.setIsEnglish(flag)
   $q.notify({
     type: 'positive',
-    position: 'top',
+    position: 'bottom',
     progress: true,
     message: flag ? 'Language updated' : t('تم تحديث اللغة'),
   })
@@ -334,7 +334,7 @@ function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): v
         type: 'warning',
         progress: true,
         multiLine: true,
-        position: 'top',
+        position: 'bottom',
         message: val.message,
       })
     }
@@ -357,7 +357,7 @@ async function UpdateUserProfileData (): Promise<void> {
     if (payload?.success) {
       $q.notify({
         type: 'positive',
-        position: 'top',
+        position: 'bottom',
         progress: true,
         multiLine: true,
         message: t('تم تحديث بياناتك بنجاح'),

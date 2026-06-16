@@ -50,7 +50,7 @@ function errorHandler (errorsObj: unknown): void {
     if (!Array.isArray(entries)) continue
     for (const val of entries) {
       const v = val as Record<string, unknown>
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: String(v.PaymentUrl ?? '') })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: String(v.PaymentUrl ?? '') })
     }
   }
 }

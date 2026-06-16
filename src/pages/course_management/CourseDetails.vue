@@ -357,7 +357,7 @@ async function loadCourse (params: Record<string, string | string[]>): Promise<v
 function redirectToLogin (): void {
   $q.notify({
     type: 'info',
-    position: 'top',
+    position: 'bottom',
     message: 'سجل دخول أولاً للمتابعة',
     progress: true,
     timeout: 2000,
@@ -397,7 +397,7 @@ async function addToCart (): Promise<void> {
     cart.addCourseToCart({ user: user.value, course: item })
     $q.notify({
       type: 'positive',
-      position: 'top',
+      position: 'bottom',
       message: 'تمت الإضافة إلى السلة',
       progress: true,
       timeout: 2200,
@@ -515,7 +515,7 @@ async function shareCourse (): Promise<void> {
   }
   try {
     void navigator.clipboard.writeText(url)
-    $q.notify({ type: 'positive', position: 'top', message: 'تم نسخ الرابط', timeout: 1800 })
+    $q.notify({ type: 'positive', position: 'bottom', message: 'تم نسخ الرابط', timeout: 1800 })
   } catch {
     /* ignore */
   }
@@ -524,7 +524,7 @@ async function shareCourse (): Promise<void> {
 function giftCourse (): void {
   $q.notify({
     type: 'info',
-    position: 'top',
+    position: 'bottom',
     message: 'قريباً: إهداء الدورة',
     timeout: 1800,
   })

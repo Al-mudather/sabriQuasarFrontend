@@ -161,14 +161,14 @@ function errorHandler (errorsObj: unknown): void {
           type: 'warning',
           progress: true,
           multiLine: true,
-          position: 'top',
+          position: 'bottom',
           message: val.message,
         })
       }
     }
   } else {
     const msg = (errorsObj as { message?: string })?.message ?? String(errorsObj)
-    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: msg })
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: msg })
   }
 }
 
@@ -185,7 +185,7 @@ async function reUploadTheTransactionBill (): Promise<void> {
     if (payload?.success) {
       $q.notify({
         type: 'positive',
-        position: 'top',
+        position: 'bottom',
         progress: true,
         multiLine: true,
         message: 'The transaction has been reuploaded',

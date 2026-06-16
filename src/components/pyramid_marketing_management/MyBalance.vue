@@ -99,12 +99,12 @@ function cancelWithdraw(): void {
 
 function errorHandler(errorsObj: Record<string, Array<{ message: string | { msg: string } }>>): void {
   if (typeof errorsObj === 'object' && errorsObj && (errorsObj as unknown as { message?: string }).message) {
-    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: (errorsObj as unknown as { message: string }).message })
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: (errorsObj as unknown as { message: string }).message })
   } else {
     for (const key in errorsObj) {
       for (const val of errorsObj[key]) {
         const msg = typeof val.message === 'object' && val.message ? val.message.msg : val.message
-        $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: msg })
+        $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: msg })
       }
     }
   }
@@ -115,7 +115,7 @@ async function orderBalanceWithdraw(): Promise<void> {
   if (!Number.isFinite(amt) || amt > myBalance.value || amt <= 0) {
     $q.notify({
       type: 'warning',
-      position: 'top',
+      position: 'bottom',
       progress: true,
       multiLine: true,
       message: t("You can't withdraw what you don't have (-_-), or 0 cash"),
@@ -127,7 +127,7 @@ async function orderBalanceWithdraw(): Promise<void> {
   if (payload?.success) {
     $q.notify({
       type: 'positive',
-      position: 'top',
+      position: 'bottom',
       progress: true,
       multiLine: true,
       message: t('The withdraw order has been requested.'),

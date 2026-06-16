@@ -70,7 +70,7 @@ function errorHandler (errorsObj: unknown): void {
     if (!Array.isArray(entries)) continue
     for (const val of entries) {
       const v = val as Record<string, unknown>
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: String(v.message ?? '') })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: String(v.message ?? '') })
     }
   }
 }
@@ -144,7 +144,7 @@ async function buyTheCoursesUsingPaypal (): Promise<void> {
     btnVisible.value = true
     const msg = error instanceof Error ? error.message : ''
     if (msg === 'Network error: Network Error' || msg === 'paypal is not defined') {
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
     }
   }
 }

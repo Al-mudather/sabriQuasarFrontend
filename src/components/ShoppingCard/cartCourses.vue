@@ -241,7 +241,7 @@ function purgeZeroCostItems (): void {
         type: 'warning',
         progress: true,
         multiLine: true,
-        position: 'top',
+        position: 'bottom',
         message: 'هذا الكورس تحت التحضير'
       })
     }
@@ -256,7 +256,7 @@ function goToAuthenticationCartPage (): void {
       type: 'warning',
       progress: true,
       multiLine: true,
-      position: 'top',
+      position: 'bottom',
       message: 'Please fill the basket first'
     })
   }

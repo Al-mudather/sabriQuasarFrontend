@@ -203,7 +203,7 @@ export const useAuthStore = defineStore('authentication', {
         type: 'positive',
         progress: true,
         multiLine: true,
-        position: 'top',
+        position: 'bottom',
         message: 'Logged Out Successfully',
       })
     },

@@ -21,7 +21,7 @@ function notifyOnce (message) {
   Notify.create({
     type: 'negative',
     message,
-    position: 'top',
+    position: 'bottom',
     timeout: 4000,
     progress: true,
     actions: [{ icon: 'close', color: 'white', round: true }]

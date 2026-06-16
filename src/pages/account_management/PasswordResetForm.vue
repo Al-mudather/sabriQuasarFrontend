@@ -154,7 +154,7 @@ async function ResetTheUserPassword (): Promise<void> {
     })
     const payload = res?.data?.passwordReset
     if (payload?.success) {
-      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'top', message: t('تم تعيين كلمة المرور بنجاح') })
+      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'bottom', message: t('تم تعيين كلمة المرور بنجاح') })
       void router.push({ name: 'login' })
     } else if (payload?.errors) {
       errorHandler(payload.errors as Record<string, Array<{ message: string }>>)

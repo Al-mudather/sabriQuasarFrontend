@@ -47,7 +47,7 @@ function currencySelectionHandler (currency: CurrencyCode): void {
     type: 'positive',
     progress: true,
     multiLine: true,
-    position: 'top',
+    position: 'bottom',
     message: t('تم تغيير العمله الى:') + currency
   })
 }
