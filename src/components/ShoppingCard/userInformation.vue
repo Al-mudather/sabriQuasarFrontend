@@ -15,6 +15,7 @@
       >
         <DsInput
           v-model="fullName"
+          dir="auto"
           :label="$t('الاسم الكامل')"
           :placeholder="$t('مثال: أحمد محمد')"
           :error="errors.fullName"
@@ -22,7 +23,10 @@
           required
         />
 
-        <div class="user-info__row user-info__row--phone">
+        <!-- Phone is inherently LTR: dir="ltr" puts +966 on the left and the
+             number to its right, and makes the digits read left-to-right even
+             on the RTL page. -->
+        <div class="user-info__row user-info__row--phone" dir="ltr">
           <div class="user-info__country">
             <label class="user-info__country-label" for="country-code">
               {{ $t('الرمز') }}
@@ -59,6 +63,7 @@
         <DsInput
           v-model="telegramNumber"
           type="tel"
+          dir="ltr"
           :label="$t('رقم تلجرام (اختياري)')"
           :placeholder="$t('إن وجد')"
         />
@@ -66,6 +71,7 @@
         <DsInput
           v-model="email"
           type="email"
+          dir="ltr"
           :label="$t('البريد الإلكتروني')"
           :placeholder="$t('example@mail.com')"
           :error="errors.email"
