@@ -69,6 +69,8 @@ export default {
       "الإيميل" : "Email",
  
       "كلمة المرور" : "password",
+      "إظهار كلمة المرور" : "Show password",
+      "إخفاء كلمة المرور" : "Hide password",
  
       "هل نسيت كلمة" : "Forgot your",
  

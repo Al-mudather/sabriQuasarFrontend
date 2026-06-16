@@ -31,7 +31,7 @@
         :id="inputId"
         ref="input"
         class="ds-input__control"
-        :type="type"
+        :type="effectiveType"
         :value="modelValue"
         :placeholder="placeholder"
         :disabled="disabled"
@@ -45,6 +45,23 @@
         @blur="onBlur"
         @keydown="$emit('keydown', $event)"
       />
+
+      <!-- Password visibility toggle (only for type="password"). -->
+      <button
+        v-if="isPassword"
+        type="button"
+        class="ds-input__affix ds-input__affix--toggle"
+        :aria-label="showPassword ? t('إخفاء كلمة المرور') : t('إظهار كلمة المرور')"
+        :aria-pressed="showPassword"
+        @click="showPassword = !showPassword"
+      >
+        <svg v-if="!showPassword" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" /><circle cx="12" cy="12" r="3" />
+        </svg>
+        <svg v-else viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" />
+        </svg>
+      </button>
 
       <span
         v-if="$slots.suffix"
@@ -74,8 +91,11 @@
 
 <script setup lang="ts">
 import { ref, computed, useSlots } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 defineOptions({ name: 'DsInput', inheritAttrs: false })
+
+const { t } = useI18n()
 
 let _uid = 0
 
@@ -117,6 +137,13 @@ const slots = useSlots()
 const focused = ref(false)
 const localUid = `ds-input-${++_uid}`
 const input = ref<HTMLInputElement | null>(null)
+
+// Password visibility toggle: when type="password", render an eye button that
+// swaps the rendered input type between 'password' and 'text'.
+const showPassword = ref(false)
+const isPassword = computed(() => props.type === 'password')
+const effectiveType = computed(() =>
+  isPassword.value && showPassword.value ? 'text' : props.type)
 
 const inputId = computed(() => props.id || localUid)
 
@@ -198,6 +225,24 @@ defineExpose({ focus, blur })
     color: var(--ds-taupe);
     font-size: var(--ds-text-md);
     flex: 0 0 auto;
+  }
+
+  // Password show/hide eye button.
+  &__affix--toggle {
+    border: 0;
+    background: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    color: var(--ds-taupe);
+    transition: color var(--ds-duration-fast) var(--ds-ease-out);
+
+    &:hover { color: var(--ds-text); }
+    &:focus-visible {
+      outline: 2px solid var(--ds-brand-600);
+      outline-offset: 2px;
+      border-radius: var(--ds-radius-sm);
+    }
   }
 
   // Directional icons flip under RTL via scaleX; non-directional stay put.

@@ -1,5 +1,5 @@
 <template>
-  <main class="account-shell" dir="rtl">
+  <main class="account-shell" :dir="isEnglish ? 'ltr' : 'rtl'">
     <section class="account-shell__form-side">
       <header class="account-shell__brand">
         <router-link :to="{ name: 'Home' }" class="account-shell__brand-link" :aria-label="$t('الصفحة الرئيسية')">
@@ -13,7 +13,7 @@
       </div>
     </section>
 
-    <aside class="account-shell__panel" aria-hidden="true">
+    <aside class="account-shell__panel" dir="rtl" aria-hidden="true">
       <svg
         class="account-shell__topo"
         viewBox="0 0 600 900"
@@ -41,7 +41,14 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useSettingsStore } from 'src/stores/settings'
 import { LOGO, BRAND } from 'src/design-system/brand'
+
+// The auth shell follows the app locale: English renders LTR (so the form,
+// fine print, and labels read left-to-right); Arabic renders RTL. The branding
+// panel stays RTL since its copy is Arabic.
+const { isEnglish } = storeToRefs(useSettingsStore())
 
 const logo = LOGO.full
 const brandName = BRAND.nameAr

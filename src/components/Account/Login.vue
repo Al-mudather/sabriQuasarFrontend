@@ -51,6 +51,7 @@
           <ds-input
             v-model="email"
             type="email"
+            dir="ltr"
             :label="t('البريد الإلكتروني')"
             :error="fieldErrors.email"
             autocomplete="email"
@@ -60,6 +61,7 @@
           <ds-input
             v-model="password"
             type="password"
+            dir="ltr"
             :label="t('كلمة المرور')"
             :error="fieldErrors.password"
             autocomplete="current-password"
