@@ -403,10 +403,11 @@ async function onSelect(contentPk: number): Promise<void> {
   background: #000;
 }
 
-// Self-hosted HLS owns its own layout (16:9 stage + control bar BELOW it), so
-// the media box must not impose a 16:9 clip — that would crop the controls.
-// Other providers (vimeo / youtube / vdocipher) keep the clipped 16:9 box above.
-.cls-cockpit[data-kind='video'] .cls-cockpit__media[data-provider='type_hasif'] {
+// Providers that render our custom control bar BELOW the 16:9 stage (HLS, Vimeo)
+// own their own layout, so the media box must not impose a 16:9 clip — that
+// would crop the controls. YouTube / VdoCipher keep the clipped 16:9 box above.
+.cls-cockpit[data-kind='video'] .cls-cockpit__media[data-provider='type_hasif'],
+.cls-cockpit[data-kind='video'] .cls-cockpit__media[data-provider='vimeo'] {
   aspect-ratio: auto;
   overflow: visible;
   border-radius: 0;
