@@ -45,7 +45,14 @@ export default route(function (/* { store, ssrContext } */) {
 
     try {
       const pyramid = usePyramidStore()
-      const ok = await pyramid.verifyPlatformAccess()
+      // Race the access check against a timeout so a slow/hung network can never
+      // leave a navigation pending (which looked like a "stuck" login). Fail
+      // OPEN on timeout — the backend still enforces the gate server-side, and
+      // the cached verdict corrects a later navigation.
+      const ok = await Promise.race([
+        pyramid.verifyPlatformAccess(),
+        new Promise((resolve) => setTimeout(() => resolve(true), 5000))
+      ])
       if (ok) return next()
       return next({ name: 'registeration-code', query: { redirect: to.fullPath } })
     } catch (_e) {

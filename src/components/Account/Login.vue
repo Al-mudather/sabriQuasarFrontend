@@ -108,7 +108,6 @@ import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { LoginUserWithEmail } from 'src/graphql/account_management/mutation/LoginUserWithEmail'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue'
 import DsInput from 'src/design-system/components/DsInput.vue'
@@ -172,16 +171,6 @@ function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): v
   if (generic.length) apiError.value = generic.join(' — ')
 }
 
-function redirectAfterLogin (fallback?: string): boolean {
-  const target = route.query?.redirect
-  if (target) {
-    void router.push(target as string).catch(() => {})
-    return true
-  }
-  if (fallback) void router.push(fallback).catch(() => {})
-  return false
-}
-
 async function isUserEnrolled (): Promise<boolean> {
   try {
     const res = await apolloClient.query({ query: AllEnrollmentsForCurrentUser })
@@ -191,19 +180,27 @@ async function isUserEnrolled (): Promise<boolean> {
   }
 }
 
-async function checkRegistrationCode (): Promise<void> {
-  try {
-    await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
-    pyramid.fetchMyMarketingCode()
-    const hasCourses = await isUserEnrolled()
-    pyramid.setMyMarketingCode('')
-    void router.push({ name: hasCourses ? 'my-courses' : 'Home' })
-  } catch (e: unknown) {
-    const err = e as { message?: string }
-    if (err.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-      void router.push({ name: 'registeration-code' })
-    }
+async function navigateAfterLogin (): Promise<void> {
+  // Registration-code gating is owned by the global router guard now, so we just
+  // send the user to their destination — the guard diverts a no-code user to
+  // `registeration-code` automatically. AWAIT the push so the spinner spans the
+  // real navigation (a `void` push cleared the spinner early and looked stuck).
+  const redirectTarget = route.query?.redirect
+  if (typeof redirectTarget === 'string' && redirectTarget) {
+    await router.push(redirectTarget).catch(() => {})
+    return
   }
+
+  // Enrolled users land on their courses, everyone else on Home. Time-boxed so a
+  // slow enrollment query can never hang the post-login navigation.
+  let hasCourses = false
+  try {
+    hasCourses = await Promise.race([
+      isUserEnrolled(),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000))
+    ])
+  } catch { hasCourses = false }
+  await router.push({ name: hasCourses ? 'my-courses' : 'Home' }).catch(() => {})
 }
 
 async function loginUser (): Promise<void> {
@@ -235,8 +232,7 @@ async function loginUser (): Promise<void> {
         pyramid.resetPlatformAccess()
         // Success toast (the notification persists across the redirect).
         toast.success(t('تم تسجيل الدخول بنجاح'))
-        if (redirectAfterLogin()) return
-        await checkRegistrationCode()
+        await navigateAfterLogin()
       } else {
         void router.push({ name: 'password-confirm' })
       }

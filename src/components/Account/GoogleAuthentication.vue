@@ -18,7 +18,6 @@ import { useSettingsStore } from 'src/stores/settings'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { SocialAuth } from 'src/graphql/account_management/mutation/CreateSocailAuth'
 import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import type { SocialAuthMutationResult, SocialAuthVariables } from 'src/types/auth/types'
 
 interface Props {
@@ -57,27 +56,27 @@ async function isUserEnrolled (): Promise<boolean> {
   }
 }
 
-async function checkRegistrationCode (): Promise<void> {
-  // If the user arrived at login via a redirect (e.g. unauthenticated enrol),
-  // honor that redirect first — mirrors Login.vue's redirectAfterLogin().
+async function navigateAfterLogin (): Promise<void> {
+  // Registration-code gating is owned by the global router guard now, so we just
+  // send the user to their destination — the guard diverts a no-code user to
+  // `registeration-code` automatically. AWAIT the push so the spinner spans the
+  // real navigation (a `void` push cleared the spinner early and looked stuck).
   const redirectTarget = route.query?.redirect
-  if (redirectTarget) {
-    void router.push(redirectTarget as string).catch(() => {})
+  if (typeof redirectTarget === 'string' && redirectTarget) {
+    await router.push(redirectTarget).catch(() => {})
     return
   }
 
+  // Enrolled users land on their courses, everyone else on Home. Time-boxed so a
+  // slow enrollment query can never hang the post-login navigation.
+  let hasCourses = false
   try {
-    await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
-    pyramid.fetchMyMarketingCode()
-    const hasCourses = await isUserEnrolled()
-    pyramid.setMyMarketingCode('')
-    void router.push({ name: hasCourses ? 'my-courses' : 'Home' })
-  } catch (e: unknown) {
-    const err = e as { message?: string }
-    if (err.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-      void router.push({ name: 'registeration-code' })
-    }
-  }
+    hasCourses = await Promise.race([
+      isUserEnrolled(),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000))
+    ])
+  } catch { hasCourses = false }
+  await router.push({ name: hasCourses ? 'my-courses' : 'Home' }).catch(() => {})
 }
 
 async function loginAuthMutation (accessToken: string, provider: string, email = ''): Promise<void> {
@@ -114,7 +113,7 @@ async function loginAuthMutation (accessToken: string, provider: string, email =
     } catch { /* OneSignal optional */ }
 
     toast.success(t('تم تسجيل الدخول بنجاح'))
-    await checkRegistrationCode()
+    await navigateAfterLogin()
   } catch (error: unknown) {
     const err = error as { message?: string }
     if (err.message === 'GraphQL error: UNIQUE constraint failed: account_manager_user.email') {

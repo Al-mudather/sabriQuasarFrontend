@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { apolloClient } from 'src/apollo/client'
@@ -18,7 +18,6 @@ import { useSettingsStore } from 'src/stores/settings'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { SocialAuth } from 'src/graphql/account_management/mutation/CreateSocailAuth'
 import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import type { SocialAuthMutationResult, SocialAuthVariables } from 'src/types/auth/types'
 
 interface Props {
@@ -29,6 +28,7 @@ interface Props {
 defineProps<Props>()
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
 const auth = useAuthStore()
@@ -46,20 +46,27 @@ async function isUserEnrolled (): Promise<boolean> {
   }
 }
 
-async function checkRegistrationCode (): Promise<void> {
-  try {
-    await apolloClient.query({ query: CheckTheUserPermissionToUsePlatforme })
-    pyramid.fetchMyMarketingCode()
-    const hasCourses = await isUserEnrolled()
-    pyramid.setMyMarketingCode('')
-    void router.push({ name: hasCourses ? 'my-courses' : 'Home' })
-  } catch (e: unknown) {
-    const err = e as { message?: string }
-    if (err.message === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-      $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'bottom', message: 'You must inter the registeration code' })
-      void router.push({ name: 'registeration-code' })
-    }
+async function navigateAfterLogin (): Promise<void> {
+  // Registration-code gating is owned by the global router guard now, so we just
+  // send the user to their destination — the guard diverts a no-code user to
+  // `registeration-code` automatically. AWAIT the push so the spinner spans the
+  // real navigation (a `void` push cleared the spinner early and looked stuck).
+  const redirectTarget = route.query?.redirect
+  if (typeof redirectTarget === 'string' && redirectTarget) {
+    await router.push(redirectTarget).catch(() => {})
+    return
   }
+
+  // Enrolled users land on their courses, everyone else on Home. Time-boxed so a
+  // slow enrollment query can never hang the post-login navigation.
+  let hasCourses = false
+  try {
+    hasCourses = await Promise.race([
+      isUserEnrolled(),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000))
+    ])
+  } catch { hasCourses = false }
+  await router.push({ name: hasCourses ? 'my-courses' : 'Home' }).catch(() => {})
 }
 
 async function loginAuthMutation (accessToken: string, provider: string, email = ''): Promise<void> {
@@ -72,6 +79,8 @@ async function loginAuthMutation (accessToken: string, provider: string, email =
     const userData = result?.data?.socialAuth
     if (userData) {
       await auth.login({ ...userData, token: userData.token ?? '' })
+      // New session → re-verify the registration-code gate (the router guard).
+      pyramid.resetPlatformAccess()
       try {
         const userCur = userData.social?.user?.userCurrency
         if (userCur) settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')
@@ -88,7 +97,7 @@ async function loginAuthMutation (accessToken: string, provider: string, email =
 
       if (userData.token) {
         $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'bottom', message: t('تم تسجيل الدخول بنجاح') })
-        await checkRegistrationCode()
+        await navigateAfterLogin()
       }
     }
   } catch {
