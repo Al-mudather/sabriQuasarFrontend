@@ -110,6 +110,7 @@ import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_market
 import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue'
 import DsInput from 'src/design-system/components/DsInput.vue'
+import { toast } from 'src/design-system/toast'
 import type { LoginMutationResult, LoginVariables } from 'src/types/auth/types'
 
 const { t } = useI18n()
@@ -228,6 +229,8 @@ async function loginUser (): Promise<void> {
         } catch { /* OneSignal optional */ }
 
         await auth.login(tokenAuth)
+        // Success toast (the notification persists across the redirect).
+        toast.success(t('تم تسجيل الدخول بنجاح'))
         if (redirectAfterLogin()) return
         await checkRegistrationCode()
       } else {
@@ -235,9 +238,12 @@ async function loginUser (): Promise<void> {
       }
     } else if (tokenAuth?.errors) {
       errorHandler(tokenAuth.errors as Record<string, Array<{ message: string }>>)
+      // Surface the failure as a toast too, not only the inline field errors.
+      toast.danger(apiError.value || t('تعذر تسجيل الدخول. تحقق من بياناتك وحاول مجدداً.'))
     }
   } catch {
     apiError.value = t('تعذر تسجيل الدخول. تحقق من بياناتك وحاول مجدداً.')
+    toast.danger(apiError.value)
   } finally {
     visible.value = false
   }
