@@ -74,7 +74,23 @@ module.exports = configure(function (/* ctx */) {
     devServer: {
       https: false,
       port: 8080,
-      open: false // don't auto-open; keeps CI & headless runs quiet
+      open: false, // don't auto-open; keeps CI & headless runs quiet
+      // Proxy the API through the dev server so the browser treats it as
+      // SAME-ORIGIN (localhost). `changeOrigin` sets the upstream Host header;
+      // `cookieDomainRewrite: ''` strips the Set-Cookie Domain so session
+      // cookies (sessionid/csrftoken) become first-party localhost cookies —
+      // which means they're sent on requests and actually cleared on logout,
+      // matching production (where the SPA is served from the API host). In dev
+      // the app uses a RELATIVE API path (see src/utils/hostConfig.js) so these
+      // requests hit this proxy instead of going cross-origin to stc.training.
+      proxy: {
+        '/api': {
+          target: 'https://stc.training',
+          changeOrigin: true,
+          secure: true,
+          cookieDomainRewrite: ''
+        }
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#property-framework

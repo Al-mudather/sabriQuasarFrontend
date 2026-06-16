@@ -48,12 +48,20 @@ const parseJsonStringRead = (existing) => {
 const jsonStringFieldPolicy = { read: parseJsonStringRead }
 
 // ---------- HTTP (upload) link ---------------------------------------------
+// In dev, hit the GraphQL endpoint via a RELATIVE path so it goes through the
+// Quasar devServer proxy (see quasar.config.js) and the browser treats it as
+// same-origin (localhost). That makes session cookies first-party localhost
+// cookies, so logout can actually clear them — matching production, where the
+// SPA is served from the API host and the absolute URL is already same-site.
+// Only the GraphQL endpoint is relative; media/other URLs keep using API_URI.
+const graphqlUri = process.env.DEV ? '/api/graphql/' : API_URI + '/api/graphql/'
+
 const uploadLink = createUploadLink({
-  uri: API_URI + '/api/graphql/',
+  uri: graphqlUri,
   // Send cookies on same-origin requests. REQUIRED for `logoutUser`: the server
   // clears the HttpOnly `sessionid` cookie via Set-Cookie, which only works if
-  // the browser includes that cookie on the request. In production the app and
-  // /api/graphql/ share the same host (stc.training), so 'same-origin' applies.
+  // the browser includes that cookie on the request. Same-origin in prod (app +
+  // API on stc.training) and in dev via the proxy above.
   credentials: 'same-origin',
   // Native fetch is sufficient here; the old axios-fetch wrapper existed for
   // upload progress, which can be restored in Track C when the upload UI is
