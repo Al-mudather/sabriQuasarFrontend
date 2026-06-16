@@ -65,6 +65,8 @@ export default {
         
  
       "تسجيل الدخول" : "Sign in",
+      "مرحباً بك في رحلتك الطبية" : "Welcome to your medical journey",
+      "تعلّم بثقة. تمرّن بإتقان. تقدّم بخطى واثقة." : "Learn with confidence. Train with mastery. Advance with sure steps.",
  
       "الإيميل" : "Email",
  

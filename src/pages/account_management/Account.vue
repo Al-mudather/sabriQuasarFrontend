@@ -13,7 +13,7 @@
       </div>
     </section>
 
-    <aside class="account-shell__panel" dir="rtl" aria-hidden="true">
+    <aside class="account-shell__panel" :dir="isEnglish ? 'ltr' : 'rtl'" aria-hidden="true">
       <svg
         class="account-shell__topo"
         viewBox="0 0 600 900"
@@ -33,8 +33,8 @@
 
       <div class="account-shell__panel-inner">
         <span class="account-shell__eyebrow">{{ acronym }}</span>
-        <h2 class="account-shell__headline">{{ headline }}</h2>
-        <p class="account-shell__tagline">{{ tagline }}</p>
+        <h2 class="account-shell__headline">{{ $t('مرحباً بك في رحلتك الطبية') }}</h2>
+        <p class="account-shell__tagline">{{ $t('تعلّم بثقة. تمرّن بإتقان. تقدّم بخطى واثقة.') }}</p>
       </div>
     </aside>
   </main>
@@ -53,8 +53,6 @@ const { isEnglish } = storeToRefs(useSettingsStore())
 const logo = LOGO.full
 const brandName = BRAND.nameAr
 const acronym = BRAND.acronym
-const headline = 'مرحباً بك في رحلتك الطبية'
-const tagline = 'تعلّم بثقة. تمرّن بإتقان. تقدّم بخطى واثقة.'
 </script>
 
 <style lang="scss" scoped>
