@@ -77,10 +77,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCartStore } from 'src/stores/cart'
 import { useSettingsStore } from 'src/stores/settings'
+import { usePyramidStore } from 'src/stores/pyramid'
 import { apolloClient } from 'src/apollo/client'
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
 import { UploadAttachmentTransaction } from 'src/graphql/checkout_management/mutation/UploadAttachmentTransaction'
@@ -95,12 +96,25 @@ import FileUpload from 'src/components/utils/FileUploader.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsProgressBar from 'src/design-system/components/DsProgressBar.vue'
 
+const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const cart = useCartStore()
 const settings = useSettingsStore()
+const pyramid = usePyramidStore()
 const { shoppingCartDataList } = storeToRefs(cart)
 const { currency } = storeToRefs(settings)
+
+/**
+ * Route the user to the registration-code page with a clear reason. The
+ * registration-code (PyramidAffiliate) requirement is the #1 reason a payment
+ * is rejected; we detect it deterministically via the gate check below rather
+ * than parsing the backend's error string (which is opaque and varied).
+ */
+function routeToRegistrationCode (): void {
+  toast.warning(t('يرجى إدخال رمز الإحالة الخاص بك أولاً'))
+  void router.push({ name: 'registeration-code', query: { redirect: route.fullPath } })
+}
 
 const visible = ref<boolean>(false)
 const bankakBill = ref<File | null>(null)
@@ -196,6 +210,17 @@ async function SEND_THE_PAYMENT (): Promise<void> {
       return
     }
 
+    // Registration-code gate — check BEFORE creating an order so a no-code user
+    // is told to enter their code (not left with a misleading "image unclear"
+    // error after the upload, and no orphaned pending order is created). This is
+    // deterministic: it re-checks the PyramidAffiliate link instead of guessing
+    // from the server's rejection wording.
+    if (!(await pyramid.verifyPlatformAccess(true))) {
+      visible.value = false
+      routeToRegistrationCode()
+      return
+    }
+
     const orderResult = await getOrderResult(courseIds)
     // getOrderResult already surfaced the reason on failure — just stop here.
     if (!orderResult?.order?.pk) { visible.value = false; return }
@@ -217,17 +242,17 @@ async function SEND_THE_PAYMENT (): Promise<void> {
       cart.deleteCart()
       router.push({ name: 'cart-success' })
     } else {
-      // The user-reported "nothing happens" bug: the receipt was rejected but
-      // the failure was swallowed. Surface the server's reason, and handle the
-      // known "referral code required" case by routing the user to fix it.
+      // The receipt was rejected. The most common reason is the missing
+      // registration code — re-check the gate deterministically (the server
+      // error shape is opaque and was hiding the real reason behind a generic
+      // "image unclear" message). Otherwise surface the server's own message.
       visible.value = false
+      if (!(await pyramid.verifyPlatformAccess(true))) {
+        routeToRegistrationCode()
+        return
+      }
       const shown = dataObj?.errors ? errorHandler(dataObj.errors) : 0
-      // Known case: the backend requires a referral code first → route them there.
-      const raw = JSON.stringify(dataObj?.errors ?? '')
-      if (raw.includes('PyramidAffiliate')) {
-        toast.warning(t('يرجى إدخال رمز الإحالة الخاص بك أولاً'))
-        void router.push({ name: 'registeration-code' })
-      } else if (shown === 0) {
+      if (shown === 0) {
         // Never leave the user with no feedback (the original silent bug).
         toast.danger(t('لم يتم قبول الإيصال، يرجى التأكد من وضوح الصورة والمحاولة مجدداً'))
       }
@@ -237,8 +262,13 @@ async function SEND_THE_PAYMENT (): Promise<void> {
     visible.value = false
     if (msg.includes('User already has valid enrollment in the course')) {
       toast.warning(t('لديك اشتراك مسبق في أحد الكورسات التي قمت بشرائها، الرجاء شراء كورس لم تمتلكه من قبل'))
+    } else if (!(await pyramid.verifyPlatformAccess(true))) {
+      // A thrown rejection that's really the missing-code case.
+      routeToRegistrationCode()
     } else {
-      toast.danger(t('حدث خطأ أثناء إرسال الدفعة'))
+      // Surface the raw server reason if we have one (the old system showed it
+      // verbatim) instead of always blaming the connection.
+      toast.danger(msg || t('حدث خطأ أثناء إرسال الدفعة'))
     }
   }
 }
