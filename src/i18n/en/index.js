@@ -424,9 +424,27 @@ export default {
  
         
   "_comment_src_components_ShoppingCard_payment.vue": "src_components_ShoppingCard_payment.vue",
-        
- 
-        
+
+  // Cart stepper labels
+  "معلومات الفوترة": "Billing info",
+
+  // FileUploader
+  "انقر لرفع ملف أو اسحب هنا": "Click to upload or drag here",
+  "انقر أو اسحب ملفاً هنا": "Click or drag a file here",
+  "حتى {mb} ميجابايت": "Up to {mb} MB",
+  "نوع الملف غير مدعوم": "File type not supported",
+  "حجم الملف أكبر من المسموح به": "File size exceeds the allowed limit",
+  "تغيير": "Change",
+  "إزالة": "Remove",
+
+  // Payment page toasts
+  "انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه": "You are offline. Please connect to the internet and reload the page.",
+  "Stripe غير محمل، يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى": "Stripe is not loaded. Please reload the page and try again.",
+  "حدث خطأ في عملية الدفع، يرجى المحاولة مرة أخرى": "A payment error occurred. Please try again.",
+  "هذا الكورس تحت التحضير": "This course is currently being prepared.",
+  "يجب ان تكمل بياناتك الشخصيه": "Please complete your personal information.",
+  "لا يمكنك شراء لا شيء": "Your cart is empty.",
+
   "_comment_src_components_ShoppingCard_successMessage.vue": "src_components_ShoppingCard_successMessage.vue",
         
  
@@ -732,6 +750,17 @@ export default {
   "استعادة كلمة المرور": "Reset password",
   "اسم إستخراج شهادة التدريب": "Name for training certificate",
   "اضغط للإرفاق فاتورة الدفع": "Tap to attach payment receipt",
+  "إشعار بنكك الأبيض": "Bankak white receipt",
+  "ارفع صورة واضحة لإيصال الدفع ليتمكن الفريق من التحقق من معاملتك.": "Upload a clear image of your payment receipt so the team can verify your transaction.",
+  "الرجاء إرفاق صورة إيصال الدفع قبل الإرسال": "Please attach a payment receipt image before sending.",
+  "لا توجد كورسات في سلة المشتريات": "Your cart is empty. Please add a course before paying.",
+  "تعذّر إنشاء الطلب، يرجى المحاولة مجدداً أو التواصل مع الدعم": "Couldn't create your order. Please try again or contact support.",
+  "حدث خطأ أثناء إنشاء الطلب، يرجى التحقق من اتصالك بالإنترنت والمحاولة مجدداً": "Something went wrong creating your order. Check your connection and try again.",
+  "لديك اشتراك مسبق في هذا الكورس": "You already have an active enrollment in this course.",
+  "لم يتم قبول الإيصال، يرجى التأكد من وضوح الصورة والمحاولة مجدداً": "Your receipt wasn't accepted. Make sure the image is clear and try again.",
+  "يرجى إدخال رمز الإحالة الخاص بك أولاً": "Please enter your referral code first.",
+  "لديك اشتراك مسبق في أحد الكورسات التي قمت بشرائها، الرجاء شراء كورس لم تمتلكه من قبل": "You already own one or more courses in your cart. Please remove them and try again.",
+  "حدث خطأ أثناء إرسال الدفعة": "Something went wrong submitting your payment. Please try again.",
   "اطلب أول عملية سحب عندما يتوفر رصيدك.": "Request your first withdrawal once your balance is available.",
   "اعرف المزيد": "Learn more",
   "الأكثر استخداماً": "Most used",
@@ -991,7 +1020,6 @@ export default {
   "تسجيل الدخول للمتابعة": "Sign in to continue",
   "الدفع": "Checkout",
   "تم استلام الطلب": "Order received",
-  "معلومات الفوترة": "Billing information",
   "مركز دكتور صبري ابو قرون": "Dr. Sabri Abugroun Center",
   "باطنية": "Internal medicine",
   "مشترك": "Enrolled",

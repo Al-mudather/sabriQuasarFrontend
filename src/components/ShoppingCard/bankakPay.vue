@@ -104,7 +104,7 @@ const { currency } = storeToRefs(settings)
 
 const visible = ref<boolean>(false)
 const bankakBill = ref<File | null>(null)
-const bankakLabel = 'إشعار بنكك الأبيض'
+const bankakLabel = t('إشعار بنكك الأبيض')
 const othersLabel = t('اضغط للإرفاق فاتورة الدفع')
 
 // ---------------------------------------------------------------------------
@@ -114,16 +114,37 @@ function paymentImageHandler (val: File | null): void {
   bankakBill.value = val
 }
 
-function errorHandler (errorsObj: unknown): void {
-  if (typeof errorsObj !== 'object' || errorsObj == null) return
-  for (const key of Object.keys(errorsObj as Record<string, unknown>)) {
-    const entries = (errorsObj as Record<string, unknown[]>)[key]
+/**
+ * Surface server validation errors. Returns the number of messages actually
+ * shown so callers can fall back to a generic message when the payload has an
+ * unexpected shape — guaranteeing the user is never left with no feedback.
+ * Handles the common Django/Graphene shape `{ field: [{ message }] }` as well
+ * as a bare `{ message }` or a plain string.
+ */
+function errorHandler (errorsObj: unknown): number {
+  if (errorsObj == null) return 0
+  if (typeof errorsObj === 'string') {
+    if (errorsObj) { toast.warning(errorsObj); return 1 }
+    return 0
+  }
+  if (typeof errorsObj !== 'object') return 0
+  let shown = 0
+  const top = errorsObj as Record<string, unknown>
+  // Bare `{ message: '...' }`.
+  if (typeof top.message === 'string' && top.message) {
+    toast.warning(top.message)
+    shown++
+  }
+  for (const key of Object.keys(top)) {
+    const entries = top[key]
     if (!Array.isArray(entries)) continue
     for (const val of entries) {
       const v = val as Record<string, unknown>
-      toast.warning(String(v.message ?? ''))
+      const msg = String(v?.message ?? '')
+      if (msg) { toast.warning(msg); shown++ }
     }
   }
+  return shown
 }
 
 function getOrdersIds (): number[] {
@@ -141,16 +162,19 @@ async function getOrderResult (
       variables: { courseIds },
     })
     const dataObj = result.data?.createNewOrderWithBulkOrderDetails
-    if (dataObj?.errors) {
-      visible.value = false
-      errorHandler(dataObj.errors)
-    }
     if (dataObj?.success) return dataObj
+    // Order creation failed — surface it instead of returning silently. If the
+    // errors payload had no readable message, still show a generic reason.
+    if (!dataObj?.errors || errorHandler(dataObj.errors) === 0) {
+      toast.danger(t('تعذّر إنشاء الطلب، يرجى المحاولة مجدداً أو التواصل مع الدعم'))
+    }
     return undefined
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : ''
     if (msg.includes('User already has valid enrollment in the course')) {
-      toast.warning('لديك اشتراك مسبق في هذا الكورس')
+      toast.warning(t('لديك اشتراك مسبق في هذا الكورس'))
+    } else {
+      toast.danger(t('حدث خطأ أثناء إنشاء الطلب، يرجى التحقق من اتصالك بالإنترنت والمحاولة مجدداً'))
     }
     return undefined
   }
@@ -160,13 +184,20 @@ async function SEND_THE_PAYMENT (): Promise<void> {
   try {
     visible.value = true
     if (!bankakBill.value) {
-      toast.danger('الرجاء إرفاق صورة إيصال الدفع قبل الإرسال')
+      toast.danger(t('الرجاء إرفاق صورة إيصال الدفع قبل الإرسال'))
       visible.value = false
       return
     }
 
     const courseIds = getOrdersIds()
+    if (courseIds.length === 0) {
+      toast.danger(t('لا توجد كورسات في سلة المشتريات'))
+      visible.value = false
+      return
+    }
+
     const orderResult = await getOrderResult(courseIds)
+    // getOrderResult already surfaced the reason on failure — just stop here.
     if (!orderResult?.order?.pk) { visible.value = false; return }
     cart.setSaveCheckoutOrderID(orderResult.order.pk)
 
@@ -186,14 +217,28 @@ async function SEND_THE_PAYMENT (): Promise<void> {
       cart.deleteCart()
       router.push({ name: 'cart-success' })
     } else {
+      // The user-reported "nothing happens" bug: the receipt was rejected but
+      // the failure was swallowed. Surface the server's reason, and handle the
+      // known "referral code required" case by routing the user to fix it.
       visible.value = false
+      const shown = dataObj?.errors ? errorHandler(dataObj.errors) : 0
+      // Known case: the backend requires a referral code first → route them there.
+      const raw = JSON.stringify(dataObj?.errors ?? '')
+      if (raw.includes('PyramidAffiliate')) {
+        toast.warning(t('يرجى إدخال رمز الإحالة الخاص بك أولاً'))
+        void router.push({ name: 'registeration-code' })
+      } else if (shown === 0) {
+        // Never leave the user with no feedback (the original silent bug).
+        toast.danger(t('لم يتم قبول الإيصال، يرجى التأكد من وضوح الصورة والمحاولة مجدداً'))
+      }
     }
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : ''
-    toast.danger(msg || 'حدث خطأ أثناء إرسال الدفعة')
     visible.value = false
     if (msg.includes('User already has valid enrollment in the course')) {
-      toast.warning('لديك اشتراك مسبق في أحد الكورسات التي قمت بشرائها، الرجاء شراء كورس لم تمتلكه من قبل')
+      toast.warning(t('لديك اشتراك مسبق في أحد الكورسات التي قمت بشرائها، الرجاء شراء كورس لم تمتلكه من قبل'))
+    } else {
+      toast.danger(t('حدث خطأ أثناء إرسال الدفعة'))
     }
   }
 }

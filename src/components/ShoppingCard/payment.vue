@@ -4,7 +4,7 @@
     <div v-if="showBankakPayment" class="cart-payment__subview">
       <header class="cart-payment__subview-head">
         <DsButton variant="ghost" size="md" @click="goBackToOptions">
-          ← {{ $t('رجوع') }}
+          <span class="cart-payment__back-arrow" aria-hidden="true"></span>{{ $t('رجوع') }}
         </DsButton>
         <div>
           <h2 class="cart-payment__subview-title">
@@ -24,7 +24,7 @@
     <div v-else-if="showStripePayment" class="cart-payment__subview">
       <header class="cart-payment__subview-head">
         <DsButton variant="ghost" size="md" @click="goBackToOptions">
-          ← {{ $t('رجوع') }}
+          <span class="cart-payment__back-arrow" aria-hidden="true"></span>{{ $t('رجوع') }}
         </DsButton>
         <div>
           <h2 class="cart-payment__subview-title">
@@ -121,7 +121,7 @@
             size="md"
             @click="$router.push({ name: 'user-info' })"
           >
-            ← {{ $t('عودة') }}
+            <span class="cart-payment__back-arrow" aria-hidden="true"></span>{{ $t('عودة') }}
           </DsButton>
           <DsButton
             variant="accent"
@@ -316,7 +316,7 @@ function errorHandler (errorsObj: unknown): void {
     if (!Array.isArray(entries)) continue
     for (const val of entries) {
       const v = val as Record<string, unknown>
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: String(v.message ?? '') })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: String(v.message ?? '') })
     }
   }
 }
@@ -360,7 +360,7 @@ async function getStripePaymentUrl (orderResult: NonNullable<CreateOrderResult['
   const details = result.data?.createStripeCheckout
   if (details?.errors) {
     stripeLoading.value = false
-    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه' })
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: t('انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه') })
   }
   if (details?.success) return details.paymentUrl
   return null
@@ -393,9 +393,9 @@ async function initiateStripePayment (): Promise<void> {
     stripeLoading.value = false
     const msg = error instanceof Error ? error.message : ''
     if (msg === 'Stripe not loaded') {
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'Stripe غير محمل، يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى' })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: t('Stripe غير محمل، يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى') })
     } else {
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'حدث خطأ في عملية الدفع، يرجى المحاولة مرة أخرى' })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: t('حدث خطأ في عملية الدفع، يرجى المحاولة مرة أخرى') })
     }
   }
 }
@@ -420,7 +420,7 @@ function purgeZeroCostItems (): void {
     const feeSDG = parseInt(String(c.courseFeeInSdg ?? ''), 10)
     if (fee === 0 || feeSDG === 0) {
       removeCourseFromCart(item)
-      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'top', message: 'هذا الكورس تحت التحضير' })
+      $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: t('هذا الكورس تحت التحضير') })
     }
   })
 }
@@ -432,7 +432,7 @@ onMounted(async () => {
     const res = await apolloClient.query<GetMyProfileResult, GetMyProfileVariables>({ query: GetMyProfileData })
     const me = res.data?.me
     if (me?.pk && !(me.fullName && (me.phoneNumber2 || me.phoneNumber3))) {
-      $q.notify({ type: 'negative', progress: true, multiLine: true, position: 'top', message: 'يجب ان تكمل بياناتك الشخصيه' })
+      $q.notify({ type: 'negative', progress: true, multiLine: true, position: 'bottom', message: t('يجب ان تكمل بياناتك الشخصيه') })
       router.push({ name: 'user-info' })
     }
   } catch { /* silent */ }
@@ -440,7 +440,7 @@ onMounted(async () => {
   purgeZeroCostItems()
 
   if (shoppingCartDataList.value.length === 0) {
-    $q.notify({ type: 'negative', progress: true, multiLine: true, position: 'top', message: 'لا يمكنك شراء لا شيء' })
+    $q.notify({ type: 'negative', progress: true, multiLine: true, position: 'bottom', message: t('لا يمكنك شراء لا شيء') })
     router.push({ name: 'Home' })
   }
 })
@@ -776,5 +776,20 @@ onMounted(async () => {
     font-size: var(--ds-text-xs);
     color: var(--ds-text-muted);
   }
+}
+</style>
+
+<style lang="scss">
+/* Direction-aware back arrow. In LTR the arrow points left (←); in RTL it
+   points right (→) because "back" is the opposite physical direction.
+   Using a plain ancestor-attribute selector outside scoped rules per CLAUDE.md. */
+.cart-payment__back-arrow::before {
+  content: '←';
+  display: inline-block;
+  margin-inline-end: 0.25em;
+}
+
+[dir='rtl'] .cart-payment__back-arrow::before {
+  content: '→';
 }
 </style>

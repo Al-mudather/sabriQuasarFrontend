@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf" :dir="$q.lang.rtl ? 'rtl' : 'rtl'">
+  <q-layout view="hHh lpR fFf" :dir="$q.lang.rtl ? 'rtl' : 'ltr'">
     <AppHeader variant="cream" :sticky="true" />
 
     <q-page-container>
@@ -86,6 +86,7 @@ import { onBeforeRouteUpdate, onBeforeRouteLeave, useRoute } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 
 // Route-name → zero-indexed step. Order: cart, login, userInfo, payment, success.
 const STEP_BY_ROUTE: Record<string, number> = {
@@ -102,6 +103,7 @@ const WIDE_STEPS = new Set(['cart', 'payment'])
 const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
+const { t } = useI18n()
 const cart = useCartStore()
 const { shoppingCartDataList } = storeToRefs(cart)
 const prevRoute = ref<string | null>(null)
@@ -113,13 +115,13 @@ useSubscription<CheckoutSubscriptionResult, CheckoutSubscriptionVars>(CheckoutSu
 onBeforeRouteUpdate((to, from) => { prevRoute.value = from.fullPath })
 onBeforeRouteLeave((to, from) => { prevRoute.value = from.fullPath })
 
-const steps = [
-  { key: 'cart',     label: 'السلة' },
-  { key: 'login',    label: 'تسجيل الدخول' },
-  { key: 'billing',  label: 'معلومات الفوترة' },
-  { key: 'payment',  label: 'الدفع' },
-  { key: 'confirm',  label: 'تأكيد' }
-]
+const steps = computed(() => [
+  { key: 'cart',     label: t('السلة') },
+  { key: 'login',    label: t('تسجيل الدخول') },
+  { key: 'billing',  label: t('معلومات الفوترة') },
+  { key: 'payment',  label: t('الدفع') },
+  { key: 'confirm',  label: t('تأكيد') }
+])
 
 const activeIndex = computed((): number => {
   const routeName = route.name as string | undefined
@@ -148,7 +150,7 @@ async function checkPyramidRegistration (): Promise<void> {
         type: 'positive',
         progress: true,
         multiLine: true,
-        position: 'top',
+        position: 'bottom',
         message: 'You must inter the registeration code'
       })
       router.push({ name: 'registeration-code' })

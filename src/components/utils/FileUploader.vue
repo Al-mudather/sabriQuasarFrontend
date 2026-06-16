@@ -61,7 +61,7 @@
       </svg>
 
       <!-- Prompt -->
-      <span class="fu-dropzone__prompt">{{ label || 'انقر لرفع ملف أو اسحب هنا' }}</span>
+      <span class="fu-dropzone__prompt">{{ label || t('انقر لرفع ملف أو اسحب هنا') }}</span>
 
       <!-- Hint -->
       <span :id="hintId" class="fu-dropzone__hint">{{ hintText }}</span>
@@ -120,7 +120,7 @@
           class="fu-preview__action"
           @click="openDialog"
         >
-          تغيير
+          {{ t('تغيير') }}
         </button>
         <span class="fu-preview__action-sep" aria-hidden="true">·</span>
         <button
@@ -128,7 +128,7 @@
           class="fu-preview__action fu-preview__action--remove"
           @click="removeFile"
         >
-          إزالة
+          {{ t('إزالة') }}
         </button>
       </div>
     </div>
@@ -137,6 +137,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { toast } from 'src/design-system/toast'
 
 // ---------------------------------------------------------------------------
@@ -149,6 +150,8 @@ interface Props {
   imgeSize?: number
   label?: string
 }
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps<Props>(), {
   readonly: false,
@@ -186,16 +189,16 @@ const hintText = computed((): string => {
       .split(',')
       .map(s => s.trim().replace(/^\./, '').toUpperCase())
       .filter(Boolean)
-    if (exts.length) parts.push(exts.join(' أو '))
+    if (exts.length) parts.push(exts.join(` ${t('أو')} `))
   }
 
   // Human-readable max size
   if (props.imgeSize != null) {
     const mb = props.imgeSize / (1024 * 1024)
-    parts.push(`حتى ${mb % 1 === 0 ? mb : mb.toFixed(1)} ميجابايت`)
+    parts.push(t('حتى {mb} ميجابايت', { mb: mb % 1 === 0 ? mb : mb.toFixed(1) }))
   }
 
-  return parts.length ? parts.join(' — ') : 'انقر أو اسحب ملفاً هنا'
+  return parts.length ? parts.join(' — ') : t('انقر أو اسحب ملفاً هنا')
 })
 
 // ---------------------------------------------------------------------------
@@ -230,11 +233,11 @@ function matchesAccept(file: File): boolean {
 
 function processFile(file: File): void {
   if (!matchesAccept(file)) {
-    toast.danger('نوع الملف غير مدعوم')
+    toast.danger(t('نوع الملف غير مدعوم'))
     return
   }
   if (props.imgeSize != null && file.size > props.imgeSize) {
-    toast.danger('حجم الملف أكبر من المسموح به')
+    toast.danger(t('حجم الملف أكبر من المسموح به'))
     return
   }
 
