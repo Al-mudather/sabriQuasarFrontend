@@ -108,7 +108,6 @@ import { useAuthStore } from 'src/stores/auth'
 import { useSettingsStore } from 'src/stores/settings'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { LoginUserWithEmail } from 'src/graphql/account_management/mutation/LoginUserWithEmail'
-import { AllEnrollmentsForCurrentUser } from 'src/graphql/enrollment_management/query/AllEnrollmentsForCurrentUser'
 import GoogleAuthentication from 'src/components/Account/GoogleAuthentication.vue'
 import DsInput from 'src/design-system/components/DsInput.vue'
 import { toast } from 'src/design-system/toast'
@@ -171,36 +170,20 @@ function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): v
   if (generic.length) apiError.value = generic.join(' — ')
 }
 
-async function isUserEnrolled (): Promise<boolean> {
-  try {
-    const res = await apolloClient.query({ query: AllEnrollmentsForCurrentUser })
-    return (res.data?.allEnrollmentsForCurrentUser?.edges?.length ?? 0) > 0
-  } catch {
-    return false
-  }
-}
-
 async function navigateAfterLogin (): Promise<void> {
-  // Registration-code gating is owned by the global router guard now, so we just
-  // send the user to their destination — the guard diverts a no-code user to
-  // `registeration-code` automatically. AWAIT the push so the spinner spans the
-  // real navigation (a `void` push cleared the spinner early and looked stuck).
+  // Send the user straight to their destination — NO blocking pre-queries. The
+  // global router guard owns registration-code gating (it diverts a no-code user
+  // to `registeration-code`), and any "enrolled → my-courses" routing belongs to
+  // that destination, not here. Blocking navigation on an enrollment lookup +
+  // the guard's access check used to stack ~8s of sequential network round-trips
+  // on a cold first attempt, which read as a "stuck" login that only worked on a
+  // second click (warm cache). `replace` keeps the login page out of history; a
+  // NavigationFailure from the guard redirecting is expected, so swallow it.
   const redirectTarget = route.query?.redirect
-  if (typeof redirectTarget === 'string' && redirectTarget) {
-    await router.push(redirectTarget).catch(() => {})
-    return
-  }
-
-  // Enrolled users land on their courses, everyone else on Home. Time-boxed so a
-  // slow enrollment query can never hang the post-login navigation.
-  let hasCourses = false
-  try {
-    hasCourses = await Promise.race([
-      isUserEnrolled(),
-      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000))
-    ])
-  } catch { hasCourses = false }
-  await router.push({ name: hasCourses ? 'my-courses' : 'Home' }).catch(() => {})
+  const target = (typeof redirectTarget === 'string' && redirectTarget)
+    ? redirectTarget
+    : { name: 'Home' }
+  await router.replace(target).catch(() => {})
 }
 
 async function loginUser (): Promise<void> {

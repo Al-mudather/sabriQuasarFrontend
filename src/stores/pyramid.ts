@@ -100,17 +100,25 @@ export const usePyramidStore = defineStore('pyramidManagement', {
         const res = await apolloClient.query<{ checkPyramidAffiliate: unknown }>({
           query: CheckTheUserPermissionToUsePlatforme,
           fetchPolicy: 'network-only',
+          errorPolicy: 'all',
         })
-        // The backend returns SUCCESS with `checkPyramidAffiliate: null` when the
-        // user has NO registration code — it does NOT throw. A non-null object
-        // means they're linked to a PyramidAffiliate and may use the platform.
+        // The Apollo client default is `errorPolicy: 'all'`, so a GraphQL error
+        // does NOT throw — it arrives in `res.errors` with `res.data` possibly
+        // null. The very first authenticated request right after login can fail
+        // transiently; reading that as "no code" (`data.checkPyramidAffiliate`
+        // being null/undefined → false) wrongly bounced a legitimate user to the
+        // registration-code page. So: any errors → FAIL OPEN and do NOT cache a
+        // verdict (re-check on the next navigation).
+        if (res.errors && res.errors.length) return true
+        // Clean response: the backend returns SUCCESS with
+        // `checkPyramidAffiliate: null` when the user has NO registration code.
+        // A non-null object means they're linked to a PyramidAffiliate.
         this.hasPlatformAccess = res.data?.checkPyramidAffiliate != null
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : ''
-        // A legacy backend threw this for the no-code case — treat as no code.
-        // Any OTHER (network/unknown) error fails OPEN so a transient blip can't
-        // lock a legitimate user out of the whole app.
-        this.hasPlatformAccess = !msg.includes('PyramidAffiliate matching query does not exist')
+      } catch (_e: unknown) {
+        // Network/unknown throw → fail OPEN so a transient blip can't lock a
+        // legitimate user out of the whole app (the backend still enforces the
+        // gate server-side at order/payment time). Do not cache a hard verdict.
+        return true
       }
       return this.hasPlatformAccess
     },
