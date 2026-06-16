@@ -25,9 +25,21 @@
         <img v-else src="~assets/img/user-13.jpg" :alt="displayName(edge)" class="cd-instructor__avatar" />
         <div class="cd-instructor__text">
           <h3 class="cd-instructor__name">{{ displayName(edge) }}</h3>
-          <p class="cd-instructor__qualification">
+          <p
+            :ref="(el) => setBioRef(el, edge.node?.id ?? '')"
+            class="cd-instructor__qualification"
+            :class="{ 'cd-instructor__qualification--clamped': !expandedIds.has(edge.node?.id ?? '') }"
+          >
             {{ edge.node?.instructor?.qualification ?? '' }}
           </p>
+          <button
+            v-if="overflowingIds.has(edge.node?.id ?? '')"
+            class="cd-instructor__toggle"
+            :aria-expanded="expandedIds.has(edge.node?.id ?? '')"
+            @click="toggleExpanded(edge.node?.id ?? '')"
+          >
+            {{ expandedIds.has(edge.node?.id ?? '') ? $t('عرض أقل') : $t('عرض المزيد') }}
+          </button>
         </div>
       </article>
     </div>
@@ -35,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { GetAllCourseInstructors } from 'src/graphql/course_management/query/GetAllCourseInstructors'
 import type {
@@ -61,6 +73,48 @@ const instructors = computed(
   () => (result.value?.allCourseInstructors?.edges ?? [])
     .filter((e): e is InstructorEdge => !!e && !!e.node),
 )
+
+/** Per-instructor expanded state — keyed by node id */
+const expandedIds = ref<Set<string>>(new Set())
+
+/** Ids whose bio text actually overflows the 5-line clamp */
+const overflowingIds = ref<Set<string>>(new Set())
+
+/** Map of node id → paragraph DOM element, populated by the template ref callback */
+const bioEls = ref<Map<string, Element>>(new Map())
+
+function setBioRef (el: unknown, id: string): void {
+  if (el instanceof Element) {
+    bioEls.value.set(id, el)
+  } else {
+    bioEls.value.delete(id)
+  }
+}
+
+function toggleExpanded (id: string): void {
+  const next = new Set(expandedIds.value)
+  if (next.has(id)) {
+    next.delete(id)
+  } else {
+    next.add(id)
+  }
+  expandedIds.value = next
+}
+
+/** Measure each paragraph's overflow after the DOM has settled */
+async function measureOverflow (): Promise<void> {
+  await nextTick()
+  const next = new Set<string>()
+  for (const [id, el] of bioEls.value.entries()) {
+    if (el.scrollHeight > el.clientHeight + 2) {
+      next.add(id)
+    }
+  }
+  overflowingIds.value = next
+}
+
+// Re-measure whenever instructors load or change
+watch(instructors, () => { void measureOverflow() }, { immediate: true })
 
 function displayName (edge: InstructorEdge): string {
   const user = edge.node?.instructor?.user
@@ -147,6 +201,38 @@ function getImageUrl (img: string): string {
     margin: 0;
     line-height: var(--ds-leading-arabic);
     max-inline-size: 65ch;
+
+    &--clamped {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 5;
+      overflow: hidden;
+    }
+  }
+
+  &__toggle {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-block-start: var(--ds-space-1);
+    font-size: var(--ds-text-sm);
+    font-family: var(--ds-font-body);
+    font-weight: var(--ds-weight-medium);
+    color: var(--ds-indigo, var(--ds-primary));
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ds-indigo, var(--ds-primary));
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
   }
 }
 </style>
