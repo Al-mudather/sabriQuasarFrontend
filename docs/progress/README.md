@@ -39,6 +39,12 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 | 1.1.7 | [Login: toast feedback](1.1.7-login-toast-feedback.md) | ✅ | `bca0932` |
 | 1.1.8 | [Course: post-login redirect + clean `+`-slug URLs](1.1.8-course-redirect-and-clean-urls.md) | 🟡 | `ee21b42` |
 | 1.1.9 | [Course: collapsible instructor bios](1.1.9-instructor-bio-show-more.md) | ✅ | `93b6241` |
+| 1.1.10 | [Auth: fix laggy/silent Google sign-in](1.1.10-google-signin-lag-fix.md) | 🟡 | `e5ccaca` |
+| 1.1.11 | [Version 2.2.0 + footer-sync clarification](1.1.11-version-2.2.0-footer-sync.md) | ✅ | `ec0fa43` |
+| 1.1.12 | [Auth: registration-code gate (global guard + bypass fix)](1.1.12-registration-code-gate.md) | 🟡 | `bc3725e` |
+
+Tags: each commit also carries a descriptive git tag — `google-signin-fix`,
+`version-2.2.0`, `registration-code-gate` (see standing conventions).
 
 ---
 
@@ -53,8 +59,12 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
   and `MyPyramidRewards.vue` are unrouted/unimported dead code (found during 1.1.1).
 - 🔭 **Live-verify cart error toasts** — the receipt-upload failure paths (1.1.5) are
   build/logic-verified but only fire on a real backend rejection; confirm in-app.
-- 🔭 **Live-verify enrol → Google-login → course redirect** — the [1.1.8](1.1.8-course-redirect-and-clean-urls.md)
-  fix is code-traced but the OAuth loop can't run headless; confirm with a real login.
+- 🔭 **Live-verify auth flows** — with a real login (the OAuth loop can't run headless):
+  (a) [1.1.10](1.1.10-google-signin-lag-fix.md) full Google success → redirect;
+  (b) [1.1.12](1.1.12-registration-code-gate.md) gate — a user WITH a code browses
+  freely, a no-code user is forced to `registeration-code` then lands on their course.
+  (Guests/no-token already verified unrestricted.) This supersedes the old 1.1.8
+  redirect check — the global guard now owns that path.
 - 🔭 **Dependabot** — the repo reports 28 dependency vulnerabilities (1 critical, 5 high)
   on every push. Triage the critical/high ones.
 
@@ -75,3 +85,8 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
   Headless check: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
   --headless --disable-gpu --enable-logging=stderr --virtual-time-budget=9000
   --dump-dom <url> 2>err.log` then grep the log for `is not a function` / `Vue warn`.
+- **Tag every commit** with a short descriptive kebab-case git tag and push it
+  (`git tag <slug> && git push origin <slug>`) — e.g. `google-signin-fix`,
+  `registration-code-gate`. Matches the repo's existing tags; makes history
+  skimmable and any commit a one-command rollback (`git reset --hard <slug>`).
+  Use a `pre-<thing>` tag to mark a baseline before a risky change.
