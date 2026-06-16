@@ -37,6 +37,18 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PRWLZK8VKV"></script>
 
     <!--
+      Google Identity Services (social login) — preloaded.
+
+      CRITICAL: requestAccessToken() must run inside the synchronous click
+      handler or the browser blocks/defers the popup ("nothing happens" on the
+      first click). Loading the SDK lazily on click broke that user-gesture
+      chain. Preconnecting + loading the script here means window.google.accounts
+      is ready before the user can click, so the popup opens in-gesture.
+    -->
+    <link rel="preconnect" href="https://accounts.google.com" crossorigin />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!--
       Video player (video.js) globals.
 
       ONLY the legacy SmartNode course-preview (src/utils/video-client.js, used by

@@ -55,6 +55,10 @@ export default {
         
  
       "هذا الحساب مسجل مسبقا" : "This account is already registered",
+
+      "تعذر تسجيل الدخول عبر Google. حاول مجدداً." : "Couldn't sign in with Google. Please try again.",
+      "تعذّر الاتصال بـ Google. حاول مجدداً." : "Couldn't reach Google. Please try again.",
+      "تم إلغاء تسجيل الدخول." : "Sign-in cancelled.",
  
         
   "_comment_src_components_Account_Login.vue": "src_components_Account_Login.vue",

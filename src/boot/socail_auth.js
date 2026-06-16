@@ -50,27 +50,61 @@ function loadGis () {
   return gisLoader
 }
 
+// The token client is created ONCE and reused. The per-request callbacks are
+// swapped via module-level handlers just before each requestAccessToken() call,
+// so the click handler can fire the popup synchronously (in-gesture) instead of
+// constructing a fresh client inside an async chain.
+let tokenClient = null
+let pendingResolve = null
+let pendingReject = null
+
+// Distinguishes a user cancel/close from a real error, so the UI can stay quiet
+// on cancel but surface genuine failures.
+function makeAuthError (message, cancelled) {
+  const e = new Error(message)
+  e.cancelled = !!cancelled
+  return e
+}
+
+function buildTokenClient (clientId) {
+  return window.google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: GOOGLE_SCOPE,
+    // Force the account chooser every time so Google can NEVER silently
+    // reuse the previously signed-in account / a cached token (which made
+    // logout-then-login come back as the old user).
+    prompt: 'select_account',
+    callback: (resp) => {
+      const resolve = pendingResolve
+      pendingResolve = pendingReject = null
+      if (!resolve) return
+      if (resp && resp.access_token) resolve({ accessToken: resp.access_token })
+      else if (pendingReject) pendingReject(makeAuthError((resp && (resp.error_description || resp.error)) || 'Google authentication failed', false))
+    },
+    // Fired when the user closes the popup, dismisses it, or it can't be shown.
+    error_callback: (err) => {
+      const reject = pendingReject
+      pendingResolve = pendingReject = null
+      if (!reject) return
+      const type = (err && err.type) || ''
+      // 'popup_closed' / 'popup_failed_to_open' / user dismissal → treat as cancel.
+      const cancelled = type === 'popup_closed' || type === 'popup_failed_to_open' || type === 'user_cancel'
+      reject(makeAuthError((err && (err.message || err.type)) || 'Google authentication cancelled', cancelled))
+    }
+  })
+}
+
 function authenticateGoogle () {
   const clientId = process.env.SOCIAL_AUTH_GOOGLE_CLIENT_ID || ''
   if (!clientId) {
-    return Promise.reject(new Error('Missing client id for google (SOCIAL_AUTH_GOOGLE_CLIENT_ID)'))
+    return Promise.reject(makeAuthError('Missing client id for google (SOCIAL_AUTH_GOOGLE_CLIENT_ID)', false))
   }
   return loadGis().then(() => new Promise((resolve, reject) => {
-    const client = window.google.accounts.oauth2.initTokenClient({
-      client_id: clientId,
-      scope: GOOGLE_SCOPE,
-      // Force the account chooser every time so Google can NEVER silently
-      // reuse the previously signed-in account / a cached token (which made
-      // logout-then-login come back as the old user).
-      prompt: 'select_account',
-      callback: (resp) => {
-        if (resp && resp.access_token) resolve({ accessToken: resp.access_token })
-        else reject(new Error((resp && (resp.error_description || resp.error)) || 'Google authentication failed'))
-      },
-      // Fired when the user closes the popup or the request can't be displayed.
-      error_callback: (err) => reject(new Error((err && (err.message || err.type)) || 'Google authentication cancelled'))
-    })
-    client.requestAccessToken()
+    // Reuse the cached client; only build it the first time.
+    if (!tokenClient) tokenClient = buildTokenClient(clientId)
+    pendingResolve = resolve
+    pendingReject = reject
+    tokenClient.requestAccessToken()
   }))
 }
 
