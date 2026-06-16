@@ -229,6 +229,8 @@ async function loginUser (): Promise<void> {
         } catch { /* OneSignal optional */ }
 
         await auth.login(tokenAuth)
+        // New session → re-verify the registration-code gate (router guard).
+        pyramid.resetPlatformAccess()
         // Success toast (the notification persists across the redirect).
         toast.success(t('تم تسجيل الدخول بنجاح'))
         if (redirectAfterLogin()) return

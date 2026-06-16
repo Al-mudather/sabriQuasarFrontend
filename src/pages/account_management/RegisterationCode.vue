@@ -45,7 +45,7 @@
  * (`JoinPlatform`) belongs to the pyramid feature, not auth.
  */
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useMutation } from '@vue/apollo-composable'
@@ -56,6 +56,7 @@ import type { JoinPlatformResult, JoinPlatformVars } from 'src/types/pyramid/typ
 
 const { t } = useI18n()
 const $q = useQuasar()
+const route = useRoute()
 const router = useRouter()
 const pyramid = usePyramidStore()
 const { registerationCode } = storeToRefs(pyramid)
@@ -95,7 +96,12 @@ async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
     if (res?.data?.joinPlatform?.success) {
       $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'bottom', message: t('مرحباً بك') })
       pyramid.setRegisterationCode('')
-      void router.push({ name: 'Home' })
+      // The user now has a PyramidAffiliate — let the router guard through.
+      pyramid.markPlatformAccessGranted()
+      // Land them where they were headed before the gate (e.g. the course they
+      // tried to enrol in); fall back Home.
+      const redirect = route.query?.redirect
+      void router.push(typeof redirect === 'string' && redirect ? redirect : { name: 'Home' }).catch(() => {})
     }
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : ''

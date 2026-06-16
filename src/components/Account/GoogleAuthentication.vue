@@ -96,6 +96,9 @@ async function loginAuthMutation (accessToken: string, provider: string, email =
     }
 
     await auth.login({ ...userData, token: userData.token })
+    // New session → re-verify the registration-code gate (the router guard
+    // reads this). Without the reset a previous user's verdict could leak.
+    pyramid.resetPlatformAccess()
     try {
       const userCur = userData.social?.user?.userCurrency
       if (userCur) settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')

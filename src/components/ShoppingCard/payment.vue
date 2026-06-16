@@ -194,18 +194,18 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 import { useCartStore } from 'src/stores/cart'
 import { useSettingsStore } from 'src/stores/settings'
+import { usePyramidStore } from 'src/stores/pyramid'
 import { apolloClient } from 'src/apollo/client'
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
 import { CreateStripeCheckout } from 'src/graphql/checkout_management/mutation/CreateStripeCheckout'
 import { StripePublishableKey } from 'src/graphql/checkout_management/query/StripePublishableKey'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 
 import type {
   CartEntry,
@@ -215,8 +215,6 @@ import type {
   StripePublishableKeyVars,
   CreateOrderResult,
   CreateOrderVars,
-  CheckPyramidAffiliateResult,
-  CheckPyramidAffiliateVars,
 } from 'src/types/cart/types'
 import type {
   GetMyProfileResult,
@@ -226,11 +224,13 @@ import type {
 import bankakPayment from 'src/components/ShoppingCard/bankakPay.vue'
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
 
+const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
 const { t } = useI18n()
 const cart = useCartStore()
 const settings = useSettingsStore()
+const pyramid = usePyramidStore()
 const { shoppingCartDataList, totalPaymentFees } = storeToRefs(cart)
 const { currency } = storeToRefs(settings)
 
@@ -400,16 +400,13 @@ async function initiateStripePayment (): Promise<void> {
   }
 }
 
+// Registration-code gate (payment-side backstop). The global router guard
+// already blocks no-code users from reaching payment; we re-verify here
+// (network-only, via the store) as defense-in-depth at the transactional edge.
 async function checkPyramidRegistration (): Promise<void> {
-  try {
-    await apolloClient.query<CheckPyramidAffiliateResult, CheckPyramidAffiliateVars>({
-      query: CheckTheUserPermissionToUsePlatforme
-    })
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : ''
-    if (msg.includes('PyramidAffiliate matching query does not exist.')) {
-      router.push({ name: 'registeration-code' })
-    }
+  const ok = await pyramid.verifyPlatformAccess(true)
+  if (!ok) {
+    router.push({ name: 'registeration-code', query: { redirect: route.fullPath } })
   }
 }
 

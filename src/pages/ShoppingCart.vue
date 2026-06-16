@@ -70,18 +70,15 @@
 <script setup lang="ts">
 import AppHeader from 'src/components/shared/AppHeader.vue'
 import AppFooter from 'src/components/shared/AppFooter.vue'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { CheckoutSubscription } from 'src/graphql/notification_management/subscription/CheckoutSubscription'
 import type {
   CheckoutSubscriptionResult,
   CheckoutSubscriptionVars,
-  CheckPyramidAffiliateResult,
-  CheckPyramidAffiliateVars,
 } from 'src/types/cart/types'
 import { useCartStore } from 'src/stores/cart'
+import { usePyramidStore } from 'src/stores/pyramid'
 import { storeToRefs } from 'pinia'
 import { useSubscription } from '@vue/apollo-composable'
-import { apolloClient } from 'src/apollo/client'
 import { onBeforeRouteUpdate, onBeforeRouteLeave, useRoute } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { ref, computed, onMounted } from 'vue'
@@ -105,6 +102,7 @@ const router = useRouter()
 const $q = useQuasar()
 const { t } = useI18n()
 const cart = useCartStore()
+const pyramid = usePyramidStore()
 const { shoppingCartDataList } = storeToRefs(cart)
 const prevRoute = ref<string | null>(null)
 
@@ -138,23 +136,20 @@ const isWideStep = computed((): boolean => {
   return WIDE_STEPS.has(route.name as string)
 })
 
+// Registration-code gate (payment-side backstop). The global router guard
+// already blocks no-code users from reaching the cart, but we re-verify here
+// (network-only, via the store) as defense-in-depth at the transactional edge.
 async function checkPyramidRegistration (): Promise<void> {
-  try {
-    await apolloClient.query<CheckPyramidAffiliateResult, CheckPyramidAffiliateVars>({
-      query: CheckTheUserPermissionToUsePlatforme
+  const ok = await pyramid.verifyPlatformAccess(true)
+  if (!ok) {
+    $q.notify({
+      type: 'warning',
+      progress: true,
+      multiLine: true,
+      position: 'bottom',
+      message: t('يرجى إدخال رمز الإحالة الخاص بك أولاً')
     })
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : ''
-    if (msg === 'GraphQL error: PyramidAffiliate matching query does not exist.') {
-      $q.notify({
-        type: 'positive',
-        progress: true,
-        multiLine: true,
-        position: 'bottom',
-        message: 'You must inter the registeration code'
-      })
-      router.push({ name: 'registeration-code' })
-    }
+    router.push({ name: 'registeration-code', query: { redirect: route.fullPath } })
   }
 }
 

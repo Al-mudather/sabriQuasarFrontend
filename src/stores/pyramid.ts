@@ -7,6 +7,7 @@
 import { defineStore } from 'pinia'
 import { apolloClient } from 'src/apollo/client.js'
 import { MyPyramidAccount } from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
+import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 
 import type { MyPyramidAccountResult, PyramidAccount } from 'src/types/pyramid/types'
 
@@ -18,12 +19,20 @@ interface PyramidStoreState {
   myMarketingCode: string
   /** Referral code the caller used when registering (upline), mirrored to localStorage. */
   registerationCode: string
+  /**
+   * Whether the current user is linked to a PyramidAffiliate (has entered a
+   * registration code and may use the platform). `null` = not yet checked this
+   * session; `true`/`false` = cached verdict so the router guard reads it
+   * cheaply. Reset to `null` on logout (useLogout → $reset) and login.
+   */
+  hasPlatformAccess: boolean | null
 }
 
 export const usePyramidStore = defineStore('pyramidManagement', {
   state: (): PyramidStoreState => ({
     myMarketingCode: localStorage.getItem('myMarketingCode') || '',
     registerationCode: localStorage.getItem('registerationCode') || '',
+    hasPlatformAccess: null,
   }),
 
   getters: {
@@ -70,6 +79,47 @@ export const usePyramidStore = defineStore('pyramidManagement', {
         this.UPDATE_MY_MARKETING_CODE_MUTATION('')
       }
       return undefined
+    },
+
+    // ---- Registration-code (PyramidAffiliate) gate --------------------------
+    /**
+     * Verify (and cache) whether the current user may use the platform, i.e. is
+     * linked to a PyramidAffiliate. `CheckPyramidAffiliate` succeeds when the
+     * link exists and throws `PyramidAffiliate matching query does not exist`
+     * when it doesn't. Network-only so a stale Apollo cache entry can't mask a
+     * revoked/absent affiliate (the old inline checks used cache-first and
+     * leaked). Caches the verdict in `hasPlatformAccess`.
+     *
+     * Fail-open on transient/unknown errors (network down, unexpected shape) so
+     * a blip never traps a legitimate user — the backend still enforces the
+     * constraint server-side at order/payment time.
+     */
+    async verifyPlatformAccess (force = false): Promise<boolean> {
+      if (!force && this.hasPlatformAccess !== null) return this.hasPlatformAccess
+      try {
+        await apolloClient.query({
+          query: CheckTheUserPermissionToUsePlatforme,
+          fetchPolicy: 'network-only',
+        })
+        this.hasPlatformAccess = true
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : ''
+        // Only a definitive "no affiliate" verdict blocks the user. Anything
+        // else (network/unknown) fails open so a transient error can't lock
+        // a legitimate user out of the whole app.
+        this.hasPlatformAccess = !msg.includes('PyramidAffiliate matching query does not exist')
+      }
+      return this.hasPlatformAccess
+    },
+
+    /** Call after a successful JoinPlatform — the user now has access. */
+    markPlatformAccessGranted (): void {
+      this.hasPlatformAccess = true
+    },
+
+    /** Force a re-check on next read (e.g. after login / account switch). */
+    resetPlatformAccess (): void {
+      this.hasPlatformAccess = null
     },
 
     // ---- Short-name aliases used by C1/C2 migrated call sites --------------
