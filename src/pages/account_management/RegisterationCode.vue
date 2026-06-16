@@ -36,6 +36,12 @@
         {{ $t('تأكيد') }}
       </ds-button>
     </form>
+
+    <!-- Safeguard: a user gated here without a code must always be able to sign
+         out (the gate funnels every other route back to this page). -->
+    <button type="button" class="auth-card__logout" @click="logout">
+      {{ $t('تسجيل الخروج') }}
+    </button>
   </div>
 </template>
 
@@ -51,6 +57,7 @@ import { useQuasar } from 'quasar'
 import { useMutation } from '@vue/apollo-composable'
 import { storeToRefs } from 'pinia'
 import { usePyramidStore } from 'src/stores/pyramid'
+import { useLogout } from 'src/composables/useLogout'
 import { JoinPlatform } from 'src/graphql/pyramid_marketing_management/mutation/JoinPlatform'
 import type { JoinPlatformResult, JoinPlatformVars } from 'src/types/pyramid/types'
 
@@ -59,6 +66,7 @@ const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 const pyramid = usePyramidStore()
+const { logout } = useLogout()
 const { registerationCode } = storeToRefs(pyramid)
 
 const { mutate: joinPlatformMutate } = useMutation<JoinPlatformResult, JoinPlatformVars>(JoinPlatform)
@@ -171,6 +179,27 @@ onBeforeUnmount(() => {
     display: flex;
     flex-direction: column;
     gap: var(--ds-space-4);
+  }
+
+  &__logout {
+    align-self: center;
+    margin-block-start: var(--ds-space-2);
+    background: none;
+    border: none;
+    padding: var(--ds-space-1) var(--ds-space-2);
+    font-family: var(--ds-font-body);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover { color: var(--ds-brand-600); }
+    &:focus-visible {
+      outline: 2px solid var(--ds-brand-600);
+      outline-offset: 2px;
+      border-radius: var(--ds-radius-sm);
+    }
   }
 }
 

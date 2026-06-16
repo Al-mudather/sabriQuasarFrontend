@@ -97,16 +97,19 @@ export const usePyramidStore = defineStore('pyramidManagement', {
     async verifyPlatformAccess (force = false): Promise<boolean> {
       if (!force && this.hasPlatformAccess !== null) return this.hasPlatformAccess
       try {
-        await apolloClient.query({
+        const res = await apolloClient.query<{ checkPyramidAffiliate: unknown }>({
           query: CheckTheUserPermissionToUsePlatforme,
           fetchPolicy: 'network-only',
         })
-        this.hasPlatformAccess = true
+        // The backend returns SUCCESS with `checkPyramidAffiliate: null` when the
+        // user has NO registration code — it does NOT throw. A non-null object
+        // means they're linked to a PyramidAffiliate and may use the platform.
+        this.hasPlatformAccess = res.data?.checkPyramidAffiliate != null
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : ''
-        // Only a definitive "no affiliate" verdict blocks the user. Anything
-        // else (network/unknown) fails open so a transient error can't lock
-        // a legitimate user out of the whole app.
+        // A legacy backend threw this for the no-code case — treat as no code.
+        // Any OTHER (network/unknown) error fails OPEN so a transient blip can't
+        // lock a legitimate user out of the whole app.
         this.hasPlatformAccess = !msg.includes('PyramidAffiliate matching query does not exist')
       }
       return this.hasPlatformAccess
