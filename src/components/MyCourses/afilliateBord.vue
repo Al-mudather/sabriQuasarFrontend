@@ -149,7 +149,6 @@ async function JOIN_THE_PYRAMID_PROGRAM (): Promise<void> {
   display: flex;
   align-items: center;
   gap: var(--ds-space-4);
-  flex-wrap: wrap;
   margin-block-end: var(--ds-space-5);
   padding: var(--ds-space-5);
   background: linear-gradient(135deg, var(--ds-brand-600), var(--ds-brand-800));
@@ -177,12 +176,34 @@ async function JOIN_THE_PYRAMID_PROGRAM (): Promise<void> {
 
   &__text {
     flex: 1;
-    min-inline-size: 12rem;
+    min-inline-size: 0;
     margin: 0;
     font-size: var(--ds-text-md);
     line-height: var(--ds-leading-arabic);
   }
 
   &__cta { flex-shrink: 0; }
+
+  /* Small screens: stack into one column — icon on top, then the message and
+     the button each spanning the full width. Far cleaner than the cramped
+     three-across row on a phone. */
+  @media (max-width: 599px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--ds-space-4);
+    padding: var(--ds-space-4);
+
+    .affiliate-board__text {
+      flex: none;
+    }
+
+    .affiliate-board__cta {
+      inline-size: 100%;
+
+      :deep(.ds-btn) {
+        inline-size: 100%;
+      }
+    }
+  }
 }
 </style>
