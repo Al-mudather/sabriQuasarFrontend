@@ -1,35 +1,40 @@
 <template>
-  <div class="affiliate-board">
-    <div class="affiliate-board__prompt">
-      <img class="affiliate-board__icon" src="~assets/img/money.png" alt="" aria-hidden="true" />
-      <div class="affiliate-board__text">
-        <p v-if="myPyramidAccountID || amIAMarketer">
-          {{ $t('انت الان ضمن عائلة مسوقي المنصه التعليميه. الرجاء الذهاب الى صفحتك التسويقيه') }}
-        </p>
-        <p v-else>
-          {{ $t('هل تريد ان تكون ضمن عائلة مسوقي المنصه التعليميه, اذا نعم قم بالضغط على طلب الإنضمام الان') }}
-        </p>
-      </div>
-      <div class="affiliate-board__cta">
-        <ds-button
-          v-if="myPyramidAccountID || amIAMarketer"
-          variant="secondary"
-          :loading="visible"
-          @click="GO_TO_MY_MARKETING_PAGE"
-        >
-          {{ $t('الذهاب') }}
-        </ds-button>
-        <ds-button
-          v-else
-          variant="accent"
-          :loading="visible"
-          @click="JOIN_THE_PYRAMID_PROGRAM"
-        >
-          {{ $t('طلب إنضمام') }}
-        </ds-button>
-      </div>
+  <section class="affiliate-board">
+    <span class="affiliate-board__badge" aria-hidden="true">
+      <!-- Megaphone: the "marketer / promote & earn" mark (replaces the old
+           money.png raster image with a crisp, theme-coloured line icon). -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 10v4a1 1 0 0 0 1 1h3l8 4V5L7 9H4a1 1 0 0 0-1 1Z" />
+        <path d="M7 15v3a1.5 1.5 0 0 0 3 0v-2" />
+        <path d="M18.4 9.6a4 4 0 0 1 0 4.8" />
+      </svg>
+    </span>
+
+    <p class="affiliate-board__text">
+      {{ isMarketer
+        ? $t('انت الان ضمن عائلة مسوقي المنصه التعليميه. الرجاء الذهاب الى صفحتك التسويقيه')
+        : $t('هل تريد ان تكون ضمن عائلة مسوقي المنصه التعليميه, اذا نعم قم بالضغط على طلب الإنضمام الان') }}
+    </p>
+
+    <div class="affiliate-board__cta">
+      <ds-button
+        v-if="isMarketer"
+        variant="secondary"
+        :loading="visible"
+        @click="GO_TO_MY_MARKETING_PAGE"
+      >
+        {{ $t('الذهاب') }}
+      </ds-button>
+      <ds-button
+        v-else
+        variant="accent"
+        :loading="visible"
+        @click="JOIN_THE_PYRAMID_PROGRAM"
+      >
+        {{ $t('طلب إنضمام') }}
+      </ds-button>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
@@ -65,6 +70,10 @@ const myPyramidAccountID = ref<string | null>(null)
 const amIAMarketer = ref(false)
 const visible = ref(false)
 
+// Already part of the marketers program → show "go to marketing page"; otherwise
+// show the "request to join" CTA.
+const isMarketer = computed(() => !!myPyramidAccountID.value || amIAMarketer.value)
+
 const { result, onResult } = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(
   MyPyramidAccount,
   {},
@@ -93,7 +102,7 @@ async function CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE (): Promise<void> {
         progress: true,
         multiLine: true,
         position: 'bottom',
-        message: 'You must inter the registeration code'
+        message: t('يجب إدخال كود التسجيل أولاً')
       })
       router.push({ name: 'registeration-code' })
     }
@@ -118,7 +127,7 @@ async function JOIN_THE_PYRAMID_PROGRAM (): Promise<void> {
         progress: true,
         multiLine: true,
         position: 'bottom',
-        message: 'You are now a marketer'
+        message: t('أنت الآن مسوّق')
       })
       amIAMarketer.value = true
       const profile = await apolloClient.query<GetMyProfileResult>({ query: GetMyProfileData })
@@ -137,34 +146,41 @@ async function JOIN_THE_PYRAMID_PROGRAM (): Promise<void> {
 
 <style lang="scss" scoped>
 .affiliate-board {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-4);
+  flex-wrap: wrap;
   margin-block-end: var(--ds-space-5);
+  padding: var(--ds-space-5);
+  background: linear-gradient(135deg, var(--ds-brand-600), var(--ds-brand-800));
+  color: var(--ds-text-onBrand);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-md);
 
-  &__prompt {
-    display: flex;
+  &__badge {
+    display: inline-flex;
     align-items: center;
-    gap: var(--ds-space-4);
-    background: linear-gradient(135deg, var(--ds-brand-600), var(--ds-brand-700));
-    color: var(--ds-text-onBrand);
-    border-radius: var(--ds-radius-xl);
-    padding: var(--ds-space-5);
-    box-shadow: var(--ds-shadow-md);
-    flex-wrap: wrap;
-  }
-
-  &__icon {
-    inline-size: 4rem;
-    block-size: 4rem;
+    justify-content: center;
+    inline-size: 3rem;
+    block-size: 3rem;
     flex-shrink: 0;
+    border-radius: var(--ds-radius-lg);
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: var(--ds-accent-300);
+
+    svg {
+      inline-size: 1.6rem;
+      block-size: 1.6rem;
+    }
   }
 
   &__text {
     flex: 1;
     min-inline-size: 12rem;
-    p {
-      margin: 0;
-      font-size: var(--ds-text-md);
-      line-height: var(--ds-leading-arabic);
-    }
+    margin: 0;
+    font-size: var(--ds-text-md);
+    line-height: var(--ds-leading-arabic);
   }
 
   &__cta { flex-shrink: 0; }

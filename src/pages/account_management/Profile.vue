@@ -8,6 +8,12 @@
     </header>
 
     <div class="profile-page__stack">
+      <!-- Become-a-marketer / go-to-marketing-page banner. Shows a "Request to
+           join" CTA for a normal user (runs joinPyramidProgram) and a "Go to
+           your marketing page" link once they're a marketer. Restored here after
+           the phase-4 redesign dropped it (it originally lived on this page). -->
+      <AfilliateBord class="profile-page__affiliate" />
+
       <!-- Identity section (full-width) -->
       <section class="profile-section profile-identity" aria-labelledby="identity-heading">
         <div class="profile-identity__avatar" aria-hidden="true">
@@ -201,6 +207,7 @@ import { useSettingsStore } from 'src/stores/settings'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
 import { UpdateUserProfile } from 'src/graphql/account_management/mutation/UpdateUserProfile'
 import DsInput from 'src/design-system/components/DsInput.vue'
+import AfilliateBord from 'src/components/MyCourses/afilliateBord.vue'
 import type {
   GetMyProfileResult,
   GetMyProfileVariables,

@@ -1175,4 +1175,8 @@ export default {
 
   // Registration-code page: already-registered guard message.
   "أنت مسجّل بالفعل": "You are already registered",
+
+  // Become-a-marketer (join pyramid program) notifications.
+  "أنت الآن مسوّق": "You are now a marketer",
+  "يجب إدخال كود التسجيل أولاً": "You must enter the registration code first",
 }
