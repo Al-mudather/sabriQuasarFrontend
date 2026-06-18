@@ -948,7 +948,7 @@ export default {
   "كلمة المرور قصيرة جداً": "Password is too short",
   "كلمة المرور مطلوبة": "Password is required",
   "كلمتا المرور غير متطابقتين": "Passwords don't match",
-  "كود التسجيل": "Sign-up code",
+  "كود التسجيل": "Registration code",
   "تسجيل الخروج": "Sign out",
   "كود الخصم": "Discount code",
   "كورساتي": "My courses",
@@ -1172,4 +1172,7 @@ export default {
 
   // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.
   "15+ سنة خبرة": "15+ years of experience",
+
+  // Registration-code page: already-registered guard message.
+  "أنت مسجّل بالفعل": "You are already registered",
 }

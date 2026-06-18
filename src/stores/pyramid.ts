@@ -102,25 +102,32 @@ export const usePyramidStore = defineStore('pyramidManagement', {
           fetchPolicy: 'network-only',
           errorPolicy: 'all',
         })
-        // The Apollo client default is `errorPolicy: 'all'`, so a GraphQL error
-        // does NOT throw — it arrives in `res.errors` with `res.data` possibly
-        // null. The very first authenticated request right after login can fail
-        // transiently; reading that as "no code" (`data.checkPyramidAffiliate`
-        // being null/undefined → false) wrongly bounced a legitimate user to the
-        // registration-code page. So: any errors → FAIL OPEN and do NOT cache a
-        // verdict (re-check on the next navigation).
-        if (res.errors && res.errors.length) return true
-        // Clean response: the backend returns SUCCESS with
-        // `checkPyramidAffiliate: null` when the user has NO registration code.
-        // A non-null object means they're linked to a PyramidAffiliate.
-        this.hasPlatformAccess = res.data?.checkPyramidAffiliate != null
+        // HAS ACCESS: the affiliate object resolved.
+        if (res.data?.checkPyramidAffiliate != null) {
+          this.hasPlatformAccess = true
+          return true
+        }
+        // NO CODE: the backend reports the missing affiliate as a GraphQL error
+        // ("PyramidAffiliate matching query does not exist.") with data:null.
+        // With errorPolicy:'all' that error does NOT throw — it arrives in
+        // res.errors. This is the AUTHORITATIVE "no registration code" signal,
+        // so we gate the user. (A clean data:null with no errors — the older
+        // backend shape — also means no code.)
+        const errs = res.errors || []
+        const isNoCode = errs.some((e) => /PyramidAffiliate matching query does not exist/i.test((e && e.message) || ''))
+        if (isNoCode || errs.length === 0) {
+          this.hasPlatformAccess = false
+          return false
+        }
+        // data:null with some OTHER, unexpected error → genuinely ambiguous or
+        // transient. Fail OPEN and do NOT cache, so a blip can't lock a logged-in
+        // user out of browsing; the backend still enforces the gate at
+        // order/payment time and the next navigation re-checks.
+        return true
       } catch (_e: unknown) {
-        // Network/unknown throw → fail OPEN so a transient blip can't lock a
-        // legitimate user out of the whole app (the backend still enforces the
-        // gate server-side at order/payment time). Do not cache a hard verdict.
+        // Network/unknown throw → fail OPEN, uncached (same rationale as above).
         return true
       }
-      return this.hasPlatformAccess
     },
 
     /** Call after a successful JoinPlatform — the user now has access. */

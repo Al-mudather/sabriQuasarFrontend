@@ -57,6 +57,11 @@ function loadGis () {
 let tokenClient = null
 let pendingResolve = null
 let pendingReject = null
+// True once GIS is loaded AND the token client is built — i.e. a click can open
+// the popup synchronously, in-gesture. While false, the first click would have
+// to await the GIS network load (a macrotask), which loses the user gesture and
+// makes the popup silently fail ("nothing happens; works on the 2nd click").
+let googleReady = false
 
 // Distinguishes a user cancel/close from a real error, so the UI can stay quiet
 // on cancel but surface genuine failures.
@@ -94,18 +99,46 @@ function buildTokenClient (clientId) {
   })
 }
 
+// Eagerly load GIS and build the token client so the FIRST real click can open
+// the popup synchronously (in-gesture). Called at boot and on the login page's
+// mount. Idempotent and best-effort: resolves once ready, never throws on the
+// happy path. Returns a promise so a caller (the button) can reflect readiness.
+function warmGoogle () {
+  const clientId = process.env.SOCIAL_AUTH_GOOGLE_CLIENT_ID || ''
+  if (!clientId) return Promise.reject(makeAuthError('Missing client id for google (SOCIAL_AUTH_GOOGLE_CLIENT_ID)', false))
+  if (googleReady && tokenClient) return Promise.resolve()
+  return loadGis().then(() => {
+    if (!tokenClient) tokenClient = buildTokenClient(clientId)
+    googleReady = true
+  })
+}
+
+function isGoogleReady () {
+  return googleReady && !!tokenClient
+}
+
 function authenticateGoogle () {
   const clientId = process.env.SOCIAL_AUTH_GOOGLE_CLIENT_ID || ''
   if (!clientId) {
     return Promise.reject(makeAuthError('Missing client id for google (SOCIAL_AUTH_GOOGLE_CLIENT_ID)', false))
   }
-  return loadGis().then(() => new Promise((resolve, reject) => {
-    // Reuse the cached client; only build it the first time.
-    if (!tokenClient) tokenClient = buildTokenClient(clientId)
+  return new Promise((resolve, reject) => {
     pendingResolve = resolve
     pendingReject = reject
-    tokenClient.requestAccessToken()
-  }))
+    if (googleReady && tokenClient) {
+      // WARM PATH — GIS is already loaded and the client built, so this call is
+      // a microtask off the click: the user gesture is preserved and the popup
+      // opens immediately. This is the path that makes Google a single click.
+      tokenClient.requestAccessToken()
+    } else {
+      // COLD PATH — GIS is still loading (user clicked very early). Awaiting the
+      // network load loses the gesture, so the popup may not open until a second
+      // click. We still warm + try; the boot/mount warm-up makes this rare.
+      warmGoogle()
+        .then(() => { tokenClient.requestAccessToken() })
+        .catch((e) => { pendingResolve = pendingReject = null; reject(e) })
+    }
+  })
 }
 
 // Legacy Facebook authorization redirect — behaviour unchanged.
@@ -159,11 +192,14 @@ function authenticate (provider) {
 }
 
 export default boot(({ app }) => {
-  const api = { authenticate, revokeGoogle }
+  const api = { authenticate, revokeGoogle, warmGoogle, isGoogleReady }
   app.config.globalProperties.$socialAuth = api
   app.config.globalProperties.$auth = api
   if (typeof window !== 'undefined') {
     window.__appGlobals = window.__appGlobals || {}
     window.__appGlobals.$socialAuth = api
+    // Warm Google sign-in as soon as the app boots so the first click on the
+    // login page can open the popup in-gesture (single click). Best-effort.
+    warmGoogle().catch(() => { /* GIS may still load lazily on click */ })
   }
 })

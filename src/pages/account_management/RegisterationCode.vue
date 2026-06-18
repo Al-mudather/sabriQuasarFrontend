@@ -57,6 +57,7 @@ import { useQuasar } from 'quasar'
 import { useMutation } from '@vue/apollo-composable'
 import { storeToRefs } from 'pinia'
 import { usePyramidStore } from 'src/stores/pyramid'
+import { tokenStorage } from 'src/localStorageService'
 import { useLogout } from 'src/composables/useLogout'
 import { JoinPlatform } from 'src/graphql/pyramid_marketing_management/mutation/JoinPlatform'
 import type { JoinPlatformResult, JoinPlatformVars } from 'src/types/pyramid/types'
@@ -110,6 +111,12 @@ async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
       // tried to enrol in); fall back Home.
       const redirect = route.query?.redirect
       void router.push(typeof redirect === 'string' && redirect ? redirect : { name: 'Home' }).catch(() => {})
+    } else {
+      // Mutation resolved but did NOT succeed (e.g. invalid/used code). With
+      // errorPolicy:'all' a GraphQL error lands here as data:false rather than a
+      // throw, so without this branch the spinner just vanishes with no feedback
+      // (and the prefilled auto-submit path would look like it did nothing).
+      apiError.value = t('هذا الكود غير صحيح — يرجى التحقق والمحاولة مجدداً.')
     }
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : ''
@@ -126,7 +133,26 @@ async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
 // ---------------------------------------------------------------------------
 // Lifecycle
 // ---------------------------------------------------------------------------
-onMounted(() => {
+onMounted(async () => {
+  // No double-registration: a user ALREADY linked to a code must not see the
+  // form (they reached here via the dropdown link or a stale URL). The backend
+  // also rejects a second joinPlatform, but the UI shouldn't even offer it —
+  // send them to their destination / Home. A no-code user (the gated case) stays.
+  // Only meaningful for an authenticated user — the "already registered" concept
+  // requires a session. An unauthenticated visitor (e.g. an affiliate share link
+  // followed before login) just sees the form. Non-forced: reuses the verdict
+  // the router guard just cached on a gated arrival (no redundant query), and
+  // re-checks when the cache is null (dropdown-link entry / direct refresh).
+  if (tokenStorage.getAccessToken()) {
+    const alreadyHasCode = await pyramid.verifyPlatformAccess()
+    if (alreadyHasCode) {
+      $q.notify({ type: 'info', progress: true, position: 'bottom', message: t('أنت مسجّل بالفعل') })
+      const dest = route.query?.redirect
+      void router.replace(typeof dest === 'string' && dest ? dest : { name: 'Home' }).catch(() => {})
+      return
+    }
+  }
+
   // Prefill from a code carried in via the affiliate share link (loadCourse →
   // setRegisterationCode). Use it verbatim — it's an alphanumeric code — and
   // auto-submit so a referred user sails straight through.

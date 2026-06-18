@@ -299,6 +299,10 @@ const accountLinks = computed<{ to: string; label: string }[]>(() => {
     { to: '/myOrders',        label: t('طلباتي') },
     { to: '/myMarketingPage', label: t('صفحتي التسويقية') },
     { to: '/profile',         label: t('الملف الشخصي') },
+    // Registration code — a direct entry point to the join-platform page. A user
+    // who already has a code is redirected away on arrival (RegisterationCode.vue
+    // mount guard), so this can't double-register them.
+    { to: '/account/registerationCode', label: t('كود التسجيل') },
   ]
 })
 

@@ -1,6 +1,6 @@
 <template>
   <div class="social">
-    <q-btn class="full-width" :label="label" icon="la la-google" @click="helloGoogleAuth" color="deep-orange" />
+    <q-btn class="full-width" :label="label" icon="la la-google" @click="helloGoogleAuth" color="deep-orange" :loading="!googleReady && !visible" />
     <q-inner-loading :showing="visible">
       <q-spinner-hourglass color="primary" size="70px" />
     </q-inner-loading>
@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'src/design-system/toast'
@@ -34,6 +34,34 @@ const settings = useSettingsStore()
 const pyramid = usePyramidStore()
 
 const visible = ref(false)
+// Gates the Google button: until GIS is loaded + the token client is built, a
+// click can't open the popup in-gesture (it would need to await the network
+// load and lose the gesture — the "two clicks" bug). We warm at boot AND here on
+// mount, then enable the button. With the index.html GIS preload this is near-
+// instant, so the brief loading state is usually invisible.
+const googleReady = ref(false)
+
+interface SocialAuthApi {
+  warmGoogle?: () => Promise<void>
+  isGoogleReady?: () => boolean
+}
+function socialApi (): SocialAuthApi | null {
+  return (window as unknown as { __appGlobals?: { $socialAuth?: SocialAuthApi } }).__appGlobals?.$socialAuth ?? null
+}
+
+onMounted(() => {
+  const api = socialApi()
+  if (api?.isGoogleReady?.()) { googleReady.value = true; return }
+  if (api?.warmGoogle) {
+    api.warmGoogle()
+      .then(() => { googleReady.value = true })
+      // If warming fails, still enable the button so the user isn't stuck — the
+      // click will take the cold path (may need a retry) rather than nothing.
+      .catch(() => { googleReady.value = true })
+  } else {
+    googleReady.value = true
+  }
+})
 
 // Backstop timer: clears the spinner if the whole flow ever hangs (e.g. the GIS
 // popup never returns a callback). Normal cancel/error already resolve fast via

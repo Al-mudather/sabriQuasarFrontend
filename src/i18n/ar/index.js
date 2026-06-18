@@ -1152,4 +1152,7 @@ export default {
 
   // Phase 4 fixups (2026-05-19): missing nav/role/aria translations.
   "15+ سنة خبرة": "15+ سنة خبرة",
+
+  // Registration-code page: already-registered guard message.
+  "أنت مسجّل بالفعل": "أنت مسجّل بالفعل",
 };

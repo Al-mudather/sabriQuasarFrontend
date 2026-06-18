@@ -47,6 +47,7 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 | 1.1.15 | [Fix: my-courses post-login 404 (name vs path)](1.1.15-mycourses-redirect-404.md) | ✅ | `db860bb` |
 | 1.1.16 | [Auth: simplify + harden post-login navigation (stuck-login fix)](1.1.16-login-navigation-stuck-fix.md) | ✅ | `3b0bd79` |
 | 1.1.17 | [Auth: remove blocking queries from post-login navigation (real stuck-login fix)](1.1.17-login-navigation-no-blocking-queries.md) | ✅ | `login-nav-no-blocking-queries` |
+| 1.1.18 | [Auth: fix registration-code gate + dropdown entry + single-click Google](1.1.18-regcode-gate-fix-and-dropdown.md) | ✅ | `regcode-gate-appears` |
 
 Tags: each commit also carries a descriptive git tag — e.g. `registration-code-gate`,
 `payment-code-gate`, `regcode-null-fix`, `userinfo-bidi-direction`,
