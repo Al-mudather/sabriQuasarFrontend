@@ -28,6 +28,7 @@ import { GetCourseUnitContents } from 'src/graphql/course_management/query/GetCo
 import { useClassroomCacheStore } from 'src/stores/classroomCache'
 import {
   kindFromModelName,
+  titleFromModelValue,
   type CurriculumContent,
   type GetCourseUnitContentsResult,
   type GetCourseUnitContentsVars,
@@ -42,24 +43,6 @@ const UNIT_TTL_MS = 10 * 60 * 1000
 // still arrive in one round-trip; the rare unit that exceeds it falls back
 // to scroll-triggered `loadMore`.
 const UNIT_CONTENTS_PAGE_SIZE = 100
-
-function titleFromModelValue(modelName: string, raw: string | null | undefined): string {
-  if (!raw) return kindFromModelName(modelName)
-  try {
-    const parsed = JSON.parse(raw) as Record<string, unknown>
-    for (const key of ['title', 'quiz_title', 'name', 'label']) {
-      const v = parsed[key]
-      if (typeof v === 'string' && v.trim()) return v
-    }
-  } catch {
-    /* fall through */
-  }
-  const k = kindFromModelName(modelName)
-  if (k === 'video') return 'Video lesson'
-  if (k === 'quiz') return 'Quiz'
-  if (k === 'file') return 'Resource'
-  return 'Lesson'
-}
 
 export interface UseUnitContentsApi {
   /** Map of unitPk → hydrated lesson list. Reactive — components can `v-for` it. */

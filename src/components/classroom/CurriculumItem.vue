@@ -34,6 +34,19 @@ const kindLabel = computed(() => {
   return m || 'content'
 })
 
+// At-a-glance type icon next to the kind label. Deliberately uses `smart_display`
+// for video (not `play_circle`, which the status column already uses to mean
+// "in progress" — keeping type and status icons distinct avoids confusion).
+const kindIcon = computed(() => {
+  switch (kindLabel.value) {
+    case 'video': return 'smart_display'
+    case 'quiz': return 'quiz'
+    case 'file': return 'description'
+    case 'article': return 'article'
+    default: return 'circle'
+  }
+})
+
 function handleClick() {
   if (props.locked) return
   emit('click')
@@ -69,6 +82,12 @@ function handleKeydown(e: KeyboardEvent) {
     <span class="cls-curriculum-item__main">
       <span class="cls-curriculum-item__title">{{ content.title }}</span>
       <span class="cls-curriculum-item__meta">
+        <q-icon
+          :name="kindIcon"
+          size="14px"
+          aria-hidden="true"
+          class="cls-curriculum-item__kind-icon"
+        />
         <span class="cls-curriculum-item__kind">{{ kindLabel }}</span>
         <span v-if="content.isFree" class="cls-curriculum-item__badge cls-curriculum-item__badge--free">
           FREE
@@ -131,7 +150,8 @@ function handleKeydown(e: KeyboardEvent) {
       font-weight: var(--ds-weight-semibold);
     }
 
-    .cls-curriculum-item__kind {
+    .cls-curriculum-item__kind,
+    .cls-curriculum-item__kind-icon {
       color: var(--cls-accent);
     }
   }
@@ -187,6 +207,11 @@ function handleKeydown(e: KeyboardEvent) {
     color: var(--cls-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+  }
+
+  &__kind-icon {
+    flex-shrink: 0;
+    color: var(--cls-text-muted);
   }
 
   &__badge {

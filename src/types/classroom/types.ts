@@ -106,6 +106,77 @@ export function parseModelValue<T>(raw: string | null | undefined): T | null {
   }
 }
 
+/**
+ * Human-friendly file name derived from an attachment URL/path: the last path
+ * segment, URL-decoded, with the extension dropped and `_`/`-` turned into
+ * spaces. e.g. "/media/.../High_yield_handbook_psychiatry_questions.pdf" ->
+ * "High yield handbook psychiatry questions". Empty string when not derivable.
+ */
+export function fileNameFromAttachment(attachment: string | null | undefined): string {
+  if (!attachment) return ''
+  try {
+    const noQuery = attachment.split(/[?#]/)[0] ?? ''
+    const seg = noQuery.split('/').filter(Boolean).pop() ?? ''
+    let name = decodeURIComponent(seg)
+    name = name.replace(/\.[a-z0-9]{1,8}$/i, '')
+    name = name.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim()
+    return name
+  } catch {
+    return ''
+  }
+}
+
+// Placeholder titles teachers leave on a content item when they don't name it.
+// The observed real-world default is the literal "File Title" — and it shows up
+// on videos/quizzes too, not just files.
+const GENERIC_TITLES = new Set(['file title', 'untitled', 'file', 'no title', 'new file'])
+
+/** True when a title is empty or one of the known generic placeholders. */
+export function isGenericTitle(title: string | null | undefined): boolean {
+  const t = (title ?? '').trim().toLowerCase()
+  return t === '' || GENERIC_TITLES.has(t)
+}
+
+/**
+ * Resolve a FILE item's display title: the teacher's title when it is
+ * meaningful, otherwise the real uploaded file name derived from the attachment
+ * URL, otherwise the given fallback.
+ */
+export function resolveFileTitle(parsed: ParsedFileValue | null | undefined, fallback = 'Resource'): string {
+  const title = (parsed?.title ?? '').trim()
+  if (!isGenericTitle(title)) return title
+  const fromFile = fileNameFromAttachment(parsed?.attachment)
+  return fromFile || title || fallback
+}
+
+/**
+ * Display title for any content item from its (modelName, raw modelValue).
+ * Shared by the curriculum rail (useUnitContents) and the open lesson
+ * (useCurrentContent) so the sidebar and the content view always agree.
+ */
+export function titleFromModelValue(modelName: string | null | undefined, raw: string | null | undefined): string {
+  const kind = kindFromModelName(modelName)
+  const parsed = parseModelValue<Record<string, unknown>>(raw)
+  if (kind === 'file') {
+    return resolveFileTitle(parsed as ParsedFileValue | null, 'Resource')
+  }
+  // Pull the title from the usual keys.
+  let title = ''
+  if (parsed) {
+    for (const key of ['title', 'quiz_title', 'name', 'label']) {
+      const v = parsed[key]
+      if (typeof v === 'string' && v.trim()) { title = v.trim(); break }
+    }
+  }
+  // Videos/quizzes have no derivable real name (a video only carries a UUID
+  // stream key), so when the title is a generic placeholder ("File Title") we
+  // show a sensible kind label instead of the misleading verbatim text.
+  if (title && !isGenericTitle(title)) return title
+  if (kind === 'video') return 'Video lesson'
+  if (kind === 'quiz') return 'Quiz'
+  return 'Lesson'
+}
+
 // ---------------------------------------------------------------------------
 // Video provider discriminator.
 // ---------------------------------------------------------------------------

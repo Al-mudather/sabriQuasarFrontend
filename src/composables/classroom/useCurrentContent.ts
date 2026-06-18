@@ -15,30 +15,13 @@ import { GetCourseUnitContent } from 'src/graphql/course_management/query/GetCou
 import { useClassroomCacheStore } from 'src/stores/classroomCache'
 import {
   kindFromModelName,
+  titleFromModelValue,
   type CurriculumContent,
   type GetCourseUnitContentResult,
   type GetCourseUnitContentVars,
 } from 'src/types/classroom/types'
 
 const CURRENT_CONTENT_TTL_MS = 10 * 60 * 1000
-
-function titleFromModelValue(modelName: string, raw: string | null | undefined): string {
-  if (!raw) return kindFromModelName(modelName)
-  try {
-    const parsed = JSON.parse(raw) as Record<string, unknown>
-    for (const key of ['title', 'quiz_title', 'name', 'label']) {
-      const v = parsed[key]
-      if (typeof v === 'string' && v.trim()) return v
-    }
-  } catch {
-    /* fall through */
-  }
-  const k = kindFromModelName(modelName)
-  if (k === 'video') return 'Video lesson'
-  if (k === 'quiz') return 'Quiz'
-  if (k === 'file') return 'Resource'
-  return 'Lesson'
-}
 
 type PkLike = number | Ref<number | null | undefined> | null | undefined
 
