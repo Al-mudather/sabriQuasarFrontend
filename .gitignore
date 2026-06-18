@@ -4,7 +4,8 @@ node_modules
 
 # Quasar core related directories
 .quasar
-# /dist
+# Build output — the server builds on deploy, so dist/ is never committed.
+/dist
 ./env
 env
 # Cordova related directories and files
