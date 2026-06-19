@@ -63,7 +63,7 @@ const currentContentPkFromRoute = computed<number | null>(() => {
 // Data layer (slim bootstrap + lazy unit lessons + current-lesson resolver)
 // ---------------------------------------------------------------------------
 
-const { bootstrap: rawBootstrap, loading, error, refetch } = useCourseBootstrap(coursePk)
+const { bootstrap: rawBootstrap, loading, error, refetch, refreshEnrollment } = useCourseBootstrap(coursePk)
 
 const enrollmentPk = computed<number | null>(() => rawBootstrap.value?.enrollmentPk ?? null)
 
@@ -75,15 +75,14 @@ const {
 } = useLearningProgress(coursePk, enrollmentPk)
 
 // Live-ring update: when the user navigates away from a content (contentPk changes),
-// refetch the enrollment so the header ring reflects the new backend percentage.
-// This fires after the route-level navigation that typically follows end() → next().
-// Tradeoff: one extra enrollment fetch per content switch. This is the simplest
-// correct wiring without touching useLearningProgress internals.
+// refetch ONLY the enrollment so the header ring reflects the new backend
+// percentage. (Previously called the full bootstrap refetch, which needlessly
+// re-fetched the static course + all unit titles on every single lesson switch.)
 watch(
   () => currentContentPkFromRoute.value,
   (next, prev) => {
     if (prev != null && next !== prev) {
-      void refetch()
+      refreshEnrollment()
     }
   },
 )
@@ -143,6 +142,10 @@ provide(ClassroomContextKey, classroomContext)
 // ---------------------------------------------------------------------------
 
 const headerTitle = computed<string>(() => {
+  // Show the current LESSON/video name in the header (centered), not the course
+  // name. Fall back to the course title, then loading/fallback labels.
+  const lesson = currentContent.value?.title
+  if (lesson && lesson.trim()) return lesson
   if (bootstrap.value?.courseTitle) return bootstrap.value.courseTitle
   if (loading.value) return t('classroom.header.loading')
   return t('classroom.header.fallbackTitle')

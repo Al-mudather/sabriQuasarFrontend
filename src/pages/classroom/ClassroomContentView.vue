@@ -29,11 +29,12 @@
       />
       <div v-else class="cls-cockpit__stage">
         <div class="cls-cockpit__top">
-          <h2 class="cls-cockpit__title">{{ current.title }}</h2>
-
+          <!-- Lesson title now lives (centered) in the classroom header; showing
+               it again above the player here was redundant. -->
           <div class="cls-cockpit__media" :data-provider="videoProvider || null">
             <VideoPlayer
               v-if="current.kind === 'video'"
+              :key="current.pk"
               :model-value-raw="current.modelValueRaw"
               @begin="onBegin"
               @complete="onComplete"
@@ -527,6 +528,15 @@ async function onSelect(contentPk: number): Promise<void> {
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+  }
+
+  // Video: center the 16:9 stage vertically so the player reads as a framed
+  // video rather than a small strip stranded at the top above a big black void
+  // (the lesson panel is an off-canvas drawer on mobile, so nothing fills the
+  // space below the video). Quiz/file keep flex-start above so they scroll from
+  // the top. The real "make it big" path is fullscreen, fixed in VdoCipherPlayer.
+  .cls-cockpit[data-kind='video'] .cls-cockpit__main {
+    align-items: center;
   }
 
   // Full-bleed edge-to-edge video on mobile (no rounded corners).

@@ -22,8 +22,6 @@
         :show-label="true"
         :aria-label="t('classroom.header.progressLabel')"
       />
-
-      <LanguageSwitcher variant="dark" />
     </div>
   </header>
 </template>
@@ -33,7 +31,6 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import ClassroomProgressRing from 'src/components/classroom/ClassroomProgressRing.vue'
-import LanguageSwitcher from 'src/components/shared/LanguageSwitcher.vue'
 
 interface Props {
   title?: string
@@ -61,8 +58,10 @@ function onExit (): void {
 
 <style lang="scss" scoped>
 .cls-header {
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   block-size: 56px;
   padding-inline: 16px;
@@ -89,14 +88,23 @@ function onExit (): void {
     font-size: 13px;
   }
 
+  // Absolutely centered in the bar (so it's viewport-centered regardless of the
+  // differing widths of the back button and the progress ring). `pointer-events:
+  // none` keeps it from blocking those controls; ellipsis + max width prevent a
+  // long lesson name from overlapping them.
   &__title {
-    flex: 1 1 auto;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-inline-size: 56%;
     margin: 0;
     font-size: 15px;
     font-weight: 600;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    pointer-events: none;
   }
 
   &__meta {
@@ -121,7 +129,7 @@ function onExit (): void {
 
     &__exit-label { display: none; }
     &__exit { padding: 6px 8px; }
-    &__title { font-size: 13px; }
+    &__title { font-size: 13px; max-inline-size: 60%; }
     &__meta { gap: 6px; }
   }
 }
