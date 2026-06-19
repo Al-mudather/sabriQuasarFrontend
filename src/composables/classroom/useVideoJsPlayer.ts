@@ -94,6 +94,7 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
   let player: PlayerInstance | null = null
   let levels: QualityLevelList | null = null
   let beginEmitted = false
+  let hasSource = false
 
   function buildSrc(uuid: string): string {
     return `https://video.cdn1.stc.training/stream/hls/${uuid}/playlist.m3u8`
@@ -124,7 +125,11 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
   function mount(el: HTMLVideoElement): void {
     player = videojs(el, {
       controls: false,
-      preload: 'auto',
+      // 'metadata' fetches only the HLS manifest (duration + quality levels) up
+      // front, NOT the media segments — so opening a lesson no longer kicks off
+      // segment downloads that compete with the page's GraphQL requests before
+      // the user even presses play (a cause of the "slow / won't load" reports).
+      preload: 'metadata',
       playbackRates: [...PLAYBACK_RATES],
       html5: {
         nativeAudioTracks: false,
@@ -191,6 +196,22 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
     beginEmitted = false
     state.error = null
     state.ended = false
+    // Clean tech reset BETWEEN lessons (not on first load): tears down the
+    // previous stream's VHS/hls segment loaders and their abort listeners.
+    // Without it, a long session of source swaps on one instance leaks listeners
+    // and lets stale segment requests interfere with the new source ("video
+    // won't load"). reset() reverts volume/rate to defaults, so preserve them.
+    if (hasSource) {
+      try {
+        const vol = player.volume() ?? 1
+        const mut = player.muted() ?? false
+        const rate = player.playbackRate() ?? 1
+        player.reset()
+        player.volume(vol)
+        player.muted(mut)
+        player.playbackRate(rate)
+      } catch { /* ignore — fall through to src() */ }
+    }
     const source = {
       src: buildSrc(uuid),
       type: 'application/vnd.apple.mpegurl',
@@ -198,6 +219,7 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
       keySystems: { 'org.w3.clearkey': {} },
     }
     player.src(source as unknown as Parameters<PlayerInstance['src']>[0])
+    hasSource = true
   }
 
   // --- intent methods -------------------------------------------------------
