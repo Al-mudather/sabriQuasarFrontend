@@ -22,16 +22,8 @@ query GetCourseByIDSlim($coursePk:Int) {
   course(id:$coursePk) {
     id,
     pk,
-    courseHours,
     title,
-    profile,
     cover,
-    courseFee,
-    courseFeeInSdg,
-    currency,
-    brief,
-    isPaid,
-    enrollmentCount,
     telegramLink,
     hasCertificate,
     courseunitSet {
@@ -46,18 +38,6 @@ query GetCourseByIDSlim($coursePk:Int) {
           }
         }
       }
-    },
-    enrolled,
-    courseSpeciality {
-      id,
-      pk,
-      speciality
-    },
-    courseLanguage {
-      id,
-      pk,
-      languageName,
-      languageCode
     }
   }
 }

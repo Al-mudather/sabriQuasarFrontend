@@ -8,11 +8,10 @@
 // CurriculumContent plus its parent unit pk. The rail then eagerly
 // loads that unit so prev/next navigation has the surrounding lessons.
 
-import { computed, isRef, unref, watch, type ComputedRef, type Ref } from 'vue'
+import { computed, isRef, unref, type ComputedRef, type Ref } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 
 import { GetCourseUnitContent } from 'src/graphql/course_management/query/GetCourseUnitContent'
-import { useClassroomCacheStore } from 'src/stores/classroomCache'
 import {
   kindFromModelName,
   titleFromModelValue,
@@ -20,8 +19,6 @@ import {
   type GetCourseUnitContentResult,
   type GetCourseUnitContentVars,
 } from 'src/types/classroom/types'
-
-const CURRENT_CONTENT_TTL_MS = 10 * 60 * 1000
 
 type PkLike = number | Ref<number | null | undefined> | null | undefined
 
@@ -35,37 +32,24 @@ export function useCurrentContent(contentPk: PkLike): {
   currentUnitPk: ComputedRef<number | null>
   loading: Ref<boolean>
 } {
-  const cache = useClassroomCacheStore()
-
   const vars = computed<GetCourseUnitContentVars>(() => ({ contentPk: toNum(contentPk) ?? 0 }))
   const enabled = computed(() => toNum(contentPk) !== null)
 
-  const { result, loading, onResult, refetch } = useQuery<
+  // ONE network-only fetch per lesson. Two things matter for VdoCipher, whose
+  // `cipher_iframe` modelValue carries a SINGLE-USE OTP:
+  //   1. network-only — never replay a cached (already-consumed) OTP on revisit.
+  //   2. exactly one fetch — the previous code ALSO ran a TTL `watch` that called
+  //      `refetch()` on mount, so every lesson fetched TWICE → the iframe loaded
+  //      twice → the first load consumed the OTP and the second 403'd ("6007").
+  //      That redundant refetch is removed; network-only already keeps it fresh.
+  const { result, loading } = useQuery<
     GetCourseUnitContentResult,
     GetCourseUnitContentVars
   >(GetCourseUnitContent, vars, () => ({
     enabled: enabled.value,
     errorPolicy: 'all',
-    fetchPolicy: 'cache-first',
+    fetchPolicy: 'network-only',
   }))
-
-  onResult((res) => {
-    const pk = res.data?.courseUnitContent?.pk
-    if (pk) cache.markFresh(`content:${pk}`)
-  })
-
-  // Stale-after-TTL refetch for the current lesson too — keeps the metadata
-  // (and the video / quiz / file pointers) fresh after long playback sessions.
-  watch(
-    () => toNum(contentPk),
-    (pk) => {
-      if (pk == null) return
-      if (cache.isStale(`content:${pk}`, CURRENT_CONTENT_TTL_MS)) {
-        void refetch(vars.value)
-      }
-    },
-    { immediate: true },
-  )
 
   const currentContent = computed<CurriculumContent | null>(() => {
     const node = result.value?.courseUnitContent

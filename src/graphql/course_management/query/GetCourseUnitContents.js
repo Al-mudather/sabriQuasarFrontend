@@ -25,11 +25,7 @@ query GetCourseUnitContents($unitPk: Int!, $cursor: String, $limit: Int) {
         isFree,
         isMandatory,
         modelName,
-        modelValue,
-        courseUnit {
-          id,
-          pk
-        }
+        modelValue
       }
     }
   }

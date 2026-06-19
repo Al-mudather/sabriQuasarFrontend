@@ -53,7 +53,9 @@ export function useQuizQuestions(contentQuizId: NumLike): {
   >(AllContentQuizQuestionByContentQuizIdQuery, vars, () => ({
     enabled: enabled.value,
     errorPolicy: 'all',
-    fetchPolicy: 'cache-and-network',
+    // Quiz questions are static content — `cache-first` paints instantly on
+    // re-open instead of firing a background network request every mount.
+    fetchPolicy: 'cache-first',
   }))
 
   const questions = computed<QuizEdge[]>(() => {

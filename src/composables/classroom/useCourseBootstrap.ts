@@ -45,6 +45,7 @@ export function useCourseBootstrap(coursePk: PkLike): {
   loading: Ref<boolean>
   error: Ref<Error | null>
   refetch: () => void
+  refreshEnrollment: () => void
 } {
   const courseVars = computed<GetCourseByIDSlimVars>(() => ({ coursePk: toNum(coursePk) ?? 0 }))
   const enabled = computed(() => toNum(coursePk) !== null)
@@ -75,14 +76,15 @@ export function useCourseBootstrap(coursePk: PkLike): {
     if (res.data?.course) markCourseFresh()
   })
 
-  // Enrollment query keyed on course.pk (filled by the first query).
+  // Enrollment query keyed on the ROUTE course pk — the same value the course
+  // query resolves to (`course(id: $coursePk)` returns `course.pk === coursePk`).
+  // Keying on the input instead of the course RESPONSE lets enrollment fire IN
+  // PARALLEL with the course query rather than waiting for it (was a 2-hop
+  // waterfall on every cold classroom entry).
   const enrollmentVars = computed<GetEnrollmentByCourseForCurrentUserVars>(() => ({
-    courseId: courseResult.value?.course?.pk ?? 0,
+    courseId: toNum(coursePk) ?? 0,
   }))
-  const enrollmentEnabled = computed<boolean>(() => {
-    const pk = courseResult.value?.course?.pk
-    return typeof pk === 'number' && pk > 0
-  })
+  const enrollmentEnabled = computed<boolean>(() => toNum(coursePk) !== null)
 
   const {
     result: enrollmentResult,
@@ -101,7 +103,7 @@ export function useCourseBootstrap(coursePk: PkLike): {
 
   const { markFresh: markEnrollmentFresh } = useStaleAfterTtl({
     key: () => {
-      const pk = courseResult.value?.course?.pk
+      const pk = toNum(coursePk)
       return pk ? `enrollment:${pk}` : null
     },
     refetch: () => refetchEnrollment({ ...enrollmentVars.value }),
@@ -112,14 +114,10 @@ export function useCourseBootstrap(coursePk: PkLike): {
     if (res.data?.enrollmentByCourseForCurrentUser) markEnrollmentFresh()
   })
 
-  // Refetch the enrollment query whenever the course pk lands so we don't
-  // reuse a stale enrollment from a previous course.
-  watch(
-    () => courseResult.value?.course?.pk,
-    (next, prev) => {
-      if (next && next !== prev) void refetchEnrollment()
-    },
-  )
+  // (Removed the `watch(course.pk) -> refetchEnrollment()` that re-fired the
+  // enrollment query the instant the course landed — a redundant SECOND fetch.
+  // The enrollment query is now keyed on the stable route `coursePk`, so it
+  // already targets the right course from the first call.)
 
   const loading = computed<boolean>(() => courseLoading.value || enrollmentLoading.value)
   const aggregatedError = ref<Error | null>(null)
@@ -197,6 +195,11 @@ export function useCourseBootstrap(coursePk: PkLike): {
     error: aggregatedError as Ref<Error | null>,
     refetch: () => {
       void refetchCourse()
+      if (enrollmentEnabled.value) void refetchEnrollment()
+    },
+    // Refetch ONLY the enrollment (progress ring) — used after lesson navigation,
+    // where the course meta is static and doesn't need re-fetching.
+    refreshEnrollment: () => {
       if (enrollmentEnabled.value) void refetchEnrollment()
     },
   }
