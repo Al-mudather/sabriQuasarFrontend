@@ -148,15 +148,32 @@ export function useCourseBootstrap(coursePk: PkLike): {
     unitEdges.forEach((uEdge, uIdx) => {
       const u = uEdge?.node
       if (!u) return
-      const unitPk = (u as { pk?: number | null }).pk ?? null
-      if (unitPk == null) return
-      const contentsCount = u.courseunitcontentSet?.totalCount ?? 0
+      // EXTERNAL units carry no content of their own — their lessons live on the
+      // linked `external` unit (e.g. course 169's "Neurology" unit borrows its 7
+      // videos from unit 41). Point this curriculum entry at whichever unit
+      // actually OWNS the content, so lazy loading + navigation resolve real
+      // lessons instead of rendering an empty unit that hangs the classroom with
+      // nothing to play. Title/order stay from THIS course's unit.
+      const node = u as {
+        pk?: number | null
+        id?: string
+        title?: string | null
+        order?: number | null
+        isExternal?: boolean | null
+        external?: { pk?: number | null; id?: string; courseunitcontentSet?: { totalCount?: number | null } | null } | null
+        courseunitcontentSet?: { totalCount?: number | null } | null
+      }
+      const external = node.isExternal ? node.external ?? null : null
+      const contentUnitPk = (external?.pk ?? node.pk) ?? null
+      if (contentUnitPk == null) return
+      const contentsCount =
+        external?.courseunitcontentSet?.totalCount ?? node.courseunitcontentSet?.totalCount ?? 0
       totalContents += contentsCount
       units.push({
-        pk: unitPk,
-        id: u.id,
-        title: (u as { title?: string | null }).title ?? '',
-        order: (u as { order?: number | null }).order ?? uIdx,
+        pk: contentUnitPk,
+        id: external?.id ?? node.id ?? '',
+        title: node.title ?? '',
+        order: node.order ?? uIdx,
         contentsCount,
         contents: [],
         hydrated: false,

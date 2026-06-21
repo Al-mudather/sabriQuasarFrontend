@@ -17,6 +17,15 @@ import gql from 'graphql-tag'
 //
 // Lessons per unit are fetched on-demand via GetCourseUnitContents when the
 // CurriculumRail accordion expands that unit.
+//
+// EXTERNAL units: a course unit can be a *reference* to another unit
+// (`isExternal: true`) — it carries NO content of its own; its lessons live on
+// the linked `external` unit. The admin + the old classroom resolve content via
+// `external.courseunitcontentSet`. We therefore select `isExternal` + the
+// external unit's pk + its content count, so the bootstrap can point content
+// loading at the unit that actually owns the lessons (otherwise an external
+// unit looks empty → the classroom hangs with nothing to play). See
+// useCourseBootstrap for the resolution.
 export const GetCourseByIDSlim = gql`
 query GetCourseByIDSlim($coursePk:Int) {
   course(id:$coursePk) {
@@ -32,6 +41,14 @@ query GetCourseByIDSlim($coursePk:Int) {
           pk,
           title,
           order,
+          isExternal,
+          external {
+            id,
+            pk,
+            courseunitcontentSet {
+              totalCount
+            }
+          },
           courseunitcontentSet {
             totalCount
           }
