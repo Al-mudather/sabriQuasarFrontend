@@ -26,7 +26,7 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 
 ## Phase 1 — Frontend redesign & modernization
 
-### Block 1.1 — 2026-06-15 → 2026-06-16
+### Block 1.1 — 2026-06-15 → 2026-06-21
 
 | #     | Title                                             | Status | Commit    |
 |-------|---------------------------------------------------|--------|-----------|
@@ -50,6 +50,11 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 | 1.1.18 | [Auth: fix registration-code gate + dropdown entry + single-click Google](1.1.18-regcode-gate-fix-and-dropdown.md) | ✅ | `regcode-gate-appears` |
 | 1.1.19 | [Restore "become a marketer" banner on Profile + on-brand redesign](1.1.19-restore-become-marketer-banner.md) | ✅ | `restore-become-marketer` |
 | 1.1.20 | [Classroom: content-type icons + smart file titles](1.1.20-classroom-type-icons-and-file-titles.md) | ✅ | `classroom-type-icons-file-titles` |
+| 1.1.21 | [Classroom: query perf + VdoCipher single-injection/fullscreen + header (lesson name, no lang switcher) + 6007 resolution](1.1.21-classroom-perf-vdocipher-header.md) | ✅ | `classroom-perf-single-fetch`…`vdocipher-6007-resolution-docs` |
+| 1.1.22 | [Classroom: drop unused query fields + stop progress refetch-storm + remove header ring](1.1.22-classroom-query-perf-trim.md) | ✅ | `classroom-query-trim-fields`…`classroom-header-drop-ring` |
+| 1.1.23 | [Classroom: support external units (fix infinite-spinner courses)](1.1.23-classroom-external-units-fix.md) | ✅ | `classroom-external-units-fix` |
+| 1.1.24 | [Classroom: scan units for first lesson (never hang) + own-first external + skeletons](1.1.24-classroom-scan-units-no-hang.md) | ✅ | `classroom-scan-units-no-hang` |
+| 1.1.25 | [Classroom: render all units first, resolve video in background + course/lesson title swap](1.1.25-classroom-units-first-render.md) | ✅ | `classroom-units-first-render` |
 
 Tags: each commit also carries a descriptive git tag — e.g. `registration-code-gate`,
 `payment-code-gate`, `regcode-null-fix`, `userinfo-bidi-direction`,
@@ -64,6 +69,17 @@ Tags: each commit also carries a descriptive git tag — e.g. `registration-code
   pre-signed, cross-origin iframe blob, so its native controls can't be hidden and its
   playback can't be driven from the frontend without **backend changes** (disable the
   embed's controls / switch to OTP + playbackInfo init). Needs a backend hand-off spec.
+  NOTE: fullscreen + single-OTP-injection are now fixed ([1.1.21](1.1.21-classroom-perf-vdocipher-header.md));
+  the small-screen "6007" was diagnosed as a DevTools device-emulation artifact, not a
+  bug ([6007 resolution](1.1.21-classroom-perf-vdocipher-header.md)).
+- 🔭 **Classroom backend follow-ups** (frontend-side fixes shipped in 1.1.22–1.1.25;
+  these need backend work): a lightweight lesson `title` field so the rail can stop
+  fetching the heavy `modelValue` per lesson; `first:` pagination on
+  `learningProgressByCourse` + `courseunitSet`; and fixing the **data quirk** where a
+  unit's `courseunitcontentSet.totalCount` / `enrollment.progress.total` disagree with
+  what `allCourseUnitContentsByCourseUnit` actually returns (the classroom now
+  self-heals by scanning, but the counts are still wrong). See
+  [1.1.23](1.1.23-classroom-external-units-fix.md)–[1.1.25](1.1.25-classroom-units-first-render.md).
 - 🔭 **Remove dead pyramid code** — `src/components/pyramid_marketing_management/MyPyramid.vue`
   and `MyPyramidRewards.vue` are unrouted/unimported dead code (found during 1.1.1).
 - 🔭 **Live-verify cart error toasts** — the receipt-upload failure paths (1.1.5) are
