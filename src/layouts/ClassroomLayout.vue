@@ -128,10 +128,8 @@ provide(ClassroomContextKey, classroomContext)
 // ---------------------------------------------------------------------------
 
 const headerTitle = computed<string>(() => {
-  // Show the current LESSON/video name in the header (centered), not the course
-  // name. Fall back to the course title, then loading/fallback labels.
-  const lesson = currentContent.value?.title
-  if (lesson && lesson.trim()) return lesson
+  // Header shows the COURSE name (centered). The selected LESSON name is shown
+  // above the video inside ClassroomContentView.
   if (bootstrap.value?.courseTitle) return bootstrap.value.courseTitle
   if (loading.value) return t('classroom.header.loading')
   return t('classroom.header.fallbackTitle')

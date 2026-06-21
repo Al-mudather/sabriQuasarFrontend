@@ -120,7 +120,7 @@ const routes = [
     component: () => import('layouts/ClassroomLayout.vue'),
     beforeEnter: requireAuthentication,
     children: [
-      { path: 'class/:coursePk(\\d+)',                             name: 'classroom-shell',       component: () => import('pages/classroom/ClassroomShell.vue') },
+      { path: 'class/:coursePk(\\d+)',                             name: 'classroom-shell',       component: () => import('pages/classroom/ClassroomContentView.vue') },
       { path: 'class/:coursePk(\\d+)/content/:contentPk(\\d+)',    name: 'classroom-content',     component: () => import('pages/classroom/ClassroomContentView.vue') },
       { path: 'class/:coursePk(\\d+)/overview',                    name: 'classroom-overview',    component: () => import('pages/classroom/ClassroomOverview.vue') },
       { path: 'class/:coursePk(\\d+)/qa',                          name: 'classroom-qa',          component: () => import('pages/classroom/ClassroomQA.vue') },

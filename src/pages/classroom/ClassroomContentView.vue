@@ -19,18 +19,12 @@
     </aside>
 
     <section class="cls-cockpit__main" ref="stageRef">
-      <div v-if="ctx.loading.value && !current" class="cls-cockpit__loading">
-        <q-skeleton class="cls-cockpit__loading-player" />
-      </div>
-      <ClassroomEmptyState
-        v-else-if="!current"
-        :title="$t('classroom.empty.contentMissing')"
-        icon="videocam_off"
-      />
-      <div v-else class="cls-cockpit__stage">
+      <!-- A real lesson is on screen. -->
+      <div v-if="current" class="cls-cockpit__stage">
         <div class="cls-cockpit__top">
-          <!-- Lesson title now lives (centered) in the classroom header; showing
-               it again above the player here was redundant. -->
+          <!-- Selected lesson name, shown above the video. (The header shows
+               the COURSE name.) -->
+          <h2 class="cls-cockpit__title">{{ current.title }}</h2>
           <div class="cls-cockpit__media" :data-provider="videoProvider || null">
             <VideoPlayer
               v-if="current.kind === 'video'"
@@ -61,6 +55,32 @@
           </div>
         </div>
       </div>
+
+      <!-- No playable lesson anywhere in the course (every unit scanned, all
+           empty). The rail still shows all units; we just say so here instead
+           of hanging. -->
+      <ClassroomEmptyState
+        v-else-if="noContent"
+        :title="$t('classroom.empty.noCurriculum')"
+        icon="inbox"
+      />
+
+      <!-- Resolving the first lesson (bare course URL) or the current lesson is
+           still loading → player-shaped skeleton, with the rail/units already
+           visible alongside. -->
+      <div
+        v-else-if="currentContentPk == null || ctx.loading.value"
+        class="cls-cockpit__loading"
+      >
+        <q-skeleton class="cls-cockpit__loading-player" />
+      </div>
+
+      <!-- A specific lesson was requested but its content didn't resolve. -->
+      <ClassroomEmptyState
+        v-else
+        :title="$t('classroom.empty.contentMissing')"
+        icon="videocam_off"
+      />
     </section>
 
     <!-- Side panel. Desktop: static right column. Mobile: a full-height drawer
@@ -144,6 +164,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useClassroomStore } from 'src/stores/classroom'
 import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
+import { useCurriculumNavigation } from 'src/composables/classroom/useCurriculumNavigation'
 import {
   parseModelValue,
   resolveVideoProvider,
@@ -197,6 +218,65 @@ const coursePkRef = computed<number | null>(() => {
 })
 
 const enrollmentPkRef = computed<number | null>(() => ctx.bootstrap.value?.enrollmentPk ?? null)
+
+// ---------------------------------------------------------------------------
+// First-lesson resolution (bare `class/:coursePk` entry — no contentPk).
+//
+// Correct flow per product: render the classroom IMMEDIATELY (the rail shows
+// ALL units, even empty ones — handled by CurriculumRail), then resolve which
+// lesson to open in the background while the units are already on screen.
+//
+// The first unit(s) may be empty while the videos live in a LATER unit (real
+// cases: course 143's unit 1 is empty; a course could have 9 empty units and
+// the video only in the 10th). So we walk the units IN ORDER, loading each,
+// and open the FIRST unit that actually yields lessons. If none anywhere has a
+// lesson we show the no-content state — never an infinite spinner. The player
+// area shows a skeleton during this resolve; the rail/units stay visible.
+// ---------------------------------------------------------------------------
+const { goToFirstUnwatched } = useCurriculumNavigation({
+  bootstrap: ctx.bootstrap,
+  currentContentPk,
+  unitContents: ctx.unitContents,
+})
+const noContent = ref<boolean>(false)
+let resolveInFlight = false
+
+async function resolveFirstLesson(): Promise<void> {
+  if (resolveInFlight) return
+  if (currentContentPk.value != null) return // already on a lesson
+  const b = ctx.bootstrap.value
+  const cpk = coursePkRef.value
+  if (!b || cpk == null) return
+  // Cross-course race guard: when switching courses in-app the layout persists,
+  // so `bootstrap` can momentarily still hold the previous course.
+  if (b.coursePk !== cpk) return
+  resolveInFlight = true
+  noContent.value = false
+  try {
+    for (const unit of b.units) {
+      if (currentContentPk.value != null) return // user navigated meanwhile
+      const lessons = await ctx.loadUnit(unit.pk)
+      if (currentContentPk.value != null) return
+      if (lessons && lessons.length > 0) {
+        // goToFirstUnwatched scans hydrated units in order → first lesson of the
+        // first non-empty unit we just loaded.
+        goToFirstUnwatched(cpk)
+        return
+      }
+    }
+    noContent.value = true // walked every unit, nothing playable
+  } finally {
+    resolveInFlight = false
+  }
+}
+
+watch(
+  [() => ctx.bootstrap.value, currentContentPk],
+  () => {
+    if (currentContentPk.value == null) void resolveFirstLesson()
+  },
+  { immediate: true },
+)
 
 // Current lesson + its parent unit pk come from the context, which the
 // layout populated via useCurrentContent (single-content query) — no need
