@@ -54,8 +54,11 @@ export function useCourseQuestions(courseId: CourseIdLike): {
   >(AllQuestionsByCourse, variables, () => ({
     enabled: enabled.value,
     errorPolicy: 'all',
-    fetchPolicy: 'cache-and-network',
-    notifyOnNetworkStatusChange: true,
+    // cache-first: when the student opens the Q&A tab (or re-enters the
+    // classroom with Q&A as their persisted tab), serve the cached list
+    // instantly instead of always re-hitting the network. The live
+    // subscription keeps it fresh; explicit refetch()/fetchMore() still pull.
+    fetchPolicy: 'cache-first',
   }))
 
   const questions = computed<CourseQuestion[]>(() => {

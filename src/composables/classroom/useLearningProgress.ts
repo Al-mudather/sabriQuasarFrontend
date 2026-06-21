@@ -78,6 +78,13 @@ export function useLearningProgress(
     if (res.data?.learningProgressByCourse) markProgressFresh()
   })
 
+  // Local, optimistic overrides applied on top of the once-fetched server map.
+  // Instead of refetching the entire (unbounded) course-wide progress list on
+  // every lesson change, we patch only the row the student just touched, using
+  // the single row the Start/End mutations return. The checkmark/in-progress
+  // tick updates instantly; a full reload still reconciles from the backend.
+  const localOverrides = ref<ProgressMap>({})
+
   const progressMap = computed<ProgressMap>(() => {
     const edges = result.value?.learningProgressByCourse?.edges ?? []
     const map: ProgressMap = {}
@@ -94,7 +101,8 @@ export function useLearningProgress(
       }
       map[cpk] = entry
     }
-    return map
+    // Session-local patches win over the server snapshot.
+    return { ...map, ...localOverrides.value }
   })
 
   const { mutate: runStart } = useMutation<StartLearningUnitResult, StartLearningUnitVars>(
@@ -119,7 +127,16 @@ export function useLearningProgress(
       const res = await runStart({ progressData: input })
       const success = res?.data?.startLearningUnit?.success
       const pk = res?.data?.startLearningUnit?.learning?.pk
-      if (success && typeof pk === 'number') currentProgressId.value = pk
+      if (success && typeof pk === 'number') {
+        currentProgressId.value = pk
+        // Optimistically mark the row in-progress so the rail dot shows now,
+        // without refetching the whole course progress list.
+        const prev = localOverrides.value[contentPk]
+        localOverrides.value = {
+          ...localOverrides.value,
+          [contentPk]: { pk, begin: prev?.begin ?? new Date().toISOString(), complete: prev?.complete ?? null },
+        }
+      }
     } catch {
       /* start failed — leave progress id unset */
     }
@@ -138,10 +155,22 @@ export function useLearningProgress(
       const success = res?.data?.endLearningUnit?.success
       if (success) {
         currentProgressId.value = null
-        void refetch()
+        // Patch ONLY the row we just ended, from the mutation's returned row —
+        // no course-wide refetch. `complete` is the backend's authoritative
+        // value (it may stay null if the lesson wasn't sufficiently watched).
+        const learning = res?.data?.endLearningUnit?.learning
+        const prev = localOverrides.value[ccid]
+        localOverrides.value = {
+          ...localOverrides.value,
+          [ccid]: {
+            pk: learning?.pk ?? prev?.pk ?? pid,
+            begin: prev?.begin ?? new Date().toISOString(),
+            complete: (learning?.complete as string | null | undefined) ?? prev?.complete ?? null,
+          },
+        }
       }
     } catch {
-      /* end failed — progress will be reconciled on next refetch */
+      /* end failed — progress reconciles on next full load / TTL refetch */
     }
   }
 
@@ -154,6 +183,9 @@ export function useLearningProgress(
       currentProgressId.value = null
       currentContentPk.value = null
       currentUnitPk.value = null
+      // New course/enrollment → drop session-local progress patches; the fresh
+      // server map for the new course is the source of truth.
+      localOverrides.value = {}
     },
   )
 
