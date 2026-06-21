@@ -23,7 +23,6 @@ query GetCourseByIDSlim($coursePk:Int) {
     id,
     pk,
     title,
-    cover,
     telegramLink,
     hasCertificate,
     courseunitSet {

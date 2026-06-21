@@ -23,25 +23,9 @@ query AllQuestionsByCourse($courseId: Int!, $orderBy:[String], $cursor: String, 
             email
           },
           questionreplySet {
-            totalCount,
-            edges {
-              node {
-                id,
-                pk,
-                answer,
-                user {
-                  id,
-                  pk,
-                  firstName,
-                  lastName,
-                  email
-                }
-              }
-            }
+            totalCount
           }
-            
         }
-        
     }
   }
 }

@@ -70,4 +70,3 @@ export type QnaSubscriptionEnvelope = NonNullable<
 >
 
 export type QnaSubscriptionQuestion = NonNullable<QnaSubscriptionEnvelope['question']>
-export type QnaSubscriptionAnswer = NonNullable<QnaSubscriptionEnvelope['answer']>
