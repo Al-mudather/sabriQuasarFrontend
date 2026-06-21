@@ -13,43 +13,23 @@
     <h1 class="cls-header__title" :title="title">
       {{ title }}
     </h1>
-
-    <div class="cls-header__meta">
-      <ClassroomProgressRing
-        :percent="safePercent"
-        :size="36"
-        :stroke="3"
-        :show-label="true"
-        :aria-label="t('classroom.header.progressLabel')"
-      />
-    </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import ClassroomProgressRing from 'src/components/classroom/ClassroomProgressRing.vue'
 
 interface Props {
   title?: string
-  percent?: number
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   title: 'Loading...',
-  percent: 0,
 })
 
 const router = useRouter()
 const { t } = useI18n()
-
-const safePercent = computed<number>(() => {
-  const raw = Number(props.percent)
-  if (!Number.isFinite(raw)) return 0
-  return Math.max(0, Math.min(100, Math.round(raw)))
-})
 
 function onExit (): void {
   void router.push({ name: 'my-courses' })
@@ -107,19 +87,6 @@ function onExit (): void {
     pointer-events: none;
   }
 
-  &__meta {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  &__progress {
-    font-size: 13px;
-    font-variant-numeric: tabular-nums;
-    color: #F5F2EA;
-    opacity: 0.9;
-  }
-
 }
 
 @media (max-width: 600px) {
@@ -129,8 +96,7 @@ function onExit (): void {
 
     &__exit-label { display: none; }
     &__exit { padding: 6px 8px; }
-    &__title { font-size: 13px; max-inline-size: 60%; }
-    &__meta { gap: 6px; }
+    &__title { font-size: 13px; max-inline-size: 70%; }
   }
 }
 </style>

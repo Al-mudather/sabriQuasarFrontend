@@ -2,7 +2,6 @@
   <div class="cls-layout classroom-scope" :dir="$q.lang.rtl ? 'rtl' : 'ltr'">
     <ClassroomHeader
       :title="headerTitle"
-      :percent="headerPercent"
     />
     <main class="cls-layout__main">
       <router-view />
@@ -63,7 +62,7 @@ const currentContentPkFromRoute = computed<number | null>(() => {
 // Data layer (slim bootstrap + lazy unit lessons + current-lesson resolver)
 // ---------------------------------------------------------------------------
 
-const { bootstrap: rawBootstrap, loading, error, refetch, refreshEnrollment } = useCourseBootstrap(coursePk)
+const { bootstrap: rawBootstrap, loading, error, refetch } = useCourseBootstrap(coursePk)
 
 const enrollmentPk = computed<number | null>(() => rawBootstrap.value?.enrollmentPk ?? null)
 
@@ -73,19 +72,6 @@ const {
   start: startProgress,
   end: endProgress,
 } = useLearningProgress(coursePk, enrollmentPk)
-
-// Live-ring update: when the user navigates away from a content (contentPk changes),
-// refetch ONLY the enrollment so the header ring reflects the new backend
-// percentage. (Previously called the full bootstrap refetch, which needlessly
-// re-fetched the static course + all unit titles on every single lesson switch.)
-watch(
-  () => currentContentPkFromRoute.value,
-  (next, prev) => {
-    if (prev != null && next !== prev) {
-      refreshEnrollment()
-    }
-  },
-)
 
 const {
   contentsByUnitPk,
@@ -150,8 +136,6 @@ const headerTitle = computed<string>(() => {
   if (loading.value) return t('classroom.header.loading')
   return t('classroom.header.fallbackTitle')
 })
-
-const headerPercent = computed<number>(() => bootstrap.value?.progressPercent ?? 0)
 </script>
 
 <style lang="scss" scoped>
