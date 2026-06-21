@@ -148,12 +148,16 @@ export function useCourseBootstrap(coursePk: PkLike): {
     unitEdges.forEach((uEdge, uIdx) => {
       const u = uEdge?.node
       if (!u) return
-      // EXTERNAL units carry no content of their own — their lessons live on the
-      // linked `external` unit (e.g. course 169's "Neurology" unit borrows its 7
-      // videos from unit 41). Point this curriculum entry at whichever unit
-      // actually OWNS the content, so lazy loading + navigation resolve real
-      // lessons instead of rendering an empty unit that hangs the classroom with
-      // nothing to play. Title/order stay from THIS course's unit.
+      // EXTERNAL units: a unit can be flagged `isExternal` and linked to another
+      // unit. Two real shapes exist in production:
+      //   - course 169 "Neurology": 0 OWN contents, 7 on the external unit (41)
+      //     → the lessons live on the external unit.
+      //   - course 143 unit 963: 4 OWN contents + an external link to unit 962
+      //     → the lessons live on the unit ITSELF.
+      // So the rule is: prefer the unit's OWN content; only borrow from the
+      // external unit when the unit has none of its own. Point this curriculum
+      // entry at whichever unit actually OWNS the content so lazy loading +
+      // navigation resolve real lessons. Title/order stay from THIS course unit.
       const node = u as {
         pk?: number | null
         id?: string
@@ -163,15 +167,17 @@ export function useCourseBootstrap(coursePk: PkLike): {
         external?: { pk?: number | null; id?: string; courseunitcontentSet?: { totalCount?: number | null } | null } | null
         courseunitcontentSet?: { totalCount?: number | null } | null
       }
-      const external = node.isExternal ? node.external ?? null : null
-      const contentUnitPk = (external?.pk ?? node.pk) ?? null
+      const ownCount = node.courseunitcontentSet?.totalCount ?? 0
+      const ext = node.isExternal ? node.external ?? null : null
+      const extCount = ext?.courseunitcontentSet?.totalCount ?? 0
+      const useExternal = ext != null && ownCount === 0 && extCount > 0
+      const contentUnitPk = (useExternal ? ext?.pk : node.pk) ?? null
       if (contentUnitPk == null) return
-      const contentsCount =
-        external?.courseunitcontentSet?.totalCount ?? node.courseunitcontentSet?.totalCount ?? 0
+      const contentsCount = useExternal ? extCount : ownCount
       totalContents += contentsCount
       units.push({
         pk: contentUnitPk,
-        id: external?.id ?? node.id ?? '',
+        id: (useExternal ? ext?.id : node.id) ?? node.id ?? '',
         title: node.title ?? '',
         order: node.order ?? uIdx,
         contentsCount,

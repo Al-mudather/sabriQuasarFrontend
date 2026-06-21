@@ -6,24 +6,26 @@
       :description="ctx.error.value.message || $t('classroom.empty.errorDescription')"
       icon="error_outline"
     />
+    <!-- Settled with no playable lesson anywhere → say so, don't spin forever. -->
     <ClassroomEmptyState
-      v-else-if="ctx.bootstrap.value && ctx.bootstrap.value.totalContents === 0"
+      v-else-if="noContent"
       :title="$t('classroom.empty.noCurriculum')"
       icon="inbox"
     />
-    <div v-else class="cls-shell__loading" role="status" :aria-label="$t('classroom.header.loading')">
-      <q-spinner-dots color="secondary" size="48px" />
-    </div>
+    <!-- Loading: show a classroom-shaped skeleton (not a bare spinner) while we
+         resolve which lesson to open. -->
+    <ClassroomSkeleton v-else />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useClassroomStore } from 'src/stores/classroom'
 import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
 import { useCurriculumNavigation } from 'src/composables/classroom/useCurriculumNavigation'
 import ClassroomEmptyState from 'src/components/classroom/ClassroomEmptyState.vue'
+import ClassroomSkeleton from 'src/components/classroom/ClassroomSkeleton.vue'
 
 defineOptions({ name: 'ClassroomShell' })
 
@@ -53,36 +55,60 @@ const { goToFirstUnwatched } = useCurriculumNavigation({
   unitContents: ctx.unitContents,
 })
 
-// On entry the slim bootstrap arrives without per-unit lessons. To pick a
-// "first unwatched" target we need the first unit's lessons hydrated.
-// loadUnit() is idempotent + cache-aware, so calling it here is cheap.
+// Set once we've scanned every unit and found NO playable lesson — drives the
+// graceful "no curriculum" state instead of an endless spinner.
+const noContent = ref<boolean>(false)
+
+// Resolve the FIRST lesson to open. The bootstrap arrives WITHOUT per-unit
+// lessons, and — critically — the first unit(s) may be empty while the videos
+// live in a LATER unit (real case: course 143's units 1–2 have no playable
+// content, the videos start at unit 3). So we walk the units IN ORDER, loading
+// each, and redirect into the FIRST unit that actually yields lessons. This
+// also self-heals the count-vs-reality mismatch (a unit whose totalCount says
+// "1" but whose content query returns nothing is simply skipped). If no unit
+// anywhere has a lesson, we settle to the empty state — never an infinite load.
+let resolving = false
 let routedOnce = false
+
+async function resolveFirstLesson(): Promise<void> {
+  if (routedOnce || resolving) return
+  const b = ctx.bootstrap.value
+  const cpk = coursePk.value
+  if (!b || cpk == null) return
+  // Guard against the cross-course race: when switching courses in-app the
+  // layout persists, so `bootstrap` can momentarily still hold the PREVIOUS
+  // course (cache-first) while this route already points at the new one. Acting
+  // on it would route into the wrong course's lesson. Wait until the bootstrap
+  // is actually for THIS course.
+  if (b.coursePk !== cpk) return
+  resolving = true
+  noContent.value = false
+  try {
+    for (const unit of b.units) {
+      if (routedOnce) return
+      // loadUnit is idempotent + cache-aware; it resolves with the unit's
+      // lessons (empty array when the unit has none).
+      const lessons = await ctx.loadUnit(unit.pk)
+      if (routedOnce) return
+      if (lessons && lessons.length > 0) {
+        routedOnce = true
+        // goToFirstUnwatched scans the hydrated units in order, so it lands on
+        // the first lesson of the first non-empty unit we just loaded.
+        goToFirstUnwatched(cpk)
+        return
+      }
+    }
+    // Walked every unit, nothing playable.
+    noContent.value = true
+  } finally {
+    resolving = false
+  }
+}
+
 watch(
   () => ctx.bootstrap.value,
   (b) => {
-    if (!b || b.totalContents === 0 || b.units.length === 0) return
-    const first = b.units[0]
-    if (first) void ctx.loadUnit(first.pk)
-  },
-  { immediate: true },
-)
-
-// Once the first unit's lessons land, route to its first unwatched lesson.
-// Guarded with `routedOnce` so a later background refetch doesn't yank the
-// user out of the lesson they've since navigated to.
-watch(
-  [() => ctx.bootstrap.value, () => ctx.unitContents.size, () => Array.from(ctx.unitContents.values()).flat().length],
-  () => {
-    if (routedOnce) return
-    const cpk = coursePk.value
-    const b = ctx.bootstrap.value
-    if (!b || !cpk || b.totalContents === 0) return
-    const firstUnit = b.units[0]
-    if (!firstUnit) return
-    const firstHydrated = ctx.unitContents.get(firstUnit.pk)
-    if (!firstHydrated || firstHydrated.length === 0) return
-    routedOnce = true
-    goToFirstUnwatched(cpk)
+    if (b) void resolveFirstLesson()
   },
   { immediate: true },
 )
@@ -92,12 +118,6 @@ watch(
 .cls-shell {
   flex: 1 1 auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
   min-block-size: 0;
-
-  &__loading {
-    display: inline-flex;
-  }
 }
 </style>

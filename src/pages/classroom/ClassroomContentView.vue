@@ -20,7 +20,7 @@
 
     <section class="cls-cockpit__main" ref="stageRef">
       <div v-if="ctx.loading.value && !current" class="cls-cockpit__loading">
-        <q-spinner-dots color="secondary" size="48px" />
+        <q-skeleton class="cls-cockpit__loading-player" />
       </div>
       <ClassroomEmptyState
         v-else-if="!current"
@@ -347,8 +347,19 @@ async function onSelect(contentPk: number): Promise<void> {
   }
 
   &__loading {
-    display: inline-flex;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    max-inline-size: 960px;
     align-self: center;
+  }
+
+  &__loading-player {
+    inline-size: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--cls-radius-lg, 16px);
+    background: rgba(245, 242, 234, 0.07);
   }
 
   &__stage {
