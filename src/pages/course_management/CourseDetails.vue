@@ -38,6 +38,10 @@
           />
 
           <!-- Course sections -->
+          <section class="course-details__section" data-section="about">
+            <about-the-course :courseData="courseData" />
+          </section>
+
           <section class="course-details__section" data-section="what-you-will-learn">
             <what-iwill-learn v-if="courseID" :course_id="courseID" />
           </section>
@@ -67,10 +71,6 @@
 
           <section class="course-details__section" data-section="requirements">
             <course-pre-requisites v-if="coursePK" :course_id="coursePK" />
-          </section>
-
-          <section class="course-details__section" data-section="about">
-            <about-the-course :courseData="courseData" />
           </section>
 
           <section class="course-details__section" data-section="instructor">

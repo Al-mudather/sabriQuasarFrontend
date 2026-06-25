@@ -47,15 +47,26 @@ const ALLOWED_TAGS = [
 
 const ALLOWED_ATTR = ['href', 'title', 'target', 'rel', 'lang', 'dir']
 
-/** Returns sanitized HTML safe for v-html. Empty string for blank input. */
-export function renderQaContent(raw: string | null | undefined): string {
+/**
+ * Render markdown → sanitized HTML safe for v-html. Empty string for blank
+ * input. Generic (no legacy-HTML stripping) — used for course content
+ * (what-you-will-learn / prerequisites) which is authored markdown.
+ */
+export function renderMarkdown(raw: string | null | undefined): string {
   if (!raw) return ''
-  const cleaned = stripLegacyHtml(raw)
-  const html = marked.parse(cleaned, { async: false }) as string
+  const html = marked.parse(raw, { async: false }) as string
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS,
     ALLOWED_ATTR,
     // External links open safely (rel added below).
     ADD_ATTR: ['target', 'rel'],
   })
+}
+
+/** Returns sanitized HTML safe for v-html. Empty string for blank input. */
+export function renderQaContent(raw: string | null | undefined): string {
+  if (!raw) return ''
+  // Strip the legacy rich-text editor's <font>/style noise first, then render
+  // the result as markdown.
+  return renderMarkdown(stripLegacyHtml(raw))
 }

@@ -26,16 +26,8 @@
     </h1>
     <ds-skeleton v-else shape="line" width="72%" height="3.25rem" />
 
-    <p
-      v-if="courseData && courseData.brief"
-      class="course-hero__summary"
-      v-html="truncatedBrief"
-    />
-    <div v-else class="course-hero__summary-skeleton">
-      <ds-skeleton shape="line" width="94%" />
-      <ds-skeleton shape="line" width="80%" />
-      <ds-skeleton shape="line" width="62%" />
-    </div>
+    <!-- The brief now lives in full (with read-more) in the الوصف section
+         below; the old truncated hero teaser duplicated it, so it was removed. -->
 
     <ul class="course-hero__meta">
       <li v-if="leadInstructor">
@@ -89,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import DsSkeleton from 'src/design-system/components/DsSkeleton.vue'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { contourDrift } from 'src/design-system/motion.js'
@@ -107,7 +99,7 @@ interface Props {
   lessonTotal: number
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 const heroRoot = ref<HTMLElement | null>(null)
 const contour = ref<SVGElement | null>(null)
@@ -127,13 +119,6 @@ onBeforeUnmount(() => {
   motionHandle = null
 })
 
-const truncatedBrief = computed<string>(() => {
-  const raw = props.courseData?.brief ?? ''
-  if (!raw) return ''
-  const text = String(raw).replace(/<[^>]*>/g, '').trim()
-  return text.length > 280 ? text.slice(0, 280) + '…' : text
-})
-
 function formatCount(n: number | null | undefined): string {
   const num = Number(n)
   if (!Number.isFinite(num)) return '0'
@@ -147,7 +132,9 @@ defineExpose({ titleEl })
 <style lang="scss" scoped>
 .course-hero {
   position: relative;
-  padding-block: var(--ds-space-8) var(--ds-space-10);
+  // Bottom padding kept minimal: the hero no longer carries a summary, so the
+  // only separation from the description below is the main column's row-gap.
+  padding-block: var(--ds-space-8) 0;
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-4);
@@ -188,23 +175,6 @@ defineExpose({ titleEl })
     margin: 0;
     letter-spacing: -0.01em;
     max-inline-size: 28ch;
-  }
-
-  &__summary {
-    font-family: var(--ds-font-body);
-    font-weight: 400;
-    font-size: var(--ds-text-md);
-    line-height: var(--ds-leading-arabic);
-    color: var(--ds-taupe, var(--ds-text-muted));
-    margin: 0;
-    max-inline-size: 58ch;
-  }
-
-  &__summary-skeleton {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-space-2);
-    max-inline-size: 58ch;
   }
 
   &__meta {
