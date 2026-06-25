@@ -5,18 +5,22 @@
     ref="shellRef"
     class="cls-hasif"
     :data-fullscreen="isFullscreen || null"
+    :data-controls-hidden="(isFullscreen && !controlsVisible) || null"
     tabindex="0"
-    @keydown="onKeydown"
+    @keydown="onShellKeydown"
+    @pointermove="onActivity"
+    @touchstart="onActivity"
   >
     <div class="cls-hasif__stage">
       <video ref="videoEl" playsinline class="cls-hasif__video video-js" />
 
-      <!-- Click anywhere on the picture to toggle play (YouTube-style). -->
+      <!-- Click anywhere on the picture to toggle play (YouTube-style). In
+           fullscreen, the first tap when controls are hidden just reveals them. -->
       <button
         type="button"
         class="cls-hasif__surface"
         :aria-label="state.playing ? $t('classroom.player.controls.pause') : $t('classroom.player.controls.play')"
-        @click="togglePlay"
+        @click="onSurfaceClick"
       ></button>
 
       <div v-if="state.buffering" class="cls-hasif__spinner">
@@ -25,6 +29,8 @@
     </div>
 
     <ClassroomVideoControls
+      @mouseenter="hoveringControls = true"
+      @mouseleave="onControlsLeave"
       :playing="state.playing"
       :ready="state.ready"
       :current-time="state.currentTime"
@@ -99,6 +105,80 @@ function onFullscreenChange(): void {
   isFullscreen.value = document.fullscreenElement === shellRef.value
 }
 
+// ---------------------------------------------------------------------------
+// YouTube-style auto-hiding controls (fullscreen only).
+//
+// In fullscreen the control bar OVERLAYS the bottom of the picture, so a
+// persistent bar covers content (worse in landscape/rotation). We hide it
+// after a short idle while PLAYING and reveal it on any pointer/touch/key
+// activity. We never hide while paused or while the pointer is over the bar
+// (so the user can aim for a button). Windowed mode is unchanged — there the
+// bar sits BELOW the video and covers nothing.
+//
+// Opacity/transform is used (not display:none) so the controls stay in the DOM
+// and remain reachable; on touch the first tap reveals (see onSurfaceClick).
+const HIDE_DELAY_MS = 2800
+const controlsVisible = ref(true)
+const hoveringControls = ref(false)
+let hideTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearHideTimer(): void {
+  if (hideTimer) { clearTimeout(hideTimer); hideTimer = null }
+}
+
+function scheduleHide(): void {
+  clearHideTimer()
+  // Only auto-hide in fullscreen, while playing, and not hovering the bar.
+  if (!isFullscreen.value || !state.playing || hoveringControls.value) return
+  hideTimer = setTimeout(() => {
+    if (isFullscreen.value && state.playing && !hoveringControls.value) {
+      controlsVisible.value = false
+    }
+  }, HIDE_DELAY_MS)
+}
+
+function nudgeControls(): void {
+  controlsVisible.value = true
+  scheduleHide()
+}
+
+/** Any pointer / touch activity inside the shell reveals the controls. */
+function onActivity(): void {
+  if (isFullscreen.value) nudgeControls()
+}
+
+/** Pointer left the control bar — resume the idle countdown. */
+function onControlsLeave(): void {
+  hoveringControls.value = false
+  scheduleHide()
+}
+
+/** Surface tap: in fullscreen, a tap while controls are hidden only reveals
+ *  them (don't also toggle play); otherwise toggle play as usual. */
+function onSurfaceClick(): void {
+  if (isFullscreen.value && !controlsVisible.value) {
+    nudgeControls()
+    return
+  }
+  togglePlay()
+  nudgeControls()
+}
+
+// Pause → always show controls; play/enter-fullscreen → start the idle cycle.
+watch(() => state.playing, (playing) => {
+  if (!playing) { clearHideTimer(); controlsVisible.value = true }
+  else scheduleHide()
+})
+watch(isFullscreen, (fs) => {
+  if (fs) nudgeControls()
+  else { clearHideTimer(); controlsVisible.value = true }
+})
+
+function onShellKeydown(e: KeyboardEvent): void {
+  nudgeControls()
+  onKeydown(e)
+}
+
 function onKeydown(e: KeyboardEvent): void {
   // When a control (button / range) is focused, let its native key behavior win
   // so we don't double-handle Space / arrows.
@@ -137,6 +217,7 @@ watch(() => props.videoUuid, (next) => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', onFullscreenChange)
+  clearHideTimer()
   // useVideoJsPlayer disposes the player on its own onBeforeUnmount.
 })
 </script>
@@ -219,6 +300,22 @@ onBeforeUnmount(() => {
     border: none;
     border-radius: 0;
     padding-block-end: max(14px, env(safe-area-inset-bottom, 0px));
+    // Fade/slide for the auto-hide (opacity — controls stay in the DOM).
+    transition: opacity var(--cls-dur-med, 220ms) ease, transform var(--cls-dur-med, 220ms) ease;
+    will-change: opacity, transform;
+  }
+}
+
+// ---- Auto-hide: controls + cursor fade away after idle in fullscreen --------
+.cls-hasif[data-fullscreen][data-controls-hidden] {
+  cursor: none;
+
+  .cls-hasif__surface { cursor: none; }
+
+  :deep(.cvc) {
+    opacity: 0;
+    transform: translateY(110%);
+    pointer-events: none;
   }
 }
 
