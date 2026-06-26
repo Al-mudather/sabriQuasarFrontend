@@ -9,7 +9,9 @@
 // which is the single canonical entry point for all later toggles.
 
 import { boot } from 'quasar/wrappers'
-import { createHead } from '@unhead/vue'
+// unhead v3 moved the client factory to the '/client' entry (useHead stays
+// on the root entry, see CourseDetails.vue).
+import { createHead } from '@unhead/vue/client'
 import { Quasar, LocalStorage } from 'quasar'
 import qLangAr from 'quasar/lang/ar'
 

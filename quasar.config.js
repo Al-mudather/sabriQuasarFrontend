@@ -8,11 +8,23 @@
 // Configuration for your app — Quasar 2 / Vite
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-const { configure } = require('quasar/wrappers')
-const envparser = require('./src/boot/envparser.js')
-const { version: APP_VERSION } = require('./package.json')
+// app-vite v2 loads this file as ESM (it compiles it to .mjs), so use import
+// syntax — CJS `require()` of quasar/wrappers / local files is not supported
+// in the compiled output. The dotenv + package.json-version logic that used
+// to live in src/boot/envparser.js is inlined here as ESM for the same reason.
+import { configure } from 'quasar/wrappers'
+import dotenv from 'dotenv'
+import { readFileSync } from 'node:fs'
 
-module.exports = configure(function (/* ctx */) {
+const { version: APP_VERSION } = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf8')
+)
+
+// Quasar's build.env runs values through DefinePlugin (already stringified),
+// so pass the RAW parsed values — pre-stringifying would double-wrap them.
+const parsedEnv = dotenv.config().parsed || {}
+
+export default configure(function (/* ctx */) {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -20,8 +32,8 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    // envparser is a plain CJS helper consumed by this config (build.env),
-    // not a runtime boot file. Only runtime boot files are listed here.
+    // Only runtime boot files are listed here. (.env parsing for build.env is
+    // handled inline at the top of this file, not via a boot file.)
     boot: [
       'main',
       'backend',
@@ -54,10 +66,15 @@ module.exports = configure(function (/* ctx */) {
 
       vueRouterMode: 'hash', // preserve existing hash URLs
 
+      // app-vite v2 tree-shakes Vue's Options API by default. This codebase
+      // still has many Options-API pages/components, so keep it enabled or
+      // they silently render blank at runtime (no build error).
+      vueOptionsAPI: true,
+
       // Spread the .env vars, then expose the package.json version as
       // process.env.APP_VERSION so the footer can show the deployed build.
       // Vite statically replaces this at build time.
-      env: { ...envparser(), APP_VERSION },
+      env: { ...parsedEnv, APP_VERSION },
 
       // https://v2.quasar.dev/quasar-cli-vite/handling-vite
       // extendViteConf (viteConf) {}
