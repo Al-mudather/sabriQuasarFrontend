@@ -3,11 +3,9 @@ const esModules = ['quasar/lang', 'lodash-es'].join('|');
 module.exports = {
   globals: {
     __DEV__: true,
-    // TODO: Remove if resolved natively https://github.com/vuejs/vue-jest/issues/175
-    'vue-jest': {
-      pug: { doctype: 'html' },
-    },
   },
+  // jest 28+ no longer bundles jsdom; it ships as jest-environment-jsdom.
+  testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/test/jest/jest.setup.js'],
   // noStackTrace: true,
   // bail: true,
@@ -37,7 +35,7 @@ module.exports = {
   ],
   moduleFileExtensions: ['vue', 'js', 'jsx', 'json'],
   moduleNameMapper: {
-    '^vue$': 'vue/dist/vue.common.js',
+    // Vue 3: no '^vue$' remap (that was a Vue-2 vue.common.js shim).
     '^test-utils$': '@vue/test-utils/dist/vue-test-utils.js',
     '^quasar$': 'quasar/dist/quasar.common.js',
     '^~/(.*)$': '<rootDir>/$1',
@@ -45,14 +43,11 @@ module.exports = {
     '.*css$': '@quasar/quasar-app-extension-testing-unit-jest/stub.css',
   },
   transform: {
-    '.*\\.vue$': 'vue-jest',
+    // Vue 3 SFCs via @vue/vue3-jest (replaces the Vue-2 vue-jest alpha).
+    '.*\\.vue$': '@vue/vue3-jest',
     '.*\\.js$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$':
       'jest-transform-stub',
-    // use these if NPM is being flaky, care as hosting could interfere with these
-    // '.*\\.vue$': '@quasar/quasar-app-extension-testing-unit-jest/node_modules/vue-jest',
-    // '.*\\.js$': '@quasar/quasar-app-extension-testing-unit-jest/node_modules/babel-jest'
   },
   transformIgnorePatterns: [`node_modules/(?!(${esModules}))`],
-  snapshotSerializers: ['jest-serializer-vue'],
 };
