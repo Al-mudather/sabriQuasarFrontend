@@ -59,6 +59,7 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 | 1.1.27 | [Classroom video: YouTube-style auto-hiding controls (fullscreen)](1.1.27-classroom-video-autohide-controls.md) | ✅ | `classroom-video-autohide-controls` |
 | 1.1.28 | [Fix "Go to lesson" bouncing enrolled users to login (dead classroom link)](1.1.28-go-to-lesson-dead-classroom-link.md) | ✅ | `go-to-lesson-classroom-route` |
 | 1.1.29 | [Fix dead fullscreen button on mobile (iOS element-fullscreen)](1.1.29-classroom-fullscreen-mobile-fix.md) | ✅ | `classroom-fullscreen-mobile-fix` |
+| 1.1.30 | [Dependency security audit: 43 → 0 vulnerabilities (app-vite v2 / Vite 8 / unhead v3)](1.1.30-dependency-audit-zero-vulns.md) | ✅ | `deps-audit-criticals-jest`…`deps-audit-appvite-v2-zero` |
 
 Tags: each commit also carries a descriptive git tag — e.g. `registration-code-gate`,
 `payment-code-gate`, `regcode-null-fix`, `userinfo-bidi-direction`,
@@ -94,8 +95,9 @@ Tags: each commit also carries a descriptive git tag — e.g. `registration-code
   real no-code account is redirected to `registeration-code` (`access false`);
   guests/no-token confirmed unrestricted. NOTE: production must be **deployed** for
   any of this to take effect there — local testing hits the prod backend with new code.
-- 🔭 **Dependabot** — the repo reports 28 dependency vulnerabilities (1 critical, 5 high)
-  on every push. Triage the critical/high ones.
+- ✅ **Dependabot / `npm audit`** — DONE in [1.1.30](1.1.30-dependency-audit-zero-vulns.md):
+  43 → **0** vulnerabilities. Note the build now requires **Node ≥22.22** (`.nvmrc`
+  pins 22) because of the `@quasar/app-vite` v2 migration.
 
 ## Standing conventions (don't relearn these each session)
 
