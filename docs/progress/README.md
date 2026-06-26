@@ -58,6 +58,7 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 | 1.1.26 | [Course detail: markdown + read-more, reorder, drop redundant hero teaser](1.1.26-course-detail-markdown-readmore.md) | ✅ | `course-detail-markdown-readmore` |
 | 1.1.27 | [Classroom video: YouTube-style auto-hiding controls (fullscreen)](1.1.27-classroom-video-autohide-controls.md) | ✅ | `classroom-video-autohide-controls` |
 | 1.1.28 | [Fix "Go to lesson" bouncing enrolled users to login (dead classroom link)](1.1.28-go-to-lesson-dead-classroom-link.md) | ✅ | `go-to-lesson-classroom-route` |
+| 1.1.29 | [Fix dead fullscreen button on mobile (iOS element-fullscreen)](1.1.29-classroom-fullscreen-mobile-fix.md) | ✅ | `classroom-fullscreen-mobile-fix` |
 
 Tags: each commit also carries a descriptive git tag — e.g. `registration-code-gate`,
 `payment-code-gate`, `regcode-null-fix`, `userinfo-bidi-direction`,

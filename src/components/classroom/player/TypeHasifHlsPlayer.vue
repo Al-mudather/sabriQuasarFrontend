@@ -66,6 +66,12 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ClassroomVideoControls from 'src/components/classroom/player/ClassroomVideoControls.vue'
 import { useVideoJsPlayer } from 'src/composables/classroom/useVideoJsPlayer'
+import {
+  getFullscreenElement,
+  requestFullscreen,
+  exitFullscreen,
+  FS_CHANGE_EVENTS,
+} from 'src/composables/classroom/useFullscreen'
 
 const props = defineProps<{
   videoUuid: string
@@ -97,12 +103,20 @@ const isFullscreen = ref(false)
 function toggleFullscreen(): void {
   const el = shellRef.value
   if (!el) return
-  if (document.fullscreenElement) void document.exitFullscreen()
-  else void el.requestFullscreen?.()
+  if (getFullscreenElement()) {
+    exitFullscreen()
+  } else {
+    // Pass videoEl as the iOS fallback: if neither W3C nor webkit element
+    // fullscreen is available (iOS Safari), the <video> element's native
+    // webkitEnterFullscreen() is used instead, opening the iOS player.
+    requestFullscreen(el, videoEl.value)
+  }
 }
 
 function onFullscreenChange(): void {
-  isFullscreen.value = document.fullscreenElement === shellRef.value
+  // Check both W3C and webkit-prefixed fullscreen element so this works on
+  // desktop Chrome/Firefox AND older WebKit / Android browsers.
+  isFullscreen.value = getFullscreenElement() === shellRef.value
 }
 
 // ---------------------------------------------------------------------------
@@ -208,7 +222,10 @@ function onKeydown(e: KeyboardEvent): void {
 onMounted(() => {
   if (videoEl.value) mount(videoEl.value)
   if (props.videoUuid) loadSource(props.videoUuid)
-  document.addEventListener('fullscreenchange', onFullscreenChange)
+  // Listen to both unprefixed (W3C) and webkit-prefixed fullscreen events.
+  for (const evt of FS_CHANGE_EVENTS) {
+    document.addEventListener(evt, onFullscreenChange)
+  }
 })
 
 watch(() => props.videoUuid, (next) => {
@@ -216,7 +233,9 @@ watch(() => props.videoUuid, (next) => {
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('fullscreenchange', onFullscreenChange)
+  for (const evt of FS_CHANGE_EVENTS) {
+    document.removeEventListener(evt, onFullscreenChange)
+  }
   clearHideTimer()
   // useVideoJsPlayer disposes the player on its own onBeforeUnmount.
 })

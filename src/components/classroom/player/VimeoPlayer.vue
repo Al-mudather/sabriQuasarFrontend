@@ -5,8 +5,11 @@
     ref="shellRef"
     class="cls-vimeo"
     :data-fullscreen="isFullscreen || null"
+    :data-controls-hidden="(isFullscreen && !controlsVisible) || null"
     tabindex="0"
-    @keydown="onKeydown"
+    @keydown="onShellKeydown"
+    @pointermove="onActivity"
+    @touchstart="onActivity"
   >
     <div class="cls-vimeo__stage">
       <div ref="mountRef" class="cls-vimeo__mount" />
@@ -15,7 +18,7 @@
         type="button"
         class="cls-vimeo__surface"
         :aria-label="state.playing ? $t('classroom.player.controls.pause') : $t('classroom.player.controls.play')"
-        @click="togglePlay"
+        @click="onSurfaceClick"
       ></button>
 
       <div v-if="state.buffering" class="cls-vimeo__spinner">
@@ -24,6 +27,8 @@
     </div>
 
     <ClassroomVideoControls
+      @mouseenter="hoveringControls = true"
+      @mouseleave="onControlsLeave"
       :playing="state.playing"
       :ready="state.ready"
       :current-time="state.currentTime"
@@ -58,6 +63,12 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ClassroomVideoControls from 'src/components/classroom/player/ClassroomVideoControls.vue'
 import { useVimeoPlayer } from 'src/composables/classroom/useVimeoPlayer'
+import {
+  getFullscreenElement,
+  requestFullscreen,
+  exitFullscreen,
+  FS_CHANGE_EVENTS,
+} from 'src/composables/classroom/useFullscreen'
 
 interface Props {
   /** Vimeo numeric id, stored on ContentVideoNode.videoMetadata. */
@@ -97,12 +108,81 @@ function remount(): void {
 function toggleFullscreen(): void {
   const el = shellRef.value
   if (!el) return
-  if (document.fullscreenElement) void document.exitFullscreen()
-  else void el.requestFullscreen?.()
+  if (getFullscreenElement()) {
+    exitFullscreen()
+  } else {
+    // Vimeo uses an iframe — there is no underlying <video> element we can
+    // reach for iOS fallback.  requestFullscreen will return false on iOS and
+    // the Vimeo SDK's own native controls remain the user's fallback there.
+    requestFullscreen(el)
+  }
 }
 
 function onFullscreenChange(): void {
-  isFullscreen.value = document.fullscreenElement === shellRef.value
+  // Check both W3C and webkit-prefixed fullscreen element so this works on
+  // desktop Chrome/Firefox AND older WebKit / Android browsers.
+  isFullscreen.value = getFullscreenElement() === shellRef.value
+}
+
+// ---------------------------------------------------------------------------
+// YouTube-style auto-hiding controls (fullscreen only).
+//
+// Matches the TypeHasifHlsPlayer implementation exactly: controls overlay
+// the video in fullscreen and auto-hide after idle while playing.
+const HIDE_DELAY_MS = 2800
+const controlsVisible = ref(true)
+const hoveringControls = ref(false)
+let hideTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearHideTimer(): void {
+  if (hideTimer) { clearTimeout(hideTimer); hideTimer = null }
+}
+
+function scheduleHide(): void {
+  clearHideTimer()
+  if (!isFullscreen.value || !state.playing || hoveringControls.value) return
+  hideTimer = setTimeout(() => {
+    if (isFullscreen.value && state.playing && !hoveringControls.value) {
+      controlsVisible.value = false
+    }
+  }, HIDE_DELAY_MS)
+}
+
+function nudgeControls(): void {
+  controlsVisible.value = true
+  scheduleHide()
+}
+
+function onActivity(): void {
+  if (isFullscreen.value) nudgeControls()
+}
+
+function onControlsLeave(): void {
+  hoveringControls.value = false
+  scheduleHide()
+}
+
+function onSurfaceClick(): void {
+  if (isFullscreen.value && !controlsVisible.value) {
+    nudgeControls()
+    return
+  }
+  togglePlay()
+  nudgeControls()
+}
+
+watch(() => state.playing, (playing) => {
+  if (!playing) { clearHideTimer(); controlsVisible.value = true }
+  else scheduleHide()
+})
+watch(isFullscreen, (fs) => {
+  if (fs) nudgeControls()
+  else { clearHideTimer(); controlsVisible.value = true }
+})
+
+function onShellKeydown(e: KeyboardEvent): void {
+  nudgeControls()
+  onKeydown(e)
 }
 
 function onKeydown(e: KeyboardEvent): void {
@@ -131,13 +211,19 @@ function onKeydown(e: KeyboardEvent): void {
 
 onMounted(() => {
   remount()
-  document.addEventListener('fullscreenchange', onFullscreenChange)
+  // Listen to both unprefixed (W3C) and webkit-prefixed fullscreen events.
+  for (const evt of FS_CHANGE_EVENTS) {
+    document.addEventListener(evt, onFullscreenChange)
+  }
 })
 
 watch(() => [props.videoId, props.hash], remount)
 
 onBeforeUnmount(() => {
-  document.removeEventListener('fullscreenchange', onFullscreenChange)
+  for (const evt of FS_CHANGE_EVENTS) {
+    document.removeEventListener(evt, onFullscreenChange)
+  }
+  clearHideTimer()
   destroy()
 })
 </script>
@@ -224,6 +310,22 @@ onBeforeUnmount(() => {
     border: none;
     border-radius: 0;
     padding-block-end: max(14px, env(safe-area-inset-bottom, 0px));
+    // Fade/slide for the auto-hide (opacity — controls stay in the DOM).
+    transition: opacity var(--cls-dur-med, 220ms) ease, transform var(--cls-dur-med, 220ms) ease;
+    will-change: opacity, transform;
+  }
+}
+
+// ---- Auto-hide: controls + cursor fade away after idle in fullscreen --------
+.cls-vimeo[data-fullscreen][data-controls-hidden] {
+  cursor: none;
+
+  .cls-vimeo__surface { cursor: none; }
+
+  :deep(.cvc) {
+    opacity: 0;
+    transform: translateY(110%);
+    pointer-events: none;
   }
 }
 
