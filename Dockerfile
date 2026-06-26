@@ -1,5 +1,5 @@
-# Get nodejs 22.18.0 container (matches local dev: v22.18.0)
-FROM node:22.18.0
+# Get nodejs 22.23.1 container (matches local dev v22.23.1; app-vite v2 needs >=22.22)
+FROM node:22.23.1
 
 # Create workdir app directory
 WORKDIR /frontend
