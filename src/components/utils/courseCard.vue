@@ -179,12 +179,24 @@ async function goToDetails (): Promise<void> {
   }
 }
 
-function goToClassroom (): void {
+async function goToClassroom (): Promise<void> {
   if (loadingClass.value) return
-  // Hard reload into the classroom hash app — keep the spinner up; the browser
-  // unloads this page, so there is no need to clear the flag.
   loadingClass.value = true
-  window.location.href = `${location.origin}/classroom/#/class/${props.course.pk}/`
+  try {
+    await withMinDuration(
+      Promise.resolve(
+        router.push({
+          name: 'classroom-shell',
+          params: { coursePk: String(props.course.pk) },
+        }),
+      ),
+      LOADING_FLOOR_MS,
+    )
+  } catch {
+    /* navigation aborted/duplicated — nothing to do */
+  } finally {
+    loadingClass.value = false
+  }
 }
 
 async function addToCart (): Promise<void> {

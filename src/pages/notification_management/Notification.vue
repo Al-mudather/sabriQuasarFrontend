@@ -479,7 +479,9 @@ function onRowClick (item: MappedRow): void {
     } catch {
       /* malformed — ignore */
     }
-    if (courseID) window.location.href = `${location.origin}/classroom/#/class/${courseID}/`
+    // In-app classroom route (the old /classroom/#/class/:pk/ hard-link is a
+    // dead separate app that bounced to login).
+    if (courseID) void router.push({ name: 'classroom-shell', params: { coursePk: String(courseID) } })
   } else if (type === 'CHECKOUT_DONE' || type === 'PAYMENT') {
     void router.push({ name: 'my-courses' })
   }

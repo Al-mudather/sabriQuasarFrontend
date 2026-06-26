@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import type { Enrollment } from 'src/types/enrollments/types'
@@ -53,6 +54,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const { t } = useI18n()
+const router = useRouter()
 
 const progressPercent = computed(() => {
   const total = (props.course.courseunitSet.edges ?? []).reduce(
@@ -84,12 +86,14 @@ const ctaLabel = computed(() => {
   return t('اذهب الى الدرس')
 })
 
-const classroomUrl = computed(
-  () => `${location.origin}/classroom/#/class/${props.course.pk}/`
-)
-
+// Enter the in-app classroom (the shell auto-resolves the first lesson). The
+// old `/classroom/#/class/:pk/` hard-link pointed at a separate hash app that no
+// longer exists, which bounced the user to the login page.
 function openClassroom (): void {
-  window.location.href = classroomUrl.value
+  void router.push({
+    name: 'classroom-shell',
+    params: { coursePk: String(props.course?.pk ?? '') },
+  })
 }
 </script>
 

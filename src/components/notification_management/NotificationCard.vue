@@ -56,7 +56,11 @@ onMounted(() => {
 function goToTheNotificationSource (): void {
   const type = props.notification?.type
   if (type === 'QUESTION_ASK' || type === 'QUESTION_ANS') {
-    window.location.href = `${location.origin}/classroom/#/class/${courseID.value}/`
+    // In-app classroom route (the old /classroom/#/class/:pk/ hard-link is a
+    // dead separate app that bounced to login).
+    if (courseID.value) {
+      void router.push({ name: 'classroom-shell', params: { coursePk: String(courseID.value) } })
+    }
   } else if (type === 'CHECKOUT_DONE') {
     void router.push({ name: 'my-courses' })
   }
