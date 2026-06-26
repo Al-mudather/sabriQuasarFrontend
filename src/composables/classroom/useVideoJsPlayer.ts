@@ -9,13 +9,15 @@
 // element (video + custom controls), which the wrapper component owns, so the
 // controls stay visible in fullscreen. See TypeHasifHlsPlayer.vue.
 //
-// HLS + ClearKey DRM + adaptive quality come from video.js (VHS) and the
-// contrib-eme / contrib-quality-levels plugins — none of that changes; only the
-// control surface does.
+// The stream is **plain AES-128 HLS** (standard HLS encryption — NOT DRM). The
+// decryption key is fetched from the manifest's #EXT-X-KEY URI automatically.
+// Apple's WebKit (Safari + every iOS/iPadOS browser) plays AES-128 HLS NATIVELY
+// but its MSE/JS path is unreliable, so on native-HLS browsers we must let the
+// browser play natively (see `mount`). Desktop Chrome/Firefox have no native
+// HLS and keep the VHS (MSE) path. No EME / ClearKey is involved.
 // =============================================================================
 import { onBeforeUnmount, reactive, ref } from 'vue'
 import videojs from 'video.js'
-import 'videojs-contrib-eme'
 import 'videojs-contrib-quality-levels'
 import 'video.js/dist/video-js.css'
 
@@ -59,7 +61,6 @@ interface QualityLevelList {
   on(event: string, cb: () => void): void
 }
 interface PluginSurface {
-  eme?: () => void
   qualityLevels?: () => QualityLevelList
 }
 
@@ -123,6 +124,15 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
   }
 
   function mount(el: HTMLVideoElement): void {
+    // Should we let the browser play HLS natively (vs video.js's VHS/MSE)?
+    // YES on Apple's WebKit (Safari / iOS / iPadOS) — forcing VHS there breaks
+    // playback on iPad/iPhone. NO on desktop Chrome/Firefox — they need VHS for
+    // the AES-128 stream AND for the quality-level selector.
+    // NOTE: do NOT use video.canPlayType('application/vnd.apple.mpegurl') —
+    // Chrome lies and returns "maybe" for it, which would wrongly disable VHS
+    // on desktop (kills the quality menu). video.js's browser flags are correct.
+    const nativeHls = videojs.browser.IS_ANY_SAFARI || videojs.browser.IS_IPAD
+
     player = videojs(el, {
       controls: false,
       // 'metadata' fetches only the HLS manifest (duration + quality levels) up
@@ -132,15 +142,17 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
       preload: 'metadata',
       playbackRates: [...PLAYBACK_RATES],
       html5: {
-        nativeAudioTracks: false,
-        nativeVideoTracks: false,
-        vhs: { cacheEncryptionKeys: true, overrideNative: true },
+        // On native-HLS browsers (Apple), DON'T override native or playback
+        // dies on iPad/iPhone; let WebKit decrypt the AES-128 stream itself.
+        // Elsewhere keep the VHS (MSE) path that powers the quality selector.
+        nativeAudioTracks: nativeHls,
+        nativeVideoTracks: nativeHls,
+        vhs: { cacheEncryptionKeys: true, overrideNative: !nativeHls },
       },
     })
 
     player.ready(() => {
       const p = player as unknown as PluginSurface
-      if (typeof p.eme === 'function') p.eme()
       if (typeof p.qualityLevels === 'function') {
         levels = p.qualityLevels()
         levels.on('addqualitylevel', refreshQualities)
@@ -212,13 +224,13 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
         player.playbackRate(rate)
       } catch { /* ignore — fall through to src() */ }
     }
+    // Plain AES-128 HLS: VHS (desktop) and native HLS (Apple) both fetch the
+    // key from the manifest's #EXT-X-KEY URI automatically — no EME/keySystems.
     const source = {
       src: buildSrc(uuid),
       type: 'application/vnd.apple.mpegurl',
-      // ClearKey DRM — backend serves the key when the manifest requests it.
-      keySystems: { 'org.w3.clearkey': {} },
     }
-    player.src(source as unknown as Parameters<PlayerInstance['src']>[0])
+    player.src(source)
     hasSource = true
   }
 

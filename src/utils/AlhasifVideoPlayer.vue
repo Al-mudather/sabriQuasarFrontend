@@ -19,6 +19,13 @@ const props = defineProps<Props>()
 const videoPlayer = ref<HTMLVideoElement | null>(null)
 let player: ReturnType<typeof videojs> | null = null
 
+// The stream is plain AES-128 HLS (not DRM). Apple's WebKit (Safari / iOS /
+// iPadOS) must play it NATIVELY — forcing video.js's MSE path there breaks
+// playback on iPad/iPhone. Desktop Chrome/Firefox keep the VHS path.
+// NOTE: video.canPlayType('application/vnd.apple.mpegurl') is unreliable
+// (Chrome returns "maybe"), so use video.js's own browser flags.
+const nativeHls = videojs.browser.IS_ANY_SAFARI || videojs.browser.IS_IPAD
+
 const videoOptions = {
   controlBar: {
     children: [
@@ -32,10 +39,9 @@ const videoOptions = {
   controls: true,
   playbackRates: [0.5, 1, 1.5, 2],
   html5: {
-    nativeAudioTracks: false,
-    nativeVideoTracks: false,
-    vhs: { cacheEncryptionKeys: true },
-    hls: { overrideNative: true, debug: true }
+    nativeAudioTracks: nativeHls,
+    nativeVideoTracks: nativeHls,
+    vhs: { cacheEncryptionKeys: true, overrideNative: !nativeHls },
   }
 }
 
@@ -45,7 +51,6 @@ async function playVideo (videoUuid: string): Promise<void> {
   player.src({
     src,
     type: 'application/vnd.apple.mpegurl',
-    keySystems: { 'org.w3.clearkey': {} }
   })
   // Auto-start playback after source is set. Browsers may block unmuted
   // autoplay on first interaction — fall back to muted if rejected so the
