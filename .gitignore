@@ -48,3 +48,42 @@ package-lock.json
 * copy.*
 * copy [0-9].*
 *_old.*
+
+# macOS Finder metadata (anywhere in the tree)
+.DS_Store
+**/.DS_Store
+
+# Local AI / coding-assistant tool artifacts — machine-specific, never shared.
+# (.claude/ is intentionally NOT ignored — it holds shared project config.)
+/skills/
+/skills-lock.json
+/.adal/
+/.agents/
+/.augment/
+/.codebuddy/
+/.commandcode/
+/.continue/
+/.cortex/
+/.crush/
+/.factory/
+/.goose/
+/.iflow/
+/.junie/
+/.kilocode/
+/.kiro/
+/.kode/
+/.mcpjam/
+/.mux/
+/.neovate/
+/.openhands/
+/.pi/
+/.pochi/
+/.qoder/
+/.qwen/
+/.roo/
+/.stitch/
+/.superpowers/
+/.trae/
+/.vibe/
+/.windsurf/
+/.zencoder/
