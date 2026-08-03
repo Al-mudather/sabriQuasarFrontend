@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar, exportFile } from 'quasar'
+import { storeToRefs } from 'pinia'
+import axios from 'axios'
+import { useAuthStore } from 'src/stores/auth'
+import { API_URI } from 'src/utils/hostConfig'
 import type { Certificate } from 'src/types/certificates/types'
 
 defineOptions({ name: 'CertificateCard' })
@@ -11,6 +16,8 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
+const $q = useQuasar()
+const { user, token } = storeToRefs(useAuthStore())
 
 function formatDate(value: string | null | undefined): string {
   if (!value) return '—'
@@ -40,31 +47,59 @@ const periodLabel = computed(() => {
   return `${start} – ${end}`
 })
 
-// The CertificateNode does not currently expose a PDF URL. When/if a
-// `pdfUrl` (or similar) field is added, surface it here.
-const pdfUrl = computed<string | null>(() => {
-  const node = props.certificate as unknown as Record<string, unknown>
-  const candidate = node.pdfUrl ?? node.pdf ?? node.fileUrl ?? null
-  return typeof candidate === 'string' && candidate.length > 0 ? candidate : null
-})
+// The CertificateNode exposes no PDF URL — the PDF is served by an
+// authenticated REST endpoint, same as the /Certificates page. Fetch it as a
+// blob with the JWT and hand it to exportFile.
+const downloading = ref(false)
 
-const canDownload = computed(() => {
-  return props.certificate.isPrintable && (pdfUrl.value !== null)
-})
+async function onDownload(): Promise<void> {
+  const pk = props.certificate.pk
+  if (!pk) return
 
-function onDownload(): void {
-  if (!pdfUrl.value) return
-  window.open(pdfUrl.value, '_blank', 'noopener,noreferrer')
+  downloading.value = true
+  try {
+    const res = await axios({
+      method: 'GET',
+      url: `${API_URI}/api/enrollment/certificate/download/${pk}`,
+      responseType: 'blob',
+      headers: {
+        Authorization: `JWT ${token.value ?? ''}`,
+        // '*/*' — see CertificatePage.vue: `application/pdf` gets a 406 from
+        // DRF content negotiation before auth runs.
+        Accept: '*/*',
+      },
+    })
+
+    const pdfBlob = res.data instanceof Blob
+      ? new Blob([res.data], { type: 'application/pdf' })
+      : new Blob([res.data as BlobPart], { type: 'application/pdf' })
+
+    const safe = (s: string) => s.replace(/[\\/:*?"<>|]+/g, '-')
+    const fileName = `${safe(courseTitle.value || 'certificate')}-${safe(user.value?.fullName ?? user.value?.email ?? 'user')}.pdf`
+
+    if (exportFile(fileName, pdfBlob, { mimeType: 'application/pdf' }) !== true) {
+      $q.notify({ type: 'negative', position: 'bottom', message: t('تعذّر حفظ الملف') })
+    }
+  } catch {
+    $q.notify({
+      type: 'negative',
+      position: 'bottom',
+      timeout: 6000,
+      message: t('تعذّر تحميل الشهادة، حاول مرة أخرى'),
+    })
+  } finally {
+    downloading.value = false
+  }
 }
 
 function onShare(): void {
-  // Stub — a future phase will wire real share.
-  if (typeof navigator !== 'undefined' && 'share' in navigator && pdfUrl.value) {
+  const url = typeof window !== 'undefined' ? window.location.href : ''
+  if (typeof navigator !== 'undefined' && 'share' in navigator && url) {
     void (navigator as Navigator & {
       share: (data: { title?: string; url?: string }) => Promise<void>
     }).share({
       title: courseTitle.value,
-      url: pdfUrl.value,
+      url,
     }).catch(() => { /* user cancelled */ })
   }
 }
@@ -109,7 +144,7 @@ function onShare(): void {
         unelevated
         no-caps
         class="cls-cert__cta"
-        :disable="!canDownload"
+        :loading="downloading"
         icon="download"
         :label="t('classroom.certificate.downloadCertificate')"
         @click="onDownload"

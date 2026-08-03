@@ -61,6 +61,7 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 | 1.1.29 | [Fix dead fullscreen button on mobile (iOS element-fullscreen)](1.1.29-classroom-fullscreen-mobile-fix.md) | ✅ | `classroom-fullscreen-mobile-fix` |
 | 1.1.30 | [Dependency security audit: 43 → 0 vulnerabilities (app-vite v2 / Vite 8 / unhead v3)](1.1.30-dependency-audit-zero-vulns.md) | ✅ | `deps-audit-criticals-jest`…`deps-audit-appvite-v2-zero` |
 | 1.1.31 | [Fix classroom video not playing on iPad/iPhone (native HLS for AES-128)](1.1.31-classroom-ipad-native-hls.md) | ✅ | `classroom-ipad-native-hls` |
+| 1.1.32 | [Fix: no user could download any certificate (406 + dead-button gates)](1.1.32-certificate-download-406-fix.md) | ✅ | `certificate-download-406-fix` |
 
 Tags: each commit also carries a descriptive git tag — e.g. `registration-code-gate`,
 `payment-code-gate`, `regcode-null-fix`, `userinfo-bidi-direction`,

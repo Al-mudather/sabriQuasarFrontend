@@ -129,18 +129,10 @@
             variant="primary"
             size="md"
             :loading="downloadingPk === cert.node.pk"
-            :disabled="!isDownloadable(cert)"
             @click="downloadCertificate(cert)"
           >
             {{ $t('تحميل الشهادة') }}
           </ds-button>
-          <p
-            v-if="downloadBlockedReason(cert)"
-            class="cert-card__blocked-reason"
-            role="note"
-          >
-            {{ downloadBlockedReason(cert) }}
-          </p>
         </div>
       </article>
     </section>
@@ -245,18 +237,6 @@ function totalHoursOf (cert: CertEdge): string {
   return h != null && h > 0 ? String(h) : ''
 }
 
-function isDownloadable (cert: CertEdge): boolean {
-  return cert.node?.isPrintable !== false
-}
-
-// Why the download is gated for a given cert — for inline display + telemetry.
-function downloadBlockedReason (cert: CertEdge): string | null {
-  if (cert.node?.isPrintable === false) {
-    return t('الشهادة قيد المراجعة من الإدارة، لا يمكن تحميلها حالياً')
-  }
-  return null
-}
-
 function formatGregorianDate (d: string | null): string {
   if (!d) return '—'
   try {
@@ -289,18 +269,12 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
     certificateName: u?.certificateName ?? null,
   })
 
+  // A missing certificateName is NOT a client-side gate any more — it used to
+  // abort the download and bounce the user to /profile, which made the button
+  // look dead for anyone whose cached user object lacked the field. The
+  // backend is the authority; we only surface the hint if it actually rejects.
   if (!hasCertName) {
-    dwarn('[certificates] gated by missing certificateName', { userPk: u?.pk })
-    $q.notify({
-      type: 'warning',
-      progress: true,
-      multiLine: true,
-      timeout: 6000,
-      position: 'bottom',
-      message: t('يجب تعيين اسم شهادة التدريب من ملفك الشخصي'),
-    })
-    void router.push({ name: 'user-profile' })
-    return
+    dwarn('[certificates] certificateName missing — proceeding anyway', { userPk: u?.pk })
   }
 
   if (!pk) {
@@ -318,7 +292,11 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
       responseType: 'blob',
       headers: {
         Authorization: `JWT ${token.value ?? ''}`,
-        Accept: 'application/pdf',
+        // MUST stay '*/*'. The endpoint is DRF and has no application/pdf
+        // renderer registered, so `Accept: application/pdf` fails content
+        // negotiation with 406 Not Acceptable *before* auth even runs —
+        // which is what broke every certificate download.
+        Accept: '*/*',
       },
     })
     dlog('[certificates] axios ←', {
@@ -353,12 +331,26 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
       statusText: e?.response?.statusText ?? null,
       message: e?.message ?? String(err),
     })
-    $q.notify({
-      type: 'negative',
-      position: 'bottom',
-      timeout: 6000,
-      message: t('تعذّر تحميل الشهادة، حاول مرة أخرى'),
-    })
+    // Only now — after the server said no — is the missing certificate name
+    // worth surfacing, with a route to fix it.
+    if (!hasCertName) {
+      $q.notify({
+        type: 'warning',
+        progress: true,
+        multiLine: true,
+        timeout: 6000,
+        position: 'bottom',
+        message: t('يجب تعيين اسم شهادة التدريب من ملفك الشخصي'),
+      })
+      void router.push({ name: 'user-profile' })
+    } else {
+      $q.notify({
+        type: 'negative',
+        position: 'bottom',
+        timeout: 6000,
+        message: t('تعذّر تحميل الشهادة، حاول مرة أخرى'),
+      })
+    }
   } finally {
     downloadingPk.value = null
   }
@@ -550,15 +542,6 @@ function goToMyCourses (): void {
       inline-size: 100%;
       justify-content: center;
     }
-  }
-
-  &__blocked-reason {
-    margin: 0;
-    font-family: var(--ds-font-body);
-    font-size: var(--ds-text-xs);
-    color: var(--ds-taupe);
-    line-height: 1.5;
-    text-align: center;
   }
 }
 
