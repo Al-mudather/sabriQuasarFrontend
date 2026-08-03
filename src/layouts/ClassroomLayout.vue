@@ -62,7 +62,13 @@ const currentContentPkFromRoute = computed<number | null>(() => {
 // Data layer (slim bootstrap + lazy unit lessons + current-lesson resolver)
 // ---------------------------------------------------------------------------
 
-const { bootstrap: rawBootstrap, loading, error, refetch } = useCourseBootstrap(coursePk)
+const {
+  bootstrap: rawBootstrap,
+  loading,
+  error,
+  refetch,
+  refreshEnrollment,
+} = useCourseBootstrap(coursePk)
 
 const enrollmentPk = computed<number | null>(() => rawBootstrap.value?.enrollmentPk ?? null)
 
@@ -100,6 +106,27 @@ watch(
   { immediate: true },
 )
 
+// Then hydrate EVERY other unit in the background. The rail's "N / M" header
+// counter is derived from each unit's hydrated lesson array, so an unhydrated
+// unit reported a permanent "0 / <raw totalCount>":
+//   - numerator stuck at 0 because the array it filters is empty until the
+//     unit is expanded (CurriculumRail.completedCount);
+//   - denominator inflated because the fallback is the server's raw
+//     courseunitcontentSet.totalCount, which counts NoneType placeholders and
+//     content kinds the rail never renders (CurriculumRail.unitLessonTotal).
+// loadUnit is idempotent, in-flight-deduped and TTL-cached, so this costs one
+// request per unit on a cold classroom load and nothing thereafter.
+watch(
+  () => bootstrap.value?.units,
+  (units) => {
+    if (!units?.length) return
+    for (const unit of units) {
+      if (unit.pk != null) void loadUnit(unit.pk)
+    }
+  },
+  { immediate: true },
+)
+
 // ---------------------------------------------------------------------------
 // Inject into descendant components.
 // ---------------------------------------------------------------------------
@@ -120,6 +147,7 @@ const classroomContext: ClassroomContext = {
   error,
   refetch,
   refetchProgress,
+  refreshEnrollment,
 }
 provide(ClassroomContextKey, classroomContext)
 

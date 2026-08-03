@@ -40,6 +40,14 @@ export type ClassroomContext = {
   error: Ref<Error | null>
   refetch: () => void
   refetchProgress: () => void
+  /**
+   * Re-read the enrollment (and with it `progress { completed total
+   * percentage }`, which the Overview panel renders). The EndLearningUnit
+   * mutation returns only `success` + the single `learning` row, so Apollo has
+   * no way to update the enrollment entity from its payload — without this the
+   * Overview stays stale until a full page reload.
+   */
+  refreshEnrollment: () => void
 }
 
 export const ClassroomContextKey: InjectionKey<ClassroomContext> = Symbol('classroomContext')

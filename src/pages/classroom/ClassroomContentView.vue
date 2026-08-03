@@ -327,13 +327,25 @@ const fileUrl = computed<string>(() => {
 // on content switch / unmount so the backend can mark complete when appropriate.
 let startTimer: ReturnType<typeof setTimeout> | null = null
 
+// End the lesson, THEN re-read the enrollment. EndLearningUnit returns only
+// `success` + the single `learning` row, so Apollo cannot update the enrollment
+// entity from its payload — and the Overview panel reads its
+// `completed / total / percentage` straight off that entity via the bootstrap.
+// Without this refresh the header sat at a stale percentage until the learner
+// hit reload. `refreshEnrollment` is a network re-read of a query we already
+// own; it is cheap and only fires on real lesson-boundary events.
+async function endProgressAndSync(): Promise<void> {
+  await endProgress()
+  ctx.refreshEnrollment()
+}
+
 watch(
   () => [currentContentPk.value, currentUnitPk.value, enrollmentPkRef.value, coursePkRef.value] as const,
   async ([cpk, upk, epk, kpk], prev) => {
     const [prevCpk] = prev ?? []
     if (prevCpk && prevCpk !== cpk) {
       // Flush end for the previous content before starting new.
-      await endProgress()
+      await endProgressAndSync()
     }
     if (startTimer) {
       clearTimeout(startTimer)
@@ -363,13 +375,13 @@ function onBegin(): void {
 
 async function onComplete(): Promise<void> {
   // A natural video-end event is a strong signal to end the unit immediately.
-  await endProgress()
+  await endProgressAndSync()
 }
 
 async function onSelect(contentPk: number): Promise<void> {
   const cpk = coursePkRef.value
   if (cpk == null) return
-  await endProgress()
+  await endProgressAndSync()
   await router.push({
     name: 'classroom-content',
     params: { coursePk: String(cpk), contentPk: String(contentPk) },
