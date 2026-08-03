@@ -141,7 +141,6 @@
               </span>
               <span class="mc-card__progress-value">
                 {{ item.progress }}%
-                <span class="mc-card__progress-count">{{ item.completed }} / {{ item.total }}</span>
               </span>
             </div>
             <div
@@ -703,12 +702,6 @@ function resetFilters(): void {
     font-variant-numeric: tabular-nums;
     color: var(--ds-brand-600, #322873);
     line-height: 1;
-  }
-
-  &__progress-count {
-    font-weight: 400;
-    font-size: var(--ds-text-xs);
-    color: var(--ds-taupe, var(--ds-text-muted));
   }
 
   &__progress-track {
