@@ -198,8 +198,7 @@ async function loginUser (): Promise<void> {
     if (tokenAuth?.success) {
       if (tokenAuth.user?.verified) {
         try {
-          const userCur = tokenAuth.user.userCurrency
-          if (userCur) settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')
+          // Platform is USD-only — the account's `userCurrency` is no longer honoured.
           const userEmail = tokenAuth.user.email
           if (userEmail && typeof window !== 'undefined' && 'OneSignal' in window) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

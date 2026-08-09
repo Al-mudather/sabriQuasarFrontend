@@ -34,6 +34,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { DISPLAY_CURRENCY } from 'src/utils/currency'
 
 interface Props {
   amount: number
@@ -48,7 +49,9 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   originalAmount: null,
-  currency: 'SAR',
+  // The platform sells in USD only — see src/utils/currency.ts. Callers may
+  // still pass a code explicitly (e.g. a backend-supplied order currency).
+  currency: DISPLAY_CURRENCY,
   size: 'md',
   variant: 'terracotta',
   // Price numerals stay Latin ("100,000" not "١٠٠٬٠٠٠") even in Arabic UI —
@@ -84,12 +87,10 @@ const formattedOriginal = computed(() =>
 
 const formattedDiscount = computed(() => numberFormatter.value.format(discountPercent.value))
 
-const currencySymbol = computed(() => {
-  const code = (props.currency ?? '').toUpperCase()
-  if (code === 'SAR') return 'ر.س'
-  if (code === 'AED') return 'د.إ'
-  return code
-})
+// Rendered as the bare code ("USD") rather than a glyph: it sits next to Latin
+// numerals in an otherwise Arabic UI, where "$" leading an RTL line is easy to
+// misread as belonging to the neighbouring text.
+const currencySymbol = computed(() => (props.currency ?? DISPLAY_CURRENCY).toUpperCase())
 
 const ariaLabel = computed(() => {
   let label = `${formattedAmount.value} ${currencySymbol.value}`

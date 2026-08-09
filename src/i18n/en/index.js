@@ -190,15 +190,7 @@ export default {
   "_comment_src_components_Home_Currency.vue": "src_components_Home_Currency.vue",
         
  
-      "حدد عملة الشراء" : "Select the purchase currency",
- 
-      "الجنيه السوداني" : "Sudanese pound",
- 
-      "الدولار الامريكي" : "U.S. dollar",
- 
       "الريال السعودي" : "Saudi riyal",
- 
-      "تم تغيير العمله الى:" : "The currency has been changed to:",
  
         
   "_comment_src_components_Home_Evaluation.vue": "src_components_Home_Evaluation.vue",

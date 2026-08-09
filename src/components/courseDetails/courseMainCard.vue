@@ -43,7 +43,7 @@
           {{ formattedPrice }}
         </span>
         <ds-skeleton v-else shape="line" width="5ch" height="1.5rem" />
-        <span class="course-main-card__price-currency">{{ currency }}</span>
+        <span class="course-main-card__price-currency">{{ DISPLAY_CURRENCY }}</span>
       </div>
 
       <!-- Primary CTA -->
@@ -80,10 +80,10 @@ import { useQuasar, copyToClipboard } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
-import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import { DISPLAY_CURRENCY, usdPriceOf } from 'src/utils/currency'
 import type { CourseDetail, CoursePricing } from 'src/types/courses/types'
 
 const priceLookup = [
@@ -110,12 +110,10 @@ const $q = useQuasar()
 const { t } = useI18n()
 
 const auth = useAuthStore()
-const settings = useSettingsStore()
 const cart = useCartStore()
 const pyramid = usePyramidStore()
 
 const { user, token } = storeToRefs(auth)
-const { currency } = storeToRefs(settings)
 const { myMarketingCode } = storeToRefs(pyramid)
 
 const message = ref(t('انسخ الرابط'))
@@ -137,17 +135,22 @@ const parsedPrices = computed<CoursePricing | null>(() => {
   return raw as unknown as CoursePricing
 })
 
-const hasPrice = computed<boolean>(() => {
-  const prices = parsedPrices.value
-  if (!prices) return false
-  const value = parseFloat(String((prices as Record<string, number>)[currency.value ?? '']))
-  return Number.isFinite(value) && value > 0
-})
+// Only the USD key of the pricing map is ever read now — the SDG/USD switcher
+// and the settings.currency field it wrote to are both gone. usdPriceOf yields
+// null for a map with no usable USD entry, which keeps the skeleton showing
+// instead of rendering a misleading 0.
+const usdPrice = computed<number | null>(
+  () => usdPriceOf(parsedPrices.value),
+)
+
+const hasPrice = computed<boolean>(
+  () => usdPrice.value !== null && usdPrice.value > 0,
+)
 
 const formattedPrice = computed<string>(() => {
-  if (!hasPrice.value) return ''
-  const prices = parsedPrices.value as Record<string, number>
-  return formatPrice(parseFloat(String(prices[currency.value ?? ''])))
+  const value = usdPrice.value
+  if (value === null) return ''
+  return formatPrice(value)
 })
 
 const prepareCourseSharingLink = computed<string>(() => {

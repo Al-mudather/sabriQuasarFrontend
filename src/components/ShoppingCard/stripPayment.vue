@@ -31,14 +31,12 @@ import type {
   CreateOrderVars,
 } from 'src/types/cart/types'
 import { useCartStore } from 'src/stores/cart'
-import { useSettingsStore } from 'src/stores/settings'
 import { apolloClient } from 'src/apollo/client'
+import { DISPLAY_CURRENCY } from 'src/utils/currency'
 
 const $q = useQuasar()
 const cart = useCartStore()
-const settings = useSettingsStore()
 const { shoppingCartDataList } = storeToRefs(cart)
-const { currency } = storeToRefs(settings)
 
 const errorMessages = ref<string[]>([])
 const alert = ref<boolean>(false)
@@ -94,7 +92,9 @@ async function getStripePaymentUrl (orderResult: NonNullable<CreateOrderResult['
     mutation: CreateStripeCheckout,
     variables: {
       orderId: orderResult.order.pk,
-      currency: currency.value,
+      // Checkout is always billed in the single display currency — there is no
+      // user-selectable currency any more (see src/utils/currency.ts).
+      currency: DISPLAY_CURRENCY,
       successUrl: location.origin + '/#/cart/success',
       cancelUrl: location.origin + '/#/cart/cancel'
     }

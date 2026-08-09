@@ -2,17 +2,23 @@
 // 1:1 with the Vuex version for mechanical migration.
 //
 // Persistence:
-//   - `currency` and `isEnglish` persist via the Pinia persist plugin.
+//   - `isEnglish` persists via the Pinia persist plugin.
 //   - `isEnglish` also writes directly to Quasar `LocalStorage` in its action
 //     to match the Vuex behavior (legacy code still reads the raw key).
 //   - `activeNav` keeps the direct LocalStorage write pattern (legacy code
 //     reads the raw key on boot).
 //   - `openMenu` is UI-transient and not persisted.
+//
+// `currency` USED TO LIVE HERE (default 'SDG', persisted, written by the
+// SDG/USD switcher and by the login handlers from `user.userCurrency`). The
+// platform now sells in USD only, so the display currency is the constant
+// `DISPLAY_CURRENCY` in `src/utils/currency.ts`. Dropping the field from
+// `persist.paths` is deliberate and load-bearing: existing visitors have
+// `{"currency":"SDG"}` sitting in localStorage['settings'], and keeping it in
+// the paths list would rehydrate that stale preference over the new default.
 
 import { defineStore } from 'pinia'
 import { LocalStorage } from 'quasar'
-
-import type { CurrencyCode } from 'src/types/settings/types'
 
 // Load the pinia-plugin-persistedstate module augmentation so `persist: { paths: [...] }`
 // is accepted as a valid option on DefineStoreOptions.
@@ -23,7 +29,6 @@ import 'pinia-plugin-persistedstate'
 // ---------------------------------------------------------------------------
 interface SettingsStoreState {
   isEnglish: boolean
-  currency: CurrencyCode
   openMenu: boolean
   activeNav: string
 }
@@ -31,7 +36,6 @@ interface SettingsStoreState {
 export const useSettingsStore = defineStore('settings', {
   state: (): SettingsStoreState => ({
     isEnglish: (LocalStorage.getItem<boolean>('isEnglish') ?? false),
-    currency: 'SDG',
     openMenu: false,
     activeNav: (LocalStorage.getItem<string>('activeNav') ?? ''),
   }),
@@ -51,22 +55,19 @@ export const useSettingsStore = defineStore('settings', {
       this.isEnglish = value
     },
     updateOpenMenu (value: boolean): void { this.openMenu = value },
-    updateCurrency (value: CurrencyCode): void { this.currency = value },
 
     // ---- Vuex actions, names preserved --------------------------------------
     setActiveNavAction (value: string): void { this.updateActiveNav(value) },
-    setCurrencyAction (value: CurrencyCode): void { this.updateCurrency(value) },
     setOpenMenuAction (value: boolean): void { this.updateOpenMenu(value) },
     setIsEnglishAction (value: boolean): void { this.updateIsEnglish(value) },
 
     // ---- Short-name aliases used by C1/C2 migrated call sites --------------
     setActiveNav (v: string): void { return this.setActiveNavAction(v) },
-    setCurrency (v: CurrencyCode): void { return this.setCurrencyAction(v) },
     setOpenMenu (v: boolean): void { return this.setOpenMenuAction(v) },
     setIsEnglish (v: boolean): void { return this.setIsEnglishAction(v) },
   },
 
   persist: {
-    paths: ['currency', 'isEnglish'],
+    paths: ['isEnglish'],
   },
 })

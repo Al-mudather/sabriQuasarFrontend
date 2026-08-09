@@ -14,7 +14,6 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { apolloClient } from 'src/apollo/client'
 import { useAuthStore } from 'src/stores/auth'
-import { useSettingsStore } from 'src/stores/settings'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { SocialAuth } from 'src/graphql/account_management/mutation/CreateSocailAuth'
 import type { SocialAuthMutationResult, SocialAuthVariables } from 'src/types/auth/types'
@@ -31,7 +30,6 @@ const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
 const auth = useAuthStore()
-const settings = useSettingsStore()
 const pyramid = usePyramidStore()
 
 const visible = ref(false)
@@ -65,8 +63,7 @@ async function loginAuthMutation (accessToken: string, provider: string, email =
       // New session → re-verify the registration-code gate (the router guard).
       pyramid.resetPlatformAccess()
       try {
-        const userCur = userData.social?.user?.userCurrency
-        if (userCur) settings.setCurrency(userCur === 'SDG' ? 'SDG' : 'USD')
+        // Platform is USD-only — the account's `userCurrency` is no longer honoured.
 
         const userEmail = userData.social?.user?.email
         if (userEmail && typeof window !== 'undefined' && 'OneSignal' in window) {

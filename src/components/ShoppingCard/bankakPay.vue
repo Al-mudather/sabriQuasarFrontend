@@ -3,8 +3,12 @@
     <!-- ------------------------------------------------------------------ -->
     <!-- Heading                                                              -->
     <!-- ------------------------------------------------------------------ -->
+    <!-- This screen IS the Bankak (Sudanese bank transfer) flow and it is the
+         only active payment method, so the SDG branch was the only one ever
+         rendered. Dropping the SDG *pricing* must not change the wording here,
+         hence the Bankak copy is kept verbatim rather than conditional. -->
     <h2 class="bk-pay__heading">
-      {{ currency === 'SDG' ? $t('إشعار بنكك') : $t('ارفق فاتورة الدفع') }}
+      {{ $t('إشعار بنكك') }}
     </h2>
 
     <!-- ------------------------------------------------------------------ -->
@@ -43,7 +47,7 @@
     <file-upload
       :imgeSize="4000000"
       :accept="'.png,.jpg,image/*'"
-      :label="currency === 'SDG' ? bankakLabel : othersLabel"
+      :label="bankakLabel"
       @File_Handler="paymentImageHandler"
     />
 
@@ -80,7 +84,6 @@ import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCartStore } from 'src/stores/cart'
-import { useSettingsStore } from 'src/stores/settings'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { apolloClient } from 'src/apollo/client'
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
@@ -100,10 +103,8 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const cart = useCartStore()
-const settings = useSettingsStore()
 const pyramid = usePyramidStore()
 const { shoppingCartDataList } = storeToRefs(cart)
-const { currency } = storeToRefs(settings)
 
 /**
  * Route the user to the registration-code page with a clear reason. The
@@ -119,7 +120,6 @@ function routeToRegistrationCode (): void {
 const visible = ref<boolean>(false)
 const bankakBill = ref<File | null>(null)
 const bankakLabel = t('إشعار بنكك الأبيض')
-const othersLabel = t('اضغط للإرفاق فاتورة الدفع')
 
 // ---------------------------------------------------------------------------
 // Handlers

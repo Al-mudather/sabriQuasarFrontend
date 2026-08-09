@@ -68,15 +68,14 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
-import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { withMinDuration } from 'src/utils/withMinDuration'
+import { DISPLAY_CURRENCY, usdPriceOf } from 'src/utils/currency'
 import type {
   Course,
   CourseInSpeciality,
   CoursePricing,
-  CurrencyCode,
 } from 'src/types/courses/types'
 
 // Accept both the rich `Course` shape (from `GetAllCourses`) and the lighter
@@ -95,10 +94,8 @@ const props = defineProps<Props>()
 
 const router = useRouter()
 const auth = useAuthStore()
-const settings = useSettingsStore()
 const cart = useCartStore()
 const { user } = storeToRefs(auth)
-const { currency } = storeToRefs(settings)
 
 const displayTitle = computed(() => props.name || props.course.title)
 
@@ -112,20 +109,13 @@ const pricing = computed<CoursePricing | null>(() => {
   return raw as CoursePricing
 })
 
-const selectedCurrency = computed<CurrencyCode>(
-  () => (currency.value as CurrencyCode) || 'SDG',
-)
-
 const displayAmount = computed<number | null>(() => {
-  const map = pricing.value
-  if (map) {
-    const priced = map[selectedCurrency.value]
-    if (typeof priced === 'number' && Number.isFinite(priced) && priced > 0) {
-      return priced
-    }
-  }
-  // Fallback to CourseNode.courseFee (number) when the currency map is absent
-  // or doesn't carry the selected currency.
+  const priced = usdPriceOf(pricing.value)
+  if (priced !== null && priced > 0) return priced
+  // Fallback to CourseNode.courseFee when the currency map is absent or has no
+  // USD entry. courseFee IS the dollar figure — the schema carries the Sudanese
+  // amount separately as `courseFeeInSdg` — so this stays correct under the
+  // USD-only pricing model.
   const fee = Number(props.course.courseFee)
   if (Number.isFinite(fee) && fee > 0) return fee
   return null
@@ -140,7 +130,7 @@ const isFree = computed(() => {
   return false
 })
 
-const displayCurrency = computed(() => selectedCurrency.value)
+const displayCurrency = DISPLAY_CURRENCY
 
 function formatAmount (n: number): string {
   try {

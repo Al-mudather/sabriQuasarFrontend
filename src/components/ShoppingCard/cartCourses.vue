@@ -55,7 +55,6 @@
                   <h3 class="cart-courses__title">{{ item.course.title ?? item.course.name }}</h3>
                   <PriceDisplay
                     :amount="itemAmount(item)"
-                    :currency="currency"
                     size="sm"
                     variant="ink"
                   />
@@ -88,7 +87,6 @@
               <dd>
                 <PriceDisplay
                   :amount="subtotal"
-                  :currency="currency"
                   size="sm"
                   variant="ink"
                 />
@@ -100,7 +98,6 @@
               <dd>
                 <PriceDisplay
                   :amount="totalDue"
-                  :currency="currency"
                   size="lg"
                   variant="terracotta"
                 />
@@ -134,9 +131,9 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useCartStore } from 'src/stores/cart'
-import { useSettingsStore } from 'src/stores/settings'
 import { apolloClient } from 'src/apollo/client'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
+import { usdPriceOf } from 'src/utils/currency'
 import type {
   CartEntry,
   CreateBraintreeCheckoutResult,
@@ -153,22 +150,16 @@ import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
 const router = useRouter()
 const $q = useQuasar()
 const cart = useCartStore()
-const settings = useSettingsStore()
 const { shoppingCartDataList } = storeToRefs(cart)
-const { currency } = storeToRefs(settings)
 
 const hasItems = computed(() => shoppingCartDataList.value && shoppingCartDataList.value.length > 0)
 
+// `course.currency` is the parsed pricing map (see src/utils/currency.ts); the
+// platform sells in USD only, so we read that one key. `usdPriceOf` returns
+// null when there is no USD figure — falling back to 0 keeps the pre-existing
+// behaviour of rendering a zero line rather than a blank/NaN price.
 function itemAmount (item: CartEntry): number {
-  try {
-    const raw = item.course.currency
-    if (raw && typeof raw === 'object') {
-      return parseFloat(String((raw as Record<string, number>)[currency.value])) || 0
-    }
-    return 0
-  } catch {
-    return 0
-  }
+  return usdPriceOf(item.course.currency) ?? 0
 }
 
 const subtotal = computed((): number => {
@@ -234,8 +225,11 @@ function purgeZeroCostItems (): void {
   shoppingCartDataList.value.forEach(item => {
     const c = item.course as unknown as Record<string, unknown>
     const fee = parseInt(String(c.courseFee ?? ''), 10)
-    const feeSDG = parseInt(String(c.courseFeeInSdg ?? ''), 10)
-    if (fee === 0 || feeSDG === 0) {
+    // USD-only: gate on `courseFee` (the dollar figure) alone. This used to also
+    // purge when `courseFeeInSdg === 0`, which is now a false positive — a course
+    // that is priced in dollars but carries no SDG figure would be silently
+    // dropped from the basket behind a "course under preparation" toast.
+    if (fee === 0) {
       removeCourseFromCart(item)
       $q.notify({
         type: 'warning',

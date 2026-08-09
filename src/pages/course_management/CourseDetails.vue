@@ -154,7 +154,6 @@ import { useHead } from '@unhead/vue'
 import { storeToRefs } from 'pinia'
 import { apolloClient } from 'src/apollo/client'
 import { useAuthStore } from 'src/stores/auth'
-import { useSettingsStore } from 'src/stores/settings'
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { GetCourseByID } from 'src/graphql/course_management/query/GetCourseByID'
@@ -162,6 +161,7 @@ import { useQuery } from '@vue/apollo-composable'
 import { FORMAT_THE_WEB_SIT_URL, FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { withMinDuration } from 'src/utils/withMinDuration'
 import { courseSlug } from 'src/utils/courseSlug'
+import { DISPLAY_CURRENCY, usdPriceOf } from 'src/utils/currency'
 import type { CourseDetail, CoursePricing } from 'src/types/courses/types'
 import type { GetCourseByIdResult, GetCourseByIdVars } from 'src/types/courses/types'
 
@@ -191,12 +191,10 @@ const router = useRouter()
 const $q = useQuasar()
 
 const auth = useAuthStore()
-const settings = useSettingsStore()
 const cart = useCartStore()
 const pyramid = usePyramidStore()
 
 const { user } = storeToRefs(auth)
-const { currency } = storeToRefs(settings)
 
 // Local state ---------------------------------------------------------------
 const courseID = ref('')
@@ -231,21 +229,23 @@ useHead({
 })
 
 // Computed ------------------------------------------------------------------
-const selectedCurrency = computed<string>(() =>
-  (currency.value || 'SAR').toUpperCase(),
-)
+// The SDG/USD switcher is gone — the platform sells in USD only, so this is a
+// constant rather than a reactive read off the settings store. It stays a
+// computed (not a bare string) because the sidebar / sticky / mobile bars all
+// declare `selectedCurrency` as a plain prop and this keeps their wiring and
+// the surrounding computed block untouched.
+const selectedCurrency = computed<string>(() => DISPLAY_CURRENCY)
 
 const parsedPrices = computed<CoursePricing | null>(() => {
   if (!courseData.value?.currency) return null
   return courseData.value.currency as unknown as CoursePricing
 })
 
-const currentPrice = computed<number | null>(() => {
-  const prices = parsedPrices.value
-  if (!prices) return null
-  const value = parseFloat(String((prices as Record<string, number>)[selectedCurrency.value]))
-  return Number.isFinite(value) ? value : null
-})
+// usdPriceOf returns null when the pricing map carries no usable USD entry, so
+// a course still awaiting a USD price renders the skeleton instead of a bogus 0.
+const currentPrice = computed<number | null>(
+  () => usdPriceOf(parsedPrices.value),
+)
 
 const hasPrice = computed<boolean>(
   () => Number.isFinite(currentPrice.value) && (currentPrice.value ?? 0) > 0,

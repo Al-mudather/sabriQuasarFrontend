@@ -97,13 +97,13 @@ import { useIntl } from 'src/composables/useIntl'
 import { useI18n } from 'vue-i18n'
 import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { withMinDuration } from 'src/utils/withMinDuration'
+import { DISPLAY_CURRENCY, usdPriceOf } from 'src/utils/currency'
 import { cascade } from 'src/design-system/motion.js'
 import type {
   AllCoursesInSpecialityResult,
   AllCoursesInSpecialityVars,
   CourseInSpeciality,
   CoursePricing,
-  CurrencyCode,
 } from 'src/types/courses/types'
 import type { Speciality } from 'src/types/courses/types'
 
@@ -148,7 +148,7 @@ const auth = useAuthStore()
 const cart = useCartStore()
 const { user } = storeToRefs(auth)
 const settings = useSettingsStore()
-const { currency, isEnglish } = storeToRefs(settings)
+const { isEnglish } = storeToRefs(settings)
 
 // ---------------------------------------------------------------------------
 // Query
@@ -240,10 +240,15 @@ interface NormalizedCourse {
 }
 
 function normalize (node: CourseInSpeciality): NormalizedCourse {
-  const selectedCur: CurrencyCode = (currency.value as CurrencyCode) || 'SAR'
+  // Display currency is a constant now — the SDG/USD switcher and the
+  // settings.currency field behind it are gone, so only the USD key is read.
   // currency is already parsed by the Apollo typePolicy — treat directly as CoursePricing
   const prices = (node.currency ?? {}) as CoursePricing
-  const current = node.isPaid === false ? 0 : (Number(prices[selectedCur]) || 0)
+  // An explicitly free course wins over whatever the map says; otherwise a
+  // missing USD price collapses to 0 so the card still renders a price slot.
+  const current = node.isPaid === false
+    ? 0
+    : (usdPriceOf(prices) ?? 0)
   return {
     id: node.id,
     pk: node.pk,
@@ -252,7 +257,7 @@ function normalize (node: CourseInSpeciality): NormalizedCourse {
     coverImage: resolveImage(node) ?? undefined,
     price: {
       current,
-      currency: selectedCur,
+      currency: DISPLAY_CURRENCY,
     },
     category: props.speciality.speciality,
     studentCount: node.enrolled ? 1 : 0,

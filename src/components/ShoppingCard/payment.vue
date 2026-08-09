@@ -43,7 +43,7 @@
           </span>
           <span class="cart-payment__stripe-value">
             ${{ calculateDollarAmount() }}
-            <span class="cart-payment__stripe-unit">USD</span>
+            <span class="cart-payment__stripe-unit">{{ DISPLAY_CURRENCY }}</span>
           </span>
           <span class="cart-payment__stripe-note">
             {{ $t('سيتم التحويل تلقائياً حسب سعر الصرف') }}
@@ -149,7 +149,6 @@
               <span class="cart-payment__summary-name">{{ (item.course as unknown as Record<string, unknown>).title ?? item.course.name }}</span>
               <PriceDisplay
                 :amount="itemAmount(item)"
-                :currency="currency"
                 size="sm"
                 variant="ink"
               />
@@ -162,7 +161,6 @@
               <dd>
                 <PriceDisplay
                   :amount="Number(totalPaymentFees) || 0"
-                  :currency="currency"
                   size="sm"
                   variant="ink"
                 />
@@ -173,7 +171,6 @@
               <dd>
                 <PriceDisplay
                   :amount="Number(totalPaymentFees) || 0"
-                  :currency="currency"
                   size="lg"
                   variant="terracotta"
                 />
@@ -199,9 +196,9 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 import { useCartStore } from 'src/stores/cart'
-import { useSettingsStore } from 'src/stores/settings'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { apolloClient } from 'src/apollo/client'
+import { DISPLAY_CURRENCY, usdPriceOf } from 'src/utils/currency'
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
 import { CreateStripeCheckout } from 'src/graphql/checkout_management/mutation/CreateStripeCheckout'
 import { StripePublishableKey } from 'src/graphql/checkout_management/query/StripePublishableKey'
@@ -229,10 +226,8 @@ const router = useRouter()
 const $q = useQuasar()
 const { t } = useI18n()
 const cart = useCartStore()
-const settings = useSettingsStore()
 const pyramid = usePyramidStore()
 const { shoppingCartDataList, totalPaymentFees } = storeToRefs(cart)
-const { currency } = storeToRefs(settings)
 
 const showBankakPayment = ref<boolean>(false)
 const showStripePayment = ref<boolean>(false)
@@ -262,16 +257,12 @@ const availableMethods = computed((): PaymentMethod[] => [
   }
 ])
 
+// `course.currency` is the parsed pricing map (see src/utils/currency.ts); the
+// platform sells in USD only, so we read that one key. `usdPriceOf` returns null
+// when there is no USD figure — falling back to 0 preserves the previous
+// behaviour of showing a zero line instead of a blank/NaN price.
 function itemAmount (item: CartEntry): number {
-  try {
-    const raw = item.course.currency
-    if (raw && typeof raw === 'object') {
-      return parseFloat(String((raw as Record<string, number>)[currency.value])) || 0
-    }
-    return 0
-  } catch {
-    return 0
-  }
+  return usdPriceOf(item.course.currency) ?? 0
 }
 
 function confirmMethod (): void {
@@ -289,6 +280,8 @@ function goBackToOptions (): void {
   showStripePayment.value = false
 }
 
+// `courseFee` IS the dollar figure (the SDG amount lives in the separate
+// `courseFeeInSdg` field), so this is already the USD total — no conversion.
 function calculateDollarAmount (): string {
   let sum = 0.0
   for (const item of shoppingCartDataList.value) {
@@ -352,7 +345,7 @@ async function getStripePaymentUrl (orderResult: NonNullable<CreateOrderResult['
     mutation: CreateStripeCheckout,
     variables: {
       orderId: orderResult.order.pk,
-      currency: 'USD',
+      currency: DISPLAY_CURRENCY,
       successUrl: location.origin + '/#/cart/success',
       cancelUrl: location.origin + '/#/cart/cancel'
     }
@@ -414,8 +407,11 @@ function purgeZeroCostItems (): void {
   shoppingCartDataList.value.forEach(item => {
     const c = item.course as unknown as Record<string, unknown>
     const fee = parseInt(String(c.courseFee ?? ''), 10)
-    const feeSDG = parseInt(String(c.courseFeeInSdg ?? ''), 10)
-    if (fee === 0 || feeSDG === 0) {
+    // USD-only: gate on `courseFee` (the dollar figure) alone. This used to also
+    // purge when `courseFeeInSdg === 0`, which is now a false positive — a course
+    // that is priced in dollars but carries no SDG figure would be silently
+    // dropped from the basket behind a "course under preparation" toast.
+    if (fee === 0) {
       removeCourseFromCart(item)
       $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: t('هذا الكورس تحت التحضير') })
     }

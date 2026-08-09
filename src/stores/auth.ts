@@ -217,8 +217,9 @@ export const useAuthStore = defineStore('authentication', {
         globals?.$socialAuth?.revokeGoogle?.()
       } catch (_e) { /* ignore */ }
 
-      // 4. Wipe all client storage + cookies, keeping only language/currency
-      //    display prefs so the UI doesn't flip language on logout.
+      // 4. Wipe all client storage + cookies, keeping only the language pref so
+      //    the UI doesn't flip language on logout. (Currency used to be kept
+      //    here too; the platform is USD-only now, so there is no such pref.)
       purgeClientStorage({ keepLocalStorageKeys: ['isEnglish', 'pinia_settings'] })
 
       // 5. Reset in-memory auth state.

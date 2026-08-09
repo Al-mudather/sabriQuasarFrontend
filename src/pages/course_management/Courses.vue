@@ -185,7 +185,6 @@
               :name="course.node.title"
               :instructor="$t('مركز دكتور صبري ابو قرون')"
               :price="course.node.courseFee"
-              unit="SDG"
             />
           </div>
 
