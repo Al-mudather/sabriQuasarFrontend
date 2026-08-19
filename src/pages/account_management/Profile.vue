@@ -151,6 +151,95 @@
         </form>
       </section>
 
+      <!-- Certificate-name section (full-width).
+           The name printed on training certificates. It is WRITE-ONCE: the
+           backend accepts `updateCertificateName` only while the field is
+           empty, which is why the set form disappears entirely once a name
+           exists rather than turning into an editable field.
+
+           This section was dropped by the phase-4 redesign (its old component,
+           Profile_managements/UpdataCertificateName.vue, was left orphaned and
+           rendered by nothing), which left learners with no way to set the name
+           at all — and the certificate page used to redirect them *here* to do
+           it. Restored inline so it shares the page's section/form styles. -->
+      <section class="profile-section" aria-labelledby="certname-heading">
+        <header class="profile-section__head">
+          <div class="profile-section__head-text">
+            <h2 id="certname-heading">
+              {{ hasCertificateName ? $t('اسم إستخراج شهادة التدريب') : $t('تعيين اسم إستخراج شهادة التدريب') }}
+            </h2>
+            <p>{{ $t('الاسم الذي سيُطبع على شهادات التدريب الخاصة بك.') }}</p>
+          </div>
+        </header>
+
+        <!-- Already set — show it, locked. -->
+        <template v-if="hasCertificateName">
+          <div class="profile-form__grid">
+            <ds-input
+              :model-value="savedCertificateName"
+              class="profile-form__field profile-form__field--full"
+              :label="$t('الإسم رباعيا باللغه الإنجليزيه للإستخراج الشهاده')"
+              readonly
+              disabled
+              dir="ltr"
+            />
+          </div>
+          <p class="cert-name__locked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
+              <path d="M8 10V7a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>{{ $t('لا يمكن تغيير هذا الاسم بعد تعيينه.') }}</span>
+          </p>
+        </template>
+
+        <!-- Not set yet — the one chance to get it right. -->
+        <form v-else class="profile-form" @submit.prevent="submitCertificateName">
+          <p class="cert-name__callout" role="note">
+            {{ $t('تذكر اسمك الرباعي باللغه الإنجليزيه سوف يكتب في الشهاده و لايمكن تغييره مره اخرى... الأفضل كتابة اسمك من جواز السفر.') }}
+          </p>
+
+          <div class="profile-form__grid">
+            <ds-input
+              v-model="certificateName"
+              class="profile-form__field profile-form__field--full"
+              :label="$t('الإسم رباعيا باللغه الإنجليزيه للإستخراج الشهاده')"
+              :error="certificateNameError"
+              :disabled="savingCertName"
+              placeholder="MOHAMED AHMED ALI HASSAN"
+              dir="ltr"
+              autocomplete="off"
+              spellcheck="false"
+              @blur="certNameTouched = true"
+            />
+            <ds-input
+              v-model="certificateNameConfirm"
+              class="profile-form__field profile-form__field--full"
+              :label="$t('تأكيد الإسم باللغه الإنجليزيه')"
+              :error="certificateNameConfirmError"
+              :disabled="savingCertName"
+              placeholder="MOHAMED AHMED ALI HASSAN"
+              dir="ltr"
+              autocomplete="off"
+              spellcheck="false"
+              @blur="certNameTouched = true"
+            />
+          </div>
+
+          <div class="profile-form__actions">
+            <ds-button
+              type="submit"
+              variant="primary"
+              size="md"
+              :loading="savingCertName"
+              :disabled="!canSubmitCertName"
+            >
+              {{ $t('تعيين') }}
+            </ds-button>
+          </div>
+        </form>
+      </section>
+
       <!-- Preferences section (full-width) -->
       <section class="profile-section" aria-labelledby="prefs-heading">
         <header class="profile-section__head">
@@ -199,13 +288,16 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useQuery, useMutation } from '@vue/apollo-composable'
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from 'src/stores/settings'
+import { useAuthStore } from 'src/stores/auth'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
 import { UpdateUserProfile } from 'src/graphql/account_management/mutation/UpdateUserProfile'
+import { UpdateCertificateNameQuery } from 'src/graphql/account_management/mutation/UpdateCertificateName'
 import DsInput from 'src/design-system/components/DsInput.vue'
 import AfilliateBord from 'src/components/MyCourses/afilliateBord.vue'
 import type {
@@ -213,10 +305,14 @@ import type {
   GetMyProfileVariables,
   UpdateProfileMutationResult,
   UpdateProfileVariables,
+  UpdateCertificateNameResult,
+  UpdateCertificateNameVariables,
 } from 'src/types/auth/types'
 
 const { t } = useI18n()
 const $q = useQuasar()
+const router = useRouter()
+const auth = useAuthStore()
 const settings = useSettingsStore()
 const { isEnglish } = storeToRefs(settings)
 
@@ -234,6 +330,15 @@ const { mutate: updateProfileMutate } = useMutation<
   UpdateProfileVariables
 >(UpdateUserProfile, { refetchQueries: [{ query: GetMyProfileData }] })
 
+// refetchQueries (not an optimistic cache write) because the backend normalises
+// what it stores — it is the authority on the final value, and this field can
+// never be corrected from the UI afterwards, so the user must see exactly what
+// was persisted.
+const { mutate: updateCertificateNameMutate } = useMutation<
+  UpdateCertificateNameResult,
+  UpdateCertificateNameVariables
+>(UpdateCertificateNameQuery, { refetchQueries: [{ query: GetMyProfileData }] })
+
 // ---------------------------------------------------------------------------
 // Local form state
 // ---------------------------------------------------------------------------
@@ -245,6 +350,14 @@ const phoneNumber = ref('')
 const whatsAppNumber = ref('')
 const telegramNumber = ref('')
 const gender = ref('')
+
+// Certificate name (write-once) --------------------------------------------
+const savingCertName = ref(false)
+const certificateName = ref('')
+const certificateNameConfirm = ref('')
+// Errors stay hidden until the user has actually left a field once, so the
+// form doesn't greet them in red before they've typed anything.
+const certNameTouched = ref(false)
 
 interface Snapshot {
   fullName: string
@@ -268,6 +381,43 @@ const genderLabel = computed(() => {
   if (gender.value === 'female') return t('أنثى')
   return '—'
 })
+
+// Certificate name -----------------------------------------------------------
+const savedCertificateName = computed(() => me.value?.certificateName ?? '')
+const hasCertificateName = computed(() => savedCertificateName.value.trim().length > 0)
+
+// Collapse runs of whitespace so "AHMED   ALI" and "AHMED ALI" compare equal —
+// otherwise a stray double space makes the confirmation fail for a name the
+// user typed identically twice.
+function normaliseCertName (value: string): string {
+  return value.trim().replace(/\s+/g, ' ')
+}
+
+const certNameValue = computed(() => normaliseCertName(certificateName.value))
+const certNameConfirmValue = computed(() => normaliseCertName(certificateNameConfirm.value))
+
+// Latin letters only. The certificate is issued in English and the backend
+// uppercases the value; Arabic input would render as mojibake on the PDF.
+const LATIN_NAME_RE = /^[A-Za-z][A-Za-z\s.'-]*$/
+
+const certificateNameError = computed<string>(() => {
+  if (!certNameTouched.value || !certNameValue.value) return ''
+  if (!LATIN_NAME_RE.test(certNameValue.value)) return t('استخدم الحروف الإنجليزية فقط')
+  return ''
+})
+
+const certificateNameConfirmError = computed<string>(() => {
+  if (!certNameTouched.value || !certNameConfirmValue.value) return ''
+  if (certNameConfirmValue.value !== certNameValue.value) return t('الاسمان غير متطابقان')
+  return ''
+})
+
+const canSubmitCertName = computed<boolean>(() =>
+  !savingCertName.value &&
+  certNameValue.value.length > 0 &&
+  LATIN_NAME_RE.test(certNameValue.value) &&
+  certNameConfirmValue.value === certNameValue.value,
+)
 
 const initials = computed(() => {
   const n = (fullName.value || email.value || '').trim()
@@ -346,6 +496,44 @@ function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): v
       })
     }
   }
+}
+
+async function submitCertificateName (): Promise<void> {
+  certNameTouched.value = true
+  if (!canSubmitCertName.value) return
+
+  savingCertName.value = true
+  try {
+    // Uppercased to match how the name is rendered on the certificate itself.
+    const value = certNameValue.value.toUpperCase()
+    const result = await updateCertificateNameMutate({
+      input: { certificateName: value, certificateNameConfirm: value },
+    })
+    const payload = result?.data?.updateCertificateName
+    if (payload?.success) {
+      certificateName.value = ''
+      certificateNameConfirm.value = ''
+      certNameTouched.value = false
+      // Refresh the auth store too: CertificatePage reads `certificateName`
+      // off the cached user, not off this page's query.
+      void auth.getMyProfileData()
+      $q.notify({
+        type: 'positive',
+        position: 'bottom',
+        progress: true,
+        multiLine: true,
+        message: t('تم تعيين اسم الشهادة بنجاح'),
+        actions: [{
+          label: t('شهاداتي'),
+          color: 'white',
+          handler: () => { void router.push({ name: 'my-certificate' }) },
+        }],
+      })
+    } else if (payload?.errors) {
+      errorHandler(payload.errors as Record<string, Array<{ message: string }>>)
+    }
+  } catch { /* apolloProvider surfaces the error toast */ }
+  finally { savingCertName.value = false }
 }
 
 async function UpdateUserProfileData (): Promise<void> {
@@ -463,6 +651,33 @@ async function UpdateUserProfileData (): Promise<void> {
 
   &__head-text { min-inline-size: 0; }
   &__head-action { flex-shrink: 0; }
+}
+
+// ---------------------------------------------------------------------------
+// Certificate name — the write-once warning + the locked confirmation
+// ---------------------------------------------------------------------------
+.cert-name {
+  &__callout {
+    margin: 0;
+    padding: var(--ds-space-3) var(--ds-space-4);
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-warning-bg, #fdf3e3);
+    color: var(--ds-warning, #8a5a12);
+    border-inline-start: 3px solid currentColor;
+    font-size: var(--ds-text-sm);
+    line-height: var(--ds-leading-arabic);
+  }
+
+  &__locked {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    font-size: var(--ds-text-sm);
+    color: var(--ds-taupe, var(--ds-text-muted));
+
+    svg { flex-shrink: 0; }
+  }
 }
 
 // ---------------------------------------------------------------------------

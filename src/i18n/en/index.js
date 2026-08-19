@@ -524,6 +524,16 @@ export default {
  
         
   "_comment_src_pages_account_management_Profile.vue": "src_pages_account_management_Profile.vue",
+
+      "الاسم الذي سيُطبع على شهادات التدريب الخاصة بك." : "The name that will be printed on your training certificates.",
+
+      "لا يمكن تغيير هذا الاسم بعد تعيينه." : "This name cannot be changed once it has been set.",
+
+      "استخدم الحروف الإنجليزية فقط" : "Use English letters only",
+
+      "الاسمان غير متطابقان" : "The two names do not match",
+
+      "تم تعيين اسم الشهادة بنجاح" : "Certificate name set successfully",
         
  
       "بياناتــي" : "My Profile",
