@@ -67,6 +67,7 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 | 1.1.35 | [USD-only pricing: drop SDG display + remove the currency switcher](1.1.35-usd-only-pricing.md) | ✅ | `usd-only-pricing` |
 | 1.1.36 | [Profile: restore the missing certificate-name section](1.1.36-profile-certificate-name-section.md) | ✅ | `profile-certificate-name` |
 | 1.1.37 | [Course details: the description's "read more" never appeared](1.1.37-course-description-read-more.md) | ✅ | `course-description-read-more` |
+| 1.1.38 | [Home hero: huge empty gap under the portrait on real iOS](1.1.38-hero-safari-gap.md) | ✅ | `hero-safari-gap` |
 
 Tags: each commit also carries a descriptive git tag — e.g. `registration-code-gate`,
 `payment-code-gate`, `regcode-null-fix`, `userinfo-bidi-direction`,

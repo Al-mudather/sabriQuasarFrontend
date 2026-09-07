@@ -324,7 +324,6 @@ onBeforeUnmount(() => {
 
 .hero-indigo__portrait-wrap {
   position: relative;
-  min-block-size: 100%;
 
   /* Show the doctors below the copy on small screens (stacked layout). */
   @media (max-width: $ds-bp-md) {
