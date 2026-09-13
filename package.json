@@ -45,6 +45,7 @@
     "jquery": "^3.3.1",
     "js-cookie": "^3.0.5",
     "js-file-download": "^0.4.12",
+    "libphonenumber-js": "^1.13.13",
     "marked": "^18.0.2",
     "mux.js": "^5.11.1",
     "node-fetch": "^2.6.1",

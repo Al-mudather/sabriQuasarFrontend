@@ -65,6 +65,7 @@
               v-model="fullName"
               class="profile-form__field profile-form__field--full"
               :label="$t('الاسم الكامل')"
+              :error="formErrors.fullName"
               :disabled="!editingInfo"
               :readonly="!editingInfo"
             />
@@ -77,35 +78,29 @@
               disabled
               dir="ltr"
             />
-            <ds-input
+            <PhoneInput
+              ref="phoneInputRef"
               v-model="phoneNumber"
               class="profile-form__field"
               :label="$t('رقم الهاتف')"
+              :error="formErrors.phone"
               :disabled="!editingInfo"
-              :readonly="!editingInfo"
-              placeholder="+249XXXXXXXXX"
-              dir="ltr"
-              inputmode="tel"
             />
-            <ds-input
+            <PhoneInput
+              ref="whatsAppInputRef"
               v-model="whatsAppNumber"
               class="profile-form__field"
               :label="$t('رقم الواتساب')"
+              :error="formErrors.whatsApp"
               :disabled="!editingInfo"
-              :readonly="!editingInfo"
-              placeholder="+249XXXXXXXXX"
-              dir="ltr"
-              inputmode="tel"
             />
-            <ds-input
+            <PhoneInput
+              ref="telegramInputRef"
               v-model="telegramNumber"
               class="profile-form__field profile-form__field--full"
               :label="$t('رقم التلجرام')"
+              :error="formErrors.telegram"
               :disabled="!editingInfo"
-              :readonly="!editingInfo"
-              placeholder="+249XXXXXXXXX"
-              dir="ltr"
-              inputmode="tel"
             />
           </div>
 
@@ -287,7 +282,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
@@ -299,6 +294,7 @@ import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProf
 import { UpdateUserProfile } from 'src/graphql/account_management/mutation/UpdateUserProfile'
 import { UpdateCertificateNameQuery } from 'src/graphql/account_management/mutation/UpdateCertificateName'
 import DsInput from 'src/design-system/components/DsInput.vue'
+import PhoneInput from 'src/components/shared/PhoneInput.vue'
 import AfilliateBord from 'src/components/MyCourses/afilliateBord.vue'
 import type {
   GetMyProfileResult,
@@ -346,10 +342,17 @@ const saving = ref(false)
 const editingInfo = ref(false)
 const fullName = ref('')
 const email = ref('')
-const phoneNumber = ref('')
-const whatsAppNumber = ref('')
-const telegramNumber = ref('')
+// Phones are held and persisted as E.164 (PhoneInput's contract); legacy
+// stored shapes (`0912…`) are re-parsed by PhoneInput on the way in.
+const phoneNumber = ref<string | null>(null)
+const whatsAppNumber = ref<string | null>(null)
+const telegramNumber = ref<string | null>(null)
 const gender = ref('')
+const formErrors = reactive({ fullName: '', phone: '', whatsApp: '', telegram: '' })
+
+const phoneInputRef = ref<InstanceType<typeof PhoneInput> | null>(null)
+const whatsAppInputRef = ref<InstanceType<typeof PhoneInput> | null>(null)
+const telegramInputRef = ref<InstanceType<typeof PhoneInput> | null>(null)
 
 // Certificate name (write-once) --------------------------------------------
 const savingCertName = ref(false)
@@ -361,9 +364,9 @@ const certNameTouched = ref(false)
 
 interface Snapshot {
   fullName: string
-  phoneNumber: string
-  whatsAppNumber: string
-  telegramNumber: string
+  phoneNumber: string | null
+  whatsAppNumber: string | null
+  telegramNumber: string | null
   gender: string
 }
 const snapshot = ref<Snapshot | null>(null)
@@ -434,9 +437,9 @@ watch(me, (value) => {
   if (!value) return
   email.value          = value.email ?? ''
   fullName.value       = value.fullName ?? ''
-  phoneNumber.value    = value.phoneNumber ?? ''
-  whatsAppNumber.value = value.phoneNumber2 ?? ''
-  telegramNumber.value = value.phoneNumber3 ?? ''
+  phoneNumber.value    = value.phoneNumber || null
+  whatsAppNumber.value = value.phoneNumber2 || null
+  telegramNumber.value = value.phoneNumber3 || null
   if (value.gender === 'MALE')   gender.value = 'male'
   if (value.gender === 'FEMALE') gender.value = 'female'
 })
@@ -470,6 +473,10 @@ function cancelEditInfo (): void {
     telegramNumber.value = snapshot.value.telegramNumber
     gender.value         = snapshot.value.gender
   }
+  formErrors.fullName = ''
+  formErrors.phone = ''
+  formErrors.whatsApp = ''
+  formErrors.telegram = ''
   editingInfo.value = false
 }
 
@@ -536,7 +543,38 @@ async function submitCertificateName (): Promise<void> {
   finally { savingCertName.value = false }
 }
 
+function validateInfoForm (): boolean {
+  formErrors.fullName = ''
+  formErrors.phone = ''
+  formErrors.whatsApp = ''
+  formErrors.telegram = ''
+  let ok = true
+
+  // Any script (Arabic, Latin, Cyrillic, …): just a real name-ish string.
+  if (!fullName.value || fullName.value.trim().length < 2 || !/\p{L}/u.test(fullName.value)) {
+    formErrors.fullName = t('يرجى إدخال اسمك الكامل')
+    ok = false
+  }
+  // All three numbers are optional here, but a non-empty one must be a valid
+  // number for its selected country.
+  const invalidMsg = t('الرقم غير صالح للدولة المختارة')
+  if (phoneInputRef.value?.status === 'invalid') {
+    formErrors.phone = invalidMsg
+    ok = false
+  }
+  if (whatsAppInputRef.value?.status === 'invalid') {
+    formErrors.whatsApp = invalidMsg
+    ok = false
+  }
+  if (telegramInputRef.value?.status === 'invalid') {
+    formErrors.telegram = invalidMsg
+    ok = false
+  }
+  return ok
+}
+
 async function UpdateUserProfileData (): Promise<void> {
+  if (!validateInfoForm()) return
   saving.value = true
   try {
     const result = await updateProfileMutate({

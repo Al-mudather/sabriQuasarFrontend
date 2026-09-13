@@ -19,53 +19,26 @@
           :label="$t('الاسم الكامل')"
           :placeholder="$t('مثال: أحمد محمد')"
           :error="errors.fullName"
-          :hint="$t('باللغة العربية أو الإنجليزية')"
+          required
+        >
+          <template #helper>{{ $t('باللغة العربية أو الإنجليزية') }}</template>
+        </DsInput>
+
+        <PhoneInput
+          ref="whatsAppInput"
+          v-model="whatsAppNumber"
+          :label="$t('رقم واتساب')"
+          :placeholder="$t('رقم الهاتف')"
+          :error="errors.phone"
+          :helper="$t('يفضل رقم متصل بواتساب')"
           required
         />
 
-        <!-- Phone is inherently LTR: dir="ltr" puts +966 on the left and the
-             number to its right, and makes the digits read left-to-right even
-             on the RTL page. -->
-        <div class="user-info__row user-info__row--phone" dir="ltr">
-          <div class="user-info__country">
-            <label class="user-info__country-label" for="country-code">
-              {{ $t('الرمز') }}
-            </label>
-            <select
-              id="country-code"
-              v-model="countryCode"
-              class="user-info__country-select"
-              :aria-label="$t('رمز الدولة')"
-            >
-              <option
-                v-for="c in countryCodes"
-                :key="c.code"
-                :value="c.code"
-              >
-                {{ c.flag }} {{ c.code }}
-              </option>
-            </select>
-          </div>
-
-          <div class="user-info__phone">
-            <DsInput
-              v-model="whatsAppNumber"
-              type="tel"
-              :label="$t('رقم واتساب')"
-              :placeholder="$t('رقم الهاتف')"
-              :error="errors.phone"
-              :hint="$t('يفضل رقم متصل بواتساب')"
-              required
-            />
-          </div>
-        </div>
-
-        <DsInput
+        <PhoneInput
+          ref="telegramInput"
           v-model="telegramNumber"
-          type="tel"
-          dir="ltr"
           :label="$t('رقم تلجرام (اختياري)')"
-          :placeholder="$t('إن وجد')"
+          :error="errors.telegram"
         />
 
         <DsInput
@@ -139,6 +112,7 @@ import type {
 
 import DsInput from 'src/design-system/components/DsInput.vue'
 import DsTextarea from 'src/design-system/components/DsTextarea.vue'
+import PhoneInput from 'src/components/shared/PhoneInput.vue'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -146,32 +120,17 @@ const { t } = useI18n()
 
 const fullName = ref<string>('')
 const email = ref<string>('')
-const countryCode = ref<string>('+966')
-const whatsAppNumber = ref<string>('')
-const telegramNumber = ref<string>('')
+// Both numbers are held and persisted as E.164 (PhoneInput's contract).
+const whatsAppNumber = ref<string | null>(null)
+const telegramNumber = ref<string | null>(null)
 const country = ref<string>('')
 const city = ref<string>('')
 const notes = ref<string>('')
 const submitting = ref<boolean>(false)
-const errors = reactive({ fullName: '', phone: '', email: '' })
+const errors = reactive({ fullName: '', phone: '', telegram: '', email: '' })
 
-const countryCodes = [
-  { code: '+966', flag: '🇸🇦' },
-  { code: '+971', flag: '🇦🇪' },
-  { code: '+20',  flag: '🇪🇬' },
-  { code: '+249', flag: '🇸🇩' },
-  { code: '+962', flag: '🇯🇴' },
-  { code: '+965', flag: '🇰🇼' },
-  { code: '+974', flag: '🇶🇦' },
-  { code: '+973', flag: '🇧🇭' },
-  { code: '+968', flag: '🇴🇲' },
-  { code: '+212', flag: '🇲🇦' },
-  { code: '+216', flag: '🇹🇳' },
-  { code: '+213', flag: '🇩🇿' },
-  { code: '+964', flag: '🇮🇶' },
-  { code: '+961', flag: '🇱🇧' },
-  { code: '+967', flag: '🇾🇪' }
-]
+const whatsAppInput = ref<InstanceType<typeof PhoneInput> | null>(null)
+const telegramInput = ref<InstanceType<typeof PhoneInput> | null>(null)
 
 onMounted(async () => {
   try {
@@ -185,8 +144,8 @@ onMounted(async () => {
         return
       }
       fullName.value = me.fullName || ''
-      whatsAppNumber.value = me.phoneNumber2 || ''
-      telegramNumber.value = me.phoneNumber3 || ''
+      whatsAppNumber.value = me.phoneNumber2 || null
+      telegramNumber.value = me.phoneNumber3 || null
       email.value = me.email || ''
     }
   } catch {
@@ -197,15 +156,25 @@ onMounted(async () => {
 function validate (): boolean {
   errors.fullName = ''
   errors.phone = ''
+  errors.telegram = ''
   errors.email = ''
   let ok = true
 
-  if (!fullName.value || fullName.value.trim().length < 2) {
+  // Any script (Arabic, Latin, Cyrillic, …): just a real name-ish string.
+  if (!fullName.value || fullName.value.trim().length < 2 || !/\p{L}/u.test(fullName.value)) {
     errors.fullName = t('يرجى إدخال اسمك الكامل')
     ok = false
   }
-  if (!whatsAppNumber.value || whatsAppNumber.value.replace(/\D/g, '').length < 6) {
+  const waStatus = whatsAppInput.value?.status ?? 'empty'
+  if (waStatus === 'empty') {
     errors.phone = t('يرجى إدخال رقم هاتف صحيح')
+    ok = false
+  } else if (waStatus === 'invalid') {
+    errors.phone = t('الرقم غير صالح للدولة المختارة')
+    ok = false
+  }
+  if ((telegramInput.value?.status ?? 'empty') === 'invalid') {
+    errors.telegram = t('الرقم غير صالح للدولة المختارة')
     ok = false
   }
   if (email.value && !/^\S+@\S+\.\S+$/.test(email.value)) {
@@ -236,16 +205,12 @@ async function UPDATE_THE_USER_PROFILE (e?: Event): Promise<void> {
 
   submitting.value = true
   try {
-    const fullPhone = whatsAppNumber.value
-      ? `${countryCode.value}${whatsAppNumber.value.replace(/\D/g, '')}`
-      : null
-
     const res = await apolloClient.mutate<UpdateProfileMutationResult, UpdateProfileVariables>({
       mutation: UpdateUserProfile,
       variables: {
         input: {
           fullName: fullName.value,
-          phoneNumber2: fullPhone,
+          phoneNumber2: whatsAppNumber.value,
           phoneNumber3: telegramNumber.value || null
         }
       }
@@ -304,42 +269,9 @@ async function UPDATE_THE_USER_PROFILE (e?: Event): Promise<void> {
     display: grid;
     gap: var(--ds-space-3);
 
-    &--phone {
-      grid-template-columns: 7rem 1fr;
-      align-items: end;
-    }
-
     &--two {
       grid-template-columns: 1fr 1fr;
       @media (max-width: 600px) { grid-template-columns: 1fr; }
-    }
-  }
-
-  &__country-label {
-    display: block;
-    font-size: var(--ds-text-sm);
-    font-weight: var(--ds-weight-medium);
-    color: var(--ds-text);
-    margin-block-end: var(--ds-space-2);
-  }
-
-  &__country-select {
-    width: 100%;
-    height: 2.75rem;
-    border: 1px solid var(--ds-border);
-    border-radius: var(--ds-radius-md);
-    background: var(--ds-surface);
-    color: var(--ds-text);
-    padding-inline: var(--ds-space-3);
-    font-family: var(--ds-font-body);
-    font-size: var(--ds-text-sm);
-    appearance: none;
-    cursor: pointer;
-
-    &:focus {
-      outline: none;
-      border-color: var(--ds-indigo, #322873);
-      box-shadow: 0 0 0 3px rgba(50, 40, 115, 0.12);
     }
   }
 

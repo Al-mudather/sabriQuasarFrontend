@@ -106,7 +106,7 @@ const routes = [
     children: [
       { path: '',          name: 'cart',         component: () => import('components/ShoppingCard/cartCourses.vue') },
       { path: 'loginCart', name: 'login-cart',   component: () => import('components/ShoppingCard/loginCart.vue') },
-      { path: 'userInfo',  name: 'user-info',    component: () => import('components/ShoppingCard/userInformation.vue') },
+      { path: 'userInfo',  name: 'user-info',    beforeEnter: requireAuthentication, component: () => import('components/ShoppingCard/userInformation.vue') },
       { path: 'payment',   name: 'payment',      beforeEnter: requireAuthentication, component: () => import('components/ShoppingCard/payment.vue') },
       { path: 'success',   name: 'cart-success', beforeEnter: requireAuthentication, component: () => import('components/ShoppingCard/successMessage.vue') }
     ]
