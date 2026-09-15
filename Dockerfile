@@ -4,7 +4,14 @@ FROM node:22.23.1
 # Create workdir app directory
 WORKDIR /frontend
 
-# Copy all files to the app directory
+# Install dependencies from the lockfile first so the layer is cached until
+# package.json / package-lock.json change. This must run inside the image:
+# a node_modules copied from the host goes stale the moment a dependency is
+# added (e.g. libphonenumber-js) and the build fails with an unresolved import.
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+# Copy the rest of the source (node_modules / dist are excluded via .dockerignore)
 COPY . .
 
 RUN npm install -g @quasar/cli
