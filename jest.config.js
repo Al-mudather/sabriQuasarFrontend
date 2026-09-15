@@ -31,9 +31,10 @@ module.exports = {
   },
   testMatch: [
     '<rootDir>/test/jest/__tests__/**/*.(spec|test).js',
+    '<rootDir>/test/jest/__tests__/**/*.(spec|test).ts',
     '<rootDir>/src/**/*.jest.(spec|test).js',
   ],
-  moduleFileExtensions: ['vue', 'js', 'jsx', 'json'],
+  moduleFileExtensions: ['vue', 'js', 'jsx', 'ts', 'json'],
   moduleNameMapper: {
     // Vue 3: no '^vue$' remap (that was a Vue-2 vue.common.js shim).
     '^test-utils$': '@vue/test-utils/dist/vue-test-utils.js',
@@ -46,6 +47,8 @@ module.exports = {
     // Vue 3 SFCs via @vue/vue3-jest (replaces the Vue-2 vue-jest alpha).
     '.*\\.vue$': '@vue/vue3-jest',
     '.*\\.js$': 'babel-jest',
+    // Babel already carries @babel/preset-typescript (babel.config.js).
+    '.*\\.ts$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$':
       'jest-transform-stub',
   },

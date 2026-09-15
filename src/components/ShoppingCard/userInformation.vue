@@ -34,40 +34,14 @@
           required
         />
 
+        <!-- Telegram follows the WhatsApp country until the user types a
+             Telegram number — most students use one number for both. -->
         <PhoneInput
           ref="telegramInput"
           v-model="telegramNumber"
+          :default-country="whatsAppInput?.country ?? 'SD'"
           :label="$t('رقم تلجرام (اختياري)')"
           :error="errors.telegram"
-        />
-
-        <DsInput
-          v-model="email"
-          type="email"
-          dir="ltr"
-          :label="$t('البريد الإلكتروني')"
-          :placeholder="$t('example@mail.com')"
-          :error="errors.email"
-        />
-
-        <div class="user-info__row user-info__row--two">
-          <DsInput
-            v-model="country"
-            :label="$t('الدولة')"
-            :placeholder="$t('السعودية')"
-          />
-          <DsInput
-            v-model="city"
-            :label="$t('المدينة')"
-            :placeholder="$t('الرياض')"
-          />
-        </div>
-
-        <DsTextarea
-          v-model="notes"
-          :label="$t('ملاحظات (اختياري)')"
-          :placeholder="$t('أي معلومات إضافية تودّ إخبارنا بها')"
-          :rows="3"
         />
 
         <div class="user-info__actions">
@@ -111,23 +85,19 @@ import type {
 } from 'src/types/auth/types'
 
 import DsInput from 'src/design-system/components/DsInput.vue'
-import DsTextarea from 'src/design-system/components/DsTextarea.vue'
 import PhoneInput from 'src/components/shared/PhoneInput.vue'
+import { isUnauthenticatedError } from 'src/utils/session'
 
 const router = useRouter()
 const $q = useQuasar()
 const { t } = useI18n()
 
 const fullName = ref<string>('')
-const email = ref<string>('')
 // Both numbers are held and persisted as E.164 (PhoneInput's contract).
 const whatsAppNumber = ref<string | null>(null)
 const telegramNumber = ref<string | null>(null)
-const country = ref<string>('')
-const city = ref<string>('')
-const notes = ref<string>('')
 const submitting = ref<boolean>(false)
-const errors = reactive({ fullName: '', phone: '', telegram: '', email: '' })
+const errors = reactive({ fullName: '', phone: '', telegram: '' })
 
 const whatsAppInput = ref<InstanceType<typeof PhoneInput> | null>(null)
 const telegramInput = ref<InstanceType<typeof PhoneInput> | null>(null)
@@ -146,7 +116,6 @@ onMounted(async () => {
       fullName.value = me.fullName || ''
       whatsAppNumber.value = me.phoneNumber2 || null
       telegramNumber.value = me.phoneNumber3 || null
-      email.value = me.email || ''
     }
   } catch {
     // silent — form will render empty
@@ -157,7 +126,6 @@ function validate (): boolean {
   errors.fullName = ''
   errors.phone = ''
   errors.telegram = ''
-  errors.email = ''
   let ok = true
 
   // Any script (Arabic, Latin, Cyrillic, …): just a real name-ish string.
@@ -177,23 +145,32 @@ function validate (): boolean {
     errors.telegram = t('الرقم غير صالح للدولة المختارة')
     ok = false
   }
-  if (email.value && !/^\S+@\S+\.\S+$/.test(email.value)) {
-    errors.email = t('صيغة البريد الإلكتروني غير صحيحة')
-    ok = false
-  }
   return ok
+}
+
+// Server-side field errors land on the matching input; anything else is a
+// plain toast (no more "message : nonFieldErrors").
+const FIELD_ERROR_TARGET: Record<string, 'fullName' | 'phone' | 'telegram'> = {
+  fullName: 'fullName',
+  phoneNumber2: 'phone',
+  phoneNumber3: 'telegram'
 }
 
 function errorHandler (errorsObj: unknown): void {
   if (typeof errorsObj !== 'object' || errorsObj == null) return
-  for (const key of Object.keys(errorsObj as Record<string, unknown>)) {
-    const entries = (errorsObj as Record<string, unknown[]>)[key]
+  for (const [key, entries] of Object.entries(errorsObj as Record<string, unknown>)) {
     if (!Array.isArray(entries)) continue
     for (const val of entries) {
-      const v = val as Record<string, unknown>
-      const msg = typeof v.message === 'object'
-        ? ((v.message as Record<string, unknown>).msg as string ?? JSON.stringify(v.message))
-        : `${v.message} : ${key}`
+      const v = (val ?? {}) as { message?: unknown; code?: string }
+      const message = typeof v.message === 'object' && v.message !== null
+        ? String((v.message as Record<string, unknown>).msg ?? JSON.stringify(v.message))
+        : typeof v.message === 'string' ? v.message : ''
+      // A dead session is handled globally (App.vue tells the user and sends
+      // them to login) — a second toast here would only confuse.
+      if (isUnauthenticatedError({ message, code: v.code })) return
+      const msg = message || t('حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى')
+      const target = FIELD_ERROR_TARGET[key]
+      if (target) errors[target] = msg
       $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: msg })
     }
   }
@@ -263,16 +240,6 @@ async function UPDATE_THE_USER_PROFILE (e?: Event): Promise<void> {
     display: flex;
     flex-direction: column;
     gap: var(--ds-space-4);
-  }
-
-  &__row {
-    display: grid;
-    gap: var(--ds-space-3);
-
-    &--two {
-      grid-template-columns: 1fr 1fr;
-      @media (max-width: 600px) { grid-template-columns: 1fr; }
-    }
   }
 
   &__actions {

@@ -1,12 +1,16 @@
 import { Notify } from 'quasar'
 import { tokenStorage } from 'src/localStorageService'
+import { isJwtExpired } from 'src/utils/jwt'
 
 // Route guard: redirect unauthenticated visitors to /account/login while
 // preserving the intended destination as a ?redirect= query param so
 // login can restore them afterwards. Reads the token via tokenStorage so the
 // storage key lives in exactly one place (no hardcoded key string here).
+// An expired token counts as no token: the backend treats it as anonymous, so
+// letting it through only defers the failure to the first mutation.
 const requireAuthentication = (to, from, next) => {
-  if (tokenStorage.getAccessToken()) {
+  const token = tokenStorage.getAccessToken()
+  if (token && !isJwtExpired(token)) {
     next()
   } else {
     Notify.create({
@@ -77,10 +81,12 @@ const routes = [
       { path: '/Certificates',    name: 'my-certificate',    beforeEnter: requireAuthentication, component: () => import('src/pages/certificate_management/CertificatePage.vue') }
     ]
   },
+  // Public on purpose: the visitor is by definition NOT logged in yet (login
+  // refuses unverified accounts), so guarding this route locks every
+  // email-registered user out of activation.
   {
     path: '/verify/email/:token',
     name: 'verify-email',
-    beforeEnter: requireAuthentication,
     component: () => import('pages/account_management/VerifyEmail.vue')
   },
   {

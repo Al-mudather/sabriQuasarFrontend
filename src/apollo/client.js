@@ -14,6 +14,7 @@ import createUploadLink from 'apollo-upload-client/createUploadLink.mjs'
 
 import { tokenStorage } from 'src/localStorageService'
 import { API_URI, WS_HOST } from '../utils/hostConfig'
+import { isUnauthenticatedResult, SESSION_CHECK_EXEMPT_OPERATIONS } from '../utils/session'
 
 // ---------- Auth middleware -------------------------------------------------
 // Token is fetched from tokenStorage (the canonical source) at request time,
@@ -32,6 +33,41 @@ const authMiddleware = new ApolloLink((operation, forward) => {
   }))
   return forward(operation)
 })
+
+// ---------- Dead-session watchdog ------------------------------------------
+// The backend silently treats an expired, malformed, or missing JWT as an
+// anonymous request (verified against production: all four cases answer
+// identically), so the ONLY signal that a session has died is the reply
+// itself — a `login_required` refusal. Every response passes through here;
+// when one looks unauthenticated while we still hold a token, the registered
+// handler (App.vue) confirms with `verifyToken` and, if the session is really
+// gone, clears it, tells the user, and sends them to login. Without this the
+// UI keeps showing "Sign out" and forms surface raw server text
+// ("Unauthenticated. : nonFieldErrors").
+let sessionLossHandler = null
+let sessionLossInFlight = false
+
+export function onSuspectedSessionLoss (handler) {
+  sessionLossHandler = handler
+}
+
+const sessionWatchdog = new ApolloLink((operation, forward) =>
+  forward(operation).map((result) => {
+    if (
+      sessionLossHandler &&
+      !sessionLossInFlight &&
+      tokenStorage.getAccessToken() &&
+      !SESSION_CHECK_EXEMPT_OPERATIONS.has(operation.operationName) &&
+      isUnauthenticatedResult(result)
+    ) {
+      sessionLossInFlight = true
+      Promise.resolve()
+        .then(() => sessionLossHandler(operation.operationName))
+        .catch(() => { /* handler is best-effort */ })
+        .finally(() => { sessionLossInFlight = false })
+    }
+    return result
+  }))
 
 // ---------- JSONString scalar read policy ----------------------------------
 // Backend sends `JSONString` scalars as a JSON-encoded string. Previously
@@ -135,7 +171,7 @@ const cache = new InMemoryCache({
 })
 
 export const apolloClient = new ApolloClient({
-  link: ApolloLink.from([authMiddleware, transportLink]),
+  link: ApolloLink.from([authMiddleware, sessionWatchdog, transportLink]),
   cache,
   defaultOptions,
   connectToDevTools: true

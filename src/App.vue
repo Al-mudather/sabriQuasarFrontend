@@ -11,6 +11,10 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
+import { useCartStore } from 'src/stores/cart'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { onSuspectedSessionLoss } from 'src/apollo/client'
+import { isJwtExpired } from 'src/utils/jwt'
 
 defineOptions({ name: 'App' })
 
@@ -18,7 +22,46 @@ const $q = useQuasar()
 const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
+const cart = useCartStore()
+const pyramid = usePyramidStore()
 const { token, user } = storeToRefs(auth)
+
+// ---------------------------------------------------------------------------
+// Dead-session handling
+// ---------------------------------------------------------------------------
+// The backend treats an expired/invalid JWT as anonymous without saying so, so
+// a stale session used to linger: "Sign out" in the header, guards passing,
+// and the first mutation failing with raw "Unauthenticated." text. This is
+// the single place that ends such a session: wipe it, tell the user in their
+// language, and send them to login with the way back preserved.
+async function endDeadSession (): Promise<void> {
+  await auth.expireSession()
+  try { cart.$reset() } catch (_e) { /* ignore */ }
+  try { pyramid.$reset() } catch (_e) { /* ignore */ }
+  $q.notify({
+    type: 'warning',
+    progress: true,
+    multiLine: true,
+    position: 'bottom',
+    message: t('انتهت صلاحية جلستك، يرجى تسجيل الدخول مرة أخرى'),
+  })
+  // On a cold load the route guard may already have redirected to login with
+  // the intended destination in ?redirect= — wait for that navigation to
+  // settle so we neither race it nor overwrite its redirect target.
+  await router.isReady()
+  const current = router.currentRoute.value
+  if (current.name !== 'login') {
+    void router.push({ name: 'login', query: { redirect: current.fullPath } }).catch(() => {})
+  }
+}
+
+// Fired by the Apollo watchdog when a reply looks unauthenticated while we
+// still hold a token. The same server message also covers genuine permission
+// denials, so confirm with the backend before ending the session.
+onSuspectedSessionLoss(async () => {
+  if (await auth.verifySession()) return
+  await endDeadSession()
+})
 
 // ---------------------------------------------------------------------------
 // OneSignal DOMContentLoaded handler (registered once on mount)
@@ -99,8 +142,14 @@ onMounted(() => {
   // Empty the nav bar
   LocalStorage.set('activeNav', '')
 
-  // If there is a token, re-login the user
+  // If there is a token, re-login the user. Google sign-in issues no refresh
+  // token, so an expired token with nothing to refresh it is simply a dead
+  // session — end it now rather than letting the first request discover it.
   if (token.value) {
+    if (isJwtExpired(token.value) && !auth.refreshToken) {
+      void endDeadSession()
+      return
+    }
     auth.RE_LOGIN_USER()
       .then((re: boolean) => {
         if (re === false) {
@@ -109,7 +158,7 @@ onMounted(() => {
             progress: true,
             multiLine: true,
             position: 'bottom',
-            message: 'لقد انتهت صلاحية دخولك للموقع... الرجاء الدخول مره اخرى لتتمكن من تطوير مهاراتك',
+            message: t('انتهت صلاحية جلستك، يرجى تسجيل الدخول مرة أخرى'),
           })
           auth.logOutAction()
           void router.push({ name: 'login' })

@@ -170,6 +170,7 @@ function clearAllCookies() {
   });
 }
 
+/** @param {{ keepLocalStorageKeys?: string[] }} [options] */
 function purgeClientStorage({ keepLocalStorageKeys = [] } = {}) {
   const keep = new Set(keepLocalStorageKeys);
 

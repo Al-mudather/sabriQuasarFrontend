@@ -177,6 +177,13 @@ watch(e164, (val) => {
   if (val !== (props.modelValue ?? null)) emit('update:modelValue', val)
 })
 
+// A parent may steer the default (e.g. Telegram follows the WhatsApp
+// country); only adopt it while the field is still empty so a number the
+// user already typed never silently changes country.
+watch(() => props.defaultCountry, (iso) => {
+  if (status.value === 'empty') country.value = iso
+})
+
 function toggleOpen (): void {
   if (props.disabled) return
   open.value = !open.value
@@ -206,6 +213,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick, tru
 
 defineExpose({
   status,
+  country,
   focus: (): void => inputEl.value?.focus(),
 })
 </script>

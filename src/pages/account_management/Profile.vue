@@ -296,6 +296,7 @@ import { UpdateCertificateNameQuery } from 'src/graphql/account_management/mutat
 import DsInput from 'src/design-system/components/DsInput.vue'
 import PhoneInput from 'src/components/shared/PhoneInput.vue'
 import AfilliateBord from 'src/components/MyCourses/afilliateBord.vue'
+import { isUnauthenticatedError } from 'src/utils/session'
 import type {
   GetMyProfileResult,
   GetMyProfileVariables,
@@ -491,9 +492,11 @@ function setLang (flag: boolean): void {
   })
 }
 
-function errorHandler (errorsObj: Record<string, Array<{ message: string }>>): void {
+function errorHandler (errorsObj: Record<string, Array<{ message: string; code?: string }>>): void {
   for (const key in errorsObj) {
     for (const val of errorsObj[key]) {
+      // A dead session is handled globally (App.vue) — no second toast here.
+      if (isUnauthenticatedError(val)) return
       $q.notify({
         type: 'warning',
         progress: true,
@@ -583,7 +586,9 @@ async function UpdateUserProfileData (): Promise<void> {
         phoneNumber: phoneNumber.value,
         phoneNumber2: whatsAppNumber.value,
         phoneNumber3: telegramNumber.value,
-        gender: gender.value,
+        // Only send a gender the user actually chose — "" wipes the backend's
+        // not_set default to NULL.
+        ...(gender.value ? { gender: gender.value } : {}),
       },
     })
     const payload = result?.data?.updateUserProfile

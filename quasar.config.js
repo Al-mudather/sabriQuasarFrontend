@@ -100,11 +100,13 @@ export default configure(function (/* ctx */) {
       // matching production (where the SPA is served from the API host). In dev
       // the app uses a RELATIVE API path (see src/utils/hostConfig.js) so these
       // requests hit this proxy instead of going cross-origin to stc.training.
+      // DEV_API_PROXY_TARGET (shell env or .env) points the proxy at a local
+      // backend, e.g. http://127.0.0.1:8000, for end-to-end testing.
       proxy: {
         '/api': {
-          target: 'https://stc.training',
+          target: process.env.DEV_API_PROXY_TARGET || parsedEnv.DEV_API_PROXY_TARGET || 'https://stc.training',
           changeOrigin: true,
-          secure: true,
+          secure: !(process.env.DEV_API_PROXY_TARGET || parsedEnv.DEV_API_PROXY_TARGET || '').startsWith('http://'),
           cookieDomainRewrite: ''
         }
       }

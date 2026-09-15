@@ -903,6 +903,8 @@ export default {
   "ابحث عن الدولة": "Search country",
   "اختر الدولة": "Select country",
   "الرقم غير صالح للدولة المختارة": "Invalid number for the selected country",
+  "انتهت صلاحية جلستك، يرجى تسجيل الدخول مرة أخرى": "Your session has expired. Please sign in again.",
+  "حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى": "Something went wrong. Please try again.",
   "سؤال جديد": "New question",
   "ساعة": "hour",
   "ساعة من الدروس": "hours of lessons",

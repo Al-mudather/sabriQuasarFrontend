@@ -21,7 +21,9 @@ import { tokenStorage, userProfileStorage, purgeClientStorage } from 'src/localS
 import { RefreshLoginUserWithEmail } from 'src/graphql/account_management/mutation/RefreshUserToken'
 import { RevokeUserRefreshToken } from 'src/graphql/account_management/mutation/RevokeUserRefreshToken.js'
 import { LogoutUser } from 'src/graphql/account_management/mutation/LogoutUser'
+import { VerifyUserToken } from 'src/graphql/account_management/mutation/VerifyUserToken'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData.js'
+import { isJwtExpired } from 'src/utils/jwt'
 
 import type {
   AuthSessionUser,
@@ -29,6 +31,8 @@ import type {
   SocialAuthResult,
   LogoutUserResult,
   LogoutUserVariables,
+  VerifyTokenResult,
+  VerifyTokenVariables,
 } from 'src/types/auth/types'
 
 // Load the pinia-plugin-persistedstate module augmentation so `persist: false`
@@ -71,8 +75,11 @@ export const useAuthStore = defineStore('authentication', {
     navbarSearchGetter: (state): boolean => state.navbarSearch,
     // Single source of truth for "is the user logged in?". Components must
     // consult this before any action that relies on session identity
-    // (add to cart, enrol, open classroom, view profile, etc.).
-    isAuthenticated: (state): boolean => !!(state.token && state.user),
+    // (add to cart, enrol, open classroom, view profile, etc.). A token whose
+    // `exp` has passed is a dead session, not a logged-in user — the backend
+    // treats it as anonymous, so we must not keep showing "Sign out".
+    isAuthenticated: (state): boolean =>
+      !!(state.token && state.user) && !isJwtExpired(state.token),
   },
 
   actions: {
@@ -155,6 +162,36 @@ export const useAuthStore = defineStore('authentication', {
       } catch (_) {
         return false
       }
+    },
+
+    // Does the backend still accept the session behind our access token?
+    // Used to confirm a suspected dead session before acting on it: the
+    // "permission" error the watchdog sees on queries is also what a real
+    // permission denial looks like, and only the server can tell them apart.
+    async verifySession (): Promise<boolean> {
+      const token = tokenStorage.getAccessToken()
+      if (!token || isJwtExpired(token)) return false
+      try {
+        const res = await apolloClient.mutate<VerifyTokenResult, VerifyTokenVariables>({
+          mutation: VerifyUserToken,
+          variables: { token },
+        })
+        return res.data?.verifyToken?.success === true
+      } catch (_e) {
+        // Network trouble is not evidence of a dead session — keep the user in.
+        return true
+      }
+    },
+
+    // Local-only teardown for a session the backend no longer accepts. Unlike
+    // logOutAction there is nothing to revoke server-side (the token is already
+    // dead) and no success toast — the caller explains what happened.
+    async expireSession (): Promise<void> {
+      try {
+        await resetApolloSession()
+      } catch (_e) { /* ignore */ }
+      purgeClientStorage({ keepLocalStorageKeys: ['isEnglish', 'pinia_settings'] })
+      this.deleteData()
     },
 
     DESTROY_THE_USER_REFRESH_TOKEN (): Promise<unknown> {
