@@ -25,11 +25,9 @@
 
     <template #footer>
       <ds-button
-        tag="a"
-        :href="classroomUrl"
         :variant="isCompleted ? 'secondary' : 'accent'"
         full-width
-        @click.stop
+        @click.stop="openClassroom"
       >
         {{ ctaLabel }}
       </ds-button>

@@ -150,7 +150,6 @@ import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
 import { AllCertificates } from 'src/graphql/certificatesManagement/query/GetAllCertificates.js'
 import { API_URI } from 'src/utils/hostConfig'
-import { dlog, dwarn } from 'src/composables/classroom/devLog'
 import type {
   AllCertificatesResult,
   AllCertificatesVars,
@@ -258,7 +257,7 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
   const pk = cert.node?.pk
   const u = user.value as Record<string, unknown> | null
   const hasCertName = !!(u && typeof u.certificateName === 'string' && (u.certificateName as string).trim())
-  dlog('[certificates] download click', {
+  console.log('[certificates] download click', {
     pk,
     isPrintable: cert.node?.isPrintable,
     isReady: cert.node?.isReady,
@@ -274,17 +273,17 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
   // look dead for anyone whose cached user object lacked the field. The
   // backend is the authority; we only surface the hint if it actually rejects.
   if (!hasCertName) {
-    dwarn('[certificates] certificateName missing — proceeding anyway', { userPk: u?.pk })
+    console.warn('[certificates] certificateName missing — proceeding anyway', { userPk: u?.pk })
   }
 
   if (!pk) {
-    dwarn('[certificates] download aborted — no cert pk', { cert })
+    console.warn('[certificates] download aborted — no cert pk', { cert })
     return
   }
 
   downloadingPk.value = pk
   const downloadUrl = `${API_URI}/api/enrollment/certificate/download/${pk}`
-  dlog('[certificates] axios →', { url: downloadUrl, hasToken: !!token.value })
+  console.log('[certificates] axios →', { url: downloadUrl, hasToken: !!token.value })
   try {
     const res = await axios({
       method: 'GET',
@@ -299,7 +298,7 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
         Accept: '*/*',
       },
     })
-    dlog('[certificates] axios ←', {
+    console.log('[certificates] axios ←', {
       pk,
       status: res.status,
       bytes: (res.data as Blob)?.size ?? null,
@@ -319,13 +318,13 @@ async function downloadCertificate (cert: CertEdge): Promise<void> {
     const fileName = `${safeCourse}-${safeName}.pdf`
 
     const ok = exportFile(fileName, pdfBlob, { mimeType: 'application/pdf' })
-    dlog('[certificates] exportFile', { pk, fileName, ok })
+    console.log('[certificates] exportFile', { pk, fileName, ok })
     if (ok !== true) {
       $q.notify({ type: 'negative', position: 'bottom', message: t('تعذّر حفظ الملف') })
     }
   } catch (err: unknown) {
     const e = err as { response?: { status?: number; statusText?: string }; message?: string }
-    dwarn('[certificates] download failed', {
+    console.warn('[certificates] download failed', {
       pk,
       status: e?.response?.status ?? null,
       statusText: e?.response?.statusText ?? null,
