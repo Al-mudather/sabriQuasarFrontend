@@ -121,7 +121,7 @@ export function notifyDuplicateAffiliate (): void {
   const t = (key: string): string => i18n.global.t(key) as unknown as string
   toast.danger(
     `${t('تعذّر إتمام العملية: حسابك مرتبط بأكثر من رمز تسجيل')}. ` +
-    t('هذه مشكلة في بيانات الحساب لدينا وليست في الإيصال أو الصورة. يرجى التواصل مع الدعم وذكر رمز الخطأ: DUP-AFFILIATE'),
+    t('يرجى التواصل مع إدارة المركز وذكر رمز الخطأ: DUP-AFFILIATE'),
     { duration: 0, actions: [{ label: t('حسناً') }] },
   )
 }
