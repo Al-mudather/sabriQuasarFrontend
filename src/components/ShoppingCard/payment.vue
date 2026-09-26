@@ -197,6 +197,7 @@ import { useI18n } from 'vue-i18n'
 
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
+import { notifyDuplicateAffiliate } from 'src/utils/pyramidErrors'
 import { apolloClient } from 'src/apollo/client'
 import { DISPLAY_CURRENCY, usdPriceOf } from 'src/utils/currency'
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
@@ -398,6 +399,13 @@ async function initiateStripePayment (): Promise<void> {
 // (network-only, via the store) as defense-in-depth at the transactional edge.
 async function checkPyramidRegistration (): Promise<void> {
   const ok = await pyramid.verifyPlatformAccess(true)
+  // Duplicate affiliate rows: the gate fails open (it cannot answer), so `ok`
+  // is true and routing to the registration-code page would be wrong advice —
+  // the user HAS a code, there are simply two of them. Name the real fault.
+  if (pyramid.hasDuplicateAffiliate()) {
+    notifyDuplicateAffiliate()
+    return
+  }
   if (!ok) {
     router.push({ name: 'registeration-code', query: { redirect: route.fullPath } })
   }

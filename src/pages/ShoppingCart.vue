@@ -77,6 +77,7 @@ import type {
 } from 'src/types/cart/types'
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
+import { notifyDuplicateAffiliate } from 'src/utils/pyramidErrors'
 import { storeToRefs } from 'pinia'
 import { useSubscription } from '@vue/apollo-composable'
 import { onBeforeRouteUpdate, onBeforeRouteLeave, useRoute } from 'vue-router'
@@ -141,6 +142,13 @@ const isWideStep = computed((): boolean => {
 // (network-only, via the store) as defense-in-depth at the transactional edge.
 async function checkPyramidRegistration (): Promise<void> {
   const ok = await pyramid.verifyPlatformAccess(true)
+  // Duplicate affiliate rows: the gate fails open (it cannot answer), so `ok`
+  // is true. Say so here, at the top of checkout, rather than letting the user
+  // reach the receipt screen and be told their photo is unclear.
+  if (pyramid.hasDuplicateAffiliate()) {
+    notifyDuplicateAffiliate()
+    return
+  }
   if (!ok) {
     $q.notify({
       type: 'warning',

@@ -95,6 +95,7 @@ import type {
   UploadAttachmentVars,
 } from 'src/types/cart/types'
 import { toast } from 'src/design-system/toast'
+import { notifyDuplicateAffiliate, reportDuplicateAffiliate } from 'src/utils/pyramidErrors'
 import FileUpload from 'src/components/utils/FileUploader.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
 import DsProgressBar from 'src/design-system/components/DsProgressBar.vue'
@@ -177,15 +178,21 @@ async function getOrderResult (
     })
     const dataObj = result.data?.createNewOrderWithBulkOrderDetails
     if (dataObj?.success) return dataObj
-    // Order creation failed — surface it instead of returning silently. If the
-    // errors payload had no readable message, still show a generic reason.
+    // Order creation failed. Check the top-level `result.errors` first: under
+    // errorPolicy:'all' that is where a server exception lands, and a generic
+    // "couldn't create the order" would bury the real reason.
+    if (reportDuplicateAffiliate('createNewOrderWithBulkOrderDetails', result.errors)) return undefined
+    // Surface it instead of returning silently. If the errors payload had no
+    // readable message, still show a generic reason.
     if (!dataObj?.errors || errorHandler(dataObj.errors) === 0) {
       toast.danger(t('تعذّر إنشاء الطلب، يرجى المحاولة مجدداً أو التواصل مع الدعم'))
     }
     return undefined
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : ''
-    if (msg.includes('User already has valid enrollment in the course')) {
+    if (reportDuplicateAffiliate('createNewOrderWithBulkOrderDetails (threw)', error)) {
+      return undefined
+    } else if (msg.includes('User already has valid enrollment in the course')) {
       toast.warning(t('لديك اشتراك مسبق في هذا الكورس'))
     } else {
       toast.danger(t('حدث خطأ أثناء إنشاء الطلب، يرجى التحقق من اتصالك بالإنترنت والمحاولة مجدداً'))
@@ -215,7 +222,17 @@ async function SEND_THE_PAYMENT (): Promise<void> {
     // error after the upload, and no orphaned pending order is created). This is
     // deterministic: it re-checks the PyramidAffiliate link instead of guessing
     // from the server's rejection wording.
-    if (!(await pyramid.verifyPlatformAccess(true))) {
+    const hasAccess = await pyramid.verifyPlatformAccess(true)
+    // The gate fails OPEN on a duplicate-affiliate fault (see the store), so
+    // `hasAccess` is true and we would happily create an order that the receipt
+    // upload is then guaranteed to reject. Stop here instead: no orphaned
+    // pending order, and the user learns the real reason before uploading.
+    if (pyramid.hasDuplicateAffiliate()) {
+      visible.value = false
+      notifyDuplicateAffiliate()
+      return
+    }
+    if (!hasAccess) {
       visible.value = false
       routeToRegistrationCode()
       return
@@ -247,10 +264,17 @@ async function SEND_THE_PAYMENT (): Promise<void> {
       // error shape is opaque and was hiding the real reason behind a generic
       // "image unclear" message). Otherwise surface the server's own message.
       visible.value = false
+      // The server's own top-level errors are the most direct evidence — check
+      // them before re-probing the gate.
+      if (reportDuplicateAffiliate('uploadAttachmentTransaction', bankakPaymentResult.errors)) return
       if (!(await pyramid.verifyPlatformAccess(true))) {
         routeToRegistrationCode()
         return
       }
+      // Re-checked AFTER the gate re-verify above, which reassigns the fault.
+      // Catches an upload that reported only a field-level rejection while the
+      // real cause is the duplicate affiliate.
+      if (pyramid.hasDuplicateAffiliate()) { notifyDuplicateAffiliate(); return }
       const shown = dataObj?.errors ? errorHandler(dataObj.errors) : 0
       if (shown === 0) {
         // Never leave the user with no feedback (the original silent bug).
@@ -260,7 +284,9 @@ async function SEND_THE_PAYMENT (): Promise<void> {
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : ''
     visible.value = false
-    if (msg.includes('User already has valid enrollment in the course')) {
+    if (reportDuplicateAffiliate('SEND_THE_PAYMENT (threw)', error)) {
+      return
+    } else if (msg.includes('User already has valid enrollment in the course')) {
       toast.warning(t('لديك اشتراك مسبق في أحد الكورسات التي قمت بشرائها، الرجاء شراء كورس لم تمتلكه من قبل'))
     } else if (!(await pyramid.verifyPlatformAccess(true))) {
       // A thrown rejection that's really the missing-code case.

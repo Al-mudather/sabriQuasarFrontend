@@ -768,6 +768,10 @@ export default {
   "حدث خطأ أثناء إنشاء الطلب، يرجى التحقق من اتصالك بالإنترنت والمحاولة مجدداً": "Something went wrong creating your order. Check your connection and try again.",
   "لديك اشتراك مسبق في هذا الكورس": "You already have an active enrollment in this course.",
   "لم يتم قبول الإيصال، يرجى التأكد من وضوح الصورة والمحاولة مجدداً": "Your receipt wasn't accepted. Make sure the image is clear and try again.",
+  // --- PyramidAffiliate data fault (duplicate registration-code link) ---
+  "تعذّر إتمام العملية: حسابك مرتبط بأكثر من رمز تسجيل": "We can't complete this: your account is linked to more than one registration code",
+  "هذه مشكلة في بيانات الحساب لدينا وليست في الإيصال أو الصورة. يرجى التواصل مع الدعم وذكر رمز الخطأ: DUP-AFFILIATE": "This is a problem with your account data on our side, not with your receipt or the image. Please contact support and quote error code: DUP-AFFILIATE",
+  "حسناً": "OK",
   "يرجى إدخال رمز الإحالة الخاص بك أولاً": "Please enter your referral code first.",
   "لديك اشتراك مسبق في أحد الكورسات التي قمت بشرائها، الرجاء شراء كورس لم تمتلكه من قبل": "You already own one or more courses in your cart. Please remove them and try again.",
   "حدث خطأ أثناء إرسال الدفعة": "Something went wrong submitting your payment. Please try again.",

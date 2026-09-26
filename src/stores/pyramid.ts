@@ -10,6 +10,11 @@ import { MyPyramidAccount } from 'src/graphql/pyramid_marketing_management/query
 import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 
 import type { MyPyramidAccountResult, PyramidAccount } from 'src/types/pyramid/types'
+import {
+  pyramidAffiliateFault,
+  logDuplicateAffiliate,
+  type PyramidAffiliateFault,
+} from 'src/utils/pyramidErrors'
 
 // ---------------------------------------------------------------------------
 // State interface
@@ -26,6 +31,17 @@ interface PyramidStoreState {
    * cheaply. Reset to `null` on logout (useLogout → $reset) and login.
    */
   hasPlatformAccess: boolean | null
+  /**
+   * Which PyramidAffiliate fault the last `verifyPlatformAccess()` saw, if any.
+   * `'missing'` is the ordinary no-registration-code case that `hasPlatformAccess:
+   * false` already expresses. `'duplicate'` is a SERVER DATA FAULT — the account
+   * is linked to more than one affiliate row — and is the interesting one: the
+   * gate deliberately keeps failing open for it (locking the user out would not
+   * help; only deleting the duplicate row does), so this field is the only way a
+   * caller can tell that "access granted" was really "we could not tell".
+   * Checkout reads it to explain the real problem instead of blaming the receipt.
+   */
+  affiliateFault: PyramidAffiliateFault | null
 }
 
 export const usePyramidStore = defineStore('pyramidManagement', {
@@ -33,6 +49,7 @@ export const usePyramidStore = defineStore('pyramidManagement', {
     myMarketingCode: localStorage.getItem('myMarketingCode') || '',
     registerationCode: localStorage.getItem('registerationCode') || '',
     hasPlatformAccess: null,
+    affiliateFault: null,
   }),
 
   getters: {
@@ -96,6 +113,7 @@ export const usePyramidStore = defineStore('pyramidManagement', {
      */
     async verifyPlatformAccess (force = false): Promise<boolean> {
       if (!force && this.hasPlatformAccess !== null) return this.hasPlatformAccess
+      this.affiliateFault = null
       try {
         const res = await apolloClient.query<{ checkPyramidAffiliate: unknown }>({
           query: CheckTheUserPermissionToUsePlatforme,
@@ -114,8 +132,22 @@ export const usePyramidStore = defineStore('pyramidManagement', {
         // so we gate the user. (A clean data:null with no errors — the older
         // backend shape — also means no code.)
         const errs = res.errors || []
-        const isNoCode = errs.some((e) => /PyramidAffiliate matching query does not exist/i.test((e && e.message) || ''))
-        if (isNoCode || errs.length === 0) {
+        const fault = pyramidAffiliateFault(errs)
+        this.affiliateFault = fault
+
+        // DUPLICATE AFFILIATE: the account is linked to more than one affiliate
+        // row, so the backend's `get()` raises before it can answer the
+        // question. Fail OPEN and do NOT cache — gating the user would be the
+        // wrong remedy (they have a code; there are simply two of them) and the
+        // fix is a server-side row deletion. `affiliateFault` carries the real
+        // reason to whoever asked, so checkout can say so instead of guessing.
+        if (fault === 'duplicate') {
+          logDuplicateAffiliate('checkPyramidAffiliate', errs)
+          return true
+        }
+
+        // NO CODE, or the older clean data:null shape.
+        if (fault === 'missing' || errs.length === 0) {
           this.hasPlatformAccess = false
           return false
         }
@@ -124,20 +156,40 @@ export const usePyramidStore = defineStore('pyramidManagement', {
         // user out of browsing; the backend still enforces the gate at
         // order/payment time and the next navigation re-checks.
         return true
-      } catch (_e: unknown) {
+      } catch (e: unknown) {
         // Network/unknown throw → fail OPEN, uncached (same rationale as above).
+        // A thrown ApolloError can still carry the duplicate fault in
+        // `graphQLErrors`, so classify before giving up on the reason.
+        const fault = pyramidAffiliateFault(e)
+        this.affiliateFault = fault
+        if (fault === 'duplicate') logDuplicateAffiliate('checkPyramidAffiliate (threw)', e)
         return true
       }
+    },
+
+    /**
+     * Whether the last `verifyPlatformAccess()` hit the duplicate-affiliate data
+     * fault. A method rather than a raw field read on purpose: callers check it
+     * both before and after a re-verify, and TypeScript narrows a property (or a
+     * const initialised from one) at the first comparison — so a second
+     * `pyramid.affiliateFault === 'duplicate'` in the same function is reported
+     * as dead code even though the intervening await reassigns it. A call
+     * expression is never narrowed, so this keeps the check honest.
+     */
+    hasDuplicateAffiliate (): boolean {
+      return this.affiliateFault === 'duplicate'
     },
 
     /** Call after a successful JoinPlatform — the user now has access. */
     markPlatformAccessGranted (): void {
       this.hasPlatformAccess = true
+      this.affiliateFault = null
     },
 
     /** Force a re-check on next read (e.g. after login / account switch). */
     resetPlatformAccess (): void {
       this.hasPlatformAccess = null
+      this.affiliateFault = null
     },
 
     // ---- Short-name aliases used by C1/C2 migrated call sites --------------
