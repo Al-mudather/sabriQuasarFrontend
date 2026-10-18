@@ -829,6 +829,8 @@ export default {
   "بحث": "Search",
   "بدون اسم": "No name",
   "بريدك الإلكتروني مطلوب": "Your email is required",
+  "بطاقة ائتمانية": "Credit card",
+  "الدفع عبر Stripe": "Pay with Stripe",
   "بطاقة ائتمانية (Visa / Mastercard)": "Credit card (Visa / Mastercard)",
   "تأكيد الإسم باللغه الإنجليزيه": "Confirm name in English",
   "تأكيد الدفع": "Confirm payment",

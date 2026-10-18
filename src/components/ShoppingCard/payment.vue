@@ -198,6 +198,8 @@ import { useI18n } from 'vue-i18n'
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { notifyDuplicateAffiliate } from 'src/utils/pyramidErrors'
+import { payloadErrorMessages } from 'src/utils/graphqlErrors'
+import { stripeKeyFromPayload, loadStripeJs } from 'src/utils/stripe'
 import { apolloClient } from 'src/apollo/client'
 import { DISPLAY_CURRENCY, usdPriceOf } from 'src/utils/currency'
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
@@ -233,6 +235,8 @@ const { shoppingCartDataList, totalPaymentFees } = storeToRefs(cart)
 const showBankakPayment = ref<boolean>(false)
 const showStripePayment = ref<boolean>(false)
 const stripeLoading = ref<boolean>(false)
+// Non-null only when the backend exposes a Stripe publishable key (dev/test).
+const stripeKey = ref<string | null>(null)
 // Pre-selected: Bankak is the only active method, so the user can confirm
 // directly without picking one.
 const selectedMethod = ref<string | null>('bankak')
@@ -245,18 +249,29 @@ interface PaymentMethod {
   badge: string
 }
 
-// Credit-card (Stripe) is not activated yet — only Bankak is offered for now.
-// The Stripe handlers below are kept intact so it can be re-enabled by adding
-// its entry back here.
-const availableMethods = computed((): PaymentMethod[] => [
-  {
-    id: 'bankak',
-    title: t('إرفاق إشعار بنكي'),
-    subtitle: t('البنوك السودانية — تفعيل خلال 48 ساعة'),
-    icon: 'account_balance',
-    badge: t('الأكثر استخداماً')
+// Card payment (Stripe) is offered only when the backend returns a publishable
+// key; in production the key is null and only Bankak is shown.
+const availableMethods = computed((): PaymentMethod[] => {
+  const methods: PaymentMethod[] = [
+    {
+      id: 'bankak',
+      title: t('إرفاق إشعار بنكي'),
+      subtitle: t('البنوك السودانية — تفعيل خلال 48 ساعة'),
+      icon: 'account_balance',
+      badge: t('الأكثر استخداماً')
+    }
+  ]
+  if (stripeKey.value !== null) {
+    methods.push({
+      id: 'stripe',
+      title: t('بطاقة ائتمانية'),
+      subtitle: t('الدفع عبر Stripe'),
+      icon: 'credit_card',
+      badge: ''
+    })
   }
-])
+  return methods
+})
 
 // `course.currency` is the parsed pricing map (see src/utils/currency.ts); the
 // platform sells in USD only, so we read that one key. `usdPriceOf` returns null
@@ -329,17 +344,6 @@ async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateO
   return undefined
 }
 
-async function getStripeKeyFromTheBackend (): Promise<string> {
-  const stripeKeyResult = await apolloClient.query<StripePublishableKeyResult, StripePublishableKeyVars>({
-    query: StripePublishableKey
-  })
-  const raw = stripeKeyResult.data?.stripePublishableKey
-  if (raw && typeof raw === 'object') {
-    return (raw as unknown as Record<string, string>).publisableKey ?? ''
-  }
-  return ''
-}
-
 async function getStripePaymentUrl (orderResult: NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']>): Promise<string | null | undefined> {
   if (!orderResult.order?.pk) return null
   const result = await apolloClient.mutate<CreateStripeCheckoutResult, CreateStripeCheckoutVars>({
@@ -354,7 +358,14 @@ async function getStripePaymentUrl (orderResult: NonNullable<CreateOrderResult['
   const details = result.data?.createStripeCheckout
   if (details?.errors) {
     stripeLoading.value = false
-    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message: t('انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه') })
+    const messages = payloadErrorMessages(details.errors)
+    $q.notify({
+      type: 'warning',
+      progress: true,
+      multiLine: true,
+      position: 'bottom',
+      message: messages.length > 0 ? messages.join('\n') : t('انت غير متصل بالانترنت, قم بالاتصال و اعد تحميل الصفحه')
+    })
   }
   if (details?.success) return details.paymentUrl
   return null
@@ -364,11 +375,9 @@ async function initiateStripePayment (): Promise<void> {
   try {
     stripeLoading.value = true
 
-    // Runtime guard for the Stripe SDK injected by index.html.
-    const stripeGlobal = (window as unknown as Record<string, unknown>)['Stripe']
-    if (typeof stripeGlobal !== 'function') {
-      throw new Error('Stripe not loaded')
-    }
+    const key = stripeKey.value
+    if (key === null) throw new Error('Stripe not loaded')
+    const Stripe = await loadStripeJs()
 
     const courseIds = getOrdersIds()
     const orderResult = await getOrderResult(courseIds)
@@ -376,8 +385,7 @@ async function initiateStripePayment (): Promise<void> {
 
     cart.setSaveCheckoutOrderID(orderResult.order.pk)
 
-    const stripeKey = await getStripeKeyFromTheBackend()
-    const stripe = (stripeGlobal as (key: string) => { redirectToCheckout: (opts: { sessionId: string }) => void })(stripeKey)
+    const stripe = Stripe(key)
     const sessionId = await getStripePaymentUrl(orderResult)
 
     if (sessionId) stripe.redirectToCheckout({ sessionId })
@@ -426,8 +434,21 @@ function purgeZeroCostItems (): void {
   })
 }
 
+async function loadStripeKey (): Promise<void> {
+  try {
+    const res = await apolloClient.query<StripePublishableKeyResult, StripePublishableKeyVars>({
+      query: StripePublishableKey,
+      fetchPolicy: 'network-only'
+    })
+    stripeKey.value = stripeKeyFromPayload(res.data?.stripePublishableKey)
+  } catch {
+    stripeKey.value = null
+  }
+}
+
 onMounted(async () => {
   checkPyramidRegistration()
+  loadStripeKey()
 
   try {
     const res = await apolloClient.query<GetMyProfileResult, GetMyProfileVariables>({ query: GetMyProfileData })

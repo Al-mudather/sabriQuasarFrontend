@@ -33,6 +33,7 @@
 import logger from 'src/utils/logger'
 import { toast } from 'src/design-system/toast'
 import { i18n } from 'src/boot/i18n'
+import { collectErrorMessages } from 'src/utils/graphqlErrors'
 
 /** A registration-code fault the UI must react to differently. */
 export type PyramidAffiliateFault = 'missing' | 'duplicate'
@@ -49,29 +50,7 @@ const MISSING_RE = /PyramidAffiliate matching query does not exist/i
 // middle of the sentence only.
 const DUPLICATE_RE = /returned more than one PyramidAffiliate/i
 
-interface MessageLike { message?: unknown }
-
-/**
- * Pull every candidate error string out of whatever the caller has in hand.
- * Accepts, in any nesting: a raw string, an `Error`/`ApolloError` (including
- * its `graphQLErrors` / `networkError`), an array of `{ message }`, or an
- * Apollo result object (`{ errors }`) — because the same fault reaches us
- * through all of those shapes depending on the operation and errorPolicy.
- */
-export function collectErrorMessages (source: unknown, depth = 0): string[] {
-  if (source == null || depth > 4) return []
-  if (typeof source === 'string') return source ? [source] : []
-  if (Array.isArray(source)) return source.flatMap((s) => collectErrorMessages(s, depth + 1))
-
-  if (typeof source !== 'object') return []
-  const obj = source as MessageLike & Record<string, unknown>
-  const out: string[] = []
-  if (typeof obj.message === 'string' && obj.message) out.push(obj.message)
-  for (const key of ['errors', 'graphQLErrors', 'networkError'] as const) {
-    if (obj[key] != null) out.push(...collectErrorMessages(obj[key], depth + 1))
-  }
-  return out
-}
+export { collectErrorMessages }
 
 /**
  * Classify a PyramidAffiliate fault, or `null` when the source says nothing
