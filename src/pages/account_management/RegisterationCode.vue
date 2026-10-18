@@ -60,6 +60,8 @@ import { usePyramidStore } from 'src/stores/pyramid'
 import { tokenStorage } from 'src/localStorageService'
 import { useLogout } from 'src/composables/useLogout'
 import { JoinPlatform } from 'src/graphql/pyramid_marketing_management/mutation/JoinPlatform'
+import { joinPlatformOutcome } from 'src/utils/joinPlatform'
+import { resultErrorMessages } from 'src/utils/graphqlErrors'
 import type { JoinPlatformResult, JoinPlatformVars } from 'src/types/pyramid/types'
 
 const { t } = useI18n()
@@ -93,6 +95,10 @@ const isComplete = computed(() => code.value.trim().length > 0)
 // Methods
 // ---------------------------------------------------------------------------
 async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
+  // One joinPlatform call per user action: the backend serialises them, so a
+  // second in-flight call (auto-submit racing Enter, double tap) would come back
+  // "Already exists". Must precede any state change.
+  if (visible.value) return
   const value = code.value.trim()
   if (!value) {
     apiError.value = t('يرجى إدخال الكود')
@@ -102,7 +108,8 @@ async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
   visible.value = true
   try {
     const res = await joinPlatformMutate({ marketingCode: value, input: {} })
-    if (res?.data?.joinPlatform?.success) {
+    const outcome = joinPlatformOutcome(res)
+    if (outcome === 'joined' || outcome === 'already') {
       $q.notify({ type: 'positive', progress: true, multiLine: true, position: 'bottom', message: t('مرحباً بك') })
       pyramid.setRegisterationCode('')
       // The user now has a PyramidAffiliate — let the router guard through.
@@ -111,20 +118,14 @@ async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
       // tried to enrol in); fall back Home.
       const redirect = route.query?.redirect
       void router.push(typeof redirect === 'string' && redirect ? redirect : { name: 'Home' }).catch(() => {})
-    } else {
-      // Mutation resolved but did NOT succeed (e.g. invalid/used code). With
-      // errorPolicy:'all' a GraphQL error lands here as data:false rather than a
-      // throw, so without this branch the spinner just vanishes with no feedback
-      // (and the prefilled auto-submit path would look like it did nothing).
-      apiError.value = t('هذا الكود غير صحيح — يرجى التحقق والمحاولة مجدداً.')
-    }
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : ''
-    if (msg === 'GraphQL error: Pyramid matching query does not exist.') {
+    } else if (outcome === 'invalid') {
       apiError.value = t('هذا الكود غير صحيح — يرجى التحقق والمحاولة مجدداً.')
     } else {
-      apiError.value = t('تعذّر التحقق من الكود.')
+      // With errorPolicy:'all' top-level errors arrive in res.errors, not a throw.
+      apiError.value = resultErrorMessages(res)[0] ?? t('تعذّر التحقق من الكود.')
     }
+  } catch {
+    apiError.value = t('تعذّر التحقق من الكود.')
   } finally {
     visible.value = false
   }
