@@ -12,8 +12,13 @@ const STRIPE_SRC = 'https://js.stripe.com/v3/'
 
 /** Extract the publishable key from the query payload; `null` hides Stripe. */
 export function stripeKeyFromPayload (raw: unknown): string | null {
-  if (raw == null || typeof raw !== 'object') return null
-  const obj = raw as Record<string, unknown>
+  let value = raw
+  // The field is a JSONString scalar: the server sends it JSON-encoded.
+  if (typeof value === 'string') {
+    try { value = JSON.parse(value) } catch { return null }
+  }
+  if (value == null || typeof value !== 'object') return null
+  const obj = value as Record<string, unknown>
   // `publisableKey` (sic) is the backend's spelling.
   const key = obj.publisableKey ?? obj.publishableKey
   return typeof key === 'string' && key !== '' ? key : null
