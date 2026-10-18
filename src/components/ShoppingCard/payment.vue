@@ -199,7 +199,7 @@ import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { notifyDuplicateAffiliate } from 'src/utils/pyramidErrors'
 import { payloadErrorMessages } from 'src/utils/graphqlErrors'
-import { stripeKeyFromPayload, loadStripeJs } from 'src/utils/stripe'
+import { stripeKeyFromPayload, loadStripeJs, stripeCheckoutUiEnabled } from 'src/utils/stripe'
 import { apolloClient } from 'src/apollo/client'
 import { DISPLAY_CURRENCY, usdPriceOf } from 'src/utils/currency'
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
@@ -250,7 +250,7 @@ interface PaymentMethod {
 }
 
 // Card payment (Stripe) is offered only when the backend returns a publishable
-// key; in production the key is null and only Bankak is shown.
+// key AND the STRIPE_CHECKOUT_UI build flag is on; otherwise only Bankak is shown.
 const availableMethods = computed((): PaymentMethod[] => {
   const methods: PaymentMethod[] = [
     {
@@ -261,7 +261,7 @@ const availableMethods = computed((): PaymentMethod[] => {
       badge: t('الأكثر استخداماً')
     }
   ]
-  if (stripeKey.value !== null) {
+  if (stripeCheckoutUiEnabled() && stripeKey.value !== null) {
     methods.push({
       id: 'stripe',
       title: t('بطاقة ائتمانية'),
@@ -448,7 +448,7 @@ async function loadStripeKey (): Promise<void> {
 
 onMounted(async () => {
   checkPyramidRegistration()
-  loadStripeKey()
+  if (stripeCheckoutUiEnabled()) loadStripeKey()
 
   try {
     const res = await apolloClient.query<GetMyProfileResult, GetMyProfileVariables>({ query: GetMyProfileData })

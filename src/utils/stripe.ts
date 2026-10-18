@@ -24,6 +24,17 @@ export function stripeKeyFromPayload (raw: unknown): string | null {
   return typeof key === 'string' && key !== '' ? key : null
 }
 
+/**
+ * Build-time kill switch (`STRIPE_CHECKOUT_UI`, inlined by quasar.config.js).
+ * Card checkout is offered only when this is on AND a key is returned.
+ */
+export function stripeCheckoutUiEnabled (flag: unknown = process.env.STRIPE_CHECKOUT_UI): boolean {
+  if (flag === true) return true
+  if (typeof flag !== 'string') return false
+  const v = flag.trim().toLowerCase()
+  return v === 'true' || v === '1'
+}
+
 let scriptPromise: Promise<StripeConstructor> | null = null
 
 function currentStripe (): StripeConstructor | null {

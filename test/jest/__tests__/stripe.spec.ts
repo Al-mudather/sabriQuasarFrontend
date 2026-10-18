@@ -1,7 +1,11 @@
-import { stripeKeyFromPayload } from 'src/utils/stripe'
+import { stripeKeyFromPayload, stripeCheckoutUiEnabled } from 'src/utils/stripe'
 test('null key hides stripe', () => expect(stripeKeyFromPayload(null)).toBeNull())
 test('reads backend spelling', () => expect(stripeKeyFromPayload({ publisableKey: 'pk_test_1' })).toBe('pk_test_1'))
 test('empty string is null', () => expect(stripeKeyFromPayload({ publisableKey: '' })).toBeNull())
 test('accepts JSON-encoded string', () => expect(stripeKeyFromPayload('{"publisableKey": "pk_test_1"}')).toBe('pk_test_1'))
 test('invalid JSON is null', () => expect(stripeKeyFromPayload('not json')).toBeNull())
 test('JSON null is null', () => expect(stripeKeyFromPayload('null')).toBeNull())
+test('flag undefined is off', () => expect(stripeCheckoutUiEnabled(undefined)).toBe(false))
+test('flag "false" is off', () => expect(stripeCheckoutUiEnabled('false')).toBe(false))
+test('flag "true" is on', () => expect(stripeCheckoutUiEnabled('true')).toBe(true))
+test('flag "1" is on', () => expect(stripeCheckoutUiEnabled('1')).toBe(true))
