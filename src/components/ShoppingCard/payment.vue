@@ -198,7 +198,7 @@ import { useI18n } from 'vue-i18n'
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { notifyDuplicateAffiliate } from 'src/utils/pyramidErrors'
-import { payloadErrorMessages } from 'src/utils/graphqlErrors'
+import { matchesError, payloadErrorMessages, resultErrorMessages } from 'src/utils/graphqlErrors'
 import { stripeKeyFromPayload, loadStripeJs, stripeCheckoutUiEnabled } from 'src/utils/stripe'
 import { apolloClient } from 'src/apollo/client'
 import { DISPLAY_CURRENCY, usdPriceOf } from 'src/utils/currency'
@@ -341,6 +341,15 @@ async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateO
     errorHandler(dataObj.errors)
   }
   if (dataObj?.success) return dataObj
+  if (!dataObj?.errors) {
+    // Top-level error with a null payload (errorPolicy 'all'): tell the student why.
+    stripeLoading.value = false
+    const top = resultErrorMessages(result)
+    const message = matchesError(result, /already has valid enrollment/i)
+      ? t('لديك اشتراك مسبق في أحد الكورسات التي قمت بشرائها، الرجاء شراء كورس لم تمتلكه من قبل')
+      : (top[0] ?? t('تعذّر إنشاء الطلب، يرجى المحاولة مجدداً أو التواصل مع الدعم'))
+    $q.notify({ type: 'warning', progress: true, multiLine: true, position: 'bottom', message })
+  }
   return undefined
 }
 

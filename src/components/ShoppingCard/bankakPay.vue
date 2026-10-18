@@ -95,7 +95,7 @@ import type {
   UploadAttachmentVars,
 } from 'src/types/cart/types'
 import { toast } from 'src/design-system/toast'
-import { payloadErrorMessages } from 'src/utils/graphqlErrors'
+import { matchesError, payloadErrorMessages, resultErrorMessages } from 'src/utils/graphqlErrors'
 import { notifyDuplicateAffiliate, reportDuplicateAffiliate } from 'src/utils/pyramidErrors'
 import FileUpload from 'src/components/utils/FileUploader.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
@@ -163,9 +163,19 @@ async function getOrderResult (
     // errorPolicy:'all' that is where a server exception lands, and a generic
     // "couldn't create the order" would bury the real reason.
     if (reportDuplicateAffiliate('createNewOrderWithBulkOrderDetails', result.errors)) return undefined
-    // Surface it instead of returning silently. If the errors payload had no
-    // readable message, still show a generic reason.
-    if (!dataObj?.errors || errorHandler(dataObj.errors) === 0) {
+    // Already enrolled in a course that is still in the cart: the server
+    // reports it as a top-level error with a null payload.
+    if (matchesError(result, /already has valid enrollment/i)) {
+      toast.warning(t('لديك اشتراك مسبق في أحد الكورسات التي قمت بشرائها، الرجاء شراء كورس لم تمتلكه من قبل'))
+      return undefined
+    }
+    // Surface it instead of returning silently. Payload errors first, then the
+    // server's own top-level reason verbatim, then a generic reason.
+    if (dataObj?.errors && errorHandler(dataObj.errors) > 0) return undefined
+    const top = resultErrorMessages(result)
+    if (top.length > 0) {
+      toast.danger(top[0])
+    } else {
       toast.danger(t('تعذّر إنشاء الطلب، يرجى المحاولة مجدداً أو التواصل مع الدعم'))
     }
     return undefined
