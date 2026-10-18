@@ -20,9 +20,10 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { CreateCertificate } from 'src/graphql/certificatesManagement/mutation/CreateCertificate'
 import type {
-  CreateCertificateMutation,
-  CreateCertificateMutationVariables,
-} from 'src/graphql/generated'
+  CreateAutomaticCertificateResult,
+  CreateAutomaticCertificateVars,
+} from 'src/types/certificates/types'
+import { payloadErrorMessages, resultErrorMessages } from 'src/utils/graphqlErrors'
 import type { ClassroomBootstrap } from 'src/types/classroom/types'
 
 const props = defineProps<{ bootstrap: ClassroomBootstrap | null }>()
@@ -38,8 +39,8 @@ const percent = computed<number>(() => props.bootstrap?.progressPercent ?? 0)
 const hasCertificate = computed<boolean>(() => Boolean(props.bootstrap?.hasCertificate))
 
 const { mutate: runCreateCert } = useMutation<
-  CreateCertificateMutation,
-  CreateCertificateMutationVariables
+  CreateAutomaticCertificateResult,
+  CreateAutomaticCertificateVars
 >(CreateCertificate)
 
 function onJoinTelegram(): void {
@@ -63,7 +64,8 @@ async function onRequestCertificate(): Promise<void> {
   requesting.value = true
   try {
     const res = await runCreateCert({ enrollmentId: enrollmentPk, input: {} })
-    const ok = res?.data?.createCertificate?.success
+    const payload = res?.data?.createCertificate
+    const ok = payload?.success
     if (ok) {
       $q.notify({
         type: 'positive',
@@ -73,11 +75,10 @@ async function onRequestCertificate(): Promise<void> {
         message: t('classroom.overview.certificateSuccess'),
       })
     } else {
-      const errs = res?.data?.createCertificate?.errors
       const msg =
-        (typeof errs === 'object' && errs !== null && 'message' in errs
-          ? String((errs as { message?: unknown }).message ?? '')
-          : '') || t('classroom.overview.certificateError')
+        payloadErrorMessages(payload?.errors)[0] ??
+        resultErrorMessages(res)[0] ??
+        t('classroom.overview.certificateError')
       $q.notify({
         type: 'negative',
         position: 'bottom',

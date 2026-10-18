@@ -95,6 +95,7 @@ import type {
   UploadAttachmentVars,
 } from 'src/types/cart/types'
 import { toast } from 'src/design-system/toast'
+import { payloadErrorMessages } from 'src/utils/graphqlErrors'
 import { notifyDuplicateAffiliate, reportDuplicateAffiliate } from 'src/utils/pyramidErrors'
 import FileUpload from 'src/components/utils/FileUploader.vue'
 import DsButton from 'src/design-system/components/DsButton.vue'
@@ -137,29 +138,9 @@ function paymentImageHandler (val: File | null): void {
  * as a bare `{ message }` or a plain string.
  */
 function errorHandler (errorsObj: unknown): number {
-  if (errorsObj == null) return 0
-  if (typeof errorsObj === 'string') {
-    if (errorsObj) { toast.warning(errorsObj); return 1 }
-    return 0
-  }
-  if (typeof errorsObj !== 'object') return 0
-  let shown = 0
-  const top = errorsObj as Record<string, unknown>
-  // Bare `{ message: '...' }`.
-  if (typeof top.message === 'string' && top.message) {
-    toast.warning(top.message)
-    shown++
-  }
-  for (const key of Object.keys(top)) {
-    const entries = top[key]
-    if (!Array.isArray(entries)) continue
-    for (const val of entries) {
-      const v = val as Record<string, unknown>
-      const msg = String(v?.message ?? '')
-      if (msg) { toast.warning(msg); shown++ }
-    }
-  }
-  return shown
+  const msgs = payloadErrorMessages(errorsObj)
+  msgs.forEach(m => toast.warning(m))
+  return msgs.length
 }
 
 function getOrdersIds (): number[] {

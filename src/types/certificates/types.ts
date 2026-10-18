@@ -12,6 +12,8 @@ import type {
   AllCertificatesQueryVariables,
   CreateManualCertificateMutation,
   CreateManualCertificateMutationVariables,
+  CreateCertificateMutation,
+  CreateCertificateMutationVariables,
 } from 'src/graphql/generated'
 
 export type Certificate = NonNullable<
@@ -25,3 +27,8 @@ export type AllCertificatesVars = AllCertificatesQueryVariables
 
 export type CreateCertificateResult = CreateManualCertificateMutation
 export type CreateCertificateVars = CreateManualCertificateMutationVariables
+
+// `CreateCertificate` (learner requests an automatic certificate from the
+// classroom overview). Distinct from the manual-certificate aliases above.
+export type CreateAutomaticCertificateResult = CreateCertificateMutation
+export type CreateAutomaticCertificateVars = CreateCertificateMutationVariables
