@@ -136,14 +136,11 @@ import { FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
 import { usdPriceOf } from 'src/utils/currency'
 import type {
   CartEntry,
-  CreateBraintreeCheckoutResult,
-  CreateBraintreeCheckoutVars,
   CreateOrderResult,
   CreateOrderVars,
 } from 'src/types/cart/types'
 
 import { CreateNewOrderWithBulkOrderDetails } from 'src/graphql/order_management/mutation/CreateNewOrderWithBulkOrderDetails'
-import { CreateBraintreeCheckout } from 'src/graphql/checkout_management/mutation/CreateBraintreeCheckout.js'
 
 import PriceDisplay from 'src/components/shared/PriceDisplay.vue'
 
@@ -177,16 +174,6 @@ watch(subtotal, (v) => {
   cart.setTotalPaymentFees(v)
 }, { immediate: true })
 
-async function getBraintreeClientToken (orderId: number): Promise<string | null | undefined> {
-  const result = await apolloClient.mutate<CreateBraintreeCheckoutResult, CreateBraintreeCheckoutVars>({
-    mutation: CreateBraintreeCheckout,
-    variables: { orderId }
-  })
-  const details = result.data?.createBraintreeCheckout
-  if (details?.success) return details.braintreeClientToken
-  return null
-}
-
 async function getOrderResult (courseIds: number[]): Promise<NonNullable<CreateOrderResult['createNewOrderWithBulkOrderDetails']> | undefined> {
   const result = await apolloClient.mutate<CreateOrderResult, CreateOrderVars>({
     mutation: CreateNewOrderWithBulkOrderDetails,
@@ -201,19 +188,6 @@ function getOrdersIds (): number[] {
   return shoppingCartDataList.value
     .map(item => item.course.pk)
     .filter((pk): pk is number => pk != null)
-}
-
-async function buyTheCoursesUsingBraintree (): Promise<void> {
-  try {
-    const courseIds = getOrdersIds()
-    const orderResult = await getOrderResult(courseIds)
-    if (!orderResult?.order?.pk) return
-    const token = await getBraintreeClientToken(orderResult.order.pk)
-    cart.setBraintreeClientToken(token ?? null)
-    cart.setOrderData(orderResult)
-  } catch {
-    // silent
-  }
 }
 
 function removeCourseFromCart (item: CartEntry): void {

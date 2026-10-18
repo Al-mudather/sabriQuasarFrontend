@@ -18,7 +18,6 @@ import type { CartEntry } from 'src/types/cart/types'
 // ---------------------------------------------------------------------------
 interface CartState {
   shoppinCartDialog: boolean
-  braintreeClientToken: string | null
   /**
    * Order payload returned by CreateNewOrderWithBulkOrderDetails. Kept
    * permissive (unknown) because the shape is not aliased in types/cart/types.
@@ -32,7 +31,6 @@ interface CartState {
 export const useCartStore = defineStore('shoppingCart', {
   state: (): CartState => ({
     shoppinCartDialog: false,
-    braintreeClientToken: null,
     orderData: null,
     totalPaymentFees: (SessionStorage.getItem<number>('totalPaymentFees') ?? 0.0),
     checkoutOrderID: (SessionStorage.getItem<string | number>('orderID') ?? null) as string | number | null,
@@ -44,7 +42,6 @@ export const useCartStore = defineStore('shoppingCart', {
   actions: {
     // ---- Direct state writers (formerly Vuex mutations) ---------------------
     ORDER_DATA_MUTATION (value: unknown): void { this.orderData = value },
-    BRAINTREE_CLIENT_TOKEN_MUTATION (value: string | null): void { this.braintreeClientToken = value },
 
     saveCheckoutOrderID (value: string | number | null): void {
       SessionStorage.set('orderID', value)
@@ -98,7 +95,6 @@ export const useCartStore = defineStore('shoppingCart', {
 
     // ---- Vuex actions, names preserved --------------------------------------
     SET_ORDER_DATA_Action (value: unknown): void { this.ORDER_DATA_MUTATION(value) },
-    SET_BRAINTREE_CLIENT_TOKEN_Action (value: string | null): void { this.BRAINTREE_CLIENT_TOKEN_MUTATION(value) },
     setSaveCheckoutOrderIDAction (value: string | number | null): void { this.saveCheckoutOrderID(value) },
     setShoppinCartDataListAction (value: CartEntry[]): void { this.updateShoppinCartDataList(value) },
     deleteShoppinCartDataListAction (): void { this.deleteShoppinCartDataList() },
@@ -112,7 +108,6 @@ export const useCartStore = defineStore('shoppingCart', {
     addCourseToCart (v: CartEntry): void { return this.setShoppingCartDataListAction(v) },
     setCartList (v: CartEntry[]): void { return this.setShoppinCartDataListAction(v) },
     setOrderData (v: unknown): void { return this.SET_ORDER_DATA_Action(v) },
-    setBraintreeClientToken (v: string | null): void { return this.SET_BRAINTREE_CLIENT_TOKEN_Action(v) },
     setTotalPaymentFees (v: number): void { return this.setTotalPaymentFeesAction(v) },
     setSaveCheckoutOrderID (v: string | number | null): void { return this.setSaveCheckoutOrderIDAction(v) },
   },

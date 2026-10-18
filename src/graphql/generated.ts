@@ -389,22 +389,6 @@ export type BulkUpdateRates = {
   updatedCount: Maybe<Scalars['Int']['output']>;
 };
 
-export type CaptureBraintreeCheckout = {
-  __typename?: 'CaptureBraintreeCheckout';
-  braintreeClientToken: Maybe<Scalars['String']['output']>;
-  errors: Maybe<Scalars['ExpectedErrorType']['output']>;
-  session: Maybe<Scalars['JSONString']['output']>;
-  success: Maybe<Scalars['Boolean']['output']>;
-};
-
-/** Enables logged in users to create order request  */
-export type CapturePaypalCheckout = {
-  __typename?: 'CapturePaypalCheckout';
-  errors: Maybe<Scalars['ExpectedErrorType']['output']>;
-  session: Maybe<Scalars['JSONString']['output']>;
-  success: Maybe<Scalars['Boolean']['output']>;
-};
-
 export type CertificateNode = MyNode & {
   __typename?: 'CertificateNode';
   batch: Maybe<BatchNode>;
@@ -1448,13 +1432,6 @@ export type CreateBatchInput = {
   totalHours?: InputMaybe<Scalars['Float']['input']>;
 };
 
-export type CreateBraintreeCheckout = {
-  __typename?: 'CreateBraintreeCheckout';
-  braintreeClientToken: Maybe<Scalars['String']['output']>;
-  errors: Maybe<Scalars['ExpectedErrorType']['output']>;
-  success: Maybe<Scalars['Boolean']['output']>;
-};
-
 /** Enables logged in users to create order request  */
 export type CreateBulkOrderDetails = {
   __typename?: 'CreateBulkOrderDetails';
@@ -1898,14 +1875,6 @@ export type CreatePartnerWithdrawInput = {
   user?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type CreatePaypalCheckout = {
-  __typename?: 'CreatePaypalCheckout';
-  errors: Maybe<Scalars['ExpectedErrorType']['output']>;
-  paymentUrl: Maybe<Scalars['String']['output']>;
-  session: Maybe<Scalars['JSONString']['output']>;
-  success: Maybe<Scalars['Boolean']['output']>;
-};
-
 /** Enables logged in users to create order request  */
 export type CreatePrerequisite = {
   __typename?: 'CreatePrerequisite';
@@ -1919,13 +1888,6 @@ export type CreateQuestionReply = {
   __typename?: 'CreateQuestionReply';
   errors: Maybe<Scalars['ExpectedErrorType']['output']>;
   questionReply: Maybe<QuestionReplyNode>;
-  success: Maybe<Scalars['Boolean']['output']>;
-};
-
-/** Enables logged in users to create order request  */
-export type CreateSmartNodeCheckout = {
-  __typename?: 'CreateSmartNodeCheckout';
-  errors: Maybe<Scalars['ExpectedErrorType']['output']>;
   success: Maybe<Scalars['Boolean']['output']>;
 };
 
@@ -4388,9 +4350,6 @@ export type RootMutation = {
   assignInstructor: Maybe<AssignInstructor>;
   /** Bulk update conversion rates  */
   bulkUpdateRates: Maybe<BulkUpdateRates>;
-  captureBraintreeCheckout: Maybe<CaptureBraintreeCheckout>;
-  /** Enables logged in users to create order request  */
-  capturePaypalCheckout: Maybe<CapturePaypalCheckout>;
   /** Create   */
   claimAlhasifPartnerBalance: Maybe<ClaimAlhasifPartnerBalance>;
   /** Create   */
@@ -4405,7 +4364,6 @@ export type RootMutation = {
   createAttachmentTransaction: Maybe<CreateAttachmentTransaction>;
   /** Create   */
   createBatch: Maybe<CreateBatch>;
-  createBraintreeCheckout: Maybe<CreateBraintreeCheckout>;
   /** Enables logged in users to create order request  */
   createBulkOrderDetails: Maybe<CreateBulkOrderDetails>;
   /** Create   */
@@ -4464,13 +4422,10 @@ export type RootMutation = {
   createPartnerRewardLedger: Maybe<CreatePartnerRewardLedger>;
   /** Create   */
   createPartnerWithdraw: Maybe<CreatePartnerWithdraw>;
-  createPaypalCheckout: Maybe<CreatePaypalCheckout>;
   /** Enables logged in users to create order request  */
   createPrerequisite: Maybe<CreatePrerequisite>;
   /** Enables logged in users to create order request  */
   createQuestionReply: Maybe<CreateQuestionReply>;
-  /** Enables logged in users to create order request  */
-  createSmartNodeCheckout: Maybe<CreateSmartNodeCheckout>;
   /** Enables logged in users to create order request  */
   createStripeCheckout: Maybe<CreateStripeCheckout>;
   /** Enables logged in users to create order request  */
@@ -4779,19 +4734,6 @@ export type RootMutationBulkUpdateRatesArgs = {
 
 
 /** The project root mutation */
-export type RootMutationCaptureBraintreeCheckoutArgs = {
-  nonce?: InputMaybe<Scalars['String']['input']>;
-  orderId: Scalars['Int']['input'];
-};
-
-
-/** The project root mutation */
-export type RootMutationCapturePaypalCheckoutArgs = {
-  orderId: Scalars['String']['input'];
-};
-
-
-/** The project root mutation */
 export type RootMutationClaimAlhasifPartnerBalanceArgs = {
   id?: InputMaybe<Scalars['Int']['input']>;
   input: ClaimAlhasifPartnerBalanceInput;
@@ -4837,12 +4779,6 @@ export type RootMutationCreateAttachmentTransactionArgs = {
 export type RootMutationCreateBatchArgs = {
   id?: InputMaybe<Scalars['Int']['input']>;
   input: CreateBatchInput;
-};
-
-
-/** The project root mutation */
-export type RootMutationCreateBraintreeCheckoutArgs = {
-  orderId: Scalars['Int']['input'];
 };
 
 
@@ -5052,13 +4988,6 @@ export type RootMutationCreatePartnerWithdrawArgs = {
 
 
 /** The project root mutation */
-export type RootMutationCreatePaypalCheckoutArgs = {
-  currency: Scalars['String']['input'];
-  orderId: Scalars['Int']['input'];
-};
-
-
-/** The project root mutation */
 export type RootMutationCreatePrerequisiteArgs = {
   contentData?: InputMaybe<PrerequisiteInput>;
 };
@@ -5068,15 +4997,6 @@ export type RootMutationCreatePrerequisiteArgs = {
 export type RootMutationCreateQuestionReplyArgs = {
   answer: Scalars['String']['input'];
   questionId?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-/** The project root mutation */
-export type RootMutationCreateSmartNodeCheckoutArgs = {
-  card?: InputMaybe<Scalars['String']['input']>;
-  expDate?: InputMaybe<Scalars['String']['input']>;
-  ipin?: InputMaybe<Scalars['Int']['input']>;
-  orderId: Scalars['Int']['input'];
 };
 
 
@@ -5746,7 +5666,6 @@ export type RootQuery = {
   currencyRateHistory: Maybe<CurrencyRateHistoryNode>;
   currencyRateHistoryByConverter: Maybe<CurrencyRateHistoryNodeConnection>;
   currencyRateHistoryByCurrencyPair: Maybe<CurrencyRateHistoryNodeConnection>;
-  /** The ID of the object */
   enrollment: Maybe<EnrollmentNode>;
   enrollmentByCourseForCurrentUser: Maybe<EnrollmentNode>;
   enrollmentFeedback: Maybe<EnrollmentFeedbackNode>;
@@ -5777,7 +5696,6 @@ export type RootQuery = {
   partnerLedger: Maybe<PartnerLedgerNode>;
   partnerRewardLedger: Maybe<PartnerRewardLedgerNode>;
   partnerWithdraw: Maybe<PartnerWithdrawNode>;
-  paypalPublishableKey: Maybe<Scalars['JSONString']['output']>;
   prerequisite: Maybe<PrerequisiteNode>;
   pyramid: Maybe<PyramidNode>;
   pyramidBalance: Maybe<PyramidBalanceNode>;
@@ -8327,38 +8245,6 @@ export type AllCertificatesQueryVariables = Exact<{
 
 export type AllCertificatesQuery = { __typename?: 'RootQuery', allCertificates: { __typename?: 'CertificateNodeConnection', edges: Array<{ __typename?: 'CertificateNodeEdge', node: { __typename?: 'CertificateNode', id: string, pk: number | null, serial: string | null, startDate: string | null, endDate: string | null, issueDate: string | null, period: number | null, totalHours: number | null, isManual: boolean, isReady: boolean, isPrinted: boolean, isPrintable: boolean, created: string, updated: string, enrollment: { __typename?: 'EnrollmentNode', pk: number | null, id: string, course: { __typename?: 'CourseNode', id: string, pk: number | null, title: string } } | null, batch: { __typename?: 'BatchNode', id: string, pk: number | null, batchName: string | null, courseName: string | null } | null, user: { __typename?: 'CustomUserNode', id: string, pk: number | null, email: string, fullName: string } | null } | null } | null> } | null };
 
-export type CaptureBraintreeCheckoutMutationVariables = Exact<{
-  orderId: Scalars['Int']['input'];
-  nonce: Scalars['String']['input'];
-}>;
-
-
-export type CaptureBraintreeCheckoutMutation = { __typename?: 'RootMutation', captureBraintreeCheckout: { __typename?: 'CaptureBraintreeCheckout', success: boolean | null, errors: any | null } | null };
-
-export type CapturePaypalCheckoutMutationVariables = Exact<{
-  orderId: Scalars['String']['input'];
-}>;
-
-
-export type CapturePaypalCheckoutMutation = { __typename?: 'RootMutation', capturePaypalCheckout: { __typename?: 'CapturePaypalCheckout', success: boolean | null, errors: any | null, session: Record<string, number> | null } | null };
-
-export type CreateBraintreeCheckoutMutationVariables = Exact<{
-  orderId: Scalars['Int']['input'];
-}>;
-
-
-export type CreateBraintreeCheckoutMutation = { __typename?: 'RootMutation', createBraintreeCheckout: { __typename?: 'CreateBraintreeCheckout', success: boolean | null, errors: any | null, braintreeClientToken: string | null } | null };
-
-export type CreateSmartNodeCheckoutMutationVariables = Exact<{
-  orderId: Scalars['Int']['input'];
-  card?: InputMaybe<Scalars['String']['input']>;
-  expDate?: InputMaybe<Scalars['String']['input']>;
-  ipin?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type CreateSmartNodeCheckoutMutation = { __typename?: 'RootMutation', createSmartNodeCheckout: { __typename?: 'CreateSmartNodeCheckout', success: boolean | null, errors: any | null } | null };
-
 export type CreateStripeCheckoutMutationVariables = Exact<{
   orderId: Scalars['Int']['input'];
   currency: Scalars['String']['input'];
@@ -8368,11 +8254,6 @@ export type CreateStripeCheckoutMutationVariables = Exact<{
 
 
 export type CreateStripeCheckoutMutation = { __typename?: 'RootMutation', createStripeCheckout: { __typename?: 'CreateStripeCheckout', success: boolean | null, errors: any | null, paymentUrl: string | null } | null };
-
-export type PaypalPublishableKeyQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type PaypalPublishableKeyQuery = { __typename?: 'RootQuery', paypalPublishableKey: Record<string, number> | null };
 
 export type StripePublishableKeyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -8753,12 +8634,7 @@ export const MyAttachmentTransactionsDocument = {"kind":"Document","definitions"
 export const CreateCertificateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateCertificate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"enrollmentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateCertificateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createCertificate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"enrollmentId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"enrollmentId"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<CreateCertificateMutation, CreateCertificateMutationVariables>;
 export const CreateManualCertificateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateManualCertificate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"course"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userEmail"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateManualCertificateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createManualCertificate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"course"},"value":{"kind":"Variable","name":{"kind":"Name","value":"course"}}},{"kind":"Argument","name":{"kind":"Name","value":"userEmail"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userEmail"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<CreateManualCertificateMutation, CreateManualCertificateMutationVariables>;
 export const AllCertificatesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AllCertificates"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"JSONString"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"allCertificates"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"enrollment"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"course"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"title"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"batch"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"batchName"}},{"kind":"Field","name":{"kind":"Name","value":"courseName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"serial"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}},{"kind":"Field","name":{"kind":"Name","value":"issueDate"}},{"kind":"Field","name":{"kind":"Name","value":"period"}},{"kind":"Field","name":{"kind":"Name","value":"totalHours"}},{"kind":"Field","name":{"kind":"Name","value":"isManual"}},{"kind":"Field","name":{"kind":"Name","value":"isReady"}},{"kind":"Field","name":{"kind":"Name","value":"isPrinted"}},{"kind":"Field","name":{"kind":"Name","value":"isPrintable"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AllCertificatesQuery, AllCertificatesQueryVariables>;
-export const CaptureBraintreeCheckoutDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CaptureBraintreeCheckout"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"nonce"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"captureBraintreeCheckout"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}}},{"kind":"Argument","name":{"kind":"Name","value":"nonce"},"value":{"kind":"Variable","name":{"kind":"Name","value":"nonce"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<CaptureBraintreeCheckoutMutation, CaptureBraintreeCheckoutMutationVariables>;
-export const CapturePaypalCheckoutDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CapturePaypalCheckout"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capturePaypalCheckout"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","name":{"kind":"Name","value":"session"}}]}}]}}]} as unknown as DocumentNode<CapturePaypalCheckoutMutation, CapturePaypalCheckoutMutationVariables>;
-export const CreateBraintreeCheckoutDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateBraintreeCheckout"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createBraintreeCheckout"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","name":{"kind":"Name","value":"braintreeClientToken"}}]}}]}}]} as unknown as DocumentNode<CreateBraintreeCheckoutMutation, CreateBraintreeCheckoutMutationVariables>;
-export const CreateSmartNodeCheckoutDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateSmartNodeCheckout"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"card"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"expDate"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ipin"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createSmartNodeCheckout"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}}},{"kind":"Argument","name":{"kind":"Name","value":"card"},"value":{"kind":"Variable","name":{"kind":"Name","value":"card"}}},{"kind":"Argument","name":{"kind":"Name","value":"ipin"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ipin"}}},{"kind":"Argument","name":{"kind":"Name","value":"expDate"},"value":{"kind":"Variable","name":{"kind":"Name","value":"expDate"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<CreateSmartNodeCheckoutMutation, CreateSmartNodeCheckoutMutationVariables>;
 export const CreateStripeCheckoutDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateStripeCheckout"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"currency"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"successUrl"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"cancelUrl"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createStripeCheckout"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderId"}}},{"kind":"Argument","name":{"kind":"Name","value":"successUrl"},"value":{"kind":"Variable","name":{"kind":"Name","value":"successUrl"}}},{"kind":"Argument","name":{"kind":"Name","value":"cancelUrl"},"value":{"kind":"Variable","name":{"kind":"Name","value":"cancelUrl"}}},{"kind":"Argument","name":{"kind":"Name","value":"currency"},"value":{"kind":"Variable","name":{"kind":"Name","value":"currency"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","name":{"kind":"Name","value":"paymentUrl"}}]}}]}}]} as unknown as DocumentNode<CreateStripeCheckoutMutation, CreateStripeCheckoutMutationVariables>;
-export const PaypalPublishableKeyDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaypalPublishableKey"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paypalPublishableKey"}}]}}]} as unknown as DocumentNode<PaypalPublishableKeyQuery, PaypalPublishableKeyQueryVariables>;
 export const StripePublishableKeyDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"StripePublishableKey"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stripePublishableKey"}}]}}]} as unknown as DocumentNode<StripePublishableKeyQuery, StripePublishableKeyQueryVariables>;
 export const CreateCourseQuizSolutionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateCourseQuizSolution"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateCourseQuizSolutionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createCourseQuizSolution"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","alias":{"kind":"Name","value":"courseQuizSolution"},"name":{"kind":"Name","value":"instance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userAnswer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"answer"}},{"kind":"Field","name":{"kind":"Name","value":"isCorrect"}},{"kind":"Field","name":{"kind":"Name","value":"why"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateCourseQuizSolutionMutation, CreateCourseQuizSolutionMutationVariables>;
 export const EndLearningUnitDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"EndLearningUnit"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"progressData"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ProgressInput"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"progressId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"endLearningUnit"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"progressData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"progressData"}}},{"kind":"Argument","name":{"kind":"Name","value":"progressId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"progressId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"learning"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"complete"}}]}}]}}]}}]} as unknown as DocumentNode<EndLearningUnitMutation, EndLearningUnitMutationVariables>;

@@ -12,22 +12,9 @@ import type {
   // Stripe
   CreateStripeCheckoutMutation,
   CreateStripeCheckoutMutationVariables,
-  // Paypal
-  CapturePaypalCheckoutMutation,
-  CapturePaypalCheckoutMutationVariables,
-  // Braintree
-  CreateBraintreeCheckoutMutation,
-  CreateBraintreeCheckoutMutationVariables,
-  CaptureBraintreeCheckoutMutation,
-  CaptureBraintreeCheckoutMutationVariables,
-  // SmartNode
-  CreateSmartNodeCheckoutMutation,
-  CreateSmartNodeCheckoutMutationVariables,
   // Publishable keys
   StripePublishableKeyQuery,
   StripePublishableKeyQueryVariables,
-  PaypalPublishableKeyQuery,
-  PaypalPublishableKeyQueryVariables,
   // Order management
   CreateNewOrderWithBulkOrderDetailsMutation,
   CreateNewOrderWithBulkOrderDetailsMutationVariables,
@@ -94,15 +81,8 @@ export interface CartEntry {
 // ---------------------------------------------------------------------------
 // Payment providers
 // ---------------------------------------------------------------------------
-// Canonical discriminator used by the cart/checkout UI. `syberpay` is kept in
-// the union because product/UI still reference it even though its GraphQL ops
-// are not exported from generated.ts yet (see TODOs below).
-export type PaymentProvider =
-  | 'stripe'
-  | 'paypal'
-  | 'braintree'
-  | 'smartnode'
-  | 'syberpay'
+// Canonical discriminator used by the cart/checkout UI.
+export type PaymentProvider = 'stripe' | 'bankak'
 
 // ---------------------------------------------------------------------------
 // Per-operation Result / Vars aliases
@@ -117,40 +97,11 @@ export type CreateStripeCheckoutVars = CreateStripeCheckoutMutationVariables
 // flow captures server-side via webhook / paymentUrl redirect, so no client
 // mutation exists. Add here if a capture mutation is later introduced.
 
-// ---- Paypal ----
-// TODO: CreatePaypalCheckout mutation is defined on the schema
-// (see RootMutationCreatePaypalCheckoutArgs) but no named client operation is
-// exported from generated.ts. Add the operation document under
-// src/graphql/checkout_management/ and re-run codegen to surface
-// `CreatePaypalCheckoutMutation{,Variables}` aliases here.
-export type CapturePaypalCheckoutResult = CapturePaypalCheckoutMutation
-export type CapturePaypalCheckoutVars = CapturePaypalCheckoutMutationVariables
-
-// ---- Braintree ----
-export type CreateBraintreeCheckoutResult = CreateBraintreeCheckoutMutation
-export type CreateBraintreeCheckoutVars = CreateBraintreeCheckoutMutationVariables
-export type CaptureBraintreeCheckoutResult = CaptureBraintreeCheckoutMutation
-export type CaptureBraintreeCheckoutVars = CaptureBraintreeCheckoutMutationVariables
-
-// ---- SmartNode ----
-export type CreateSmartNodeCheckoutResult = CreateSmartNodeCheckoutMutation
-export type CreateSmartNodeCheckoutVars = CreateSmartNodeCheckoutMutationVariables
-// TODO: CaptureSmartNodeCheckout is not exported from generated.ts. Add here
-// if/when the backend ships a client-callable capture mutation.
-
-// ---- Syberpay ----
-// TODO: Neither CreateSyberpayCheckout nor CaptureSyberpayCheckout are
-// exported from generated.ts (excluded from codegen or not yet added on the
-// backend). The `'syberpay'` PaymentProvider variant is kept for UI parity.
-
 // ---------------------------------------------------------------------------
 // Publishable-key queries
 // ---------------------------------------------------------------------------
 export type StripePublishableKeyResult = StripePublishableKeyQuery
 export type StripePublishableKeyVars = StripePublishableKeyQueryVariables
-
-export type PaypalPublishableKeyResult = PaypalPublishableKeyQuery
-export type PaypalPublishableKeyVars = PaypalPublishableKeyQueryVariables
 
 // ---------------------------------------------------------------------------
 // Order management

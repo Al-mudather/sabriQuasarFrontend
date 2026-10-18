@@ -1,5 +1,5 @@
 schema:
-  - https://stc.training/api/graphql/
+  - ${GRAPHQL_SCHEMA_URL:https://stc.training/api/graphql/}
 documents:
   - 'src/graphql/**/*.js'
   # Excluded due to duplicate operation names (see PR notes). The kept file
@@ -17,8 +17,6 @@ documents:
   # from typed output.
   - '!src/graphql/account_management/mutation/SetUserPassword.js'
   - '!src/graphql/afilliate_management/mutation/JoinAffiliateProgram.js'
-  - '!src/graphql/checkout_management/mutation/CreatePaypalCheckout.js'
-  - '!src/graphql/checkout_management/mutation/CreateSyberpayCheckout.js'
   - '!src/graphql/enrollment_management/query/GetEnrollmentByID.js'
 generates:
   src/graphql/generated.ts:
