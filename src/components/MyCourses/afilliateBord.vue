@@ -26,7 +26,7 @@
         {{ $t('الذهاب') }}
       </ds-button>
       <ds-button
-        v-else
+        v-else-if="!loading"
         variant="accent"
         :loading="visible"
         @click="JOIN_THE_PYRAMID_PROGRAM"
@@ -42,19 +42,17 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import { storeToRefs } from 'pinia'
 import { useQuery } from '@vue/apollo-composable'
 import { useAuthStore } from 'src/stores/auth'
+import { usePyramidStore } from 'src/stores/pyramid'
+import { payloadErrorMessages, resultErrorMessages, matchesError } from 'src/utils/graphqlErrors'
 import { apolloClient } from 'src/apollo/client'
 import { GetMyProfileData } from 'src/graphql/account_management/query/GetMyProfileData'
-import { CheckTheUserPermissionToUsePlatforme } from 'src/graphql/pyramid_marketing_management/query/CheckPyramidAffiliateQuery'
 import { JoinPyramidProgram } from 'src/graphql/pyramid_marketing_management/mutation/JoinPyramidProgram'
 import { MyPyramidAccount } from 'src/graphql/pyramid_marketing_management/query/MyPyramidAccount'
 import type {
   MyPyramidAccountResult,
   MyPyramidAccountVars,
-  CheckPyramidAffiliateResult,
-  CheckPyramidAffiliateVars,
   JoinPyramidProgramResult,
   JoinPyramidProgramVars,
 } from 'src/types/pyramid/types'
@@ -64,7 +62,7 @@ const router = useRouter()
 const $q = useQuasar()
 const { t } = useI18n()
 const auth = useAuthStore()
-const { user } = storeToRefs(auth)
+const pyramid = usePyramidStore()
 
 const myPyramidAccountID = ref<string | null>(null)
 const amIAMarketer = ref(false)
@@ -72,9 +70,11 @@ const visible = ref(false)
 
 // Already part of the marketers program → show "go to marketing page"; otherwise
 // show the "request to join" CTA.
-const isMarketer = computed(() => !!myPyramidAccountID.value || amIAMarketer.value)
+const isMarketer = computed(
+  () => !!myPyramidAccountID.value || amIAMarketer.value || !!auth.user?.isPyramidMarketer
+)
 
-const { result, onResult } = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(
+const { result, loading, onResult } = useQuery<MyPyramidAccountResult, MyPyramidAccountVars>(
   MyPyramidAccount,
   {},
   { errorPolicy: 'all' }
@@ -83,45 +83,42 @@ const { result, onResult } = useQuery<MyPyramidAccountResult, MyPyramidAccountVa
 const myPyramidAccount = computed(() => result.value?.myPyramidAccount ?? null)
 
 onResult((r) => {
-  visible.value = false
   if (r.data?.myPyramidAccount) {
     myPyramidAccountID.value = r.data.myPyramidAccount.pyramidId ?? null
   }
 })
 
-async function CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE (): Promise<void> {
-  try {
-    await apolloClient.query<CheckPyramidAffiliateResult, CheckPyramidAffiliateVars>({
-      query: CheckTheUserPermissionToUsePlatforme
-    })
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : ''
-    if (msg.includes('PyramidAffiliate matching query does not exist')) {
-      $q.notify({
-        type: 'negative',
-        progress: true,
-        multiLine: true,
-        position: 'bottom',
-        message: t('يجب إدخال كود التسجيل أولاً')
-      })
-      router.push({ name: 'registeration-code' })
-    }
-  }
-}
-
 function GO_TO_MY_MARKETING_PAGE (): void {
   router.push({ name: 'my-marketing-page' })
 }
 
+function notifyError (message: string): void {
+  $q.notify({ type: 'negative', progress: true, multiLine: true, position: 'bottom', message })
+}
+
 async function JOIN_THE_PYRAMID_PROGRAM (): Promise<void> {
+  if (visible.value) return
   visible.value = true
-  await CHECK_IF_THE_USER_HASE_THE_REGISTERATION_CODE()
   try {
+    // A user without a registration code cannot become a marketer.
+    const ok = await pyramid.verifyPlatformAccess(true)
+    if (!ok) {
+      notifyError(t('يجب إدخال كود التسجيل أولاً'))
+      router.push({ name: 'registeration-code' })
+      return
+    }
     const res = await apolloClient.mutate<JoinPyramidProgramResult, JoinPyramidProgramVars>({
       mutation: JoinPyramidProgram,
-      variables: { input: {} }
+      variables: { input: {} },
+      errorPolicy: 'all'
     })
-    if (res.data?.joinPyramidProgram?.success) {
+    const payload = res.data?.joinPyramidProgram
+    if (!payload) {
+      notifyError(resultErrorMessages(res)[0] ?? t('تعذّر الانضمام، حاول مجدداً'))
+      return
+    }
+    if (payload.success) {
+      // Success covers both a newly created and an already existing account.
       $q.notify({
         type: 'positive',
         progress: true,
@@ -130,13 +127,21 @@ async function JOIN_THE_PYRAMID_PROGRAM (): Promise<void> {
         message: t('أنت الآن مسوّق')
       })
       amIAMarketer.value = true
+      pyramid.setMyMarketingCode(payload.instance?.pyramidCode ?? '')
       const profile = await apolloClient.query<GetMyProfileResult>({ query: GetMyProfileData })
       if (profile.data.me) {
         auth.setUserAfterJoinPyramid(profile.data.me)
       }
+      return
     }
-  } catch {
-    /* apolloClient surfaces error */
+    if (matchesError(payload.errors, /Pyramid Affiliate Does Not Exist/i)) {
+      notifyError(t('يجب إدخال كود التسجيل أولاً'))
+      router.push({ name: 'registeration-code' })
+      return
+    }
+    notifyError(payloadErrorMessages(payload.errors)[0] ?? t('تعذّر الانضمام، حاول مجدداً'))
+  } catch (e: unknown) {
+    notifyError(resultErrorMessages(e)[0] ?? t('تعذّر الانضمام، حاول مجدداً'))
   } finally {
     visible.value = false
   }

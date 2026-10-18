@@ -1192,4 +1192,5 @@ export default {
   // Become-a-marketer (join pyramid program) notifications.
   "أنت الآن مسوّق": "You are now a marketer",
   "يجب إدخال كود التسجيل أولاً": "You must enter the registration code first",
+  "تعذّر الانضمام، حاول مجدداً": "We could not complete your join request. Please try again.",
 }

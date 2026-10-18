@@ -7,18 +7,9 @@ mutation JoinPyramidProgram($input: JoinPyramidProgramInput!) {
 
       success
       errors
-      pyramid: instance {
-        pyramidId
-        user {
-          pk
-        }
-        parent {
-          pk
-        }
+      instance {
+        pk
         pyramidCode
-        created
-        updated
-
       }
 
   }
