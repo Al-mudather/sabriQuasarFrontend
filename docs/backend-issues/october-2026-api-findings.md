@@ -7,6 +7,27 @@
 
 Priority: **B1 and B2 block real users**; the rest are contract mismatches and robustness issues.
 
+## Status after the backend's 19 October response (master `af8d3ea`, PR #10)
+
+Re-verified against a local run of `af8d3ea` with the same ten personas.
+
+| Finding | Backend status | Verified locally |
+|---|---|---|
+| B1 nested `order.user` fields "Access denied" for non-staff managers | **Open** (product decision; pinned as an xfail test). All production managers are staff today. | Unchanged |
+| B2 upload fails after saving when the queue is down | Fixed (`c4f7d84`): upload succeeds, receipt reviewed without OCR | ✅ with Redis unreachable |
+| B3 orders without a registration code | **Open** (product decision). Such users cannot pay: `uploadAttachmentTransaction` refuses with "PyramidAffiliate matching query does not exist." — keep the client-side gate | ✅ refusal reproduced |
+| B4 foreign re-upload raised | Fixed (`e33423b`): `{"message": "Not Found"}` | ✅ |
+| B5 Stripe crash without redirect URLs | Fixed (`ab364bd`): falls back to configured redirects | ✅ no crash (Stripe off → `nonFieldErrors`) |
+| B6 error shapes | Guide corrected: shape 2 is `{"nonFieldErrors": [...]}`, shape 5 added for `not_verified` / `unauthenticated` | ✅ |
+| B7 already-enrolled raised | Fixed (`9591309`): `{"success": false, "errors": {"message": "User already has valid enrollment in the course: <titles>"}}`, no order created | ✅ (course title included) |
+| B8 confirmation `KeyError` | Fixed (`bbe73fa`): an omitted flag means false | ✅ approve with only `pyramidManagerEndorse` works |
+
+Frontend impact: none required. The student web already matches `/already has valid enrollment/` on both payload and top-level messages, routes "PyramidAffiliate matching query does not exist." to the registration-code page, and parses the `nonFieldErrors` wrapper.
+
+---
+
+## Original findings (18 October, against `56d0e35`)
+
 ---
 
 ## B1. Non-staff pyramid managers cannot see any receipt (blocks the receipt-review screen)
