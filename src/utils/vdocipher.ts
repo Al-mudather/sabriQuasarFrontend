@@ -36,13 +36,25 @@ export interface VdoCipherEmbed {
   iframeCount: number
 }
 
-function decodeEntities(s: string): string {
+/** Decode the HTML entities an embed code can arrive with (named + numeric). */
+export function decodeEntities(s: string): string {
   return s
-    .replace(/&amp;/gi, '&')
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => safeFromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => safeFromCodePoint(parseInt(dec, 10)))
     .replace(/&quot;/gi, '"')
     .replace(/&#39;|&apos;/gi, "'")
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
+    // &amp; last, so "&amp;lt;" decodes to the literal text "&lt;" only once.
+    .replace(/&amp;/gi, '&')
+}
+
+function safeFromCodePoint(n: number): string {
+  try {
+    return Number.isFinite(n) && n > 0 ? String.fromCodePoint(n) : ''
+  } catch {
+    return ''
+  }
 }
 
 /** Returns the URL if it is an https VdoCipher player URL, else null. */
@@ -51,7 +63,11 @@ export function toVdoCipherPlayerUrl(raw: string | null | undefined): string | n
   const candidate = decodeEntities(raw.trim())
   let url: URL
   try {
-    url = new URL(candidate)
+    // Protocol-relative embeds (`//player.vdocipher.com/...`) resolve against
+    // the player origin; anything else must already be absolute.
+    url = candidate.startsWith('//')
+      ? new URL(candidate, 'https://player.vdocipher.com')
+      : new URL(candidate)
   } catch {
     return null
   }
@@ -61,30 +77,38 @@ export function toVdoCipherPlayerUrl(raw: string | null | undefined): string | n
 }
 
 /**
- * Parse the pasted VdoCipher embed code (or a bare player URL) into exactly
- * one player URL. Returns null when nothing usable is found.
+ * Parse the pasted VdoCipher embed code (or a player URL, possibly surrounded
+ * by other text) into exactly one player URL. Returns null when nothing
+ * usable is found. HTML-escaped embeds (`&lt;iframe …`) are decoded first.
  */
 export function parseVdoCipherEmbed(code: string | null | undefined): VdoCipherEmbed | null {
   if (!code) return null
-  const text = String(code).trim()
+  const text = decodeEntities(String(code)).trim()
   if (!text) return null
-
-  // A bare URL pasted instead of the embed code.
-  if (!text.includes('<')) {
-    const src = toVdoCipherPlayerUrl(text)
-    return src ? { src, iframeCount: 1 } : null
-  }
 
   const srcs: string[] = []
   const tagRe = /<iframe\b[^>]*>/gi
   const srcRe = /\ssrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/i
   let m: RegExpExecArray | null
+  let sawIframe = false
   while ((m = tagRe.exec(text)) !== null) {
+    sawIframe = true
     const s = m[0].match(srcRe)
     const value = s?.[1] ?? s?.[2] ?? s?.[3] ?? null
     const src = toVdoCipherPlayerUrl(value)
     if (src) srcs.push(src)
   }
-  if (srcs.length === 0) return null
-  return { src: srcs[0] as string, iframeCount: srcs.length }
+  if (srcs.length > 0) return { src: srcs[0] as string, iframeCount: srcs.length }
+  // Markup without a usable player iframe (e.g. a <script> embed) is not a
+  // player — only plain text gets the bare-URL fallback below.
+  if (sawIframe || /<[a-z]/i.test(text)) return null
+
+  // Plain text: a bare player URL, possibly with text around it.
+  // `http://` is not upgraded: the lookbehind stops `//` matching after `http:`.
+  const urlRe = /(?:https:\/\/|(?<![:\w])\/\/)player\.vdocipher\.com\/[^\s"'<>]*/gi
+  const found = (text.match(urlRe) ?? [])
+    .map((u) => toVdoCipherPlayerUrl(u))
+    .filter((u): u is string => !!u)
+  if (found.length === 0) return null
+  return { src: found[0] as string, iframeCount: found.length }
 }

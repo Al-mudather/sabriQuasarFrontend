@@ -41,7 +41,8 @@ export default {
     vdocipher: {
       missingCredentials: 'Secure video credentials are missing. Please refresh to try again.',
       pausedElsewhere: 'This video was stopped because another video is playing in another tab or window. Only one video can play at a time.',
-      resumeHere: 'Play here'
+      resumeHere: 'Play here',
+      invalidEmbed: 'The video code is invalid. Please contact the administration.'
     },
     controls: {
       seek: 'Seek',

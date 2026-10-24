@@ -73,9 +73,26 @@ describe('VdoCipherPlayer', () => {
     a.unmount(); b.unmount()
   })
 
-  it('shows the missing-credentials message for an unusable blob', () => {
+  it('shows the invalid-embed message, warns and emits error for an unrecognised code', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     const w = mount(VdoCipherPlayer, { props: { cipherIframe: '<p>oops</p>' }, global })
     expect(w.find('iframe').exists()).toBe(false)
+    expect(w.text()).toContain('classroom.player.vdocipher.invalidEmbed')
+    expect(w.emitted('error')).toEqual([['invalid-vdocipher-embed']])
+    expect(warn).toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
+  it('shows the missing-credentials message when there is no code at all', () => {
+    const w = mount(VdoCipherPlayer, { props: { cipherIframe: '' }, global })
     expect(w.text()).toContain('classroom.player.vdocipher.missingCredentials')
+  })
+
+  it('warns when the code holds several players (double paste)', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const w = mount(VdoCipherPlayer, { props: { cipherIframe: block(LEGACY) + block(LEGACY), title: 'CNS Pathology L7' }, global })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('several players'), expect.objectContaining({ iframeCount: 2 }))
+    warn.mockRestore()
+    w.unmount()
   })
 })

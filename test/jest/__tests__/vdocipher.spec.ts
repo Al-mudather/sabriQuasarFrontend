@@ -1,4 +1,4 @@
-import { parseVdoCipherEmbed, toVdoCipherPlayerUrl, VDOCIPHER_IFRAME_ALLOW } from 'src/utils/vdocipher'
+import { decodeEntities, parseVdoCipherEmbed, toVdoCipherPlayerUrl, VDOCIPHER_IFRAME_ALLOW } from 'src/utils/vdocipher'
 
 const V2 = 'https://player.vdocipher.com/v2/?otp=OTP1&playbackInfo=PB1'
 const LEGACY = 'https://player.vdocipher.com/playerAssets/1.x/vdo/embed/index.html#otp=OTP2&playbackInfo=PB2'
@@ -54,5 +54,32 @@ describe('utils/vdocipher parseVdoCipherEmbed', () => {
     for (const p of ['encrypted-media', 'fullscreen', 'picture-in-picture']) {
       expect(VDOCIPHER_IFRAME_ALLOW).toContain(p)
     }
+  })
+
+  it('accepts protocol-relative //player.vdocipher.com URLs (iframe and bare)', () => {
+    const rel = '//player.vdocipher.com/v2/?otp=OTP1&playbackInfo=PB1'
+    expect(parseVdoCipherEmbed(`<iframe src="${rel}"></iframe>`)?.src).toBe(V2)
+    expect(parseVdoCipherEmbed(rel)?.src).toBe(V2)
+    expect(toVdoCipherPlayerUrl('//evil.example/v2/')).toBeNull()
+  })
+
+  it('decodes an HTML-escaped embed before parsing', () => {
+    const escaped = single.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    expect(parseVdoCipherEmbed(escaped)).toEqual({ src: V2, iframeCount: 1 })
+  })
+
+  it('decodes numeric entities (&#38; and &#x26;) in the src', () => {
+    expect(parseVdoCipherEmbed(`<iframe src="${V2.replace('&', '&#38;')}"></iframe>`)?.src).toBe(V2)
+    expect(parseVdoCipherEmbed(`<iframe src="${V2.replace('&', '&#x26;')}"></iframe>`)?.src).toBe(V2)
+    expect(decodeEntities('a&#60;b&#x3e;c&amp;d')).toBe('a<b>c&d')
+  })
+
+  it('finds a bare URL surrounded by text, but never upgrades http://', () => {
+    expect(parseVdoCipherEmbed(`Lecture 1 video: ${V2} (new)`)).toEqual({ src: V2, iframeCount: 1 })
+    expect(parseVdoCipherEmbed('see http://player.vdocipher.com/v2/?otp=a')).toBeNull()
+  })
+
+  it('returns null when iframes exist but none is VdoCipher (no text fallback)', () => {
+    expect(parseVdoCipherEmbed(`<iframe src="https://evil.example/?u=${V2}"></iframe>`)).toBeNull()
   })
 })

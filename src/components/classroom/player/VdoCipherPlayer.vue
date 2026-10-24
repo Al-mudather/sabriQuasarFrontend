@@ -28,6 +28,9 @@
         />
       </div>
     </template>
+    <div v-else-if="hasCode" class="cls-vdo__missing" role="alert">
+      {{ $t('classroom.player.vdocipher.invalidEmbed') }}
+    </div>
     <div v-else class="cls-vdo__missing" role="alert">
       {{ $t('classroom.player.vdocipher.missingCredentials') }}
     </div>
@@ -49,13 +52,20 @@
   shows a "resume here" button if another player takes over.
 
   The parent keys this component on the lesson pk, so a lesson switch fully
-  unmounts the old iframe before the new one loads (after a short gap so the
-  device can release the previous DRM session).
+  unmounts the old iframe before the new one loads; the arbiter delays the
+  load until other tabs confirm they stopped and a short gap has passed, so
+  the device can release the previous DRM session. pagehide / freeze stop the
+  player (arbiter.suspend → onRevoke); coming back shows "play here".
+
+  A pasted code that holds no VdoCipher player URL shows its own message and
+  emits `error`; a code holding several players is logged so admins can find
+  double-pasted lessons.
 
   Progress events are NOT captured here. The classroom ends the learning
   unit via EndLearningUnit on content switch, same as CC2.
 */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import logger from 'src/utils/logger'
 import { parseVdoCipherEmbed, VDOCIPHER_IFRAME_ALLOW, type VdoCipherEmbed } from 'src/utils/vdocipher'
 import { getPlayerArbiter } from 'src/utils/singleActivePlayer'
 
@@ -65,7 +75,7 @@ const props = defineProps<{
   title?: string | null
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'begin'): void
   (e: 'progress', seconds: number, duration: number): void
   (e: 'complete'): void
@@ -73,21 +83,31 @@ defineEmits<{
 }>()
 
 const embed = computed<VdoCipherEmbed | null>(() => parseVdoCipherEmbed(props.cipherIframe))
+const hasCode = computed<boolean>(() => !!props.cipherIframe?.trim())
+
+function reportEmbed(): void {
+  if (hasCode.value && !embed.value) {
+    logger.warn('[VdoCipherPlayer] unrecognised VdoCipher embed code', {
+      title: props.title ?? null,
+      parsed: embed.value,
+      // First 120 chars, with any OTP / playbackInfo redacted.
+      code: props.cipherIframe?.replace(/(otp|playbackInfo)=[^&"'#\s]+/gi, '$1=…').slice(0, 120),
+    })
+    emit('error', 'invalid-vdocipher-embed')
+  } else if (embed.value && embed.value.iframeCount > 1) {
+    logger.warn('[VdoCipherPlayer] embed code holds several players; rendering only the first', {
+      title: props.title ?? null,
+      iframeCount: embed.value.iframeCount,
+    })
+  }
+}
 
 const arbiter = getPlayerArbiter()
 const playerId = `vdo-${Math.random().toString(36).slice(2, 10)}`
 const active = ref<boolean>(false)
 const revoked = ref<boolean>(false)
 const iframeEl = ref<HTMLIFrameElement | null>(null)
-let loadTimer: ReturnType<typeof setTimeout> | null = null
 let unmounted = false
-
-function clearLoadTimer(): void {
-  if (loadTimer) {
-    clearTimeout(loadTimer)
-    loadTimer = null
-  }
-}
 
 function blankIframe(): void {
   // Navigate the player away before Vue detaches it, so VdoCipher tears its
@@ -98,7 +118,6 @@ function blankIframe(): void {
 }
 
 function onRevoke(): void {
-  clearLoadTimer()
   blankIframe()
   active.value = false
   revoked.value = true
@@ -107,22 +126,19 @@ function onRevoke(): void {
 function start(): void {
   if (unmounted || !embed.value) return
   revoked.value = false
-  clearLoadTimer()
-  const { waitMs } = arbiter.claim(playerId, onRevoke)
-  const load = (): void => {
-    loadTimer = null
+  arbiter.claim(playerId, onRevoke, () => {
     if (unmounted || arbiter.activeId() !== playerId) return
     active.value = true
-  }
-  if (waitMs > 0) loadTimer = setTimeout(load, waitMs)
-  else load()
+  })
 }
 
-onMounted(start)
+onMounted(() => {
+  reportEmbed()
+  start()
+})
 
 onBeforeUnmount(() => {
   unmounted = true
-  clearLoadTimer()
   blankIframe()
   active.value = false
   arbiter.release(playerId)
