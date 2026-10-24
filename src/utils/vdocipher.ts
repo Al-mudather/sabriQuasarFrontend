@@ -104,11 +104,16 @@ export function parseVdoCipherEmbed(code: string | null | undefined): VdoCipherE
   if (sawIframe || /<[a-z]/i.test(text)) return null
 
   // Plain text: a bare player URL, possibly with text around it.
-  // `http://` is not upgraded: the lookbehind stops `//` matching after `http:`.
-  const urlRe = /(?:https:\/\/|(?<![:\w])\/\/)player\.vdocipher\.com\/[^\s"'<>]*/gi
-  const found = (text.match(urlRe) ?? [])
-    .map((u) => toVdoCipherPlayerUrl(u))
-    .filter((u): u is string => !!u)
+  // `http://` is not upgraded: group 1 must be start-of-text or a character
+  // other than ':' / word char, so `//` right after `http:` never matches.
+  // (No lookbehind assertion: Safari < 16.4 throws a SyntaxError on them.)
+  const urlRe = /(^|[^:\w])((?:https:)?\/\/player\.vdocipher\.com\/[^\s"'<>()]*)/gi
+  const found: string[] = []
+  let u: RegExpExecArray | null
+  while ((u = urlRe.exec(text)) !== null) {
+    const src = toVdoCipherPlayerUrl(u[2])
+    if (src) found.push(src)
+  }
   if (found.length === 0) return null
   return { src: found[0] as string, iframeCount: found.length }
 }

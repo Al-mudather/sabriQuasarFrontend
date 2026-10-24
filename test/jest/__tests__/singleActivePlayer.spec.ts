@@ -85,7 +85,7 @@ describe('utils/singleActivePlayer', () => {
     const revoked1 = jest.fn()
     const ready1 = jest.fn()
     tab1.claim('a', revoked1, ready1)
-    jest.advanceTimersByTime(200) // discovery window passes; tab2 learns tab1 holds
+    jest.advanceTimersByTime(400) // discovery window passes; tab2 learns tab1 holds
     expect(ready1).toHaveBeenCalledTimes(1)
 
     const ready2 = jest.fn()
@@ -111,7 +111,7 @@ describe('utils/singleActivePlayer', () => {
     const tab1 = arbiter('t1', c1)
     const tab2 = arbiter('t2', bus.connect())
     tab1.claim('a', jest.fn(), jest.fn())
-    jest.advanceTimersByTime(200)
+    jest.advanceTimersByTime(400)
     bus.frozen.add(c1) // tab1 frozen: never answers
     const ready2 = jest.fn()
     tab2.claim('b', jest.fn(), ready2)
@@ -127,7 +127,7 @@ describe('utils/singleActivePlayer', () => {
     const tab2 = arbiter('t2', bus.connect())
     const revoked1 = jest.fn()
     tab1.claim('a', revoked1, jest.fn())
-    jest.advanceTimersByTime(200)
+    jest.advanceTimersByTime(400)
     const revoked2 = jest.fn()
     tab2.claim('b', revoked2, jest.fn())
     jest.advanceTimersByTime(1000)
@@ -191,7 +191,7 @@ describe('utils/singleActivePlayer', () => {
     const revoked = jest.fn()
     const ready = jest.fn()
     tab1.claim('a', revoked, ready)
-    jest.advanceTimersByTime(200)
+    jest.advanceTimersByTime(400)
     tab1.suspend()
     expect(revoked).toHaveBeenCalledTimes(1)
     expect(tab1.activeId()).toBeNull()
@@ -204,6 +204,75 @@ describe('utils/singleActivePlayer', () => {
     tab1.resume()
     expect(opened).toBe(2)
     expect(ready).toHaveBeenCalledTimes(1) // no auto-play after resume
+  })
+
+  it('discovery: a holder whose answer takes 300 ms is still awaited', () => {
+    const bus = makeBus(150) // 150 ms each way → replies land at 300 ms
+    const tab1 = arbiter('t1', bus.connect())
+    const revoked1 = jest.fn()
+    tab1.claim('a', revoked1, jest.fn())
+    jest.advanceTimersByTime(1000)
+    // tab2 opens later (never saw tab1's claim) and claims at once.
+    const tab2 = arbiter('t2', bus.connect())
+    const ready2 = jest.fn()
+    tab2.claim('b', jest.fn(), ready2)
+    jest.advanceTimersByTime(150)
+    expect(revoked1).toHaveBeenCalledTimes(1)
+    jest.advanceTimersByTime(150) // tab1's answers arrive at 300 ms
+    expect(ready2).not.toHaveBeenCalled()
+    jest.advanceTimersByTime(399) // + 400 ms release gap
+    expect(ready2).not.toHaveBeenCalled()
+    jest.advanceTimersByTime(1)
+    expect(ready2).toHaveBeenCalledTimes(1)
+  })
+
+  it('hello: a newly opened tab learns of an existing holder and waits for it', () => {
+    const bus = makeBus(5)
+    const c1 = bus.connect()
+    const tab1 = arbiter('t1', c1)
+    tab1.claim('a', jest.fn(), jest.fn())
+    jest.advanceTimersByTime(1000)
+    const tab2 = arbiter('t2', bus.connect()) // sends hello; tab1 answers holding
+    jest.advanceTimersByTime(400)
+    bus.frozen.add(c1) // tab1 now never answers
+    const ready2 = jest.fn()
+    tab2.claim('b', jest.fn(), ready2)
+    jest.advanceTimersByTime(599)
+    expect(ready2).not.toHaveBeenCalled() // waits for the known holder…
+    jest.advanceTimersByTime(1)
+    expect(ready2).toHaveBeenCalledTimes(1) // …up to the 600 ms timeout
+  })
+
+  it('re-sends its claim when an older claim arrives (clock-jump case)', () => {
+    let handler: ((m: unknown) => void) | null = null
+    const post = jest.fn()
+    const ch: PlayerLockChannel = { postMessage: post, listen: (h) => { handler = h }, close: jest.fn() }
+    const a = arbiter('t1', ch)
+    const revoked = jest.fn()
+    a.claim('p1', revoked, jest.fn())
+    jest.advanceTimersByTime(1000)
+    const ours = post.mock.calls.map((c) => c[0] as PlayerLockMessage).find((m) => m.type === 'claim')
+    post.mockClear()
+    const h = handler as unknown as (m: unknown) => void
+    // Another tab whose clock is behind claims with an older timestamp.
+    h({ type: 'claim', tabId: 't9', playerId: 'x', ts: 1 })
+    expect(revoked).not.toHaveBeenCalled()
+    expect(post).toHaveBeenCalledWith(ours)
+  })
+
+  it('end to end: the older claimer (clock behind) stops after the re-sent claim', () => {
+    const bus = makeBus(10)
+    const tab1 = arbiter('t1', bus.connect())
+    tab1.claim('a', jest.fn(), jest.fn())
+    jest.advanceTimersByTime(1000)
+    // tab2's clock is far behind, and it claims before hearing anything.
+    const tab2 = new SinglePlayerArbiter({ tabId: 't2', channelFactory: () => bus.connect(), now: () => Date.now() - 1e9 })
+    const revoked2 = jest.fn()
+    tab2.claim('b', revoked2, jest.fn())
+    jest.advanceTimersByTime(2000)
+    expect(revoked2).toHaveBeenCalledTimes(1)
+    expect(tab1.activeId()).toBe('a')
+    expect(tab2.activeId()).toBeNull()
   })
 
   it('ignores malformed and own-tab messages', () => {
@@ -272,7 +341,7 @@ describe('StoragePlayerChannel (no BroadcastChannel fallback)', () => {
     const tab2 = new SinglePlayerArbiter({ tabId: 't2', channelFactory: () => new StoragePlayerChannel(mkStorage(1), wins[1]!.target) })
     const revoked1 = jest.fn()
     tab1.claim('a', revoked1, jest.fn())
-    jest.advanceTimersByTime(200)
+    jest.advanceTimersByTime(400)
     const ready2 = jest.fn()
     tab2.claim('b', jest.fn(), ready2)
     jest.advanceTimersByTime(1000)

@@ -14,11 +14,16 @@
 //            other; an older holder stops its player and answers:
 //   released {tabId, stopped}       — "I hold nothing now" (stopped=true when a
 //            player was actually torn down). Also sent on unmount/pagehide.
+//   hello    {tabId}                — sent whenever this tab's channel opens
+//            (load, pageshow/resume); tabs holding a player answer with
+//   holding  {tabId, ts}            — so a newly opened tab knows whom to wait
+//            for even if it never saw their claim.
 //
 // The claimer does not load its iframe until (a) every tab known to hold a
 // player has answered `released`, bounded by `releaseTimeoutMs`, (b) a short
 // discovery window has passed so holders it did not know about can answer,
-// and (c) `releaseGapMs` has passed since the last release anywhere, giving
+// counted from when this tab's channel opened (time for `holding` answers to
+// arrive), and (c) `releaseGapMs` has passed since the last release anywhere, giving
 // the device time to drop the previous DRM session.
 
 export interface PlayerClaimMessage {
@@ -35,7 +40,22 @@ export interface PlayerReleasedMessage {
   stopped: boolean
 }
 
-export type PlayerLockMessage = PlayerClaimMessage | PlayerReleasedMessage
+export interface PlayerHelloMessage {
+  type: 'hello'
+  tabId: string
+}
+
+export interface PlayerHoldingMessage {
+  type: 'holding'
+  tabId: string
+  ts: number
+}
+
+export type PlayerLockMessage =
+  | PlayerClaimMessage
+  | PlayerReleasedMessage
+  | PlayerHelloMessage
+  | PlayerHoldingMessage
 
 /** Transport between tabs (BroadcastChannel / localStorage / test fake). */
 export interface PlayerLockChannel {
@@ -54,7 +74,10 @@ export interface ArbiterOptions {
   releaseGapMs?: number
   /** Max wait for known holders in other tabs to answer `released`. */
   releaseTimeoutMs?: number
-  /** Window in which unknown holders in other tabs can answer a claim. */
+  /**
+   * Window after the channel opens in which holders in other tabs can answer
+   * our `hello`. Claims made inside it wait for it to end.
+   */
   discoveryMs?: number
 }
 
@@ -87,6 +110,18 @@ function isClaim(v: unknown): v is PlayerClaimMessage {
   return o.type === 'claim' && typeof o.tabId === 'string' && typeof o.playerId === 'string' && typeof o.ts === 'number'
 }
 
+function isHello(v: unknown): v is PlayerHelloMessage {
+  if (!v || typeof v !== 'object') return false
+  const o = v as Record<string, unknown>
+  return o.type === 'hello' && typeof o.tabId === 'string'
+}
+
+function isHolding(v: unknown): v is PlayerHoldingMessage {
+  if (!v || typeof v !== 'object') return false
+  const o = v as Record<string, unknown>
+  return o.type === 'holding' && typeof o.tabId === 'string' && typeof o.ts === 'number'
+}
+
 function isReleased(v: unknown): v is PlayerReleasedMessage {
   if (!v || typeof v !== 'object') return false
   const o = v as Record<string, unknown>
@@ -100,6 +135,8 @@ export class SinglePlayerArbiter {
   /** Remote tabs believed to hold a player, with their claim. */
   private readonly remoteHolders = new Map<string, ClaimKey>()
   private channel: PlayerLockChannel | null = null
+  /** When the current channel opened (start of the discovery window). */
+  private channelOpenedAt = Number.NEGATIVE_INFINITY
   private readonly tabId: string
   private readonly channelFactory: (() => PlayerLockChannel | null) | null
   private readonly now: () => number
@@ -113,7 +150,7 @@ export class SinglePlayerArbiter {
     this.now = opts.now ?? (() => Date.now())
     this.releaseGapMs = opts.releaseGapMs ?? 400
     this.releaseTimeoutMs = opts.releaseTimeoutMs ?? 600
-    this.discoveryMs = opts.discoveryMs ?? 120
+    this.discoveryMs = opts.discoveryMs ?? 350
     this.openChannel()
   }
 
@@ -195,7 +232,10 @@ export class SinglePlayerArbiter {
     } catch {
       this.channel = null
     }
-    this.channel?.listen((m) => this.onRemote(m))
+    if (!this.channel) return
+    this.channel.listen((m) => this.onRemote(m))
+    this.channelOpenedAt = this.now()
+    this.send({ type: 'hello', tabId: this.tabId })
   }
 
   private send(message: PlayerLockMessage): void {
@@ -225,7 +265,7 @@ export class SinglePlayerArbiter {
     const now = this.now()
     const waits: number[] = []
     if (this.channel) {
-      const discoveryLeft = h.startedAt + this.discoveryMs - now
+      const discoveryLeft = this.channelOpenedAt + this.discoveryMs - now
       if (discoveryLeft > 0) waits.push(discoveryLeft)
       const timeoutLeft = h.startedAt + this.releaseTimeoutMs - now
       if (h.pending.size > 0 && timeoutLeft > 0) waits.push(timeoutLeft)
@@ -253,9 +293,11 @@ export class SinglePlayerArbiter {
       this.remoteHolders.set(data.tabId, remoteKey)
       const h = this.holder
       if (h && compareClaims(h.key, remoteKey) > 0) {
-        // Ours is newer: the remote tab will stop when it sees our claim.
-        // Wait for its `released` before loading, if we have not loaded yet.
+        // Ours is newer. Re-send our claim (same ts) so the older claimer
+        // stops even if it never saw the first one (closed/frozen channel,
+        // clock jump), and wait for its `released` if we have not loaded yet.
         if (!h.ready) h.pending.add(data.tabId)
+        this.send({ type: 'claim', tabId: this.tabId, playerId: h.playerId, ts: h.key.ts })
         return
       }
       let stopped = false
@@ -267,6 +309,36 @@ export class SinglePlayerArbiter {
         h.onRevoke()
       }
       this.send({ type: 'released', tabId: this.tabId, stopped })
+      return
+    }
+    if (isHello(data)) {
+      if (data.tabId === this.tabId) return
+      const h = this.holder
+      if (h) this.send({ type: 'holding', tabId: this.tabId, ts: h.key.ts })
+      return
+    }
+    if (isHolding(data)) {
+      if (data.tabId === this.tabId) return
+      this.lastTs = Math.max(this.lastTs, data.ts)
+      this.remoteHolders.set(data.tabId, { ts: data.ts, tabId: data.tabId })
+      const h = this.holder
+      if (!h) return
+      if (compareClaims(h.key, { ts: data.ts, tabId: data.tabId }) > 0) {
+        // Ours is newer: make sure that holder stops (re-send our claim) and,
+        // if we have not loaded yet, wait for its `released`.
+        if (!h.ready) {
+          h.pending.add(data.tabId)
+          this.schedule(h)
+        }
+        this.send({ type: 'claim', tabId: this.tabId, playerId: h.playerId, ts: h.key.ts })
+      } else {
+        // Theirs is newer and we missed its claim: we yield.
+        this.clearTimer(h)
+        this.holder = null
+        this.lastReleasedAt = this.now()
+        h.onRevoke()
+        this.send({ type: 'released', tabId: this.tabId, stopped: h.ready })
+      }
       return
     }
     if (isReleased(data)) {

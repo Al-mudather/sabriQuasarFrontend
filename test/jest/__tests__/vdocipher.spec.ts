@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { decodeEntities, parseVdoCipherEmbed, toVdoCipherPlayerUrl, VDOCIPHER_IFRAME_ALLOW } from 'src/utils/vdocipher'
 
 const V2 = 'https://player.vdocipher.com/v2/?otp=OTP1&playbackInfo=PB1'
@@ -81,5 +83,22 @@ describe('utils/vdocipher parseVdoCipherEmbed', () => {
 
   it('returns null when iframes exist but none is VdoCipher (no text fallback)', () => {
     expect(parseVdoCipherEmbed(`<iframe src="https://evil.example/?u=${V2}"></iframe>`)).toBeNull()
+  })
+
+  it('uses no lookbehind regex (Safari < 16.4 throws SyntaxError on them)', () => {
+    for (const f of ['src/utils/vdocipher.ts', 'src/utils/singleActivePlayer.ts']) {
+      const src = readFileSync(join(__dirname, '../../..', f), 'utf8')
+      expect(src).not.toMatch(/\(\?<[=!]/)
+      expect(src).not.toContain('(?<')
+    }
+  })
+
+  it('bare-URL fallback cases still work without lookbehind', () => {
+    expect(parseVdoCipherEmbed(V2)?.src).toBe(V2)
+    expect(parseVdoCipherEmbed(`video:${V2}`)).toBeNull() // ':' before https: rejected like http
+    expect(parseVdoCipherEmbed(`video: ${V2}`)?.src).toBe(V2)
+    expect(parseVdoCipherEmbed(`(${V2.replace('https:', '')})`)?.src).toBe(V2) // protocol-relative in parentheses
+    expect(parseVdoCipherEmbed('http://player.vdocipher.com/v2/?otp=a')).toBeNull()
+    expect(parseVdoCipherEmbed(`two: ${V2} and ${V2}`)).toEqual({ src: V2, iframeCount: 2 })
   })
 })
