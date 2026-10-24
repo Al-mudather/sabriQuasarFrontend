@@ -59,11 +59,19 @@
               />
             </div>
 
+            <!-- One VdoCipher iframe, parsed from the pasted embed code (never
+                 v-html: pasted blobs can hold several iframes → Error 6006).
+                 Keyed per sample so a switch fully destroys the old player. -->
             <div
               v-else-if="activeCipher"
               class="preview-dialog__cipher"
-              v-html="activeCipher"
-            />
+            >
+              <VdoCipherPlayer
+                :key="'cipher-' + activeSample.id"
+                :cipher-iframe="activeCipher"
+                :title="activeSample.title"
+              />
+            </div>
 
             <iframe
               v-else-if="activeEmbedUrl"
@@ -145,6 +153,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, onBeforeUnmount, nextTick } from 'vue'
 import AlhasifVideoPlayer from 'src/utils/AlhasifVideoPlayer.vue'
+import VdoCipherPlayer from 'src/components/classroom/player/VdoCipherPlayer.vue'
 import videoPlayer from 'src/utils/video-client.js'
 
 export interface FreeSample {

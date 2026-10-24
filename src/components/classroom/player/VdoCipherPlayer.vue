@@ -1,10 +1,33 @@
 <template>
   <div class="cls-vdo">
-    <!-- The iframe is injected ONCE, imperatively, into this mount node (see
-         script). We deliberately do NOT use v-html: v-html re-runs on every
-         re-render and any DOM patch that re-touches the iframe makes VdoCipher
-         reload and re-request its SINGLE-USE OTP → "Authentication failed 6007". -->
-    <div v-if="cipherIframe" ref="mountEl" class="cls-vdo__mount" />
+    <!-- Exactly ONE <iframe>, rendered by us from the single player URL parsed
+         out of the pasted embed code. We never inject the raw blob (v-html /
+         innerHTML): real rows contain the code pasted twice, and two live
+         VdoCipher players → "Error 6006 Multiple active videos". -->
+    <template v-if="embed">
+      <iframe
+        v-if="active"
+        ref="iframeEl"
+        :key="embed.src"
+        class="cls-vdo__frame"
+        :src="embed.src"
+        :title="title || 'Video'"
+        :allow="VDOCIPHER_IFRAME_ALLOW"
+        allowfullscreen
+        frameborder="0"
+      />
+      <div v-else-if="revoked" class="cls-vdo__paused" role="status">
+        <p class="cls-vdo__paused-text">{{ $t('classroom.player.vdocipher.pausedElsewhere') }}</p>
+        <q-btn
+          unelevated
+          no-caps
+          color="primary"
+          icon="play_arrow"
+          :label="$t('classroom.player.vdocipher.resumeHere')"
+          @click="start"
+        />
+      </div>
+    </template>
     <div v-else class="cls-vdo__missing" role="alert">
       {{ $t('classroom.player.vdocipher.missingCredentials') }}
     </div>
@@ -13,21 +36,31 @@
 
 <script setup lang="ts">
 /*
-  VdoCipher player — mirrors CourseClassRoom2 class.vue:41-45.
+  VdoCipher player.
 
-  CC2's pattern: the backend returns a server-rendered iframe blob in
-  `modelValue.cipher_iframe` (already signed for the current user). We
-  drop the HTML into the DOM via v-html. No postMessage bridge, no OTP
-  refresh, no client-side DRM negotiation — all of that lives inside
-  the VdoCipher player iframe.
+  `cipherIframe` is the embed code an admin pasted in the dashboard
+  (ContentVideo.cipher_iframe). We parse it to ONE player URL
+  (src/utils/vdocipher.ts) and render ONE iframe with the permissions
+  VdoCipher needs (encrypted-media, fullscreen, picture-in-picture).
+
+  Only one VdoCipher player may be alive per browser (all tabs): the
+  SinglePlayerArbiter (src/utils/singleActivePlayer.ts) unmounts any other
+  player — in this tab or another tab — when this one starts, and this one
+  shows a "resume here" button if another player takes over.
+
+  The parent keys this component on the lesson pk, so a lesson switch fully
+  unmounts the old iframe before the new one loads (after a short gap so the
+  device can release the previous DRM session).
 
   Progress events are NOT captured here. The classroom ends the learning
   unit via EndLearningUnit on content switch, same as CC2.
 */
-import { ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { parseVdoCipherEmbed, VDOCIPHER_IFRAME_ALLOW, type VdoCipherEmbed } from 'src/utils/vdocipher'
+import { getPlayerArbiter } from 'src/utils/singleActivePlayer'
 
 const props = defineProps<{
-  /** Server-rendered iframe HTML blob from modelValue.cipher_iframe. */
+  /** Pasted VdoCipher embed code (or bare player URL) from modelValue.cipher_iframe. */
   cipherIframe: string | null
   title?: string | null
 }>()
@@ -39,53 +72,61 @@ defineEmits<{
   (e: 'error', message: string): void
 }>()
 
-// The backend's cipher_iframe ships `allowFullScreen` but `allow="encrypted-media"`
-// — and an `allow` attribute that OMITS `fullscreen` makes Chromium ignore the
-// legacy `allowFullScreen`, so the VdoCipher player's fullscreen button silently
-// does nothing. We rewrite the <iframe> tag to delegate fullscreen (and PiP) via
-// the modern `allow` attribute, keeping a legacy `allowfullscreen` for old engines.
-// Trusted server value — we only add attributes, never inject new markup.
-function ensureIframePermissions(html: string | null | undefined): string {
-  if (!html) return ''
-  return html.replace(/<iframe\b[^>]*>/i, (tag) => {
-    let out = tag
-    const need = ['encrypted-media', 'fullscreen', 'picture-in-picture']
-    const allowRe = /\sallow\s*=\s*"([^"]*)"/i
-    const m = out.match(allowRe)
-    if (m) {
-      const have = m[1].split(';').map((s) => s.trim()).filter(Boolean)
-      const merged = Array.from(new Set([...have, ...need]))
-      out = out.replace(allowRe, ` allow="${merged.join('; ')}"`)
-    } else {
-      out = out.replace(/<iframe\b/i, `<iframe allow="${need.join('; ')}"`)
-    }
-    if (!/\sallowfullscreen\b/i.test(out)) {
-      out = out.replace(/<iframe\b/i, '<iframe allowfullscreen')
-    }
-    return out
-  })
+const embed = computed<VdoCipherEmbed | null>(() => parseVdoCipherEmbed(props.cipherIframe))
+
+const arbiter = getPlayerArbiter()
+const playerId = `vdo-${Math.random().toString(36).slice(2, 10)}`
+const active = ref<boolean>(false)
+const revoked = ref<boolean>(false)
+const iframeEl = ref<HTMLIFrameElement | null>(null)
+let loadTimer: ReturnType<typeof setTimeout> | null = null
+let unmounted = false
+
+function clearLoadTimer(): void {
+  if (loadTimer) {
+    clearTimeout(loadTimer)
+    loadTimer = null
+  }
 }
 
-// Inject the VdoCipher iframe EXACTLY ONCE. After the first injection we never
-// touch the node again, so the player never reloads and never replays its
-// single-use OTP. A genuine lesson change remounts this whole component (it's
-// keyed on the content pk in ClassroomContentView) and re-injects with a fresh
-// OTP. This is what makes VdoCipher reliable across re-renders / resizes / the
-// mobile↔desktop layout flip.
-const mountEl = ref<HTMLElement | null>(null)
-let injected = false
-
-function injectOnce(): void {
-  if (injected) return
-  const el = mountEl.value
-  if (!el || !props.cipherIframe) return
-  el.innerHTML = ensureIframePermissions(props.cipherIframe)
-  injected = true
+function blankIframe(): void {
+  // Navigate the player away before Vue detaches it, so VdoCipher tears its
+  // DRM session down instead of leaving it to garbage collection.
+  try {
+    if (iframeEl.value) iframeEl.value.src = 'about:blank'
+  } catch { /* ignore */ }
 }
 
-// mountEl is null until the v-if div renders (which only happens once
-// cipherIframe is truthy); when it populates we inject, exactly once.
-watch(mountEl, injectOnce, { immediate: true })
+function onRevoke(): void {
+  clearLoadTimer()
+  blankIframe()
+  active.value = false
+  revoked.value = true
+}
+
+function start(): void {
+  if (unmounted || !embed.value) return
+  revoked.value = false
+  clearLoadTimer()
+  const { waitMs } = arbiter.claim(playerId, onRevoke)
+  const load = (): void => {
+    loadTimer = null
+    if (unmounted || arbiter.activeId() !== playerId) return
+    active.value = true
+  }
+  if (waitMs > 0) loadTimer = setTimeout(load, waitMs)
+  else load()
+}
+
+onMounted(start)
+
+onBeforeUnmount(() => {
+  unmounted = true
+  clearLoadTimer()
+  blankIframe()
+  active.value = false
+  arbiter.release(playerId)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -98,32 +139,32 @@ watch(mountEl, injectOnce, { immediate: true })
   border-radius: inherit;
   overflow: hidden;
 
-  &__mount {
+  &__frame {
     position: absolute;
     inset: 0;
     inline-size: 100%;
     block-size: 100%;
-
-    :deep(iframe),
-    :deep(div) {
-      position: absolute;
-      inset: 0;
-      inline-size: 100% !important;
-      block-size: 100% !important;
-      border: 0;
-    }
+    border: 0;
   }
 
+  &__paused,
   &__missing {
     position: absolute;
     inset: 0;
     display: flex;
+    flex-direction: column;
+    gap: 12px;
     align-items: center;
     justify-content: center;
     color: var(--cls-text-muted, #9890A8);
     font-size: 0.95rem;
     padding-inline: var(--cls-space-lg, 24px);
     text-align: center;
+  }
+
+  &__paused-text {
+    margin: 0;
+    max-inline-size: 36ch;
   }
 }
 </style>
