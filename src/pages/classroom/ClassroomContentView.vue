@@ -2,7 +2,7 @@
   <div
     class="cls-cockpit"
     :data-mobile="isMobileCockpit || null"
-    :data-kind="current?.kind || null"
+    :data-kind="shown?.kind || null"
   >
     <aside
       v-if="!isMobileCockpit"
@@ -20,34 +20,38 @@
 
     <section class="cls-cockpit__main" ref="stageRef">
       <!-- A real lesson is on screen. -->
-      <div v-if="current" class="cls-cockpit__stage">
+      <div v-if="shown" class="cls-cockpit__stage">
         <div class="cls-cockpit__top">
           <!-- Selected lesson name, shown above the video. (The header shows
                the COURSE name.) -->
-          <h2 class="cls-cockpit__title">{{ current.title }}</h2>
+          <h2 class="cls-cockpit__title">{{ shown.title }}</h2>
           <div class="cls-cockpit__media" :data-provider="videoProvider || null">
+            <!-- VdoCipher lessons share ONE key, so going from one VdoCipher
+                 lesson to the next keeps the same player (and iframe) alive
+                 and only swaps the video inside it. Every other provider is
+                 still keyed per lesson. -->
             <VideoPlayer
-              v-if="current.kind === 'video'"
-              :key="current.pk"
-              :model-value-raw="current.modelValueRaw"
+              v-if="shown.kind === 'video'"
+              :key="videoKey"
+              :model-value-raw="shown.modelValueRaw"
               @begin="onBegin"
               @complete="onComplete"
             />
             <QuizRunner
-              v-else-if="current.kind === 'quiz' && quizContentId != null"
+              v-else-if="shown.kind === 'quiz' && quizContentId != null"
               :content-quiz-id="quizContentId"
               :title="quizTitle"
             />
             <FileView
-              v-else-if="current.kind === 'file' && currentContentPk != null && coursePkRef != null"
+              v-else-if="shown.kind === 'file' && currentContentPk != null && coursePkRef != null"
               :file-url="fileUrl"
-              :title="current.title"
+              :title="shown.title"
             />
             <div
               v-else
               class="cls-cockpit__player-placeholder"
               role="img"
-              :aria-label="current.title"
+              :aria-label="shown.title"
             >
               <q-icon name="play_circle" size="64px" />
               <p>{{ $t('classroom.player.comingSoon') }}</p>
@@ -159,15 +163,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, inject, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useClassroomStore } from 'src/stores/classroom'
 import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
 import { useCurriculumNavigation } from 'src/composables/classroom/useCurriculumNavigation'
+import { stopVdoCipherPlayers } from 'src/composables/classroom/useVdoCipherSession'
+import { pickResumeAnchor, resumeFrom, withLocalHint } from 'src/utils/classroomResume'
+import { recallLesson, rememberLesson } from 'src/utils/classroomResumeHint'
 import {
   parseModelValue,
   resolveVideoProvider,
+  type ClassroomBootstrap,
+  type CurriculumContent,
   type ParsedFileValue,
   type ParsedQuizValue,
   type ParsedVideoValue,
@@ -241,6 +250,73 @@ const { goToFirstUnwatched } = useCurriculumNavigation({
 const noContent = ref<boolean>(false)
 let resolveInFlight = false
 
+/** Resolves once the progress list is in (or after `timeoutMs`, whichever first). */
+function waitForProgress(timeoutMs: number): Promise<void> {
+  if (ctx.progressReady.value) return Promise.resolve()
+  return new Promise<void>((resolve) => {
+    const finish = (): void => {
+      clearTimeout(timer)
+      stop()
+      resolve()
+    }
+    const timer = setTimeout(finish, timeoutMs)
+    const stop = watch(
+      () => ctx.progressReady.value,
+      (ready) => {
+        if (ready) finish()
+      },
+    )
+  })
+}
+
+/**
+ * Which lesson should a bare classroom URL open for a student WITH progress?
+ * The lesson they touched last if it is unfinished, else the first unfinished
+ * lesson after it (src/utils/classroomResume.ts). Only the unit that owns that
+ * lesson is loaded — plus later units when everything after it is finished.
+ * Returns null for "no progress / cannot tell" → the caller opens lesson 1.
+ */
+async function resolveResumeLesson(b: ClassroomBootstrap, cpk: number): Promise<number | null> {
+  const stale = (): boolean =>
+    currentContentPk.value != null || coursePkRef.value !== cpk || ctx.bootstrap.value?.coursePk !== cpk
+  await waitForProgress(4000)
+  if (stale()) return null
+  const anchor = pickResumeAnchor(withLocalHint(ctx.resumeRows.value, recallLesson(b.enrollmentPk)))
+  if (!anchor || anchor.unitPk == null) return null
+  const anchorUnitPk = anchor.unitPk
+  const unitIndex = b.units.findIndex((u) => u.pk === anchorUnitPk)
+  if (unitIndex === -1) return null
+
+  const isComplete = (pk: number): boolean => Boolean(ctx.progress.value[pk]?.complete)
+  const lessonsOf = (unitPk: number): number[] => (ctx.unitContents.get(unitPk) ?? []).map((l) => l.pk)
+  const hasMore = (unitPk: number): boolean => ctx.unitPagination.get(unitPk)?.hasNextPage === true
+  const settled = (pks: number[]): boolean => {
+    const d = resumeFrom(pks, anchor, isComplete)
+    // Settled = the anchor itself is unfinished, or an unfinished lesson was found after it.
+    return d.kind === 'open' && (!anchor.complete || d.contentPk !== anchor.contentPk)
+  }
+
+  await ctx.loadUnit(anchorUnitPk)
+  if (stale()) return null
+  // Units page at 100 lessons: keep paging until the anchor (and something
+  // unfinished after it) is in view, or the unit is exhausted.
+  for (let page = 0; page < 20 && hasMore(anchorUnitPk) && !settled(lessonsOf(anchorUnitPk)); page++) {
+    await ctx.loadMore(anchorUnitPk)
+    if (stale()) return null
+  }
+  let ordered = lessonsOf(anchorUnitPk)
+  if (resumeFrom(ordered, anchor, isComplete).kind === 'anchor-not-found') return null
+  // Everything after the anchor in its unit is finished: look into later units.
+  for (const unit of b.units.slice(unitIndex + 1)) {
+    if (settled(ordered)) break
+    await ctx.loadUnit(unit.pk)
+    if (stale()) return null
+    ordered = [...ordered, ...lessonsOf(unit.pk)]
+  }
+  const decision = resumeFrom(ordered, anchor, isComplete)
+  return decision.kind === 'open' ? decision.contentPk : null
+}
+
 async function resolveFirstLesson(): Promise<void> {
   if (resolveInFlight) return
   if (currentContentPk.value != null) return // already on a lesson
@@ -253,6 +329,17 @@ async function resolveFirstLesson(): Promise<void> {
   resolveInFlight = true
   noContent.value = false
   try {
+    // Returning student: open the lesson they were on (one lesson, one
+    // player — no lesson-1 flash). No progress → the walk below, unchanged.
+    const resumePk = await resolveResumeLesson(b, cpk)
+    if (currentContentPk.value != null) return
+    if (resumePk != null) {
+      void router.push({
+        name: 'classroom-content',
+        params: { coursePk: String(cpk), contentPk: String(resumePk) },
+      })
+      return
+    }
     for (const unit of b.units) {
       if (currentContentPk.value != null) return // user navigated meanwhile
       const lessons = await ctx.loadUnit(unit.pk)
@@ -284,6 +371,44 @@ watch(
 const current = ctx.currentContent
 const currentUnitPk = ctx.currentUnitPk
 
+function providerOf(content: CurriculumContent | null): VideoProvider | null {
+  if (!content || content.kind !== 'video') return null
+  return resolveVideoProvider(parseModelValue<ParsedVideoValue>(content.modelValueRaw))
+}
+
+// What is actually on screen. It follows `current`, with one deliberate lag:
+// when the lesson on screen is a VdoCipher video and the next one is NOT
+// (Vimeo / self-hosted / file / quiz / nothing), the VdoCipher player is
+// stopped gracefully first — about:blank, wait for it, remove — and only then
+// is the stage switched. Once Vue unmounts the player there is nothing left
+// to wait for, and the next media element would start 0 ms after it.
+// VdoCipher → VdoCipher needs no lag: the same player stays mounted.
+const shown = shallowRef<CurriculumContent | null>(current.value)
+let shownToken = 0
+watch(current, async (next) => {
+  const token = ++shownToken
+  if (providerOf(shown.value) === 'vdocipher' && providerOf(next) !== 'vdocipher') {
+    await stopVdoCipherPlayers()
+  }
+  if (token === shownToken) shown.value = next
+})
+
+// Leaving the classroom: same graceful stop before the page is torn down.
+onBeforeRouteLeave(async () => {
+  await stopVdoCipherPlayers()
+})
+
+// Remember the lesson on screen (per enrollment, this device) so the next
+// bare entry resumes here even while the cached progress list is stale.
+watch(
+  () => [shown.value?.pk ?? null, currentUnitPk.value, enrollmentPkRef.value] as const,
+  ([pk, unitPk, enrollmentPk]) => {
+    if (pk == null || unitPk == null || enrollmentPk == null || pk !== currentContentPk.value) return
+    rememberLesson(enrollmentPk, pk, unitPk)
+  },
+  { immediate: true },
+)
+
 // start/end come from the SINGLE useLearningProgress instance in the layout
 // (via context) — instantiating our own here re-ran the whole progress query.
 const startProgress = ctx.startProgress
@@ -291,8 +416,8 @@ const endProgress = ctx.endProgress
 
 // Parse modelValue on-demand for the current content type.
 const parsedQuiz = computed<ParsedQuizValue | null>(() => {
-  if (!current.value || current.value.kind !== 'quiz') return null
-  return parseModelValue<ParsedQuizValue>(current.value.modelValueRaw)
+  if (!shown.value || shown.value.kind !== 'quiz') return null
+  return parseModelValue<ParsedQuizValue>(shown.value.modelValueRaw)
 })
 const quizContentId = computed<number | null>(() => {
   const id = parsedQuiz.value?.id
@@ -305,14 +430,17 @@ const quizTitle = computed<string | null>(() => parsedQuiz.value?.quiz_title ?? 
 // Which playback engine the current video uses. The self-hosted HLS player now
 // renders its own control bar BELOW the 16:9 stage, so its media box must not
 // clip/aspect-lock like the embed providers — see the [data-provider] CSS below.
-const videoProvider = computed<VideoProvider | null>(() => {
-  if (!current.value || current.value.kind !== 'video') return null
-  return resolveVideoProvider(parseModelValue<ParsedVideoValue>(current.value.modelValueRaw))
-})
+const videoProvider = computed<VideoProvider | null>(() => providerOf(shown.value))
+
+// One shared key for every VdoCipher lesson (persistent player); per-lesson
+// keys for everything else.
+const videoKey = computed<string>(() =>
+  videoProvider.value === 'vdocipher' ? 'vdocipher' : `lesson-${shown.value?.pk ?? 'none'}`,
+)
 
 const parsedFile = computed<ParsedFileValue | null>(() => {
-  if (!current.value || current.value.kind !== 'file') return null
-  return parseModelValue<ParsedFileValue>(current.value.modelValueRaw)
+  if (!shown.value || shown.value.kind !== 'file') return null
+  return parseModelValue<ParsedFileValue>(shown.value.modelValueRaw)
 })
 const fileUrl = computed<string>(() => {
   const att = parsedFile.value?.attachment
@@ -341,11 +469,14 @@ async function endProgressAndSync(): Promise<void> {
 
 watch(
   () => [currentContentPk.value, currentUnitPk.value, enrollmentPkRef.value, coursePkRef.value] as const,
-  async ([cpk, upk, epk, kpk], prev) => {
+  ([cpk, upk, epk, kpk], prev) => {
     const [prevCpk] = prev ?? []
     if (prevCpk && prevCpk !== cpk) {
-      // Flush end for the previous content before starting new.
-      await endProgressAndSync()
+      // End the previous lesson in the background: navigation never waits on
+      // this mutation (a slow connection made a tap look dead and invited a
+      // second one). useLearningProgress.end() captures the row it ends before
+      // its first await and sends ONE EndLearningUnit per row.
+      void endProgressAndSync()
     }
     if (startTimer) {
       clearTimeout(startTimer)
@@ -378,19 +509,29 @@ async function onComplete(): Promise<void> {
   await endProgressAndSync()
 }
 
-async function onSelect(contentPk: number): Promise<void> {
+// Lesson tap: navigate at once. Ending the lesson being left is the route
+// watcher's job (above) and runs in the background. A second tap on the
+// lesson already open — or already being opened — does nothing.
+let pendingSelectPk: number | null = null
+
+function onSelect(contentPk: number): void {
   const cpk = coursePkRef.value
   if (cpk == null) return
-  await endProgressAndSync()
-  await router.push({
-    name: 'classroom-content',
-    params: { coursePk: String(cpk), contentPk: String(contentPk) },
-  })
   // On mobile the curriculum lives in a drawer; close it after a pick so the
   // learner returns to the clean video.
   if (isMobileCockpit.value) {
     drawerOpen.value = false
   }
+  if (contentPk === currentContentPk.value || contentPk === pendingSelectPk) return
+  pendingSelectPk = contentPk
+  void router
+    .push({
+      name: 'classroom-content',
+      params: { coursePk: String(cpk), contentPk: String(contentPk) },
+    })
+    .finally(() => {
+      if (pendingSelectPk === contentPk) pendingSelectPk = null
+    })
 }
 
 </script>
@@ -516,6 +657,22 @@ async function onSelect(contentPk: number): Promise<void> {
   overflow: visible;
   border-radius: 0;
   background: transparent;
+}
+
+// VdoCipher help panel (shown after automatic recovery from a DRM session
+// error gave up): a title, four steps and a retry button do not fit a 16:9 box
+// at phone width, so let the box grow with the panel. Browsers without :has()
+// keep the 16:9 box and the panel scrolls inside it.
+@supports selector(:has(*)) {
+  .cls-cockpit[data-kind='video'] .cls-cockpit__media:has(.cls-vdo[data-state='failed']) {
+    aspect-ratio: auto;
+    min-block-size: 0;
+
+    :deep(.cls-vdo__help) {
+      position: relative;
+      inset: auto;
+    }
+  }
 }
 
 .cls-cockpit__panel-body {

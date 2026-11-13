@@ -13,8 +13,8 @@
 // is "complete" only after the backend returns complete on the progress row
 // following an EndLearningUnit mutation.
 
-import { computed, isRef, ref, unref, watch, type ComputedRef, type Ref } from 'vue'
-import { useMutation, useQuery } from '@vue/apollo-composable'
+import { computed, isRef, ref, shallowRef, unref, watch, type ComputedRef, type Ref } from 'vue'
+import { useApolloClient, useMutation, useQuery } from '@vue/apollo-composable'
 import { GetAllLearningProgressByCourse } from 'src/graphql/classroom/query/GetAllLearningProgressByCourse'
 import { StartLearningUnit } from 'src/graphql/classroom/mutation/StartLearningUnit'
 import { EndLearningUnit } from 'src/graphql/classroom/mutation/EndLearningUnit'
@@ -26,9 +26,19 @@ import type {
   GetAllLearningProgressByCourseVars,
   ProgressEntry,
   ProgressMap,
+  ResumeRow,
   StartLearningUnitResult,
   StartLearningUnitVars,
 } from 'src/types/classroom/types'
+
+/** The server caps this connection at 100 rows per page. */
+const PROGRESS_PAGE_SIZE = 100
+/** Safety stop for the paging loop (30 × 100 rows is far beyond any course). */
+const PROGRESS_MAX_PAGES = 30
+
+type ProgressEdges = NonNullable<
+  GetAllLearningProgressByCourseResult['learningProgressByCourse']
+>['edges']
 
 type PkLike = number | Ref<number | null | undefined> | null | undefined
 
@@ -42,6 +52,13 @@ export function useLearningProgress(
   enrollmentPk: PkLike,
 ): {
   progressMap: ComputedRef<ProgressMap>
+  /** Server progress rows shaped for the classroom's resume-on-entry logic. */
+  resumeRows: ComputedRef<ResumeRow[]>
+  /**
+   * True once every page of the progress list has arrived (or failed) for the
+   * current enrollment — the entry logic waits for it before picking a lesson.
+   */
+  progressReady: ComputedRef<boolean>
   refetch: () => void
   start: (contentPk: number, unitPk: number) => Promise<void>
   end: () => Promise<void>
@@ -50,12 +67,15 @@ export function useLearningProgress(
   const vars = computed<GetAllLearningProgressByCourseVars>(() => ({
     courseId: toNum(coursePk),
     enrollmentId: toNum(enrollmentPk),
+    first: PROGRESS_PAGE_SIZE,
+    after: null,
   }))
   const enabled = computed<boolean>(
     () => toNum(coursePk) !== null && toNum(enrollmentPk) !== null,
   )
 
-  const { result, refetch, onResult } = useQuery<
+  const { client } = useApolloClient()
+  const { result, refetch, onResult, onError } = useQuery<
     GetAllLearningProgressByCourseResult,
     GetAllLearningProgressByCourseVars
   >(GetAllLearningProgressByCourse, vars, () => ({
@@ -74,8 +94,72 @@ export function useLearningProgress(
     disabled: () => !enabled.value,
   })
 
+  // Pages after the first. The connection returns at most 100 rows per page,
+  // so without paging a student deep into a long course would be missing
+  // ticks and could not get a correct resume point.
+  //
+  // Both pieces of state are tagged with the enrollment they belong to rather
+  // than reset from a watcher: a cache hit can deliver its result in the same
+  // tick the enrollment becomes known, and a reset running after it would
+  // leave `progressReady` false for good.
+  const scopeKey = computed<string | null>(() =>
+    enabled.value ? `${toNum(coursePk)}:${toNum(enrollmentPk)}` : null,
+  )
+  const extra = shallowRef<{ key: string | null; edges: ProgressEdges }>({ key: null, edges: [] })
+  const readyKey = ref<string | null>(null)
+  const progressReady = computed<boolean>(() => scopeKey.value !== null && readyKey.value === scopeKey.value)
+  let pagingToken = 0
+
+  async function loadRemainingPages(startCursor: string, base: GetAllLearningProgressByCourseVars): Promise<void> {
+    const token = ++pagingToken
+    const key = scopeKey.value
+    const collected: ProgressEdges = []
+    let cursor: string | null = startCursor
+    try {
+      for (let page = 0; cursor && page < PROGRESS_MAX_PAGES; page++) {
+        const res: { data: GetAllLearningProgressByCourseResult } = await client.query<
+          GetAllLearningProgressByCourseResult,
+          GetAllLearningProgressByCourseVars
+        >({
+          query: GetAllLearningProgressByCourse,
+          variables: { ...base, after: cursor },
+          fetchPolicy: 'network-only',
+          errorPolicy: 'all',
+        })
+        if (token !== pagingToken) return
+        const conn = res.data?.learningProgressByCourse
+        collected.push(...(conn?.edges ?? []))
+        cursor = conn?.pageInfo?.hasNextPage ? conn.pageInfo.endCursor ?? null : null
+      }
+    } catch {
+      /* partial progress is still useful — fall through with what we have */
+    }
+    if (token !== pagingToken) return
+    extra.value = { key, edges: collected }
+    readyKey.value = key
+  }
+
   onResult((res) => {
-    if (res.data?.learningProgressByCourse) markProgressFresh()
+    const conn = res.data?.learningProgressByCourse
+    if (!conn) {
+      // Answered without a list (GraphQL error with errorPolicy 'all'): there
+      // is nothing to wait for — do not hold the classroom entry.
+      if (!res.loading) readyKey.value = scopeKey.value
+      return
+    }
+    markProgressFresh()
+    const next = conn.pageInfo?.hasNextPage ? conn.pageInfo.endCursor ?? null : null
+    if (next) {
+      void loadRemainingPages(next, { ...vars.value })
+    } else {
+      pagingToken++
+      extra.value = { key: scopeKey.value, edges: [] }
+      readyKey.value = scopeKey.value
+    }
+  })
+  // A failed progress query must not hold the classroom entry hostage.
+  onError(() => {
+    readyKey.value = scopeKey.value
   })
 
   // Local, optimistic overrides applied on top of the once-fetched server map.
@@ -85,8 +169,32 @@ export function useLearningProgress(
   // tick updates instantly; a full reload still reconciles from the backend.
   const localOverrides = ref<ProgressMap>({})
 
+  const allEdges = computed<ProgressEdges>(() => [
+    ...(result.value?.learningProgressByCourse?.edges ?? []),
+    ...(extra.value.key === scopeKey.value ? extra.value.edges : []),
+  ])
+
+  const resumeRows = computed<ResumeRow[]>(() => {
+    const rows: ResumeRow[] = []
+    for (const edge of allEdges.value) {
+      const node = edge?.node
+      const contentPk = node?.courseUnitContent?.pk
+      const progressPk = node?.pk
+      if (!node || contentPk == null || progressPk == null) continue
+      rows.push({
+        contentPk,
+        unitPk: node.courseUnitContent?.courseUnit?.pk ?? null,
+        progressPk,
+        begin: node.begin ?? null,
+        complete: node.complete ?? null,
+        updated: node.updated ?? null,
+      })
+    }
+    return rows
+  })
+
   const progressMap = computed<ProgressMap>(() => {
-    const edges = result.value?.learningProgressByCourse?.edges ?? []
+    const edges = allEdges.value
     const map: ProgressMap = {}
     for (const edge of edges) {
       const node = edge?.node
@@ -142,7 +250,22 @@ export function useLearningProgress(
     }
   }
 
-  async function end(): Promise<void> {
+  // One EndLearningUnit per leave: a lesson tap, the route watcher and the
+  // unmount hook can all ask to end the same row at once. They share the one
+  // request that is in flight for that progress row.
+  let endInFlight: { pid: number; promise: Promise<void> } | null = null
+
+  function end(): Promise<void> {
+    const pid = currentProgressId.value
+    if (pid != null && endInFlight?.pid === pid) return endInFlight.promise
+    const promise = runEndOnce().finally(() => {
+      if (endInFlight?.promise === promise) endInFlight = null
+    })
+    if (pid != null) endInFlight = { pid, promise }
+    return promise
+  }
+
+  async function runEndOnce(): Promise<void> {
     const cid = toNum(coursePk)
     const eid = toNum(enrollmentPk)
     const pid = currentProgressId.value
@@ -154,7 +277,9 @@ export function useLearningProgress(
       const res = await runEnd({ progressData: input, progressId: pid })
       const success = res?.data?.endLearningUnit?.success
       if (success) {
-        currentProgressId.value = null
+        // Only clear the row we ended: a slow End must not wipe the id of a
+        // lesson that was started while it was in flight.
+        if (currentProgressId.value === pid) currentProgressId.value = null
         // Patch ONLY the row we just ended, from the mutation's returned row —
         // no course-wide refetch. `complete` is the backend's authoritative
         // value (it may stay null if the lesson wasn't sufficiently watched).
@@ -191,6 +316,8 @@ export function useLearningProgress(
 
   return {
     progressMap,
+    resumeRows,
+    progressReady,
     refetch: () => {
       if (enabled.value) void refetch()
     },

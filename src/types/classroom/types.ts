@@ -282,6 +282,9 @@ export type ProgressEntry = {
 /** Keyed by courseUnitContent.pk. */
 export type ProgressMap = Record<number, ProgressEntry>
 
+/** One learning-progress row, shaped for resume-on-entry (src/utils/classroomResume.ts). */
+export type { ResumeRow } from 'src/utils/classroomResume'
+
 // ---------------------------------------------------------------------------
 // Per-unit pagination state, exposed to the rail so it can render an
 // auto-loading sentinel when there are more lessons to fetch.

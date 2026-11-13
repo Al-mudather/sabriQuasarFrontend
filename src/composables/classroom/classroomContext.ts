@@ -3,6 +3,7 @@ import type {
   ClassroomBootstrap,
   CurriculumContent,
   ProgressMap,
+  ResumeRow,
   UnitPagination,
 } from 'src/types/classroom/types'
 
@@ -28,6 +29,10 @@ export type ClassroomContext = {
   currentUnitPk: ComputedRef<number | null>
   /** Progress map keyed by courseUnitContent.pk. */
   progress: ComputedRef<ProgressMap>
+  /** Server progress rows for the resume-on-entry logic. */
+  resumeRows: ComputedRef<ResumeRow[]>
+  /** True once the whole progress list has arrived (or failed). */
+  progressReady: ComputedRef<boolean>
   /**
    * Start / end the learning-progress record for the active lesson. Owned by
    * the SINGLE useLearningProgress instance in the layout — ContentView calls

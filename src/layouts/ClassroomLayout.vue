@@ -74,6 +74,8 @@ const enrollmentPk = computed<number | null>(() => rawBootstrap.value?.enrollmen
 
 const {
   progressMap,
+  resumeRows,
+  progressReady,
   refetch: refetchProgress,
   start: startProgress,
   end: endProgress,
@@ -141,6 +143,8 @@ const classroomContext: ClassroomContext = {
   currentContent,
   currentUnitPk,
   progress: progressMap,
+  resumeRows,
+  progressReady,
   startProgress,
   endProgress,
   loading,
