@@ -117,3 +117,91 @@ export function parseVdoCipherEmbed(code: string | null | undefined): VdoCipherE
   if (found.length === 0) return null
   return { src: found[0] as string, iframeCount: found.length }
 }
+
+// ---------------------------------------------------------------------------
+// Player URL helpers (lite mode, credentials for the Player API, redaction)
+// ---------------------------------------------------------------------------
+
+/** VdoCipher's Player API script (defines `window.VdoPlayer`). */
+export const VDOCIPHER_API_SCRIPT = 'https://player.vdocipher.com/v2/api.js'
+
+/** True for the current `/v2/` player; false for legacy `playerAssets/1.x`. */
+export function isV2PlayerUrl(src: string | null | undefined): boolean {
+  if (!src) return false
+  try {
+    const url = new URL(src)
+    if (!VDOCIPHER_HOSTS.has(url.hostname.toLowerCase())) return false
+    return url.pathname === '/v2' || url.pathname.startsWith('/v2/')
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Add `litemode=true` to a v2 player URL. In lite mode the player shows only
+ * the poster and requests NO licence / media until the viewer taps play, so a
+ * lesson that is opened but never played opens no DRM session.
+ * (https://www.vdocipher.com/docs/player/v2/config-player)
+ *
+ * String surgery on purpose: `URLSearchParams` would re-serialise the whole
+ * query (`+` ↔ space, `=` → `%3D`) and the OTP / playbackInfo must reach the
+ * player byte-for-byte. Legacy 1.x URLs are returned unchanged.
+ */
+export function withLiteMode(src: string): string {
+  if (!isV2PlayerUrl(src)) return src
+  const hashAt = src.indexOf('#')
+  const head = hashAt === -1 ? src : src.slice(0, hashAt)
+  const hash = hashAt === -1 ? '' : src.slice(hashAt)
+  const liteRe = /([?&])litemode=[^&]*/i
+  if (liteRe.test(head)) return head.replace(liteRe, '$1litemode=true') + hash
+  const sep = head.includes('?') ? (head.endsWith('?') || head.endsWith('&') ? '' : '&') : '?'
+  return `${head}${sep}litemode=true${hash}`
+}
+
+export interface VdoCipherCredentials {
+  otp: string
+  playbackInfo: string
+}
+
+/**
+ * Same lookup the VdoCipher player runs on its own URL
+ * (`RegExp("[?&#]"+key+"=([^&]*)")` + decodeURIComponent, `+` → space), so the
+ * value we hand to `player.api.loadVideo` is the one the iframe would have
+ * read itself.
+ */
+function playerParam(key: string, text: string): string | null {
+  const m = new RegExp(`[?&#]${key}=([^&]*)`).exec(text)
+  if (!m || !m[1]) return null
+  try {
+    return decodeURIComponent(m[1].replace(/\+/g, ' '))
+  } catch {
+    return null
+  }
+}
+
+/**
+ * otp + playbackInfo of a player URL — query form (`/v2/?otp=…&playbackInfo=…`)
+ * or legacy fragment form (`…/index.html#otp=…&playbackInfo=…`). The player
+ * prefers the query when there is one; so do we.
+ */
+export function extractVdoCipherCredentials(src: string | null | undefined): VdoCipherCredentials | null {
+  if (!src) return null
+  let url: URL
+  try {
+    url = new URL(decodeEntities(src.trim()))
+  } catch {
+    return null
+  }
+  for (const part of [url.search, url.hash]) {
+    if (!part) continue
+    const otp = playerParam('otp', part)
+    const playbackInfo = playerParam('playbackInfo', part)
+    if (otp && playbackInfo) return { otp, playbackInfo }
+  }
+  return null
+}
+
+/** Strip OTP / playbackInfo values from anything that is about to be logged. */
+export function redactVdoCipher(text: string | null | undefined): string {
+  return String(text ?? '').replace(/(otp|playbackInfo)=[^&"'#\s]+/gi, '$1=…')
+}
