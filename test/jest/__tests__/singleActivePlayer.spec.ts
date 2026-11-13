@@ -37,7 +37,9 @@ function makeBus(latencyMs = 5): { connect: () => PlayerLockChannel; frozen: Set
 }
 
 function arbiter(tabId: string, channel: PlayerLockChannel | null, extra: Partial<ConstructorParameters<typeof SinglePlayerArbiter>[0]> = {}): SinglePlayerArbiter {
-  return new SinglePlayerArbiter({ tabId, channelFactory: () => channel, ...extra })
+  // The historical fixed 400 ms gap keeps the timing assertions below exact;
+  // the adaptive default is covered in its own block.
+  return new SinglePlayerArbiter({ tabId, channelFactory: () => channel, releaseGapMs: 400, ...extra })
 }
 
 describe('utils/singleActivePlayer', () => {
@@ -186,7 +188,7 @@ describe('utils/singleActivePlayer', () => {
   it('suspend (pagehide/freeze) revokes, tells other tabs, closes; resume reopens without playing', () => {
     const bus = makeBus(5)
     let opened = 0
-    const tab1 = new SinglePlayerArbiter({ tabId: 't1', channelFactory: () => { opened++; return bus.connect() } })
+    const tab1 = new SinglePlayerArbiter({ tabId: 't1', releaseGapMs: 400, channelFactory: () => { opened++; return bus.connect() } })
     const tab2 = arbiter('t2', bus.connect())
     const revoked = jest.fn()
     const ready = jest.fn()
@@ -348,5 +350,175 @@ describe('StoragePlayerChannel (no BroadcastChannel fallback)', () => {
     expect(revoked1).toHaveBeenCalledTimes(1)
     expect(ready2).toHaveBeenCalledTimes(1)
     jest.useRealTimers()
+  })
+})
+
+describe('utils/singleActivePlayer adaptive gap and graceful teardown', () => {
+  const ANDROID_GAP = 1500
+  // Deterministic stand-in for adaptiveReleaseGapMs on an Android UA.
+  const gapFor = (info: { kind?: string; hadSession?: boolean }): number =>
+    info.kind === 'hasif' ? 800 : info.hadSession === false ? 0 : ANDROID_GAP
+  const make = (tabId: string, channel: PlayerLockChannel | null = null): SinglePlayerArbiter =>
+    new SinglePlayerArbiter({ tabId, channelFactory: () => channel, gapFor })
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: 2_000_000 })
+  })
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('no gap after a player that never opened a session', () => {
+    const a = make('t1')
+    a.claim('p1', jest.fn(), jest.fn())
+    a.release('p1', { kind: 'vdocipher', hadSession: false })
+    expect(a.gapLeftMs()).toBe(0)
+    const ready = jest.fn()
+    a.claim('p2', jest.fn(), ready)
+    expect(ready).toHaveBeenCalledTimes(1)
+  })
+
+  it('long gap after a player that held a session (and when it is unknown)', () => {
+    const a = make('t1')
+    a.claim('p1', jest.fn(), jest.fn())
+    a.release('p1', { kind: 'vdocipher', hadSession: true })
+    expect(a.gapLeftMs()).toBe(ANDROID_GAP)
+    const ready = jest.fn()
+    a.claim('p2', jest.fn(), ready)
+    jest.advanceTimersByTime(ANDROID_GAP - 1)
+    expect(ready).not.toHaveBeenCalled()
+    jest.advanceTimersByTime(1)
+    expect(ready).toHaveBeenCalledTimes(1)
+
+    a.release('p2') // unknown → assume a session
+    expect(a.gapLeftMs()).toBe(ANDROID_GAP)
+  })
+
+  it('a holder that never got to load leaves no gap, whatever it reports', () => {
+    const a = make('t1')
+    a.claim('p1', jest.fn(), jest.fn())
+    a.release('p1', { hadSession: true })
+    const ready = jest.fn()
+    a.claim('p2', jest.fn(), ready) // waits for p1's gap
+    jest.advanceTimersByTime(1000)
+    expect(ready).not.toHaveBeenCalled()
+    a.release('p2', { hadSession: true }) // it never loaded: nothing to release
+    expect(a.gapLeftMs()).toBe(ANDROID_GAP - 1000) // only p1's gap is still running
+  })
+
+  it('noteRelease (TYPE_HASIF / Vimeo teardown) delays a VdoCipher claim, even one already waiting', () => {
+    const a = make('t1')
+    a.noteRelease({ kind: 'hasif' })
+    const ready = jest.fn()
+    a.claim('p1', jest.fn(), ready)
+    expect(ready).not.toHaveBeenCalled() // never 0 ms after the <video> was destroyed
+    jest.advanceTimersByTime(799)
+    expect(ready).not.toHaveBeenCalled()
+    jest.advanceTimersByTime(1)
+    expect(ready).toHaveBeenCalledTimes(1)
+
+    // A claim already pending is pushed back by a later teardown.
+    const b = make('t2')
+    b.noteRelease({ kind: 'hasif' })
+    const readyB = jest.fn()
+    b.claim('p1', jest.fn(), readyB)
+    jest.advanceTimersByTime(700)
+    b.noteRelease({ kind: 'hasif' })
+    jest.advanceTimersByTime(700)
+    expect(readyB).not.toHaveBeenCalled()
+    jest.advanceTimersByTime(100)
+    expect(readyB).toHaveBeenCalledTimes(1)
+  })
+
+  it('local hand-over waits for the old player to finish its graceful teardown, then the gap', async () => {
+    const a = make('t1')
+    let finish: (info: { hadSession: boolean }) => void = () => undefined
+    const revoke = jest.fn(() => new Promise<{ hadSession: boolean }>((resolve) => { finish = resolve }))
+    a.claim('old', revoke, jest.fn())
+    const ready = jest.fn()
+    a.claim('new', jest.fn(), ready)
+    expect(revoke).toHaveBeenCalledWith('replaced')
+    jest.advanceTimersByTime(5000)
+    expect(ready).not.toHaveBeenCalled() // still tearing down
+    finish({ hadSession: true })
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(ready).not.toHaveBeenCalled() // gap starts only now
+    jest.advanceTimersByTime(ANDROID_GAP)
+    expect(ready).toHaveBeenCalledTimes(1)
+  })
+
+  it('a rejected or throwing revoke still lets the next player load', async () => {
+    const a = make('t1')
+    a.claim('old', () => Promise.reject(new Error('x')), jest.fn())
+    const ready = jest.fn()
+    a.claim('new', jest.fn(), ready)
+    await Promise.resolve()
+    await Promise.resolve()
+    jest.advanceTimersByTime(ANDROID_GAP)
+    expect(ready).toHaveBeenCalledTimes(1)
+
+    const b = make('t2')
+    b.claim('old', () => { throw new Error('y') }, jest.fn())
+    const readyB = jest.fn()
+    b.claim('new', jest.fn(), readyB)
+    jest.advanceTimersByTime(ANDROID_GAP)
+    expect(readyB).toHaveBeenCalledTimes(1)
+  })
+
+  it('cross-tab: `released` is sent only after the graceful teardown, and carries hadSession', async () => {
+    const bus = makeBus(5)
+    const sent: PlayerLockMessage[] = []
+    const ch1 = bus.connect()
+    const post = ch1.postMessage.bind(ch1)
+    ch1.postMessage = (m: PlayerLockMessage) => { sent.push(m); post(m) }
+    const tab1 = make('t1', ch1)
+    const tab2 = make('t2', bus.connect())
+    let finish: (info: { hadSession: boolean }) => void = () => undefined
+    const revoke1 = jest.fn(() => new Promise<{ hadSession: boolean }>((resolve) => { finish = resolve }))
+    tab1.claim('a', revoke1, jest.fn())
+    jest.advanceTimersByTime(400)
+    const ready2 = jest.fn()
+    tab2.claim('b', jest.fn(), ready2)
+    jest.advanceTimersByTime(10)
+    expect(revoke1).toHaveBeenCalledWith('elsewhere')
+    expect(sent.some((m) => m.type === 'released')).toBe(false)
+    finish({ hadSession: false })
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(sent.filter((m) => m.type === 'released')).toEqual([{ type: 'released', tabId: 't1', stopped: true, hadSession: false }])
+    jest.advanceTimersByTime(10)
+    expect(ready2).toHaveBeenCalledTimes(1) // no session was held → no gap
+  })
+
+  it('cross-tab: a released session (or an old tab that does not say) costs the long gap', () => {
+    const bus = makeBus(5)
+    const tab1 = make('t1', bus.connect())
+    const tab2 = make('t2', bus.connect())
+    tab1.claim('a', () => ({ hadSession: true }), jest.fn())
+    jest.advanceTimersByTime(400)
+    const ready2 = jest.fn()
+    tab2.claim('b', jest.fn(), ready2)
+    jest.advanceTimersByTime(10) // claim → released
+    jest.advanceTimersByTime(ANDROID_GAP - 1)
+    expect(ready2).not.toHaveBeenCalled()
+    jest.advanceTimersByTime(1)
+    expect(ready2).toHaveBeenCalledTimes(1)
+  })
+
+  it('suspend is synchronous: revoke("suspend"), released sent at once', () => {
+    const bus = makeBus(5)
+    const sent: PlayerLockMessage[] = []
+    const ch1 = bus.connect()
+    const post = ch1.postMessage.bind(ch1)
+    ch1.postMessage = (m: PlayerLockMessage) => { sent.push(m); post(m) }
+    const tab1 = make('t1', ch1)
+    const revoke = jest.fn(() => ({ hadSession: true }))
+    tab1.claim('a', revoke, jest.fn())
+    jest.advanceTimersByTime(400)
+    tab1.suspend()
+    expect(revoke).toHaveBeenCalledWith('suspend')
+    expect(sent[sent.length - 1]).toEqual({ type: 'released', tabId: 't1', stopped: true, hadSession: true })
+    expect(tab1.activeId()).toBeNull()
   })
 })

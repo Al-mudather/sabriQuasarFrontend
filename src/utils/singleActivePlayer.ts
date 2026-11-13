@@ -23,8 +23,33 @@
 // player has answered `released`, bounded by `releaseTimeoutMs`, (b) a short
 // discovery window has passed so holders it did not know about can answer,
 // counted from when this tab's channel opened (time for `holding` answers to
-// arrive), and (c) `releaseGapMs` has passed since the last release anywhere, giving
-// the device time to drop the previous DRM session.
+// arrive), and (c) the release gap after the last teardown anywhere has
+// passed, giving the device time to drop the previous DRM session.
+//
+// The gap is ADAPTIVE (src/utils/vdoPlayerPolicy.ts): nothing when the player
+// that went away never opened a session (lite mode, never played), ≥1500 ms on
+// Android / 800 ms elsewhere when it did. Teardown is GRACEFUL: `onRevoke` may
+// return a promise that settles once the old player document has really
+// unloaded (about:blank committed); the gap — and the `released` answer to
+// other tabs — only start then. Other media elements (TYPE_HASIF video.js,
+// Vimeo) report their teardown with `noteRelease` so a VdoCipher player never
+// starts 0 ms after another video element was destroyed.
+
+import { adaptiveReleaseGapMs, type ReleaseInfo } from 'src/utils/vdoPlayerPolicy'
+
+export type { ReleaseInfo }
+
+/**
+ * Why a player is being told to stop:
+ *  - `replaced`  another player in THIS tab took over;
+ *  - `elsewhere` a player in another tab took over;
+ *  - `suspend`   the page is being hidden for good / frozen — the callback
+ *                must tear down synchronously (the page may never run again).
+ */
+export type RevokeReason = 'replaced' | 'elsewhere' | 'suspend'
+
+/** Result of a revoke: what was torn down, now or once the promise settles. */
+export type RevokeResult = void | ReleaseInfo | Promise<ReleaseInfo | void>
 
 export interface PlayerClaimMessage {
   type: 'claim'
@@ -38,6 +63,8 @@ export interface PlayerReleasedMessage {
   tabId: string
   /** True when this tab actually tore a player down. */
   stopped: boolean
+  /** Did that player hold a DRM session? Absent (old bundle) → assume yes. */
+  hadSession?: boolean
 }
 
 export interface PlayerHelloMessage {
@@ -70,8 +97,13 @@ export interface ArbiterOptions {
   /** Opens a channel; called again after resume(). Null → single-tab mode. */
   channelFactory?: (() => PlayerLockChannel | null) | null
   now?: () => number
-  /** Gap kept between one player's release and the next one's load. */
+  /**
+   * Fixed gap between one player's release and the next one's load. When
+   * omitted the gap is adaptive (see `gapFor`).
+   */
   releaseGapMs?: number
+  /** Adaptive gap for one release. Default: adaptiveReleaseGapMs + this UA. */
+  gapFor?: (info: ReleaseInfo) => number
   /** Max wait for known holders in other tabs to answer `released`. */
   releaseTimeoutMs?: number
   /**
@@ -89,9 +121,11 @@ interface ClaimKey {
 interface Holder {
   playerId: string
   key: ClaimKey
-  onRevoke: () => void
+  onRevoke: (reason: RevokeReason) => RevokeResult
   onReady: () => void
   ready: boolean
+  /** Local players still tearing down (async revoke) that we wait for. */
+  localPending: number
   /** Remote tabs we wait on before loading. */
   pending: Set<string>
   startedAt: number
@@ -130,7 +164,8 @@ function isReleased(v: unknown): v is PlayerReleasedMessage {
 
 export class SinglePlayerArbiter {
   private holder: Holder | null = null
-  private lastReleasedAt = Number.NEGATIVE_INFINITY
+  /** No player may load before this moment (end of the current gap). */
+  private clearAt = Number.NEGATIVE_INFINITY
   private lastTs = 0
   /** Remote tabs believed to hold a player, with their claim. */
   private readonly remoteHolders = new Map<string, ClaimKey>()
@@ -140,7 +175,7 @@ export class SinglePlayerArbiter {
   private readonly tabId: string
   private readonly channelFactory: (() => PlayerLockChannel | null) | null
   private readonly now: () => number
-  private readonly releaseGapMs: number
+  private readonly gapFor: (info: ReleaseInfo) => number
   private readonly releaseTimeoutMs: number
   private readonly discoveryMs: number
 
@@ -148,7 +183,12 @@ export class SinglePlayerArbiter {
     this.tabId = opts.tabId
     this.channelFactory = opts.channelFactory ?? null
     this.now = opts.now ?? (() => Date.now())
-    this.releaseGapMs = opts.releaseGapMs ?? 400
+    const fixed = opts.releaseGapMs
+    this.gapFor =
+      typeof fixed === 'number'
+        ? () => fixed
+        : opts.gapFor ??
+          ((info) => adaptiveReleaseGapMs(info, typeof navigator !== 'undefined' ? navigator.userAgent : ''))
     this.releaseTimeoutMs = opts.releaseTimeoutMs ?? 600
     this.discoveryMs = opts.discoveryMs ?? 350
     this.openChannel()
@@ -165,16 +205,12 @@ export class SinglePlayerArbiter {
    * fires once the iframe may load; `onRevoke` fires if another player
    * (here or in another tab) takes over first or later.
    */
-  claim(playerId: string, onRevoke: () => void, onReady: () => void): void {
+  claim(
+    playerId: string,
+    onRevoke: (reason: RevokeReason) => RevokeResult,
+    onReady: () => void,
+  ): void {
     const prev = this.holder
-    if (prev) {
-      this.clearTimer(prev)
-      this.holder = null
-      if (prev.playerId !== playerId) {
-        this.lastReleasedAt = this.now()
-        prev.onRevoke()
-      }
-    }
     const ts = this.nextTs()
     const holder: Holder = {
       playerId,
@@ -182,23 +218,56 @@ export class SinglePlayerArbiter {
       onRevoke,
       onReady,
       ready: false,
+      localPending: 0,
       pending: new Set(this.channel ? this.remoteHolders.keys() : []),
       startedAt: this.now(),
       timer: null,
+    }
+    if (prev) {
+      this.clearTimer(prev)
+      this.holder = null
+      if (prev.playerId !== playerId) {
+        // The new holder does not load until the old player has really gone.
+        holder.localPending++
+        this.settle(this.callRevoke(prev, 'replaced'), (info) => {
+          this.markReleased(info, prev.ready)
+          holder.localPending--
+          this.schedule(holder)
+        })
+      }
     }
     this.holder = holder
     this.send({ type: 'claim', tabId: this.tabId, playerId, ts })
     this.schedule(holder)
   }
 
-  /** The player unmounted or stopped. No-op if it is not the holder. */
-  release(playerId: string): void {
+  /**
+   * The player unmounted or stopped (its teardown is finished). No-op if it is
+   * not the holder. `info.hadSession` picks the gap before the next load.
+   */
+  release(playerId: string, info: ReleaseInfo = {}): void {
     const h = this.holder
     if (!h || h.playerId !== playerId) return
     this.clearTimer(h)
     this.holder = null
-    this.lastReleasedAt = this.now()
-    this.send({ type: 'released', tabId: this.tabId, stopped: h.ready })
+    this.markReleased(info, h.ready)
+    this.send(this.releasedMessage(h.ready, info))
+  }
+
+  /**
+   * A media element was destroyed outside a claim hand-over: a TYPE_HASIF /
+   * Vimeo player unmounted, or the holder rebuilt its own iframe. Starts the
+   * matching gap; a claim that is still waiting re-checks.
+   */
+  noteRelease(info: ReleaseInfo): void {
+    this.markReleased(info, true)
+    const h = this.holder
+    if (h && !h.ready) this.schedule(h)
+  }
+
+  /** Milliseconds until a player may load (0 when clear). */
+  gapLeftMs(): number {
+    return Math.max(0, this.clearAt - this.now())
   }
 
   /**
@@ -211,9 +280,12 @@ export class SinglePlayerArbiter {
     if (h) {
       this.clearTimer(h)
       this.holder = null
-      this.lastReleasedAt = this.now()
-      h.onRevoke()
-      this.send({ type: 'released', tabId: this.tabId, stopped: true })
+      // Synchronous by contract: the page may never run again.
+      const result = this.callRevoke(h, 'suspend')
+      const info: ReleaseInfo =
+        result && typeof (result as Promise<unknown>).then !== 'function' ? (result as ReleaseInfo) : {}
+      this.markReleased(info, h.ready)
+      this.send(this.releasedMessage(true, info))
     }
     this.channel?.close()
     this.channel = null
@@ -246,6 +318,48 @@ export class SinglePlayerArbiter {
     }
   }
 
+  private callRevoke(h: Holder, reason: RevokeReason): RevokeResult {
+    try {
+      return h.onRevoke(reason)
+    } catch {
+      return undefined
+    }
+  }
+
+  /** Run `done` once a revoke has finished (now, or when its promise settles). */
+  private settle(result: RevokeResult, done: (info: ReleaseInfo) => void): void {
+    if (result && typeof (result as Promise<unknown>).then === 'function') {
+      void (result as Promise<ReleaseInfo | void>).then(
+        (info) => done(info ?? {}),
+        () => done({}),
+      )
+      return
+    }
+    done((result as ReleaseInfo | undefined) ?? {})
+  }
+
+  /** Start the gap for a release. A holder that never loaded leaves no gap. */
+  private markReleased(info: ReleaseInfo, wasLoaded: boolean): void {
+    const gap = Math.max(0, this.gapFor(wasLoaded ? info : { ...info, hadSession: false }))
+    this.clearAt = Math.max(this.clearAt, this.now() + gap)
+  }
+
+  private releasedMessage(stopped: boolean, info: ReleaseInfo): PlayerReleasedMessage {
+    const message: PlayerReleasedMessage = { type: 'released', tabId: this.tabId, stopped }
+    if (stopped && typeof info.hadSession === 'boolean') message.hadSession = info.hadSession
+    return message
+  }
+
+  /** Stop the local holder because another tab took over; answer when done. */
+  private yieldTo(h: Holder): void {
+    this.clearTimer(h)
+    this.holder = null
+    this.settle(this.callRevoke(h, 'elsewhere'), (info) => {
+      this.markReleased(info, h.ready)
+      this.send(this.releasedMessage(h.ready, info))
+    })
+  }
+
   private nextTs(): number {
     this.lastTs = Math.max(this.now(), this.lastTs + 1)
     return this.lastTs
@@ -270,8 +384,11 @@ export class SinglePlayerArbiter {
       const timeoutLeft = h.startedAt + this.releaseTimeoutMs - now
       if (h.pending.size > 0 && timeoutLeft > 0) waits.push(timeoutLeft)
     }
-    const gapLeft = this.lastReleasedAt + this.releaseGapMs - now
+    const gapLeft = this.clearAt - now
     if (gapLeft > 0) waits.push(gapLeft)
+
+    // A local player is still tearing down: its settle() re-schedules us.
+    if (h.localPending > 0) return
 
     if (waits.length === 0) {
       h.ready = true
@@ -300,15 +417,8 @@ export class SinglePlayerArbiter {
         this.send({ type: 'claim', tabId: this.tabId, playerId: h.playerId, ts: h.key.ts })
         return
       }
-      let stopped = false
-      if (h) {
-        this.clearTimer(h)
-        this.holder = null
-        this.lastReleasedAt = this.now()
-        stopped = h.ready
-        h.onRevoke()
-      }
-      this.send({ type: 'released', tabId: this.tabId, stopped })
+      if (h) this.yieldTo(h)
+      else this.send({ type: 'released', tabId: this.tabId, stopped: false })
       return
     }
     if (isHello(data)) {
@@ -333,18 +443,17 @@ export class SinglePlayerArbiter {
         this.send({ type: 'claim', tabId: this.tabId, playerId: h.playerId, ts: h.key.ts })
       } else {
         // Theirs is newer and we missed its claim: we yield.
-        this.clearTimer(h)
-        this.holder = null
-        this.lastReleasedAt = this.now()
-        h.onRevoke()
-        this.send({ type: 'released', tabId: this.tabId, stopped: h.ready })
+        this.yieldTo(h)
       }
       return
     }
     if (isReleased(data)) {
       if (data.tabId === this.tabId) return
       this.remoteHolders.delete(data.tabId)
-      if (data.stopped) this.lastReleasedAt = this.now()
+      if (data.stopped) {
+        const hadSession = (data as PlayerReleasedMessage).hadSession
+        this.markReleased({ kind: 'vdocipher', hadSession: typeof hadSession === 'boolean' ? hadSession : undefined }, true)
+      }
       const h = this.holder
       if (h && !h.ready) {
         h.pending.delete(data.tabId)

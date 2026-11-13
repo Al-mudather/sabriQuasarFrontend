@@ -12,6 +12,7 @@
 // reliable across embed privacy settings).
 // =============================================================================
 import { onBeforeUnmount, reactive, ref } from 'vue'
+import { getPlayerArbiter } from 'src/utils/singleActivePlayer'
 import Player from '@vimeo/player'
 import type { QualityOption } from 'src/composables/classroom/useVideoJsPlayer'
 
@@ -94,6 +95,9 @@ export function useVimeoPlayer(cb: UseVimeoPlayerCallbacks = {}) {
     if (player) {
       try { void player.destroy() } catch { /* ignore */ }
       player = null
+      // Report the teardown so a VdoCipher player does not start in the same
+      // instant this one is being destroyed.
+      getPlayerArbiter().noteRelease({ kind: 'vimeo' })
     }
   }
 

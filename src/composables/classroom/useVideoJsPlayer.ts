@@ -17,6 +17,7 @@
 // HLS and keep the VHS (MSE) path. No EME / ClearKey is involved.
 // =============================================================================
 import { onBeforeUnmount, reactive, ref } from 'vue'
+import { getPlayerArbiter } from 'src/utils/singleActivePlayer'
 import videojs from 'video.js'
 import 'videojs-contrib-quality-levels'
 import 'video.js/dist/video-js.css'
@@ -276,6 +277,10 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
       try { player.dispose() } catch { /* ignore */ }
       player = null
       levels = null
+      // Tell the single-player arbiter a <video> was just destroyed, so a
+      // VdoCipher (DRM) player never starts 0 ms after this one let go of the
+      // decoder — it waits a moderate gap first.
+      getPlayerArbiter().noteRelease({ kind: 'hasif' })
     }
   }
 
