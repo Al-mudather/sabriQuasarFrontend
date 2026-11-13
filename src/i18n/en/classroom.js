@@ -42,7 +42,18 @@ export default {
       missingCredentials: 'Secure video credentials are missing. Please refresh to try again.',
       pausedElsewhere: 'This video was stopped because another video is playing in another tab or window. Only one video can play at a time.',
       resumeHere: 'Play here',
-      invalidEmbed: 'The video code is invalid. Please contact the administration.'
+      invalidEmbed: 'The video code is invalid. Please contact the administration.',
+      stoppedAway: 'We stopped the video because you left this page. Tap "Play here" to continue.',
+      recovering: 'Your device could not start the protected video. We are resetting the player. Wait a moment, then tap play.',
+      help: {
+        title: 'This device could not play the video',
+        intro: 'Your device allows only a few protected videos at a time, and another one still seems to be open. Try these steps in order:',
+        closeOthers: 'Close every other tab and app that is showing a protected video, including the platform app and other browsers, then tap "Try again".',
+        restart: 'If the error comes back, restart your phone and open the lesson again.',
+        browser: 'Use an up-to-date Chrome browser, and do not use incognito mode.',
+        protectedContent: 'Make sure protected content is allowed: Chrome → Settings → Site settings → Protected content → Allowed.',
+        retry: 'Try again'
+      }
     },
     controls: {
       seek: 'Seek',
