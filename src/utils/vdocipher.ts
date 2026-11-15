@@ -152,7 +152,18 @@ export function withLiteMode(src: string): string {
   const hashAt = src.indexOf('#')
   const head = hashAt === -1 ? src : src.slice(0, hashAt)
   const hash = hashAt === -1 ? '' : src.slice(hashAt)
-  const liteRe = /([?&])litemode=[^&]*/i
+  const liteRe = /([?&#])litemode=[^&]*/i
+  const queryAt = head.indexOf('?')
+  const hasQuery = queryAt !== -1 && queryAt < head.length - 1
+  // The player reads its parameters from `location.search || location.hash`.
+  // A v2 URL with NO query and the credentials in the fragment must get the
+  // flag in the fragment too: adding a query would make the player stop
+  // reading the fragment and lose the OTP.
+  if (!hasQuery && /[#&]otp=/.test(hash)) {
+    const bare = queryAt === -1 ? head : head.slice(0, queryAt)
+    if (liteRe.test(hash)) return bare + hash.replace(liteRe, '$1litemode=true')
+    return `${bare}${hash}${hash.endsWith('&') ? '' : '&'}litemode=true`
+  }
   if (liteRe.test(head)) return head.replace(liteRe, '$1litemode=true') + hash
   const sep = head.includes('?') ? (head.endsWith('?') || head.endsWith('&') ? '' : '&') : '?'
   return `${head}${sep}litemode=true${hash}`
@@ -192,7 +203,8 @@ export function extractVdoCipherCredentials(src: string | null | undefined): Vdo
   } catch {
     return null
   }
-  for (const part of [url.search, url.hash]) {
+  // Same precedence as the player: the query if there is one, else the fragment.
+  for (const part of [url.search.length > 1 ? url.search : '', url.hash]) {
     if (!part) continue
     const otp = playerParam('otp', part)
     const playbackInfo = playerParam('playbackInfo', part)

@@ -43,6 +43,26 @@ describe('utils/vdocipher lite mode', () => {
     )
   })
 
+  it('v2 URL with NO query and the credentials in the fragment: the flag goes in the fragment', () => {
+    // The player reads `location.search || location.hash`: a query would hide the fragment's OTP.
+    const hashForm = 'https://player.vdocipher.com/v2/#otp=OTP1&playbackInfo=PB1'
+    const lite = withLiteMode(hashForm)
+    expect(lite).toBe('https://player.vdocipher.com/v2/#otp=OTP1&playbackInfo=PB1&litemode=true')
+    expect(new URL(lite).search).toBe('')
+    expect(withLiteMode(lite)).toBe(lite)
+    expect(withLiteMode('https://player.vdocipher.com/v2/?#otp=O&playbackInfo=P')).toBe(
+      'https://player.vdocipher.com/v2/#otp=O&playbackInfo=P&litemode=true',
+    )
+    expect(withLiteMode('https://player.vdocipher.com/v2/#otp=O&litemode=false&playbackInfo=P')).toBe(
+      'https://player.vdocipher.com/v2/#otp=O&litemode=true&playbackInfo=P',
+    )
+    expect(extractVdoCipherCredentials(lite)).toEqual({ otp: 'OTP1', playbackInfo: 'PB1' })
+    // Credentials in the query: the fragment is left alone.
+    expect(withLiteMode('https://player.vdocipher.com/v2/?otp=O&playbackInfo=P#otp=X')).toBe(
+      'https://player.vdocipher.com/v2/?otp=O&playbackInfo=P&litemode=true#otp=X',
+    )
+  })
+
   it('leaves legacy 1.x URLs unchanged', () => {
     expect(withLiteMode(LEGACY)).toBe(LEGACY)
   })
