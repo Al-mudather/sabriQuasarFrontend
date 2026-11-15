@@ -170,7 +170,7 @@ import { useClassroomStore } from 'src/stores/classroom'
 import { ClassroomContextKey } from 'src/composables/classroom/classroomContext'
 import { useCurriculumNavigation } from 'src/composables/classroom/useCurriculumNavigation'
 import { stopVdoCipherPlayers } from 'src/composables/classroom/useVdoCipherSession'
-import { pickResumeAnchor, resumeFrom, withLocalHint } from 'src/utils/classroomResume'
+import { isOpenableLesson, pickResumeAnchor, resumeFrom, withLocalHint } from 'src/utils/classroomResume'
 import { recallLesson, rememberLesson } from 'src/utils/classroomResumeHint'
 import {
   parseModelValue,
@@ -180,6 +180,7 @@ import {
   type ParsedFileValue,
   type ParsedQuizValue,
   type ParsedVideoValue,
+  type ResumeRow,
   type VideoProvider,
 } from 'src/types/classroom/types'
 import CurriculumRail from 'src/components/classroom/CurriculumRail.vue'
@@ -248,7 +249,6 @@ const { goToFirstUnwatched } = useCurriculumNavigation({
   unitContents: ctx.unitContents,
 })
 const noContent = ref<boolean>(false)
-let resolveInFlight = false
 
 /** Resolves once the progress list is in (or after `timeoutMs`, whichever first). */
 function waitForProgress(timeoutMs: number): Promise<void> {
@@ -269,56 +269,89 @@ function waitForProgress(timeoutMs: number): Promise<void> {
   })
 }
 
+/** True once a resolve started for `cpk` must stop: lesson chosen, or another course on screen. */
+type StaleCheck = () => boolean
+
 /**
- * Which lesson should a bare classroom URL open for a student WITH progress?
- * The lesson they touched last if it is unfinished, else the first unfinished
- * lesson after it (src/utils/classroomResume.ts). Only the unit that owns that
- * lesson is loaded — plus later units when everything after it is finished.
- * Returns null for "no progress / cannot tell" → the caller opens lesson 1.
+ * Open-from-here decision for ONE anchor row (src/utils/classroomResume.ts).
+ * Only the unit that owns the anchor is loaded — plus later units when
+ * everything after it is finished. null = this anchor cannot be used (unit or
+ * lesson gone, lesson not openable, or the resolve went stale).
  */
-async function resolveResumeLesson(b: ClassroomBootstrap, cpk: number): Promise<number | null> {
-  const stale = (): boolean =>
-    currentContentPk.value != null || coursePkRef.value !== cpk || ctx.bootstrap.value?.coursePk !== cpk
-  await waitForProgress(4000)
-  if (stale()) return null
-  const anchor = pickResumeAnchor(withLocalHint(ctx.resumeRows.value, recallLesson(b.enrollmentPk)))
-  if (!anchor || anchor.unitPk == null) return null
+async function resumeFromAnchor(b: ClassroomBootstrap, anchor: ResumeRow, stale: StaleCheck): Promise<number | null> {
+  if (anchor.unitPk == null) return null
   const anchorUnitPk = anchor.unitPk
   const unitIndex = b.units.findIndex((u) => u.pk === anchorUnitPk)
   if (unitIndex === -1) return null
 
   const isComplete = (pk: number): boolean => Boolean(ctx.progress.value[pk]?.complete)
-  const lessonsOf = (unitPk: number): number[] => (ctx.unitContents.get(unitPk) ?? []).map((l) => l.pk)
+  const lessonsOf = (unitPk: number): CurriculumContent[] => ctx.unitContents.get(unitPk) ?? []
   const hasMore = (unitPk: number): boolean => ctx.unitPagination.get(unitPk)?.hasNextPage === true
-  const settled = (pks: number[]): boolean => {
-    const d = resumeFrom(pks, anchor, isComplete)
-    // Settled = the anchor itself is unfinished, or an unfinished lesson was found after it.
+  let lessons: CurriculumContent[] = []
+  const decide = (): ReturnType<typeof resumeFrom> => {
+    const openable = new Set(lessons.filter((l) => isOpenableLesson(l.kind, l.modelValueRaw)).map((l) => l.pk))
+    return resumeFrom(lessons.map((l) => l.pk), anchor, isComplete, (pk) => openable.has(pk))
+  }
+  // Settled = the anchor itself is unfinished, or an unfinished lesson was found after it.
+  const settled = (): boolean => {
+    const d = decide()
     return d.kind === 'open' && (!anchor.complete || d.contentPk !== anchor.contentPk)
   }
 
   await ctx.loadUnit(anchorUnitPk)
   if (stale()) return null
+  lessons = lessonsOf(anchorUnitPk)
   // Units page at 100 lessons: keep paging until the anchor (and something
   // unfinished after it) is in view, or the unit is exhausted.
-  for (let page = 0; page < 20 && hasMore(anchorUnitPk) && !settled(lessonsOf(anchorUnitPk)); page++) {
+  for (let page = 0; page < 20 && hasMore(anchorUnitPk) && !settled(); page++) {
     await ctx.loadMore(anchorUnitPk)
     if (stale()) return null
+    lessons = lessonsOf(anchorUnitPk)
   }
-  let ordered = lessonsOf(anchorUnitPk)
-  if (resumeFrom(ordered, anchor, isComplete).kind === 'anchor-not-found') return null
+  if (decide().kind === 'anchor-not-found') return null
   // Everything after the anchor in its unit is finished: look into later units.
   for (const unit of b.units.slice(unitIndex + 1)) {
-    if (settled(ordered)) break
+    if (settled()) break
     await ctx.loadUnit(unit.pk)
     if (stale()) return null
-    ordered = [...ordered, ...lessonsOf(unit.pk)]
+    lessons = [...lessons, ...lessonsOf(unit.pk)]
   }
-  const decision = resumeFrom(ordered, anchor, isComplete)
+  const decision = decide()
   return decision.kind === 'open' ? decision.contentPk : null
 }
 
+/**
+ * Which lesson should a bare classroom URL open for a student WITH progress?
+ * The lesson they touched last if it is unfinished, else the first unfinished
+ * lesson after it. Tried first with the device-local hint, then — if that
+ * points at a lesson / unit that no longer exists or cannot be opened — with
+ * the server rows alone. Returns null for "no progress / cannot tell" → the
+ * caller opens lesson 1.
+ */
+async function resolveResumeLesson(b: ClassroomBootstrap, stale: StaleCheck): Promise<number | null> {
+  await waitForProgress(4000)
+  if (stale()) return null
+  const serverRows = ctx.resumeRows.value
+  const serverAnchor = pickResumeAnchor(serverRows)
+  const hintedAnchor = pickResumeAnchor(withLocalHint(serverRows, recallLesson(b.enrollmentPk)))
+  const tried = new Set<ResumeRow>()
+  for (const anchor of [hintedAnchor, serverAnchor]) {
+    if (!anchor || tried.has(anchor)) continue
+    tried.add(anchor)
+    const pk = await resumeFromAnchor(b, anchor, stale)
+    if (stale()) return null
+    if (pk != null) return pk
+  }
+  return null
+}
+
+// One resolve per course at a time. A token (not a plain "in flight" flag)
+// so that switching course mid-resolve neither blocks the new course nor lets
+// the old run push the old course's pk with the new course's lesson.
+let resolveRun = 0
+let resolvingCoursePk: number | null = null
+
 async function resolveFirstLesson(): Promise<void> {
-  if (resolveInFlight) return
   if (currentContentPk.value != null) return // already on a lesson
   const b = ctx.bootstrap.value
   const cpk = coursePkRef.value
@@ -326,13 +359,20 @@ async function resolveFirstLesson(): Promise<void> {
   // Cross-course race guard: when switching courses in-app the layout persists,
   // so `bootstrap` can momentarily still hold the previous course.
   if (b.coursePk !== cpk) return
-  resolveInFlight = true
+  if (resolvingCoursePk === cpk) return // this course is already being resolved
+  const run = ++resolveRun
+  resolvingCoursePk = cpk
+  const stale: StaleCheck = () =>
+    run !== resolveRun ||
+    currentContentPk.value != null ||
+    coursePkRef.value !== cpk ||
+    ctx.bootstrap.value?.coursePk !== cpk
   noContent.value = false
   try {
     // Returning student: open the lesson they were on (one lesson, one
     // player — no lesson-1 flash). No progress → the walk below, unchanged.
-    const resumePk = await resolveResumeLesson(b, cpk)
-    if (currentContentPk.value != null) return
+    const resumePk = await resolveResumeLesson(b, stale)
+    if (stale()) return
     if (resumePk != null) {
       void router.push({
         name: 'classroom-content',
@@ -341,9 +381,8 @@ async function resolveFirstLesson(): Promise<void> {
       return
     }
     for (const unit of b.units) {
-      if (currentContentPk.value != null) return // user navigated meanwhile
       const lessons = await ctx.loadUnit(unit.pk)
-      if (currentContentPk.value != null) return
+      if (stale()) return // user navigated, or another course is on screen now
       if (lessons && lessons.length > 0) {
         // goToFirstUnwatched scans hydrated units in order → first lesson of the
         // first non-empty unit we just loaded.
@@ -353,12 +392,12 @@ async function resolveFirstLesson(): Promise<void> {
     }
     noContent.value = true // walked every unit, nothing playable
   } finally {
-    resolveInFlight = false
+    if (run === resolveRun) resolvingCoursePk = null
   }
 }
 
 watch(
-  [() => ctx.bootstrap.value, currentContentPk],
+  [() => ctx.bootstrap.value, currentContentPk, coursePkRef],
   () => {
     if (currentContentPk.value == null) void resolveFirstLesson()
   },
