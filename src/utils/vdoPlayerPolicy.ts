@@ -119,8 +119,19 @@ export interface SwitchInput {
   sameTarget: boolean
   /** Is the current player a v2 player (false → legacy 1.x)? */
   currentIsV2: boolean
-  /** Did the current player open a DRM session (played / loadVideo'd)? */
-  sessionOpen: boolean
+  /**
+   * Could the current player hold a DRM session? Deliberately generous (a tap
+   * inside the iframe counts): it only chooses the release gap.
+   */
+  mayHoldSession: boolean
+  /**
+   * Did a real `play` / `playing` event arrive for the video loaded RIGHT NOW?
+   * Only then does the player have a playback tech, and only then does it act
+   * on `loadVideo` — in lite mode, while it is still initialising after the
+   * tap, or while a previous `loadVideo` is initialising, the vendor player
+   * accepts the message and silently does nothing.
+   */
+  playConfirmed: boolean
   /** Is the Player API attached to the current iframe? */
   apiReady: boolean
   nextIsV2: boolean
@@ -132,19 +143,23 @@ export type SwitchAction =
   /** Nothing loaded yet: build a (lite) player. */
   | { action: 'create' }
   | { action: 'none' }
-  /** Session open and API ready: swap the video inside the same player. */
+  /** Playback confirmed and API ready: swap the video inside the same player. */
   | { action: 'load-video' }
-  /** Destroy + build a new player. `hadSession` picks the gap. */
-  | { action: 'recreate'; hadSession: boolean }
+  /**
+   * Destroy + build a new player. `hadSession` picks the gap; `undefined` =
+   * unknown (no API to tell us) and is treated as "yes" by the gap policy.
+   */
+  | { action: 'recreate'; hadSession: boolean | undefined }
 
 export function decideSwitch(s: SwitchInput): SwitchAction {
   if (!s.hasPlayer) return { action: 'create' }
   if (s.sameTarget) return { action: 'none' }
   // Legacy 1.x has no lite mode: it opened a session when it loaded.
-  const hadSession = s.currentIsV2 ? s.sessionOpen : true
-  if (!hadSession) return { action: 'recreate', hadSession: false }
-  if (s.currentIsV2 && s.apiReady && s.nextIsV2 && s.nextHasCredentials) return { action: 'load-video' }
-  return { action: 'recreate', hadSession: true }
+  if (!s.currentIsV2) return { action: 'recreate', hadSession: true }
+  if (s.playConfirmed && s.apiReady && s.nextIsV2 && s.nextHasCredentials) return { action: 'load-video' }
+  if (s.mayHoldSession || s.playConfirmed) return { action: 'recreate', hadSession: true }
+  // Nothing suggests a session. Without the API we cannot be sure: unknown.
+  return { action: 'recreate', hadSession: s.apiReady ? false : undefined }
 }
 
 // ---------------------------------------------------------------------------

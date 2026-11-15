@@ -68,6 +68,11 @@ function setup(over: { api?: VdoPlayerStatic | null; gap?: () => number } = {}):
 }
 
 const tick = (ms = 0): Promise<void> => jest.advanceTimersByTimeAsync(ms)
+type Fake = ReturnType<typeof fakeApi>
+/** What real Chrome fires when a tapped lite player starts: …play → playing. */
+const playback = (fake: Fake): void => { fake.emitVideo('play'); fake.emitVideo('playing') }
+/** What real Chrome fires when loadVideo really switches: abort, emptied, emptied, loadstart. */
+const switched = (fake: Fake): void => { fake.emitVideo('abort'); fake.emitVideo('emptied'); fake.emitVideo('emptied'); fake.emitVideo('loadstart') }
 
 describe('VdoCipherSession', () => {
   let warn: jest.SpyInstance
@@ -125,14 +130,17 @@ describe('VdoCipherSession', () => {
     s.session.show(t(1))
     await tick()
     const first = s.frames()[0]
-    fake.emitVideo('play')
+    playback(fake)
     expect(s.session.hasSession).toBe(true)
+    expect(s.session.canSwitchInPlace).toBe(true)
     s.session.show(t(2))
     await tick(350)
     expect(fake.loadVideo).toHaveBeenCalledTimes(1)
     expect(fake.loadVideo).toHaveBeenCalledWith({ otp: 'OTP2', playbackInfo: 'PB2' })
     expect(s.phases[s.phases.length - 1]).toBe('loading')
-    fake.emitVideo('loadstart')
+    expect(s.session.loaded).toBe(url(1)) // not claimed until the player proves it
+    expect(first?.getAttribute('title')).toBe('Lecture 1')
+    switched(fake)
     await tick()
     expect(s.phases[s.phases.length - 1]).toBe('ready')
     expect(s.frames()).toEqual([first]) // the iframe survived
@@ -148,7 +156,7 @@ describe('VdoCipherSession', () => {
     const s = setup({ api: fake.api })
     s.session.show(t(1))
     await tick()
-    fake.emitVideo('play')
+    playback(fake)
     s.session.show(t(2))
     await tick(200)
     s.session.show(t(3))
@@ -160,27 +168,218 @@ describe('VdoCipherSession', () => {
     s.session.destroy()
   })
 
-  it('serialised: a second loadVideo waits until the first shows a sign of life', async () => {
+  it('serialised: nothing else starts while a loadVideo is unconfirmed; the next switch needs its own play', async () => {
     const fake = fakeApi()
     const s = setup({ api: fake.api })
     s.session.show(t(1))
     await tick()
-    fake.emitVideo('play')
+    const first = s.frames()[0]
+    playback(fake)
     s.session.show(t(2))
     await tick(350)
     expect(fake.loadVideo).toHaveBeenCalledTimes(1)
     s.session.show(t(3))
     await tick(1000) // debounce long gone, but lesson 2 is still loading
     expect(fake.loadVideo).toHaveBeenCalledTimes(1)
-    fake.emitVideo('loadedmetadata')
+    expect(s.frames()).toEqual([first])
+    switched(fake) // lesson 2 is in…
+    playback(fake) // …and playing: the player has a tech again
     await tick()
     expect(fake.loadVideo).toHaveBeenCalledTimes(2)
     expect(fake.loadVideo).toHaveBeenLastCalledWith({ otp: 'OTP3', playbackInfo: 'PB3' })
-    // No sign of life at all: the queue is released after the settle timeout.
-    s.session.show(t(4))
-    await tick(4000)
-    expect(fake.loadVideo).toHaveBeenCalledTimes(3)
+    switched(fake)
+    await tick()
+    expect(s.session.loaded).toBe(url(3))
+    expect(s.frames()).toEqual([first])
     s.session.destroy()
+  })
+
+  it('switch → switch again before the first one is PLAYING: the second is a rebuild, never a second loadVideo', async () => {
+    const fake = fakeApi()
+    const s = setup({ api: fake.api })
+    s.session.show(t(1))
+    await tick()
+    const first = s.frames()[0]
+    playback(fake)
+    s.session.show(t(2))
+    await tick(350)
+    switched(fake) // lesson 2 started loading, but no play event yet
+    await tick()
+    expect(s.session.loaded).toBe(url(2))
+    expect(s.session.canSwitchInPlace).toBe(false)
+    s.session.show(t(3))
+    await tick(350)
+    await tick(500)
+    expect(fake.loadVideo).toHaveBeenCalledTimes(1) // the vendor player would have ignored a second one
+    expect(s.released).toEqual([{ kind: 'vdocipher', hadSession: true }])
+    expect(s.frames()).toHaveLength(1)
+    expect(s.frames()[0]).not.toBe(first)
+    expect(s.frames()[0]?.getAttribute('src')).toBe(`${url(3)}&litemode=true`)
+    expect(s.session.loaded).toBe(url(3))
+    s.session.destroy()
+  })
+
+  it('a loadVideo the player silently ignores ends in a REBUILT iframe for the right lesson, never "ready" on the old one', async () => {
+    const fake = fakeApi() // loadVideo resolves, and nothing happens: the vendor no-op
+    const s = setup({ api: fake.api })
+    s.session.show(t(1))
+    await tick()
+    const first = s.frames()[0]
+    playback(fake)
+    const before = s.phases.length
+    s.session.show(t(2))
+    await tick(350)
+    expect(fake.loadVideo).toHaveBeenCalledTimes(1)
+    await tick(5999)
+    expect(s.session.loaded).toBe(url(1)) // still honest
+    expect(first?.getAttribute('title')).toBe('Lecture 1')
+    expect(s.phases.slice(before)).toEqual(['loading']) // never "ready" for lesson 2 on lesson 1's iframe
+    await tick(1) // settle timeout = failure
+    await tick(500)
+    expect(s.released).toEqual([{ kind: 'vdocipher', hadSession: true }]) // played-gap
+    expect(s.frames()).toHaveLength(1)
+    expect(s.frames()[0]).not.toBe(first)
+    expect(s.frames()[0]?.getAttribute('src')).toBe(`${url(2)}&litemode=true`)
+    expect(s.frames()[0]?.getAttribute('title')).toBe('Lecture 2')
+    expect(s.session.loaded).toBe(url(2))
+    expect(s.phases[s.phases.length - 1]).toBe('ready')
+    s.session.destroy()
+  })
+
+  it('events arriving late from the PREVIOUS video do not count as the switch, nor as playback of the new one', async () => {
+    const fake = fakeApi()
+    const s = setup({ api: fake.api })
+    s.session.show(t(1))
+    await tick()
+    const first = s.frames()[0]
+    playback(fake)
+    s.session.show(t(2))
+    await tick(350)
+    // Stragglers of lesson 1 (its own load / play), with no `emptied` after our call:
+    for (const ev of ['loadstart', 'loadedmetadata', 'canplay', 'play', 'playing']) fake.emitVideo(ev)
+    await tick(100)
+    expect(s.session.loaded).toBe(url(1))
+    expect(s.session.canSwitchInPlace).toBe(false)
+    expect(s.phases[s.phases.length - 1]).toBe('loading')
+    // `emptied` alone is not enough either (the old media was dropped, nothing new came).
+    fake.emitVideo('emptied')
+    await tick(100)
+    expect(s.session.loaded).toBe(url(1))
+    fake.emitVideo('loadstart')
+    await tick()
+    expect(s.session.loaded).toBe(url(2))
+    expect(s.frames()).toEqual([first])
+    expect(s.session.canSwitchInPlace).toBe(false) // until lesson 2 itself plays
+    playback(fake)
+    expect(s.session.canSwitchInPlace).toBe(true)
+    s.session.destroy()
+  })
+
+  it('a tap inside a lite player (focus heuristic) never selects loadVideo; it only buys the played-gap', async () => {
+    const fake = fakeApi()
+    const s = setup({ api: fake.api })
+    s.session.show(t(1))
+    await tick()
+    const first = s.frames()[0] as HTMLIFrameElement
+    Object.defineProperty(document, 'activeElement', { configurable: true, get: () => first })
+    window.dispatchEvent(new Event('blur'))
+    delete (document as unknown as { activeElement?: unknown }).activeElement
+    expect(s.session.hasSession).toBe(true)
+    expect(s.session.canSwitchInPlace).toBe(false)
+    s.session.show(t(2))
+    await tick(350)
+    await tick(500)
+    expect(fake.loadVideo).not.toHaveBeenCalled()
+    expect(s.released).toEqual([{ kind: 'vdocipher', hadSession: true }])
+    expect(s.frames()[0]).not.toBe(first)
+    expect(s.frames()[0]?.getAttribute('src')).toBe(`${url(2)}&litemode=true`)
+    expect(s.session.loaded).toBe(url(2))
+    s.session.destroy()
+  })
+
+  it('a session error during a switch leaves the rebuild to recovery (one rebuild, after the backoff)', async () => {
+    const fake = fakeApi()
+    const s = setup({ api: fake.api })
+    s.session.show(t(1))
+    await tick()
+    playback(fake)
+    s.session.show(t(2))
+    await tick(350)
+    fake.emitError({ code: 6006 })
+    await tick(500)
+    expect(s.frames()).toHaveLength(0)
+    expect(s.phases[s.phases.length - 1]).toBe('recovering')
+    await tick(2000)
+    expect(s.frames()).toHaveLength(1)
+    expect(s.frames()[0]?.getAttribute('src')).toBe(`${url(2)}&litemode=true`)
+    expect(s.released).toHaveLength(1)
+    s.session.destroy()
+  })
+
+  it('v2 player whose API never attached: what it held is UNKNOWN, never "no session"', async () => {
+    const s = setup({ api: null })
+    s.session.show(t(1))
+    await tick()
+    s.session.show(t(2))
+    await tick(350)
+    await tick(500)
+    expect(s.released).toEqual([{ kind: 'vdocipher', hadSession: undefined }])
+    expect(s.frames()[0]?.getAttribute('src')).toBe(`${url(2)}&litemode=true`)
+    s.session.destroy()
+  })
+
+  it('stop() racing a new show(): never two iframes, and the late stop does not report idle', async () => {
+    const s = setup({ api: fakeApi().api })
+    s.session.show(t(1))
+    await tick()
+    const first = s.frames()[0]
+    const stopping = s.session.stop()
+    s.session.show(t(3))
+    expect(s.frames().length).toBeLessThanOrEqual(1)
+    for (let i = 0; i < 20; i++) {
+      await tick(25)
+      expect(s.frames().length).toBeLessThanOrEqual(1)
+    }
+    await stopping
+    await tick(500)
+    expect(s.frames()).toHaveLength(1)
+    expect(s.frames()[0]).not.toBe(first)
+    expect(s.frames()[0]?.getAttribute('src')).toBe(`${url(3)}&litemode=true`)
+    expect(s.phases[s.phases.length - 1]).toBe('ready')
+    expect(s.phases).not.toContain('idle')
+    s.session.destroy()
+  })
+
+  it('host not rendered yet: waits for it; no host at all: reports idle instead of loading forever', async () => {
+    const host = document.createElement('div')
+    let visible: HTMLElement | null = null
+    const phases: VdoSessionPhase[] = []
+    const session = new VdoCipherSession({
+      host: () => visible,
+      arbiter: { noteRelease: () => undefined, gapLeftMs: () => 0 },
+      onPhase: (p) => phases.push(p),
+      loadApi: () => Promise.resolve(null),
+    })
+    session.show(t(1))
+    await tick(100)
+    expect(phases[phases.length - 1]).toBe('loading')
+    document.body.appendChild(host)
+    visible = host
+    await tick(50)
+    expect(host.querySelectorAll('iframe')).toHaveLength(1)
+    expect(phases[phases.length - 1]).toBe('ready')
+    session.destroy()
+
+    const never = new VdoCipherSession({
+      host: () => null,
+      arbiter: { noteRelease: () => undefined, gapLeftMs: () => 0 },
+      onPhase: (p) => phases.push(p),
+      loadApi: () => Promise.resolve(null),
+    })
+    never.show(t(1))
+    await tick(5000)
+    expect(phases[phases.length - 1]).toBe('idle')
+    never.destroy()
   })
 
   it('loadVideo rejects → graceful teardown (session released) and a fresh lite player', async () => {
@@ -190,7 +389,7 @@ describe('VdoCipherSession', () => {
     s.session.show(t(1))
     await tick()
     const first = s.frames()[0]
-    fake.emitVideo('play')
+    playback(fake)
     s.session.show(t(2))
     await tick(350)
     expect(first?.getAttribute('src')).toBe('about:blank') // blanked BEFORE removal
@@ -256,7 +455,7 @@ describe('VdoCipherSession', () => {
     s.session.show(t(1))
     await tick()
     const first = s.frames()[0]
-    fake.emitVideo('play')
+    playback(fake)
     fake.emitError({ code: 6006, message: 'Multiple active videos', payload: { code: 6006, shaka: 6006, vdo: 0 } })
     expect(s.phases[s.phases.length - 1]).toBe('recovering')
     await tick()
@@ -357,7 +556,7 @@ describe('VdoCipherSession', () => {
     s.session.show(t(1))
     await tick()
     const frame = s.frames()[0] as HTMLIFrameElement
-    fake.emitVideo('play')
+    playback(fake)
     let info: ReleaseInfo | null = null
     void s.session.stop().then((i) => { info = i })
     expect(frame.getAttribute('src')).toBe('about:blank')
@@ -402,7 +601,7 @@ describe('VdoCipherSession', () => {
     s.session.show(t(1))
     await tick()
     const frame = s.frames()[0] as HTMLIFrameElement
-    expect(s.session.stopSync()).toEqual({ kind: 'vdocipher', hadSession: false })
+    expect(s.session.stopSync()).toEqual({ kind: 'vdocipher', hadSession: undefined }) // no API: unknown
     expect(frame.isConnected).toBe(false)
     expect(frame.getAttribute('src')).toBe('about:blank')
     s.session.destroy()

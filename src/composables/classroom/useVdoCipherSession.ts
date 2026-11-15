@@ -152,13 +152,21 @@ export interface VdoCipherSessionOptions {
 }
 
 /**
- * Media events that prove a `loadVideo` reached the player. Only events a NEW
- * load fires — `playing` / `canplay` could still come from the video being
- * replaced. (Real Chrome: loadstart → loadedmetadata → play → playing.)
+ * How a `loadVideo` proves it really happened (measured on real Chrome):
+ *   loadVideo() → abort, `emptied` (old media dropped, ~5 ms)
+ *               → `emptied`, `loadstart` (new media, 0.2–0.7 s) → loadedmetadata → play → playing
+ * The vendor player ACCEPTS the message and silently does nothing when it has
+ * no playback tech yet (lite mode, still initialising after the tap, a
+ * previous loadVideo still initialising). So success is `emptied` AFTER our
+ * call, followed by one of these — never the promise, never a timeout.
  */
-const LOAD_SIGNS = ['loadstart', 'loadedmetadata'] as const
+const SWITCH_SIGNS = ['loadstart', 'loadedmetadata'] as const
 
-const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+/** Result of watching one loadVideo. */
+interface SwitchWatch {
+  sawEmptied: boolean
+  settle: (ok: boolean) => void
+}
 
 const live = new Set<VdoCipherSession>()
 
@@ -182,11 +190,23 @@ export class VdoCipherSession {
   private epoch = 0
   private loadedSrc: string | null = null
   private wanted: VdoTarget | null = null
-  private sessionOpen = false
+  /**
+   * "The current player may hold a DRM session" — generous on purpose (a tap
+   * inside the iframe counts). Only ever used to pick the release gap.
+   */
+  private mayHoldSession = false
+  /**
+   * A real `play` / `playing` arrived for the video loaded right now. The ONLY
+   * thing that makes `loadVideo` eligible; cleared on every loadVideo and
+   * re-armed by the next play of the new video.
+   */
+  private playConfirmed = false
+  /** In-flight graceful teardown; a new iframe waits for it. */
+  private tearingDown: Promise<unknown> | null = null
   private recoveries = 0
   /** Set by a session error: the next run rebuilds after this delay. */
   private rebuildDelayMs: number | null = null
-  private loadSign: (() => void) | null = null
+  private switchWatch: SwitchWatch | null = null
   /** Was the current iframe built from a v2 URL (false → legacy 1.x)? */
   private builtV2 = false
   /** Wake-ups for in-flight waits, fired by stop() so nothing lingers. */
@@ -211,9 +231,14 @@ export class VdoCipherSession {
     return this.loadedSrc
   }
 
-  /** True once the current player opened a DRM session (played). */
+  /** True when the current player may hold a DRM session (tapped / played). */
   get hasSession(): boolean {
-    return this.iframe !== null && this.sessionOpen
+    return this.iframe !== null && this.mayHoldSession
+  }
+
+  /** True when playback of the loaded video was confirmed by the player. */
+  get canSwitchInPlace(): boolean {
+    return this.iframe !== null && this.player !== null && this.playConfirmed
   }
 
   /** Show this video. Rapid calls collapse to the last one. */
@@ -232,8 +257,9 @@ export class VdoCipherSession {
     this.queue.request(target, first)
   }
 
-  /** Help-panel "retry": start over with a fresh player. */
-  retry(): void {
+  /** Help-panel "retry" / "play here" after a failure: a fresh attempt. */
+  retry(target?: VdoTarget): void {
+    if (target) this.wanted = target
     if (this.destroyed || !this.wanted) return
     this.recoveries = 0
     this.rebuildDelayMs = null
@@ -250,7 +276,8 @@ export class VdoCipherSession {
     this.interrupt()
     this.rebuildDelayMs = null
     const info = await this.teardown()
-    if (this.phase !== 'failed') this.setPhase('idle')
+    // A show() that arrived while we were tearing down owns the phase now.
+    if (this.phase !== 'failed' && this.iframe === null && !this.queue.busy) this.setPhase('idle')
     return info
   }
 
@@ -316,7 +343,7 @@ export class VdoCipherSession {
    * open". Works even when api.js could not be loaded.
    */
   private readonly onWindowBlur = (): void => {
-    if (this.iframe && document.activeElement === this.iframe) this.sessionOpen = true
+    if (this.iframe && document.activeElement === this.iframe) this.mayHoldSession = true
   }
 
   /** One serialised switch (never overlaps another). */
@@ -338,7 +365,8 @@ export class VdoCipherSession {
         hasPlayer: this.iframe !== null,
         sameTarget: this.loadedSrc === target.src,
         currentIsV2: this.iframe !== null && this.builtV2,
-        sessionOpen: this.sessionOpen,
+        mayHoldSession: this.mayHoldSession,
+        playConfirmed: this.playConfirmed,
         apiReady: this.player !== null,
         nextIsV2: isV2PlayerUrl(target.src),
         nextHasCredentials: extractVdoCipherCredentials(target.src) !== null,
@@ -354,8 +382,10 @@ export class VdoCipherSession {
         case 'load-video':
           this.setPhase('loading')
           if (await this.loadVideo(target, epoch)) return
-          if (epoch !== this.epoch) return
-          // The API let us down: fall back to a clean rebuild.
+          // A session error during the switch: the queued recovery rebuilds.
+          if (epoch !== this.epoch || this.rebuildDelayMs !== null) return
+          // The player did not switch (ignored, rejected or timed out). Never
+          // leave lesson A playing under lesson B's title: rebuild cleanly.
           await this.teardown(true)
           if (epoch !== this.epoch) return
           await this.create(target, epoch)
@@ -373,12 +403,29 @@ export class VdoCipherSession {
 
   /** Build a fresh (lite) player once the release gap has passed. */
   private async create(target: VdoTarget, epoch: number): Promise<void> {
+    // Never two iframes: a graceful teardown still in flight finishes first.
+    while (this.tearingDown) {
+      await this.tearingDown.catch(() => undefined)
+      if (epoch !== this.epoch) return
+    }
     for (let left = this.opts.arbiter.gapLeftMs(); left > 0; left = this.opts.arbiter.gapLeftMs()) {
       await this.pause(left)
       if (epoch !== this.epoch) return
     }
-    const host = this.opts.host()
-    if (!host || epoch !== this.epoch || this.destroyed) return
+    // The host is rendered by the component; right after an invalid embed is
+    // replaced by a valid one it may not be in the DOM yet. Wait briefly.
+    let host = this.opts.host()
+    for (let tries = 0; !host && tries < 40; tries++) {
+      await this.pause(25)
+      if (epoch !== this.epoch || this.destroyed) return
+      host = this.opts.host()
+    }
+    if (epoch !== this.epoch || this.destroyed) return
+    if (!host) {
+      // Nowhere to put a player: say so instead of spinning forever.
+      this.setPhase('idle')
+      return
+    }
     const v2 = isV2PlayerUrl(target.src)
     const el = document.createElement('iframe')
     if (this.opts.frameClass) el.className = this.opts.frameClass
@@ -394,7 +441,8 @@ export class VdoCipherSession {
     this.builtV2 = v2
     this.loadedSrc = target.src
     // Legacy 1.x has no lite mode: it opens its session while loading.
-    this.sessionOpen = !v2
+    this.mayHoldSession = !v2
+    this.playConfirmed = false
     this.setPhase('ready')
     if (v2) void this.attachApi(el, this.gen)
   }
@@ -405,17 +453,24 @@ export class VdoCipherSession {
     try {
       const player = api.getInstance(el)
       const live = (): boolean => gen === this.gen
-      player.video.addEventListener('play', () => {
-        if (live()) this.sessionOpen = true
-      })
-      player.video.addEventListener('playing', () => {
+      const onPlay = (playing: boolean): void => {
         if (!live()) return
-        this.sessionOpen = true
-        this.recoveries = 0 // it plays: the device is healthy again
+        this.mayHoldSession = true
+        // While a loadVideo is unconfirmed, a play event may still belong to
+        // the video being replaced: it proves nothing about the new one.
+        if (this.switchWatch) return
+        this.playConfirmed = true
+        if (playing) this.recoveries = 0 // it plays: the device is healthy again
+      }
+      player.video.addEventListener('play', () => onPlay(false))
+      player.video.addEventListener('playing', () => onPlay(true))
+      player.video.addEventListener('emptied', () => {
+        if (live() && this.switchWatch) this.switchWatch.sawEmptied = true
       })
-      for (const sign of LOAD_SIGNS) {
+      for (const sign of SWITCH_SIGNS) {
         player.video.addEventListener(sign, () => {
-          if (live()) this.loadSign?.()
+          const watch = this.switchWatch
+          if (live() && watch?.sawEmptied) watch.settle(true)
         })
       }
       // Undocumented but accepted by api.js: player-level errors.
@@ -430,32 +485,47 @@ export class VdoCipherSession {
     }
   }
 
-  /** Swap the video inside the live player. False → caller must rebuild. */
+  /**
+   * Swap the video inside the live player. Resolves true ONLY when the player
+   * showed that it dropped the old media and started the new one; anything
+   * else (ignored message, rejection, timeout, error) is false and the caller
+   * rebuilds. `loadedSrc` / the title change only on that positive sign, so
+   * the UI can never claim a lesson the iframe did not load.
+   */
   private async loadVideo(target: VdoTarget, epoch: number): Promise<boolean> {
     const player = this.player
     const el = this.iframe
     const credentials = extractVdoCipherCredentials(target.src)
     if (!player || !el || !credentials) return false
-    const settleMs = this.opts.loadVideoSettleMs ?? 4000
+    const settleMs = this.opts.loadVideoSettleMs ?? 6000
+    let watch: SwitchWatch | null = null
     try {
-      const sign = new Promise<void>((resolve) => {
-        this.loadSign = resolve
+      const switched = new Promise<boolean>((resolve) => {
+        const mine: SwitchWatch = {
+          sawEmptied: false,
+          settle: (ok) => {
+            // Stop watching at once: the next play event belongs to the new video.
+            if (this.switchWatch === mine) this.switchWatch = null
+            resolve(ok)
+          },
+        }
+        watch = mine
+        this.switchWatch = mine
       })
+      // From here the old video's play state says nothing about the next one.
+      this.playConfirmed = false
+      this.mayHoldSession = true
       // Resolves when the message was SENT, not when the video is loaded.
-      await Promise.race([
-        Promise.resolve(player.api.loadVideo(credentials)),
-        sleep(settleMs).then(() => {
-          throw new Error('loadVideo timed out')
-        }),
-      ])
-      if (epoch !== this.epoch || this.iframe !== el) return true
+      void Promise.resolve(player.api.loadVideo(credentials)).catch(() => watch?.settle(false))
+      const ok = await Promise.race([switched, this.pause(settleMs).then(() => false)])
+      if (epoch !== this.epoch || this.iframe !== el) return true // stopped meanwhile: nothing to rebuild
+      if (!ok) {
+        logger.warn('[VdoCipher] the player did not switch videos; rebuilding it')
+        return false
+      }
       this.loadedSrc = target.src
-      this.sessionOpen = true // loadVideo always runs non-lite and autoplays
       el.setAttribute('title', target.title || 'Video')
-      // Hold the queue until the player shows a sign of life (or gives up
-      // waiting), so two loadVideo calls never overlap inside the player.
-      await Promise.race([sign, this.pause(settleMs)])
-      if (epoch === this.epoch && this.iframe === el && this.rebuildDelayMs === null) this.setPhase('ready')
+      if (this.rebuildDelayMs === null) this.setPhase('ready')
       return true
     } catch (e) {
       logger.warn('[VdoCipher] loadVideo failed; rebuilding the player', {
@@ -463,7 +533,7 @@ export class VdoCipherSession {
       })
       return false
     } finally {
-      this.loadSign = null
+      if (this.switchWatch === watch) this.switchWatch = null
     }
   }
 
@@ -477,8 +547,10 @@ export class VdoCipherSession {
       recoveries: this.recoveries,
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
     })
-    this.loadSign?.()
-    if (!session || this.rebuildDelayMs !== null || this.phase === 'recovering' || this.phase === 'failed') return
+    if (!session || this.rebuildDelayMs !== null || this.phase === 'recovering' || this.phase === 'failed') {
+      this.switchWatch?.settle(false)
+      return
+    }
     const delay = recoveryDelayMs(this.recoveries + 1)
     if (delay === null) {
       // Out of automatic retries: free the player and ask the student.
@@ -491,51 +563,72 @@ export class VdoCipherSession {
     this.recoveries++
     this.rebuildDelayMs = delay
     this.setPhase('recovering')
+    // After rebuildDelayMs is set, so an in-flight switch leaves it to recovery.
+    this.switchWatch?.settle(false)
     if (this.wanted) this.queue.request(this.wanted, true)
   }
 
   /** Forget the current iframe; returns what it held. */
   private detach(): ReleaseInfo {
-    const hadSession = this.iframe !== null && this.sessionOpen
+    const had = this.iframe !== null
+    // true: something suggested a session. false: the API was attached and saw
+    // no playback. undefined: a v2 player we could not observe → unknown, which
+    // the gap policy treats as "yes".
+    const hadSession: boolean | undefined = !had
+      ? false
+      : this.mayHoldSession || this.playConfirmed
+        ? true
+        : this.builtV2 && this.player === null
+          ? undefined
+          : false
     this.iframe = null
     this.player = null
     this.loadedSrc = null
-    this.sessionOpen = false
-    this.loadSign?.()
+    this.mayHoldSession = false
+    this.playConfirmed = false
+    this.switchWatch?.settle(false)
     this.gen++
     return { kind: 'vdocipher', hadSession }
   }
 
   /**
    * about:blank → wait for it to load → remove → start the gap. `forceSession`
-   * is for error recovery, where a (broken) session certainly existed.
+   * is for error recovery / a failed switch, where a session certainly existed.
    */
-  private async teardown(forceSession = false): Promise<ReleaseInfo> {
+  private teardown(forceSession: boolean | undefined = false): Promise<ReleaseInfo> {
     const el = this.iframe
     const info = this.detach()
-    if (forceSession) info.hadSession = true
-    if (!el) return { kind: 'vdocipher', hadSession: false }
-    if (el.isConnected) {
-      await new Promise<void>((resolve) => {
-        let done = false
-        const finish = (): void => {
-          if (done) return
-          done = true
-          clearTimeout(timer)
-          el.removeEventListener('load', finish)
-          resolve()
-        }
-        const timer = setTimeout(finish, this.opts.blankTimeoutMs ?? 450)
-        el.addEventListener('load', finish)
-        try {
-          el.src = 'about:blank'
-        } catch {
-          finish()
-        }
-      })
-    }
-    el.remove()
-    this.opts.arbiter.noteRelease(info)
-    return info
+    if (forceSession === true) info.hadSession = true
+    else if (forceSession === undefined && info.hadSession === false) info.hadSession = undefined
+    if (!el) return Promise.resolve({ kind: 'vdocipher', hadSession: false })
+    const work = (async (): Promise<ReleaseInfo> => {
+      if (el.isConnected) {
+        await new Promise<void>((resolve) => {
+          let done = false
+          const finish = (): void => {
+            if (done) return
+            done = true
+            clearTimeout(timer)
+            el.removeEventListener('load', finish)
+            resolve()
+          }
+          const timer = setTimeout(finish, this.opts.blankTimeoutMs ?? 450)
+          el.addEventListener('load', finish)
+          try {
+            el.src = 'about:blank'
+          } catch {
+            finish()
+          }
+        })
+      }
+      el.remove()
+      this.opts.arbiter.noteRelease(info)
+      return info
+    })()
+    const tracked = work.finally(() => {
+      if (this.tearingDown === tracked) this.tearingDown = null
+    })
+    this.tearingDown = tracked
+    return tracked
   }
 }

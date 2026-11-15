@@ -144,6 +144,8 @@ const stopped = ref<'elsewhere' | 'away' | null>(null)
 /** True while this component holds the arbiter's go-ahead to load. */
 let ready = false
 let unmounted = false
+/** Bumped by every claim: a late release from an older state checks it. */
+let claimSeq = 0
 let idleTimer: ReturnType<typeof setTimeout> | null = null
 
 const session = new VdoCipherSession({
@@ -188,10 +190,14 @@ function onRevoke(reason: RevokeReason): RevokeResult {
 function start(): void {
   if (unmounted || !target.value) return
   stopped.value = null
+  claimSeq++
   arbiter.claim(playerId, onRevoke, () => {
-    if (unmounted || arbiter.activeId() !== playerId) return
+    if (unmounted || arbiter.activeId() !== playerId || !target.value) return
     ready = true
-    if (target.value) session.show(target.value)
+    // "Play here" after the help panel was up (failed, then taken over by
+    // another tab) is a fresh attempt, not a second trip to the help panel.
+    if (phase.value === 'failed') session.retry(target.value)
+    else session.show(target.value)
   })
 }
 
@@ -210,13 +216,20 @@ watch(
     const next = target.value
     if (!src || !next) {
       ready = false
-      void session.stop().then((info) => arbiter.release(playerId, info))
+      const seq = ++claimSeq
+      void session.stop().then((info) => {
+        // A valid lesson may have re-claimed meanwhile: never drop that claim.
+        if (seq === claimSeq && !unmounted) arbiter.release(playerId, info)
+      })
       return
     }
     // A lesson picked here is an explicit "play here", whoever holds the player.
     if (ready && arbiter.activeId() === playerId) session.show(next)
     else start()
   },
+  // After render: going from an invalid embed to a valid one, the host element
+  // the iframe goes into only exists once the template has re-rendered.
+  { flush: 'post' },
 )
 
 // Keep the iframe's accessible name in step when only the title changes.

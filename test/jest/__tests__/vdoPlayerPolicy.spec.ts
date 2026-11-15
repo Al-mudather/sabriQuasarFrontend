@@ -94,7 +94,8 @@ describe('vdoPlayerPolicy decideSwitch', () => {
     hasPlayer: true,
     sameTarget: false,
     currentIsV2: true,
-    sessionOpen: false,
+    mayHoldSession: false,
+    playConfirmed: false,
     apiReady: true,
     nextIsV2: true,
     nextHasCredentials: true,
@@ -106,29 +107,37 @@ describe('vdoPlayerPolicy decideSwitch', () => {
   })
 
   it('does nothing when the wanted video is already loaded', () => {
-    expect(decideSwitch({ ...base, sameTarget: true, sessionOpen: true })).toEqual({ action: 'none' })
+    expect(decideSwitch({ ...base, sameTarget: true, mayHoldSession: true, playConfirmed: true })).toEqual({ action: 'none' })
   })
 
-  it('never played (lite): rebuilds, with nothing to release', () => {
+  it('never played, API watching: rebuilds, with nothing to release', () => {
     expect(decideSwitch(base)).toEqual({ action: 'recreate', hadSession: false })
-    // The API being unavailable does not matter when no session exists.
-    expect(decideSwitch({ ...base, apiReady: false })).toEqual({ action: 'recreate', hadSession: false })
   })
 
-  it('played: switches inside the player with loadVideo', () => {
-    expect(decideSwitch({ ...base, sessionOpen: true })).toEqual({ action: 'load-video' })
+  it('never played but NO API to confirm it: rebuilds as "unknown", never as "no session"', () => {
+    expect(decideSwitch({ ...base, apiReady: false })).toEqual({ action: 'recreate', hadSession: undefined })
+  })
+
+  it('playback confirmed for the current video: switches inside the player with loadVideo', () => {
+    expect(decideSwitch({ ...base, mayHoldSession: true, playConfirmed: true })).toEqual({ action: 'load-video' })
+  })
+
+  it('a tap alone (no play event yet) NEVER selects loadVideo — the player would ignore it', () => {
+    // Lite player just tapped, or still initialising, or a previous loadVideo not yet playing.
+    expect(decideSwitch({ ...base, mayHoldSession: true, playConfirmed: false })).toEqual({ action: 'recreate', hadSession: true })
   })
 
   it('played but loadVideo is impossible: graceful rebuild that counts as a released session', () => {
     const rebuilt = { action: 'recreate', hadSession: true }
-    expect(decideSwitch({ ...base, sessionOpen: true, apiReady: false })).toEqual(rebuilt)
-    expect(decideSwitch({ ...base, sessionOpen: true, nextIsV2: false })).toEqual(rebuilt)
-    expect(decideSwitch({ ...base, sessionOpen: true, nextHasCredentials: false })).toEqual(rebuilt)
+    const played = { ...base, mayHoldSession: true, playConfirmed: true }
+    expect(decideSwitch({ ...played, apiReady: false })).toEqual(rebuilt)
+    expect(decideSwitch({ ...played, nextIsV2: false })).toEqual(rebuilt)
+    expect(decideSwitch({ ...played, nextHasCredentials: false })).toEqual(rebuilt)
   })
 
   it('legacy 1.x player: always holds a session and can only be rebuilt', () => {
-    expect(decideSwitch({ ...base, currentIsV2: false, sessionOpen: false })).toEqual({ action: 'recreate', hadSession: true })
-    expect(decideSwitch({ ...base, currentIsV2: false, sessionOpen: true })).toEqual({ action: 'recreate', hadSession: true })
+    expect(decideSwitch({ ...base, currentIsV2: false })).toEqual({ action: 'recreate', hadSession: true })
+    expect(decideSwitch({ ...base, currentIsV2: false, mayHoldSession: true, playConfirmed: true })).toEqual({ action: 'recreate', hadSession: true })
   })
 })
 

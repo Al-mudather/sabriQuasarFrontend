@@ -103,15 +103,64 @@ describe('VdoCipherPlayer', () => {
     await settle()
     const frame = w.find('iframe').element
     fire(videoHandlers, 'play')
+    fire(videoHandlers, 'playing')
     await w.setProps({ cipherIframe: block(V2(2)), title: 'L2' })
     await settle(400)
     expect(loadVideo).toHaveBeenCalledWith({ otp: 'O2', playbackInfo: 'P2' })
+    expect(w.find('.cls-vdo__busy').exists()).toBe(true) // not "ready" until the player proves the switch
+    fire(videoHandlers, 'emptied')
     fire(videoHandlers, 'loadstart')
     await settle()
+    expect(w.find('.cls-vdo__busy').exists()).toBe(false)
     expect(iframeCount()).toBe(1)
     expect(w.find('iframe').element).toBe(frame)
     expect(w.find('iframe').attributes('title')).toBe('L2')
     w.unmount()
+  })
+
+  it('invalid embed → valid embed on the SAME component: the player appears, no endless spinner', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const w = mount(VdoCipherPlayer, { props: { cipherIframe: '<p>not a player</p>', title: 'L1' }, global, attachTo: document.body })
+    await settle()
+    expect(iframeCount()).toBe(0)
+    await w.setProps({ cipherIframe: block(V2(1)), title: 'L1' })
+    await settle()
+    expect(iframeCount()).toBe(1)
+    expect(w.find('iframe').attributes('src')).toBe(`${V2(1)}&litemode=true`)
+    expect(w.find('.cls-vdo__busy').exists()).toBe(false)
+    expect(w.attributes('data-state')).toBe('player')
+    // …and back to invalid, then valid again: the late release must not drop the new claim.
+    await w.setProps({ cipherIframe: '<p>oops</p>' })
+    await w.setProps({ cipherIframe: block(V2(2)) })
+    await settle()
+    expect(iframeCount()).toBe(1)
+    expect(w.find('iframe').attributes('src')).toBe(`${V2(2)}&litemode=true`)
+    await w.setProps({ cipherIframe: block(V2(1)) }) // still the holder: a later switch works
+    await settle()
+    expect(w.find('iframe').attributes('src')).toBe(`${V2(1)}&litemode=true`)
+    warn.mockRestore()
+    w.unmount()
+  })
+
+  it('help panel up, then another player takes over: ONE tap on "play here" gives a fresh player', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const a = mount(VdoCipherPlayer, { props: { cipherIframe: block(V2(1)) }, global, attachTo: document.body })
+    await settle()
+    for (let i = 0; i < 3; i++) {
+      fire(apiHandlers, 'error', { code: 6006 })
+      await settle(8000)
+    }
+    expect(a.attributes('data-state')).toBe('failed')
+    const b = mount(VdoCipherPlayer, { props: { cipherIframe: block(V2(2)) }, global, attachTo: document.body })
+    await settle()
+    expect(a.attributes('data-state')).toBe('stopped')
+    await a.find('button').trigger('click')
+    await settle()
+    expect(a.attributes('data-state')).toBe('player')
+    expect(a.find('iframe').exists()).toBe(true)
+    expect(b.find('iframe').exists()).toBe(false)
+    warn.mockRestore()
+    a.unmount(); b.unmount()
   })
 
   it('a second player revokes the first; "play here" takes it back', async () => {
