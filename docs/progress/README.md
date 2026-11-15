@@ -70,6 +70,7 @@ a later block is `1.2`, a new phase is `2`. Never renumber old entries.
 | 1.1.38 | [Home hero: huge empty gap under the portrait on real iOS](1.1.38-hero-safari-gap.md) | ✅ | `hero-safari-gap` |
 | 1.1.39 | ["Receipt not accepted" was really a duplicate-affiliate data fault](1.1.39-duplicate-affiliate-error.md) | ✅ | `duplicate-affiliate-error` |
 | 1.1.41 | [VdoCipher "Error 6006": one persistent player, lite mode, resume, recovery](1.1.41-vdocipher-6006-persistent-player.md) | 🟡 | `vdocipher-6006-persistent-player` |
+| 1.1.42 | [Al-Hasif player: Speed and Quality buttons, bottom sheet, double-tap seek](1.1.42-hasif-player-speed-quality-sheet.md) | 🟡 | `bb4b060` |
 
 Tags: each commit also carries a descriptive git tag — e.g. `registration-code-gate`,
 `payment-code-gate`, `regcode-null-fix`, `userinfo-bidi-direction`,
