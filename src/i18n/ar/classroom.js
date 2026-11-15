@@ -67,7 +67,13 @@ export default {
       volume: 'مستوى الصوت',
       speed: 'السرعة',
       quality: 'الجودة',
-      more: 'خيارات أخرى',
+      speedTitle: 'سرعة التشغيل',
+      qualityTitle: 'جودة الفيديو',
+      auto: 'تلقائي',
+      normal: 'عادي',
+      close: 'إغلاق',
+      seekSecondsFew: '{n} ثوانٍ',
+      seekSecondsMany: '{n} ثانية',
       fullscreen: 'ملء الشاشة',
       exitFullscreen: 'إنهاء ملء الشاشة'
     }

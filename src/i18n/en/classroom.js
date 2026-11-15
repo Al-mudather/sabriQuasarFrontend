@@ -67,7 +67,13 @@ export default {
       volume: 'Volume',
       speed: 'Speed',
       quality: 'Quality',
-      more: 'More options',
+      speedTitle: 'Playback speed',
+      qualityTitle: 'Video quality',
+      auto: 'Auto',
+      normal: 'Normal',
+      close: 'Close',
+      seekSecondsFew: '{n} seconds',
+      seekSecondsMany: '{n} seconds',
       fullscreen: 'Fullscreen',
       exitFullscreen: 'Exit fullscreen'
     }

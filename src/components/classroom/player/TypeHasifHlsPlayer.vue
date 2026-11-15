@@ -15,13 +15,30 @@
       <video ref="videoEl" playsinline class="cls-hasif__video video-js" />
 
       <!-- Click anywhere on the picture to toggle play (YouTube-style). In
-           fullscreen, the first tap when controls are hidden just reveals them. -->
+           fullscreen, the first tap when controls are hidden just reveals them.
+           On touch, a double-tap on the left / right half seeks −10 s / +10 s. -->
       <button
+        ref="surfaceRef"
         type="button"
         class="cls-hasif__surface"
         :aria-label="state.playing ? $t('classroom.player.controls.pause') : $t('classroom.player.controls.play')"
+        @pointerdown="onSurfacePointerDown"
         @click="onSurfaceClick"
       ></button>
+
+      <!-- Double-tap feedback. dir=ltr + physical left/right on purpose: the
+           left half means "back" in every locale, like the scrub row. -->
+      <div
+        v-if="seekFlash"
+        :key="seekFlash.id"
+        class="cls-hasif__seekflash"
+        :data-side="seekFlash.side"
+        dir="ltr"
+        aria-hidden="true"
+      >
+        <q-icon :name="seekFlash.side === 'back' ? 'fast_rewind' : 'fast_forward'" size="30px" />
+        <span dir="auto">{{ $t('classroom.player.controls.' + seekSecondsKey(seekFlash.total), { n: seekFlash.total }) }}</span>
+      </div>
 
       <div v-if="state.buffering" class="cls-hasif__spinner">
         <q-spinner-dots color="secondary" size="42px" />
@@ -41,6 +58,7 @@
       :rate="state.rate"
       :qualities="qualities"
       :active-quality-id="activeQualityId"
+      :playing-height="state.videoHeight"
       :is-fullscreen="isFullscreen"
       @toggle-play="togglePlay"
       @seek="seek"
@@ -50,6 +68,7 @@
       @toggle-mute="toggleMute"
       @set-quality="setQuality"
       @toggle-fullscreen="toggleFullscreen"
+      @menu-open="onMenuOpen"
     />
   </div>
 </template>
@@ -72,6 +91,15 @@ import {
   exitFullscreen,
   FS_CHANGE_EVENTS,
 } from 'src/composables/classroom/useFullscreen'
+import {
+  DOUBLE_TAP_MS,
+  INITIAL_TAP_STATE,
+  classifyTap,
+  seekSecondsKey,
+  tapSide,
+  type TapSide,
+  type TapState,
+} from 'src/utils/playerControls'
 
 const props = defineProps<{
   videoUuid: string
@@ -134,6 +162,8 @@ function onFullscreenChange(): void {
 const HIDE_DELAY_MS = 2800
 const controlsVisible = ref(true)
 const hoveringControls = ref(false)
+/** A speed/quality list is open — never hide the bar underneath it. */
+const menuOpen = ref(false)
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 
 function clearHideTimer(): void {
@@ -143,9 +173,9 @@ function clearHideTimer(): void {
 function scheduleHide(): void {
   clearHideTimer()
   // Only auto-hide in fullscreen, while playing, and not hovering the bar.
-  if (!isFullscreen.value || !state.playing || hoveringControls.value) return
+  if (!isFullscreen.value || !state.playing || hoveringControls.value || menuOpen.value) return
   hideTimer = setTimeout(() => {
-    if (isFullscreen.value && state.playing && !hoveringControls.value) {
+    if (isFullscreen.value && state.playing && !hoveringControls.value && !menuOpen.value) {
       controlsVisible.value = false
     }
   }, HIDE_DELAY_MS)
@@ -167,15 +197,90 @@ function onControlsLeave(): void {
   scheduleHide()
 }
 
-/** Surface tap: in fullscreen, a tap while controls are hidden only reveals
- *  them (don't also toggle play); otherwise toggle play as usual. */
-function onSurfaceClick(): void {
-  if (isFullscreen.value && !controlsVisible.value) {
+/** Open list → pin the controls; closed → restart the idle countdown. */
+function onMenuOpen(open: boolean): void {
+  menuOpen.value = open
+  if (open) { clearHideTimer(); controlsVisible.value = true }
+  else scheduleHide()
+}
+
+// ---------------------------------------------------------------------------
+// Picture taps.
+//
+// Mouse / keyboard: a click toggles play at once, as before.
+// Touch: YouTube-style — two quick taps on the left / right half seek −10 s /
+// +10 s (more taps keep adding). Because a tap may be the first half of a
+// double-tap, the single-tap action waits DOUBLE_TAP_MS on touch only, so
+// playback never flickers pause→play around a seek. The classification itself
+// is pure (src/utils/playerControls.ts).
+const surfaceRef = ref<HTMLButtonElement | null>(null)
+/** Pointer type of the press that led to the coming click ('' = keyboard). */
+let pressPointerType = ''
+/** Were the fullscreen controls hidden when this press began? The shell's own
+ *  touchstart reveals them before `click` fires, so it is sampled on press. */
+let hiddenAtPress = false
+let tapState: TapState = INITIAL_TAP_STATE
+let singleTapTimer: ReturnType<typeof setTimeout> | null = null
+
+interface SeekFlash { id: number; side: TapSide; total: number }
+const SEEK_FLASH_MS = 650
+const seekFlash = ref<SeekFlash | null>(null)
+let seekFlashTimer: ReturnType<typeof setTimeout> | null = null
+let seekFlashSeq = 0
+
+function clearSingleTapTimer(): void {
+  if (singleTapTimer) { clearTimeout(singleTapTimer); singleTapTimer = null }
+}
+
+function onSurfacePointerDown(e: PointerEvent): void {
+  pressPointerType = e.pointerType
+  hiddenAtPress = isFullscreen.value && !controlsVisible.value
+}
+
+/** Single-tap / click action: in fullscreen, a tap while controls are hidden
+ *  only reveals them (don't also toggle play); otherwise toggle play. */
+function runSingleTap(wasHidden: boolean): void {
+  if (wasHidden) {
     nudgeControls()
     return
   }
   togglePlay()
   nudgeControls()
+}
+
+function showSeekFlash(side: TapSide, total: number): void {
+  seekFlash.value = { id: ++seekFlashSeq, side, total }
+  if (seekFlashTimer) clearTimeout(seekFlashTimer)
+  seekFlashTimer = setTimeout(() => { seekFlash.value = null; seekFlashTimer = null }, SEEK_FLASH_MS)
+}
+
+function onSurfaceClick(e: MouseEvent): void {
+  const pointerType = pressPointerType
+  const wasHidden = hiddenAtPress || (isFullscreen.value && !controlsVisible.value)
+  pressPointerType = ''
+  hiddenAtPress = false
+
+  if (pointerType !== 'touch') {
+    runSingleTap(wasHidden)
+    return
+  }
+
+  const rect = surfaceRef.value?.getBoundingClientRect()
+  const side = tapSide(e.clientX - (rect?.left ?? 0), rect?.width ?? 0)
+  const { state: next, outcome } = classifyTap(tapState, { time: e.timeStamp, side })
+  tapState = next
+  clearSingleTapTimer()
+
+  if (outcome.kind === 'seek') {
+    if (state.ready) skip(outcome.delta)
+    showSeekFlash(outcome.side, outcome.total)
+    return
+  }
+  singleTapTimer = setTimeout(() => {
+    singleTapTimer = null
+    tapState = INITIAL_TAP_STATE
+    runSingleTap(wasHidden)
+  }, DOUBLE_TAP_MS)
 }
 
 // Pause → always show controls; play/enter-fullscreen → start the idle cycle.
@@ -237,6 +342,8 @@ onBeforeUnmount(() => {
     document.removeEventListener(evt, onFullscreenChange)
   }
   clearHideTimer()
+  clearSingleTapTimer()
+  if (seekFlashTimer) clearTimeout(seekFlashTimer)
   // useVideoJsPlayer disposes the player on its own onBeforeUnmount.
 })
 </script>
@@ -287,6 +394,37 @@ onBeforeUnmount(() => {
     padding: 0;
     background: transparent;
     cursor: pointer;
+    // No double-tap-to-zoom and no 300 ms click delay: we read double taps.
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  // Double-tap feedback: a soft half-disc on the tapped side with "10 ثوانٍ".
+  &__seekflash {
+    position: absolute;
+    inset-block: 0;
+    inline-size: 42%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(245, 242, 234, 0.16);
+    pointer-events: none;
+    animation: cls-hasif-seekflash 650ms ease-out both;
+
+    &[data-side='back'] {
+      left: 0;
+      border-radius: 0 50% 50% 0 / 0 100% 100% 0;
+    }
+    &[data-side='forward'] {
+      right: 0;
+      border-radius: 50% 0 0 50% / 100% 0 0 100%;
+    }
   }
 
   &__spinner {
@@ -297,6 +435,17 @@ onBeforeUnmount(() => {
     justify-content: center;
     pointer-events: none;
   }
+}
+
+@keyframes cls-hasif-seekflash {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cls-hasif__seekflash { animation-duration: 1ms; animation-fill-mode: none; }
 }
 
 // ---- Fullscreen: stage fills the screen, control bar overlays the bottom ----

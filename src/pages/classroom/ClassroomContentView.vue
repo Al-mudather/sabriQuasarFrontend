@@ -838,6 +838,26 @@ function onSelect(contentPk: number): void {
     align-items: center;
   }
 
+  // Al-Hasif's control bar ends with a row of two buttons (speed / quality).
+  // Keep that row clear of the floating lesson-list button (60px + 16px gap,
+  // pinned above the footer), and when the stage is taller than the screen
+  // (landscape phones) let it scroll from its top instead of clipping it.
+  .cls-cockpit[data-kind='video'] .cls-cockpit__media[data-provider='type_hasif'] {
+    margin-block-end: 84px;
+  }
+  // Landscape phones: the footer collapses, so the button sits lower
+  // relative to the scrolling column — leave room for all of it.
+  @media (max-height: 500px) {
+    .cls-cockpit[data-kind='video'] .cls-cockpit__media[data-provider='type_hasif'] {
+      margin-block-end: 136px;
+    }
+  }
+  @supports selector(:has(*)) {
+    .cls-cockpit[data-kind='video'] .cls-cockpit__main:has(.cls-cockpit__media[data-provider='type_hasif']) {
+      align-items: safe center;
+    }
+  }
+
   // Full-bleed edge-to-edge video on mobile (no rounded corners).
   .cls-cockpit[data-kind='video'] .cls-cockpit__media {
     border-radius: 0;

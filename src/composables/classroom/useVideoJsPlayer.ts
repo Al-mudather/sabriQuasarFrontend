@@ -47,6 +47,9 @@ export interface VideoJsState {
   volume: number
   muted: boolean
   rate: number
+  /** Height (px) of the picture actually being decoded; 0 until known. Lets
+   *  the quality button say what "auto" is playing right now. */
+  videoHeight: number
   error: string | null
 }
 
@@ -59,6 +62,8 @@ interface QualityLevel {
 interface QualityLevelList {
   length: number
   readonly [index: number]: QualityLevel
+  /** Index of the rendition being downloaded right now, or -1. */
+  readonly selectedIndex?: number
   on(event: string, cb: () => void): void
 }
 interface PluginSurface {
@@ -66,6 +71,14 @@ interface PluginSurface {
 }
 
 export const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] as const
+
+/**
+ * What the student chose, for the rest of this visit to the app. The classroom
+ * mounts a NEW player (and a new instance of this composable) for every Hasif
+ * lesson, so without this a student watching at 1.5× / 360p would have to pick
+ * both again on each lesson. In memory only: a reload starts from the defaults.
+ */
+const sessionPrefs: { rate: number; height: number | null } = { rate: 1, height: null }
 
 export interface UseVideoJsPlayerCallbacks {
   onBegin?: () => void
@@ -86,6 +99,7 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
     volume: 1,
     muted: false,
     rate: 1,
+    videoHeight: 0,
     error: null,
   })
 
@@ -94,9 +108,16 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
   const activeQualityId = ref<string>('auto')
 
   let player: PlayerInstance | null = null
+  /** The <video> itself (video.js keeps using the element it was given). */
+  let mediaEl: HTMLVideoElement | null = null
   let levels: QualityLevelList | null = null
   let beginEmitted = false
   let hasSource = false
+  /** Height the student locked quality to (null = auto). Kept across lessons:
+   *  each new source brings a fresh level list with everything enabled, so
+   *  the lock is re-applied by height (or dropped to auto when that height
+   *  does not exist in the new ladder) — the label never lies. */
+  let preferredHeight: number | null = sessionPrefs.height
 
   function buildSrc(uuid: string): string {
     return `https://video.cdn1.stc.training/stream/hls/${uuid}/playlist.m3u8`
@@ -113,6 +134,67 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
     const auto = out[0]!
     const rest = out.slice(1).sort((a, b) => (b.height ?? 0) - (a.height ?? 0))
     qualities.value = [auto, ...rest]
+    applyPreferredQuality()
+  }
+
+  /**
+   * Enable exactly rendition `target`, or everything (ABR) for -1.
+   *
+   * `immediate` (a choice the student just made): VHS only does its fast
+   * switch — drop the forward buffer and refetch from the playhead — when a
+   * rendition goes disabled → enabled, and it switches TO that rendition
+   * (debounced, last call wins). Merely disabling the others leaves up to
+   * ~30 s of the old quality in the buffer, so the picture would change half
+   * a minute after the tap. We therefore finish with an off → on toggle of:
+   *   - the chosen rendition (lock)  → fast switch to it, now;
+   *   - the one already playing (auto) → VHS sees "same as current" and keeps
+   *     the buffer; ABR simply takes over from the next segment.
+   */
+  function enableOnly(target: number, immediate: boolean): void {
+    if (!levels) return
+    const last = !immediate ? -1 : target === -1 ? (levels.selectedIndex ?? -1) : target
+    for (let i = 0; i < levels.length; i++) {
+      if (i === last) continue
+      const level = levels[i]
+      const enable = target === -1 || i === target
+      if (level && level.enabled !== enable) level.enabled = enable
+    }
+    const lastLevel = last >= 0 ? levels[last] : undefined
+    if (lastLevel) {
+      if (lastLevel.enabled) lastLevel.enabled = false
+      lastLevel.enabled = true
+    }
+  }
+
+  /** Apply the remembered lock (by height) to the current level list. */
+  function applyPreferredQuality(immediate = false): void {
+    if (!levels) return
+    let target = -1
+    if (preferredHeight !== null) {
+      for (let i = 0; i < levels.length; i++) {
+        if (levels[i]?.height === preferredHeight) { target = i; break }
+      }
+    }
+    enableOnly(target, immediate)
+    activeQualityId.value = target === -1 ? 'auto' : String(target)
+  }
+
+  /** The speed really in effect. Read from the element: video.js's own
+   *  getter answers from a cache that only follows 'ratechange' events, and a
+   *  source load can change the rate without one. */
+  function actualRate(): number {
+    const fromEl = mediaEl?.playbackRate
+    if (typeof fromEl === 'number' && fromEl > 0) return fromEl
+    return player?.playbackRate() ?? 1
+  }
+
+  function syncVideoHeight(): void {
+    if (!player) return
+    try {
+      state.videoHeight = player.videoHeight() ?? 0
+    } catch {
+      /* tech not ready */
+    }
   }
 
   function syncBuffered(): void {
@@ -133,6 +215,7 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
     // Chrome lies and returns "maybe" for it, which would wrongly disable VHS
     // on desktop (kills the quality menu). video.js's browser flags are correct.
     const nativeHls = videojs.browser.IS_ANY_SAFARI || videojs.browser.IS_IPAD
+    mediaEl = el
 
     player = videojs(el, {
       controls: false,
@@ -160,10 +243,11 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
         levels.on('removequalitylevel', refreshQualities)
         refreshQualities()
       }
+      if (sessionPrefs.rate !== 1) applyRate(sessionPrefs.rate)
       state.ready = true
       state.volume = player?.volume() ?? 1
       state.muted = player?.muted() ?? false
-      state.rate = player?.playbackRate() ?? 1
+      state.rate = actualRate()
     })
 
     player.on('play', () => {
@@ -191,7 +275,17 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
       state.volume = player.volume() ?? 0
       state.muted = player.muted() ?? false
     })
-    player.on('ratechange', () => { state.rate = player?.playbackRate() ?? 1 })
+    player.on('ratechange', () => { state.rate = actualRate() })
+    // 'resize' fires on the media element whenever the decoded picture size
+    // changes — i.e. on every real rendition switch (ABR or manual).
+    player.on(['resize', 'loadedmetadata', 'playing'], syncVideoHeight)
+    // A freshly loaded source may come up at the element's default rate
+    // without a 'ratechange' we can rely on — re-assert the chosen speed.
+    player.on('loadedmetadata', () => {
+      if (!player) return
+      if (actualRate() !== sessionPrefs.rate) applyRate(sessionPrefs.rate)
+      state.rate = actualRate()
+    })
     player.on('ended', () => {
       state.playing = false
       state.ended = true
@@ -209,6 +303,7 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
     beginEmitted = false
     state.error = null
     state.ended = false
+    state.videoHeight = 0
     // Clean tech reset BETWEEN lessons (not on first load): tears down the
     // previous stream's VHS/hls segment loaders and their abort listeners.
     // Without it, a long session of source swaps on one instance leaks listeners
@@ -218,10 +313,11 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
       try {
         const vol = player.volume() ?? 1
         const mut = player.muted() ?? false
-        const rate = player.playbackRate() ?? 1
+        const rate = actualRate()
         player.reset()
         player.volume(vol)
         player.muted(mut)
+        player.defaultPlaybackRate(rate)
         player.playbackRate(rate)
       } catch { /* ignore — fall through to src() */ }
     }
@@ -252,7 +348,19 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
     if (!player) return
     seek((player.currentTime() ?? 0) + delta)
   }
-  function setRate(rate: number): void { player?.playbackRate(rate) }
+  /** Set the speed AND the default speed: loading a source resets a media
+   *  element to its default rate, so the default has to follow the choice. */
+  function applyRate(rate: number): void {
+    if (!player) return
+    player.defaultPlaybackRate(rate)
+    player.playbackRate(rate)
+    state.rate = rate
+  }
+  function setRate(rate: number): void {
+    if (!Number.isFinite(rate) || rate <= 0) return
+    sessionPrefs.rate = rate
+    applyRate(rate)
+  }
   function setVolume(v: number): void {
     if (!player) return
     const vol = Math.max(0, Math.min(1, v))
@@ -265,17 +373,24 @@ export function useVideoJsPlayer(cb: UseVideoJsPlayerCallbacks = {}) {
   }
   function setQuality(id: string): void {
     if (!levels) return
-    const target = id === 'auto' ? -1 : Number(id)
-    for (let i = 0; i < levels.length; i++) {
-      levels[i]!.enabled = target === -1 || i === target
+    const index = id === 'auto' ? -1 : Number(id)
+    const picked = Number.isInteger(index) && index >= 0 ? levels[index] : undefined
+    preferredHeight = picked?.height ?? null
+    sessionPrefs.height = preferredHeight
+    if (picked && preferredHeight === null) {
+      // Rendition without a reported height: lock by index for this source only.
+      enableOnly(index, true)
+      activeQualityId.value = id
+      return
     }
-    activeQualityId.value = id
+    applyPreferredQuality(true)
   }
 
   function dispose(): void {
     if (player) {
       try { player.dispose() } catch { /* ignore */ }
       player = null
+      mediaEl = null
       levels = null
       // Tell the single-player arbiter a <video> was just destroyed, so a
       // VdoCipher (DRM) player never starts 0 ms after this one let go of the
