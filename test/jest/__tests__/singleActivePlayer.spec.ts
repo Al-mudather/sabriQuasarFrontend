@@ -506,6 +506,31 @@ describe('utils/singleActivePlayer adaptive gap and graceful teardown', () => {
     expect(ready2).toHaveBeenCalledTimes(1)
   })
 
+  it('lazy channel: nothing is opened for teardown reports; the first claim opens it and still discovers holders', () => {
+    const bus = makeBus(5)
+    const tab1 = make('t1', bus.connect())
+    const revoked1 = jest.fn(() => ({ hadSession: false }))
+    tab1.claim('a', revoked1, jest.fn())
+    jest.advanceTimersByTime(1000)
+    let opened = 0
+    const tab2 = new SinglePlayerArbiter({ tabId: 't2', lazyChannel: true, gapFor, channelFactory: () => { opened++; return bus.connect() } })
+    tab2.noteRelease({ kind: 'hasif' })
+    tab2.resume() // pageshow on a page that never claimed
+    jest.advanceTimersByTime(2000)
+    expect(opened).toBe(0)
+    const ready2 = jest.fn()
+    tab2.claim('b', jest.fn(), ready2)
+    expect(opened).toBe(1)
+    expect(ready2).not.toHaveBeenCalled() // discovery window: tab1 may be holding
+    jest.advanceTimersByTime(20)
+    expect(revoked1).toHaveBeenCalledWith('elsewhere')
+    jest.advanceTimersByTime(400)
+    expect(ready2).toHaveBeenCalledTimes(1)
+    tab2.suspend()
+    tab2.resume()
+    expect(opened).toBe(2) // it has claimed before: it listens again
+  })
+
   it('suspend is synchronous: revoke("suspend"), released sent at once', () => {
     const bus = makeBus(5)
     const sent: PlayerLockMessage[] = []

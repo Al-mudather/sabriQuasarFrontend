@@ -102,6 +102,12 @@ export interface ArbiterOptions {
    * omitted the gap is adaptive (see `gapFor`).
    */
   releaseGapMs?: number
+  /**
+   * Open the channel on the first claim instead of at construction, so pages
+   * that never show a VdoCipher player (they may still report a TYPE_HASIF /
+   * Vimeo teardown) open no BroadcastChannel at all.
+   */
+  lazyChannel?: boolean
   /** Adaptive gap for one release. Default: adaptiveReleaseGapMs + this UA. */
   gapFor?: (info: ReleaseInfo) => number
   /** Max wait for known holders in other tabs to answer `released`. */
@@ -178,6 +184,9 @@ export class SinglePlayerArbiter {
   private readonly gapFor: (info: ReleaseInfo) => number
   private readonly releaseTimeoutMs: number
   private readonly discoveryMs: number
+  private readonly lazyChannel: boolean
+  /** Has this arbiter ever opened a channel (i.e. ever claimed)? */
+  private everOpened = false
 
   constructor(opts: ArbiterOptions) {
     this.tabId = opts.tabId
@@ -191,7 +200,8 @@ export class SinglePlayerArbiter {
           ((info) => adaptiveReleaseGapMs(info, typeof navigator !== 'undefined' ? navigator.userAgent : ''))
     this.releaseTimeoutMs = opts.releaseTimeoutMs ?? 600
     this.discoveryMs = opts.discoveryMs ?? 350
-    this.openChannel()
+    this.lazyChannel = opts.lazyChannel === true
+    if (!this.lazyChannel) this.openChannel()
   }
 
   /** The player id currently allowed to (eventually) hold an iframe here. */
@@ -210,6 +220,7 @@ export class SinglePlayerArbiter {
     onRevoke: (reason: RevokeReason) => RevokeResult,
     onReady: () => void,
   ): void {
+    if (!this.channel && this.lazyChannel && !this.everOpened) this.openChannel()
     const prev = this.holder
     const ts = this.nextTs()
     const holder: Holder = {
@@ -293,7 +304,7 @@ export class SinglePlayerArbiter {
 
   /** Page is back (pageshow / resume): reopen the channel. Never auto-plays. */
   resume(): void {
-    if (!this.channel) this.openChannel()
+    if (!this.channel && (!this.lazyChannel || this.everOpened)) this.openChannel()
   }
 
   // -------------------------------------------------------------------------
@@ -304,6 +315,7 @@ export class SinglePlayerArbiter {
     } catch {
       this.channel = null
     }
+    this.everOpened = true
     if (!this.channel) return
     this.channel.listen((m) => this.onRemote(m))
     this.channelOpenedAt = this.now()
@@ -567,7 +579,7 @@ let shared: SinglePlayerArbiter | null = null
 export function getPlayerArbiter(): SinglePlayerArbiter {
   if (shared) return shared
   const tabId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
-  const arbiter = new SinglePlayerArbiter({ tabId, channelFactory: openPlayerChannel })
+  const arbiter = new SinglePlayerArbiter({ tabId, channelFactory: openPlayerChannel, lazyChannel: true })
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     window.addEventListener('pagehide', () => arbiter.suspend())
     window.addEventListener('pageshow', () => arbiter.resume())
