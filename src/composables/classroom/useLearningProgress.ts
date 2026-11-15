@@ -223,20 +223,30 @@ export function useLearningProgress(
   const currentProgressId = ref<number | null>(null)
   const currentContentPk = ref<number | null>(null)
   const currentUnitPk = ref<number | null>(null)
+  // One token per start() call = one VISIT to a lesson. The backend may hand
+  // back the same progress row for a second visit to the same lesson, so the
+  // row pk cannot tell two visits apart; the token can.
+  let startSeq = 0
+  /** Token of the visit `currentProgressId` belongs to. */
+  let visitToken = 0
 
   async function start(contentPk: number, unitPk: number): Promise<void> {
     const cid = toNum(coursePk)
     const eid = toNum(enrollmentPk)
     if (cid == null || eid == null) return
+    const token = ++startSeq
     currentContentPk.value = contentPk
     currentUnitPk.value = unitPk
     const input = { courseId: cid, enrollmentId: eid, courseUnitId: unitPk, courseUnitContentId: contentPk }
     try {
       const res = await runStart({ progressData: input })
+      // A newer start() owns the "current" state now: this answer is stale.
+      if (token !== startSeq) return
       const success = res?.data?.startLearningUnit?.success
       const pk = res?.data?.startLearningUnit?.learning?.pk
       if (success && typeof pk === 'number') {
         currentProgressId.value = pk
+        visitToken = token
         // Optimistically mark the row in-progress so the rail dot shows now,
         // without refetching the whole course progress list.
         const prev = localOverrides.value[contentPk]
@@ -251,21 +261,25 @@ export function useLearningProgress(
   }
 
   // One EndLearningUnit per leave: a lesson tap, the route watcher and the
-  // unmount hook can all ask to end the same row at once. They share the one
-  // request that is in flight for that progress row.
-  let endInFlight: { pid: number; promise: Promise<void> } | null = null
+  // unmount hook can all ask to end the same visit at once. They share the
+  // one request that is in flight for that visit. A LATER visit to the same
+  // lesson (A → B → A while End(A) is still in flight) is a different visit:
+  // it gets its own request, and the late answer of the first one must not
+  // clear its progress id.
+  let endInFlight: { visit: number; promise: Promise<void> } | null = null
 
   function end(): Promise<void> {
     const pid = currentProgressId.value
-    if (pid != null && endInFlight?.pid === pid) return endInFlight.promise
-    const promise = runEndOnce().finally(() => {
+    const visit = visitToken
+    if (pid != null && endInFlight?.visit === visit) return endInFlight.promise
+    const promise = runEndOnce(visit).finally(() => {
       if (endInFlight?.promise === promise) endInFlight = null
     })
-    if (pid != null) endInFlight = { pid, promise }
+    if (pid != null) endInFlight = { visit, promise }
     return promise
   }
 
-  async function runEndOnce(): Promise<void> {
+  async function runEndOnce(visit: number): Promise<void> {
     const cid = toNum(coursePk)
     const eid = toNum(enrollmentPk)
     const pid = currentProgressId.value
@@ -277,9 +291,9 @@ export function useLearningProgress(
       const res = await runEnd({ progressData: input, progressId: pid })
       const success = res?.data?.endLearningUnit?.success
       if (success) {
-        // Only clear the row we ended: a slow End must not wipe the id of a
-        // lesson that was started while it was in flight.
-        if (currentProgressId.value === pid) currentProgressId.value = null
+        // Only clear the VISIT we ended: a slow End must not wipe the id of a
+        // lesson (even the same lesson, same row) started while it was in flight.
+        if (visitToken === visit && currentProgressId.value === pid) currentProgressId.value = null
         // Patch ONLY the row we just ended, from the mutation's returned row —
         // no course-wide refetch. `complete` is the backend's authoritative
         // value (it may stay null if the lesson wasn't sufficiently watched).
@@ -308,6 +322,7 @@ export function useLearningProgress(
       currentProgressId.value = null
       currentContentPk.value = null
       currentUnitPk.value = null
+      startSeq++ // answers still in flight belong to the old course
       // New course/enrollment → drop session-local progress patches; the fresh
       // server map for the new course is the source of truth.
       localOverrides.value = {}
