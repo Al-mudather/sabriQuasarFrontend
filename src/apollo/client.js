@@ -1,14 +1,15 @@
-// Apollo Client 3 + @vue/apollo-composable + graphql-ws wiring.
+// Apollo Client 3 + @vue/apollo-composable + subscriptions-transport-ws wiring.
 //
 // Preserves the behavior of the legacy Apollo Client 2 setup:
 //  - HTTP link with file-upload support (apollo-upload-client v18).
-//  - WebSocket link for GraphQL subscriptions (graphql-ws).
+//  - WebSocket link for GraphQL subscriptions (subscriptions-transport-ws;
+//    see the WebSocket link section for why not graphql-ws).
 //  - JWT auth middleware that injects the user's access token on every op.
 //  - fetchPolicy defaults tuned for UX (cache-and-network on watch, network-only on query).
 
 import { ApolloClient, ApolloLink, InMemoryCache, split } from '@apollo/client/core'
-import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
-import { createClient as createWsClient } from 'graphql-ws'
+import { WebSocketLink } from '@apollo/client/link/ws'
+import { SubscriptionClient } from 'subscriptions-transport-ws'
 import { getMainDefinition } from '@apollo/client/utilities'
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs'
 
@@ -107,21 +108,30 @@ const uploadLink = createUploadLink({
 })
 
 // ---------- WebSocket link --------------------------------------------------
+// The backend (django-channels-graphql-ws 0.7.5) speaks only the legacy
+// `graphql-ws` subprotocol of subscriptions-transport-ws. The `graphql-ws`
+// npm package speaks the newer `graphql-transport-ws` subprotocol, which the
+// server refuses on connect, so subscriptions (checkout status,
+// notifications, Q&A) never arrived. Hence the legacy client here.
+//
+// The backend reads `Authorization` as the bare JWT (graphql_jwt
+// get_user_by_token), without the "JWT " prefix used on HTTP requests; with
+// the prefix the server drops the connection.
 const wsProtocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'wss' : 'ws'
-// Keep a handle on the underlying graphql-ws client so logout can dispose the
-// socket. `connectionParams` reads the token lazily at (re)connect time, so a
-// fresh subscription after a new login picks up the new token — but an already
-// open socket keeps the old user's token until disposed.
-const wsClient = createWsClient({
-  url: `${wsProtocol}://${WS_HOST}/ws/graphql/`,
+// Keep a handle on the client so logout can close the socket.
+// `connectionParams` is read at (re)connect time, so a subscription after a
+// new login picks up the new token — but an already open socket keeps the old
+// user's token until closed.
+const wsClient = new SubscriptionClient(`${wsProtocol}://${WS_HOST}/ws/graphql/`, {
+  lazy: true,
+  reconnect: true,
+  reconnectionAttempts: 5,
   connectionParams: () => {
     const token = tokenStorage.getAccessToken()
-    return token ? { Authorization: 'JWT ' + token } : {}
-  },
-  lazy: true,
-  retryAttempts: 5
+    return token ? { Authorization: token } : {}
+  }
 })
-const wsLink = new GraphQLWsLink(wsClient)
+const wsLink = new WebSocketLink(wsClient)
 
 // ---------- Split: subscriptions -> ws, everything else -> http ------------
 const transportLink = split(
@@ -183,8 +193,9 @@ export const apolloClient = new ApolloClient({
 //    (resetStore() would immediately refetch with a now-absent token and throw
 //    auth errors — wrong for logout).
 //  - stop(): cancel in-flight queries / polling.
-//  - wsClient.dispose(): close the subscription socket so the next login
-//    reconnects with the new token instead of reusing the old connection.
+//  - wsClient.close(): close the subscription socket so the next login
+//    reconnects with the new token instead of reusing the old connection
+//    (the client is lazy: the next subscription opens a new socket).
 export async function resetApolloSession () {
   try {
     await apolloClient.clearStore()
@@ -193,7 +204,7 @@ export async function resetApolloSession () {
     apolloClient.stop()
   } catch (_e) { /* ignore */ }
   try {
-    wsClient.dispose()
+    wsClient.close()
   } catch (_e) { /* ignore */ }
 }
 
