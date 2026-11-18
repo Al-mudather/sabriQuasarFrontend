@@ -190,7 +190,9 @@ export const useAuthStore = defineStore('authentication', {
       try {
         await resetApolloSession()
       } catch (_e) { /* ignore */ }
-      purgeClientStorage({ keepLocalStorageKeys: ['isEnglish', 'pinia_settings'] })
+      // Keep a referral code captured from a share link: a visitor arriving
+      // with a stale session still has to sign in and submit it.
+      purgeClientStorage({ keepLocalStorageKeys: ['isEnglish', 'pinia_settings', 'registerationCode'] })
       this.deleteData()
     },
 

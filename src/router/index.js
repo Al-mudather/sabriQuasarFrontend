@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 import { tokenStorage } from 'src/localStorageService'
 import { usePyramidStore } from 'src/stores/pyramid'
+import { referralCodeFromQuery } from 'src/utils/referral'
 
 import routes from './routes'
 
@@ -39,6 +40,14 @@ export default route(function (/* { store, ssrContext } */) {
   // is forced to the registration-code page, with their intended destination
   // preserved as ?redirect= so they land there after entering the code.
   Router.beforeEach(async (to, from, next) => {
+    // Referral capture runs first and for everyone, signed in or not: the share
+    // link is #/register?ref=<code>, and any page may carry ?ref=. The code is
+    // kept in localStorage until the code page submits it after sign-in.
+    const referral = referralCodeFromQuery(to.query)
+    if (referral) {
+      try { usePyramidStore().setRegisterationCode(referral) } catch (_e) { /* storage blocked */ }
+    }
+
     // Unauthenticated visitors are handled by per-route requireAuthentication.
     if (!tokenStorage.getAccessToken()) return next()
     if (GATE_EXEMPT.has(to.name)) return next()
@@ -47,12 +56,22 @@ export default route(function (/* { store, ssrContext } */) {
       const pyramid = usePyramidStore()
       // Race the access check against a timeout so a slow/hung network can never
       // leave a navigation pending (which looked like a "stuck" login). Fail
-      // OPEN on timeout — the backend still enforces the gate server-side, and
-      // the cached verdict corrects a later navigation.
+      // OPEN on timeout, then apply the late verdict: if it says "no code",
+      // send the user to the code page from wherever they are by then.
+      const check = pyramid.verifyPlatformAccess()
+      let timedOut = false
       const ok = await Promise.race([
-        pyramid.verifyPlatformAccess(),
-        new Promise((resolve) => setTimeout(() => resolve(true), 5000))
+        check,
+        new Promise((resolve) => setTimeout(() => { timedOut = true; resolve(true) }, 5000))
       ])
+      if (timedOut) {
+        void check.then((granted) => {
+          const current = Router.currentRoute.value
+          if (granted === false && tokenStorage.getAccessToken() && !GATE_EXEMPT.has(current.name)) {
+            void Router.replace({ name: 'registeration-code', query: { redirect: current.fullPath } }).catch(() => {})
+          }
+        }).catch(() => {})
+      }
       if (ok) return next()
       return next({ name: 'registeration-code', query: { redirect: to.fullPath } })
     } catch (_e) {

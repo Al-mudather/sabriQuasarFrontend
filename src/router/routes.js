@@ -95,6 +95,19 @@ const routes = [
     component: () => import('pages/account_management/PasswordResetForm.vue')
   },
   { path: '/account/confirm', name: 'account-confirm', component: () => import('components/Account/Confirm.vue') },
+  // The marketers' official share link: #/register?ref=<pyramidCode>
+  // (MyMarketingPage.vue). The global guard in router/index.js stores `ref`
+  // before this redirect lands; a visitor signs up, a signed-in user goes
+  // straight to the code page, which submits the stored code.
+  {
+    path: '/register',
+    name: 'register',
+    redirect: (to) => {
+      const token = tokenStorage.getAccessToken()
+      const signedIn = !!token && !isJwtExpired(token)
+      return { name: signedIn ? 'registeration-code' : 'signUp', query: to.query }
+    }
+  },
   {
     path: '/account',
     component: () => import('pages/account_management/Account.vue'),

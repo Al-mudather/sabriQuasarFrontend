@@ -50,7 +50,7 @@
  * This page lives under account_management but its sole mutation
  * (`JoinPlatform`) belongs to the pyramid feature, not auth.
  */
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
@@ -58,6 +58,7 @@ import { useMutation } from '@vue/apollo-composable'
 import { storeToRefs } from 'pinia'
 import { usePyramidStore } from 'src/stores/pyramid'
 import { tokenStorage } from 'src/localStorageService'
+import { isJwtExpired } from 'src/utils/jwt'
 import { useLogout } from 'src/composables/useLogout'
 import { JoinPlatform } from 'src/graphql/pyramid_marketing_management/mutation/JoinPlatform'
 import { joinPlatformOutcome } from 'src/utils/joinPlatform'
@@ -119,6 +120,8 @@ async function REGISTER_THE_USER_WITH_REGISTERATION_CODE (): Promise<void> {
       const redirect = route.query?.redirect
       void router.push(typeof redirect === 'string' && redirect ? redirect : { name: 'Home' }).catch(() => {})
     } else if (outcome === 'invalid') {
+      // A bad stored code must not be resubmitted on every visit.
+      pyramid.setRegisterationCode('')
       apiError.value = t('هذا الكود غير صحيح — يرجى التحقق والمحاولة مجدداً.')
     } else {
       // With errorPolicy:'all' top-level errors arrive in res.errors, not a throw.
@@ -154,19 +157,22 @@ onMounted(async () => {
     }
   }
 
-  // Prefill from a code carried in via the affiliate share link (loadCourse →
-  // setRegisterationCode). Use it verbatim — it's an alphanumeric code — and
-  // auto-submit so a referred user sails straight through.
+  // Prefill from a code carried in by a share link: #/register?ref=<code>
+  // (stored by the router guard) or a course affiliate link (loadCourse →
+  // setRegisterationCode). Use it verbatim — it's an alphanumeric code. Submit
+  // it only for a live session: joinPlatform needs one, and a failed anonymous
+  // call would show an error for a code that is fine.
+  // The stored code is cleared only once it is used up (joined / already /
+  // invalid), never on leaving the page, so a network failure or a detour to
+  // sign in does not lose the referral.
+  const token = tokenStorage.getAccessToken()
+  const signedIn = !!token && !isJwtExpired(token)
   if (registerationCode.value && registerationCode.value.trim().length > 4) {
     code.value = String(registerationCode.value).trim()
-    void REGISTER_THE_USER_WITH_REGISTERATION_CODE()
+    if (signedIn) void REGISTER_THE_USER_WITH_REGISTERATION_CODE()
   } else {
     void nextTick(() => { codeInput.value?.focus() })
   }
-})
-
-onBeforeUnmount(() => {
-  pyramid.setRegisterationCode('')
 })
 </script>
 
