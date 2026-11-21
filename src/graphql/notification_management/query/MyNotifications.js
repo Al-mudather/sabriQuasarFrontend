@@ -12,7 +12,6 @@ query GetMyNotifications($orderBy: [String], $type: String, $extraData: String) 
         source {
           id,
           pk,
-          email,
           firstName,
           lastName
         }

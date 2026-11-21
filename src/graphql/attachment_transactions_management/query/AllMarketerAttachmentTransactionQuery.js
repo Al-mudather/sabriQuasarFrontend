@@ -16,13 +16,12 @@ query AllMarketerAttachmentTransaction {
               orderTotal
               invoiceNumber
               currency
+              # Only fields a marketer may read: username, email and phone numbers
+              # are owner/staff-only on the backend, and one denied field nulls
+              # the whole (non-null) user, order and transaction row.
               user {
                 pk
-                username
-                email,
-                fullName,
-                phoneNumber2,
-                phoneNumber3,
+                fullName
               }
               orderdetailsSet {
                 edges {

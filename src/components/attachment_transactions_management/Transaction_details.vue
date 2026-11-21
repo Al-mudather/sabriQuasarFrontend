@@ -21,16 +21,12 @@
             <tr>
               <th>{{ $t('إسم الكورس') }}</th>
               <th>{{ $t('مقدم الطلب') }}</th>
-              <th>{{ $t('رقم الواتساب') }}</th>
-              <th>{{ $t('رقم التلجرام') }}</th>
             </tr>
           </thead>
           <tbody v-if="customerTrans.order.user">
             <tr v-for="detail in customerTrans.order.orderdetailsSet?.edges" :key="detail?.node?.pk ?? String(Math.random())">
               <td>{{ detail?.node?.course?.title }}</td>
               <td>{{ customerTrans.order.user.fullName }}</td>
-              <td>{{ customerTrans.order.user.phoneNumber2 }}</td>
-              <td>{{ customerTrans.order.user.phoneNumber3 }}</td>
             </tr>
           </tbody>
         </table>

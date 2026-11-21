@@ -794,11 +794,23 @@ export type ConversionRateType = {
   toCurrency: Maybe<Scalars['String']['output']>;
 };
 
+/** An enumeration. */
+export type CourseEnrollmentExpiryPolicy =
+  /** Expires N days after enrollment */
+  | 'DAYS'
+  /** Expires on a fixed date */
+  | 'FIXED_DATE'
+  /** Never expires */
+  | 'NEVER'
+  /** Not set (end date not enforced) */
+  | 'NONE';
+
 export type CourseInput = {
   affiliateCommission?: InputMaybe<Scalars['Int']['input']>;
   allowEnrollment?: InputMaybe<Scalars['Boolean']['input']>;
   brief?: InputMaybe<Scalars['String']['input']>;
   certificateSignature?: InputMaybe<Scalars['Upload']['input']>;
+  certificateTitle?: InputMaybe<Scalars['String']['input']>;
   courseFee?: InputMaybe<Scalars['Float']['input']>;
   courseFeeInSdg?: InputMaybe<Scalars['Float']['input']>;
   courseLanguage?: InputMaybe<Scalars['Int']['input']>;
@@ -905,6 +917,7 @@ export type CourseNode = MyNode & {
   allowEnrollment: Scalars['Boolean']['output'];
   brief: Scalars['String']['output'];
   certificateSignature: Maybe<Scalars['String']['output']>;
+  certificateTitle: Scalars['String']['output'];
   compoundCourses: CourseNodeConnection;
   courseFee: Scalars['Decimal']['output'];
   courseFeeInSdg: Scalars['Decimal']['output'];
@@ -920,6 +933,8 @@ export type CourseNode = MyNode & {
   currency: Maybe<Scalars['JSONString']['output']>;
   enrolled: Maybe<Scalars['Boolean']['output']>;
   enrollmentCount: Maybe<Scalars['Int']['output']>;
+  enrollmentExpiryPolicy: Maybe<CourseEnrollmentExpiryPolicy>;
+  enrollmentFixedEndDate: Maybe<Scalars['DateTime']['output']>;
   enrollmentSet: EnrollmentNodeConnection;
   examLink: Maybe<Scalars['String']['output']>;
   hasCertificate: Scalars['Boolean']['output'];
@@ -2883,6 +2898,38 @@ export type EndLearningUnit = {
   success: Maybe<Scalars['Boolean']['output']>;
 };
 
+/**
+ * Enroll users (by pk and/or email) in courses. New pairs are created,
+ * expired ones re-activated, active ones left alone unless endDate is
+ * given. The end date follows each course's expiry policy unless endDate
+ * is given.
+ */
+export type EnrollUsers = {
+  __typename?: 'EnrollUsers';
+  alreadyActive: Maybe<Scalars['Int']['output']>;
+  created: Maybe<Scalars['Int']['output']>;
+  enrollments: Maybe<Array<Maybe<EnrollmentNode>>>;
+  errors: Maybe<Scalars['ExpectedErrorType']['output']>;
+  /** Active enrollments that got the given endDate */
+  extended: Maybe<Scalars['Int']['output']>;
+  notFoundEmails: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  notFoundUserIds: Maybe<Array<Maybe<Scalars['Int']['output']>>>;
+  reactivated: Maybe<Scalars['Int']['output']>;
+  success: Maybe<Scalars['Boolean']['output']>;
+};
+
+/**
+ * How a course's enrollments end. NONE: legacy, the end date is stored
+ * but not enforced. NEVER: no end date. DAYS: periodDays after enrollment.
+ * FIXED_DATE: every enrollment ends on fixedEndDate. DAYS and FIXED_DATE are
+ * enforced by an hourly job.
+ */
+export type EnrollmentExpiryPolicy =
+  | 'DAYS'
+  | 'FIXED_DATE'
+  | 'NEVER'
+  | 'NONE';
+
 export type EnrollmentFeedbackNode = MyNode & {
   __typename?: 'EnrollmentFeedbackNode';
   created: Scalars['DateTime']['output'];
@@ -3001,6 +3048,29 @@ export type EnrollmentProgressType = {
   percentage: Maybe<Scalars['Float']['output']>;
   /** Total content items in the course */
   total: Maybe<Scalars['Int']['output']>;
+};
+
+/**
+ * ACTIVE: not expired. EXPIRED. ENDING_SOON: active and ends within
+ * endingWithinDays (default 7). ALL.
+ */
+export type EnrollmentStatus =
+  | 'ACTIVE'
+  | 'ALL'
+  | 'ENDING_SOON'
+  | 'EXPIRED';
+
+/**
+ * Expire enrollments: pick them by enrollmentIds, or by userIds (all of
+ * those users' enrollments, or only in courseIds). Only active ones change.
+ * dryRun lists what would expire without saving.
+ */
+export type ExpireEnrollments = {
+  __typename?: 'ExpireEnrollments';
+  enrollments: Maybe<Array<Maybe<EnrollmentNode>>>;
+  errors: Maybe<Scalars['ExpectedErrorType']['output']>;
+  expiredCount: Maybe<Scalars['Int']['output']>;
+  success: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type HomePageSliderNode = MyNode & {
@@ -4284,6 +4354,18 @@ export type ReUploadAttachmentTransactionInput = {
   clientMutationId?: InputMaybe<Scalars['String']['input']>;
 };
 
+/**
+ * Give enrollments access again (expired ones) or a new end date (active
+ * ones). Without endDate the course's expiry policy is applied from now.
+ */
+export type ReactivateEnrollments = {
+  __typename?: 'ReactivateEnrollments';
+  enrollments: Maybe<Array<Maybe<EnrollmentNode>>>;
+  errors: Maybe<Scalars['ExpectedErrorType']['output']>;
+  reactivatedCount: Maybe<Scalars['Int']['output']>;
+  success: Maybe<Scalars['Boolean']['output']>;
+};
+
 /** Same as `grapgql_jwt` implementation, with standard output. */
 export type RefreshToken = {
   __typename?: 'RefreshToken';
@@ -4550,6 +4632,19 @@ export type RootMutation = {
   doneReadingNotification: Maybe<DoneReadingNotification>;
   /** Enables logged in users to create order request  */
   endLearningUnit: Maybe<EndLearningUnit>;
+  /**
+   * Enroll users (by pk and/or email) in courses. New pairs are created,
+   * expired ones re-activated, active ones left alone unless endDate is
+   * given. The end date follows each course's expiry policy unless endDate
+   * is given.
+   */
+  enrollUsers: Maybe<EnrollUsers>;
+  /**
+   * Expire enrollments: pick them by enrollmentIds, or by userIds (all of
+   * those users' enrollments, or only in courseIds). Only active ones change.
+   * dryRun lists what would expire without saving.
+   */
+  expireEnrollments: Maybe<ExpireEnrollments>;
   /** Create   */
   joinPlatform: Maybe<JoinPlatform>;
   /** Create   */
@@ -4591,6 +4686,11 @@ export type RootMutation = {
   pyramidAttachmentTransactionConfirmation: Maybe<PyramidAttachmentTransactionConfirmation>;
   /** Upload   */
   reUploadAttachmentTransaction: Maybe<ReUploadAttachmentTransaction>;
+  /**
+   * Give enrollments access again (expired ones) or a new end date (active
+   * ones). Without endDate the course's expiry policy is applied from now.
+   */
+  reactivateEnrollments: Maybe<ReactivateEnrollments>;
   /** Same as `grapgql_jwt` implementation, with standard output. */
   refreshToken: Maybe<RefreshToken>;
   /**
@@ -4645,6 +4745,13 @@ export type RootMutation = {
   sendPasswordResetEmail: Maybe<SendPasswordResetEmail>;
   /** Upload   */
   setAttachmentTransactionOperationNumber: Maybe<SetAttachmentTransactionOperationNumber>;
+  /**
+   * Set how enrollments end, for some courses (courseIds) or every course
+   * (allCourses: true). With applyToExisting the end date of current active
+   * enrollments is recomputed too; otherwise only new enrollments use the
+   * policy. dryRun returns the counts without saving.
+   */
+  setEnrollmentExpiryPolicy: Maybe<SetEnrollmentExpiryPolicy>;
   /** Social Auth for JSON Web Token (JWT) */
   socialAuth: Maybe<SocialAuthJwt>;
   /** Enables logged in users to create order request  */
@@ -5258,6 +5365,28 @@ export type RootMutationEndLearningUnitArgs = {
 
 
 /** The project root mutation */
+export type RootMutationEnrollUsersArgs = {
+  courseIds: Array<InputMaybe<Scalars['Int']['input']>>;
+  endDate?: InputMaybe<Scalars['DateTime']['input']>;
+  isPaid?: InputMaybe<Scalars['Boolean']['input']>;
+  note?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['DateTime']['input']>;
+  userEmails?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+};
+
+
+/** The project root mutation */
+export type RootMutationExpireEnrollmentsArgs = {
+  courseIds?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  dryRun?: InputMaybe<Scalars['Boolean']['input']>;
+  enrollmentIds?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  note?: InputMaybe<Scalars['String']['input']>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+};
+
+
+/** The project root mutation */
 export type RootMutationJoinPlatformArgs = {
   id?: InputMaybe<Scalars['Int']['input']>;
   input: JoinPlatformInput;
@@ -5328,6 +5457,14 @@ export type RootMutationReUploadAttachmentTransactionArgs = {
 
 
 /** The project root mutation */
+export type RootMutationReactivateEnrollmentsArgs = {
+  endDate?: InputMaybe<Scalars['DateTime']['input']>;
+  enrollmentIds: Array<InputMaybe<Scalars['Int']['input']>>;
+  note?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** The project root mutation */
 export type RootMutationRefreshTokenArgs = {
   refreshToken: Scalars['String']['input'];
 };
@@ -5377,6 +5514,18 @@ export type RootMutationSendPasswordResetEmailArgs = {
 export type RootMutationSetAttachmentTransactionOperationNumberArgs = {
   id?: InputMaybe<Scalars['Int']['input']>;
   input: SetAttachmentTransactionOperationNumberInput;
+};
+
+
+/** The project root mutation */
+export type RootMutationSetEnrollmentExpiryPolicyArgs = {
+  allCourses?: InputMaybe<Scalars['Boolean']['input']>;
+  applyToExisting?: InputMaybe<Scalars['Boolean']['input']>;
+  courseIds?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  dryRun?: InputMaybe<Scalars['Boolean']['input']>;
+  fixedEndDate?: InputMaybe<Scalars['DateTime']['input']>;
+  periodDays?: InputMaybe<Scalars['Int']['input']>;
+  policy: EnrollmentExpiryPolicy;
 };
 
 
@@ -5793,6 +5942,8 @@ export type RootQuery = {
   /** The ID of the object */
   questionReply: Maybe<QuestionReplyNode>;
   recentRateChanges: Maybe<CurrencyRateHistoryNodeConnection>;
+  /** Staff only. Search enrollments by user(s), course(s), status and dates. All arguments are optional and combined with AND. Newest first unless orderBy is given. */
+  searchEnrollments: Maybe<EnrollmentNodeConnection>;
   stripePublishableKey: Maybe<Scalars['JSONString']['output']>;
   totalUsers: Maybe<Scalars['String']['output']>;
   user: Maybe<CustomUserNode>;
@@ -7494,6 +7645,32 @@ export type RootQueryRecentRateChangesArgs = {
 
 
 /** The project root query */
+export type RootQuerySearchEnrollmentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  course?: InputMaybe<Scalars['ID']['input']>;
+  courseIds?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  course_Title?: InputMaybe<Scalars['String']['input']>;
+  course_Title_Icontains?: InputMaybe<Scalars['String']['input']>;
+  endingWithinDays?: InputMaybe<Scalars['Int']['input']>;
+  endsFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  endsTo?: InputMaybe<Scalars['DateTime']['input']>;
+  enrolledFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  enrolledTo?: InputMaybe<Scalars['DateTime']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  isPaid?: InputMaybe<Scalars['Boolean']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  status?: InputMaybe<EnrollmentStatus>;
+  user?: InputMaybe<Scalars['ID']['input']>;
+  userEmails?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+  userSearch?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** The project root query */
 export type RootQueryUserArgs = {
   id?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -7546,6 +7723,24 @@ export type SetAttachmentTransactionOperationNumber = {
 
 export type SetAttachmentTransactionOperationNumberInput = {
   clientMutationId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/**
+ * Set how enrollments end, for some courses (courseIds) or every course
+ * (allCourses: true). With applyToExisting the end date of current active
+ * enrollments is recomputed too; otherwise only new enrollments use the
+ * policy. dryRun returns the counts without saving.
+ */
+export type SetEnrollmentExpiryPolicy = {
+  __typename?: 'SetEnrollmentExpiryPolicy';
+  courses: Maybe<Array<Maybe<CourseNode>>>;
+  coursesUpdated: Maybe<Scalars['Int']['output']>;
+  /** Active enrollments whose end date was recomputed */
+  enrollmentsUpdated: Maybe<Scalars['Int']['output']>;
+  errors: Maybe<Scalars['ExpectedErrorType']['output']>;
+  /** Active enrollments the next hourly run will expire */
+  pastEndDate: Maybe<Scalars['Int']['output']>;
+  success: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type SlideUnion = CourseNode;
@@ -8332,7 +8527,7 @@ export type MarketerAttachmentTransactionConfirmationMutation = { __typename?: '
 export type AllMarketerAttachmentTransactionQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllMarketerAttachmentTransactionQuery = { __typename?: 'RootQuery', allMarketerAttachmentTransaction: { __typename?: 'AttachmentTransactionNodeConnection', edges: Array<{ __typename?: 'AttachmentTransactionNodeEdge', node: { __typename?: 'AttachmentTransactionNode', pk: number | null, attachment: string | null, marketerEndorse: boolean, retryPlease: boolean, pyramidManagerEndorse: boolean, pyramidRetryPlease: boolean, doneVerification: boolean, created: string, updated: string, order: { __typename?: 'OrderNode', pk: number | null, totalAmount: number, orderTotal: number | null, invoiceNumber: string, currency: OrderCurrency, user: { __typename?: 'CustomUserNode', pk: number | null, username: string | null, email: string, fullName: string, phoneNumber2: string | null, phoneNumber3: string | null }, orderdetailsSet: { __typename?: 'OrderDetailsNodeConnection', edges: Array<{ __typename?: 'OrderDetailsNodeEdge', node: { __typename?: 'OrderDetailsNode', pk: number | null, course: { __typename?: 'CourseNode', pk: number | null, title: string } } | null } | null> } }, marketer: { __typename?: 'PyramidNode', pk: number | null } | null, pyramidManager: { __typename?: 'AttachmentTransactionManagerNode', pk: number | null } | null } | null } | null> } | null };
+export type AllMarketerAttachmentTransactionQuery = { __typename?: 'RootQuery', allMarketerAttachmentTransaction: { __typename?: 'AttachmentTransactionNodeConnection', edges: Array<{ __typename?: 'AttachmentTransactionNodeEdge', node: { __typename?: 'AttachmentTransactionNode', pk: number | null, attachment: string | null, marketerEndorse: boolean, retryPlease: boolean, pyramidManagerEndorse: boolean, pyramidRetryPlease: boolean, doneVerification: boolean, created: string, updated: string, order: { __typename?: 'OrderNode', pk: number | null, totalAmount: number, orderTotal: number | null, invoiceNumber: string, currency: OrderCurrency, user: { __typename?: 'CustomUserNode', pk: number | null, fullName: string }, orderdetailsSet: { __typename?: 'OrderDetailsNodeConnection', edges: Array<{ __typename?: 'OrderDetailsNodeEdge', node: { __typename?: 'OrderDetailsNode', pk: number | null, course: { __typename?: 'CourseNode', pk: number | null, title: string } } | null } | null> } }, marketer: { __typename?: 'PyramidNode', pk: number | null } | null, pyramidManager: { __typename?: 'AttachmentTransactionManagerNode', pk: number | null } | null } | null } | null> } | null };
 
 export type MyAttachmentTransactionsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -8576,7 +8771,7 @@ export type GetAllMyNotificationsQueryVariables = Exact<{
 }>;
 
 
-export type GetAllMyNotificationsQuery = { __typename?: 'RootQuery', myNotifications: { __typename?: 'NotificationNodeConnection', totalCount: number | null, pageInfo: { __typename?: 'PageInfo', startCursor: string | null, endCursor: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, edges: Array<{ __typename?: 'NotificationNodeEdge', node: { __typename?: 'NotificationNode', pk: number | null, title: string, description: string | null, extraData: string | null, type: NotificationType, created: string, updated: string, source: { __typename?: 'CustomUserNode', id: string, pk: number | null, email: string, firstName: string, lastName: string } | null } | null } | null> } | null };
+export type GetAllMyNotificationsQuery = { __typename?: 'RootQuery', myNotifications: { __typename?: 'NotificationNodeConnection', totalCount: number | null, pageInfo: { __typename?: 'PageInfo', startCursor: string | null, endCursor: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, edges: Array<{ __typename?: 'NotificationNodeEdge', node: { __typename?: 'NotificationNode', pk: number | null, title: string, description: string | null, extraData: string | null, type: NotificationType, created: string, updated: string, source: { __typename?: 'CustomUserNode', id: string, pk: number | null, firstName: string, lastName: string } | null } | null } | null> } | null };
 
 export type GetMyNotificationsQueryVariables = Exact<{
   orderBy?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
@@ -8585,17 +8780,17 @@ export type GetMyNotificationsQueryVariables = Exact<{
 }>;
 
 
-export type GetMyNotificationsQuery = { __typename?: 'RootQuery', myNotifications: { __typename?: 'NotificationNodeConnection', edges: Array<{ __typename?: 'NotificationNodeEdge', node: { __typename?: 'NotificationNode', id: string, pk: number | null, type: NotificationType, title: string, source: { __typename?: 'CustomUserNode', id: string, pk: number | null, email: string, firstName: string, lastName: string } | null } | null } | null> } | null };
+export type GetMyNotificationsQuery = { __typename?: 'RootQuery', myNotifications: { __typename?: 'NotificationNodeConnection', edges: Array<{ __typename?: 'NotificationNodeEdge', node: { __typename?: 'NotificationNode', id: string, pk: number | null, type: NotificationType, title: string, source: { __typename?: 'CustomUserNode', id: string, pk: number | null, firstName: string, lastName: string } | null } | null } | null> } | null };
 
 export type CheckoutSubscriptionSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CheckoutSubscriptionSubscription = { __typename?: 'RootSubscription', checkoutSubscription: { __typename?: 'CheckoutSubscription', notification: { __typename?: 'NotificationNode', pk: number | null, title: string, description: string | null, extraData: string | null, type: NotificationType, created: string, updated: string, source: { __typename?: 'CustomUserNode', id: string, pk: number | null, email: string, firstName: string, lastName: string } | null } | null } | null };
+export type CheckoutSubscriptionSubscription = { __typename?: 'RootSubscription', checkoutSubscription: { __typename?: 'CheckoutSubscription', notification: { __typename?: 'NotificationNode', pk: number | null, title: string, description: string | null, extraData: string | null, type: NotificationType, created: string, updated: string, source: { __typename?: 'CustomUserNode', id: string, pk: number | null, firstName: string, lastName: string } | null } | null } | null };
 
 export type NotificationCreatedSubscriptionSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type NotificationCreatedSubscriptionSubscription = { __typename?: 'RootSubscription', notificationCreated: { __typename?: 'NotificationSubscription', notification: { __typename?: 'NotificationNode', pk: number | null, title: string, description: string | null, extraData: string | null, type: NotificationType, created: string, updated: string, source: { __typename?: 'CustomUserNode', id: string, pk: number | null, email: string, firstName: string, lastName: string } | null } | null } | null };
+export type NotificationCreatedSubscriptionSubscription = { __typename?: 'RootSubscription', notificationCreated: { __typename?: 'NotificationSubscription', notification: { __typename?: 'NotificationNode', pk: number | null, title: string, description: string | null, extraData: string | null, type: NotificationType, created: string, updated: string, source: { __typename?: 'CustomUserNode', id: string, pk: number | null, firstName: string, lastName: string } | null } | null } | null };
 
 export type CreateNewOrderWithBulkOrderDetailsMutationVariables = Exact<{
   courseIds: Array<Scalars['Int']['input']> | Scalars['Int']['input'];
@@ -8749,7 +8944,7 @@ export const TotalUsersDocument = {"kind":"Document","definitions":[{"kind":"Ope
 export const ReUploadAttachmentTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ReUploadAttachmentTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ReUploadAttachmentTransactionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"reUploadAttachmentTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","alias":{"kind":"Name","value":"attachmentTransaction"},"name":{"kind":"Name","value":"instance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"order"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"attachment"}},{"kind":"Field","name":{"kind":"Name","value":"marketer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"marketerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"retryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManager"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManagerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidRetryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"doneVerification"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]} as unknown as DocumentNode<ReUploadAttachmentTransactionMutation, ReUploadAttachmentTransactionMutationVariables>;
 export const UploadAttachmentTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UploadAttachmentTransaction"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UploadAttachmentTransactionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uploadAttachmentTransaction"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","alias":{"kind":"Name","value":"attachmentTransaction"},"name":{"kind":"Name","value":"instance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"order"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"attachment"}},{"kind":"Field","name":{"kind":"Name","value":"marketer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"marketerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"retryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManager"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManagerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidRetryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"doneVerification"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]} as unknown as DocumentNode<UploadAttachmentTransactionMutation, UploadAttachmentTransactionMutationVariables>;
 export const MarketerAttachmentTransactionConfirmationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"MarketerAttachmentTransactionConfirmation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MarketerAttachmentTransactionConfirmationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"marketerAttachmentTransactionConfirmation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<MarketerAttachmentTransactionConfirmationMutation, MarketerAttachmentTransactionConfirmationMutationVariables>;
-export const AllMarketerAttachmentTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AllMarketerAttachmentTransaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"allMarketerAttachmentTransaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"order"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"totalAmount"}},{"kind":"Field","name":{"kind":"Name","value":"orderTotal"}},{"kind":"Field","name":{"kind":"Name","value":"invoiceNumber"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber2"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber3"}}]}},{"kind":"Field","name":{"kind":"Name","value":"orderdetailsSet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"course"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"title"}}]}}]}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"attachment"}},{"kind":"Field","name":{"kind":"Name","value":"marketer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"marketerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"retryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManager"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManagerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidRetryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"doneVerification"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AllMarketerAttachmentTransactionQuery, AllMarketerAttachmentTransactionQueryVariables>;
+export const AllMarketerAttachmentTransactionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AllMarketerAttachmentTransaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"allMarketerAttachmentTransaction"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"order"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"totalAmount"}},{"kind":"Field","name":{"kind":"Name","value":"orderTotal"}},{"kind":"Field","name":{"kind":"Name","value":"invoiceNumber"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"orderdetailsSet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"course"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"title"}}]}}]}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"attachment"}},{"kind":"Field","name":{"kind":"Name","value":"marketer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"marketerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"retryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManager"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManagerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidRetryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"doneVerification"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AllMarketerAttachmentTransactionQuery, AllMarketerAttachmentTransactionQueryVariables>;
 export const MyAttachmentTransactionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"MyAttachmentTransactions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"myAttachmentTransactions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"order"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"orderTotal"}},{"kind":"Field","name":{"kind":"Name","value":"totalAmount"}},{"kind":"Field","name":{"kind":"Name","value":"invoiceNumber"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}}]}},{"kind":"Field","name":{"kind":"Name","value":"attachment"}},{"kind":"Field","name":{"kind":"Name","value":"marketer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"marketerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"retryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManager"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pyramidManagerEndorse"}},{"kind":"Field","name":{"kind":"Name","value":"pyramidRetryPlease"}},{"kind":"Field","name":{"kind":"Name","value":"doneVerification"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]}}]} as unknown as DocumentNode<MyAttachmentTransactionsQuery, MyAttachmentTransactionsQueryVariables>;
 export const CreateCertificateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateCertificate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"enrollmentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateCertificateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createCertificate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"enrollmentId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"enrollmentId"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<CreateCertificateMutation, CreateCertificateMutationVariables>;
 export const CreateManualCertificateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateManualCertificate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"course"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userEmail"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateManualCertificateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createManualCertificate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"course"},"value":{"kind":"Variable","name":{"kind":"Name","value":"course"}}},{"kind":"Argument","name":{"kind":"Name","value":"userEmail"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userEmail"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]} as unknown as DocumentNode<CreateManualCertificateMutation, CreateManualCertificateMutationVariables>;
@@ -8780,10 +8975,10 @@ export const AllEnrollmentsForCurrentUserDocument = {"kind":"Document","definiti
 export const GetEnrollmentByCourseForCurrentUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEnrollmentByCourseForCurrentUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"courseId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"enrollmentByCourseForCurrentUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"courseId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"courseId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"progress"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"completed"}},{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}}]}}]}}]}}]} as unknown as DocumentNode<GetEnrollmentByCourseForCurrentUserQuery, GetEnrollmentByCourseForCurrentUserQueryVariables>;
 export const AllHomePageSlidersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AllHomePageSliders"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"allHomePageSliders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"ListValue","values":[{"kind":"StringValue","value":"-id","block":false}]}},{"kind":"Argument","name":{"kind":"Name","value":"isPublished"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"slide"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"CourseFragments"}}]}},{"kind":"Field","name":{"kind":"Name","value":"objectId"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"isPublished"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"CourseFragments"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CourseNode"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"cover"}},{"kind":"Field","name":{"kind":"Name","value":"brief"}}]}}]} as unknown as DocumentNode<AllHomePageSlidersQuery, AllHomePageSlidersQueryVariables>;
 export const DoneReadingNotificationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DoneReadingNotification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"doneReadingNotification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}}]}}]}}]} as unknown as DocumentNode<DoneReadingNotificationMutation, DoneReadingNotificationMutationVariables>;
-export const GetAllMyNotificationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAllMyNotifications"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}},"type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"cursor"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"myNotifications"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}}},{"kind":"Argument","name":{"kind":"Name","value":"after"},"value":{"kind":"Variable","name":{"kind":"Name","value":"cursor"}}},{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"startCursor"}},{"kind":"Field","name":{"kind":"Name","value":"endCursor"}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}}]}},{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"extraData"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"source"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetAllMyNotificationsQuery, GetAllMyNotificationsQueryVariables>;
-export const GetMyNotificationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetMyNotifications"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}},"type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"extraData"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"myNotifications"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}}},{"kind":"Argument","name":{"kind":"Name","value":"type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}},{"kind":"Argument","name":{"kind":"Name","value":"extraData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"extraData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"source"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetMyNotificationsQuery, GetMyNotificationsQueryVariables>;
-export const CheckoutSubscriptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"CheckoutSubscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"checkoutSubscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"extraData"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"source"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]} as unknown as DocumentNode<CheckoutSubscriptionSubscription, CheckoutSubscriptionSubscriptionVariables>;
-export const NotificationCreatedSubscriptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"NotificationCreatedSubscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notificationCreated"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"extraData"}},{"kind":"Field","name":{"kind":"Name","value":"source"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]} as unknown as DocumentNode<NotificationCreatedSubscriptionSubscription, NotificationCreatedSubscriptionSubscriptionVariables>;
+export const GetAllMyNotificationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAllMyNotifications"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}},"type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"cursor"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"myNotifications"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}}},{"kind":"Argument","name":{"kind":"Name","value":"after"},"value":{"kind":"Variable","name":{"kind":"Name","value":"cursor"}}},{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"startCursor"}},{"kind":"Field","name":{"kind":"Name","value":"endCursor"}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}}]}},{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"extraData"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"source"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetAllMyNotificationsQuery, GetAllMyNotificationsQueryVariables>;
+export const GetMyNotificationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetMyNotifications"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}},"type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"extraData"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"myNotifications"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}}},{"kind":"Argument","name":{"kind":"Name","value":"type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}},{"kind":"Argument","name":{"kind":"Name","value":"extraData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"extraData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"source"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetMyNotificationsQuery, GetMyNotificationsQueryVariables>;
+export const CheckoutSubscriptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"CheckoutSubscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"checkoutSubscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"extraData"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"source"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]} as unknown as DocumentNode<CheckoutSubscriptionSubscription, CheckoutSubscriptionSubscriptionVariables>;
+export const NotificationCreatedSubscriptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"NotificationCreatedSubscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notificationCreated"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"extraData"}},{"kind":"Field","name":{"kind":"Name","value":"source"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]} as unknown as DocumentNode<NotificationCreatedSubscriptionSubscription, NotificationCreatedSubscriptionSubscriptionVariables>;
 export const CreateNewOrderWithBulkOrderDetailsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateNewOrderWithBulkOrderDetails"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"courseIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createNewOrderWithBulkOrderDetails"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"courseIds"},"value":{"kind":"Variable","name":{"kind":"Name","value":"courseIds"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","name":{"kind":"Name","value":"order"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}}]}}]}}]} as unknown as DocumentNode<CreateNewOrderWithBulkOrderDetailsMutation, CreateNewOrderWithBulkOrderDetailsMutationVariables>;
 export const ClaimPyramidLedgerBalanceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ClaimPyramidLedgerBalance"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ClaimPyramidLedgerBalanceInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"claimPyramidLedgerBalance"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","alias":{"kind":"Name","value":"pyramidBalance"},"name":{"kind":"Name","value":"instance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"balance"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"updated"}}]}}]}}]}}]} as unknown as DocumentNode<ClaimPyramidLedgerBalanceMutation, ClaimPyramidLedgerBalanceMutationVariables>;
 export const JoinPlatformDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"JoinPlatform"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"marketingCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"JoinPlatformInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"joinPlatform"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"marketingCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"marketingCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}},{"kind":"Field","alias":{"kind":"Name","value":"pyramidAffiliate"},"name":{"kind":"Name","value":"instance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"clientMutationId"}}]}}]}}]} as unknown as DocumentNode<JoinPlatformMutation, JoinPlatformMutationVariables>;

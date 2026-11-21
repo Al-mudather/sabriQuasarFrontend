@@ -12,7 +12,6 @@ subscription CheckoutSubscription{
       source {
         id,
         pk,
-        email,
         firstName,
         lastName
       },

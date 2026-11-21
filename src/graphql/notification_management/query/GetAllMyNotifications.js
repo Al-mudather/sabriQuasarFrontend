@@ -20,7 +20,6 @@ query GetAllMyNotifications($orderBy: [String],$cursor: String, $limit: Int){
         source {
           id,
           pk,
-          email,
           firstName,
           lastName
         },

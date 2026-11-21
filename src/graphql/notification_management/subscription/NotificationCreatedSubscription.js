@@ -11,7 +11,6 @@ subscription NotificationCreatedSubscription{
       source {
         id,
         pk,
-        email,
         firstName,
         lastName
       },
