@@ -7,7 +7,7 @@
 //  - JWT auth middleware that injects the user's access token on every op.
 //  - fetchPolicy defaults tuned for UX (cache-and-network on watch, network-only on query).
 
-import { ApolloClient, ApolloLink, InMemoryCache, split } from '@apollo/client/core'
+import { ApolloClient, ApolloLink, InMemoryCache, Observable, split } from '@apollo/client/core'
 import { WebSocketLink } from '@apollo/client/link/ws'
 import { SubscriptionClient } from 'subscriptions-transport-ws'
 import { getMainDefinition } from '@apollo/client/utilities'
@@ -131,7 +131,16 @@ const wsClient = new SubscriptionClient(`${wsProtocol}://${WS_HOST}/ws/graphql/`
     return token ? { Authorization: token } : {}
   }
 })
-const wsLink = new WebSocketLink(wsClient)
+// WebSocketLink hands back subscriptions-transport-ws's bare observable, which
+// has `subscribe` but no `map`. The session watchdog above calls `.map()` on
+// every result, so without this wrapper every subscription threw
+// "forward(...).map is not a function" and took its component down (the
+// classroom Q&A list rendered nothing). Wrap it in Apollo's Observable.
+const legacyWsLink = new WebSocketLink(wsClient)
+const wsLink = new ApolloLink((operation) => new Observable((observer) => {
+  const sub = legacyWsLink.request(operation).subscribe(observer)
+  return () => sub.unsubscribe()
+}))
 
 // ---------- Split: subscriptions -> ws, everything else -> http ------------
 const transportLink = split(
