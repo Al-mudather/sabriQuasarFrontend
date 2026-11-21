@@ -120,7 +120,7 @@ function displayName (edge: InstructorEdge): string {
   const user = edge.node?.instructor?.user
   if (!user) return ''
   if (user.fullName) return user.fullName
-  return user.username.split('@')[0]
+  return [user.firstName, user.lastName].filter(Boolean).join(' ').trim()
 }
 
 function getImageUrl (img: string): string {

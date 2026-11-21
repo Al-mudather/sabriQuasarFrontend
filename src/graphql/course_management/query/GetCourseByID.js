@@ -32,7 +32,6 @@ query GetCourseByID($coursePk:Int) {
             image,
             user {
               id,
-              username,
               firstName,
               lastName
             }

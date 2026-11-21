@@ -274,8 +274,7 @@ const leadInstructor = computed<{ name: string; image: string; initial: string }
   if (!instructor) return null
   const firstName = instructor.user?.firstName ?? ''
   const lastName = instructor.user?.lastName ?? ''
-  const username = instructor.user?.username ?? ''
-  const name = (`${firstName} ${lastName}`).trim() || username.split('@')[0]
+  const name = (`${firstName} ${lastName}`).trim()
   return {
     name,
     image: instructor.image ?? '',

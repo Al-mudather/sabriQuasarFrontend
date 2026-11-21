@@ -56,7 +56,6 @@ export const GetAllCourses = gql`
                   id
                   user {
                     id
-                    username
                     fullName
                     firstName
                     lastName

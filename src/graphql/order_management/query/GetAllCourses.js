@@ -42,7 +42,6 @@ query GetAllCourses(
                 id,
                 user {
                   id,
-                  username,
                   fullName,
                   firstName,
                   lastName
