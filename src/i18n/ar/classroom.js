@@ -124,6 +124,7 @@ export default {
     archive: 'أرشفة',
     archived: 'مؤرشف',
     ownBadge: 'أنت',
+    unknownAuthor: 'مستخدم',
     errorTitle: 'حدث خطأ. يرجى المحاولة مرة أخرى.',
     nReplies: 'لا ردود | رد واحد | ردّان | {n} ردود | {n} ردًا | {n} رد',
     timeAgo: {

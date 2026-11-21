@@ -10,8 +10,7 @@ subscription QuestionAndAnswer($courseId: Int) {
         id,
         pk,
         firstName,
-        lastName,
-        email
+        lastName
       },
       questionreplySet {
         totalCount

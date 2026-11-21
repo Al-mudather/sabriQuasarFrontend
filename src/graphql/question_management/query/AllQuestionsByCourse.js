@@ -19,8 +19,7 @@ query AllQuestionsByCourse($courseId: Int!, $orderBy:[String], $cursor: String, 
             id,
             pk,
             firstName,
-            lastName,
-            email
+            lastName
           },
           questionreplySet {
             totalCount

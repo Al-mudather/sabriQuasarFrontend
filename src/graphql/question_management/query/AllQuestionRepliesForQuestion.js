@@ -19,8 +19,7 @@ query AllQuestionRepliesForQuestion($questionId: Int!, $orderBy:[String], $curso
             id,
             pk,
             firstName,
-            lastName,
-            email
+            lastName
           }
         }
         

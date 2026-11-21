@@ -124,6 +124,7 @@ export default {
     archive: 'Archive',
     archived: 'Archived',
     ownBadge: 'You',
+    unknownAuthor: 'User',
     errorTitle: 'Something went wrong. Please try again.',
     // vue-i18n plural form: `zero | one | other`
     nReplies: 'no replies | 1 reply | {n} replies',

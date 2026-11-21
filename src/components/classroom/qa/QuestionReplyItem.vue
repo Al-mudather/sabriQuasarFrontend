@@ -26,7 +26,7 @@ const authorName = computed(() => {
   const u = props.reply.user
   if (!u) return ''
   const full = [u.firstName, u.lastName].filter(Boolean).join(' ').trim()
-  return full || u.email || ''
+  return full || t('classroom.qa.unknownAuthor')
 })
 
 const renderedAnswer = computed(() => renderQaContent(props.reply.answer))
