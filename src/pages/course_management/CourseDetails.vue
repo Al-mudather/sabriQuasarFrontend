@@ -156,6 +156,7 @@ import { apolloClient } from 'src/apollo/client'
 import { useAuthStore } from 'src/stores/auth'
 import { useCartStore } from 'src/stores/cart'
 import { usePyramidStore } from 'src/stores/pyramid'
+import { referralCodeFromCourseParams } from 'src/utils/referral'
 import { GetCourseByID } from 'src/graphql/course_management/query/GetCourseByID'
 import { useQuery } from '@vue/apollo-composable'
 import { FORMAT_THE_WEB_SIT_URL, FORMAT_THE_IAMGE_URL } from 'src/utils/functions.js'
@@ -335,7 +336,7 @@ async function loadCourse (params: Record<string, string | string[]>): Promise<v
   }
   courseID.value = String(params.id ?? '')
   coursePK.value = String(params.pk)
-  const marketerCode = params.code ? String(params.code) : undefined
+  const marketerCode = referralCodeFromCourseParams(params)
   if (marketerCode) pyramid.setRegisterationCode(marketerCode)
   errorLoading.value = false
   courseData.value = null

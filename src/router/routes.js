@@ -112,6 +112,8 @@ const routes = [
     path: '/account',
     component: () => import('pages/account_management/Account.vue'),
     children: [
+      // The pre-redesign app served the code page at bare #/account.
+      { path: '', redirect: { name: 'registeration-code' } },
       { path: 'registerationCode', name: 'registeration-code', component: () => import('pages/account_management/RegisterationCode.vue') },
       { path: 'login',             name: 'login',              component: () => import('components/Account/Login.vue') },
       { path: 'signUp',            name: 'signUp',             component: () => import('components/Account/SignUp.vue') },

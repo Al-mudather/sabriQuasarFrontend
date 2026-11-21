@@ -3,7 +3,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 import { tokenStorage } from 'src/localStorageService'
 import { usePyramidStore } from 'src/stores/pyramid'
-import { referralCodeFromQuery } from 'src/utils/referral'
+import { referralCodeFromQuery, referralCodeFromCourseParams } from 'src/utils/referral'
 
 import routes from './routes'
 
@@ -43,7 +43,10 @@ export default route(function (/* { store, ssrContext } */) {
     // Referral capture runs first and for everyone, signed in or not: the share
     // link is #/register?ref=<code>, and any page may carry ?ref=. The code is
     // kept in localStorage until the code page submits it after sign-in.
-    const referral = referralCodeFromQuery(to.query)
+    // Course links carry the code as a path segment; capture it here too, since
+    // the gate below can redirect before the course page mounts.
+    const isCourseLink = to.name === 'course-details' || to.name === 'course-affilliate-details'
+    const referral = referralCodeFromQuery(to.query) ?? (isCourseLink ? referralCodeFromCourseParams(to.params) : null)
     if (referral) {
       try { usePyramidStore().setRegisterationCode(referral) } catch (_e) { /* storage blocked */ }
     }
