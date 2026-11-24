@@ -205,9 +205,11 @@ const downloadingPk = ref<number | null>(null)
 // -----------------------------------------------------------------------
 function courseNameOf (cert: CertEdge): string {
   const node = cert.node
+  // Match the printed certificate: the backend prints certificateTitle when set.
   return (
-    node.enrollment?.course?.title ??
-    node.batch?.courseName ??
+    node.enrollment?.course?.certificateTitle?.trim() ||
+    node.enrollment?.course?.title ||
+    node.batch?.courseName ||
     ''
   )
 }

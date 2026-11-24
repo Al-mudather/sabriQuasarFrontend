@@ -36,6 +36,7 @@ function formatDate(value: string | null | undefined): string {
 
 const courseTitle = computed(
   () =>
+    props.certificate.enrollment?.course?.certificateTitle?.trim() ||
     props.certificate.enrollment?.course?.title ||
     props.certificate.batch?.courseName ||
     '',

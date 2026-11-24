@@ -19,6 +19,7 @@ query AllCertificates($filters: JSONString) {
                 id
                 pk
                 title
+                certificateTitle
               }
             }
             batch {
